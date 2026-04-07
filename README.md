@@ -1,43 +1,45 @@
 # Metafit: Sistema de Gestión para Entornos Fitness
 
 ### 📖 Descripción
-Metafit es una solución integral diseñada para la automatización de procesos en gimnasios y centros de acondicionamiento físico. El proyecto se centra en la digitalización de planes de entrenamiento y la administración eficiente de usuarios, sustituyendo los registros manuales por una arquitectura de datos sólida.
+Metafit es una plataforma integral diseñada para la automatización de procesos en gimnasios. El proyecto cubre desde el análisis de requisitos hasta el despliegue final, asegurando una solución robusta para la gestión de usuarios y rutinas.
 
 ---
 
-### 🛠️ Especificaciones Técnicas
+### 🛠️ Stack Tecnológico
 
-* **Arquitectura:** Programación Orientada a Objetos (POO).
-* **Lógica de Negocio:** Java.
-* **Interfaz de Usuario:** JavaScript (Vanilla) / HTML5 / CSS3.
-* **Persistencia de Datos:** MySQL.
-* **Diseño y Prototipado:** Figma.
-
----
-
-### 🚀 Funcionalidades Clave
-
-1. **Gestión de Membresías:** Control de acceso y estados de cuenta de los clientes.
-2. **Módulo de Entrenamiento:** Creación y asignación de rutinas personalizadas basadas en objetivos físicos.
-3. **Seguimiento de Progreso:** Registro de métricas corporales y evolución del desempeño.
-4. **Panel Administrativo:** Gestión de inventario de equipos y reportes de asistencia.
+**Frontend:** React.js, Bootstrap 5, HTML5, CSS3.
+**Backend (Prototipado):** JSON Server & Postman.
+**Base de Datos:** MySQL (Diseñado en MySQL Workbench).
+**Diseño:** Figma.
 
 ---
 
-### 📂 Documentación del Proyecto
+### 📂 Estructura del Proyecto (Ciclo de Vida ADSO)
 
-Como parte del proceso de desarrollo bajo la metodología **ADSO**, este repositorio incluye:
+El desarrollo se divide en 6 trimestres de formación técnica, organizados de la siguiente manera:
 
-* **Análisis:** Diagramas de Casos de Uso y Modelado de Datos (UML).
-* **Diseño:** Prototipos de alta fidelidad y maquetación profesional.
-* **Desarrollo:** Código fuente organizado siguiendo estándares de Clean Code.
+#### 1️⃣ Fase de Análisis y Requisitos (Trim 1 & 2)
+* **Contextualización:** Definición del problema y procesos actuales.
+* **Recolección de Datos:** Técnicas de levantamiento de información.
+* **Diseño Lógico:** Casos de Uso, Modelo Entidad-Relación (MER) y Diagramas de Clases.
+* **Estimación:** Análisis de costos y requisitos del sistema.
+
+#### 2️⃣ Fase de Diseño y Desarrollo Inicial (Trim 3 & 4)
+* **Base de Datos:** Implementación de sentencias DDL y DML en MySQL.
+* **Seguridad:** Protocolos de seguridad de datos.
+* **Frontend Web:** Maquetación funcional y consumo de APIs iniciales.
+* **Lógica CRUD:** Implementación de operaciones básicas (Crear, Leer, Actualizar, Eliminar).
+
+#### 3️⃣ Fase de Optimización y Entrega (Trim 5 & 6)
+* **Metodologías Ágiles:** Gestión del proyecto bajo marcos de trabajo modernos.
+* **Documentación de APIs:** Detalle técnico para integración de servicios.
+* **Calidad y Pruebas:** Modelos de calidad y ejecución de pruebas de software.
+* **Finalización:** Manuales de usuario, técnicos y Diagrama de Despliegue.
 
 ---
 
 ### ⚙️ Configuración del Entorno
 
-Para ejecutar este proyecto de forma local, sigue estos pasos:
-
-1. **Clonación:**
+1. **Clonar repositorio:**
    ```bash
    git clone [https://github.com/](https://github.com/)[tu-usuario]/Equipo_Metafit.git
