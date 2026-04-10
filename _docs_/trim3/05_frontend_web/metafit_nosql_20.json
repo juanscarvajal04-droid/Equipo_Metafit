@@ -1,0 +1,2565 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "email": "carlos@metafit.com",
+      "password": "Admin123!"
+    },
+    {
+      "id": 2,
+      "email": "laura@metafit.com",
+      "password": "Laura123!"
+    },
+    {
+      "id": 3,
+      "email": "andres@metafit.com",
+      "password": "Andres123!"
+    },
+    {
+      "id": 4,
+      "email": "maria@metafit.com",
+      "password": "Maria123!"
+    }
+  ],
+  "ejercicios": [
+    {
+      "id": 1,
+      "nombre": "Sentadilla",
+      "grupo": "Piernas"
+    },
+    {
+      "id": 2,
+      "nombre": "Press de banca",
+      "grupo": "Pecho"
+    },
+    {
+      "id": 3,
+      "nombre": "Peso muerto",
+      "grupo": "Espalda"
+    },
+    {
+      "id": 4,
+      "nombre": "Press militar",
+      "grupo": "Hombros"
+    },
+    {
+      "id": 5,
+      "nombre": "Curl de bíceps",
+      "grupo": "Brazos"
+    },
+    {
+      "id": 6,
+      "nombre": "Hip thrust",
+      "grupo": "Glúteos"
+    }
+  ],
+  "alimentos": [
+    {
+      "id": 1,
+      "nombre": "Pechuga de pollo",
+      "calorias": 165
+    },
+    {
+      "id": 2,
+      "nombre": "Arroz blanco",
+      "calorias": 130
+    },
+    {
+      "id": 3,
+      "nombre": "Huevo",
+      "calorias": 155
+    },
+    {
+      "id": 4,
+      "nombre": "Avena",
+      "calorias": 389
+    },
+    {
+      "id": 5,
+      "nombre": "Brócoli",
+      "calorias": 34
+    }
+  ],
+  "afiliados": [
+    {
+      "id": 1,
+      "nombres": "Usuario 1",
+      "apellidos": "Apellido",
+      "correo": "user1@test.com",
+      "documento": 1000001,
+      "objetivo_fisico": "Pérdida de grasa",
+      "ciclo_activo": {
+        "plan_entrenamiento": {
+          "rutinas": [
+            {
+              "dia": 1,
+              "ejercicios": [
+                {
+                  "id": 3,
+                  "nombre": "Peso muerto",
+                  "grupo": "Espalda"
+                },
+                {
+                  "id": 6,
+                  "nombre": "Hip thrust",
+                  "grupo": "Glúteos"
+                },
+                {
+                  "id": 3,
+                  "nombre": "Peso muerto",
+                  "grupo": "Espalda"
+                }
+              ]
+            },
+            {
+              "dia": 2,
+              "ejercicios": [
+                {
+                  "id": 1,
+                  "nombre": "Sentadilla",
+                  "grupo": "Piernas"
+                },
+                {
+                  "id": 4,
+                  "nombre": "Press militar",
+                  "grupo": "Hombros"
+                },
+                {
+                  "id": 2,
+                  "nombre": "Press de banca",
+                  "grupo": "Pecho"
+                }
+              ]
+            },
+            {
+              "dia": 3,
+              "ejercicios": [
+                {
+                  "id": 4,
+                  "nombre": "Press militar",
+                  "grupo": "Hombros"
+                },
+                {
+                  "id": 2,
+                  "nombre": "Press de banca",
+                  "grupo": "Pecho"
+                },
+                {
+                  "id": 4,
+                  "nombre": "Press militar",
+                  "grupo": "Hombros"
+                }
+              ]
+            }
+          ]
+        },
+        "plan_nutricional": {
+          "calorias_diarias": 2381,
+          "comidas": [
+            {
+              "momento": "Desayuno",
+              "alimentos": [
+                {
+                  "id": 2,
+                  "nombre": "Arroz blanco",
+                  "calorias": 130
+                },
+                {
+                  "id": 4,
+                  "nombre": "Avena",
+                  "calorias": 389
+                }
+              ]
+            },
+            {
+              "momento": "Almuerzo",
+              "alimentos": [
+                {
+                  "id": 2,
+                  "nombre": "Arroz blanco",
+                  "calorias": 130
+                },
+                {
+                  "id": 3,
+                  "nombre": "Huevo",
+                  "calorias": 155
+                }
+              ]
+            },
+            {
+              "momento": "Cena",
+              "alimentos": [
+                {
+                  "id": 4,
+                  "nombre": "Avena",
+                  "calorias": 389
+                },
+                {
+                  "id": 1,
+                  "nombre": "Pechuga de pollo",
+                  "calorias": 165
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 2,
+      "nombres": "Usuario 2",
+      "apellidos": "Apellido",
+      "correo": "user2@test.com",
+      "documento": 1000002,
+      "objetivo_fisico": "Pérdida de grasa",
+      "ciclo_activo": {
+        "plan_entrenamiento": {
+          "rutinas": [
+            {
+              "dia": 1,
+              "ejercicios": [
+                {
+                  "id": 6,
+                  "nombre": "Hip thrust",
+                  "grupo": "Glúteos"
+                },
+                {
+                  "id": 3,
+                  "nombre": "Peso muerto",
+                  "grupo": "Espalda"
+                },
+                {
+                  "id": 1,
+                  "nombre": "Sentadilla",
+                  "grupo": "Piernas"
+                }
+              ]
+            },
+            {
+              "dia": 2,
+              "ejercicios": [
+                {
+                  "id": 4,
+                  "nombre": "Press militar",
+                  "grupo": "Hombros"
+                },
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                },
+                {
+                  "id": 2,
+                  "nombre": "Press de banca",
+                  "grupo": "Pecho"
+                }
+              ]
+            },
+            {
+              "dia": 3,
+              "ejercicios": [
+                {
+                  "id": 3,
+                  "nombre": "Peso muerto",
+                  "grupo": "Espalda"
+                },
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                },
+                {
+                  "id": 2,
+                  "nombre": "Press de banca",
+                  "grupo": "Pecho"
+                }
+              ]
+            }
+          ]
+        },
+        "plan_nutricional": {
+          "calorias_diarias": 2085,
+          "comidas": [
+            {
+              "momento": "Desayuno",
+              "alimentos": [
+                {
+                  "id": 3,
+                  "nombre": "Huevo",
+                  "calorias": 155
+                },
+                {
+                  "id": 4,
+                  "nombre": "Avena",
+                  "calorias": 389
+                }
+              ]
+            },
+            {
+              "momento": "Almuerzo",
+              "alimentos": [
+                {
+                  "id": 2,
+                  "nombre": "Arroz blanco",
+                  "calorias": 130
+                },
+                {
+                  "id": 4,
+                  "nombre": "Avena",
+                  "calorias": 389
+                }
+              ]
+            },
+            {
+              "momento": "Cena",
+              "alimentos": [
+                {
+                  "id": 2,
+                  "nombre": "Arroz blanco",
+                  "calorias": 130
+                },
+                {
+                  "id": 3,
+                  "nombre": "Huevo",
+                  "calorias": 155
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 3,
+      "nombres": "Usuario 3",
+      "apellidos": "Apellido",
+      "correo": "user3@test.com",
+      "documento": 1000003,
+      "objetivo_fisico": "Pérdida de grasa",
+      "ciclo_activo": {
+        "plan_entrenamiento": {
+          "rutinas": [
+            {
+              "dia": 1,
+              "ejercicios": [
+                {
+                  "id": 1,
+                  "nombre": "Sentadilla",
+                  "grupo": "Piernas"
+                },
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                },
+                {
+                  "id": 1,
+                  "nombre": "Sentadilla",
+                  "grupo": "Piernas"
+                }
+              ]
+            },
+            {
+              "dia": 2,
+              "ejercicios": [
+                {
+                  "id": 3,
+                  "nombre": "Peso muerto",
+                  "grupo": "Espalda"
+                },
+                {
+                  "id": 4,
+                  "nombre": "Press militar",
+                  "grupo": "Hombros"
+                },
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                }
+              ]
+            },
+            {
+              "dia": 3,
+              "ejercicios": [
+                {
+                  "id": 4,
+                  "nombre": "Press militar",
+                  "grupo": "Hombros"
+                },
+                {
+                  "id": 4,
+                  "nombre": "Press militar",
+                  "grupo": "Hombros"
+                },
+                {
+                  "id": 1,
+                  "nombre": "Sentadilla",
+                  "grupo": "Piernas"
+                }
+              ]
+            }
+          ]
+        },
+        "plan_nutricional": {
+          "calorias_diarias": 2122,
+          "comidas": [
+            {
+              "momento": "Desayuno",
+              "alimentos": [
+                {
+                  "id": 3,
+                  "nombre": "Huevo",
+                  "calorias": 155
+                },
+                {
+                  "id": 2,
+                  "nombre": "Arroz blanco",
+                  "calorias": 130
+                }
+              ]
+            },
+            {
+              "momento": "Almuerzo",
+              "alimentos": [
+                {
+                  "id": 2,
+                  "nombre": "Arroz blanco",
+                  "calorias": 130
+                },
+                {
+                  "id": 1,
+                  "nombre": "Pechuga de pollo",
+                  "calorias": 165
+                }
+              ]
+            },
+            {
+              "momento": "Cena",
+              "alimentos": [
+                {
+                  "id": 4,
+                  "nombre": "Avena",
+                  "calorias": 389
+                },
+                {
+                  "id": 4,
+                  "nombre": "Avena",
+                  "calorias": 389
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 4,
+      "nombres": "Usuario 4",
+      "apellidos": "Apellido",
+      "correo": "user4@test.com",
+      "documento": 1000004,
+      "objetivo_fisico": "Pérdida de grasa",
+      "ciclo_activo": {
+        "plan_entrenamiento": {
+          "rutinas": [
+            {
+              "dia": 1,
+              "ejercicios": [
+                {
+                  "id": 3,
+                  "nombre": "Peso muerto",
+                  "grupo": "Espalda"
+                },
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                },
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                }
+              ]
+            },
+            {
+              "dia": 2,
+              "ejercicios": [
+                {
+                  "id": 4,
+                  "nombre": "Press militar",
+                  "grupo": "Hombros"
+                },
+                {
+                  "id": 2,
+                  "nombre": "Press de banca",
+                  "grupo": "Pecho"
+                },
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                }
+              ]
+            },
+            {
+              "dia": 3,
+              "ejercicios": [
+                {
+                  "id": 1,
+                  "nombre": "Sentadilla",
+                  "grupo": "Piernas"
+                },
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                },
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                }
+              ]
+            }
+          ]
+        },
+        "plan_nutricional": {
+          "calorias_diarias": 2387,
+          "comidas": [
+            {
+              "momento": "Desayuno",
+              "alimentos": [
+                {
+                  "id": 1,
+                  "nombre": "Pechuga de pollo",
+                  "calorias": 165
+                },
+                {
+                  "id": 4,
+                  "nombre": "Avena",
+                  "calorias": 389
+                }
+              ]
+            },
+            {
+              "momento": "Almuerzo",
+              "alimentos": [
+                {
+                  "id": 1,
+                  "nombre": "Pechuga de pollo",
+                  "calorias": 165
+                },
+                {
+                  "id": 3,
+                  "nombre": "Huevo",
+                  "calorias": 155
+                }
+              ]
+            },
+            {
+              "momento": "Cena",
+              "alimentos": [
+                {
+                  "id": 3,
+                  "nombre": "Huevo",
+                  "calorias": 155
+                },
+                {
+                  "id": 4,
+                  "nombre": "Avena",
+                  "calorias": 389
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 5,
+      "nombres": "Usuario 5",
+      "apellidos": "Apellido",
+      "correo": "user5@test.com",
+      "documento": 1000005,
+      "objetivo_fisico": "Aumento de masa",
+      "ciclo_activo": {
+        "plan_entrenamiento": {
+          "rutinas": [
+            {
+              "dia": 1,
+              "ejercicios": [
+                {
+                  "id": 4,
+                  "nombre": "Press militar",
+                  "grupo": "Hombros"
+                },
+                {
+                  "id": 1,
+                  "nombre": "Sentadilla",
+                  "grupo": "Piernas"
+                },
+                {
+                  "id": 4,
+                  "nombre": "Press militar",
+                  "grupo": "Hombros"
+                }
+              ]
+            },
+            {
+              "dia": 2,
+              "ejercicios": [
+                {
+                  "id": 4,
+                  "nombre": "Press militar",
+                  "grupo": "Hombros"
+                },
+                {
+                  "id": 2,
+                  "nombre": "Press de banca",
+                  "grupo": "Pecho"
+                },
+                {
+                  "id": 4,
+                  "nombre": "Press militar",
+                  "grupo": "Hombros"
+                }
+              ]
+            },
+            {
+              "dia": 3,
+              "ejercicios": [
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                },
+                {
+                  "id": 3,
+                  "nombre": "Peso muerto",
+                  "grupo": "Espalda"
+                },
+                {
+                  "id": 3,
+                  "nombre": "Peso muerto",
+                  "grupo": "Espalda"
+                }
+              ]
+            }
+          ]
+        },
+        "plan_nutricional": {
+          "calorias_diarias": 2208,
+          "comidas": [
+            {
+              "momento": "Desayuno",
+              "alimentos": [
+                {
+                  "id": 5,
+                  "nombre": "Brócoli",
+                  "calorias": 34
+                },
+                {
+                  "id": 5,
+                  "nombre": "Brócoli",
+                  "calorias": 34
+                }
+              ]
+            },
+            {
+              "momento": "Almuerzo",
+              "alimentos": [
+                {
+                  "id": 1,
+                  "nombre": "Pechuga de pollo",
+                  "calorias": 165
+                },
+                {
+                  "id": 5,
+                  "nombre": "Brócoli",
+                  "calorias": 34
+                }
+              ]
+            },
+            {
+              "momento": "Cena",
+              "alimentos": [
+                {
+                  "id": 2,
+                  "nombre": "Arroz blanco",
+                  "calorias": 130
+                },
+                {
+                  "id": 1,
+                  "nombre": "Pechuga de pollo",
+                  "calorias": 165
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 6,
+      "nombres": "Usuario 6",
+      "apellidos": "Apellido",
+      "correo": "user6@test.com",
+      "documento": 1000006,
+      "objetivo_fisico": "Mantenimiento",
+      "ciclo_activo": {
+        "plan_entrenamiento": {
+          "rutinas": [
+            {
+              "dia": 1,
+              "ejercicios": [
+                {
+                  "id": 3,
+                  "nombre": "Peso muerto",
+                  "grupo": "Espalda"
+                },
+                {
+                  "id": 3,
+                  "nombre": "Peso muerto",
+                  "grupo": "Espalda"
+                },
+                {
+                  "id": 3,
+                  "nombre": "Peso muerto",
+                  "grupo": "Espalda"
+                }
+              ]
+            },
+            {
+              "dia": 2,
+              "ejercicios": [
+                {
+                  "id": 3,
+                  "nombre": "Peso muerto",
+                  "grupo": "Espalda"
+                },
+                {
+                  "id": 1,
+                  "nombre": "Sentadilla",
+                  "grupo": "Piernas"
+                },
+                {
+                  "id": 3,
+                  "nombre": "Peso muerto",
+                  "grupo": "Espalda"
+                }
+              ]
+            },
+            {
+              "dia": 3,
+              "ejercicios": [
+                {
+                  "id": 4,
+                  "nombre": "Press militar",
+                  "grupo": "Hombros"
+                },
+                {
+                  "id": 3,
+                  "nombre": "Peso muerto",
+                  "grupo": "Espalda"
+                },
+                {
+                  "id": 6,
+                  "nombre": "Hip thrust",
+                  "grupo": "Glúteos"
+                }
+              ]
+            }
+          ]
+        },
+        "plan_nutricional": {
+          "calorias_diarias": 2212,
+          "comidas": [
+            {
+              "momento": "Desayuno",
+              "alimentos": [
+                {
+                  "id": 2,
+                  "nombre": "Arroz blanco",
+                  "calorias": 130
+                },
+                {
+                  "id": 2,
+                  "nombre": "Arroz blanco",
+                  "calorias": 130
+                }
+              ]
+            },
+            {
+              "momento": "Almuerzo",
+              "alimentos": [
+                {
+                  "id": 1,
+                  "nombre": "Pechuga de pollo",
+                  "calorias": 165
+                },
+                {
+                  "id": 2,
+                  "nombre": "Arroz blanco",
+                  "calorias": 130
+                }
+              ]
+            },
+            {
+              "momento": "Cena",
+              "alimentos": [
+                {
+                  "id": 3,
+                  "nombre": "Huevo",
+                  "calorias": 155
+                },
+                {
+                  "id": 1,
+                  "nombre": "Pechuga de pollo",
+                  "calorias": 165
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 7,
+      "nombres": "Usuario 7",
+      "apellidos": "Apellido",
+      "correo": "user7@test.com",
+      "documento": 1000007,
+      "objetivo_fisico": "Mantenimiento",
+      "ciclo_activo": {
+        "plan_entrenamiento": {
+          "rutinas": [
+            {
+              "dia": 1,
+              "ejercicios": [
+                {
+                  "id": 4,
+                  "nombre": "Press militar",
+                  "grupo": "Hombros"
+                },
+                {
+                  "id": 3,
+                  "nombre": "Peso muerto",
+                  "grupo": "Espalda"
+                },
+                {
+                  "id": 3,
+                  "nombre": "Peso muerto",
+                  "grupo": "Espalda"
+                }
+              ]
+            },
+            {
+              "dia": 2,
+              "ejercicios": [
+                {
+                  "id": 4,
+                  "nombre": "Press militar",
+                  "grupo": "Hombros"
+                },
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                },
+                {
+                  "id": 2,
+                  "nombre": "Press de banca",
+                  "grupo": "Pecho"
+                }
+              ]
+            },
+            {
+              "dia": 3,
+              "ejercicios": [
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                },
+                {
+                  "id": 4,
+                  "nombre": "Press militar",
+                  "grupo": "Hombros"
+                },
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                }
+              ]
+            }
+          ]
+        },
+        "plan_nutricional": {
+          "calorias_diarias": 1940,
+          "comidas": [
+            {
+              "momento": "Desayuno",
+              "alimentos": [
+                {
+                  "id": 5,
+                  "nombre": "Brócoli",
+                  "calorias": 34
+                },
+                {
+                  "id": 1,
+                  "nombre": "Pechuga de pollo",
+                  "calorias": 165
+                }
+              ]
+            },
+            {
+              "momento": "Almuerzo",
+              "alimentos": [
+                {
+                  "id": 2,
+                  "nombre": "Arroz blanco",
+                  "calorias": 130
+                },
+                {
+                  "id": 3,
+                  "nombre": "Huevo",
+                  "calorias": 155
+                }
+              ]
+            },
+            {
+              "momento": "Cena",
+              "alimentos": [
+                {
+                  "id": 3,
+                  "nombre": "Huevo",
+                  "calorias": 155
+                },
+                {
+                  "id": 1,
+                  "nombre": "Pechuga de pollo",
+                  "calorias": 165
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 8,
+      "nombres": "Usuario 8",
+      "apellidos": "Apellido",
+      "correo": "user8@test.com",
+      "documento": 1000008,
+      "objetivo_fisico": "Mantenimiento",
+      "ciclo_activo": {
+        "plan_entrenamiento": {
+          "rutinas": [
+            {
+              "dia": 1,
+              "ejercicios": [
+                {
+                  "id": 2,
+                  "nombre": "Press de banca",
+                  "grupo": "Pecho"
+                },
+                {
+                  "id": 2,
+                  "nombre": "Press de banca",
+                  "grupo": "Pecho"
+                },
+                {
+                  "id": 2,
+                  "nombre": "Press de banca",
+                  "grupo": "Pecho"
+                }
+              ]
+            },
+            {
+              "dia": 2,
+              "ejercicios": [
+                {
+                  "id": 6,
+                  "nombre": "Hip thrust",
+                  "grupo": "Glúteos"
+                },
+                {
+                  "id": 6,
+                  "nombre": "Hip thrust",
+                  "grupo": "Glúteos"
+                },
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                }
+              ]
+            },
+            {
+              "dia": 3,
+              "ejercicios": [
+                {
+                  "id": 6,
+                  "nombre": "Hip thrust",
+                  "grupo": "Glúteos"
+                },
+                {
+                  "id": 4,
+                  "nombre": "Press militar",
+                  "grupo": "Hombros"
+                },
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                }
+              ]
+            }
+          ]
+        },
+        "plan_nutricional": {
+          "calorias_diarias": 2011,
+          "comidas": [
+            {
+              "momento": "Desayuno",
+              "alimentos": [
+                {
+                  "id": 1,
+                  "nombre": "Pechuga de pollo",
+                  "calorias": 165
+                },
+                {
+                  "id": 4,
+                  "nombre": "Avena",
+                  "calorias": 389
+                }
+              ]
+            },
+            {
+              "momento": "Almuerzo",
+              "alimentos": [
+                {
+                  "id": 5,
+                  "nombre": "Brócoli",
+                  "calorias": 34
+                },
+                {
+                  "id": 5,
+                  "nombre": "Brócoli",
+                  "calorias": 34
+                }
+              ]
+            },
+            {
+              "momento": "Cena",
+              "alimentos": [
+                {
+                  "id": 1,
+                  "nombre": "Pechuga de pollo",
+                  "calorias": 165
+                },
+                {
+                  "id": 2,
+                  "nombre": "Arroz blanco",
+                  "calorias": 130
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 9,
+      "nombres": "Usuario 9",
+      "apellidos": "Apellido",
+      "correo": "user9@test.com",
+      "documento": 1000009,
+      "objetivo_fisico": "Aumento de masa",
+      "ciclo_activo": {
+        "plan_entrenamiento": {
+          "rutinas": [
+            {
+              "dia": 1,
+              "ejercicios": [
+                {
+                  "id": 1,
+                  "nombre": "Sentadilla",
+                  "grupo": "Piernas"
+                },
+                {
+                  "id": 1,
+                  "nombre": "Sentadilla",
+                  "grupo": "Piernas"
+                },
+                {
+                  "id": 2,
+                  "nombre": "Press de banca",
+                  "grupo": "Pecho"
+                }
+              ]
+            },
+            {
+              "dia": 2,
+              "ejercicios": [
+                {
+                  "id": 4,
+                  "nombre": "Press militar",
+                  "grupo": "Hombros"
+                },
+                {
+                  "id": 1,
+                  "nombre": "Sentadilla",
+                  "grupo": "Piernas"
+                },
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                }
+              ]
+            },
+            {
+              "dia": 3,
+              "ejercicios": [
+                {
+                  "id": 3,
+                  "nombre": "Peso muerto",
+                  "grupo": "Espalda"
+                },
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                },
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                }
+              ]
+            }
+          ]
+        },
+        "plan_nutricional": {
+          "calorias_diarias": 2242,
+          "comidas": [
+            {
+              "momento": "Desayuno",
+              "alimentos": [
+                {
+                  "id": 5,
+                  "nombre": "Brócoli",
+                  "calorias": 34
+                },
+                {
+                  "id": 5,
+                  "nombre": "Brócoli",
+                  "calorias": 34
+                }
+              ]
+            },
+            {
+              "momento": "Almuerzo",
+              "alimentos": [
+                {
+                  "id": 3,
+                  "nombre": "Huevo",
+                  "calorias": 155
+                },
+                {
+                  "id": 2,
+                  "nombre": "Arroz blanco",
+                  "calorias": 130
+                }
+              ]
+            },
+            {
+              "momento": "Cena",
+              "alimentos": [
+                {
+                  "id": 5,
+                  "nombre": "Brócoli",
+                  "calorias": 34
+                },
+                {
+                  "id": 4,
+                  "nombre": "Avena",
+                  "calorias": 389
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 10,
+      "nombres": "Usuario 10",
+      "apellidos": "Apellido",
+      "correo": "user10@test.com",
+      "documento": 1000010,
+      "objetivo_fisico": "Aumento de masa",
+      "ciclo_activo": {
+        "plan_entrenamiento": {
+          "rutinas": [
+            {
+              "dia": 1,
+              "ejercicios": [
+                {
+                  "id": 6,
+                  "nombre": "Hip thrust",
+                  "grupo": "Glúteos"
+                },
+                {
+                  "id": 2,
+                  "nombre": "Press de banca",
+                  "grupo": "Pecho"
+                },
+                {
+                  "id": 2,
+                  "nombre": "Press de banca",
+                  "grupo": "Pecho"
+                }
+              ]
+            },
+            {
+              "dia": 2,
+              "ejercicios": [
+                {
+                  "id": 6,
+                  "nombre": "Hip thrust",
+                  "grupo": "Glúteos"
+                },
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                },
+                {
+                  "id": 1,
+                  "nombre": "Sentadilla",
+                  "grupo": "Piernas"
+                }
+              ]
+            },
+            {
+              "dia": 3,
+              "ejercicios": [
+                {
+                  "id": 1,
+                  "nombre": "Sentadilla",
+                  "grupo": "Piernas"
+                },
+                {
+                  "id": 2,
+                  "nombre": "Press de banca",
+                  "grupo": "Pecho"
+                },
+                {
+                  "id": 2,
+                  "nombre": "Press de banca",
+                  "grupo": "Pecho"
+                }
+              ]
+            }
+          ]
+        },
+        "plan_nutricional": {
+          "calorias_diarias": 2220,
+          "comidas": [
+            {
+              "momento": "Desayuno",
+              "alimentos": [
+                {
+                  "id": 1,
+                  "nombre": "Pechuga de pollo",
+                  "calorias": 165
+                },
+                {
+                  "id": 5,
+                  "nombre": "Brócoli",
+                  "calorias": 34
+                }
+              ]
+            },
+            {
+              "momento": "Almuerzo",
+              "alimentos": [
+                {
+                  "id": 2,
+                  "nombre": "Arroz blanco",
+                  "calorias": 130
+                },
+                {
+                  "id": 1,
+                  "nombre": "Pechuga de pollo",
+                  "calorias": 165
+                }
+              ]
+            },
+            {
+              "momento": "Cena",
+              "alimentos": [
+                {
+                  "id": 4,
+                  "nombre": "Avena",
+                  "calorias": 389
+                },
+                {
+                  "id": 2,
+                  "nombre": "Arroz blanco",
+                  "calorias": 130
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 11,
+      "nombres": "Usuario 11",
+      "apellidos": "Apellido",
+      "correo": "user11@test.com",
+      "documento": 1000011,
+      "objetivo_fisico": "Pérdida de grasa",
+      "ciclo_activo": {
+        "plan_entrenamiento": {
+          "rutinas": [
+            {
+              "dia": 1,
+              "ejercicios": [
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                },
+                {
+                  "id": 3,
+                  "nombre": "Peso muerto",
+                  "grupo": "Espalda"
+                },
+                {
+                  "id": 3,
+                  "nombre": "Peso muerto",
+                  "grupo": "Espalda"
+                }
+              ]
+            },
+            {
+              "dia": 2,
+              "ejercicios": [
+                {
+                  "id": 6,
+                  "nombre": "Hip thrust",
+                  "grupo": "Glúteos"
+                },
+                {
+                  "id": 6,
+                  "nombre": "Hip thrust",
+                  "grupo": "Glúteos"
+                },
+                {
+                  "id": 3,
+                  "nombre": "Peso muerto",
+                  "grupo": "Espalda"
+                }
+              ]
+            },
+            {
+              "dia": 3,
+              "ejercicios": [
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                },
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                },
+                {
+                  "id": 6,
+                  "nombre": "Hip thrust",
+                  "grupo": "Glúteos"
+                }
+              ]
+            }
+          ]
+        },
+        "plan_nutricional": {
+          "calorias_diarias": 2011,
+          "comidas": [
+            {
+              "momento": "Desayuno",
+              "alimentos": [
+                {
+                  "id": 3,
+                  "nombre": "Huevo",
+                  "calorias": 155
+                },
+                {
+                  "id": 4,
+                  "nombre": "Avena",
+                  "calorias": 389
+                }
+              ]
+            },
+            {
+              "momento": "Almuerzo",
+              "alimentos": [
+                {
+                  "id": 3,
+                  "nombre": "Huevo",
+                  "calorias": 155
+                },
+                {
+                  "id": 2,
+                  "nombre": "Arroz blanco",
+                  "calorias": 130
+                }
+              ]
+            },
+            {
+              "momento": "Cena",
+              "alimentos": [
+                {
+                  "id": 2,
+                  "nombre": "Arroz blanco",
+                  "calorias": 130
+                },
+                {
+                  "id": 5,
+                  "nombre": "Brócoli",
+                  "calorias": 34
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 12,
+      "nombres": "Usuario 12",
+      "apellidos": "Apellido",
+      "correo": "user12@test.com",
+      "documento": 1000012,
+      "objetivo_fisico": "Mantenimiento",
+      "ciclo_activo": {
+        "plan_entrenamiento": {
+          "rutinas": [
+            {
+              "dia": 1,
+              "ejercicios": [
+                {
+                  "id": 4,
+                  "nombre": "Press militar",
+                  "grupo": "Hombros"
+                },
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                },
+                {
+                  "id": 4,
+                  "nombre": "Press militar",
+                  "grupo": "Hombros"
+                }
+              ]
+            },
+            {
+              "dia": 2,
+              "ejercicios": [
+                {
+                  "id": 1,
+                  "nombre": "Sentadilla",
+                  "grupo": "Piernas"
+                },
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                },
+                {
+                  "id": 6,
+                  "nombre": "Hip thrust",
+                  "grupo": "Glúteos"
+                }
+              ]
+            },
+            {
+              "dia": 3,
+              "ejercicios": [
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                },
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                },
+                {
+                  "id": 3,
+                  "nombre": "Peso muerto",
+                  "grupo": "Espalda"
+                }
+              ]
+            }
+          ]
+        },
+        "plan_nutricional": {
+          "calorias_diarias": 2107,
+          "comidas": [
+            {
+              "momento": "Desayuno",
+              "alimentos": [
+                {
+                  "id": 2,
+                  "nombre": "Arroz blanco",
+                  "calorias": 130
+                },
+                {
+                  "id": 4,
+                  "nombre": "Avena",
+                  "calorias": 389
+                }
+              ]
+            },
+            {
+              "momento": "Almuerzo",
+              "alimentos": [
+                {
+                  "id": 3,
+                  "nombre": "Huevo",
+                  "calorias": 155
+                },
+                {
+                  "id": 4,
+                  "nombre": "Avena",
+                  "calorias": 389
+                }
+              ]
+            },
+            {
+              "momento": "Cena",
+              "alimentos": [
+                {
+                  "id": 3,
+                  "nombre": "Huevo",
+                  "calorias": 155
+                },
+                {
+                  "id": 4,
+                  "nombre": "Avena",
+                  "calorias": 389
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 13,
+      "nombres": "Usuario 13",
+      "apellidos": "Apellido",
+      "correo": "user13@test.com",
+      "documento": 1000013,
+      "objetivo_fisico": "Mantenimiento",
+      "ciclo_activo": {
+        "plan_entrenamiento": {
+          "rutinas": [
+            {
+              "dia": 1,
+              "ejercicios": [
+                {
+                  "id": 2,
+                  "nombre": "Press de banca",
+                  "grupo": "Pecho"
+                },
+                {
+                  "id": 3,
+                  "nombre": "Peso muerto",
+                  "grupo": "Espalda"
+                },
+                {
+                  "id": 4,
+                  "nombre": "Press militar",
+                  "grupo": "Hombros"
+                }
+              ]
+            },
+            {
+              "dia": 2,
+              "ejercicios": [
+                {
+                  "id": 2,
+                  "nombre": "Press de banca",
+                  "grupo": "Pecho"
+                },
+                {
+                  "id": 3,
+                  "nombre": "Peso muerto",
+                  "grupo": "Espalda"
+                },
+                {
+                  "id": 6,
+                  "nombre": "Hip thrust",
+                  "grupo": "Glúteos"
+                }
+              ]
+            },
+            {
+              "dia": 3,
+              "ejercicios": [
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                },
+                {
+                  "id": 2,
+                  "nombre": "Press de banca",
+                  "grupo": "Pecho"
+                },
+                {
+                  "id": 2,
+                  "nombre": "Press de banca",
+                  "grupo": "Pecho"
+                }
+              ]
+            }
+          ]
+        },
+        "plan_nutricional": {
+          "calorias_diarias": 1992,
+          "comidas": [
+            {
+              "momento": "Desayuno",
+              "alimentos": [
+                {
+                  "id": 4,
+                  "nombre": "Avena",
+                  "calorias": 389
+                },
+                {
+                  "id": 1,
+                  "nombre": "Pechuga de pollo",
+                  "calorias": 165
+                }
+              ]
+            },
+            {
+              "momento": "Almuerzo",
+              "alimentos": [
+                {
+                  "id": 2,
+                  "nombre": "Arroz blanco",
+                  "calorias": 130
+                },
+                {
+                  "id": 4,
+                  "nombre": "Avena",
+                  "calorias": 389
+                }
+              ]
+            },
+            {
+              "momento": "Cena",
+              "alimentos": [
+                {
+                  "id": 5,
+                  "nombre": "Brócoli",
+                  "calorias": 34
+                },
+                {
+                  "id": 5,
+                  "nombre": "Brócoli",
+                  "calorias": 34
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 14,
+      "nombres": "Usuario 14",
+      "apellidos": "Apellido",
+      "correo": "user14@test.com",
+      "documento": 1000014,
+      "objetivo_fisico": "Mantenimiento",
+      "ciclo_activo": {
+        "plan_entrenamiento": {
+          "rutinas": [
+            {
+              "dia": 1,
+              "ejercicios": [
+                {
+                  "id": 4,
+                  "nombre": "Press militar",
+                  "grupo": "Hombros"
+                },
+                {
+                  "id": 3,
+                  "nombre": "Peso muerto",
+                  "grupo": "Espalda"
+                },
+                {
+                  "id": 3,
+                  "nombre": "Peso muerto",
+                  "grupo": "Espalda"
+                }
+              ]
+            },
+            {
+              "dia": 2,
+              "ejercicios": [
+                {
+                  "id": 2,
+                  "nombre": "Press de banca",
+                  "grupo": "Pecho"
+                },
+                {
+                  "id": 1,
+                  "nombre": "Sentadilla",
+                  "grupo": "Piernas"
+                },
+                {
+                  "id": 1,
+                  "nombre": "Sentadilla",
+                  "grupo": "Piernas"
+                }
+              ]
+            },
+            {
+              "dia": 3,
+              "ejercicios": [
+                {
+                  "id": 6,
+                  "nombre": "Hip thrust",
+                  "grupo": "Glúteos"
+                },
+                {
+                  "id": 3,
+                  "nombre": "Peso muerto",
+                  "grupo": "Espalda"
+                },
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                }
+              ]
+            }
+          ]
+        },
+        "plan_nutricional": {
+          "calorias_diarias": 2428,
+          "comidas": [
+            {
+              "momento": "Desayuno",
+              "alimentos": [
+                {
+                  "id": 4,
+                  "nombre": "Avena",
+                  "calorias": 389
+                },
+                {
+                  "id": 2,
+                  "nombre": "Arroz blanco",
+                  "calorias": 130
+                }
+              ]
+            },
+            {
+              "momento": "Almuerzo",
+              "alimentos": [
+                {
+                  "id": 5,
+                  "nombre": "Brócoli",
+                  "calorias": 34
+                },
+                {
+                  "id": 2,
+                  "nombre": "Arroz blanco",
+                  "calorias": 130
+                }
+              ]
+            },
+            {
+              "momento": "Cena",
+              "alimentos": [
+                {
+                  "id": 1,
+                  "nombre": "Pechuga de pollo",
+                  "calorias": 165
+                },
+                {
+                  "id": 2,
+                  "nombre": "Arroz blanco",
+                  "calorias": 130
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 15,
+      "nombres": "Usuario 15",
+      "apellidos": "Apellido",
+      "correo": "user15@test.com",
+      "documento": 1000015,
+      "objetivo_fisico": "Aumento de masa",
+      "ciclo_activo": {
+        "plan_entrenamiento": {
+          "rutinas": [
+            {
+              "dia": 1,
+              "ejercicios": [
+                {
+                  "id": 2,
+                  "nombre": "Press de banca",
+                  "grupo": "Pecho"
+                },
+                {
+                  "id": 6,
+                  "nombre": "Hip thrust",
+                  "grupo": "Glúteos"
+                },
+                {
+                  "id": 4,
+                  "nombre": "Press militar",
+                  "grupo": "Hombros"
+                }
+              ]
+            },
+            {
+              "dia": 2,
+              "ejercicios": [
+                {
+                  "id": 1,
+                  "nombre": "Sentadilla",
+                  "grupo": "Piernas"
+                },
+                {
+                  "id": 2,
+                  "nombre": "Press de banca",
+                  "grupo": "Pecho"
+                },
+                {
+                  "id": 6,
+                  "nombre": "Hip thrust",
+                  "grupo": "Glúteos"
+                }
+              ]
+            },
+            {
+              "dia": 3,
+              "ejercicios": [
+                {
+                  "id": 6,
+                  "nombre": "Hip thrust",
+                  "grupo": "Glúteos"
+                },
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                },
+                {
+                  "id": 4,
+                  "nombre": "Press militar",
+                  "grupo": "Hombros"
+                }
+              ]
+            }
+          ]
+        },
+        "plan_nutricional": {
+          "calorias_diarias": 2410,
+          "comidas": [
+            {
+              "momento": "Desayuno",
+              "alimentos": [
+                {
+                  "id": 5,
+                  "nombre": "Brócoli",
+                  "calorias": 34
+                },
+                {
+                  "id": 4,
+                  "nombre": "Avena",
+                  "calorias": 389
+                }
+              ]
+            },
+            {
+              "momento": "Almuerzo",
+              "alimentos": [
+                {
+                  "id": 2,
+                  "nombre": "Arroz blanco",
+                  "calorias": 130
+                },
+                {
+                  "id": 1,
+                  "nombre": "Pechuga de pollo",
+                  "calorias": 165
+                }
+              ]
+            },
+            {
+              "momento": "Cena",
+              "alimentos": [
+                {
+                  "id": 2,
+                  "nombre": "Arroz blanco",
+                  "calorias": 130
+                },
+                {
+                  "id": 2,
+                  "nombre": "Arroz blanco",
+                  "calorias": 130
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 16,
+      "nombres": "Usuario 16",
+      "apellidos": "Apellido",
+      "correo": "user16@test.com",
+      "documento": 1000016,
+      "objetivo_fisico": "Mantenimiento",
+      "ciclo_activo": {
+        "plan_entrenamiento": {
+          "rutinas": [
+            {
+              "dia": 1,
+              "ejercicios": [
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                },
+                {
+                  "id": 4,
+                  "nombre": "Press militar",
+                  "grupo": "Hombros"
+                },
+                {
+                  "id": 6,
+                  "nombre": "Hip thrust",
+                  "grupo": "Glúteos"
+                }
+              ]
+            },
+            {
+              "dia": 2,
+              "ejercicios": [
+                {
+                  "id": 3,
+                  "nombre": "Peso muerto",
+                  "grupo": "Espalda"
+                },
+                {
+                  "id": 2,
+                  "nombre": "Press de banca",
+                  "grupo": "Pecho"
+                },
+                {
+                  "id": 3,
+                  "nombre": "Peso muerto",
+                  "grupo": "Espalda"
+                }
+              ]
+            },
+            {
+              "dia": 3,
+              "ejercicios": [
+                {
+                  "id": 3,
+                  "nombre": "Peso muerto",
+                  "grupo": "Espalda"
+                },
+                {
+                  "id": 6,
+                  "nombre": "Hip thrust",
+                  "grupo": "Glúteos"
+                },
+                {
+                  "id": 6,
+                  "nombre": "Hip thrust",
+                  "grupo": "Glúteos"
+                }
+              ]
+            }
+          ]
+        },
+        "plan_nutricional": {
+          "calorias_diarias": 2071,
+          "comidas": [
+            {
+              "momento": "Desayuno",
+              "alimentos": [
+                {
+                  "id": 3,
+                  "nombre": "Huevo",
+                  "calorias": 155
+                },
+                {
+                  "id": 3,
+                  "nombre": "Huevo",
+                  "calorias": 155
+                }
+              ]
+            },
+            {
+              "momento": "Almuerzo",
+              "alimentos": [
+                {
+                  "id": 5,
+                  "nombre": "Brócoli",
+                  "calorias": 34
+                },
+                {
+                  "id": 4,
+                  "nombre": "Avena",
+                  "calorias": 389
+                }
+              ]
+            },
+            {
+              "momento": "Cena",
+              "alimentos": [
+                {
+                  "id": 1,
+                  "nombre": "Pechuga de pollo",
+                  "calorias": 165
+                },
+                {
+                  "id": 1,
+                  "nombre": "Pechuga de pollo",
+                  "calorias": 165
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 17,
+      "nombres": "Usuario 17",
+      "apellidos": "Apellido",
+      "correo": "user17@test.com",
+      "documento": 1000017,
+      "objetivo_fisico": "Pérdida de grasa",
+      "ciclo_activo": {
+        "plan_entrenamiento": {
+          "rutinas": [
+            {
+              "dia": 1,
+              "ejercicios": [
+                {
+                  "id": 2,
+                  "nombre": "Press de banca",
+                  "grupo": "Pecho"
+                },
+                {
+                  "id": 2,
+                  "nombre": "Press de banca",
+                  "grupo": "Pecho"
+                },
+                {
+                  "id": 6,
+                  "nombre": "Hip thrust",
+                  "grupo": "Glúteos"
+                }
+              ]
+            },
+            {
+              "dia": 2,
+              "ejercicios": [
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                },
+                {
+                  "id": 4,
+                  "nombre": "Press militar",
+                  "grupo": "Hombros"
+                },
+                {
+                  "id": 4,
+                  "nombre": "Press militar",
+                  "grupo": "Hombros"
+                }
+              ]
+            },
+            {
+              "dia": 3,
+              "ejercicios": [
+                {
+                  "id": 4,
+                  "nombre": "Press militar",
+                  "grupo": "Hombros"
+                },
+                {
+                  "id": 6,
+                  "nombre": "Hip thrust",
+                  "grupo": "Glúteos"
+                },
+                {
+                  "id": 4,
+                  "nombre": "Press militar",
+                  "grupo": "Hombros"
+                }
+              ]
+            }
+          ]
+        },
+        "plan_nutricional": {
+          "calorias_diarias": 2090,
+          "comidas": [
+            {
+              "momento": "Desayuno",
+              "alimentos": [
+                {
+                  "id": 4,
+                  "nombre": "Avena",
+                  "calorias": 389
+                },
+                {
+                  "id": 5,
+                  "nombre": "Brócoli",
+                  "calorias": 34
+                }
+              ]
+            },
+            {
+              "momento": "Almuerzo",
+              "alimentos": [
+                {
+                  "id": 4,
+                  "nombre": "Avena",
+                  "calorias": 389
+                },
+                {
+                  "id": 3,
+                  "nombre": "Huevo",
+                  "calorias": 155
+                }
+              ]
+            },
+            {
+              "momento": "Cena",
+              "alimentos": [
+                {
+                  "id": 1,
+                  "nombre": "Pechuga de pollo",
+                  "calorias": 165
+                },
+                {
+                  "id": 4,
+                  "nombre": "Avena",
+                  "calorias": 389
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 18,
+      "nombres": "Usuario 18",
+      "apellidos": "Apellido",
+      "correo": "user18@test.com",
+      "documento": 1000018,
+      "objetivo_fisico": "Mantenimiento",
+      "ciclo_activo": {
+        "plan_entrenamiento": {
+          "rutinas": [
+            {
+              "dia": 1,
+              "ejercicios": [
+                {
+                  "id": 6,
+                  "nombre": "Hip thrust",
+                  "grupo": "Glúteos"
+                },
+                {
+                  "id": 3,
+                  "nombre": "Peso muerto",
+                  "grupo": "Espalda"
+                },
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                }
+              ]
+            },
+            {
+              "dia": 2,
+              "ejercicios": [
+                {
+                  "id": 1,
+                  "nombre": "Sentadilla",
+                  "grupo": "Piernas"
+                },
+                {
+                  "id": 4,
+                  "nombre": "Press militar",
+                  "grupo": "Hombros"
+                },
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                }
+              ]
+            },
+            {
+              "dia": 3,
+              "ejercicios": [
+                {
+                  "id": 6,
+                  "nombre": "Hip thrust",
+                  "grupo": "Glúteos"
+                },
+                {
+                  "id": 4,
+                  "nombre": "Press militar",
+                  "grupo": "Hombros"
+                },
+                {
+                  "id": 3,
+                  "nombre": "Peso muerto",
+                  "grupo": "Espalda"
+                }
+              ]
+            }
+          ]
+        },
+        "plan_nutricional": {
+          "calorias_diarias": 2393,
+          "comidas": [
+            {
+              "momento": "Desayuno",
+              "alimentos": [
+                {
+                  "id": 4,
+                  "nombre": "Avena",
+                  "calorias": 389
+                },
+                {
+                  "id": 5,
+                  "nombre": "Brócoli",
+                  "calorias": 34
+                }
+              ]
+            },
+            {
+              "momento": "Almuerzo",
+              "alimentos": [
+                {
+                  "id": 2,
+                  "nombre": "Arroz blanco",
+                  "calorias": 130
+                },
+                {
+                  "id": 1,
+                  "nombre": "Pechuga de pollo",
+                  "calorias": 165
+                }
+              ]
+            },
+            {
+              "momento": "Cena",
+              "alimentos": [
+                {
+                  "id": 4,
+                  "nombre": "Avena",
+                  "calorias": 389
+                },
+                {
+                  "id": 1,
+                  "nombre": "Pechuga de pollo",
+                  "calorias": 165
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 19,
+      "nombres": "Usuario 19",
+      "apellidos": "Apellido",
+      "correo": "user19@test.com",
+      "documento": 1000019,
+      "objetivo_fisico": "Aumento de masa",
+      "ciclo_activo": {
+        "plan_entrenamiento": {
+          "rutinas": [
+            {
+              "dia": 1,
+              "ejercicios": [
+                {
+                  "id": 1,
+                  "nombre": "Sentadilla",
+                  "grupo": "Piernas"
+                },
+                {
+                  "id": 4,
+                  "nombre": "Press militar",
+                  "grupo": "Hombros"
+                },
+                {
+                  "id": 2,
+                  "nombre": "Press de banca",
+                  "grupo": "Pecho"
+                }
+              ]
+            },
+            {
+              "dia": 2,
+              "ejercicios": [
+                {
+                  "id": 6,
+                  "nombre": "Hip thrust",
+                  "grupo": "Glúteos"
+                },
+                {
+                  "id": 6,
+                  "nombre": "Hip thrust",
+                  "grupo": "Glúteos"
+                },
+                {
+                  "id": 2,
+                  "nombre": "Press de banca",
+                  "grupo": "Pecho"
+                }
+              ]
+            },
+            {
+              "dia": 3,
+              "ejercicios": [
+                {
+                  "id": 3,
+                  "nombre": "Peso muerto",
+                  "grupo": "Espalda"
+                },
+                {
+                  "id": 6,
+                  "nombre": "Hip thrust",
+                  "grupo": "Glúteos"
+                },
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                }
+              ]
+            }
+          ]
+        },
+        "plan_nutricional": {
+          "calorias_diarias": 2093,
+          "comidas": [
+            {
+              "momento": "Desayuno",
+              "alimentos": [
+                {
+                  "id": 1,
+                  "nombre": "Pechuga de pollo",
+                  "calorias": 165
+                },
+                {
+                  "id": 4,
+                  "nombre": "Avena",
+                  "calorias": 389
+                }
+              ]
+            },
+            {
+              "momento": "Almuerzo",
+              "alimentos": [
+                {
+                  "id": 1,
+                  "nombre": "Pechuga de pollo",
+                  "calorias": 165
+                },
+                {
+                  "id": 3,
+                  "nombre": "Huevo",
+                  "calorias": 155
+                }
+              ]
+            },
+            {
+              "momento": "Cena",
+              "alimentos": [
+                {
+                  "id": 1,
+                  "nombre": "Pechuga de pollo",
+                  "calorias": 165
+                },
+                {
+                  "id": 4,
+                  "nombre": "Avena",
+                  "calorias": 389
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": 20,
+      "nombres": "Usuario 20",
+      "apellidos": "Apellido",
+      "correo": "user20@test.com",
+      "documento": 1000020,
+      "objetivo_fisico": "Pérdida de grasa",
+      "ciclo_activo": {
+        "plan_entrenamiento": {
+          "rutinas": [
+            {
+              "dia": 1,
+              "ejercicios": [
+                {
+                  "id": 1,
+                  "nombre": "Sentadilla",
+                  "grupo": "Piernas"
+                },
+                {
+                  "id": 5,
+                  "nombre": "Curl de bíceps",
+                  "grupo": "Brazos"
+                },
+                {
+                  "id": 6,
+                  "nombre": "Hip thrust",
+                  "grupo": "Glúteos"
+                }
+              ]
+            },
+            {
+              "dia": 2,
+              "ejercicios": [
+                {
+                  "id": 1,
+                  "nombre": "Sentadilla",
+                  "grupo": "Piernas"
+                },
+                {
+                  "id": 2,
+                  "nombre": "Press de banca",
+                  "grupo": "Pecho"
+                },
+                {
+                  "id": 4,
+                  "nombre": "Press militar",
+                  "grupo": "Hombros"
+                }
+              ]
+            },
+            {
+              "dia": 3,
+              "ejercicios": [
+                {
+                  "id": 2,
+                  "nombre": "Press de banca",
+                  "grupo": "Pecho"
+                },
+                {
+                  "id": 1,
+                  "nombre": "Sentadilla",
+                  "grupo": "Piernas"
+                },
+                {
+                  "id": 1,
+                  "nombre": "Sentadilla",
+                  "grupo": "Piernas"
+                }
+              ]
+            }
+          ]
+        },
+        "plan_nutricional": {
+          "calorias_diarias": 1913,
+          "comidas": [
+            {
+              "momento": "Desayuno",
+              "alimentos": [
+                {
+                  "id": 2,
+                  "nombre": "Arroz blanco",
+                  "calorias": 130
+                },
+                {
+                  "id": 3,
+                  "nombre": "Huevo",
+                  "calorias": 155
+                }
+              ]
+            },
+            {
+              "momento": "Almuerzo",
+              "alimentos": [
+                {
+                  "id": 4,
+                  "nombre": "Avena",
+                  "calorias": 389
+                },
+                {
+                  "id": 3,
+                  "nombre": "Huevo",
+                  "calorias": 155
+                }
+              ]
+            },
+            {
+              "momento": "Cena",
+              "alimentos": [
+                {
+                  "id": 3,
+                  "nombre": "Huevo",
+                  "calorias": 155
+                },
+                {
+                  "id": 2,
+                  "nombre": "Arroz blanco",
+                  "calorias": 130
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
