@@ -95,16 +95,20 @@ CREATE TABLE Perfil_Salud_Has_Usuario (
     usuario_id_usuario INT NOT NULL,
     usuario_id_rol INT NOT NULL,
     usuario_perfil_salud_id_perfil INT NOT NULL,
-    INDEX fk_Perfil_Salud_Has_Usuario_Perfil_Salud_idx (id_perfil ASC),
-    INDEX fk_Perfil_Salud_Has_Usuario_Usuario_idx (id_usuario id_rol perfil_salud_id_perfil ASC),
-    CONSTRAINT fk_Perfil_Salud_Has_Usuario_Perfil_Salud fk_Perfil_Salud_Has_Usuario_Usuario
+
+    INDEX fk_Perfil_Salud_idx (perfil_salud_id_perfil),
+    INDEX fk_Usuario_idx (usuario_id_usuario),
+
+    CONSTRAINT fk_Perfil_Salud_Has_Usuario_Perfil_Salud
         FOREIGN KEY (perfil_salud_id_perfil)
-        FOREIGN KEY (usuario_id_usuario)
-        FOREIGN KEY (usuario_id_rol)
-        FOREIGN KEY (usuario_perfil_salud_id_perfil)
         REFERENCES Gym_db.Perfil_Salud (id_perfil)
-        REFERENCES Gym_db.Usuario (id_usuario id_rol perfil_salud_id_perfil)
         ON DELETE CASCADE
-        ON UPDATE CASCADE)
-ENGINE = InnoDB;
+        ON UPDATE CASCADE,
+
+    CONSTRAINT fk_Perfil_Salud_Has_Usuario_Usuario
+        FOREIGN KEY (usuario_id_usuario)
+        REFERENCES Gym_db.Usuario (id_usuario)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+) ENGINE = InnoDB;
     
