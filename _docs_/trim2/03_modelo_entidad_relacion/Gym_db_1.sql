@@ -44,10 +44,10 @@ ENGINE = InnoDB;
 -- TABLA Plan_Nuricional
 -- -----------------------------------------------------
 
-CREATE TABLE Plan_Nuricional (
+CREATE TABLE Plan_Nutricional (
     id_plan INT NOT NULL,
     id_usuario INT NOT NULL,
-    tipo_planl ENUM('definicion', 'volumen', 'equilibrado', 'vegetariano', 'keto'),
+    tipo_plan ENUM('definicion', 'volumen', 'equilibrado', 'vegetariano', 'keto'),
     calorias_diarias INT NOT NULL,
     proteinas_g  INT NOT NULL,
     carbohidratos_g INT NOT NULL,
