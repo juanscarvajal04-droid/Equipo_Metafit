@@ -22,7 +22,7 @@
 -- Ronda 8: CHECK booleanos activo/es_automatico IN(0,1),
 --          CHECK fecha_nacimiento >= '1900-01-01',
 --          comentarios descriptivos en tablas pivot 4/6/8
--- =====================================================
+-- ======================================================
 
 CREATE SCHEMA IF NOT EXISTS `metafit` DEFAULT CHARACTER SET utf8mb4;
 USE `metafit`;
