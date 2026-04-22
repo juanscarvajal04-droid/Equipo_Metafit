@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-// ── Icono de Instagram (SVG inline, sin dependencias) ─────────────────────────
+// ── Icono de Instagram (SVG inline, sin dependencias) ───-──────────────────────
 function InstagramIcon() {
   return (
     <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
