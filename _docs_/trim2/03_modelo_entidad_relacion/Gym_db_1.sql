@@ -8,7 +8,7 @@ USE Gym_db ;
 -- TABLA Rol
 -- -----------------------------------------------------
 
-CREATE TABLA Rol (
+CREATE TABLE Rol (
     id_rol INT  NOT NULL,
     nombre_rol VARCHAR(50) NOT NULL,
     descripcion VARCHAR(100) NOT NULL,
@@ -22,9 +22,9 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 
 CREATE TABLE Usuario (
-    id_usuario INT NOT NUL,
+    id_usuario INT NOT NULL,
     email VARCHAR(100) NOT NULL,
-    contraseña VARCHAR(255) NOT NUL,
+    contraseña VARCHAR(255) NOT NULL,
     fecha_registro DATE NOT NULL,
     metodo_registro ENUM('email', 'google', 'apple') NOT NULL,
     estado ENUM('activo', 'inactivo', 'suspendido') NOT NULL,
@@ -33,8 +33,6 @@ CREATE TABLE Usuario (
     perfil_salud_id_perfil INT NOT NULL;
     nombre VARCHAR(45),
     PRIMARY KEY (id_usuario),
-    PRIMARY KEY (perfil_salud_id_perfil),
-    INDEX fk_id_rol_idx (id_rol ASC),
     CONSTRAINT fk_Usuario_Rol
         FOREIGN KEY (id_rol)
         REFERENCES Gym_db.Rol (id_rol)
