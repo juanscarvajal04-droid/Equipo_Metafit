@@ -80,14 +80,23 @@ export default function RutinasView() {
     setTimeout(() => setToast({ msg: "", type: "success" }), 3000);
   };
 
-  const filtrados = afiliados.filter((a) => {
-    const t = busqueda.toLowerCase();
-    return (
-      nombreCompleto(a).toLowerCase().includes(t) ||
-      (a.objetivo_fisico || "").toLowerCase().includes(t) ||
-      (a.nivel_experiencia || "").toLowerCase().includes(t)
-    );
-  });
+  const filtrados = afiliados
+    .filter((a) => {
+      const t = busqueda.toLowerCase();
+      return (
+        nombreCompleto(a).toLowerCase().includes(t) ||
+        (a.objetivo_fisico || "").toLowerCase().includes(t) ||
+        (a.nivel_experiencia || "").toLowerCase().includes(t)
+      );
+    })
+    // ⬇️ Sin rutina primero (prioridad para el entrenador)
+    .sort((a, b) => {
+      const aConRutina = !!cicloActivo(a);
+      const bConRutina = !!cicloActivo(b);
+      if (!aConRutina && bConRutina) return -1;
+      if (aConRutina && !bConRutina) return 1;
+      return 0;
+    });
 
   // ── Asignar rutina (crea/actualiza ciclo activo) ───────────────────────────
   const abrirAsignar = (afiliado) => {
@@ -114,8 +123,9 @@ export default function RutinasView() {
 
     setSaving(true); setAsigError("");
     try {
-      const id = getId(asignarModal);
+      const id             = getId(asignarModal);
       const ciclosActuales = asignarModal.ciclos || [];
+      const tieneCiclo     = !!cicloActivo(asignarModal);
 
       // Desactivar ciclos anteriores
       const ciclosActualizados = ciclosActuales.map((c) => ({ ...c, activo: false }));
@@ -142,11 +152,15 @@ export default function RutinasView() {
       };
 
       const payload = { ciclos: [...ciclosActualizados, nuevoCiclo] };
+
+      // 💾 PATCH siempre: json-server actualiza cualquier campo aunque sea nuevo.
+      // POST crea un registro DUPLICADO — nunca usar POST para actualizar.
       const { data } = await authAxios.patch(`/afiliados/${id}`, payload);
 
       setAfiliados((prev) => prev.map((a) => getId(a) === id ? data : a));
       setAsignarModal(null);
-      showToast(`✅ Rutina "${rutinaSelec.nombre}" asignada a ${nombreCompleto(data)}`);
+      const accion = tieneCiclo ? "actualizada" : "asignada";
+      showToast(`✅ Rutina "${rutinaSelec.nombre}" ${accion} a ${nombreCompleto(data)}`);
     } catch {
       setAsigError("Error al guardar. Verifica el servidor.");
     } finally {
@@ -266,11 +280,15 @@ export default function RutinasView() {
                         </td>
                       </tr>
                     ) : filtrados.map((a, idx) => {
+                      const sinRutina = !cicloActivo(a);
                       const ciclo   = cicloActivo(a);
                       const nivelCfg = NIVEL_COLOR[a.nivel_experiencia] || NIVEL_COLOR.Principiante;
 
                       return (
-                        <tr key={getId(a)}>
+                        <tr
+                          key={getId(a)}
+                          style={sinRutina ? { background: "#fff8f0", borderLeft: "3px solid #f97316" } : {}}
+                        >
                           <td className="ps-4 text-muted small">{idx + 1}</td>
 
                           {/* Afiliado */}
@@ -441,7 +459,7 @@ export default function RutinasView() {
               </div>
 
               <form onSubmit={handleAsignar}>
-                <div className="modal-body">
+                <div className="modal-body" style={{ maxHeight: "75vh", overflowY: "auto" }}>
                   {asigError && (
                     <div className="alert alert-danger py-2 mb-3">
                       <small>⚠️ {asigError}</small>
@@ -573,7 +591,9 @@ export default function RutinasView() {
                   >
                     {saving
                       ? <><span className="spinner-border spinner-border-sm me-2" />Guardando...</>
-                      : "✅ Asignar rutina"}
+                      : cicloActivo(asignarModal)
+                        ? "💾 Actualizar Plan"
+                        : "✅ Crear Plan"}
                   </button>
                 </div>
               </form>

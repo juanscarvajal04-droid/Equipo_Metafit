@@ -35,6 +35,7 @@ const FORM_NUEVO = {
   grupo_muscular_prioritario: "Pecho", nivel_experiencia: "Principiante",
   disponibilidad_semanal_dias: 3, estado: "Activo",
   plan_membresia: "Básico",
+  restricciones_medicas: "",
 };
 
 // ── Pestañas por rol ──────────────────────────────────────────────────────────
@@ -93,6 +94,13 @@ export default function AfiliadosView() {
     setNewError("");
     try {
       const newId    = Date.now();
+      // Parsear las restricciones médicas desde el textarea (una por línea)
+      const lineasRestriccion = (formNuevo.restricciones_medicas || "")
+        .split("\n")
+        .map((l) => l.trim())
+        .filter(Boolean)
+        .map((nombre, i) => ({ id_restriccion: i + 1, nombre, tipo: "Enfermedad", efecto_relevante: "" }));
+
       const payload  = {
         ...formNuevo,
         _id: newId,
@@ -101,9 +109,10 @@ export default function AfiliadosView() {
         fecha_registro: new Date().toISOString().split("T")[0],
         fecha_ultima_modificacion: null,
         registrado_por_id: getId(user) || 4,
-        restricciones: [],
+        restricciones: lineasRestriccion,
         ciclos: [],
       };
+      delete payload.restricciones_medicas; // campo UI, no va a la BD
       const { data } = await authAxios.post("/afiliados", payload);
       setAfiliados((prev) => [...prev, data]);
       setCrearModal(false);
@@ -553,7 +562,7 @@ export default function AfiliadosView() {
                   onClick={() => !savingNew && setCrearModal(false)} />
               </div>
               <form onSubmit={handleCrear}>
-                <div className="modal-body">
+                <div className="modal-body" style={{ maxHeight: "75vh", overflowY: "auto" }}>
                   {newError && <div className="alert alert-danger py-2"><small>⚠️ {newError}</small></div>}
 
                   <h6 className="fw-bold text-muted text-uppercase small mb-3">👤 Datos personales</h6>
@@ -634,6 +643,27 @@ export default function AfiliadosView() {
                       <input type="number" min="1" max="7" className="form-control"
                         value={formNuevo.disponibilidad_semanal_dias}
                         onChange={(e) => setFormNuevo({ ...formNuevo, disponibilidad_semanal_dias: parseInt(e.target.value) || 3 })} />
+                    </div>
+                  </div>
+
+                  <h6 className="fw-bold text-muted text-uppercase small mb-3 mt-4">⚠️ Restricciones Médicas</h6>
+                  <div className="row g-3">
+                    <div className="col-12">
+                      <label className="form-label small fw-semibold">
+                        Restricciones médicas / condiciones
+                        <span className="text-muted fw-normal ms-2">(una por línea, opcional)</span>
+                      </label>
+                      <textarea
+                        id="restricciones-medicas-afiliado"
+                        className="form-control"
+                        rows={3}
+                        placeholder="Ej: Diabetes tipo 2&#10;Hipertensión&#10;Alergia a lactosa"
+                        value={formNuevo.restricciones_medicas}
+                        onChange={(e) => setFormNuevo({ ...formNuevo, restricciones_medicas: e.target.value })}
+                      />
+                      <div className="form-text">
+                        💡 Escribe cada condición en una línea separada. Se registrarán como alertas médicas del afiliado.
+                      </div>
                     </div>
                   </div>
                 </div>

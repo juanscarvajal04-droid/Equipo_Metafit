@@ -146,14 +146,23 @@ export default function DietasView() {
   const tieneAlergia         = (a) => (a.restricciones || []).some((r) => r.tipo === "Alergia");
   const tieneEnfermedad      = (a) => (a.restricciones || []).some((r) => r.tipo === "Enfermedad");
 
-  const filtrados = afiliados.filter((a) => {
-    const t = busqueda.toLowerCase();
-    return (
-      nombreCompleto(a).toLowerCase().includes(t) ||
-      (a.objetivo_fisico || "").toLowerCase().includes(t) ||
-      (a.restricciones || []).some((r) => r.nombre.toLowerCase().includes(t))
-    );
-  });
+  const filtrados = afiliados
+    .filter((a) => {
+      const t = busqueda.toLowerCase();
+      return (
+        nombreCompleto(a).toLowerCase().includes(t) ||
+        (a.objetivo_fisico || "").toLowerCase().includes(t) ||
+        (a.restricciones || []).some((r) => r.nombre.toLowerCase().includes(t))
+      );
+    })
+    // ⬇️ Sin plan nutricional primero (prioridad para el entrenador)
+    .sort((a, b) => {
+      const aConPlan = tienePlanNutricional(a);
+      const bConPlan = tienePlanNutricional(b);
+      if (!aConPlan && bConPlan) return -1;
+      if (aConPlan && !bConPlan) return 1;
+      return 0;
+    });
 
   // KPIs
   const totalConPlan     = afiliados.filter((a) => tienePlanNutricional(a)).length;
@@ -179,8 +188,9 @@ export default function DietasView() {
 
     setSaving(true); setAsigError("");
     try {
-      const id      = getId(asignarModal);
-      const ciclos  = (asignarModal.ciclos || []).map((c) => ({ ...c, activo: false }));
+      const id         = getId(asignarModal);
+      const tienePlan  = !!cicloActivo(asignarModal);
+      const ciclos     = (asignarModal.ciclos || []).map((c) => ({ ...c, activo: false }));
 
       const nuevoCiclo = {
         numero_ciclo: ciclos.length + 1,
@@ -209,13 +219,15 @@ export default function DietasView() {
         progreso_fisico: [],
       };
 
-      const { data } = await authAxios.patch(`/afiliados/${id}`, {
-        ciclos: [...ciclos, nuevoCiclo],
-      });
+      const payload = { ciclos: [...ciclos, nuevoCiclo] };
+
+      // 💾 PATCH siempre: json-server actualiza campos aunque sean nuevos sin crear duplicados.
+      const { data } = await authAxios.patch(`/afiliados/${id}`, payload);
 
       setAfiliados((prev) => prev.map((a) => getId(a) === id ? data : a));
       setAsignarModal(null);
-      showToast(`✅ Plan "${planSelec.nombre}" asignado a ${nombreCompleto(data)}`);
+      const accion = tienePlan ? "actualizado" : "asignado";
+      showToast(`✅ Plan "${planSelec.nombre}" ${accion} a ${nombreCompleto(data)}`);
     } catch {
       setAsigError("Error al guardar. Verifica el servidor.");
     } finally {
@@ -342,7 +354,13 @@ export default function DietasView() {
                       const hayAlerta = tieneAlergia(a) || tieneEnfermedad(a);
 
                       return (
-                        <tr key={getId(a)} style={{ background: hayAlerta ? "#fff8f8" : "transparent" }}>
+                        <tr
+                          key={getId(a)}
+                          style={{
+                            background: !plan ? "#fff8f0" : hayAlerta ? "#fff8f8" : "transparent",
+                            borderLeft: !plan ? "3px solid #f97316" : hayAlerta ? "3px solid #ef4444" : "none",
+                          }}
+                        >
                           <td className="ps-4 text-muted small">{idx + 1}</td>
 
                           {/* Afiliado */}
@@ -571,7 +589,7 @@ export default function DietasView() {
               </div>
 
               <form onSubmit={handleAsignar}>
-                <div className="modal-body">
+                <div className="modal-body" style={{ maxHeight: "75vh", overflowY: "auto" }}>
                   {asigError && (
                     <div className="alert alert-danger py-2 mb-3">
                       <small>⚠️ {asigError}</small>
@@ -741,7 +759,9 @@ export default function DietasView() {
                   >
                     {saving
                       ? <><span className="spinner-border spinner-border-sm me-2" />Guardando...</>
-                      : "✅ Asignar plan"}
+                      : tienePlanNutricional(asignarModal)
+                        ? "💾 Actualizar Plan"
+                        : "✅ Crear Plan"}
                   </button>
                 </div>
               </form>

@@ -4,7 +4,8 @@ import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
 
 // ── Constantes ────────────────────────────────────────────────────────────────
-const ROLES = ["Administrador", "Recepcionista", "Entrenador"];
+const ROLES       = ["Administrador", "Recepcionista", "Entrenador"];
+const ROLES_CREAR = ["Recepcionista", "Entrenador"]; // Al crear, no se puede asignar Admin directamente
 
 const ROLE_BADGE = {
   Administrador: { bg: "linear-gradient(135deg,#7c3aed,#4f46e5)", label: "👑 Admin"         },
@@ -19,6 +20,11 @@ const ESTADO_BADGE = {
 };
 
 const FORM_VACÍO = {
+  email: "", password: "", role: "Recepcionista", estado_cuenta: "Activo",
+  nombres: "", apellidos: "",
+};
+
+const FORM_EDIT_VACÍO = {
   email: "", password: "", role: "Recepcionista", estado_cuenta: "Activo",
   nombres: "", apellidos: "",
 };
@@ -82,12 +88,19 @@ export default function GestionPersonal() {
     }
     setSaving(true); setFormError("");
     try {
+      // 🔐 NOTA DE PRODUCCIÓN: En un entorno real, la contraseña se encriptaría
+      // en el backend con bcrypt ANTES de guardarla en la base de datos:
+      //   const salt = await bcrypt.genSalt(12);
+      //   const hashedPassword = await bcrypt.hash(plainPassword, salt);
+      // El frontend NUNCA debe hashear: solo el servidor tiene acceso al salt.
+      // MVP: se envía en texto por HTTPS (TLS cifra el canal de transporte).
       const newUser = {
         ...formData,
         id: Date.now(),
         rol: formData.role,
         estado_cuenta: formData.estado_cuenta || "Activo",
         fecha_registro: new Date().toISOString(),
+        // password_hash: "", // ← En producción este campo reemplaza a 'password'
       };
       const { data } = await authAxios.post("/usuarios", newUser);
       setPersonal((prev) => [...prev, data]);
@@ -541,7 +554,7 @@ function ModalPersonal({ titulo, colorHeader, formData, setFormData, onSubmit, o
           </div>
 
           <form onSubmit={onSubmit}>
-            <div className="modal-body">
+            <div className="modal-body" style={{ maxHeight: "75vh", overflowY: "auto" }}>
               {formError && (
                 <div className="alert alert-danger py-2 mb-3">
                   <small>⚠️ {formError}</small>
@@ -616,7 +629,7 @@ function ModalPersonal({ titulo, colorHeader, formData, setFormData, onSubmit, o
                       color: "#1e1b4b",
                     }}
                   >
-                    {ROLES.map((r) => (
+                    {(isEdit ? ROLES : ROLES_CREAR).map((r) => (
                       <option key={r} value={r}>{r}</option>
                     ))}
                   </select>
