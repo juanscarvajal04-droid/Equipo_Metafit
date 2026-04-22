@@ -79,10 +79,11 @@ CREATE TABLE Perfil_Salud (
     PRIMARY KEY (id_perfil),
     INDEX fk_Perfil_Salud_Plan_Nutricional_idx (Plan_Nuricional ASC),
     CONSTRAINT fk_Perfil_Salud_Plan_Nutricional
-        FOREIGN KEY (Plan_Nuricional)
-        REFERENCES Gym_db.Plan_Nuricional (id_plan)
+    FOREIGN KEY (plan_nutricional_id_plan)
+REFERENCES Gym_db.Plan_Nutricional (id_plan)
+    
         ON DELETE CASCADE
-        UPDATE CASCADE)
+        ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
 -- -----------------------------------------------------
