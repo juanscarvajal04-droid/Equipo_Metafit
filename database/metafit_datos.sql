@@ -3,15 +3,15 @@
 -- Compatible con: metafit_3fn.sql v8
 -- Orden de inserción respeta todas las FKs del schema.
 -- Todos los valores cumplen los CHECK constraints de la v8.
--- =====================================================================
+-- ====================================================================
 
 USE `metafit`;
 
--- =====================================================================
+-- ====================================================================
 -- 1. USUARIO (5 registros)
 --    Roles: 1 Administrador, 2 Entrenadores, 2 Recepcionistas
 --    contrasena_usuario: SHA2('contraseña',256) — hash real
--- =====================================================================
+-- ====================================================================
 INSERT INTO `USUARIO`
   (`nombres_usuario`, `apellidos_usuario`, `correo_usuario`,
    `contrasena_usuario`, `rol_usuario`, `estado_cuenta_usuario`)
