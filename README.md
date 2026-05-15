@@ -1,48 +1,20 @@
-# Metafit: Sistema de Gestión para Sport Gym
+# 🛠️ MetaFit - Entorno de Desarrollo (Develop)
 
-### 📖 Descripción
-**Metafit** es una solución de software a medida diseñada para la digitalización y optimización de procesos en **Sport Gym** (Cra. 91a #73a-25). Con más de 3 años de trayectoria, el gimnasio requiere una transición de registros manuales hacia una plataforma robusta que mejore la experiencia del usuario y la eficiencia administrativa.
+Esta es la rama de **integración principal** del proyecto MetaFit.
 
----
+## 📋 Propósito de esta Rama
+* **Integración:** Aquí se combinan todas las funcionalidades (features) desarrolladas por el equipo.
+**Pruebas QA:** Es el entorno previo a Producción para realizar pruebas de errores y validación de roles. 
+* **Estabilidad:** Solo el código que funciona correctamente en las ramas individuales debe ser mezclado (merged) aquí.
 
-### 🛠️ Stack Tecnológico
+## 👥 Equipo de Integración
+**Responsable de Rama:** Juan Sebastián Carvajal (Líder Técnico) 
+**Colaboradores:** Sofía Astudillo, Kevin Robayo, Carlos Rodriguez e Isabella Caldas. 
 
-**Frontend (Interfaz de Usuario)**
-* **Library:** React.js
-* **Estilos:** Bootstrap 5, HTML5, CSS3
-* **Diseño:** Figma (Mockups de alta fidelidad)
-
-**Backend & Datos (Prototipado)**
-* **API de Pruebas:** JSON Server & Postman (Simulación de Endpoints)
-* **Base de Datos:** MySQL (Modelado y Normalización en Workbench)
-* **Evolución:** Evaluación técnica entre **Node.js** y **Spring Boot** para la fase final.
-
----
-
-### 📂 Roadmap de Desarrollo (Ciclo de Vida ADSO)
-
-El proyecto documenta el proceso de ingeniería de software a través de 6 trimestres de formación técnica:
-
-#### 🟢 Fase de Análisis y Diseño (Trim 1 - 2)
-* **Contextualización:** Análisis operativo de **Sport Gym**.
-* **Levantamiento de Información:** Técnicas de recolección de datos y definición de requisitos.
-* **Diseño de Arquitectura:** Diagramas de Casos de Uso, Clases (POO) y Modelo Entidad-Relación (DER).
-* **Estimación:** Análisis de costos y viabilidad técnica.
-
-#### 🟡 Fase de Implementación y Datos (Trim 3 - 4)
-* **Persistencia:** Creación de base de datos MySQL (DDL/DML) y seguridad de la información.
-* **Desarrollo Frontend:** Maquetación responsiva en React consumiendo APIs locales.
-* **Lógica CRUD:** Gestión dinámica de perfiles de usuario y rutinas de entrenamiento.
-
-#### 🔵 Fase de Calidad y Cierre (Trim 5 - 6)
-* **Metodologías Ágiles:** Gestión de entregables y sprints.
-* **Pruebas de Software:** Modelos de calidad y validación de funcionalidades.
-* **Entrega Final:** Manuales de usuario, técnicos y Diagrama de Despliegue.
+## 🚀 Flujo de Trabajo (Git Flow)
+1. Los desarrolladores trabajan en sus ramas `feature/`.
+2. Se realiza un **Pull Request** hacia esta rama (`develop`).
+3. Tras la aprobación del líder, el código se integra.
 
 ---
-
-### ⚙️ Configuración del Entorno
-
-1. **Clonación:**
-   ```bash
-   git clone [https://github.com/](https://github.com/)[tu-usuario]/Equipo_Metafit.git
+*MetaFit Inc. · Sistema de Gestión para Sport Gym Sede 80* 
