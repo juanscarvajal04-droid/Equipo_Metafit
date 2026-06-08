@@ -1,15 +1,20 @@
 // server.js
 // ─── Configuración de Express y registro de rutas ─────────────
+// Refactorizado: BUG-003 (validación Content-Type en POST/PUT/PATCH),
+//               BUG-005 (rate limiting en /login con express-rate-limit),
+//               BUG-010 (error handler global ya no filtra stack traces — mantenido)
 'use strict';
+
 const express       = require('express');
 const cors          = require('cors');
+const rateLimit     = require('express-rate-limit');
 const swaggerUi     = require('swagger-ui-express');
 const swaggerSpec   = require('./config/swagger');
 const app           = express();
 
 const IS_PROD = process.env.NODE_ENV === 'production';
 
-// ── CORS ──────────────────────────────────────────────────
+// ── CORS ──────────────────────────────────────────────────────
 const ALLOWED_ORIGINS = (process.env.CORS_ORIGINS || 'http://localhost:5173,http://localhost:3000')
   .split(',')
   .map(o => o.trim());
@@ -30,6 +35,36 @@ app.use(cors({
 app.use(express.json({ limit: '50kb' }));
 app.use(express.urlencoded({ extended: true, limit: '50kb' }));
 
+// ── BUG-003: Validación de Content-Type ───────────────────────
+// Los endpoints POST, PUT y PATCH deben recibir JSON.
+// Sin esta validación, un body enviado como text/plain o form-data
+// resulta en req.body = undefined y errores silenciosos difíciles de depurar.
+app.use((req, res, next) => {
+  if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
+    const ct = req.headers['content-type'] || '';
+    if (!ct.includes('application/json')) {
+      return res.status(415).json({
+        error: 'Content-Type debe ser application/json',
+      });
+    }
+  }
+  next();
+});
+
+// ── BUG-005: Rate limiting en /login ──────────────────────────
+// bcrypt con 12 rondas consume ~250-400ms por llamada.
+// Sin rate limiting, un atacante puede saturar el event loop con
+// ataques de fuerza bruta o generar DoS involuntario con carga alta.
+// Límite: 10 intentos por IP cada 15 minutos.
+const loginLimiter = rateLimit({
+  windowMs          : 15 * 60 * 1000,  // 15 minutos
+  max               : 10,               // máx. 10 intentos por ventana
+  standardHeaders   : true,             // expone RateLimit-* headers (RFC 6585)
+  legacyHeaders     : false,
+  message           : { error: 'Demasiados intentos de inicio de sesión. Intenta nuevamente en 15 minutos.' },
+  skipSuccessfulRequests: true,         // los logins exitosos no cuentan contra el límite
+});
+
 // ── Rutas ──────────────────────────────────────────────────────
 const authRoutes      = require('./routes/authRoutes');
 const usuarioRoutes   = require('./routes/usuarioRoutes');
@@ -38,22 +73,23 @@ const planRoutes      = require('./routes/planRoutes');
 const catalogoRoutes  = require('./routes/catalogoRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 
-app.use('/',           authRoutes);       // POST /login
-app.use('/usuarios',   usuarioRoutes);    // GET/POST/PATCH/DELETE /usuarios
-app.use('/afiliados',  afiliadoRoutes);   // CRUD afiliados + ciclos + progreso
-app.use('/planes',     planRoutes);       // Planes entrenamiento y nutricional
-app.use('/660',        catalogoRoutes);   // GET /660/ejercicios  /660/alimentos
-app.use('/catalogo',   catalogoRoutes);   // GET /catalogo/ejercicios (alias)
-app.use('/dashboard',  dashboardRoutes);  // GET /dashboard/kpis
+// BUG-005: El rate limiter se aplica SOLO al endpoint de login
+app.use('/',           loginLimiter, authRoutes);   // POST /login (con rate limit)
+app.use('/usuarios',   usuarioRoutes);              // GET/POST/PATCH/DELETE /usuarios
+app.use('/afiliados',  afiliadoRoutes);             // CRUD afiliados + ciclos + progreso
+app.use('/planes',     planRoutes);                 // Planes entrenamiento y nutricional
+app.use('/660',        catalogoRoutes);             // GET /660/ejercicios  /660/alimentos
+app.use('/catalogo',   catalogoRoutes);             // GET /catalogo/ejercicios (alias)
+app.use('/dashboard',  dashboardRoutes);            // GET /dashboard/kpis
 
-// ── Swagger UI — /api-docs ────────────────────────────────
+// ── Swagger UI — /api-docs ────────────────────────────────────
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
   customSiteTitle: 'MetaFit API Docs',
   swaggerOptions: {
-    persistAuthorization: true,      // mantiene el token entre recargas
+    persistAuthorization : true,
     displayRequestDuration: true,
-    filter: true,
-    tryItOutEnabled: true,
+    filter               : true,
+    tryItOutEnabled      : true,
   },
 }));
 
@@ -83,8 +119,8 @@ app.use((req, res) => {
 // ── Manejo global de errores ───────────────────────────────────
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
-  // Log completo solo en servidor, NUNCA al cliente
-  console.error('[ERROR]', err.stack || err.message);
+  // Log completo solo en servidor, NUNCA al cliente (BUG-010)
+  console.error('[ERROR GLOBAL]', err.stack || err.message);
 
   // Error de CORS → 403, no 500
   if (err.message && err.message.startsWith('CORS')) {
@@ -94,6 +130,11 @@ app.use((err, req, res, next) => {
   // Error de JWT malformado que escapa de requireAuth
   if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
     return res.status(401).json({ error: 'Token inválido o expirado' });
+  }
+
+  // Error de Content-Type (express.json falla al parsear body inválido)
+  if (err.type === 'entity.parse.failed') {
+    return res.status(400).json({ error: 'JSON malformado en el body' });
   }
 
   // Nunca filtrar stack traces al cliente

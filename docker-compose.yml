@@ -2,6 +2,12 @@
 # MetaFit — Orquestación de Servicios
 # Archivo: /docker-compose.yml  (raíz del proyecto)
 # Uso:     docker compose up --build
+#
+# FIX: volumen de DB apunta ahora a ./database/ (carpeta completa),
+#      no a un archivo individual. Docker ejecuta todos los .sql
+#      dentro de /docker-entrypoint-initdb.d/ en orden LEXICOGRÁFICO:
+#        01_schema.sql  -> CREATE TABLE (primero)
+#        02_seed.sql    -> INSERT INTO  (segundo, después de crear tablas)
 # ============================================================
 
 services:
@@ -15,12 +21,19 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_DATABASE:      ${DB_NAME}
+      # Forzar utf8mb4 desde arranque para evitar problemas de encoding
+      MYSQL_INITDB_SKIP_TZINFO: "true"
     ports:
       - "3306:3306"
     volumes:
-      # Inyecta el script SQL al iniciar el contenedor por primera vez
-      - ./database/metafit.sql:/docker-entrypoint-initdb.d/metafit.sql:ro
+      # FIX: se monta la CARPETA completa (no un archivo individual).
+      # Docker ejecuta TODOS los .sql en orden lexicográfico:
+      #   01_schema.sql → primero (DDL: CREATE TABLE)
+      #   02_seed.sql   → segundo (DML: INSERT INTO)
+      # Los scripts solo se ejecutan si el volumen de datos está vacío
+      # (primer arranque). Para re-ejecutarlos: docker compose down -v
+      - ./database:/docker-entrypoint-initdb.d:ro
       # Persistencia de datos entre reinicios
       - metafit_db_data:/var/lib/mysql
     healthcheck:
@@ -28,7 +41,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
-      start_period: 30s
+      start_period: 40s
     networks:
       - metafit_net
 
@@ -42,18 +55,21 @@ services:
     container_name: metafit_backend
     restart: unless-stopped
     environment:
-      PORT: ${PORT}
-      DB_HOST: db          # <- nombre del servicio Docker, NO localhost
-      DB_PORT: 3306
-      DB_USER: root
+      NODE_ENV:    production
+      PORT:        ${PORT}
+      DB_HOST:     db          # <- nombre del servicio Docker, NO localhost
+      DB_PORT:     3306
+      DB_USER:     root
       DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: ${DB_NAME}
-      JWT_SECRET: ${JWT_SECRET}
+      DB_NAME:     ${DB_NAME}
+      JWT_SECRET:  ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-8h}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
     ports:
       - "${PORT}:${PORT}"
     depends_on:
       db:
-        condition: service_healthy   # espera a que MySQL esté listo
+        condition: service_healthy   # espera a que MySQL esté listo y responda ping
     networks:
       - metafit_net
 
@@ -85,6 +101,8 @@ services:
 # ──────────────────────────────────────────────────────────
 volumes:
   metafit_db_data:
+    # Para borrar el volumen y re-inicializar la DB desde cero:
+    # docker compose down -v && docker compose up --build
 
 networks:
   metafit_net:

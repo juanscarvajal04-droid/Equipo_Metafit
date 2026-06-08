@@ -6,6 +6,9 @@
 //
 // Ahora: 4 queries planas independientes con JOINs y GROUP_CONCAT.
 //        Los datos se reensamblan en JS en O(n) usando Maps.
+//
+// Refactorizado: BUG-008 (eliminar password hardcodeado 'MetaFit2025!'),
+//               BUG-012 (paginación en findAll con LIMIT/OFFSET)
 // ─────────────────────────────────────────────────────────────
 'use strict';
 
@@ -15,9 +18,12 @@ const AfiliadoModel = {
 
   // ─────────────────────────────────────────────────────────
   // findAll — resuelto en 4 queries totales (antes: 1 + N*3)
+  // BUG-012: Soporta paginación via { page, limit }
   // ─────────────────────────────────────────────────────────
-  findAll: async () => {
-    // Query 1: todos los afiliados + nombre de quien los registró
+  findAll: async ({ page = 1, limit = 50 } = {}) => {
+    const offset = (page - 1) * limit;
+
+    // Query 1: afiliados paginados + nombre de quien los registró
     const [afiliados] = await pool.query(`
       SELECT
         a.id_usuario,
@@ -41,7 +47,8 @@ const AfiliadoModel = {
       JOIN USUARIO  u  ON a.id_usuario    = u.id_usuario
       LEFT JOIN USUARIO ur ON a.registrado_por = ur.id_usuario
       ORDER BY u.apellidos, u.nombres
-    `);
+      LIMIT ? OFFSET ?
+    `, [limit, offset]);
 
     if (!afiliados.length) return [];
 
@@ -111,22 +118,25 @@ const AfiliadoModel = {
     }
 
     // ── Reensamblar en JS usando Maps (O(n)) ─────────────────
-    const restrMap   = new Map();   // id_usuario → [restricciones]
-    const cicloMap   = new Map();   // id_usuario → ciclo
-    const progresoMap = new Map();  // id_ciclo   → ultima_medicion
+    const restrMap    = new Map();   // id_usuario → [restricciones]
+    const cicloMap    = new Map();   // id_usuario → ciclo
+    const progresoMap = new Map();   // id_ciclo   → ultima_medicion
 
     for (const r of restricciones) {
       if (!restrMap.has(r.id_usuario)) restrMap.set(r.id_usuario, []);
       restrMap.get(r.id_usuario).push(r);
     }
-    for (const c of ciclos)    cicloMap.set(c.id_usuario, c);
-    for (const p of progreso)  progresoMap.set(p.id_ciclo, p);
+    for (const c of ciclos)   cicloMap.set(c.id_usuario, c);
+    for (const p of progreso) progresoMap.set(p.id_ciclo, p);
 
     return afiliados.map(af => ({
       ...af,
       restricciones: restrMap.get(af.id_usuario) || [],
       ciclo_activo : cicloMap.has(af.id_usuario)
-        ? { ...cicloMap.get(af.id_usuario), ultimo_progreso: progresoMap.get(cicloMap.get(af.id_usuario).id_ciclo) || null }
+        ? {
+            ...cicloMap.get(af.id_usuario),
+            ultimo_progreso: progresoMap.get(cicloMap.get(af.id_usuario).id_ciclo) || null,
+          }
         : null,
     }));
   },
@@ -253,6 +263,9 @@ const AfiliadoModel = {
 
   // ─────────────────────────────────────────────────────────
   // CREATE — inserta en USUARIO + AFILIADO en transacción
+  // BUG-008: Se elimina el password hardcodeado 'MetaFit2025!'.
+  //          La contraseña es OBLIGATORIA. Si no se provee, se lanza
+  //          un error claro que el controller convierte en 400.
   // ─────────────────────────────────────────────────────────
   create: async (datos, registrado_por) => {
     const {
@@ -262,8 +275,13 @@ const AfiliadoModel = {
       estado_afiliacion,
     } = datos;
 
+    // ── BUG-008: Password obligatorio — sin fallback inseguro ─
+    if (!contrasena || contrasena.trim() === '') {
+      throw new Error('La contraseña del afiliado es requerida');
+    }
+
     const { hashPassword } = require('../middlewares/auth');
-    const hash = await hashPassword(contrasena || 'MetaFit2025!');
+    const hash = await hashPassword(contrasena);   // bcrypt 12 rondas (valida 72 bytes internamente)
 
     const conn = await pool.getConnection();
     try {
