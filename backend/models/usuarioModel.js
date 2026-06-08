@@ -1,58 +1,56 @@
-// models/usuarioModel.js
-// ─── Consultas SQL de la tabla USUARIO ───────────────────────
-const pool = require('../config/db');
-const crypto = require('crypto');
+// backend/models/usuarioModel.js
+// ─── Consultas SQL de la tabla USUARIO (bcrypt) ───────────────
+'use strict';
 
-const sha256 = (text) => crypto.createHash('sha256').update(text).digest('hex');
+const pool                   = require('../config/db');
+const { hashPassword }       = require('../middlewares/auth');
 
 const UsuarioModel = {
 
-  findByCredentials: async (email, password) => {
+  // Busca por correo y devuelve el hash para comparar en el controller
+  findByEmail: async (correo) => {
     const [rows] = await pool.query(
-      `SELECT id_usuario, nombres_usuario, apellidos_usuario,
-              correo_usuario, rol_usuario, estado_cuenta_usuario
+      `SELECT id_usuario, nombres, apellidos, correo,
+              contrasena, rol, estado
        FROM USUARIO
-       WHERE correo_usuario = ? AND contrasena_usuario = ?`,
-      [email, sha256(password)]
+       WHERE correo = ?`,
+      [correo]
     );
     return rows[0] || null;
   },
 
   findAll: async () => {
     const [rows] = await pool.query(
-      `SELECT id_usuario, nombres_usuario, apellidos_usuario,
-              correo_usuario, rol_usuario, estado_cuenta_usuario, fecha_registro
+      `SELECT id_usuario, nombres, apellidos, correo,
+              rol, estado, fecha_registro
        FROM USUARIO
-       ORDER BY rol_usuario, nombres_usuario`
+       ORDER BY rol, nombres`
     );
     return rows;
   },
 
   findById: async (id) => {
     const [rows] = await pool.query(
-      `SELECT id_usuario, nombres_usuario, apellidos_usuario,
-              correo_usuario, rol_usuario, estado_cuenta_usuario, fecha_registro
+      `SELECT id_usuario, nombres, apellidos, correo,
+              rol, estado, fecha_registro
        FROM USUARIO WHERE id_usuario = ?`,
       [id]
     );
     return rows[0] || null;
   },
 
-  create: async ({ nombres_usuario, apellidos_usuario, correo_usuario, contrasena_usuario, rol_usuario, estado_cuenta_usuario }) => {
+  create: async ({ nombres, apellidos, correo, contrasena, rol, estado }) => {
+    const hash = await hashPassword(contrasena);   // bcrypt, 12 rondas
     const [result] = await pool.query(
-      `INSERT INTO USUARIO
-         (nombres_usuario, apellidos_usuario, correo_usuario,
-          contrasena_usuario, rol_usuario, estado_cuenta_usuario)
+      `INSERT INTO USUARIO (nombres, apellidos, correo, contrasena, rol, estado)
        VALUES (?,?,?,?,?,?)`,
-      [nombres_usuario, apellidos_usuario, correo_usuario,
-       sha256(contrasena_usuario), rol_usuario, estado_cuenta_usuario || 'Activo']
+      [nombres, apellidos, correo, hash, rol, estado || 'Pendiente']
     );
     return result.insertId;
   },
 
   update: async (id, campos) => {
-    const permitidos = ['nombres_usuario','apellidos_usuario','correo_usuario',
-                        'rol_usuario','estado_cuenta_usuario'];
+    const permitidos = ['nombres','apellidos','correo','rol','estado'];
     const sets = [];
     const vals = [];
 
@@ -62,9 +60,10 @@ const UsuarioModel = {
         vals.push(campos[key]);
       }
     }
-    if (campos.contrasena_usuario) {
-      sets.push('contrasena_usuario = ?');
-      vals.push(sha256(campos.contrasena_usuario));
+    // Si viene nueva contraseña, hashearla con bcrypt
+    if (campos.contrasena) {
+      sets.push('contrasena = ?');
+      vals.push(await hashPassword(campos.contrasena));
     }
     if (!sets.length) return 0;
     vals.push(id);

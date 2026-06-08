@@ -1,0 +1,91 @@
+# ============================================================
+# MetaFit — Orquestación de Servicios
+# Archivo: /docker-compose.yml  (raíz del proyecto)
+# Uso:     docker compose up --build
+# ============================================================
+
+services:
+
+  # ──────────────────────────────────────────────────────────
+  # SERVICIO 1: Base de Datos MySQL 8
+  # ──────────────────────────────────────────────────────────
+  db:
+    image: mysql:8.0
+    container_name: metafit_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+    ports:
+      - "3306:3306"
+    volumes:
+      # Inyecta el script SQL al iniciar el contenedor por primera vez
+      - ./database/metafit.sql:/docker-entrypoint-initdb.d/metafit.sql:ro
+      # Persistencia de datos entre reinicios
+      - metafit_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - metafit_net
+
+  # ──────────────────────────────────────────────────────────
+  # SERVICIO 2: Backend Node.js
+  # ──────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: metafit_backend
+    restart: unless-stopped
+    environment:
+      PORT: ${PORT}
+      DB_HOST: db          # <- nombre del servicio Docker, NO localhost
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - "${PORT}:${PORT}"
+    depends_on:
+      db:
+        condition: service_healthy   # espera a que MySQL esté listo
+    networks:
+      - metafit_net
+
+  # ──────────────────────────────────────────────────────────
+  # SERVICIO 3: Frontend React/Vite
+  # ──────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend_web
+      dockerfile: Dockerfile
+    container_name: metafit_frontend
+    restart: unless-stopped
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      # URL pública del backend accesible desde el navegador del host
+      - VITE_API_URL=http://localhost:${PORT}
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend_web:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - metafit_net
+
+# ──────────────────────────────────────────────────────────
+# VOLUMES y NETWORKS
+# ──────────────────────────────────────────────────────────
+volumes:
+  metafit_db_data:
+
+networks:
+  metafit_net:
+    driver: bridge

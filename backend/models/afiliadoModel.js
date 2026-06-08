@@ -1,167 +1,324 @@
-// models/afiliadoModel.js
-// ─── Consultas SQL de AFILIADO con datos relacionados ─────────
+// backend/models/afiliadoModel.js
+// ─── Consultas SQL de AFILIADO — SIN N+1 queries ─────────────
+//
+// Antes: findAll() hacía 1 query principal + N*3 queries por afiliado
+//        (restricciones, ciclo activo, planes) → cuellos de botella graves.
+//
+// Ahora: 4 queries planas independientes con JOINs y GROUP_CONCAT.
+//        Los datos se reensamblan en JS en O(n) usando Maps.
+// ─────────────────────────────────────────────────────────────
+'use strict';
+
 const pool = require('../config/db');
 
 const AfiliadoModel = {
 
+  // ─────────────────────────────────────────────────────────
+  // findAll — resuelto en 4 queries totales (antes: 1 + N*3)
+  // ─────────────────────────────────────────────────────────
   findAll: async () => {
+    // Query 1: todos los afiliados + nombre de quien los registró
     const [afiliados] = await pool.query(`
-      SELECT a.*, u.nombres_usuario AS registrado_por_nombre
+      SELECT
+        a.id_usuario,
+        u.nombres,
+        u.apellidos,
+        u.correo,
+        u.estado                AS estado_cuenta,
+        u.fecha_registro        AS fecha_registro_sistema,
+        a.documento,
+        a.fecha_nacimiento,
+        TIMESTAMPDIFF(YEAR, a.fecha_nacimiento, CURDATE()) AS edad,
+        a.sexo,
+        a.telefono,
+        a.direccion,
+        a.estatura_cm,
+        a.estado_afiliacion,
+        a.fecha_registro        AS fecha_registro_afiliado,
+        a.registrado_por,
+        ur.nombres              AS registrado_por_nombre
       FROM AFILIADO a
-      LEFT JOIN USUARIO u ON a.registrado_por = u.id_usuario
-      ORDER BY a.id_afiliado
+      JOIN USUARIO  u  ON a.id_usuario    = u.id_usuario
+      LEFT JOIN USUARIO ur ON a.registrado_por = ur.id_usuario
+      ORDER BY u.apellidos, u.nombres
     `);
 
-    for (const af of afiliados) {
-      // Restricciones médicas
-      const [restr] = await pool.query(`
-        SELECT r.id_restriccion, r.nombre_restriccion,
-               r.tipo_restriccion, r.efecto_relevante
-        FROM AFILIADO_RESTRICCION ar
-        JOIN RESTRICCION r ON ar.id_restriccion = r.id_restriccion
-        WHERE ar.id_afiliado = ?
-      `, [af.id_afiliado]);
-      af.restricciones = restr;
+    if (!afiliados.length) return [];
 
-      // Ciclo activo con planes y progreso
-      af.ciclo_activo = await AfiliadoModel._getCicloActivo(af.id_afiliado);
+    const ids = afiliados.map(a => a.id_usuario);
+
+    // Query 2: todas las restricciones de todos los afiliados en un solo JOIN
+    const [restricciones] = await pool.query(`
+      SELECT
+        ar.id_usuario,
+        r.id_restriccion,
+        r.nombre_restriccion,
+        r.tipo,
+        r.efecto_relevante
+      FROM AFILIADO_RESTRICCION ar
+      JOIN RESTRICCION r ON ar.id_restriccion = r.id_restriccion
+      WHERE ar.id_usuario IN (?)
+    `, [ids]);
+
+    // Query 3: ciclo activo de cada afiliado (máximo 1 por afiliado)
+    const [ciclos] = await pool.query(`
+      SELECT
+        c.id_ciclo,
+        c.id_usuario,
+        c.fecha_inicio,
+        c.fecha_fin,
+        c.activo,
+        c.objetivo_fisico,
+        c.nivel_experiencia,
+        c.disponibilidad_dias,
+        c.grupo_muscular_prioritario,
+        c.observaciones,
+        (
+          SELECT COUNT(*)
+          FROM CICLO c2
+          WHERE c2.id_usuario   = c.id_usuario
+            AND c2.fecha_inicio <= c.fecha_inicio
+        ) AS numero_ciclo
+      FROM CICLO c
+      WHERE c.id_usuario IN (?) AND c.activo = 1
+    `, [ids]);
+
+    // Query 4: último progreso físico por ciclo activo
+    const cicloIds = ciclos.map(c => c.id_ciclo);
+    let progreso = [];
+    if (cicloIds.length) {
+      [progreso] = await pool.query(`
+        SELECT
+          pf.id_ciclo,
+          pf.fecha_registro,
+          pf.peso_kg,
+          pf.porcentaje_grasa,
+          pf.medida_cintura,
+          pf.medida_brazo,
+          pf.medida_pierna,
+          ROUND(pf.peso_kg / POW(a.estatura_cm / 100.0, 2), 2) AS imc
+        FROM PROGRESO_FISICO pf
+        JOIN CICLO    c  ON pf.id_ciclo  = c.id_ciclo
+        JOIN AFILIADO a  ON c.id_usuario = a.id_usuario
+        WHERE pf.id_ciclo IN (?)
+          AND (pf.id_ciclo, pf.fecha_registro) IN (
+            SELECT id_ciclo, MAX(fecha_registro)
+            FROM PROGRESO_FISICO
+            WHERE id_ciclo IN (?)
+            GROUP BY id_ciclo
+          )
+      `, [cicloIds, cicloIds]);
     }
-    return afiliados;
+
+    // ── Reensamblar en JS usando Maps (O(n)) ─────────────────
+    const restrMap   = new Map();   // id_usuario → [restricciones]
+    const cicloMap   = new Map();   // id_usuario → ciclo
+    const progresoMap = new Map();  // id_ciclo   → ultima_medicion
+
+    for (const r of restricciones) {
+      if (!restrMap.has(r.id_usuario)) restrMap.set(r.id_usuario, []);
+      restrMap.get(r.id_usuario).push(r);
+    }
+    for (const c of ciclos)    cicloMap.set(c.id_usuario, c);
+    for (const p of progreso)  progresoMap.set(p.id_ciclo, p);
+
+    return afiliados.map(af => ({
+      ...af,
+      restricciones: restrMap.get(af.id_usuario) || [],
+      ciclo_activo : cicloMap.has(af.id_usuario)
+        ? { ...cicloMap.get(af.id_usuario), ultimo_progreso: progresoMap.get(cicloMap.get(af.id_usuario).id_ciclo) || null }
+        : null,
+    }));
   },
 
+  // ─────────────────────────────────────────────────────────
+  // findById — detalle completo de 1 afiliado
+  // ─────────────────────────────────────────────────────────
   findById: async (id) => {
-    const [rows] = await pool.query(
-      'SELECT * FROM AFILIADO WHERE id_afiliado = ?', [id]
-    );
+    const [rows] = await pool.query(`
+      SELECT
+        a.id_usuario,
+        u.nombres, u.apellidos, u.correo,
+        u.estado AS estado_cuenta,
+        a.documento, a.fecha_nacimiento,
+        TIMESTAMPDIFF(YEAR, a.fecha_nacimiento, CURDATE()) AS edad,
+        a.sexo, a.telefono, a.direccion, a.estatura_cm,
+        a.estado_afiliacion, a.fecha_registro,
+        a.fecha_ultima_modificacion, a.registrado_por
+      FROM AFILIADO a
+      JOIN USUARIO u ON a.id_usuario = u.id_usuario
+      WHERE a.id_usuario = ?
+    `, [id]);
+
     if (!rows.length) return null;
     const af = rows[0];
+
     const [restr] = await pool.query(`
-      SELECT r.* FROM AFILIADO_RESTRICCION ar
+      SELECT r.id_restriccion, r.nombre_restriccion, r.tipo, r.efecto_relevante
+      FROM AFILIADO_RESTRICCION ar
       JOIN RESTRICCION r ON ar.id_restriccion = r.id_restriccion
-      WHERE ar.id_afiliado = ?
+      WHERE ar.id_usuario = ?
     `, [id]);
     af.restricciones = restr;
-    af.ciclo_activo  = await AfiliadoModel._getCicloActivo(id);
+
+    // Ciclo activo con planes completos (detalle individual: más queries está justificado)
+    af.ciclo_activo = await AfiliadoModel._getCicloActivo(id);
     return af;
   },
 
-  _getCicloActivo: async (id_afiliado) => {
+  // ─────────────────────────────────────────────────────────
+  // _getCicloActivo — solo para findById (detalle individual)
+  // ─────────────────────────────────────────────────────────
+  _getCicloActivo: async (id_usuario) => {
     const [ciclos] = await pool.query(`
-      SELECT c.*
+      SELECT c.*,
+        (SELECT COUNT(*) FROM CICLO c2
+         WHERE c2.id_usuario = c.id_usuario AND c2.fecha_inicio <= c.fecha_inicio
+        ) AS numero_ciclo,
+        DATEDIFF(c.fecha_fin, CURDATE()) AS dias_restantes
       FROM CICLO c
-      WHERE c.id_afiliado = ? AND c.activo = 1
-      ORDER BY c.fecha_inicio_ciclo DESC LIMIT 1
-    `, [id_afiliado]);
+      WHERE c.id_usuario = ? AND c.activo = 1
+      LIMIT 1
+    `, [id_usuario]);
     if (!ciclos.length) return null;
 
     const ciclo = ciclos[0];
 
-    // Plan de entrenamiento
-    const [planes_e] = await pool.query(
+    // Plan de entrenamiento + rutinas + ejercicios
+    const [pe] = await pool.query(
       'SELECT * FROM PLAN_ENTRENAMIENTO WHERE id_ciclo = ?', [ciclo.id_ciclo]
     );
-    if (planes_e.length) {
-      const pe = planes_e[0];
-      const [rutinas] = await pool.query(
-        'SELECT * FROM RUTINA WHERE id_plan_entrenamiento = ? ORDER BY dia_numero',
-        [pe.id_plan_entrenamiento]
-      );
-      for (const rut of rutinas) {
-        const [ejercicios] = await pool.query(`
-          SELECT re.*, e.nombre_ejercicio, e.grupo_muscular, e.descripcion
-          FROM RUTINA_EJERCICIO re
-          JOIN EJERCICIO e ON re.id_ejercicio = e.id_ejercicio
-          WHERE re.id_rutina = ? ORDER BY re.orden
-        `, [rut.id_rutina]);
-        rut.ejercicios = ejercicios;
-      }
-      pe.rutinas = rutinas;
-      ciclo.plan_entrenamiento = pe;
+    if (pe.length) {
+      const [rutinas] = await pool.query(`
+        SELECT r.*,
+          JSON_ARRAYAGG(
+            JSON_OBJECT(
+              'id_rutina_ejercicio', re.id_rutina,
+              'orden', re.orden,
+              'id_ejercicio', e.id_ejercicio,
+              'nombre_ejercicio', e.nombre_ejercicio,
+              'grupo_muscular', e.grupo_muscular,
+              'series', re.series,
+              'repeticiones', re.repeticiones
+            ) ORDER BY re.orden
+          ) AS ejercicios
+        FROM RUTINA r
+        LEFT JOIN RUTINA_EJERCICIO re ON r.id_rutina = re.id_rutina
+        LEFT JOIN EJERCICIO e ON re.id_ejercicio = e.id_ejercicio
+        WHERE r.id_ciclo = ?
+        GROUP BY r.id_rutina
+        ORDER BY r.dia_numero
+      `, [ciclo.id_ciclo]);
+      // Parsear ejercicios (JSON_ARRAYAGG devuelve string en algunos drivers)
+      rutinas.forEach(r => {
+        if (typeof r.ejercicios === 'string') r.ejercicios = JSON.parse(r.ejercicios);
+        r.ejercicios = (r.ejercicios || []).filter(e => e.id_ejercicio !== null);
+      });
+      ciclo.plan_entrenamiento = { ...pe[0], rutinas };
     }
 
-    // Plan nutricional
-    const [planes_n] = await pool.query(
+    // Plan nutricional + detalle
+    const [pn] = await pool.query(
       'SELECT * FROM PLAN_NUTRICIONAL WHERE id_ciclo = ?', [ciclo.id_ciclo]
     );
-    if (planes_n.length) {
-      const pn = planes_n[0];
+    if (pn.length) {
       const [detalle] = await pool.query(`
-        SELECT dn.*, al.nombre_alimento, al.proteinas, al.carbohidratos, al.grasas,
+        SELECT dn.num_comida, dn.id_alimento, dn.cantidad_g,
+               al.nombre_alimento, al.proteinas, al.carbohidratos, al.grasas,
                ROUND((al.proteinas*4 + al.carbohidratos*4 + al.grasas*9),2) AS calorias_por_100g
         FROM DETALLE_NUTRICIONAL dn
         JOIN ALIMENTO al ON dn.id_alimento = al.id_alimento
-        WHERE dn.id_plan_nutricional = ? ORDER BY dn.numero_comida
-      `, [pn.id_plan_nutricional]);
-      pn.detalle = detalle;
-      ciclo.plan_nutricional = pn;
+        WHERE dn.id_ciclo = ?
+        ORDER BY dn.num_comida
+      `, [ciclo.id_ciclo]);
+      ciclo.plan_nutricional = { ...pn[0], detalle };
     }
 
     // Progreso físico
     const [progreso] = await pool.query(`
-      SELECT pf.*, u.nombres_usuario AS registrado_por_nombre
+      SELECT pf.*,
+             ROUND(pf.peso_kg / POW(a.estatura_cm / 100.0, 2), 2) AS imc,
+             u.nombres AS registrado_por_nombre
       FROM PROGRESO_FISICO pf
+      JOIN CICLO    c  ON pf.id_ciclo  = c.id_ciclo
+      JOIN AFILIADO a  ON c.id_usuario = a.id_usuario
       LEFT JOIN USUARIO u ON pf.registrado_por = u.id_usuario
-      WHERE pf.id_ciclo = ? ORDER BY pf.fecha_registro DESC
+      WHERE pf.id_ciclo = ?
+      ORDER BY pf.fecha_registro DESC
     `, [ciclo.id_ciclo]);
     ciclo.progreso_fisico = progreso;
 
     return ciclo;
   },
 
+  // ─────────────────────────────────────────────────────────
+  // CREATE — inserta en USUARIO + AFILIADO en transacción
+  // ─────────────────────────────────────────────────────────
   create: async (datos, registrado_por) => {
     const {
-      nombres_afiliado, apellidos_afiliado, documento_afiliado,
-      fecha_nacimiento_afiliado, sexo_afiliado, correo_afiliado,
-      direccion_afiliado, telefono_afiliado, estatura_afiliado,
-      objetivo_fisico_afiliado, grupo_muscular_prioritario,
-      nivel_experiencia_afiliado, disponibilidad_semanal_afiliado,
+      nombres, apellidos, correo, contrasena,
+      documento, fecha_nacimiento, sexo,
+      telefono, direccion, estatura_cm,
       estado_afiliacion,
     } = datos;
 
-    const [result] = await pool.query(`
-      INSERT INTO AFILIADO
-        (nombres_afiliado, apellidos_afiliado, documento_afiliado,
-         fecha_nacimiento_afiliado, sexo_afiliado, correo_afiliado,
-         direccion_afiliado, telefono_afiliado, estatura_afiliado,
-         objetivo_fisico_afiliado, grupo_muscular_prioritario,
-         nivel_experiencia_afiliado, disponibilidad_semanal_afiliado,
-         estado_afiliacion, registrado_por)
-      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-      [nombres_afiliado, apellidos_afiliado, documento_afiliado,
-       fecha_nacimiento_afiliado, sexo_afiliado, correo_afiliado,
-       direccion_afiliado, telefono_afiliado, estatura_afiliado,
-       objetivo_fisico_afiliado, grupo_muscular_prioritario,
-       nivel_experiencia_afiliado, disponibilidad_semanal_afiliado,
-       estado_afiliacion || 'Activo', registrado_por]
-    );
-    return result.insertId;
+    const { hashPassword } = require('../middlewares/auth');
+    const hash = await hashPassword(contrasena || 'MetaFit2025!');
+
+    const conn = await pool.getConnection();
+    try {
+      await conn.beginTransaction();
+
+      const [uRes] = await conn.query(
+        `INSERT INTO USUARIO (nombres, apellidos, correo, contrasena, rol, estado)
+         VALUES (?,?,?,?,'Afiliado','Activo')`,
+        [nombres, apellidos, correo, hash]
+      );
+      const id_usuario = uRes.insertId;
+
+      await conn.query(
+        `INSERT INTO AFILIADO
+           (id_usuario, documento, fecha_nacimiento, sexo,
+            telefono, direccion, estatura_cm, estado_afiliacion, registrado_por)
+         VALUES (?,?,?,?,?,?,?,?,?)`,
+        [id_usuario, documento, fecha_nacimiento, sexo,
+         telefono, direccion, estatura_cm, estado_afiliacion || 'Activo', registrado_por]
+      );
+
+      await conn.commit();
+      return id_usuario;
+    } catch (err) {
+      await conn.rollback();
+      throw err;
+    } finally {
+      conn.release();
+    }
   },
 
   update: async (id, campos) => {
     const permitidos = [
-      'nombres_afiliado','apellidos_afiliado','documento_afiliado',
-      'fecha_nacimiento_afiliado','sexo_afiliado','correo_afiliado',
-      'direccion_afiliado','telefono_afiliado','estatura_afiliado',
-      'objetivo_fisico_afiliado','grupo_muscular_prioritario',
-      'nivel_experiencia_afiliado','disponibilidad_semanal_afiliado',
-      'estado_afiliacion','fecha_ultima_modificacion','fecha_ultimo_cambio_estado',
+      'documento','fecha_nacimiento','sexo','telefono',
+      'direccion','estatura_cm','estado_afiliacion',
     ];
     const sets = [];
     const vals = [];
     for (const key of permitidos) {
-      if (campos[key] !== undefined) { sets.push(`${key}=?`); vals.push(campos[key]); }
+      if (campos[key] !== undefined) { sets.push(`a.${key}=?`); vals.push(campos[key]); }
     }
     if (!sets.length) return 0;
     vals.push(id);
+
+    const cleanSets = sets.map(s => s.replace('a.', ''));
     const [result] = await pool.query(
-      `UPDATE AFILIADO SET ${sets.join(',')} WHERE id_afiliado=?`, vals
+      `UPDATE AFILIADO SET ${cleanSets.join(',')} WHERE id_usuario=?`, vals
     );
     return result.affectedRows;
   },
 
   delete: async (id) => {
+    // ON DELETE RESTRICT en FK → el afiliado con datos asociados no se puede eliminar
     const [result] = await pool.query(
-      'DELETE FROM AFILIADO WHERE id_afiliado=?', [id]
+      'DELETE FROM AFILIADO WHERE id_usuario=?', [id]
     );
     return result.affectedRows;
   },

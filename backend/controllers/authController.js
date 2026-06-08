@@ -1,37 +1,47 @@
-// controllers/authController.js
-const UsuarioModel = require('../models/usuarioModel');
-const { signJWT }  = require('../middlewares/auth');
+// backend/controllers/authController.js
+// ─── Login con bcrypt + JWT firmado ──────────────────────────
+'use strict';
+
+const UsuarioModel              = require('../models/usuarioModel');
+const { signJWT, comparePassword } = require('../middlewares/auth');
 
 const AuthController = {
+
   login: async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password)
       return res.status(400).json({ error: 'Correo y contraseña requeridos' });
 
     try {
-      const user = await UsuarioModel.findByCredentials(email, password);
+      // Busca por correo (sin comparar contraseña aún)
+      const user = await UsuarioModel.findByEmail(email);
       if (!user)
         return res.status(401).json({ error: 'Correo o contraseña incorrectos' });
 
-      if (user.estado_cuenta_usuario !== 'Activo')
+      // Compara con bcrypt
+      const match = await comparePassword(password, user.contrasena);
+      if (!match)
+        return res.status(401).json({ error: 'Correo o contraseña incorrectos' });
+
+      if (user.estado !== 'Activo')
         return res.status(403).json({
-          error: `Tu cuenta está en estado: ${user.estado_cuenta_usuario}. Contacta al administrador.`
+          error: `Tu cuenta está en estado: ${user.estado}. Contacta al administrador.`,
         });
 
       const token = signJWT({
         sub  : user.id_usuario,
-        email: user.correo_usuario,
-        role : user.rol_usuario,
+        email: user.correo,
+        role : user.rol,
       });
 
       res.json({
         accessToken: token,
         user: {
           id       : user.id_usuario,
-          email    : user.correo_usuario,
-          role     : user.rol_usuario,
-          nombres  : user.nombres_usuario,
-          apellidos: user.apellidos_usuario,
+          email    : user.correo,
+          role     : user.rol,
+          nombres  : user.nombres,
+          apellidos: user.apellidos,
         },
       });
     } catch (err) {

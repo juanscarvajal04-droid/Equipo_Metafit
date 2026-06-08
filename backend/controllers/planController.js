@@ -13,13 +13,13 @@ const PlanController = {
   },
 
   createEntrenamiento: async (req, res) => {
-    const { id_ciclo, es_automatico, observaciones } = req.body;
+    const { id_ciclo, observaciones } = req.body;
     if (!id_ciclo) return res.status(400).json({ error: 'id_ciclo es requerido' });
     try {
       const id = await PlanModel.createEntrenamiento(
-        id_ciclo, es_automatico, req.user.sub, observaciones
+        id_ciclo, req.user.sub, observaciones
       );
-      res.status(201).json({ id, message: 'Plan de entrenamiento creado' });
+      res.status(201).json({ id_ciclo: id, message: 'Plan de entrenamiento creado' });
     } catch (err) {
       if (err.code === 'ER_DUP_ENTRY')
         return res.status(400).json({ error: 'Este ciclo ya tiene un plan de entrenamiento' });
@@ -36,17 +36,17 @@ const PlanController = {
 
   // ── RUTINAS ───────────────────────────────────────────────
   createRutina: async (req, res) => {
-    const { id_plan_entrenamiento, nombre_rutina, enfoque_muscular, dia_numero } = req.body;
-    if (!id_plan_entrenamiento || !nombre_rutina || !dia_numero)
-      return res.status(400).json({ error: 'id_plan_entrenamiento, nombre_rutina y dia_numero son requeridos' });
+    const { id_ciclo, nombre_rutina, enfoque_muscular, dia_numero } = req.body;
+    if (!id_ciclo || !nombre_rutina || !dia_numero)
+      return res.status(400).json({ error: 'id_ciclo, nombre_rutina y dia_numero son requeridos' });
     try {
       const id = await PlanModel.createRutina(
-        id_plan_entrenamiento, nombre_rutina, enfoque_muscular, dia_numero
+        id_ciclo, nombre_rutina, enfoque_muscular, dia_numero
       );
       res.status(201).json({ id, message: 'Rutina creada correctamente' });
     } catch (err) {
       if (err.code === 'ER_DUP_ENTRY')
-        return res.status(400).json({ error: `Ya existe una rutina el día ${dia_numero} en este plan` });
+        return res.status(400).json({ error: `Ya existe una rutina el día ${dia_numero} en este ciclo` });
       res.status(500).json({ error: err.message });
     }
   },
@@ -86,14 +86,19 @@ const PlanController = {
   },
 
   createNutricional: async (req, res) => {
-    const { id_ciclo, calorias_estimadas, num_comidas_diarias, observaciones } = req.body;
-    if (!id_ciclo || !calorias_estimadas || !num_comidas_diarias)
-      return res.status(400).json({ error: 'id_ciclo, calorias_estimadas y num_comidas_diarias son requeridos' });
+    // Acepta tanto nombres nuevos (calorias_objetivo/num_comidas) como legacy
+    const id_ciclo          = req.body.id_ciclo;
+    const calorias_objetivo = req.body.calorias_objetivo || req.body.calorias_estimadas;
+    const num_comidas       = req.body.num_comidas || req.body.num_comidas_diarias;
+    const observaciones     = req.body.observaciones;
+
+    if (!id_ciclo || !calorias_objetivo || !num_comidas)
+      return res.status(400).json({ error: 'id_ciclo, calorias_objetivo y num_comidas son requeridos' });
     try {
       const id = await PlanModel.createNutricional(
-        id_ciclo, calorias_estimadas, num_comidas_diarias, req.user.sub, observaciones
+        id_ciclo, calorias_objetivo, num_comidas, req.user.sub, observaciones
       );
-      res.status(201).json({ id, message: 'Plan nutricional creado' });
+      res.status(201).json({ id_ciclo: id, message: 'Plan nutricional creado' });
     } catch (err) {
       if (err.code === 'ER_DUP_ENTRY')
         return res.status(400).json({ error: 'Este ciclo ya tiene un plan nutricional' });
@@ -102,12 +107,15 @@ const PlanController = {
   },
 
   addAlimento: async (req, res) => {
-    const { id_alimento, numero_comida, cantidad } = req.body;
-    if (!id_alimento || !numero_comida || !cantidad)
-      return res.status(400).json({ error: 'id_alimento, numero_comida y cantidad son requeridos' });
+    // Acepta tanto nombres nuevos (num_comida/cantidad_g) como legacy
+    const id_alimento = req.body.id_alimento;
+    const num_comida  = req.body.num_comida  || req.body.numero_comida;
+    const cantidad_g  = req.body.cantidad_g  || req.body.cantidad;
+    if (!id_alimento || !num_comida || !cantidad_g)
+      return res.status(400).json({ error: 'id_alimento, num_comida y cantidad_g son requeridos' });
     try {
       await PlanModel.addAlimentoToDetalle(
-        req.params.id_plan, id_alimento, numero_comida, cantidad
+        req.params.id_plan, id_alimento, num_comida, cantidad_g
       );
       res.status(201).json({ message: 'Alimento añadido al plan nutricional' });
     } catch (err) {
