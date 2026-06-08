@@ -18,4 +18,4 @@ EXPOSE 5173
 
 # 7. El comando mágico que arranca el servidor de desarrollo y abre el --host 
 # para que Windows pueda comunicarse con el contenedor y cargue en tu navegador
-CMD ["npm", "run", "dev", "--", "--host"]
+CMD ["npm", "run", "dev", "--", "--host"] 
