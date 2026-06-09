@@ -19,17 +19,34 @@ const ALLOWED_ORIGINS = (process.env.CORS_ORIGINS || 'http://localhost:5173,http
   .split(',')
   .map(o => o.trim());
 
-app.use(cors({
-  origin: (origin, callback) => {
-    // En producción, bloquear requests sin origin (evita CSRF desde scripts)
-    if (!origin && IS_PROD) return callback(new Error('CORS: origin requerido en producción'));
-    if (!origin || ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
-    callback(new Error(`CORS bloqueado para origen: ${origin}`));
-  },
-  methods : ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-}));
+// Rutas que deben estar accesibles sin restricción de origen
+// (Swagger UI, health check, herramientas de desarrollo)
+const CORS_OPEN_PATHS = ['/api-docs', '/swagger', '/health', '/api-docs.json'];
+
+app.use((req, res, next) => {
+  // Si la ruta es de documentación o health, aplicar CORS abierto y continuar
+  const isOpenPath = CORS_OPEN_PATHS.some(p => req.path === p || req.path.startsWith(p + '/'));
+  if (isOpenPath) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    if (req.method === 'OPTIONS') return res.sendStatus(204);
+    return next();
+  }
+
+  // Para el resto de rutas, aplicar CORS estricto
+  cors({
+    origin: (origin, callback) => {
+      // Permitir requests sin origin: Postman, curl, herramientas server-to-server
+      // Solo bloquear si el origin existe pero NO está en la lista permitida
+      if (!origin || ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+      callback(new Error(`CORS bloqueado para origen: ${origin}`));
+    },
+    methods : ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  })(req, res, next);
+});
 
 // ── Límite de tamaño de body (evita DoS por payloads enormes) ─
 app.use(express.json({ limit: '50kb' }));
@@ -39,8 +56,10 @@ app.use(express.urlencoded({ extended: true, limit: '50kb' }));
 // Los endpoints POST, PUT y PATCH deben recibir JSON.
 // Sin esta validación, un body enviado como text/plain o form-data
 // resulta en req.body = undefined y errores silenciosos difíciles de depurar.
+// Excepción: rutas de Swagger UI realizan requests internos sin application/json.
 app.use((req, res, next) => {
-  if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
+  const isSwaggerPath = req.path.startsWith('/api-docs') || req.path.startsWith('/swagger');
+  if (!isSwaggerPath && ['POST', 'PUT', 'PATCH'].includes(req.method)) {
     const ct = req.headers['content-type'] || '';
     if (!ct.includes('application/json')) {
       return res.status(415).json({
@@ -78,12 +97,11 @@ app.use('/',           loginLimiter, authRoutes);   // POST /login (con rate lim
 app.use('/usuarios',   usuarioRoutes);              // GET/POST/PATCH/DELETE /usuarios
 app.use('/afiliados',  afiliadoRoutes);             // CRUD afiliados + ciclos + progreso
 app.use('/planes',     planRoutes);                 // Planes entrenamiento y nutricional
-app.use('/660',        catalogoRoutes);             // GET /660/ejercicios  /660/alimentos
-app.use('/catalogo',   catalogoRoutes);             // GET /catalogo/ejercicios (alias)
+app.use('/catalogo',   catalogoRoutes);             // GET /catalogo/ejercicios|alimentos|restricciones
 app.use('/dashboard',  dashboardRoutes);            // GET /dashboard/kpis
 
-// ── Swagger UI — /api-docs ────────────────────────────────────
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+// ── Swagger UI — /api-docs y /swagger (alias) ────────────────
+const swaggerSetup = swaggerUi.setup(swaggerSpec, {
   customSiteTitle: 'MetaFit API Docs',
   swaggerOptions: {
     persistAuthorization : true,
@@ -91,7 +109,9 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
     filter               : true,
     tryItOutEnabled      : true,
   },
-}));
+});
+app.use('/api-docs', swaggerUi.serve, swaggerSetup);
+app.use('/swagger',  swaggerUi.serve, swaggerSetup);  // alias amigable
 
 // Endpoint que sirve el JSON crudo de la spec (para Postman, etc.)
 app.get('/api-docs.json', (req, res) => {

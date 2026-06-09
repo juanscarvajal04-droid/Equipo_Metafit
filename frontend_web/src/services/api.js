@@ -87,9 +87,9 @@ export const createProgreso = (data) => api.post('/afiliados/progreso', data);
 export const getRestricciones = (id) => api.get(`/afiliados/${id}/restricciones`);
 
 /** CATÁLOGOS (ejercicios, alimentos, restricciones médicas) */
-export const getEjercicios    = () => api.get('/660/ejercicios');
-export const getAlimentos     = () => api.get('/660/alimentos');
-export const getCatalogRest   = () => api.get('/660/restricciones');
+export const getEjercicios    = () => api.get('/catalogo/ejercicios');
+export const getAlimentos     = () => api.get('/catalogo/alimentos');
+export const getCatalogRest   = () => api.get('/catalogo/restricciones');
 
 /** PLANES */
 export const getPlanEntrenamiento = (idCiclo) => api.get(`/planes/entrenamiento/${idCiclo}`);

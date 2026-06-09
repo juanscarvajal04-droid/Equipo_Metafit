@@ -4,10 +4,10 @@ import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-const getId          = (doc) => doc._id ?? doc.id;
+const getId          = (doc) => doc.id_usuario ?? doc._id ?? doc.id;
 const nombreCompleto = (a)   => [a.nombres, a.apellidos].filter(Boolean).join(" ") || "Sin nombre";
 const inicial        = (a)   => (a.nombres || a.correo || "?")[0].toUpperCase();
-const cicloActivo    = (a)   => a.ciclos?.find((c) => c.activo) || null;
+const cicloActivo    = (a)   => a.ciclo_activo || null;
 const numRestr       = (a)   => a.restricciones?.length || 0;
 
 const OBJETIVO_CONFIG = {
@@ -39,7 +39,8 @@ export default function AdminDashboard() {
   const [busqueda,  setBusqueda]  = useState("");
 
   useEffect(() => {
-    authAxios.get("/660/afiliados")
+    // FIX: ruta correcta /afiliados (no /660/afiliados — legado json-server)
+    authAxios.get("/afiliados")
       .then(({ data }) => setAfiliados(data))
       .catch((err) => {
         if (err?.response?.status === 401) { logout(); navigate("/login"); }
@@ -54,7 +55,8 @@ export default function AdminDashboard() {
            (a.correo || "").toLowerCase().includes(t)  ||
            (a.objetivo_fisico || "").toLowerCase().includes(t);
   });
-  const totalActivos     = afiliados.filter((a) => a.estado?.toLowerCase() === "activo").length;
+  // FIX: el campo real del backend es estado_cuenta (de USUARIO), no estado
+  const totalActivos     = afiliados.filter((a) => (a.estado_cuenta || "").toLowerCase() === "activo").length;
   const conCicloActivo   = afiliados.filter((a) => cicloActivo(a)).length;
   const conRestricciones = afiliados.filter((a) => numRestr(a) > 0).length;
   const conteoPorObj     = OBJETIVOS.map((obj) => ({

@@ -3,11 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-const getId       = (doc) => doc._id ?? doc.id;
-const nombreCompleto = (a) => [a.nombres, a.apellidos].filter(Boolean).join(" ") || "Sin nombre";
-const inicial     = (a)   => (a.nombres || a.correo || "?")[0].toUpperCase();
-const cicloActivo = (a)   => a.ciclos?.find((c) => c.activo) || null;
-const numRestr    = (a)   => a.restricciones?.length || 0;
+const getId          = (doc) => doc.id_usuario ?? doc._id ?? doc.id;
+const nombreCompleto = (a)   => [a.nombres, a.apellidos].filter(Boolean).join(" ") || "Sin nombre";
+const inicial        = (a)   => (a.nombres || a.correo || "?")[0].toUpperCase();
+// FIX: el backend devuelve `ciclo_activo` (objeto), NO `ciclos` (array)
+const cicloActivo    = (a)   => a.ciclo_activo || null;
+const numRestr       = (a)   => a.restricciones?.length || 0;
+// FIX: MySQL devuelve '2000-01-30T00:00:00.000Z'. <input type="date"> necesita 'YYYY-MM-DD'.
+const toDateInput    = (v)   => { if (!v) return ""; if (typeof v === "string") return v.split("T")[0].split(" ")[0]; if (v instanceof Date) return v.toISOString().split("T")[0]; return ""; };
 
 const OBJETIVO_CONFIG = {
   "Pérdida de grasa": { icono: "🔥", color: "#e94560", bg: "#e9456022" },
@@ -61,9 +64,14 @@ export default function Dashboard() {
 
   // ── Carga ──────────────────────────────────────────────────────────────────
   useEffect(() => {
-    authAxios.get("/660/afiliados")
-      .then(({ data }) => setAfiliados(data))
+    // FIX: la ruta correcta es /afiliados, no /660/afiliados
+    authAxios.get("/afiliados")
+      .then(({ data }) => {
+        console.log('[Dashboard] Afiliados cargados:', data.length);
+        setAfiliados(data);
+      })
       .catch((err) => {
+        console.error('[Dashboard] Error al cargar afiliados:', err.response?.status, err.response?.data || err.message);
         if (err?.response?.status === 401 || err?.response?.status === 403) {
           logout(); navigate("/login");
         } else {
@@ -80,20 +88,22 @@ export default function Dashboard() {
     setEditModal(afiliado);
     setEditError("");
     setFormEdit({
-      nombres:                      afiliado.nombres                      || "",
-      apellidos:                    afiliado.apellidos                    || "",
-      correo:                       afiliado.correo                       || "",
-      telefono:                     afiliado.telefono                     || "",
-      direccion:                    afiliado.direccion                    || "",
-      documento:                    afiliado.documento                    || "",
-      fecha_nacimiento:             afiliado.fecha_nacimiento             || "",
-      sexo:                         afiliado.sexo                         || "Masculino",
-      estatura_cm:                  afiliado.estatura_cm                  || "",
-      objetivo_fisico:              afiliado.objetivo_fisico              || "Pérdida de grasa",
-      grupo_muscular_prioritario:   afiliado.grupo_muscular_prioritario   || "",
-      nivel_experiencia:            afiliado.nivel_experiencia            || "Principiante",
-      disponibilidad_semanal_dias:  afiliado.disponibilidad_semanal_dias  || "",
-      estado:                       afiliado.estado                       || "Activo",
+      nombres:                     afiliado.nombres                     || "",
+      apellidos:                   afiliado.apellidos                   || "",
+      correo:                      afiliado.correo                      || "",
+      telefono:                    afiliado.telefono                     || "",
+      direccion:                   afiliado.direccion                   || "",
+      documento:                   afiliado.documento                   || "",
+      // FIX: convertir ISO a YYYY-MM-DD para que <input type="date"> lo muestre
+      fecha_nacimiento:            toDateInput(afiliado.fecha_nacimiento),
+      sexo:                        afiliado.sexo                        || "Masculino",
+      estatura_cm:                 afiliado.estatura_cm                 || "",
+      objetivo_fisico:             afiliado.objetivo_fisico             || "Pérdida de grasa",
+      grupo_muscular_prioritario:  afiliado.grupo_muscular_prioritario  || "",
+      nivel_experiencia:           afiliado.nivel_experiencia           || "Principiante",
+      disponibilidad_semanal_dias: afiliado.disponibilidad_semanal_dias || "",
+      // FIX: el campo en la DB/backend es estado_afiliacion, no estado
+      estado_afiliacion:           afiliado.estado_afiliacion           || "Activo",
     });
   };
 
@@ -104,12 +114,22 @@ export default function Dashboard() {
     setEditError("");
     try {
       const id = getId(editModal);
-      const { data: actualizado } = await authAxios.patch(`/afiliados/${id}`, formEdit);
+      await authAxios.patch(`/afiliados/${id}`, formEdit);
+      // FIX: el backend devuelve {message}, NO el afiliado actualizado.
+      // Mergeamos formEdit en el objeto existente para actualizar la tabla localmente.
+      const actualizado = {
+        ...editModal,
+        ...formEdit,
+        // Mantener campos de solo-lectura del backend
+        estado_cuenta:    formEdit.estado_afiliacion || editModal.estado_cuenta,
+      };
       setAfiliados((prev) => prev.map((a) => (getId(a) === id ? actualizado : a)));
       setEditModal(null);
       showToast(`✅ ${nombreCompleto(actualizado)} actualizado correctamente`);
-    } catch {
-      setEditError("Error al guardar. Verifica el servidor.");
+    } catch (err) {
+      const msg = err?.response?.data?.error || err.message || "Error desconocido";
+      console.error('[Dashboard.guardarEdicion]', err);
+      setEditError(`Error al guardar: ${msg}`);
     } finally {
       setSavingEdit(false);
     }
@@ -141,7 +161,8 @@ export default function Dashboard() {
       (a.objetivo_fisico || "").toLowerCase().includes(t)
     );
   });
-  const totalActivos     = afiliados.filter((a) => a.estado?.toLowerCase() === "activo").length;
+  // FIX: el backend devuelve `estado_cuenta` (de USUARIO), no `estado`
+  const totalActivos     = afiliados.filter((a) => (a.estado_cuenta || a.estado_afiliacion || "").toLowerCase() === "activo").length;
   const conCicloActivo   = afiliados.filter((a) => cicloActivo(a)).length;
   const conRestricciones = afiliados.filter((a) => numRestr(a) > 0).length;
   const conteoPorObj     = OBJETIVOS.map((obj) => ({

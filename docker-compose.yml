@@ -21,7 +21,7 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      MYSQL_DATABASE:      ${DB_NAME}
+      MYSQL_DATABASE: ${DB_NAME}
       # Forzar utf8mb4 desde arranque para evitar problemas de encoding
       MYSQL_INITDB_SKIP_TZINFO: "true"
     ports:
@@ -37,7 +37,7 @@ services:
       # Persistencia de datos entre reinicios
       - metafit_db_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}" ]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -55,21 +55,21 @@ services:
     container_name: metafit_backend
     restart: unless-stopped
     environment:
-      NODE_ENV:    production
-      PORT:        ${PORT}
-      DB_HOST:     db          # <- nombre del servicio Docker, NO localhost
-      DB_PORT:     3306
-      DB_USER:     root
+      NODE_ENV: production
+      PORT: ${PORT}
+      DB_HOST: db # <- nombre del servicio Docker, NO localhost
+      DB_PORT: 3306
+      DB_USER: root
       DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME:     ${DB_NAME}
-      JWT_SECRET:  ${JWT_SECRET}
+      DB_NAME: ${DB_NAME}
+      JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-8h}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
     ports:
       - "${PORT}:${PORT}"
     depends_on:
       db:
-        condition: service_healthy   # espera a que MySQL esté listo y responda ping
+        condition: service_healthy # espera a que MySQL esté listo y responda ping
     networks:
       - metafit_net
 
@@ -107,3 +107,8 @@ volumes:
 networks:
   metafit_net:
     driver: bridge
+
+# Rutas
+# Abre ahora tu documentación:
+# http://localhost:3001/swagger
+# http://localhost:3001/api-docs

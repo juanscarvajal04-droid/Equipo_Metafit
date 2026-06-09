@@ -4,10 +4,13 @@ import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-const getId          = (doc) => doc._id ?? doc.id;
+const getId          = (doc) => doc.id_usuario ?? doc._id ?? doc.id;
 const nombreCompleto = (a)   => [a.nombres, a.apellidos].filter(Boolean).join(" ") || "Sin nombre";
 const inicial        = (a)   => (a.nombres || a.correo || "?")[0].toUpperCase();
-const cicloActivo    = (a)   => a.ciclos?.find((c) => c.activo) || null;
+// FIX: el backend devuelve `ciclo_activo` (objeto único), NO `ciclos` (array)
+const cicloActivo    = (a)   => a.ciclo_activo || null;
+// FIX: MySQL devuelve '2000-01-30T00:00:00.000Z'. <input type="date"> necesita 'YYYY-MM-DD'.
+const toDateInput    = (v)   => { if (!v) return ""; if (typeof v === "string") return v.split("T")[0].split(" ")[0]; if (v instanceof Date) return v.toISOString().split("T")[0]; return ""; };
 
 const OBJETIVO_CONFIG = {
   "Pérdida de grasa": { icono: "🔥", color: "#e94560" },
@@ -68,9 +71,15 @@ export default function AfiliadosView() {
 
   // ── Carga ──────────────────────────────────────────────────────────────────
   useEffect(() => {
-    authAxios.get("/660/afiliados")
-      .then(({ data }) => setAfiliados(data))
+    // FIX: la ruta correcta es /afiliados. /660/afiliados no existe.
+    // requireAuth permite todos los roles (Admin, Entrenador, Recepcionista).
+    authAxios.get("/afiliados")
+      .then(({ data }) => {
+        console.log('[AfiliadosView] Afiliados cargados:', data.length, '| rol:', role);
+        setAfiliados(data);
+      })
       .catch((err) => {
+        console.error('[AfiliadosView] Error:', err.response?.status, err.response?.data || err.message);
         if (err?.response?.status === 401) { logout(); navigate("/login"); }
         else setError("No se pudieron cargar los afiliados.");
       })
@@ -133,12 +142,16 @@ export default function AfiliadosView() {
       nombres: a.nombres || "", apellidos: a.apellidos || "",
       correo: a.correo || "", telefono: a.telefono || "",
       direccion: a.direccion || "", documento: a.documento || "",
-      fecha_nacimiento: a.fecha_nacimiento || "", sexo: a.sexo || "Masculino",
-      estatura_cm: a.estatura_cm || "", objetivo_fisico: a.objetivo_fisico || "Pérdida de grasa",
+      // FIX: convertir ISO a YYYY-MM-DD para que <input type="date"> lo muestre
+      fecha_nacimiento: toDateInput(a.fecha_nacimiento),
+      sexo: a.sexo || "Masculino",
+      estatura_cm: a.estatura_cm || "",
+      objetivo_fisico: a.objetivo_fisico || "Pérdida de grasa",
       grupo_muscular_prioritario: a.grupo_muscular_prioritario || "",
       nivel_experiencia: a.nivel_experiencia || "Principiante",
       disponibilidad_semanal_dias: a.disponibilidad_semanal_dias || 3,
-      estado: a.estado || "Activo",
+      // FIX: el campo real del backend es estado_afiliacion
+      estado_afiliacion: a.estado_afiliacion || "Activo",
       plan_membresia: a.plan_membresia || "Básico",
     });
   };
@@ -149,12 +162,17 @@ export default function AfiliadosView() {
     setEditError("");
     try {
       const id = getId(editModal);
-      const { data } = await authAxios.patch(`/afiliados/${id}`, formEdit);
-      setAfiliados((prev) => prev.map((a) => getId(a) === id ? data : a));
+      await authAxios.patch(`/afiliados/${id}`, formEdit);
+      // FIX: el backend devuelve {message}, NO el afiliado actualizado.
+      // Mergeamos formEdit sobre el objeto existente para reflejar los cambios.
+      const actualizado = { ...editModal, ...formEdit };
+      setAfiliados((prev) => prev.map((a) => getId(a) === id ? actualizado : a));
       setEditModal(null);
-      showToast(`✅ ${nombreCompleto(data)} actualizado`);
-    } catch {
-      setEditError("Error al guardar. Verifica el servidor.");
+      showToast(`✅ ${nombreCompleto(actualizado)} actualizado`);
+    } catch (err) {
+      const msg = err?.response?.data?.error || err.message || "Error desconocido";
+      console.error('[AfiliadosView.guardarEdicion]', err);
+      setEditError(`Error al guardar: ${msg}`);
     } finally {
       setSavingEdit(false);
     }

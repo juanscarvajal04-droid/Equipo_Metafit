@@ -129,16 +129,26 @@ const AfiliadoModel = {
     for (const c of ciclos)   cicloMap.set(c.id_usuario, c);
     for (const p of progreso) progresoMap.set(p.id_ciclo, p);
 
-    return afiliados.map(af => ({
-      ...af,
-      restricciones: restrMap.get(af.id_usuario) || [],
-      ciclo_activo : cicloMap.has(af.id_usuario)
+    return afiliados.map(af => {
+      const ciclo = cicloMap.has(af.id_usuario)
         ? {
             ...cicloMap.get(af.id_usuario),
             ultimo_progreso: progresoMap.get(cicloMap.get(af.id_usuario).id_ciclo) || null,
           }
-        : null,
-    }));
+        : null;
+
+      return {
+        ...af,
+        restricciones: restrMap.get(af.id_usuario) || [],
+        ciclo_activo : ciclo,
+        // ── Campos deportivos promovidos al nivel raiz para facilitar el render ──
+        // Viven en CICLO pero el front los espera directamente en el afiliado.
+        objetivo_fisico:             ciclo?.objetivo_fisico              || null,
+        nivel_experiencia:           ciclo?.nivel_experiencia            || null,
+        disponibilidad_semanal_dias: ciclo?.disponibilidad_dias          || null,
+        grupo_muscular_prioritario:  ciclo?.grupo_muscular_prioritario   || null,
+      };
+    });
   },
 
   // ─────────────────────────────────────────────────────────
@@ -313,24 +323,73 @@ const AfiliadoModel = {
     }
   },
 
+  // ─────────────────────────────────────────────────────────
+  // update — actualiza AFILIADO y campos de USUARIO en transacción
+  // ─────────────────────────────────────────────────────────
   update: async (id, campos) => {
-    const permitidos = [
-      'documento','fecha_nacimiento','sexo','telefono',
-      'direccion','estatura_cm','estado_afiliacion',
+    // Campos permitidos en la tabla AFILIADO
+    const permitidosAfiliado = [
+      'documento', 'fecha_nacimiento', 'sexo', 'telefono',
+      'direccion', 'estatura_cm', 'estado_afiliacion',
     ];
-    const sets = [];
-    const vals = [];
-    for (const key of permitidos) {
-      if (campos[key] !== undefined) { sets.push(`a.${key}=?`); vals.push(campos[key]); }
+    // 'estado' del frontend mapea a 'estado_afiliacion' en la BD
+    if (campos.estado !== undefined && campos.estado_afiliacion === undefined) {
+      campos.estado_afiliacion = campos.estado;
     }
-    if (!sets.length) return 0;
-    vals.push(id);
 
-    const cleanSets = sets.map(s => s.replace('a.', ''));
-    const [result] = await pool.query(
-      `UPDATE AFILIADO SET ${cleanSets.join(',')} WHERE id_usuario=?`, vals
-    );
-    return result.affectedRows;
+    // Campos permitidos en la tabla USUARIO
+    const permitidosUsuario = ['nombres', 'apellidos', 'correo', 'estado'];
+
+    const setsAfiliado = [];
+    const valsAfiliado = [];
+    for (const key of permitidosAfiliado) {
+      if (campos[key] !== undefined) {
+        setsAfiliado.push(`${key}=?`);
+        valsAfiliado.push(campos[key]);
+      }
+    }
+
+    const setsUsuario = [];
+    const valsUsuario = [];
+    for (const key of permitidosUsuario) {
+      if (campos[key] !== undefined) {
+        setsUsuario.push(`${key}=?`);
+        valsUsuario.push(campos[key]);
+      }
+    }
+
+    // Si no hay nada que actualizar, retornar 0
+    if (!setsAfiliado.length && !setsUsuario.length) return 0;
+
+    const conn = await pool.getConnection();
+    try {
+      await conn.beginTransaction();
+      let affectedRows = 0;
+
+      if (setsAfiliado.length) {
+        const [r] = await conn.query(
+          `UPDATE AFILIADO SET ${setsAfiliado.join(',')} WHERE id_usuario=?`,
+          [...valsAfiliado, id]
+        );
+        affectedRows = r.affectedRows;
+      }
+
+      if (setsUsuario.length) {
+        const [r] = await conn.query(
+          `UPDATE USUARIO SET ${setsUsuario.join(',')} WHERE id_usuario=?`,
+          [...valsUsuario, id]
+        );
+        if (!setsAfiliado.length) affectedRows = r.affectedRows;
+      }
+
+      await conn.commit();
+      return affectedRows;
+    } catch (err) {
+      await conn.rollback();
+      throw err;
+    } finally {
+      conn.release();
+    }
   },
 
   delete: async (id) => {
