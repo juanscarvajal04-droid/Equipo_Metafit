@@ -1,17 +1,17 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
-import ProtectedRoute  from "./components/ProtectedRoute";
-import HomeRedirect    from "./components/HomeRedirect";
+import ProtectedRoute from "./components/ProtectedRoute";
+import HomeRedirect from "./components/HomeRedirect";
 
 // ── Vistas ────────────────────────────────────────────────────────────────────
-import Login            from "./views/Login";
-import LandingPage      from "./views/LandingPage";
-import Dashboard        from "./views/Dashboard";
-import AfiliadosView    from "./views/AfiliadosView";
-import GestionPersonal  from "./views/GestionPersonal";
-import RutinasView      from "./views/RutinasView";
-import DietasView       from "./views/DietasView";
-import PagosView        from "./views/PagosView";
+import Login from "./views/Login";
+import LandingPage from "./views/LandingPage";
+import Dashboard from "./views/Dashboard";
+import AfiliadosView from "./views/AfiliadosView";
+import GestionPersonal from "./views/GestionPersonal";
+import RutinasView from "./views/RutinasView";
+import DietasView from "./views/DietasView";
+import PagosView from "./views/PagosView";
 
 /**
  * App.jsx — Raíz de la aplicación
@@ -33,10 +33,10 @@ import PagosView        from "./views/PagosView";
  */
 
 // Grupos de roles
-const ADMIN        = ["Administrador"];
-const ADMIN_RECEP  = ["Administrador", "Recepcionista"];
-const ADMIN_TRAIN  = ["Administrador", "Entrenador"];
-const ALL_ROLES    = ["Administrador", "Recepcionista", "Entrenador"];
+const ADMIN = ["Administrador"];
+const ADMIN_RECEP = ["Administrador", "Recepcionista"];
+const ADMIN_TRAIN = ["Administrador", "Entrenador"];
+const ALL_ROLES = ["Administrador", "Recepcionista", "Entrenador"];
 
 
 export default function App() {
@@ -59,7 +59,7 @@ export default function App() {
           <Route element={<ProtectedRoute allowedRoles={ADMIN} />}>
             <Route path="/dashboard" element={<Dashboard />} />
             {/* 🛡️ RUTA EXCLUSIVA: Gestión de Personal — Solo Administrador */}
-            <Route path="/personal"  element={<GestionPersonal />} />
+            <Route path="/personal" element={<GestionPersonal />} />
           </Route>
 
           {/* ══════════════════════════════════════════════════════════════
@@ -79,7 +79,7 @@ export default function App() {
           ══════════════════════════════════════════════════════════════ */}
           <Route element={<ProtectedRoute allowedRoles={ADMIN_TRAIN} />}>
             <Route path="/rutinas" element={<RutinasView />} />
-            <Route path="/dietas"  element={<DietasView />} />
+            <Route path="/dietas" element={<DietasView />} />
           </Route>
 
           {/* ══════════════════════════════════════════════════════════════

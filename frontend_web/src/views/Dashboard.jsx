@@ -67,7 +67,6 @@ export default function Dashboard() {
     // FIX: la ruta correcta es /afiliados, no /660/afiliados
     authAxios.get("/afiliados")
       .then(({ data }) => {
-        console.log('[Dashboard] Afiliados cargados:', data.length);
         setAfiliados(data);
       })
       .catch((err) => {

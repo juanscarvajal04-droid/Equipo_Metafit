@@ -1,4 +1,6 @@
 // controllers/dashboardController.js
+// Hardened: BUG-010 — catch usa log interno + mensaje genérico al cliente.
+'use strict';
 const CatalogoModel = require('../models/catalogoModel');
 
 const DashboardController = {
@@ -7,7 +9,10 @@ const DashboardController = {
     try {
       const kpis = await CatalogoModel.getDashboardKPIs();
       res.json(kpis);
-    } catch (err) { res.status(500).json({ error: err.message }); }
+    } catch (err) {
+      console.error('[dashboardController.getKPIs]', err);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
   },
 };
 

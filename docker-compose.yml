@@ -59,7 +59,7 @@ services:
       PORT: ${PORT}
       DB_HOST: db # <- nombre del servicio Docker, NO localhost
       DB_PORT: 3306
-      DB_USER: root
+      DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME}
       JWT_SECRET: ${JWT_SECRET}
@@ -112,3 +112,6 @@ networks:
 # Abre ahora tu documentación:
 # http://localhost:3001/swagger
 # http://localhost:3001/api-docs
+
+#fronten
+#http://localhost:5173/

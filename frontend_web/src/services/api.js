@@ -2,8 +2,8 @@
 // src/services/api.js — MetaFit API Client
 // Archivo: /frontend_web/src/services/api.js
 //
-// ANTES: el frontend leía datos del server.cjs local (JSON mockup)
-// DESPUÉS: apunta a la variable de entorno VITE_API_URL → backend real
+// Todas las llamadas apuntan al backend real (Node.js/MySQL).
+// La URL base se inyecta via VITE_API_URL (docker-compose o .env local).
 // ============================================================
 
 import axios from 'axios';

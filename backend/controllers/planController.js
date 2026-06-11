@@ -1,4 +1,6 @@
 // controllers/planController.js
+// Hardened: BUG-010 — todos los catch ahora usan log interno + mensaje genérico al cliente.
+'use strict';
 const PlanModel = require('../models/planModel');
 
 const PlanController = {
@@ -9,7 +11,10 @@ const PlanController = {
       const plan = await PlanModel.getEntrenamientoByCiclo(req.params.id_ciclo);
       if (!plan) return res.status(404).json({ error: 'Plan de entrenamiento no encontrado para este ciclo' });
       res.json(plan);
-    } catch (err) { res.status(500).json({ error: err.message }); }
+    } catch (err) {
+      console.error('[planController.getEntrenamiento]', err);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
   },
 
   createEntrenamiento: async (req, res) => {
@@ -23,7 +28,8 @@ const PlanController = {
     } catch (err) {
       if (err.code === 'ER_DUP_ENTRY')
         return res.status(400).json({ error: 'Este ciclo ya tiene un plan de entrenamiento' });
-      res.status(500).json({ error: err.message });
+      console.error('[planController.createEntrenamiento]', err);
+      res.status(500).json({ error: 'Error interno del servidor' });
     }
   },
 
@@ -31,7 +37,10 @@ const PlanController = {
     try {
       await PlanModel.updateEntrenamiento(req.params.id, req.body, req.user.sub);
       res.json({ message: 'Plan de entrenamiento actualizado' });
-    } catch (err) { res.status(500).json({ error: err.message }); }
+    } catch (err) {
+      console.error('[planController.updateEntrenamiento]', err);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
   },
 
   // ── RUTINAS ───────────────────────────────────────────────
@@ -47,7 +56,8 @@ const PlanController = {
     } catch (err) {
       if (err.code === 'ER_DUP_ENTRY')
         return res.status(400).json({ error: `Ya existe una rutina el día ${dia_numero} en este ciclo` });
-      res.status(500).json({ error: err.message });
+      console.error('[planController.createRutina]', err);
+      res.status(500).json({ error: 'Error interno del servidor' });
     }
   },
 
@@ -63,7 +73,8 @@ const PlanController = {
     } catch (err) {
       if (err.code === 'ER_DUP_ENTRY')
         return res.status(400).json({ error: 'Ese ejercicio ya está en la rutina o ese orden ya existe' });
-      res.status(500).json({ error: err.message });
+      console.error('[planController.addEjercicio]', err);
+      res.status(500).json({ error: 'Error interno del servidor' });
     }
   },
 
@@ -73,7 +84,10 @@ const PlanController = {
         req.params.id_rutina, req.params.id_ejercicio
       );
       res.json({ message: 'Ejercicio eliminado de la rutina' });
-    } catch (err) { res.status(500).json({ error: err.message }); }
+    } catch (err) {
+      console.error('[planController.removeEjercicio]', err);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
   },
 
   // ── PLAN NUTRICIONAL ──────────────────────────────────────
@@ -82,7 +96,10 @@ const PlanController = {
       const plan = await PlanModel.getNutricionalByCiclo(req.params.id_ciclo);
       if (!plan) return res.status(404).json({ error: 'Plan nutricional no encontrado para este ciclo' });
       res.json(plan);
-    } catch (err) { res.status(500).json({ error: err.message }); }
+    } catch (err) {
+      console.error('[planController.getNutricional]', err);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
   },
 
   createNutricional: async (req, res) => {
@@ -102,7 +119,8 @@ const PlanController = {
     } catch (err) {
       if (err.code === 'ER_DUP_ENTRY')
         return res.status(400).json({ error: 'Este ciclo ya tiene un plan nutricional' });
-      res.status(500).json({ error: err.message });
+      console.error('[planController.createNutricional]', err);
+      res.status(500).json({ error: 'Error interno del servidor' });
     }
   },
 
@@ -121,7 +139,8 @@ const PlanController = {
     } catch (err) {
       if (err.code === 'ER_DUP_ENTRY')
         return res.status(400).json({ error: 'Ese alimento ya está en esa comida del plan' });
-      res.status(500).json({ error: err.message });
+      console.error('[planController.addAlimento]', err);
+      res.status(500).json({ error: 'Error interno del servidor' });
     }
   },
 };

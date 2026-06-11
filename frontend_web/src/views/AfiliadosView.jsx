@@ -75,7 +75,6 @@ export default function AfiliadosView() {
     // requireAuth permite todos los roles (Admin, Entrenador, Recepcionista).
     authAxios.get("/afiliados")
       .then(({ data }) => {
-        console.log('[AfiliadosView] Afiliados cargados:', data.length, '| rol:', role);
         setAfiliados(data);
       })
       .catch((err) => {

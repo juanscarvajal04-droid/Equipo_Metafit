@@ -5,12 +5,12 @@
 //               BUG-010 (error handler global ya no filtra stack traces — mantenido)
 'use strict';
 
-const express       = require('express');
-const cors          = require('cors');
-const rateLimit     = require('express-rate-limit');
-const swaggerUi     = require('swagger-ui-express');
-const swaggerSpec   = require('./config/swagger');
-const app           = express();
+const express = require('express');
+const cors = require('cors');
+const rateLimit = require('express-rate-limit');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
+const app = express();
 
 const IS_PROD = process.env.NODE_ENV === 'production';
 
@@ -42,7 +42,7 @@ app.use((req, res, next) => {
       if (!origin || ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
       callback(new Error(`CORS bloqueado para origen: ${origin}`));
     },
-    methods : ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
   })(req, res, next);
@@ -76,42 +76,42 @@ app.use((req, res, next) => {
 // ataques de fuerza bruta o generar DoS involuntario con carga alta.
 // Límite: 10 intentos por IP cada 15 minutos.
 const loginLimiter = rateLimit({
-  windowMs          : 15 * 60 * 1000,  // 15 minutos
-  max               : 10,               // máx. 10 intentos por ventana
-  standardHeaders   : true,             // expone RateLimit-* headers (RFC 6585)
-  legacyHeaders     : false,
-  message           : { error: 'Demasiados intentos de inicio de sesión. Intenta nuevamente en 15 minutos.' },
+  windowMs: 15 * 60 * 1000,  // 15 minutos
+  max: 10,               // máx. 10 intentos por ventana
+  standardHeaders: true,             // expone RateLimit-* headers (RFC 6585)
+  legacyHeaders: false,
+  message: { error: 'Demasiados intentos de inicio de sesión. Intenta nuevamente en 15 minutos.' },
   skipSuccessfulRequests: true,         // los logins exitosos no cuentan contra el límite
 });
 
 // ── Rutas ──────────────────────────────────────────────────────
-const authRoutes      = require('./routes/authRoutes');
-const usuarioRoutes   = require('./routes/usuarioRoutes');
-const afiliadoRoutes  = require('./routes/afiliadoRoutes');
-const planRoutes      = require('./routes/planRoutes');
-const catalogoRoutes  = require('./routes/catalogoRoutes');
+const authRoutes = require('./routes/authRoutes');
+const usuarioRoutes = require('./routes/usuarioRoutes');
+const afiliadoRoutes = require('./routes/afiliadoRoutes');
+const planRoutes = require('./routes/planRoutes');
+const catalogoRoutes = require('./routes/catalogoRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 
 // BUG-005: El rate limiter se aplica SOLO al endpoint de login
-app.use('/',           loginLimiter, authRoutes);   // POST /login (con rate limit)
-app.use('/usuarios',   usuarioRoutes);              // GET/POST/PATCH/DELETE /usuarios
-app.use('/afiliados',  afiliadoRoutes);             // CRUD afiliados + ciclos + progreso
-app.use('/planes',     planRoutes);                 // Planes entrenamiento y nutricional
-app.use('/catalogo',   catalogoRoutes);             // GET /catalogo/ejercicios|alimentos|restricciones
-app.use('/dashboard',  dashboardRoutes);            // GET /dashboard/kpis
+app.use('/', loginLimiter, authRoutes);   // POST /login (con rate limit)
+app.use('/usuarios', usuarioRoutes);              // GET/POST/PATCH/DELETE /usuarios
+app.use('/afiliados', afiliadoRoutes);             // CRUD afiliados + ciclos + progreso
+app.use('/planes', planRoutes);                 // Planes entrenamiento y nutricional
+app.use('/catalogo', catalogoRoutes);             // GET /catalogo/ejercicios|alimentos|restricciones
+app.use('/dashboard', dashboardRoutes);            // GET /dashboard/kpis
 
 // ── Swagger UI — /api-docs y /swagger (alias) ────────────────
 const swaggerSetup = swaggerUi.setup(swaggerSpec, {
   customSiteTitle: 'MetaFit API Docs',
   swaggerOptions: {
-    persistAuthorization : true,
+    persistAuthorization: true,
     displayRequestDuration: true,
-    filter               : true,
-    tryItOutEnabled      : true,
+    filter: true,
+    tryItOutEnabled: true,
   },
 });
 app.use('/api-docs', swaggerUi.serve, swaggerSetup);
-app.use('/swagger',  swaggerUi.serve, swaggerSetup);  // alias amigable
+app.use('/swagger', swaggerUi.serve, swaggerSetup);  // alias amigable
 
 // Endpoint que sirve el JSON crudo de la spec (para Postman, etc.)
 app.get('/api-docs.json', (req, res) => {

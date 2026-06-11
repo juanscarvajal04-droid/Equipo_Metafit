@@ -1,4 +1,6 @@
 // controllers/catalogoController.js
+// Hardened: BUG-010 — todos los catch usan log interno + mensaje genérico al cliente.
+'use strict';
 const CatalogoModel = require('../models/catalogoModel');
 
 const CatalogoController = {
@@ -8,7 +10,10 @@ const CatalogoController = {
     try {
       const data = await CatalogoModel.getAllEjercicios();
       res.json(data);
-    } catch (err) { res.status(500).json({ error: err.message }); }
+    } catch (err) {
+      console.error('[catalogoController.getAllEjercicios]', err);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
   },
 
   createEjercicio: async (req, res) => {
@@ -21,7 +26,8 @@ const CatalogoController = {
     } catch (err) {
       if (err.code === 'ER_DUP_ENTRY')
         return res.status(400).json({ error: 'Ya existe un ejercicio con ese nombre' });
-      res.status(500).json({ error: err.message });
+      console.error('[catalogoController.createEjercicio]', err);
+      res.status(500).json({ error: 'Error interno del servidor' });
     }
   },
 
@@ -30,7 +36,10 @@ const CatalogoController = {
     try {
       const data = await CatalogoModel.getAllAlimentos();
       res.json(data);
-    } catch (err) { res.status(500).json({ error: err.message }); }
+    } catch (err) {
+      console.error('[catalogoController.getAllAlimentos]', err);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
   },
 
   createAlimento: async (req, res) => {
@@ -43,7 +52,8 @@ const CatalogoController = {
     } catch (err) {
       if (err.code === 'ER_DUP_ENTRY')
         return res.status(400).json({ error: 'Ya existe un alimento con ese nombre' });
-      res.status(500).json({ error: err.message });
+      console.error('[catalogoController.createAlimento]', err);
+      res.status(500).json({ error: 'Error interno del servidor' });
     }
   },
 
@@ -52,7 +62,10 @@ const CatalogoController = {
     try {
       const data = await CatalogoModel.getAllRestricciones();
       res.json(data);
-    } catch (err) { res.status(500).json({ error: err.message }); }
+    } catch (err) {
+      console.error('[catalogoController.getAllRestricciones]', err);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
   },
 };
 
