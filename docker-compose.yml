@@ -1,0 +1,143 @@
+# ============================================================
+# MetaFit — Orquestación de Servicios
+# Archivo: /docker-compose.yml  (raíz del proyecto)
+# Uso:     docker compose up --build
+#
+# FIX: volumen de DB apunta ahora a ./database/ (carpeta completa),
+#      no a un archivo individual. Docker ejecuta todos los .sql
+#      dentro de /docker-entrypoint-initdb.d/ en orden LEXICOGRÁFICO:
+#        01_schema.sql  -> CREATE TABLE (primero)
+#        02_seed.sql    -> INSERT INTO  (segundo, después de crear tablas)
+# ============================================================
+
+services:
+
+  # ──────────────────────────────────────────────────────────
+  # SERVICIO 1: Base de Datos MySQL 8
+  # ──────────────────────────────────────────────────────────
+  db:
+    image: mysql:8.0
+    container_name: metafit_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      # Forzar utf8mb4 desde arranque para evitar problemas de encoding
+      MYSQL_INITDB_SKIP_TZINFO: "true"
+    ports:
+      - "3306:3306"
+    volumes:
+      # FIX: se monta la CARPETA completa (no un archivo individual).
+      # Docker ejecuta TODOS los .sql en orden lexicográfico:
+      #   01_schema.sql → primero (DDL: CREATE TABLE)
+      #   02_seed.sql   → segundo (DML: INSERT INTO)
+      # Los scripts solo se ejecutan si el volumen de datos está vacío
+      # (primer arranque). Para re-ejecutarlos: docker compose down -v
+      - ./database:/docker-entrypoint-initdb.d:ro
+      # Persistencia de datos entre reinicios
+      - metafit_db_data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks:
+      - metafit_net
+
+  # ──────────────────────────────────────────────────────────
+  # SERVICIO 2: Backend Node.js
+  # ──────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: metafit_backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: ${PORT}
+      DB_HOST: db # <- nombre del servicio Docker, NO localhost
+      DB_PORT: 3306
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-8h}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+    ports:
+      - "${PORT}:${PORT}"
+    depends_on:
+      db:
+        condition: service_healthy # espera a que MySQL esté listo y responda ping
+    networks:
+      - metafit_net
+
+  # ──────────────────────────────────────────────────────────
+  # SERVICIO 3: Frontend React/Vite
+  # ──────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend_web
+      dockerfile: Dockerfile
+    container_name: metafit_frontend
+    restart: unless-stopped
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      # URL pública del backend accesible desde el navegador del host
+      - VITE_API_URL=http://localhost:${PORT}
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend_web:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - metafit_net
+
+  # ──────────────────────────────────────────────────────────
+  # SERVICIO 4: phpMyAdmin
+  # Interfaz web para auditar visualmente la base de datos MySQL
+  # Acceso: http://localhost:8080
+  # Usuario: root  |  Contraseña: valor de DB_PASSWORD en .env
+  # ──────────────────────────────────────────────────────────
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: metafit_phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db          # <- nombre exacto del servicio MySQL en esta red
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "8080:80"           # phpMyAdmin escucha en el 80 interno; lo exponemos en el 8080 local
+    depends_on:
+      db:
+        condition: service_healthy  # arranca solo cuando MySQL ya responde el healthcheck
+    networks:
+      - metafit_net
+
+# ──────────────────────────────────────────────────────────
+# VOLUMES y NETWORKS
+# ──────────────────────────────────────────────────────────
+volumes:
+  metafit_db_data:
+    # Para borrar el volumen y re-inicializar la DB desde cero:
+    # docker compose down -v && docker compose up --build
+
+networks:
+  metafit_net:
+    driver: bridge
+
+# Rutas
+# Abre ahora tu documentación:
+# http://localhost:3001/swagger
+# http://localhost:3001/api-docs
+
+# Frontend
+# http://localhost:5173/
+
+# phpMyAdmin (auditoría visual de la DB)
+# http://localhost:8080
+# Usuario: root  |  Contraseña: la definida en DB_PASSWORD del .env
