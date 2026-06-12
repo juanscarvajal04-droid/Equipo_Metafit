@@ -1,9 +1,7 @@
 import { createContext, useContext, useRef, useState } from "react";
-import axios from "axios";
+import api, { loginRequest } from "../services/api";
 
 const AuthContext = createContext(null);
-
-const BASE_URL = "http://localhost:3001";
 
 /** Limpia y valida el user guardado en localStorage. Si está corrupto, retorna null. */
 const loadStoredUser = () => {
@@ -29,29 +27,16 @@ export function AuthProvider({ children }) {
   const [user,  setUser]  = useState(() => loadStoredUser());
   const [token, setToken] = useState(() => localStorage.getItem("metafit_token") || null);
 
-  // authAxios estable (no se recrea en cada render)
-  const axiosRef = useRef(null);
-  if (!axiosRef.current) {
-    axiosRef.current = axios.create({ baseURL: BASE_URL });
-  }
-
-  // Interceptor: inyecta el token actual en cada petición
-  axiosRef.current.interceptors.request.handlers = [];   // limpiar handlers duplicados
-  axiosRef.current.interceptors.request.use((config) => {
-    const t = localStorage.getItem("metafit_token");
-    if (t) config.headers.Authorization = `Bearer ${t}`;
-    return config;
-  });
+  // authAxios estable (reutiliza la instancia de api.js)
+  const axiosRef = useRef(api);
 
   /**
-   * Login contra el servidor custom (server.cjs).
+   * Login contra el backend real (Node.js → MySQL).
    * Retorna el objeto user plano: { id, email, role, nombres, apellidos }
    */
   const login = async ({ correo, contrasena }) => {
-    const response = await axios.post(`${BASE_URL}/login`, {
-      email:    correo,
-      password: contrasena,
-    });
+    // loginRequest usa api.js → VITE_API_URL/login
+    const response = await loginRequest(correo, contrasena);
 
     const { accessToken, user: userData } = response.data;
 
@@ -85,4 +70,4 @@ export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) throw new Error("useAuth debe usarse dentro de un <AuthProvider>");
   return context;
-}
+}
