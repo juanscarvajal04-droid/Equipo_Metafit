@@ -101,33 +101,55 @@ export default function AfiliadosView() {
     setSavingNew(true);
     setNewError("");
     try {
-      const newId    = Date.now();
-      // Parsear las restricciones médicas desde el textarea (una por línea)
-      const lineasRestriccion = (formNuevo.restricciones_medicas || "")
-        .split("\n")
-        .map((l) => l.trim())
-        .filter(Boolean)
-        .map((nombre, i) => ({ id_restriccion: i + 1, nombre, tipo: "Enfermedad", efecto_relevante: "" }));
+      // ── FIX: construir payload limpio con los nombres exactos del schema MySQL ──
+      // - Se elimina `_id` (era campo MongoDB, ya no aplica)
+      // - `estado` → `estado_afiliacion` (nombre real en tabla AFILIADO)
+      // - `fecha_nacimiento` ya llega en YYYY-MM-DD desde <input type="date">,
+      //   pero si viene en otro formato lo normalizamos aquí también
+      // - `disponibilidad_semanal_dias` se mapea al campo MySQL
+      //   (en la tabla CICLO es `disponibilidad_dias`; el backend lo maneja)
+      // - La contraseña es generada automáticamente en el backend: MF_{documento}@2025
 
-      const payload  = {
-        ...formNuevo,
-        _id: newId,
-        estatura_cm: parseFloat(formNuevo.estatura_cm) || 0,
-        disponibilidad_semanal_dias: parseInt(formNuevo.disponibilidad_semanal_dias) || 3,
-        fecha_registro: new Date().toISOString().split("T")[0],
-        fecha_ultima_modificacion: null,
-        registrado_por_id: getId(user) || 4,
-        restricciones: lineasRestriccion,
-        ciclos: [],
+      const fn = formNuevo.fecha_nacimiento
+        ? String(formNuevo.fecha_nacimiento).split("T")[0].split(" ")[0]
+        : null;
+
+      const payload = {
+        nombres:              formNuevo.nombres,
+        apellidos:            formNuevo.apellidos,
+        correo:               formNuevo.correo,
+        telefono:             formNuevo.telefono || "",
+        direccion:            formNuevo.direccion || "",
+        documento:            formNuevo.documento,
+        fecha_nacimiento:     fn,
+        sexo:                 formNuevo.sexo,
+        estatura_cm:          parseFloat(formNuevo.estatura_cm) || null,
+        estado_afiliacion:    formNuevo.estado || "Activo",
+        // Campos de ciclo (no van a AFILIADO directamente, el backend los ignora por ahora)
+        objetivo_fisico:              formNuevo.objetivo_fisico,
+        grupo_muscular_prioritario:   formNuevo.grupo_muscular_prioritario,
+        nivel_experiencia:            formNuevo.nivel_experiencia,
+        disponibilidad_semanal_dias:  parseInt(formNuevo.disponibilidad_semanal_dias) || 3,
       };
-      delete payload.restricciones_medicas; // campo UI, no va a la BD
+
       const { data } = await authAxios.post("/afiliados", payload);
-      setAfiliados((prev) => [...prev, data]);
+      // El backend devuelve { id, message } — construimos el objeto para el estado local
+      const nuevoAfiliado = {
+        ...payload,
+        id_usuario: data.id,
+        estado_cuenta: payload.estado_afiliacion,
+        restricciones: [],
+        ciclo_activo: null,
+      };
+      setAfiliados((prev) => [...prev, nuevoAfiliado]);
       setCrearModal(false);
       setFormNuevo(FORM_NUEVO);
-      showToast(`✅ ${nombreCompleto(data)} creado correctamente`);
-    } catch {
-      setNewError("Error al crear. Verifica el servidor.");
+      showToast(`✅ ${nombreCompleto(nuevoAfiliado)} creado correctamente`);
+    } catch (err) {
+      // ── FIX: mostrar el error real del backend, no un string genérico ──
+      const msg = err?.response?.data?.error || err.message || "Error desconocido";
+      console.error('[AfiliadosView.handleCrear]', err.response?.data || err);
+      setNewError(`Error al crear: ${msg}`);
     } finally {
       setSavingNew(false);
     }

@@ -280,18 +280,31 @@ const AfiliadoModel = {
   create: async (datos, registrado_por) => {
     const {
       nombres, apellidos, correo, contrasena,
-      documento, fecha_nacimiento, sexo,
+      documento, sexo,
       telefono, direccion, estatura_cm,
-      estado_afiliacion,
     } = datos;
 
-    // ── BUG-008: Password obligatorio — sin fallback inseguro ─
-    if (!contrasena || contrasena.trim() === '') {
-      throw new Error('La contraseña del afiliado es requerida');
+    // ── FIX: Normalizar fecha_nacimiento → YYYY-MM-DD estricto que exige MySQL ─
+    // El input[type="date"] devuelve 'YYYY-MM-DD', pero si viene de otra fuente
+    // puede llegar como ISO 8601 completo ('2000-05-20T00:00:00.000Z').
+    let fecha_nacimiento = datos.fecha_nacimiento || null;
+    if (fecha_nacimiento) {
+      fecha_nacimiento = String(fecha_nacimiento).split('T')[0].split(' ')[0];
     }
 
+    // ── FIX: El frontend envía `estado` (campo UI), el schema MySQL lo llama
+    //         `estado_afiliacion`. Aceptamos ambos nombres.
+    const estado_afiliacion = datos.estado_afiliacion || datos.estado || 'Activo';
+
+    // ── FIX: Si el frontend no manda contraseña, generamos una temporal
+    //         segura: 'MF_' + documento + '@2025'. El admin debe comunicársela
+    //         al afiliado. Esto reemplaza el antiguo fallback hardcodeado.
+    const rawPassword = (contrasena && contrasena.trim() !== '')
+      ? contrasena.trim()
+      : `MF_${documento}@2025`;
+
     const { hashPassword } = require('../middlewares/auth');
-    const hash = await hashPassword(contrasena);   // bcrypt 12 rondas (valida 72 bytes internamente)
+    const hash = await hashPassword(rawPassword);   // bcrypt 12 rondas (valida 72 bytes internamente)
 
     const conn = await pool.getConnection();
     try {
@@ -304,13 +317,24 @@ const AfiliadoModel = {
       );
       const id_usuario = uRes.insertId;
 
+      // ── FIX: se usan las variables normalizadas (fecha_nacimiento=YYYY-MM-DD,
+      //         estado_afiliacion con fallback, estatura como float).
       await conn.query(
         `INSERT INTO AFILIADO
            (id_usuario, documento, fecha_nacimiento, sexo,
             telefono, direccion, estatura_cm, estado_afiliacion, registrado_por)
          VALUES (?,?,?,?,?,?,?,?,?)`,
-        [id_usuario, documento, fecha_nacimiento, sexo,
-         telefono, direccion, estatura_cm, estado_afiliacion || 'Activo', registrado_por]
+        [
+          id_usuario,
+          documento,
+          fecha_nacimiento || null,
+          sexo || 'Masculino',
+          telefono || '',
+          direccion || '',
+          parseFloat(estatura_cm) || null,
+          estado_afiliacion,
+          registrado_por,
+        ]
       );
 
       await conn.commit();

@@ -39,7 +39,9 @@ const AfiliadoController = {
   },
 
   create: async (req, res) => {
-    if (!req.body.nombres_afiliado || !req.body.documento_afiliado)
+    // ── FIX: Los campos en USUARIO/AFILIADO son `nombres` y `documento`,
+    //         no `nombres_afiliado`/`documento_afiliado` (vestigio del schema NoSQL).
+    if (!req.body.nombres || !req.body.documento)
       return res.status(400).json({ error: 'Nombre y documento son requeridos' });
     try {
       const id = await AfiliadoModel.create(req.body, req.user.sub);

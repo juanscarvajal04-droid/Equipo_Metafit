@@ -96,6 +96,28 @@ services:
     networks:
       - metafit_net
 
+  # ──────────────────────────────────────────────────────────
+  # SERVICIO 4: phpMyAdmin
+  # Interfaz web para auditar visualmente la base de datos MySQL
+  # Acceso: http://localhost:8080
+  # Usuario: root  |  Contraseña: valor de DB_PASSWORD en .env
+  # ──────────────────────────────────────────────────────────
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: metafit_phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db          # <- nombre exacto del servicio MySQL en esta red
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "8080:80"           # phpMyAdmin escucha en el 80 interno; lo exponemos en el 8080 local
+    depends_on:
+      db:
+        condition: service_healthy  # arranca solo cuando MySQL ya responde el healthcheck
+    networks:
+      - metafit_net
+
 # ──────────────────────────────────────────────────────────
 # VOLUMES y NETWORKS
 # ──────────────────────────────────────────────────────────
@@ -113,5 +135,9 @@ networks:
 # http://localhost:3001/swagger
 # http://localhost:3001/api-docs
 
-#fronten
-#http://localhost:5173/
+# Frontend
+# http://localhost:5173/
+
+# phpMyAdmin (auditoría visual de la DB)
+# http://localhost:8080
+# Usuario: root  |  Contraseña: la definida en DB_PASSWORD del .env
