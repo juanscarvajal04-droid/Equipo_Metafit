@@ -2,29 +2,28 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-const getId          = (doc) => doc._id ?? doc.id;
-const nombreCompleto = (a)   => [a.nombres, a.apellidos].filter(Boolean).join(" ") || "Sin nombre";
-const inicial        = (a)   => (a.nombres || a.correo || "?")[0].toUpperCase();
-const cicloActivo    = (a)   => a.ciclos?.find((c) => c.activo) || null;
+import { getId, nombreCompleto, inicial, cicloActivo, toDateInput } from "../utils/afiliadoHelpers";
+import { useToast } from "../hooks/useToast";
+import AfiliadoVerModal from "../components/AfiliadoVerModal";
+import AfiliadoEditModal from "../components/AfiliadoEditModal";
+import AfiliadoCrearModal from "../components/AfiliadoCrearModal";
 
 const OBJETIVO_CONFIG = {
   "Pérdida de grasa": { icono: "🔥", color: "#e94560" },
-  "Aumento de masa":  { icono: "💪", color: "#0d6efd" },
-  "Mantenimiento":    { icono: "⚖️", color: "#198754" },
+  "Aumento de masa": { icono: "💪", color: "#0d6efd" },
+  "Mantenimiento": { icono: "⚖️", color: "#198754" },
 };
 
-const OBJETIVOS  = Object.keys(OBJETIVO_CONFIG);
-const NIVELES    = ["Principiante", "Intermedio", "Avanzado"];
-const ESTADOS    = ["Activo", "Inactivo", "Pendiente"];
-const PLANES     = ["Básico", "Premium", "VIP"];
-const SEXOS      = ["Masculino", "Femenino", "Otro"];
-const MUSCULOS   = ["Pecho", "Espalda", "Piernas", "Glúteos", "Hombros", "Bíceps", "Tríceps", "Abdomen"];
+const OBJETIVOS = Object.keys(OBJETIVO_CONFIG);
+const NIVELES = ["Principiante", "Intermedio", "Avanzado"];
+const ESTADOS = ["Activo", "Inactivo", "Pendiente"];
+const PLANES = ["Básico", "Premium", "VIP"];
+const SEXOS = ["Masculino", "Femenino", "Otro"];
+const MUSCULOS = ["Pecho", "Espalda", "Piernas", "Glúteos", "Hombros", "Bíceps", "Tríceps", "Abdomen"];
 
 const badgeEstado = (e) => {
   const map = { activo: "success", inactivo: "danger", pendiente: "warning" };
-  const c   = map[(e || "").toLowerCase()] || "secondary";
+  const c = map[(e || "").toLowerCase()] || "secondary";
   return <span className={`badge bg-${c}`}>{e || "—"}</span>;
 };
 
@@ -40,51 +39,54 @@ const FORM_NUEVO = {
 
 // ── Pestañas por rol ──────────────────────────────────────────────────────────
 const TABS_RECEPCIONISTA = ["Estado de Cuenta"];
-const TABS_ENTRENADOR    = ["Progreso Físico", "Ciclo Activo"];
-const TABS_ADMIN         = ["Estado de Cuenta", "Progreso Físico", "Ciclo Activo"];
+const TABS_ENTRENADOR = ["Progreso Físico", "Ciclo Activo"];
+const TABS_ADMIN = ["Estado de Cuenta", "Progreso Físico", "Ciclo Activo"];
 
 export default function AfiliadosView() {
   const { user, logout, authAxios } = useAuth();
   const navigate = useNavigate();
-  const role     = user?.role || "Recepcionista";
+  const role = user?.role || "Recepcionista";
 
-  const [afiliados,  setAfiliados]  = useState([]);
-  const [loading,    setLoading]    = useState(true);
-  const [error,      setError]      = useState("");
-  const [busqueda,   setBusqueda]   = useState("");
-  const [toast,      setToast]      = useState("");
+  const [afiliados, setAfiliados] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [busqueda, setBusqueda] = useState("");
+  const { toast, showToast } = useToast();
 
   // Modales
-  const [verModal,    setVerModal]    = useState(null);
-  const [verTab,      setVerTab]      = useState(0);
-  const [editModal,   setEditModal]   = useState(null);
-  const [formEdit,    setFormEdit]    = useState(FORM_NUEVO);
-  const [savingEdit,  setSavingEdit]  = useState(false);
-  const [editError,   setEditError]   = useState("");
-  const [crearModal,  setCrearModal]  = useState(false);
-  const [formNuevo,   setFormNuevo]   = useState(FORM_NUEVO);
-  const [savingNew,   setSavingNew]   = useState(false);
-  const [newError,    setNewError]    = useState("");
+  const [verModal, setVerModal] = useState(null);
+  const [verTab, setVerTab] = useState(0);
+  const [editModal, setEditModal] = useState(null);
+  const [formEdit, setFormEdit] = useState(FORM_NUEVO);
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [editError, setEditError] = useState("");
+  const [crearModal, setCrearModal] = useState(false);
+  const [formNuevo, setFormNuevo] = useState(FORM_NUEVO);
+  const [savingNew, setSavingNew] = useState(false);
+  const [newError, setNewError] = useState("");
 
   // ── Carga ──────────────────────────────────────────────────────────────────
   useEffect(() => {
-    authAxios.get("/660/afiliados")
-      .then(({ data }) => setAfiliados(data))
+    // FIX: la ruta correcta es /afiliados. /660/afiliados no existe.
+    // requireAuth permite todos los roles (Admin, Entrenador, Recepcionista).
+    authAxios.get("/afiliados")
+      .then(({ data }) => {
+        setAfiliados(data);
+      })
       .catch((err) => {
+        console.error('[AfiliadosView] Error:', err.response?.status, err.response?.data || err.message);
         if (err?.response?.status === 401) { logout(); navigate("/login"); }
         else setError("No se pudieron cargar los afiliados.");
       })
       .finally(() => setLoading(false));
   }, []);
 
-  const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(""), 3000); };
-
   // ── Filtrado ───────────────────────────────────────────────────────────────
   const filtrados = afiliados.filter((a) => {
     const t = busqueda.toLowerCase();
     return nombreCompleto(a).toLowerCase().includes(t) ||
-           (a.correo || "").toLowerCase().includes(t)  ||
-           String(a.documento || "").includes(t);
+      (a.correo || "").toLowerCase().includes(t) ||
+      String(a.documento || "").includes(t);
   });
 
   // ── Crear afiliado (Recepcionista / Admin) ─────────────────────────────────
@@ -93,33 +95,55 @@ export default function AfiliadosView() {
     setSavingNew(true);
     setNewError("");
     try {
-      const newId    = Date.now();
-      // Parsear las restricciones médicas desde el textarea (una por línea)
-      const lineasRestriccion = (formNuevo.restricciones_medicas || "")
-        .split("\n")
-        .map((l) => l.trim())
-        .filter(Boolean)
-        .map((nombre, i) => ({ id_restriccion: i + 1, nombre, tipo: "Enfermedad", efecto_relevante: "" }));
+      // ── FIX: construir payload limpio con los nombres exactos del schema MySQL ──
+      // - Se elimina `_id` (era campo MongoDB, ya no aplica)
+      // - `estado` → `estado_afiliacion` (nombre real en tabla AFILIADO)
+      // - `fecha_nacimiento` ya llega en YYYY-MM-DD desde <input type="date">,
+      //   pero si viene en otro formato lo normalizamos aquí también
+      // - `disponibilidad_semanal_dias` se mapea al campo MySQL
+      //   (en la tabla CICLO es `disponibilidad_dias`; el backend lo maneja)
+      // - La contraseña es generada automáticamente en el backend: MF_{documento}@2025
 
-      const payload  = {
-        ...formNuevo,
-        _id: newId,
-        estatura_cm: parseFloat(formNuevo.estatura_cm) || 0,
+      const fn = formNuevo.fecha_nacimiento
+        ? String(formNuevo.fecha_nacimiento).split("T")[0].split(" ")[0]
+        : null;
+
+      const payload = {
+        nombres: formNuevo.nombres,
+        apellidos: formNuevo.apellidos,
+        correo: formNuevo.correo,
+        telefono: formNuevo.telefono || "",
+        direccion: formNuevo.direccion || "",
+        documento: formNuevo.documento,
+        fecha_nacimiento: fn,
+        sexo: formNuevo.sexo,
+        estatura_cm: parseFloat(formNuevo.estatura_cm) || null,
+        estado_afiliacion: formNuevo.estado || "Activo",
+        // Campos de ciclo (no van a AFILIADO directamente, el backend los ignora por ahora)
+        objetivo_fisico: formNuevo.objetivo_fisico,
+        grupo_muscular_prioritario: formNuevo.grupo_muscular_prioritario,
+        nivel_experiencia: formNuevo.nivel_experiencia,
         disponibilidad_semanal_dias: parseInt(formNuevo.disponibilidad_semanal_dias) || 3,
-        fecha_registro: new Date().toISOString().split("T")[0],
-        fecha_ultima_modificacion: null,
-        registrado_por_id: getId(user) || 4,
-        restricciones: lineasRestriccion,
-        ciclos: [],
       };
-      delete payload.restricciones_medicas; // campo UI, no va a la BD
+
       const { data } = await authAxios.post("/afiliados", payload);
-      setAfiliados((prev) => [...prev, data]);
+      // El backend devuelve { id, message } — construimos el objeto para el estado local
+      const nuevoAfiliado = {
+        ...payload,
+        id_usuario: data.id,
+        estado_cuenta: payload.estado_afiliacion,
+        restricciones: [],
+        ciclo_activo: null,
+      };
+      setAfiliados((prev) => [...prev, nuevoAfiliado]);
       setCrearModal(false);
       setFormNuevo(FORM_NUEVO);
-      showToast(`✅ ${nombreCompleto(data)} creado correctamente`);
-    } catch {
-      setNewError("Error al crear. Verifica el servidor.");
+      showToast(`✅ ${nombreCompleto(nuevoAfiliado)} creado correctamente`);
+    } catch (err) {
+      // ── FIX: mostrar el error real del backend, no un string genérico ──
+      const msg = err?.response?.data?.error || err.message || "Error desconocido";
+      console.error('[AfiliadosView.handleCrear]', err.response?.data || err);
+      setNewError(`Error al crear: ${msg}`);
     } finally {
       setSavingNew(false);
     }
@@ -133,12 +157,16 @@ export default function AfiliadosView() {
       nombres: a.nombres || "", apellidos: a.apellidos || "",
       correo: a.correo || "", telefono: a.telefono || "",
       direccion: a.direccion || "", documento: a.documento || "",
-      fecha_nacimiento: a.fecha_nacimiento || "", sexo: a.sexo || "Masculino",
-      estatura_cm: a.estatura_cm || "", objetivo_fisico: a.objetivo_fisico || "Pérdida de grasa",
+      // FIX: convertir ISO a YYYY-MM-DD para que <input type="date"> lo muestre
+      fecha_nacimiento: toDateInput(a.fecha_nacimiento),
+      sexo: a.sexo || "Masculino",
+      estatura_cm: a.estatura_cm || "",
+      objetivo_fisico: a.objetivo_fisico || "Pérdida de grasa",
       grupo_muscular_prioritario: a.grupo_muscular_prioritario || "",
       nivel_experiencia: a.nivel_experiencia || "Principiante",
       disponibilidad_semanal_dias: a.disponibilidad_semanal_dias || 3,
-      estado: a.estado || "Activo",
+      // FIX: el campo real del backend es estado_afiliacion
+      estado_afiliacion: a.estado_afiliacion || "Activo",
       plan_membresia: a.plan_membresia || "Básico",
     });
   };
@@ -149,12 +177,17 @@ export default function AfiliadosView() {
     setEditError("");
     try {
       const id = getId(editModal);
-      const { data } = await authAxios.patch(`/afiliados/${id}`, formEdit);
-      setAfiliados((prev) => prev.map((a) => getId(a) === id ? data : a));
+      await authAxios.patch(`/afiliados/${id}`, formEdit);
+      // FIX: el backend devuelve {message}, NO el afiliado actualizado.
+      // Mergeamos formEdit sobre el objeto existente para reflejar los cambios.
+      const actualizado = { ...editModal, ...formEdit };
+      setAfiliados((prev) => prev.map((a) => getId(a) === id ? actualizado : a));
       setEditModal(null);
-      showToast(`✅ ${nombreCompleto(data)} actualizado`);
-    } catch {
-      setEditError("Error al guardar. Verifica el servidor.");
+      showToast(`✅ ${nombreCompleto(actualizado)} actualizado`);
+    } catch (err) {
+      const msg = err?.response?.data?.error || err.message || "Error desconocido";
+      console.error('[AfiliadosView.guardarEdicion]', err);
+      setEditError(`Error al guardar: ${msg}`);
     } finally {
       setSavingEdit(false);
     }
@@ -173,16 +206,16 @@ export default function AfiliadosView() {
   };
 
   const tabs = role === "Recepcionista" ? TABS_RECEPCIONISTA
-             : role === "Entrenador"    ? TABS_ENTRENADOR
-             :                           TABS_ADMIN;
+    : role === "Entrenador" ? TABS_ENTRENADOR
+      : TABS_ADMIN;
 
   return (
     <AppLayout>
       {/* Toast */}
-      {toast && (
+      {toast.msg && (
         <div className="position-fixed bottom-0 end-0 m-4 alert alert-dark shadow-lg py-2 px-3"
           style={{ zIndex: 9999, minWidth: 280 }}>
-          {toast}
+          {toast.msg}
         </div>
       )}
 
@@ -214,7 +247,7 @@ export default function AfiliadosView() {
               value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
           </div>
           <div className="card-body p-0">
-            {error   && <div className="alert alert-danger m-3 py-2"><small>⚠️ {error}</small></div>}
+            {error && <div className="alert alert-danger m-3 py-2"><small>⚠️ {error}</small></div>}
             {loading && <div className="text-center py-5"><div className="spinner-border text-primary" /></div>}
             {!loading && !error && (
               <div className="mf-table-wrap">
@@ -226,7 +259,7 @@ export default function AfiliadosView() {
                       <th>Objetivo</th>
                       <th>Nivel</th>
                       {(role === "Recepcionista" || role === "Administrador") && <th>Plan</th>}
-                      {(role === "Entrenador"    || role === "Administrador") && <th>Ciclo activo</th>}
+                      {(role === "Entrenador" || role === "Administrador") && <th>Ciclo activo</th>}
                       <th className="col-estado">Estado</th>
                       <th className="col-acciones pe-3">Acciones</th>
                     </tr>
@@ -244,8 +277,10 @@ export default function AfiliadosView() {
                           <td>
                             <div className="d-flex align-items-center gap-2">
                               <div className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
-                                style={{ width: 36, height: 36, flexShrink: 0, fontSize: "0.8rem",
-                                  background: `hsl(${(getId(a) * 47) % 360},65%,55%)` }}>
+                                style={{
+                                  width: 36, height: 36, flexShrink: 0, fontSize: "0.8rem",
+                                  background: `hsl(${(getId(a) * 47) % 360},65%,55%)`
+                                }}>
                                 {inicial(a)}
                               </div>
                               <div>
@@ -320,16 +355,16 @@ export default function AfiliadosView() {
                 {/* Datos básicos */}
                 <div className="row g-2 mb-3">
                   {[
-                    { label: "Correo",     v: verModal.correo },
-                    { label: "Teléfono",   v: verModal.telefono },
-                    { label: "Documento",  v: verModal.documento },
-                    { label: "Sexo",       v: verModal.sexo },
+                    { label: "Correo", v: verModal.correo },
+                    { label: "Teléfono", v: verModal.telefono },
+                    { label: "Documento", v: verModal.documento },
+                    { label: "Sexo", v: verModal.sexo },
                     { label: "Nacimiento", v: verModal.fecha_nacimiento },
-                    { label: "Estatura",   v: verModal.estatura_cm ? `${verModal.estatura_cm} cm` : "—" },
-                    { label: "Objetivo",   v: verModal.objetivo_fisico },
-                    { label: "Nivel",      v: verModal.nivel_experiencia },
-                    { label: "Días/sem",   v: verModal.disponibilidad_semanal_dias },
-                    { label: "Plan",       v: verModal.plan_membresia || "Básico" },
+                    { label: "Estatura", v: verModal.estatura_cm ? `${verModal.estatura_cm} cm` : "—" },
+                    { label: "Objetivo", v: verModal.objetivo_fisico },
+                    { label: "Nivel", v: verModal.nivel_experiencia },
+                    { label: "Días/sem", v: verModal.disponibilidad_semanal_dias },
+                    { label: "Plan", v: verModal.plan_membresia || "Básico" },
                   ].map((f) => (
                     <div key={f.label} className="col-6 col-md-4">
                       <small className="text-muted d-block text-uppercase fw-semibold" style={{ fontSize: "0.68rem" }}>{f.label}</small>
@@ -402,9 +437,9 @@ export default function AfiliadosView() {
                         <div className="row g-2 text-center">
                           {[
                             { label: "% Grasa", v: `${p.porcentaje_grasa}%` },
-                            { label: "Cintura",  v: `${p.medidas_cm?.cintura} cm` },
-                            { label: "Brazo",    v: `${p.medidas_cm?.brazo} cm` },
-                            { label: "Pierna",   v: `${p.medidas_cm?.pierna} cm` },
+                            { label: "Cintura", v: `${p.medidas_cm?.cintura} cm` },
+                            { label: "Brazo", v: `${p.medidas_cm?.brazo} cm` },
+                            { label: "Pierna", v: `${p.medidas_cm?.pierna} cm` },
                           ].map((f) => (
                             <div key={f.label} className="col-3">
                               <small className="text-muted d-block" style={{ fontSize: "0.68rem" }}>{f.label}</small>
@@ -487,11 +522,11 @@ export default function AfiliadosView() {
                   {editError && <div className="alert alert-danger py-2"><small>⚠️ {editError}</small></div>}
                   <div className="row g-3">
                     {[
-                      { label: "Nombres",   key: "nombres",   type: "text"   },
-                      { label: "Apellidos", key: "apellidos", type: "text"   },
-                      { label: "Correo",    key: "correo",    type: "email"  },
-                      { label: "Teléfono", key: "telefono",   type: "text"   },
-                      { label: "Documento", key: "documento", type: "text"   },
+                      { label: "Nombres", key: "nombres", type: "text" },
+                      { label: "Apellidos", key: "apellidos", type: "text" },
+                      { label: "Correo", key: "correo", type: "email" },
+                      { label: "Teléfono", key: "telefono", type: "text" },
+                      { label: "Documento", key: "documento", type: "text" },
                     ].map(({ label, key, type }) => (
                       <div key={key} className="col-md-6">
                         <label className="form-label small fw-semibold">{label}</label>
@@ -568,12 +603,12 @@ export default function AfiliadosView() {
                   <h6 className="fw-bold text-muted text-uppercase small mb-3">👤 Datos personales</h6>
                   <div className="row g-3 mb-4">
                     {[
-                      { label: "Nombres *",    key: "nombres",    type: "text",  required: true  },
-                      { label: "Apellidos *",  key: "apellidos",  type: "text",  required: true  },
-                      { label: "Email",        key: "correo",     type: "email", required: false },
-                      { label: "Teléfono",     key: "telefono",   type: "text",  required: false },
-                      { label: "DNI / Doc. *", key: "documento",  type: "text",  required: true  },
-                      { label: "Nacimiento",   key: "fecha_nacimiento", type: "date", required: false },
+                      { label: "Nombres *", key: "nombres", type: "text", required: true },
+                      { label: "Apellidos *", key: "apellidos", type: "text", required: true },
+                      { label: "Email", key: "correo", type: "email", required: false },
+                      { label: "Teléfono", key: "telefono", type: "text", required: false },
+                      { label: "DNI / Doc. *", key: "documento", type: "text", required: true },
+                      { label: "Nacimiento", key: "fecha_nacimiento", type: "date", required: false },
                     ].map(({ label, key, type, required }) => (
                       <div key={key} className="col-md-6">
                         <label className="form-label small fw-semibold">{label}</label>

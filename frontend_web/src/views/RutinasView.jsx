@@ -2,12 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-const getId          = (doc) => doc._id ?? doc.id;
-const nombreCompleto = (a)   => [a.nombres, a.apellidos].filter(Boolean).join(" ") || "Sin nombre";
-const inicial        = (a)   => (a.nombres || a.correo || "?")[0].toUpperCase();
-const cicloActivo    = (a)   => a.ciclos?.find((c) => c.activo) || null;
+import { getId, nombreCompleto, inicial, cicloActivo } from "../utils/afiliadoHelpers";
+import { useToast } from "../hooks/useToast";
 
 const NIVEL_COLOR = {
   Principiante: { bg: "#0ea5e922", text: "#0284c7", label: "Principiante" },
@@ -43,7 +39,7 @@ export default function RutinasView() {
   const [refreshing,  setRefreshing] = useState(false);
   const [error,       setError]      = useState("");
   const [busqueda,    setBusqueda]   = useState("");
-  const [toast,       setToast]      = useState({ msg: "", type: "success" });
+  const { toast, showToast }         = useToast();
 
   // Modal asignar rutina
   const [asignarModal, setAsignarModal] = useState(null);
@@ -61,24 +57,21 @@ export default function RutinasView() {
     esRefresh ? setRefreshing(true) : setLoading(true);
     setError("");
     try {
-      const { data } = await authAxios.get("/660/afiliados");
+      // FIX: ruta correcta /afiliados (no /660/afiliados)
+      const { data } = await authAxios.get("/afiliados");
       setAfiliados(data);
       if (esRefresh) showToast(`✅ Lista actualizada — ${data.length} afiliados`);
     } catch (err) {
+      console.error('[RutinasView] Error al cargar:', err.response?.status, err.response?.data || err.message);
       if (err?.response?.status === 401) { logout(); navigate("/login"); }
       else setError("No se pudieron cargar los afiliados.");
     } finally {
       esRefresh ? setRefreshing(false) : setLoading(false);
     }
-  }, [authAxios, logout, navigate]);
+  }, [authAxios, logout, navigate, showToast]);
 
   useEffect(() => { cargarAfiliados(); }, []);
 
-  // ── Helpers ────────────────────────────────────────────────────────────────
-  const showToast = (msg, type = "success") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast({ msg: "", type: "success" }), 3000);
-  };
 
   const filtrados = afiliados
     .filter((a) => {
@@ -123,46 +116,40 @@ export default function RutinasView() {
 
     setSaving(true); setAsigError("");
     try {
-      const id             = getId(asignarModal);
-      const ciclosActuales = asignarModal.ciclos || [];
-      const tieneCiclo     = !!cicloActivo(asignarModal);
-
-      // Desactivar ciclos anteriores
-      const ciclosActualizados = ciclosActuales.map((c) => ({ ...c, activo: false }));
-
-      const nuevoCiclo = {
-        numero_ciclo:       ciclosActualizados.length + 1,
+      const id = getId(asignarModal);
+      // FIX: el backend MySQL maneja ciclos en la tabla CICLO, no como array en JSON.
+      // Enviamos solo los datos del nuevo ciclo al endpoint correcto.
+      const payload = {
         fecha_inicio:       fechaInicio,
         fecha_fin:          fechaFin,
-        activo:             true,
-        fecha_creacion:     new Date().toISOString(),
         asignado_por_id:    getId(user),
-        plan_entrenamiento: {
-          es_automatico:       false,
-          rutina_base_id:      rutinaSelec.id,
-          nombre_rutina:       rutinaSelec.nombre,
-          enfoque:             rutinaSelec.enfoque,
-          dias_semana:         rutinaSelec.dias,
-          modificado_por_id:   getId(user),
-          observaciones:       null,
-          rutinas:             [],
-        },
-        plan_nutricional: null,
-        progreso_fisico:  [],
+        nombre_rutina:      rutinaSelec.nombre,
+        enfoque:            rutinaSelec.enfoque,
+        dias_semana:        rutinaSelec.dias,
       };
-
-      const payload = { ciclos: [...ciclosActualizados, nuevoCiclo] };
-
-      // 💾 PATCH siempre: json-server actualiza cualquier campo aunque sea nuevo.
-      // POST crea un registro DUPLICADO — nunca usar POST para actualizar.
-      const { data } = await authAxios.patch(`/afiliados/${id}`, payload);
-
-      setAfiliados((prev) => prev.map((a) => getId(a) === id ? data : a));
+      await authAxios.post(`/afiliados/ciclos`, {
+        id_afiliado: id,
+        ...payload,
+      });
+      // FIX: el backend devuelve {message}, NO el afiliado actualizado.
+      // Actualizamos el estado local mergeando el nuevo ciclo activo.
+      const nuevoCicloLocal = {
+        numero_ciclo:       (asignarModal.ciclo_activo?.numero_ciclo || 0) + 1,
+        fecha_inicio:       fechaInicio,
+        fecha_fin:          fechaFin,
+        plan_entrenamiento: { nombre_rutina: rutinaSelec.nombre, enfoque: rutinaSelec.enfoque, dias_semana: rutinaSelec.dias },
+        progreso_fisico:    [],
+      };
+      setAfiliados((prev) => prev.map((a) =>
+        getId(a) === id ? { ...a, ciclo_activo: nuevoCicloLocal } : a
+      ));
       setAsignarModal(null);
-      const accion = tieneCiclo ? "actualizada" : "asignada";
-      showToast(`✅ Rutina "${rutinaSelec.nombre}" ${accion} a ${nombreCompleto(data)}`);
-    } catch {
-      setAsigError("Error al guardar. Verifica el servidor.");
+      const accion = cicloActivo(asignarModal) ? "actualizada" : "asignada";
+      showToast(`✅ Rutina "${rutinaSelec.nombre}" ${accion} a ${nombreCompleto(asignarModal)}`);
+    } catch (err) {
+      const msg = err?.response?.data?.error || err.message || "Error desconocido";
+      console.error('[RutinasView.handleAsignar]', err);
+      setAsigError(`Error al guardar: ${msg}`);
     } finally {
       setSaving(false);
     }

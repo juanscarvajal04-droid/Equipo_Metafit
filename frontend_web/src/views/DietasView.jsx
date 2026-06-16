@@ -2,12 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-const getId          = (doc) => doc._id ?? doc.id;
-const nombreCompleto = (a)   => [a.nombres, a.apellidos].filter(Boolean).join(" ") || "Sin nombre";
-const inicial        = (a)   => (a.nombres || a.correo || "?")[0].toUpperCase();
-const cicloActivo    = (a)   => a.ciclos?.find((c) => c.activo) || null;
+import { getId, nombreCompleto, inicial, cicloActivo } from "../utils/afiliadoHelpers";
 
 const OBJETIVO_CONFIG = {
   "Pérdida de grasa": { icono: "🔥", color: "#e94560", bg: "#e9456018" },
@@ -92,6 +87,8 @@ const PLANES_NUTRICIONALES = [
 ];
 
 // ── Componente principal ──────────────────────────────────────────────────────
+import { useToast } from "../hooks/useToast";
+
 export default function DietasView() {
   const { user, authAxios, logout } = useAuth();
   const navigate = useNavigate();
@@ -103,7 +100,7 @@ export default function DietasView() {
   const [refreshing, setRefreshing] = useState(false);
   const [error,      setError]      = useState("");
   const [busqueda,   setBusqueda]   = useState("");
-  const [toast,      setToast]      = useState({ msg: "", type: "success" });
+  const { toast, showToast }        = useToast();
 
   // Modal asignar plan
   const [asignarModal, setAsignarModal] = useState(null);
@@ -117,27 +114,23 @@ export default function DietasView() {
   // Modal ver plan activo
   const [verModal, setVerModal] = useState(null);
 
-  // ── Helpers (definidos antes de cargarAfiliados para poder usar showToast) ──
-  const showToast = (msg, type = "success") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast({ msg: "", type: "success" }), 3000);
-  };
-
   // ── Carga (reutilizable para el botón Actualizar) ──────────────────────────
   const cargarAfiliados = useCallback(async (esRefresh = false) => {
     esRefresh ? setRefreshing(true) : setLoading(true);
     setError("");
     try {
-      const { data } = await authAxios.get("/660/afiliados");
+      // FIX: ruta correcta /afiliados (no /660/afiliados)
+      const { data } = await authAxios.get("/afiliados");
       setAfiliados(data);
       if (esRefresh) showToast(`✅ Lista actualizada — ${data.length} afiliados`);
     } catch (err) {
+      console.error('[DietasView] Error al cargar:', err.response?.status, err.response?.data || err.message);
       if (err?.response?.status === 401) { logout(); navigate("/login"); }
       else setError("No se pudieron cargar los afiliados.");
     } finally {
       esRefresh ? setRefreshing(false) : setLoading(false);
     }
-  }, [authAxios, logout, navigate]);
+  }, [authAxios, logout, navigate, showToast]);
 
   useEffect(() => { cargarAfiliados(); }, []);
 
@@ -188,48 +181,42 @@ export default function DietasView() {
 
     setSaving(true); setAsigError("");
     try {
-      const id         = getId(asignarModal);
-      const tienePlan  = !!cicloActivo(asignarModal);
-      const ciclos     = (asignarModal.ciclos || []).map((c) => ({ ...c, activo: false }));
-
-      const nuevoCiclo = {
-        numero_ciclo: ciclos.length + 1,
-        fecha_inicio: new Date().toISOString().split("T")[0],
-        fecha_fin:    (() => {
-          const d = new Date(); d.setDate(d.getDate() + 84); // 12 semanas
-          return d.toISOString().split("T")[0];
-        })(),
-        activo:           true,
-        fecha_creacion:   new Date().toISOString(),
-        asignado_por_id:  getId(user),
-        plan_entrenamiento: null,
+      const id        = getId(asignarModal);
+      const tienePlan = !!cicloActivo(asignarModal);
+      // FIX: el backend MySQL maneja planes en tabla PLAN_NUTRICIONAL + CICLO.
+      // Usamos el endpoint /afiliados/ciclos en lugar de PATCH con array JSON.
+      await authAxios.post(`/afiliados/ciclos`, {
+        id_afiliado:          id,
+        fecha_inicio:         new Date().toISOString().split("T")[0],
+        fecha_fin:            (() => { const d = new Date(); d.setDate(d.getDate() + 84); return d.toISOString().split("T")[0]; })(),
+        asignado_por_id:      getId(user),
+        plan_base_id:         planSelec.id,
+        nombre_plan:          planSelec.nombre,
+        objetivo_dieta:       planSelec.objetivo,
+        calorias_estimadas:   Number(calorias),
+        num_comidas_diarias:  numComidas,
+        observaciones:        obs || null,
+      });
+      // FIX: el backend devuelve {message}, NO el afiliado actualizado.
+      // Mergeamos localmente el nuevo plan activo para reflejar el cambio en UI.
+      const nuevoCicloLocal = {
         plan_nutricional: {
-          plan_base_id:          planSelec.id,
-          nombre_plan:           planSelec.nombre,
-          objetivo_dieta:        planSelec.objetivo,
-          calorias_estimadas:    Number(calorias),
-          num_comidas_diarias:   numComidas,
-          es_automatico:         false,
-          modificado_por_id:     getId(user),
-          observaciones:         obs || null,
-          macros:                planSelec.macros,
-          alimentos_base:        planSelec.alimentos,
-          detalle:               [],
+          nombre_plan:          planSelec.nombre,
+          calorias_estimadas:   Number(calorias),
+          num_comidas_diarias:  numComidas,
+          objetivo_dieta:       planSelec.objetivo,
         },
-        progreso_fisico: [],
       };
-
-      const payload = { ciclos: [...ciclos, nuevoCiclo] };
-
-      // 💾 PATCH siempre: json-server actualiza campos aunque sean nuevos sin crear duplicados.
-      const { data } = await authAxios.patch(`/afiliados/${id}`, payload);
-
-      setAfiliados((prev) => prev.map((a) => getId(a) === id ? data : a));
+      setAfiliados((prev) => prev.map((a) =>
+        getId(a) === id ? { ...a, ciclo_activo: { ...a.ciclo_activo, ...nuevoCicloLocal } } : a
+      ));
       setAsignarModal(null);
       const accion = tienePlan ? "actualizado" : "asignado";
-      showToast(`✅ Plan "${planSelec.nombre}" ${accion} a ${nombreCompleto(data)}`);
-    } catch {
-      setAsigError("Error al guardar. Verifica el servidor.");
+      showToast(`✅ Plan "${planSelec.nombre}" ${accion} a ${nombreCompleto(asignarModal)}`);
+    } catch (err) {
+      const msg = err?.response?.data?.error || err.message || "Error desconocido";
+      console.error('[DietasView.handleAsignar]', err);
+      setAsigError(`Error al guardar: ${msg}`);
     } finally {
       setSaving(false);
     }

@@ -2,11 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-const getId          = (doc) => doc._id ?? doc.id;
-const nombreCompleto = (a)   => [a.nombres, a.apellidos].filter(Boolean).join(" ") || "Sin nombre";
-const inicial        = (a)   => (a.nombres || a.correo || "?")[0].toUpperCase();
+import { getId, nombreCompleto, inicial } from "../utils/afiliadoHelpers";
 
 /** Calcula días restantes entre hoy y una fecha dada (puede ser negativo = vencido) */
 const diasRestantes = (fechaStr) => {
@@ -37,6 +33,8 @@ const estadoMembresia = (dias) => {
 };
 
 // ── Componente principal ──────────────────────────────────────────────────────
+import { useToast } from "../hooks/useToast";
+
 export default function PagosView() {
   const { user, authAxios, logout } = useAuth();
   const navigate = useNavigate();
@@ -46,7 +44,7 @@ export default function PagosView() {
   const [loading,   setLoading]   = useState(true);
   const [error,     setError]     = useState("");
   const [busqueda,  setBusqueda]  = useState("");
-  const [toast,     setToast]     = useState({ msg: "", type: "success" });
+  const { toast, showToast }      = useToast();
 
   // Modal registrar pago
   const [pagoModal,  setPagoModal]  = useState(null);  // afiliado seleccionado
@@ -58,7 +56,8 @@ export default function PagosView() {
 
   // ── Carga ──────────────────────────────────────────────────────────────────
   useEffect(() => {
-    authAxios.get("/660/afiliados")
+    // FIX: ruta correcta /afiliados (no /660/afiliados — legado json-server)
+    authAxios.get("/afiliados")
       .then(({ data }) => setAfiliados(data))
       .catch((err) => {
         if (err?.response?.status === 401) { logout(); navigate("/login"); }
@@ -68,10 +67,6 @@ export default function PagosView() {
   }, []);
 
   // ── Helpers ────────────────────────────────────────────────────────────────
-  const showToast = (msg, type = "success") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast({ msg: "", type: "success" }), 3500);
-  };
 
   /** Extrae los datos de pago de un afiliado (guardados en a.membresia) */
   const membresia = (a) => a.membresia || null;
@@ -114,39 +109,43 @@ export default function PagosView() {
   const handlePago = async () => {
     setSaving(true); setPagoError("");
     try {
-      const a         = pagoModal;
-      const id        = getId(a);
+      const a          = pagoModal;
+      const id         = getId(a);
       const vencActual = fechaVenc(a);
-      // Si ya venció, se calcula desde hoy; si está vigente, se suma a la fecha actual
       const baseCalculo = vencActual && diasRestantes(vencActual) > 0 ? vencActual : hoyISO();
       const nuevaFecha  = sumarDias(baseCalculo, 30);
-      const montoPago   = 80000; // monto fijo mensualidad
+      const montoPago   = 80000;
 
       const nuevoPago = {
-        fecha_pago:  hoyISO(),
-        monto:       montoPago,
-        metodo:      "Efectivo",
+        fecha_pago:     hoyISO(),
+        monto:          montoPago,
+        metodo:         "Efectivo",
         registrado_por: user?.email || "sistema",
       };
 
       const membresiaActualizada = {
-        ultimo_pago:        hoyISO(),
-        fecha_vencimiento:  nuevaFecha,
-        monto_mensualidad:  montoPago,
+        ultimo_pago:       hoyISO(),
+        fecha_vencimiento: nuevaFecha,
+        monto_mensualidad: montoPago,
         historial: [...histPagos(a), nuevoPago],
       };
 
-      // Si estaba vencido (estado: Inactivo), lo reactiva
-      const nuevoEstado = a.estado?.toLowerCase() === "inactivo" ? "Activo" : a.estado;
+      const nuevoEstado = (a.estado_afiliacion || a.estado_cuenta || "").toLowerCase() === "inactivo"
+        ? "Activo" : (a.estado_afiliacion || a.estado_cuenta);
 
-      const payload = { membresia: membresiaActualizada, estado: nuevoEstado };
-      const { data } = await authAxios.patch(`/afiliados/${id}`, payload);
+      const payload = { membresia: membresiaActualizada, estado_afiliacion: nuevoEstado };
+      await authAxios.patch(`/afiliados/${id}`, payload);
 
-      setAfiliados((prev) => prev.map((af) => getId(af) === id ? data : af));
+      // FIX: el backend devuelve {message}, NO el afiliado actualizado.
+      // Mergeamos localmente para reflejar el pago en la UI sin refetch.
+      const actualizado = { ...a, membresia: membresiaActualizada, estado_afiliacion: nuevoEstado };
+      setAfiliados((prev) => prev.map((af) => getId(af) === id ? actualizado : af));
       setPagoModal(null);
       showToast(`✅ ¡Pago registrado! Nuevo vencimiento: ${nuevaFecha}`);
-    } catch {
-      setPagoError("Error al guardar el pago. Verifica el servidor.");
+    } catch (err) {
+      const msg = err?.response?.data?.error || err.message || "Error desconocido";
+      console.error('[PagosView.handlePago]', err);
+      setPagoError(`Error al guardar el pago: ${msg}`);
     } finally {
       setSaving(false);
     }
