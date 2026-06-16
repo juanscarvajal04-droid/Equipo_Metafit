@@ -72,7 +72,7 @@ export default function Login() {
 
       // Redirección infalible: fuerza recarga completa y limpia el estado
       const destino = ROLE_MAP[role] || "/afiliados";
-      window.location.href = destino;
+      navigate(destino, { replace: true });
 
     } catch (err) {
       const status = err?.response?.status;

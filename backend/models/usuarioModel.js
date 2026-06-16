@@ -3,7 +3,7 @@
 'use strict';
 
 const pool                   = require('../config/db');
-const { hashPassword }       = require('../middlewares/auth');
+const { hashPassword }       = require('../services/authService');
 
 const UsuarioModel = {
 

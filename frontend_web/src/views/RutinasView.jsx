@@ -2,13 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-const getId          = (doc) => doc.id_usuario ?? doc._id ?? doc.id;
-const nombreCompleto = (a)   => [a.nombres, a.apellidos].filter(Boolean).join(" ") || "Sin nombre";
-const inicial        = (a)   => (a.nombres || a.correo || "?")[0].toUpperCase();
-// FIX: el backend devuelve `ciclo_activo` (objeto), NO `ciclos` (array)
-const cicloActivo    = (a)   => a.ciclo_activo || null;
+import { getId, nombreCompleto, inicial, cicloActivo } from "../utils/afiliadoHelpers";
+import { useToast } from "../hooks/useToast";
 
 const NIVEL_COLOR = {
   Principiante: { bg: "#0ea5e922", text: "#0284c7", label: "Principiante" },
@@ -44,7 +39,7 @@ export default function RutinasView() {
   const [refreshing,  setRefreshing] = useState(false);
   const [error,       setError]      = useState("");
   const [busqueda,    setBusqueda]   = useState("");
-  const [toast,       setToast]      = useState({ msg: "", type: "success" });
+  const { toast, showToast }         = useToast();
 
   // Modal asignar rutina
   const [asignarModal, setAsignarModal] = useState(null);
@@ -73,15 +68,10 @@ export default function RutinasView() {
     } finally {
       esRefresh ? setRefreshing(false) : setLoading(false);
     }
-  }, [authAxios, logout, navigate]);
+  }, [authAxios, logout, navigate, showToast]);
 
   useEffect(() => { cargarAfiliados(); }, []);
 
-  // ── Helpers ────────────────────────────────────────────────────────────────
-  const showToast = (msg, type = "success") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast({ msg: "", type: "success" }), 3000);
-  };
 
   const filtrados = afiliados
     .filter((a) => {
