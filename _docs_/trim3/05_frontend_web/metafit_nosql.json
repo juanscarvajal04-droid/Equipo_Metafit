@@ -1,0 +1,4250 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "email": "carlos@metafit.com",
+      "password": "Admin123!",
+      "role": "Administrador"
+    },
+    {
+      "id": 2,
+      "email": "laura@metafit.com",
+      "password": "Laura123!",
+      "role": "Entrenador"
+    },
+    {
+      "id": 3,
+      "email": "andres@metafit.com",
+      "password": "Andres123!",
+      "role": "Entrenador"
+    },
+    {
+      "id": 4,
+      "email": "maria@metafit.com",
+      "password": "Maria123!",
+      "role": "Recepcionista"
+    },
+    {
+      "id": 5,
+      "email": "pedro@metafit.com",
+      "password": "Pedro123!",
+      "role": "Recepcionista"
+    }
+  ],
+  "usuarios": [
+    {
+      "_id": 1,
+      "nombres": "Carlos",
+      "apellidos": "Ramírez",
+      "correo": "carlos@metafit.com",
+      "contrasena_hash": "e3b0...b855",
+      "rol": "Administrador",
+      "estado_cuenta": "Activo",
+      "fecha_registro": "2024-01-01T08:00:00"
+    },
+    {
+      "_id": 2,
+      "nombres": "Laura",
+      "apellidos": "Gómez",
+      "correo": "laura@metafit.com",
+      "contrasena_hash": "e3b0...b856",
+      "rol": "Entrenador",
+      "estado_cuenta": "Activo",
+      "fecha_registro": "2024-01-01T08:00:00"
+    },
+    {
+      "_id": 3,
+      "nombres": "Andrés",
+      "apellidos": "Torres",
+      "correo": "andres@metafit.com",
+      "contrasena_hash": "e3b0...b857",
+      "rol": "Entrenador",
+      "estado_cuenta": "Activo",
+      "fecha_registro": "2024-01-01T08:00:00"
+    },
+    {
+      "_id": 4,
+      "nombres": "María",
+      "apellidos": "López",
+      "correo": "maria@metafit.com",
+      "contrasena_hash": "e3b0...b858",
+      "rol": "Recepcionista",
+      "estado_cuenta": "Activo",
+      "fecha_registro": "2024-01-01T08:00:00"
+    },
+    {
+      "_id": 5,
+      "nombres": "Pedro",
+      "apellidos": "Suárez",
+      "correo": "pedro@metafit.com",
+      "contrasena_hash": "e3b0...b859",
+      "rol": "Recepcionista",
+      "estado_cuenta": "Pendiente",
+      "fecha_registro": "2024-01-02T08:00:00"
+    }
+  ],
+  "ejercicios": [
+    {
+      "id": 1,
+      "nombre": "Sentadilla",
+      "grupo_muscular": "Piernas",
+      "nivel_minimo": "Principiante",
+      "restricciones_excluidas": [
+        {
+          "id_restriccion": 3,
+          "nombre": "Lesión rodilla derecha",
+          "tipo": "Lesión"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "nombre": "Press de banca",
+      "grupo_muscular": "Pecho",
+      "nivel_minimo": "Principiante",
+      "restricciones_excluidas": []
+    },
+    {
+      "id": 3,
+      "nombre": "Peso muerto",
+      "grupo_muscular": "Espalda",
+      "nivel_minimo": "Intermedio",
+      "restricciones_excluidas": [
+        {
+          "id_restriccion": 2,
+          "nombre": "Hipertensión arterial",
+          "tipo": "Enfermedad"
+        },
+        {
+          "id_restriccion": 1,
+          "nombre": "Diabetes tipo 2",
+          "tipo": "Enfermedad"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "nombre": "Press militar",
+      "grupo_muscular": "Hombros",
+      "nivel_minimo": "Intermedio",
+      "restricciones_excluidas": [
+        {
+          "id_restriccion": 2,
+          "nombre": "Hipertensión arterial",
+          "tipo": "Enfermedad"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "nombre": "Curl de bíceps",
+      "grupo_muscular": "Bíceps",
+      "nivel_minimo": "Principiante",
+      "restricciones_excluidas": []
+    },
+    {
+      "id": 6,
+      "nombre": "Extensión de tríceps",
+      "grupo_muscular": "Tríceps",
+      "nivel_minimo": "Principiante",
+      "restricciones_excluidas": []
+    },
+    {
+      "id": 7,
+      "nombre": "Hip thrust",
+      "grupo_muscular": "Glúteos",
+      "nivel_minimo": "Intermedio",
+      "restricciones_excluidas": [
+        {
+          "id_restriccion": 3,
+          "nombre": "Lesión rodilla derecha",
+          "tipo": "Lesión"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "nombre": "Dominadas",
+      "grupo_muscular": "Espalda",
+      "nivel_minimo": "Avanzado",
+      "restricciones_excluidas": [
+        {
+          "id_restriccion": 1,
+          "nombre": "Diabetes tipo 2",
+          "tipo": "Enfermedad"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "nombre": "Zancadas",
+      "grupo_muscular": "Piernas",
+      "nivel_minimo": "Intermedio",
+      "restricciones_excluidas": [
+        {
+          "id_restriccion": 3,
+          "nombre": "Lesión rodilla derecha",
+          "tipo": "Lesión"
+        }
+      ]
+    }
+  ],
+  "alimentos": [
+    {
+      "id": 1,
+      "nombre": "Pechuga de pollo",
+      "macros_por_100g": {
+        "proteinas_g": 31,
+        "carbohidratos_g": 0,
+        "grasas_g": 3.6,
+        "calorias_calculadas": 156.4
+      },
+      "restricciones_excluidas": []
+    },
+    {
+      "id": 2,
+      "nombre": "Arroz blanco",
+      "macros_por_100g": {
+        "proteinas_g": 2.7,
+        "carbohidratos_g": 28,
+        "grasas_g": 0.3,
+        "calorias_calculadas": 124.5
+      },
+      "restricciones_excluidas": [
+        {
+          "id_restriccion": 1,
+          "nombre": "Diabetes tipo 2",
+          "tipo": "Enfermedad"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "nombre": "Huevo entero",
+      "macros_por_100g": {
+        "proteinas_g": 13,
+        "carbohidratos_g": 1.1,
+        "grasas_g": 11,
+        "calorias_calculadas": 155.4
+      },
+      "restricciones_excluidas": []
+    },
+    {
+      "id": 4,
+      "nombre": "Avena",
+      "macros_por_100g": {
+        "proteinas_g": 17,
+        "carbohidratos_g": 66,
+        "grasas_g": 7,
+        "calorias_calculadas": 395
+      },
+      "restricciones_excluidas": [
+        {
+          "id_restriccion": 4,
+          "nombre": "Alergia al gluten",
+          "tipo": "Alergia"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "nombre": "Brócoli",
+      "macros_por_100g": {
+        "proteinas_g": 2.8,
+        "carbohidratos_g": 7,
+        "grasas_g": 0.4,
+        "calorias_calculadas": 43
+      },
+      "restricciones_excluidas": []
+    },
+    {
+      "id": 6,
+      "nombre": "Atún en agua",
+      "macros_por_100g": {
+        "proteinas_g": 29,
+        "carbohidratos_g": 0,
+        "grasas_g": 0.5,
+        "calorias_calculadas": 120.5
+      },
+      "restricciones_excluidas": []
+    },
+    {
+      "id": 7,
+      "nombre": "Batata",
+      "macros_por_100g": {
+        "proteinas_g": 1.6,
+        "carbohidratos_g": 20,
+        "grasas_g": 0.1,
+        "calorias_calculadas": 87.3
+      },
+      "restricciones_excluidas": [
+        {
+          "id_restriccion": 1,
+          "nombre": "Diabetes tipo 2",
+          "tipo": "Enfermedad"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "nombre": "Almendras",
+      "macros_por_100g": {
+        "proteinas_g": 21,
+        "carbohidratos_g": 22,
+        "grasas_g": 50,
+        "calorias_calculadas": 622
+      },
+      "restricciones_excluidas": []
+    },
+    {
+      "id": 9,
+      "nombre": "Leche deslactosada",
+      "macros_por_100g": {
+        "proteinas_g": 3.4,
+        "carbohidratos_g": 4.8,
+        "grasas_g": 3.6,
+        "calorias_calculadas": 64
+      },
+      "restricciones_excluidas": [
+        {
+          "id_restriccion": 5,
+          "nombre": "Intolerancia a lactosa",
+          "tipo": "Alergia"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "nombre": "Quinoa",
+      "macros_por_100g": {
+        "proteinas_g": 14,
+        "carbohidratos_g": 64,
+        "grasas_g": 6,
+        "calorias_calculadas": 398
+      },
+      "restricciones_excluidas": []
+    }
+  ],
+  "afiliados": [
+    {
+      "_id": 1,
+      "nombres": "Juan",
+      "apellidos": "Martínez",
+      "documento": 1001234567,
+      "fecha_nacimiento": "1990-03-15",
+      "sexo": "Masculino",
+      "correo": "juan@gmail.com",
+      "direccion": "Bogotá, Calle 10 # 5-20",
+      "telefono": "3001234567",
+      "estatura_cm": 175.5,
+      "objetivo_fisico": "Pérdida de grasa",
+      "grupo_muscular_prioritario": "Pecho",
+      "nivel_experiencia": "Intermedio",
+      "disponibilidad_semanal_dias": 3,
+      "estado": "Activo",
+      "fecha_registro": "2024-01-08",
+      "fecha_ultima_modificacion": "2026-04-08T21:42:04.538Z",
+      "registrado_por_id": 4,
+      "restricciones": [
+        {
+          "id_restriccion": 2,
+          "nombre": "Hipertensión arterial",
+          "tipo": "Enfermedad",
+          "efecto_relevante": "Controlar frecuencia cardíaca durante el ejercicio"
+        }
+      ],
+      "ciclos": [
+        {
+          "numero_ciclo": 1,
+          "fecha_inicio": "2024-01-08",
+          "fecha_fin": "2024-03-17",
+          "activo": false,
+          "fecha_creacion": "2024-01-08T08:00:00",
+          "plan_entrenamiento": {
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "rutinas": [
+              {
+                "nombre": "Día 1 — Pecho y Tríceps",
+                "enfoque_muscular": "Pecho",
+                "dia_numero": 1,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 2,
+                    "nombre": "Press de banca",
+                    "series": 5,
+                    "repeticiones": 15,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 9,
+                    "nombre": "Zancadas",
+                    "series": 3,
+                    "repeticiones": 15,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 6,
+                    "nombre": "Extensión de tríceps",
+                    "series": 4,
+                    "repeticiones": 15,
+                    "orden": 3
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 2 — Espalda y Bíceps",
+                "enfoque_muscular": "Espalda",
+                "dia_numero": 2,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 2,
+                    "nombre": "Press de banca",
+                    "series": 4,
+                    "repeticiones": 10,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 5,
+                    "nombre": "Curl de bíceps",
+                    "series": 3,
+                    "repeticiones": 10,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 1,
+                    "nombre": "Sentadilla",
+                    "series": 3,
+                    "repeticiones": 11,
+                    "orden": 3
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 3 — Piernas y Glúteos",
+                "enfoque_muscular": "Piernas",
+                "dia_numero": 4,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 5,
+                    "nombre": "Curl de bíceps",
+                    "series": 5,
+                    "repeticiones": 15,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 7,
+                    "nombre": "Hip thrust",
+                    "series": 3,
+                    "repeticiones": 12,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 8,
+                    "nombre": "Dominadas",
+                    "series": 4,
+                    "repeticiones": 8,
+                    "orden": 3
+                  },
+                  {
+                    "id_ejercicio": 2,
+                    "nombre": "Press de banca",
+                    "series": 4,
+                    "repeticiones": 14,
+                    "orden": 4
+                  }
+                ]
+              }
+            ]
+          },
+          "plan_nutricional": {
+            "calorias_estimadas": 1556.48,
+            "num_comidas_diarias": 3,
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "detalle": [
+              {
+                "numero_comida": 1,
+                "id_alimento": 10,
+                "nombre_alimento": "Quinoa",
+                "cantidad_g": 83
+              },
+              {
+                "numero_comida": 1,
+                "id_alimento": 3,
+                "nombre_alimento": "Huevo entero",
+                "cantidad_g": 213
+              },
+              {
+                "numero_comida": 1,
+                "id_alimento": 4,
+                "nombre_alimento": "Avena",
+                "cantidad_g": 168
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 4,
+                "nombre_alimento": "Avena",
+                "cantidad_g": 86
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 10,
+                "nombre_alimento": "Quinoa",
+                "cantidad_g": 150
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 3,
+                "nombre_alimento": "Huevo entero",
+                "cantidad_g": 205
+              }
+            ]
+          },
+          "progreso_fisico": [
+            {
+              "fecha_registro": "2024-01-08",
+              "peso_kg": 75.84,
+              "porcentaje_grasa": 24.43,
+              "medidas_cm": {
+                "cintura": 90.58,
+                "brazo": 33.58,
+                "pierna": 63.93
+              },
+              "observaciones": "Buena adherencia al plan",
+              "registrado_por_id": 2
+            },
+            {
+              "fecha_registro": "2024-02-02",
+              "peso_kg": 75.09,
+              "porcentaje_grasa": 24.29,
+              "medidas_cm": {
+                "cintura": 71.8,
+                "brazo": 31.89,
+                "pierna": 53.87
+              },
+              "observaciones": "Se nota mejoría en composición corporal",
+              "registrado_por_id": 3
+            }
+          ]
+        },
+        {
+          "numero_ciclo": 2,
+          "fecha_inicio": "2024-04-04",
+          "fecha_fin": "2024-05-31",
+          "activo": true,
+          "fecha_creacion": "2024-04-04T08:00:00",
+          "plan_entrenamiento": {
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "rutinas": [
+              {
+                "nombre": "Día 1 — Pecho y Tríceps",
+                "enfoque_muscular": "Pecho",
+                "dia_numero": 1,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 6,
+                    "nombre": "Extensión de tríceps",
+                    "series": 4,
+                    "repeticiones": 15,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 5,
+                    "nombre": "Curl de bíceps",
+                    "series": 5,
+                    "repeticiones": 12,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 7,
+                    "nombre": "Hip thrust",
+                    "series": 3,
+                    "repeticiones": 8,
+                    "orden": 3
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 2 — Espalda y Bíceps",
+                "enfoque_muscular": "Espalda",
+                "dia_numero": 4,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 2,
+                    "nombre": "Press de banca",
+                    "series": 4,
+                    "repeticiones": 10,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 5,
+                    "nombre": "Curl de bíceps",
+                    "series": 3,
+                    "repeticiones": 9,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 1,
+                    "nombre": "Sentadilla",
+                    "series": 4,
+                    "repeticiones": 12,
+                    "orden": 3
+                  },
+                  {
+                    "id_ejercicio": 9,
+                    "nombre": "Zancadas",
+                    "series": 3,
+                    "repeticiones": 14,
+                    "orden": 4
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 3 — Piernas y Glúteos",
+                "enfoque_muscular": "Piernas",
+                "dia_numero": 7,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 7,
+                    "nombre": "Hip thrust",
+                    "series": 3,
+                    "repeticiones": 13,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 1,
+                    "nombre": "Sentadilla",
+                    "series": 5,
+                    "repeticiones": 8,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 6,
+                    "nombre": "Extensión de tríceps",
+                    "series": 5,
+                    "repeticiones": 15,
+                    "orden": 3
+                  },
+                  {
+                    "id_ejercicio": 2,
+                    "nombre": "Press de banca",
+                    "series": 5,
+                    "repeticiones": 11,
+                    "orden": 4
+                  }
+                ]
+              }
+            ]
+          },
+          "plan_nutricional": {
+            "calorias_estimadas": 1899.56,
+            "num_comidas_diarias": 4,
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "detalle": [
+              {
+                "numero_comida": 1,
+                "id_alimento": 4,
+                "nombre_alimento": "Avena",
+                "cantidad_g": 99
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 5,
+                "nombre_alimento": "Brócoli",
+                "cantidad_g": 171
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 10,
+                "nombre_alimento": "Quinoa",
+                "cantidad_g": 192
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 4,
+                "nombre_alimento": "Avena",
+                "cantidad_g": 211
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 3,
+                "nombre_alimento": "Huevo entero",
+                "cantidad_g": 219
+              },
+              {
+                "numero_comida": 4,
+                "id_alimento": 1,
+                "nombre_alimento": "Pechuga de pollo",
+                "cantidad_g": 177
+              },
+              {
+                "numero_comida": 4,
+                "id_alimento": 5,
+                "nombre_alimento": "Brócoli",
+                "cantidad_g": 94
+              },
+              {
+                "numero_comida": 4,
+                "id_alimento": 10,
+                "nombre_alimento": "Quinoa",
+                "cantidad_g": 98
+              }
+            ]
+          },
+          "progreso_fisico": [
+            {
+              "fecha_registro": "2024-04-04",
+              "peso_kg": 81.13,
+              "porcentaje_grasa": 17.48,
+              "medidas_cm": {
+                "cintura": 70.84,
+                "brazo": 28.78,
+                "pierna": 66.46
+              },
+              "observaciones": "Buena adherencia al plan",
+              "registrado_por_id": 2
+            },
+            {
+              "fecha_registro": "2024-04-27",
+              "peso_kg": 80.92,
+              "porcentaje_grasa": 17.4,
+              "medidas_cm": {
+                "cintura": 100.23,
+                "brazo": 43.16,
+                "pierna": 67.7
+              },
+              "observaciones": "Buena adherencia al plan",
+              "registrado_por_id": 2
+            }
+          ]
+        }
+      ],
+      "membresia": {
+        "ultimo_pago": "2026-04-08",
+        "fecha_vencimiento": "2026-05-08",
+        "monto_mensualidad": 80000,
+        "historial": [
+          {
+            "fecha_pago": "2026-04-08",
+            "monto": 80000,
+            "metodo": "Efectivo",
+            "registrado_por": "maria@metafit.com"
+          }
+        ]
+      }
+    },
+    {
+      "_id": 2,
+      "nombres": "Ana",
+      "apellidos": "Rodríguez",
+      "documento": 1002345678,
+      "fecha_nacimiento": "1995-07-22",
+      "sexo": "Femenino",
+      "correo": "ana@gmail.com",
+      "direccion": "Bogotá, Carrera 15 # 8-30",
+      "telefono": "3012345678",
+      "estatura_cm": 162,
+      "objetivo_fisico": "Aumento de masa",
+      "grupo_muscular_prioritario": "Glúteos",
+      "nivel_experiencia": "Intermedio",
+      "disponibilidad_semanal_dias": 5,
+      "estado": "Activo",
+      "fecha_registro": "2024-02-01",
+      "fecha_ultima_modificacion": "2026-04-08T21:42:15.717Z",
+      "registrado_por_id": 4,
+      "restricciones": [
+        {
+          "id_restriccion": 5,
+          "nombre": "Intolerancia a lactosa",
+          "tipo": "Alergia",
+          "efecto_relevante": null
+        }
+      ],
+      "ciclos": [
+        {
+          "numero_ciclo": 1,
+          "fecha_inicio": "2024-02-01",
+          "fecha_fin": "2024-04-09",
+          "activo": false,
+          "fecha_creacion": "2024-02-01T08:00:00",
+          "plan_entrenamiento": {
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "rutinas": [
+              {
+                "nombre": "Día 1 — Pecho y Tríceps",
+                "enfoque_muscular": "Pecho",
+                "dia_numero": 1,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 8,
+                    "nombre": "Dominadas",
+                    "series": 4,
+                    "repeticiones": 8,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 1,
+                    "nombre": "Sentadilla",
+                    "series": 4,
+                    "repeticiones": 14,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 7,
+                    "nombre": "Hip thrust",
+                    "series": 3,
+                    "repeticiones": 9,
+                    "orden": 3
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 2 — Espalda y Bíceps",
+                "enfoque_muscular": "Espalda",
+                "dia_numero": 2,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 4,
+                    "nombre": "Press militar",
+                    "series": 5,
+                    "repeticiones": 13,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 6,
+                    "nombre": "Extensión de tríceps",
+                    "series": 5,
+                    "repeticiones": 15,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 7,
+                    "nombre": "Hip thrust",
+                    "series": 5,
+                    "repeticiones": 9,
+                    "orden": 3
+                  },
+                  {
+                    "id_ejercicio": 2,
+                    "nombre": "Press de banca",
+                    "series": 5,
+                    "repeticiones": 9,
+                    "orden": 4
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 3 — Piernas y Glúteos",
+                "enfoque_muscular": "Piernas",
+                "dia_numero": 4,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 6,
+                    "nombre": "Extensión de tríceps",
+                    "series": 5,
+                    "repeticiones": 10,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 7,
+                    "nombre": "Hip thrust",
+                    "series": 5,
+                    "repeticiones": 15,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 3,
+                    "nombre": "Peso muerto",
+                    "series": 3,
+                    "repeticiones": 9,
+                    "orden": 3
+                  },
+                  {
+                    "id_ejercicio": 2,
+                    "nombre": "Press de banca",
+                    "series": 4,
+                    "repeticiones": 9,
+                    "orden": 4
+                  }
+                ]
+              }
+            ]
+          },
+          "plan_nutricional": {
+            "calorias_estimadas": 2884.09,
+            "num_comidas_diarias": 4,
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "detalle": [
+              {
+                "numero_comida": 1,
+                "id_alimento": 6,
+                "nombre_alimento": "Atún en agua",
+                "cantidad_g": 160
+              },
+              {
+                "numero_comida": 1,
+                "id_alimento": 3,
+                "nombre_alimento": "Huevo entero",
+                "cantidad_g": 114
+              },
+              {
+                "numero_comida": 1,
+                "id_alimento": 8,
+                "nombre_alimento": "Almendras",
+                "cantidad_g": 195
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 10,
+                "nombre_alimento": "Quinoa",
+                "cantidad_g": 243
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 6,
+                "nombre_alimento": "Atún en agua",
+                "cantidad_g": 143
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 2,
+                "nombre_alimento": "Arroz blanco",
+                "cantidad_g": 52
+              },
+              {
+                "numero_comida": 4,
+                "id_alimento": 1,
+                "nombre_alimento": "Pechuga de pollo",
+                "cantidad_g": 176
+              },
+              {
+                "numero_comida": 4,
+                "id_alimento": 2,
+                "nombre_alimento": "Arroz blanco",
+                "cantidad_g": 145
+              },
+              {
+                "numero_comida": 4,
+                "id_alimento": 6,
+                "nombre_alimento": "Atún en agua",
+                "cantidad_g": 237
+              }
+            ]
+          },
+          "progreso_fisico": [
+            {
+              "fecha_registro": "2024-02-01",
+              "peso_kg": 71.27,
+              "porcentaje_grasa": 23.44,
+              "medidas_cm": {
+                "cintura": 75.88,
+                "brazo": 34.76,
+                "pierna": 49.8
+              },
+              "observaciones": "Se nota mejoría en composición corporal",
+              "registrado_por_id": 1
+            }
+          ]
+        },
+        {
+          "numero_ciclo": 2,
+          "fecha_inicio": "2024-04-22",
+          "fecha_fin": "2024-07-16",
+          "activo": true,
+          "fecha_creacion": "2024-04-22T08:00:00",
+          "plan_entrenamiento": {
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "rutinas": [
+              {
+                "nombre": "Día 1 — Pecho y Tríceps",
+                "enfoque_muscular": "Pecho",
+                "dia_numero": 5,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 6,
+                    "nombre": "Extensión de tríceps",
+                    "series": 4,
+                    "repeticiones": 10,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 2,
+                    "nombre": "Press de banca",
+                    "series": 3,
+                    "repeticiones": 13,
+                    "orden": 2
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 2 — Espalda y Bíceps",
+                "enfoque_muscular": "Espalda",
+                "dia_numero": 6,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 8,
+                    "nombre": "Dominadas",
+                    "series": 5,
+                    "repeticiones": 12,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 9,
+                    "nombre": "Zancadas",
+                    "series": 4,
+                    "repeticiones": 10,
+                    "orden": 2
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 3 — Piernas y Glúteos",
+                "enfoque_muscular": "Piernas",
+                "dia_numero": 7,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 5,
+                    "nombre": "Curl de bíceps",
+                    "series": 5,
+                    "repeticiones": 8,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 1,
+                    "nombre": "Sentadilla",
+                    "series": 3,
+                    "repeticiones": 11,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 6,
+                    "nombre": "Extensión de tríceps",
+                    "series": 4,
+                    "repeticiones": 10,
+                    "orden": 3
+                  }
+                ]
+              }
+            ]
+          },
+          "plan_nutricional": {
+            "calorias_estimadas": 3012.07,
+            "num_comidas_diarias": 4,
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "detalle": [
+              {
+                "numero_comida": 1,
+                "id_alimento": 1,
+                "nombre_alimento": "Pechuga de pollo",
+                "cantidad_g": 100
+              },
+              {
+                "numero_comida": 1,
+                "id_alimento": 6,
+                "nombre_alimento": "Atún en agua",
+                "cantidad_g": 167
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 10,
+                "nombre_alimento": "Quinoa",
+                "cantidad_g": 205
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 6,
+                "nombre_alimento": "Atún en agua",
+                "cantidad_g": 88
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 5,
+                "nombre_alimento": "Brócoli",
+                "cantidad_g": 235
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 8,
+                "nombre_alimento": "Almendras",
+                "cantidad_g": 134
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 4,
+                "nombre_alimento": "Avena",
+                "cantidad_g": 204
+              },
+              {
+                "numero_comida": 4,
+                "id_alimento": 3,
+                "nombre_alimento": "Huevo entero",
+                "cantidad_g": 219
+              }
+            ]
+          },
+          "progreso_fisico": [
+            {
+              "fecha_registro": "2024-04-22",
+              "peso_kg": 73.66,
+              "porcentaje_grasa": 14.42,
+              "medidas_cm": {
+                "cintura": 86.87,
+                "brazo": 27.48,
+                "pierna": 54.16
+              },
+              "observaciones": null,
+              "registrado_por_id": 1
+            }
+          ]
+        }
+      ],
+      "membresia": {
+        "ultimo_pago": "2026-04-08",
+        "fecha_vencimiento": "2026-05-08",
+        "monto_mensualidad": 80000,
+        "historial": [
+          {
+            "fecha_pago": "2026-04-08",
+            "monto": 80000,
+            "metodo": "Efectivo",
+            "registrado_por": "maria@metafit.com"
+          }
+        ]
+      }
+    },
+    {
+      "_id": 3,
+      "nombres": "Luis",
+      "apellidos": "Herrera",
+      "documento": 1003456789,
+      "fecha_nacimiento": "1988-11-05",
+      "sexo": "Masculino",
+      "correo": "luis@gmail.com",
+      "direccion": "Bogotá, Av 20 # 3-10",
+      "telefono": "3023456789",
+      "estatura_cm": 180,
+      "objetivo_fisico": "Mantenimiento",
+      "grupo_muscular_prioritario": "Espalda",
+      "nivel_experiencia": "Avanzado",
+      "disponibilidad_semanal_dias": 6,
+      "estado": "Activo",
+      "fecha_registro": "2024-01-15",
+      "fecha_ultima_modificacion": null,
+      "registrado_por_id": 5,
+      "restricciones": [
+        {
+          "id_restriccion": 1,
+          "nombre": "Diabetes tipo 2",
+          "tipo": "Enfermedad",
+          "efecto_relevante": "Evitar ejercicio de alta intensidad sin supervisión"
+        },
+        {
+          "id_restriccion": 6,
+          "nombre": "Metformina",
+          "tipo": "Medicamento",
+          "efecto_relevante": "Puede causar hipoglucemia en ejercicio intenso"
+        }
+      ],
+      "ciclos": [
+        {
+          "numero_ciclo": 1,
+          "fecha_inicio": "2024-01-15",
+          "fecha_fin": "2024-03-18",
+          "activo": false,
+          "fecha_creacion": "2024-01-15T08:00:00",
+          "plan_entrenamiento": {
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "rutinas": [
+              {
+                "nombre": "Día 1 — Pecho y Tríceps",
+                "enfoque_muscular": "Pecho",
+                "dia_numero": 1,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 7,
+                    "nombre": "Hip thrust",
+                    "series": 3,
+                    "repeticiones": 8,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 2,
+                    "nombre": "Press de banca",
+                    "series": 3,
+                    "repeticiones": 13,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 5,
+                    "nombre": "Curl de bíceps",
+                    "series": 5,
+                    "repeticiones": 13,
+                    "orden": 3
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 2 — Espalda y Bíceps",
+                "enfoque_muscular": "Espalda",
+                "dia_numero": 2,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 6,
+                    "nombre": "Extensión de tríceps",
+                    "series": 4,
+                    "repeticiones": 13,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 7,
+                    "nombre": "Hip thrust",
+                    "series": 5,
+                    "repeticiones": 8,
+                    "orden": 2
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 3 — Piernas y Glúteos",
+                "enfoque_muscular": "Piernas",
+                "dia_numero": 6,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 9,
+                    "nombre": "Zancadas",
+                    "series": 4,
+                    "repeticiones": 11,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 2,
+                    "nombre": "Press de banca",
+                    "series": 4,
+                    "repeticiones": 11,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 6,
+                    "nombre": "Extensión de tríceps",
+                    "series": 4,
+                    "repeticiones": 9,
+                    "orden": 3
+                  },
+                  {
+                    "id_ejercicio": 1,
+                    "nombre": "Sentadilla",
+                    "series": 4,
+                    "repeticiones": 9,
+                    "orden": 4
+                  }
+                ]
+              }
+            ]
+          },
+          "plan_nutricional": {
+            "calorias_estimadas": 2383.66,
+            "num_comidas_diarias": 3,
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "detalle": [
+              {
+                "numero_comida": 1,
+                "id_alimento": 6,
+                "nombre_alimento": "Atún en agua",
+                "cantidad_g": 85
+              },
+              {
+                "numero_comida": 1,
+                "id_alimento": 3,
+                "nombre_alimento": "Huevo entero",
+                "cantidad_g": 238
+              },
+              {
+                "numero_comida": 1,
+                "id_alimento": 9,
+                "nombre_alimento": "Leche deslactosada",
+                "cantidad_g": 76
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 3,
+                "nombre_alimento": "Huevo entero",
+                "cantidad_g": 58
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 6,
+                "nombre_alimento": "Atún en agua",
+                "cantidad_g": 57
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 5,
+                "nombre_alimento": "Brócoli",
+                "cantidad_g": 73
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 5,
+                "nombre_alimento": "Brócoli",
+                "cantidad_g": 179
+              }
+            ]
+          },
+          "progreso_fisico": [
+            {
+              "fecha_registro": "2024-01-15",
+              "peso_kg": 96.62,
+              "porcentaje_grasa": 27.25,
+              "medidas_cm": {
+                "cintura": 104.13,
+                "brazo": 26.09,
+                "pierna": 63.96
+              },
+              "observaciones": null,
+              "registrado_por_id": 2
+            },
+            {
+              "fecha_registro": "2024-02-08",
+              "peso_kg": 95.19,
+              "porcentaje_grasa": 26.83,
+              "medidas_cm": {
+                "cintura": 104.3,
+                "brazo": 40.97,
+                "pierna": 66.27
+              },
+              "observaciones": "Se nota mejoría en composición corporal",
+              "registrado_por_id": 2
+            }
+          ]
+        },
+        {
+          "numero_ciclo": 2,
+          "fecha_inicio": "2024-03-30",
+          "fecha_fin": "2024-06-13",
+          "activo": true,
+          "fecha_creacion": "2024-03-30T08:00:00",
+          "plan_entrenamiento": {
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "rutinas": [
+              {
+                "nombre": "Día 1 — Pecho y Tríceps",
+                "enfoque_muscular": "Pecho",
+                "dia_numero": 3,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 6,
+                    "nombre": "Extensión de tríceps",
+                    "series": 3,
+                    "repeticiones": 10,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 5,
+                    "nombre": "Curl de bíceps",
+                    "series": 4,
+                    "repeticiones": 8,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 7,
+                    "nombre": "Hip thrust",
+                    "series": 4,
+                    "repeticiones": 12,
+                    "orden": 3
+                  },
+                  {
+                    "id_ejercicio": 1,
+                    "nombre": "Sentadilla",
+                    "series": 5,
+                    "repeticiones": 13,
+                    "orden": 4
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 2 — Espalda y Bíceps",
+                "enfoque_muscular": "Espalda",
+                "dia_numero": 4,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 4,
+                    "nombre": "Press militar",
+                    "series": 3,
+                    "repeticiones": 9,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 7,
+                    "nombre": "Hip thrust",
+                    "series": 3,
+                    "repeticiones": 12,
+                    "orden": 2
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 3 — Piernas y Glúteos",
+                "enfoque_muscular": "Piernas",
+                "dia_numero": 5,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 6,
+                    "nombre": "Extensión de tríceps",
+                    "series": 4,
+                    "repeticiones": 11,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 2,
+                    "nombre": "Press de banca",
+                    "series": 5,
+                    "repeticiones": 15,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 4,
+                    "nombre": "Press militar",
+                    "series": 3,
+                    "repeticiones": 15,
+                    "orden": 3
+                  },
+                  {
+                    "id_ejercicio": 7,
+                    "nombre": "Hip thrust",
+                    "series": 3,
+                    "repeticiones": 14,
+                    "orden": 4
+                  }
+                ]
+              }
+            ]
+          },
+          "plan_nutricional": {
+            "calorias_estimadas": 2050.11,
+            "num_comidas_diarias": 3,
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "detalle": [
+              {
+                "numero_comida": 1,
+                "id_alimento": 4,
+                "nombre_alimento": "Avena",
+                "cantidad_g": 250
+              },
+              {
+                "numero_comida": 1,
+                "id_alimento": 5,
+                "nombre_alimento": "Brócoli",
+                "cantidad_g": 240
+              },
+              {
+                "numero_comida": 1,
+                "id_alimento": 9,
+                "nombre_alimento": "Leche deslactosada",
+                "cantidad_g": 162
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 10,
+                "nombre_alimento": "Quinoa",
+                "cantidad_g": 115
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 9,
+                "nombre_alimento": "Leche deslactosada",
+                "cantidad_g": 112
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 8,
+                "nombre_alimento": "Almendras",
+                "cantidad_g": 175
+              }
+            ]
+          },
+          "progreso_fisico": [
+            {
+              "fecha_registro": "2024-03-30",
+              "peso_kg": 58.3,
+              "porcentaje_grasa": 18.6,
+              "medidas_cm": {
+                "cintura": 88.25,
+                "brazo": 28.9,
+                "pierna": 69.24
+              },
+              "observaciones": "Se nota mejoría en composición corporal",
+              "registrado_por_id": 2
+            },
+            {
+              "fecha_registro": "2024-04-17",
+              "peso_kg": 58.13,
+              "porcentaje_grasa": 18.23,
+              "medidas_cm": {
+                "cintura": 73.87,
+                "brazo": 30.77,
+                "pierna": 63.23
+              },
+              "observaciones": "Progreso dentro de lo esperado",
+              "registrado_por_id": 2
+            },
+            {
+              "fecha_registro": "2024-05-12",
+              "peso_kg": 56.77,
+              "porcentaje_grasa": 17.84,
+              "medidas_cm": {
+                "cintura": 68.55,
+                "brazo": 40.4,
+                "pierna": 56.06
+              },
+              "observaciones": null,
+              "registrado_por_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_id": 4,
+      "nombres": "Sofía",
+      "apellidos": "Castro",
+      "documento": 1004567890,
+      "fecha_nacimiento": "2000-01-30",
+      "sexo": "Femenino",
+      "correo": "sofia@gmail.com",
+      "direccion": "Bogotá, Calle 25 # 12-5",
+      "telefono": "3034567890",
+      "estatura_cm": 158.5,
+      "objetivo_fisico": "Pérdida de grasa",
+      "grupo_muscular_prioritario": null,
+      "nivel_experiencia": "Principiante",
+      "disponibilidad_semanal_dias": 4,
+      "estado": "Activo",
+      "fecha_registro": "2024-04-01",
+      "fecha_ultima_modificacion": null,
+      "registrado_por_id": 5,
+      "restricciones": [],
+      "ciclos": [
+        {
+          "numero_ciclo": 1,
+          "fecha_inicio": "2024-04-01",
+          "fecha_fin": "2024-06-30",
+          "activo": false,
+          "fecha_creacion": "2024-04-01T08:00:00",
+          "plan_entrenamiento": {
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "rutinas": [
+              {
+                "nombre": "Día 1 — Pecho y Tríceps",
+                "enfoque_muscular": "Pecho",
+                "dia_numero": 2,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 4,
+                    "nombre": "Press militar",
+                    "series": 4,
+                    "repeticiones": 8,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 9,
+                    "nombre": "Zancadas",
+                    "series": 5,
+                    "repeticiones": 12,
+                    "orden": 2
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 2 — Espalda y Bíceps",
+                "enfoque_muscular": "Espalda",
+                "dia_numero": 3,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 6,
+                    "nombre": "Extensión de tríceps",
+                    "series": 4,
+                    "repeticiones": 9,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 3,
+                    "nombre": "Peso muerto",
+                    "series": 4,
+                    "repeticiones": 8,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 7,
+                    "nombre": "Hip thrust",
+                    "series": 3,
+                    "repeticiones": 14,
+                    "orden": 3
+                  },
+                  {
+                    "id_ejercicio": 1,
+                    "nombre": "Sentadilla",
+                    "series": 4,
+                    "repeticiones": 14,
+                    "orden": 4
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 3 — Piernas y Glúteos",
+                "enfoque_muscular": "Piernas",
+                "dia_numero": 4,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 7,
+                    "nombre": "Hip thrust",
+                    "series": 4,
+                    "repeticiones": 9,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 5,
+                    "nombre": "Curl de bíceps",
+                    "series": 4,
+                    "repeticiones": 14,
+                    "orden": 2
+                  }
+                ]
+              }
+            ]
+          },
+          "plan_nutricional": {
+            "calorias_estimadas": 1533.44,
+            "num_comidas_diarias": 4,
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "detalle": [
+              {
+                "numero_comida": 1,
+                "id_alimento": 6,
+                "nombre_alimento": "Atún en agua",
+                "cantidad_g": 242
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 9,
+                "nombre_alimento": "Leche deslactosada",
+                "cantidad_g": 244
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 1,
+                "nombre_alimento": "Pechuga de pollo",
+                "cantidad_g": 238
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 10,
+                "nombre_alimento": "Quinoa",
+                "cantidad_g": 120
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 8,
+                "nombre_alimento": "Almendras",
+                "cantidad_g": 237
+              },
+              {
+                "numero_comida": 4,
+                "id_alimento": 9,
+                "nombre_alimento": "Leche deslactosada",
+                "cantidad_g": 179
+              }
+            ]
+          },
+          "progreso_fisico": [
+            {
+              "fecha_registro": "2024-04-01",
+              "peso_kg": 79.26,
+              "porcentaje_grasa": 13.25,
+              "medidas_cm": {
+                "cintura": 73.97,
+                "brazo": 43.65,
+                "pierna": 68.81
+              },
+              "observaciones": "Buena adherencia al plan",
+              "registrado_por_id": 1
+            }
+          ]
+        },
+        {
+          "numero_ciclo": 2,
+          "fecha_inicio": "2024-06-23",
+          "fecha_fin": "2024-08-29",
+          "activo": true,
+          "fecha_creacion": "2024-06-23T08:00:00",
+          "plan_entrenamiento": {
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "rutinas": [
+              {
+                "nombre": "Día 1 — Pecho y Tríceps",
+                "enfoque_muscular": "Pecho",
+                "dia_numero": 2,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 1,
+                    "nombre": "Sentadilla",
+                    "series": 4,
+                    "repeticiones": 15,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 9,
+                    "nombre": "Zancadas",
+                    "series": 3,
+                    "repeticiones": 11,
+                    "orden": 2
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 2 — Espalda y Bíceps",
+                "enfoque_muscular": "Espalda",
+                "dia_numero": 3,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 3,
+                    "nombre": "Peso muerto",
+                    "series": 4,
+                    "repeticiones": 14,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 9,
+                    "nombre": "Zancadas",
+                    "series": 4,
+                    "repeticiones": 14,
+                    "orden": 2
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 3 — Piernas y Glúteos",
+                "enfoque_muscular": "Piernas",
+                "dia_numero": 4,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 5,
+                    "nombre": "Curl de bíceps",
+                    "series": 3,
+                    "repeticiones": 15,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 3,
+                    "nombre": "Peso muerto",
+                    "series": 4,
+                    "repeticiones": 8,
+                    "orden": 2
+                  }
+                ]
+              }
+            ]
+          },
+          "plan_nutricional": {
+            "calorias_estimadas": 1678.2,
+            "num_comidas_diarias": 3,
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "detalle": [
+              {
+                "numero_comida": 1,
+                "id_alimento": 7,
+                "nombre_alimento": "Batata",
+                "cantidad_g": 171
+              },
+              {
+                "numero_comida": 1,
+                "id_alimento": 1,
+                "nombre_alimento": "Pechuga de pollo",
+                "cantidad_g": 122
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 9,
+                "nombre_alimento": "Leche deslactosada",
+                "cantidad_g": 100
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 2,
+                "nombre_alimento": "Arroz blanco",
+                "cantidad_g": 151
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 8,
+                "nombre_alimento": "Almendras",
+                "cantidad_g": 58
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 6,
+                "nombre_alimento": "Atún en agua",
+                "cantidad_g": 242
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 1,
+                "nombre_alimento": "Pechuga de pollo",
+                "cantidad_g": 148
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 9,
+                "nombre_alimento": "Leche deslactosada",
+                "cantidad_g": 247
+              }
+            ]
+          },
+          "progreso_fisico": [
+            {
+              "fecha_registro": "2024-06-23",
+              "peso_kg": 61.54,
+              "porcentaje_grasa": 18.43,
+              "medidas_cm": {
+                "cintura": 70.22,
+                "brazo": 41.31,
+                "pierna": 67.37
+              },
+              "observaciones": null,
+              "registrado_por_id": 3
+            },
+            {
+              "fecha_registro": "2024-07-15",
+              "peso_kg": 60.8,
+              "porcentaje_grasa": 18.51,
+              "medidas_cm": {
+                "cintura": 76.98,
+                "brazo": 28.61,
+                "pierna": 63.65
+              },
+              "observaciones": "Se nota mejoría en composición corporal",
+              "registrado_por_id": 1
+            },
+            {
+              "fecha_registro": "2024-08-03",
+              "peso_kg": 59.68,
+              "porcentaje_grasa": 18.57,
+              "medidas_cm": {
+                "cintura": 101.69,
+                "brazo": 27.04,
+                "pierna": 55.1
+              },
+              "observaciones": null,
+              "registrado_por_id": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_id": 5,
+      "nombres": "Sebastián",
+      "apellidos": "Quintero Cruz",
+      "documento": 1032868828,
+      "fecha_nacimiento": "1976-06-04",
+      "sexo": "Masculino",
+      "correo": "sebastian5@gmail.com",
+      "direccion": "Barranquilla, Calle 58 # 38-36",
+      "telefono": "3028728463",
+      "estatura_cm": 178.62,
+      "objetivo_fisico": "Mantenimiento",
+      "grupo_muscular_prioritario": null,
+      "nivel_experiencia": "Principiante",
+      "disponibilidad_semanal_dias": 2,
+      "estado": "Activo",
+      "fecha_registro": "2024-01-16",
+      "fecha_ultima_modificacion": null,
+      "registrado_por_id": 1,
+      "restricciones": [
+        {
+          "id_restriccion": 4,
+          "nombre": "Alergia al gluten",
+          "tipo": "Alergia",
+          "efecto_relevante": null
+        }
+      ],
+      "ciclos": [
+        {
+          "numero_ciclo": 1,
+          "fecha_inicio": "2024-01-16",
+          "fecha_fin": "2024-04-01",
+          "activo": false,
+          "fecha_creacion": "2024-01-16T08:00:00",
+          "plan_entrenamiento": {
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "rutinas": [
+              {
+                "nombre": "Día 1 — Pecho y Tríceps",
+                "enfoque_muscular": "Pecho",
+                "dia_numero": 1,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 4,
+                    "nombre": "Press militar",
+                    "series": 5,
+                    "repeticiones": 8,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 3,
+                    "nombre": "Peso muerto",
+                    "series": 3,
+                    "repeticiones": 9,
+                    "orden": 2
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 2 — Espalda y Bíceps",
+                "enfoque_muscular": "Espalda",
+                "dia_numero": 4,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 1,
+                    "nombre": "Sentadilla",
+                    "series": 5,
+                    "repeticiones": 12,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 9,
+                    "nombre": "Zancadas",
+                    "series": 5,
+                    "repeticiones": 13,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 2,
+                    "nombre": "Press de banca",
+                    "series": 5,
+                    "repeticiones": 9,
+                    "orden": 3
+                  }
+                ]
+              }
+            ]
+          },
+          "plan_nutricional": {
+            "calorias_estimadas": 2579.55,
+            "num_comidas_diarias": 5,
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "detalle": [
+              {
+                "numero_comida": 1,
+                "id_alimento": 9,
+                "nombre_alimento": "Leche deslactosada",
+                "cantidad_g": 217
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 6,
+                "nombre_alimento": "Atún en agua",
+                "cantidad_g": 109
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 8,
+                "nombre_alimento": "Almendras",
+                "cantidad_g": 74
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 7,
+                "nombre_alimento": "Batata",
+                "cantidad_g": 145
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 2,
+                "nombre_alimento": "Arroz blanco",
+                "cantidad_g": 115
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 7,
+                "nombre_alimento": "Batata",
+                "cantidad_g": 196
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 9,
+                "nombre_alimento": "Leche deslactosada",
+                "cantidad_g": 103
+              },
+              {
+                "numero_comida": 4,
+                "id_alimento": 5,
+                "nombre_alimento": "Brócoli",
+                "cantidad_g": 63
+              },
+              {
+                "numero_comida": 5,
+                "id_alimento": 10,
+                "nombre_alimento": "Quinoa",
+                "cantidad_g": 224
+              },
+              {
+                "numero_comida": 5,
+                "id_alimento": 3,
+                "nombre_alimento": "Huevo entero",
+                "cantidad_g": 57
+              },
+              {
+                "numero_comida": 5,
+                "id_alimento": 5,
+                "nombre_alimento": "Brócoli",
+                "cantidad_g": 89
+              }
+            ]
+          },
+          "progreso_fisico": [
+            {
+              "fecha_registro": "2024-01-16",
+              "peso_kg": 85.69,
+              "porcentaje_grasa": 25.79,
+              "medidas_cm": {
+                "cintura": 67.83,
+                "brazo": 33.69,
+                "pierna": 53.42
+              },
+              "observaciones": null,
+              "registrado_por_id": 2
+            }
+          ]
+        },
+        {
+          "numero_ciclo": 2,
+          "fecha_inicio": "2024-04-12",
+          "fecha_fin": "2024-06-18",
+          "activo": true,
+          "fecha_creacion": "2024-04-12T08:00:00",
+          "plan_entrenamiento": {
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "rutinas": [
+              {
+                "nombre": "Día 1 — Pecho y Tríceps",
+                "enfoque_muscular": "Pecho",
+                "dia_numero": 5,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 9,
+                    "nombre": "Zancadas",
+                    "series": 3,
+                    "repeticiones": 8,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 3,
+                    "nombre": "Peso muerto",
+                    "series": 5,
+                    "repeticiones": 9,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 4,
+                    "nombre": "Press militar",
+                    "series": 5,
+                    "repeticiones": 12,
+                    "orden": 3
+                  },
+                  {
+                    "id_ejercicio": 1,
+                    "nombre": "Sentadilla",
+                    "series": 3,
+                    "repeticiones": 8,
+                    "orden": 4
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 2 — Espalda y Bíceps",
+                "enfoque_muscular": "Espalda",
+                "dia_numero": 7,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 9,
+                    "nombre": "Zancadas",
+                    "series": 3,
+                    "repeticiones": 13,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 4,
+                    "nombre": "Press militar",
+                    "series": 4,
+                    "repeticiones": 14,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 6,
+                    "nombre": "Extensión de tríceps",
+                    "series": 4,
+                    "repeticiones": 10,
+                    "orden": 3
+                  },
+                  {
+                    "id_ejercicio": 7,
+                    "nombre": "Hip thrust",
+                    "series": 3,
+                    "repeticiones": 10,
+                    "orden": 4
+                  }
+                ]
+              }
+            ]
+          },
+          "plan_nutricional": {
+            "calorias_estimadas": 2526.86,
+            "num_comidas_diarias": 4,
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "detalle": [
+              {
+                "numero_comida": 1,
+                "id_alimento": 2,
+                "nombre_alimento": "Arroz blanco",
+                "cantidad_g": 184
+              },
+              {
+                "numero_comida": 1,
+                "id_alimento": 1,
+                "nombre_alimento": "Pechuga de pollo",
+                "cantidad_g": 246
+              },
+              {
+                "numero_comida": 1,
+                "id_alimento": 3,
+                "nombre_alimento": "Huevo entero",
+                "cantidad_g": 196
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 6,
+                "nombre_alimento": "Atún en agua",
+                "cantidad_g": 139
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 3,
+                "nombre_alimento": "Huevo entero",
+                "cantidad_g": 92
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 2,
+                "nombre_alimento": "Arroz blanco",
+                "cantidad_g": 218
+              },
+              {
+                "numero_comida": 4,
+                "id_alimento": 7,
+                "nombre_alimento": "Batata",
+                "cantidad_g": 160
+              },
+              {
+                "numero_comida": 4,
+                "id_alimento": 3,
+                "nombre_alimento": "Huevo entero",
+                "cantidad_g": 207
+              }
+            ]
+          },
+          "progreso_fisico": [
+            {
+              "fecha_registro": "2024-04-12",
+              "peso_kg": 90.62,
+              "porcentaje_grasa": 15.92,
+              "medidas_cm": {
+                "cintura": 100.84,
+                "brazo": 28.94,
+                "pierna": 50.49
+              },
+              "observaciones": "Buena adherencia al plan",
+              "registrado_por_id": 2
+            },
+            {
+              "fecha_registro": "2024-05-04",
+              "peso_kg": 90.48,
+              "porcentaje_grasa": 15.8,
+              "medidas_cm": {
+                "cintura": 92.49,
+                "brazo": 34.66,
+                "pierna": 60.03
+              },
+              "observaciones": "Progreso dentro de lo esperado",
+              "registrado_por_id": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_id": 6,
+      "nombres": "Catalina",
+      "apellidos": "Sierra López",
+      "documento": 1030742311,
+      "fecha_nacimiento": "2000-06-10",
+      "sexo": "Femenino",
+      "correo": "catalina6@gmail.com",
+      "direccion": "Cúcuta, Calle 69 # 17-96",
+      "telefono": "3052339391",
+      "estatura_cm": 191.53,
+      "objetivo_fisico": "Aumento de masa",
+      "grupo_muscular_prioritario": "Pecho",
+      "nivel_experiencia": "Intermedio",
+      "disponibilidad_semanal_dias": 3,
+      "estado": "Activo",
+      "fecha_registro": "2024-06-10",
+      "fecha_ultima_modificacion": null,
+      "registrado_por_id": 1,
+      "restricciones": [],
+      "ciclos": [
+        {
+          "numero_ciclo": 1,
+          "fecha_inicio": "2024-06-10",
+          "fecha_fin": "2024-08-06",
+          "activo": false,
+          "fecha_creacion": "2024-06-10T08:00:00",
+          "plan_entrenamiento": {
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "rutinas": [
+              {
+                "nombre": "Día 1 — Pecho y Tríceps",
+                "enfoque_muscular": "Pecho",
+                "dia_numero": 2,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 8,
+                    "nombre": "Dominadas",
+                    "series": 5,
+                    "repeticiones": 8,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 6,
+                    "nombre": "Extensión de tríceps",
+                    "series": 3,
+                    "repeticiones": 10,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 9,
+                    "nombre": "Zancadas",
+                    "series": 4,
+                    "repeticiones": 10,
+                    "orden": 3
+                  },
+                  {
+                    "id_ejercicio": 4,
+                    "nombre": "Press militar",
+                    "series": 4,
+                    "repeticiones": 8,
+                    "orden": 4
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 2 — Espalda y Bíceps",
+                "enfoque_muscular": "Espalda",
+                "dia_numero": 4,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 1,
+                    "nombre": "Sentadilla",
+                    "series": 3,
+                    "repeticiones": 15,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 6,
+                    "nombre": "Extensión de tríceps",
+                    "series": 3,
+                    "repeticiones": 11,
+                    "orden": 2
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 3 — Piernas y Glúteos",
+                "enfoque_muscular": "Piernas",
+                "dia_numero": 5,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 3,
+                    "nombre": "Peso muerto",
+                    "series": 5,
+                    "repeticiones": 13,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 6,
+                    "nombre": "Extensión de tríceps",
+                    "series": 5,
+                    "repeticiones": 14,
+                    "orden": 2
+                  }
+                ]
+              }
+            ]
+          },
+          "plan_nutricional": {
+            "calorias_estimadas": 2811.6,
+            "num_comidas_diarias": 5,
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "detalle": [
+              {
+                "numero_comida": 1,
+                "id_alimento": 8,
+                "nombre_alimento": "Almendras",
+                "cantidad_g": 148
+              },
+              {
+                "numero_comida": 1,
+                "id_alimento": 2,
+                "nombre_alimento": "Arroz blanco",
+                "cantidad_g": 241
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 2,
+                "nombre_alimento": "Arroz blanco",
+                "cantidad_g": 218
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 5,
+                "nombre_alimento": "Brócoli",
+                "cantidad_g": 68
+              },
+              {
+                "numero_comida": 4,
+                "id_alimento": 5,
+                "nombre_alimento": "Brócoli",
+                "cantidad_g": 219
+              },
+              {
+                "numero_comida": 4,
+                "id_alimento": 1,
+                "nombre_alimento": "Pechuga de pollo",
+                "cantidad_g": 82
+              },
+              {
+                "numero_comida": 4,
+                "id_alimento": 4,
+                "nombre_alimento": "Avena",
+                "cantidad_g": 134
+              },
+              {
+                "numero_comida": 5,
+                "id_alimento": 5,
+                "nombre_alimento": "Brócoli",
+                "cantidad_g": 203
+              }
+            ]
+          },
+          "progreso_fisico": [
+            {
+              "fecha_registro": "2024-06-10",
+              "peso_kg": 73.38,
+              "porcentaje_grasa": 18.44,
+              "medidas_cm": {
+                "cintura": 76.19,
+                "brazo": 35.04,
+                "pierna": 60.41
+              },
+              "observaciones": null,
+              "registrado_por_id": 2
+            }
+          ]
+        },
+        {
+          "numero_ciclo": 2,
+          "fecha_inicio": "2024-08-13",
+          "fecha_fin": "2024-11-02",
+          "activo": true,
+          "fecha_creacion": "2024-08-13T08:00:00",
+          "plan_entrenamiento": {
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "rutinas": [
+              {
+                "nombre": "Día 1 — Pecho y Tríceps",
+                "enfoque_muscular": "Pecho",
+                "dia_numero": 2,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 3,
+                    "nombre": "Peso muerto",
+                    "series": 4,
+                    "repeticiones": 14,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 9,
+                    "nombre": "Zancadas",
+                    "series": 5,
+                    "repeticiones": 8,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 4,
+                    "nombre": "Press militar",
+                    "series": 5,
+                    "repeticiones": 10,
+                    "orden": 3
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 2 — Espalda y Bíceps",
+                "enfoque_muscular": "Espalda",
+                "dia_numero": 5,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 7,
+                    "nombre": "Hip thrust",
+                    "series": 3,
+                    "repeticiones": 9,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 8,
+                    "nombre": "Dominadas",
+                    "series": 3,
+                    "repeticiones": 10,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 2,
+                    "nombre": "Press de banca",
+                    "series": 5,
+                    "repeticiones": 15,
+                    "orden": 3
+                  },
+                  {
+                    "id_ejercicio": 5,
+                    "nombre": "Curl de bíceps",
+                    "series": 5,
+                    "repeticiones": 11,
+                    "orden": 4
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 3 — Piernas y Glúteos",
+                "enfoque_muscular": "Piernas",
+                "dia_numero": 6,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 9,
+                    "nombre": "Zancadas",
+                    "series": 4,
+                    "repeticiones": 15,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 3,
+                    "nombre": "Peso muerto",
+                    "series": 5,
+                    "repeticiones": 9,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 4,
+                    "nombre": "Press militar",
+                    "series": 3,
+                    "repeticiones": 9,
+                    "orden": 3
+                  },
+                  {
+                    "id_ejercicio": 5,
+                    "nombre": "Curl de bíceps",
+                    "series": 4,
+                    "repeticiones": 14,
+                    "orden": 4
+                  }
+                ]
+              }
+            ]
+          },
+          "plan_nutricional": {
+            "calorias_estimadas": 2836.87,
+            "num_comidas_diarias": 6,
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "detalle": [
+              {
+                "numero_comida": 1,
+                "id_alimento": 10,
+                "nombre_alimento": "Quinoa",
+                "cantidad_g": 157
+              },
+              {
+                "numero_comida": 1,
+                "id_alimento": 5,
+                "nombre_alimento": "Brócoli",
+                "cantidad_g": 242
+              },
+              {
+                "numero_comida": 1,
+                "id_alimento": 8,
+                "nombre_alimento": "Almendras",
+                "cantidad_g": 219
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 6,
+                "nombre_alimento": "Atún en agua",
+                "cantidad_g": 106
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 8,
+                "nombre_alimento": "Almendras",
+                "cantidad_g": 202
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 1,
+                "nombre_alimento": "Pechuga de pollo",
+                "cantidad_g": 110
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 7,
+                "nombre_alimento": "Batata",
+                "cantidad_g": 236
+              },
+              {
+                "numero_comida": 4,
+                "id_alimento": 8,
+                "nombre_alimento": "Almendras",
+                "cantidad_g": 139
+              },
+              {
+                "numero_comida": 4,
+                "id_alimento": 5,
+                "nombre_alimento": "Brócoli",
+                "cantidad_g": 99
+              },
+              {
+                "numero_comida": 5,
+                "id_alimento": 10,
+                "nombre_alimento": "Quinoa",
+                "cantidad_g": 222
+              },
+              {
+                "numero_comida": 6,
+                "id_alimento": 3,
+                "nombre_alimento": "Huevo entero",
+                "cantidad_g": 154
+              },
+              {
+                "numero_comida": 6,
+                "id_alimento": 8,
+                "nombre_alimento": "Almendras",
+                "cantidad_g": 206
+              },
+              {
+                "numero_comida": 6,
+                "id_alimento": 6,
+                "nombre_alimento": "Atún en agua",
+                "cantidad_g": 152
+              }
+            ]
+          },
+          "progreso_fisico": [
+            {
+              "fecha_registro": "2024-08-13",
+              "peso_kg": 96.06,
+              "porcentaje_grasa": 23.94,
+              "medidas_cm": {
+                "cintura": 85.4,
+                "brazo": 36.94,
+                "pierna": 54.65
+              },
+              "observaciones": "Buena adherencia al plan",
+              "registrado_por_id": 3
+            },
+            {
+              "fecha_registro": "2024-09-05",
+              "peso_kg": 96.08,
+              "porcentaje_grasa": 23.71,
+              "medidas_cm": {
+                "cintura": 98.42,
+                "brazo": 39.68,
+                "pierna": 61.04
+              },
+              "observaciones": "Buena adherencia al plan",
+              "registrado_por_id": 2
+            },
+            {
+              "fecha_registro": "2024-09-30",
+              "peso_kg": 96.01,
+              "porcentaje_grasa": 23.36,
+              "medidas_cm": {
+                "cintura": 80.91,
+                "brazo": 39.53,
+                "pierna": 68.75
+              },
+              "observaciones": "Se nota mejoría en composición corporal",
+              "registrado_por_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_id": 7,
+      "nombres": "Ximena",
+      "apellidos": "Guerrero Duarte",
+      "documento": 1050119651,
+      "fecha_nacimiento": "1975-12-11",
+      "sexo": "Femenino",
+      "correo": "ximena7@gmail.com",
+      "direccion": "Medellín, Carrera 5 # 22-10",
+      "telefono": "3179467853",
+      "estatura_cm": 157.56,
+      "objetivo_fisico": "Aumento de masa",
+      "grupo_muscular_prioritario": "Hombros",
+      "nivel_experiencia": "Principiante",
+      "disponibilidad_semanal_dias": 3,
+      "estado": "Activo",
+      "fecha_registro": "2024-10-28",
+      "fecha_ultima_modificacion": null,
+      "registrado_por_id": 1,
+      "restricciones": [],
+      "ciclos": [
+        {
+          "numero_ciclo": 1,
+          "fecha_inicio": "2024-10-28",
+          "fecha_fin": "2025-01-22",
+          "activo": false,
+          "fecha_creacion": "2024-10-28T08:00:00",
+          "plan_entrenamiento": {
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "rutinas": [
+              {
+                "nombre": "Día 1 — Pecho y Tríceps",
+                "enfoque_muscular": "Pecho",
+                "dia_numero": 3,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 5,
+                    "nombre": "Curl de bíceps",
+                    "series": 4,
+                    "repeticiones": 15,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 4,
+                    "nombre": "Press militar",
+                    "series": 4,
+                    "repeticiones": 8,
+                    "orden": 2
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 2 — Espalda y Bíceps",
+                "enfoque_muscular": "Espalda",
+                "dia_numero": 5,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 3,
+                    "nombre": "Peso muerto",
+                    "series": 4,
+                    "repeticiones": 8,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 9,
+                    "nombre": "Zancadas",
+                    "series": 3,
+                    "repeticiones": 8,
+                    "orden": 2
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 3 — Piernas y Glúteos",
+                "enfoque_muscular": "Piernas",
+                "dia_numero": 7,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 3,
+                    "nombre": "Peso muerto",
+                    "series": 5,
+                    "repeticiones": 10,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 9,
+                    "nombre": "Zancadas",
+                    "series": 5,
+                    "repeticiones": 8,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 8,
+                    "nombre": "Dominadas",
+                    "series": 5,
+                    "repeticiones": 9,
+                    "orden": 3
+                  }
+                ]
+              }
+            ]
+          },
+          "plan_nutricional": {
+            "calorias_estimadas": 3136.84,
+            "num_comidas_diarias": 5,
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "detalle": [
+              {
+                "numero_comida": 1,
+                "id_alimento": 8,
+                "nombre_alimento": "Almendras",
+                "cantidad_g": 132
+              },
+              {
+                "numero_comida": 1,
+                "id_alimento": 10,
+                "nombre_alimento": "Quinoa",
+                "cantidad_g": 77
+              },
+              {
+                "numero_comida": 1,
+                "id_alimento": 3,
+                "nombre_alimento": "Huevo entero",
+                "cantidad_g": 89
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 10,
+                "nombre_alimento": "Quinoa",
+                "cantidad_g": 147
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 4,
+                "nombre_alimento": "Avena",
+                "cantidad_g": 110
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 7,
+                "nombre_alimento": "Batata",
+                "cantidad_g": 152
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 2,
+                "nombre_alimento": "Arroz blanco",
+                "cantidad_g": 247
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 9,
+                "nombre_alimento": "Leche deslactosada",
+                "cantidad_g": 120
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 6,
+                "nombre_alimento": "Atún en agua",
+                "cantidad_g": 146
+              },
+              {
+                "numero_comida": 4,
+                "id_alimento": 2,
+                "nombre_alimento": "Arroz blanco",
+                "cantidad_g": 58
+              },
+              {
+                "numero_comida": 4,
+                "id_alimento": 10,
+                "nombre_alimento": "Quinoa",
+                "cantidad_g": 175
+              },
+              {
+                "numero_comida": 5,
+                "id_alimento": 5,
+                "nombre_alimento": "Brócoli",
+                "cantidad_g": 56
+              },
+              {
+                "numero_comida": 5,
+                "id_alimento": 3,
+                "nombre_alimento": "Huevo entero",
+                "cantidad_g": 117
+              }
+            ]
+          },
+          "progreso_fisico": [
+            {
+              "fecha_registro": "2024-10-28",
+              "peso_kg": 65.96,
+              "porcentaje_grasa": 32.57,
+              "medidas_cm": {
+                "cintura": 75.86,
+                "brazo": 35.84,
+                "pierna": 63.58
+              },
+              "observaciones": null,
+              "registrado_por_id": 2
+            },
+            {
+              "fecha_registro": "2024-11-20",
+              "peso_kg": 65.53,
+              "porcentaje_grasa": 32.29,
+              "medidas_cm": {
+                "cintura": 87,
+                "brazo": 41.83,
+                "pierna": 69.84
+              },
+              "observaciones": "Progreso dentro de lo esperado",
+              "registrado_por_id": 3
+            },
+            {
+              "fecha_registro": "2024-12-08",
+              "peso_kg": 64.8,
+              "porcentaje_grasa": 31.9,
+              "medidas_cm": {
+                "cintura": 86.18,
+                "brazo": 25.3,
+                "pierna": 57.93
+              },
+              "observaciones": "Progreso dentro de lo esperado",
+              "registrado_por_id": 1
+            }
+          ]
+        },
+        {
+          "numero_ciclo": 2,
+          "fecha_inicio": "2025-01-25",
+          "fecha_fin": "2025-04-15",
+          "activo": true,
+          "fecha_creacion": "2025-01-25T08:00:00",
+          "plan_entrenamiento": {
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "rutinas": [
+              {
+                "nombre": "Día 1 — Pecho y Tríceps",
+                "enfoque_muscular": "Pecho",
+                "dia_numero": 2,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 9,
+                    "nombre": "Zancadas",
+                    "series": 3,
+                    "repeticiones": 15,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 1,
+                    "nombre": "Sentadilla",
+                    "series": 4,
+                    "repeticiones": 9,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 8,
+                    "nombre": "Dominadas",
+                    "series": 3,
+                    "repeticiones": 15,
+                    "orden": 3
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 2 — Espalda y Bíceps",
+                "enfoque_muscular": "Espalda",
+                "dia_numero": 3,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 5,
+                    "nombre": "Curl de bíceps",
+                    "series": 3,
+                    "repeticiones": 12,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 7,
+                    "nombre": "Hip thrust",
+                    "series": 5,
+                    "repeticiones": 13,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 8,
+                    "nombre": "Dominadas",
+                    "series": 3,
+                    "repeticiones": 10,
+                    "orden": 3
+                  },
+                  {
+                    "id_ejercicio": 6,
+                    "nombre": "Extensión de tríceps",
+                    "series": 5,
+                    "repeticiones": 8,
+                    "orden": 4
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 3 — Piernas y Glúteos",
+                "enfoque_muscular": "Piernas",
+                "dia_numero": 4,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 6,
+                    "nombre": "Extensión de tríceps",
+                    "series": 5,
+                    "repeticiones": 10,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 4,
+                    "nombre": "Press militar",
+                    "series": 4,
+                    "repeticiones": 15,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 2,
+                    "nombre": "Press de banca",
+                    "series": 3,
+                    "repeticiones": 14,
+                    "orden": 3
+                  },
+                  {
+                    "id_ejercicio": 5,
+                    "nombre": "Curl de bíceps",
+                    "series": 4,
+                    "repeticiones": 10,
+                    "orden": 4
+                  }
+                ]
+              }
+            ]
+          },
+          "plan_nutricional": {
+            "calorias_estimadas": 3148.42,
+            "num_comidas_diarias": 4,
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "detalle": [
+              {
+                "numero_comida": 1,
+                "id_alimento": 9,
+                "nombre_alimento": "Leche deslactosada",
+                "cantidad_g": 77
+              },
+              {
+                "numero_comida": 1,
+                "id_alimento": 10,
+                "nombre_alimento": "Quinoa",
+                "cantidad_g": 70
+              },
+              {
+                "numero_comida": 1,
+                "id_alimento": 7,
+                "nombre_alimento": "Batata",
+                "cantidad_g": 159
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 4,
+                "nombre_alimento": "Avena",
+                "cantidad_g": 121
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 3,
+                "nombre_alimento": "Huevo entero",
+                "cantidad_g": 103
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 5,
+                "nombre_alimento": "Brócoli",
+                "cantidad_g": 170
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 1,
+                "nombre_alimento": "Pechuga de pollo",
+                "cantidad_g": 160
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 7,
+                "nombre_alimento": "Batata",
+                "cantidad_g": 241
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 5,
+                "nombre_alimento": "Brócoli",
+                "cantidad_g": 237
+              },
+              {
+                "numero_comida": 4,
+                "id_alimento": 6,
+                "nombre_alimento": "Atún en agua",
+                "cantidad_g": 103
+              }
+            ]
+          },
+          "progreso_fisico": [
+            {
+              "fecha_registro": "2025-01-25",
+              "peso_kg": 61.56,
+              "porcentaje_grasa": 24.62,
+              "medidas_cm": {
+                "cintura": 88.44,
+                "brazo": 40.64,
+                "pierna": 53.98
+              },
+              "observaciones": null,
+              "registrado_por_id": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_id": 8,
+      "nombres": "Melissa",
+      "apellidos": "Ospina Medina",
+      "documento": 1056775103,
+      "fecha_nacimiento": "1984-10-06",
+      "sexo": "Femenino",
+      "correo": "melissa8@gmail.com",
+      "direccion": "Cúcuta, Calle 21 # 4-66",
+      "telefono": "3284593961",
+      "estatura_cm": 162.6,
+      "objetivo_fisico": "Mantenimiento",
+      "grupo_muscular_prioritario": "Glúteos",
+      "nivel_experiencia": "Avanzado",
+      "disponibilidad_semanal_dias": 3,
+      "estado": "Activo",
+      "fecha_registro": "2024-01-30",
+      "fecha_ultima_modificacion": null,
+      "registrado_por_id": 1,
+      "restricciones": [],
+      "ciclos": [
+        {
+          "numero_ciclo": 1,
+          "fecha_inicio": "2024-01-30",
+          "fecha_fin": "2024-03-27",
+          "activo": false,
+          "fecha_creacion": "2024-01-30T08:00:00",
+          "plan_entrenamiento": {
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "rutinas": [
+              {
+                "nombre": "Día 1 — Pecho y Tríceps",
+                "enfoque_muscular": "Pecho",
+                "dia_numero": 1,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 7,
+                    "nombre": "Hip thrust",
+                    "series": 4,
+                    "repeticiones": 15,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 5,
+                    "nombre": "Curl de bíceps",
+                    "series": 5,
+                    "repeticiones": 12,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 8,
+                    "nombre": "Dominadas",
+                    "series": 3,
+                    "repeticiones": 8,
+                    "orden": 3
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 2 — Espalda y Bíceps",
+                "enfoque_muscular": "Espalda",
+                "dia_numero": 4,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 3,
+                    "nombre": "Peso muerto",
+                    "series": 4,
+                    "repeticiones": 10,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 5,
+                    "nombre": "Curl de bíceps",
+                    "series": 3,
+                    "repeticiones": 9,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 1,
+                    "nombre": "Sentadilla",
+                    "series": 4,
+                    "repeticiones": 12,
+                    "orden": 3
+                  },
+                  {
+                    "id_ejercicio": 2,
+                    "nombre": "Press de banca",
+                    "series": 3,
+                    "repeticiones": 14,
+                    "orden": 4
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 3 — Piernas y Glúteos",
+                "enfoque_muscular": "Piernas",
+                "dia_numero": 7,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 1,
+                    "nombre": "Sentadilla",
+                    "series": 5,
+                    "repeticiones": 10,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 7,
+                    "nombre": "Hip thrust",
+                    "series": 3,
+                    "repeticiones": 13,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 6,
+                    "nombre": "Extensión de tríceps",
+                    "series": 5,
+                    "repeticiones": 8,
+                    "orden": 3
+                  },
+                  {
+                    "id_ejercicio": 5,
+                    "nombre": "Curl de bíceps",
+                    "series": 5,
+                    "repeticiones": 15,
+                    "orden": 4
+                  }
+                ]
+              }
+            ]
+          },
+          "plan_nutricional": {
+            "calorias_estimadas": 2479.47,
+            "num_comidas_diarias": 4,
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "detalle": [
+              {
+                "numero_comida": 1,
+                "id_alimento": 4,
+                "nombre_alimento": "Avena",
+                "cantidad_g": 99
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 5,
+                "nombre_alimento": "Brócoli",
+                "cantidad_g": 171
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 10,
+                "nombre_alimento": "Quinoa",
+                "cantidad_g": 192
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 4,
+                "nombre_alimento": "Avena",
+                "cantidad_g": 211
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 3,
+                "nombre_alimento": "Huevo entero",
+                "cantidad_g": 219
+              },
+              {
+                "numero_comida": 4,
+                "id_alimento": 1,
+                "nombre_alimento": "Pechuga de pollo",
+                "cantidad_g": 177
+              },
+              {
+                "numero_comida": 4,
+                "id_alimento": 5,
+                "nombre_alimento": "Brócoli",
+                "cantidad_g": 94
+              },
+              {
+                "numero_comida": 4,
+                "id_alimento": 10,
+                "nombre_alimento": "Quinoa",
+                "cantidad_g": 98
+              }
+            ]
+          },
+          "progreso_fisico": [
+            {
+              "fecha_registro": "2024-01-30",
+              "peso_kg": 81.13,
+              "porcentaje_grasa": 17.48,
+              "medidas_cm": {
+                "cintura": 70.84,
+                "brazo": 28.78,
+                "pierna": 66.46
+              },
+              "observaciones": "Buena adherencia al plan",
+              "registrado_por_id": 2
+            },
+            {
+              "fecha_registro": "2024-02-22",
+              "peso_kg": 80.92,
+              "porcentaje_grasa": 17.4,
+              "medidas_cm": {
+                "cintura": 100.23,
+                "brazo": 43.16,
+                "pierna": 67.7
+              },
+              "observaciones": "Buena adherencia al plan",
+              "registrado_por_id": 2
+            }
+          ]
+        },
+        {
+          "numero_ciclo": 2,
+          "fecha_inicio": "2024-04-29",
+          "fecha_fin": "2024-07-23",
+          "activo": true,
+          "fecha_creacion": "2024-04-29T08:00:00",
+          "plan_entrenamiento": {
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "rutinas": [
+              {
+                "nombre": "Día 1 — Pecho y Tríceps",
+                "enfoque_muscular": "Pecho",
+                "dia_numero": 5,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 5,
+                    "nombre": "Curl de bíceps",
+                    "series": 3,
+                    "repeticiones": 10,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 1,
+                    "nombre": "Sentadilla",
+                    "series": 4,
+                    "repeticiones": 15,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 7,
+                    "nombre": "Hip thrust",
+                    "series": 3,
+                    "repeticiones": 12,
+                    "orden": 3
+                  },
+                  {
+                    "id_ejercicio": 6,
+                    "nombre": "Extensión de tríceps",
+                    "series": 4,
+                    "repeticiones": 14,
+                    "orden": 4
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 2 — Espalda y Bíceps",
+                "enfoque_muscular": "Espalda",
+                "dia_numero": 6,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 2,
+                    "nombre": "Press de banca",
+                    "series": 5,
+                    "repeticiones": 13,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 8,
+                    "nombre": "Dominadas",
+                    "series": 4,
+                    "repeticiones": 8,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 1,
+                    "nombre": "Sentadilla",
+                    "series": 5,
+                    "repeticiones": 9,
+                    "orden": 3
+                  },
+                  {
+                    "id_ejercicio": 3,
+                    "nombre": "Peso muerto",
+                    "series": 4,
+                    "repeticiones": 15,
+                    "orden": 4
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 3 — Piernas y Glúteos",
+                "enfoque_muscular": "Piernas",
+                "dia_numero": 7,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 9,
+                    "nombre": "Zancadas",
+                    "series": 3,
+                    "repeticiones": 15,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 6,
+                    "nombre": "Extensión de tríceps",
+                    "series": 5,
+                    "repeticiones": 9,
+                    "orden": 2
+                  }
+                ]
+              }
+            ]
+          },
+          "plan_nutricional": {
+            "calorias_estimadas": 2343.55,
+            "num_comidas_diarias": 5,
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "detalle": [
+              {
+                "numero_comida": 1,
+                "id_alimento": 8,
+                "nombre_alimento": "Almendras",
+                "cantidad_g": 170
+              },
+              {
+                "numero_comida": 1,
+                "id_alimento": 4,
+                "nombre_alimento": "Avena",
+                "cantidad_g": 171
+              },
+              {
+                "numero_comida": 1,
+                "id_alimento": 3,
+                "nombre_alimento": "Huevo entero",
+                "cantidad_g": 108
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 3,
+                "nombre_alimento": "Huevo entero",
+                "cantidad_g": 210
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 2,
+                "nombre_alimento": "Arroz blanco",
+                "cantidad_g": 187
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 5,
+                "nombre_alimento": "Brócoli",
+                "cantidad_g": 86
+              },
+              {
+                "numero_comida": 4,
+                "id_alimento": 4,
+                "nombre_alimento": "Avena",
+                "cantidad_g": 148
+              },
+              {
+                "numero_comida": 4,
+                "id_alimento": 8,
+                "nombre_alimento": "Almendras",
+                "cantidad_g": 58
+              },
+              {
+                "numero_comida": 5,
+                "id_alimento": 7,
+                "nombre_alimento": "Batata",
+                "cantidad_g": 172
+              },
+              {
+                "numero_comida": 5,
+                "id_alimento": 5,
+                "nombre_alimento": "Brócoli",
+                "cantidad_g": 175
+              }
+            ]
+          },
+          "progreso_fisico": [
+            {
+              "fecha_registro": "2024-04-29",
+              "peso_kg": 66.09,
+              "porcentaje_grasa": 15.61,
+              "medidas_cm": {
+                "cintura": 88.03,
+                "brazo": 35.56,
+                "pierna": 57.53
+              },
+              "observaciones": "Progreso dentro de lo esperado",
+              "registrado_por_id": 2
+            },
+            {
+              "fecha_registro": "2024-05-19",
+              "peso_kg": 64.92,
+              "porcentaje_grasa": 15.41,
+              "medidas_cm": {
+                "cintura": 71.56,
+                "brazo": 26.16,
+                "pierna": 61.25
+              },
+              "observaciones": "Progreso dentro de lo esperado",
+              "registrado_por_id": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_id": 9,
+      "nombres": "Catalina",
+      "apellidos": "Cruz Martínez",
+      "documento": 1000475894,
+      "fecha_nacimiento": "1994-03-09",
+      "sexo": "Femenino",
+      "correo": "catalina9@gmail.com",
+      "direccion": "Cali, Avenida 6 # 20-47",
+      "telefono": "3127558317",
+      "estatura_cm": 177.07,
+      "objetivo_fisico": "Mantenimiento",
+      "grupo_muscular_prioritario": "Espalda",
+      "nivel_experiencia": "Intermedio",
+      "disponibilidad_semanal_dias": 5,
+      "estado": "Activo",
+      "fecha_registro": "2024-10-14",
+      "fecha_ultima_modificacion": null,
+      "registrado_por_id": 1,
+      "restricciones": [
+        {
+          "id_restriccion": 4,
+          "nombre": "Alergia al gluten",
+          "tipo": "Alergia",
+          "efecto_relevante": null
+        }
+      ],
+      "ciclos": [
+        {
+          "numero_ciclo": 1,
+          "fecha_inicio": "2024-10-14",
+          "fecha_fin": "2025-01-07",
+          "activo": false,
+          "fecha_creacion": "2024-10-14T08:00:00",
+          "plan_entrenamiento": {
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "rutinas": [
+              {
+                "nombre": "Día 1 — Pecho y Tríceps",
+                "enfoque_muscular": "Pecho",
+                "dia_numero": 5,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 6,
+                    "nombre": "Extensión de tríceps",
+                    "series": 4,
+                    "repeticiones": 10,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 2,
+                    "nombre": "Press de banca",
+                    "series": 3,
+                    "repeticiones": 13,
+                    "orden": 2
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 2 — Espalda y Bíceps",
+                "enfoque_muscular": "Espalda",
+                "dia_numero": 6,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 8,
+                    "nombre": "Dominadas",
+                    "series": 5,
+                    "repeticiones": 12,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 9,
+                    "nombre": "Zancadas",
+                    "series": 4,
+                    "repeticiones": 10,
+                    "orden": 2
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 3 — Piernas y Glúteos",
+                "enfoque_muscular": "Piernas",
+                "dia_numero": 7,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 5,
+                    "nombre": "Curl de bíceps",
+                    "series": 5,
+                    "repeticiones": 8,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 1,
+                    "nombre": "Sentadilla",
+                    "series": 3,
+                    "repeticiones": 11,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 6,
+                    "nombre": "Extensión de tríceps",
+                    "series": 4,
+                    "repeticiones": 10,
+                    "orden": 3
+                  }
+                ]
+              }
+            ]
+          },
+          "plan_nutricional": {
+            "calorias_estimadas": 2438.92,
+            "num_comidas_diarias": 3,
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "detalle": [
+              {
+                "numero_comida": 1,
+                "id_alimento": 1,
+                "nombre_alimento": "Pechuga de pollo",
+                "cantidad_g": 100
+              },
+              {
+                "numero_comida": 1,
+                "id_alimento": 7,
+                "nombre_alimento": "Batata",
+                "cantidad_g": 167
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 10,
+                "nombre_alimento": "Quinoa",
+                "cantidad_g": 205
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 7,
+                "nombre_alimento": "Batata",
+                "cantidad_g": 88
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 6,
+                "nombre_alimento": "Atún en agua",
+                "cantidad_g": 235
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 9,
+                "nombre_alimento": "Leche deslactosada",
+                "cantidad_g": 134
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 5,
+                "nombre_alimento": "Brócoli",
+                "cantidad_g": 204
+              }
+            ]
+          },
+          "progreso_fisico": [
+            {
+              "fecha_registro": "2024-10-14",
+              "peso_kg": 73.66,
+              "porcentaje_grasa": 14.42,
+              "medidas_cm": {
+                "cintura": 86.87,
+                "brazo": 27.48,
+                "pierna": 54.16
+              },
+              "observaciones": null,
+              "registrado_por_id": 1
+            }
+          ]
+        },
+        {
+          "numero_ciclo": 2,
+          "fecha_inicio": "2025-01-11",
+          "fecha_fin": "2025-03-08",
+          "activo": true,
+          "fecha_creacion": "2025-01-11T08:00:00",
+          "plan_entrenamiento": {
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "rutinas": [
+              {
+                "nombre": "Día 1 — Pecho y Tríceps",
+                "enfoque_muscular": "Pecho",
+                "dia_numero": 1,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 5,
+                    "nombre": "Curl de bíceps",
+                    "series": 3,
+                    "repeticiones": 14,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 2,
+                    "nombre": "Press de banca",
+                    "series": 5,
+                    "repeticiones": 13,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 7,
+                    "nombre": "Hip thrust",
+                    "series": 4,
+                    "repeticiones": 8,
+                    "orden": 3
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 2 — Espalda y Bíceps",
+                "enfoque_muscular": "Espalda",
+                "dia_numero": 3,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 3,
+                    "nombre": "Peso muerto",
+                    "series": 5,
+                    "repeticiones": 13,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 6,
+                    "nombre": "Extensión de tríceps",
+                    "series": 5,
+                    "repeticiones": 11,
+                    "orden": 2
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 3 — Piernas y Glúteos",
+                "enfoque_muscular": "Piernas",
+                "dia_numero": 7,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 1,
+                    "nombre": "Sentadilla",
+                    "series": 3,
+                    "repeticiones": 14,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 7,
+                    "nombre": "Hip thrust",
+                    "series": 3,
+                    "repeticiones": 8,
+                    "orden": 2
+                  }
+                ]
+              }
+            ]
+          },
+          "plan_nutricional": {
+            "calorias_estimadas": 2296.3,
+            "num_comidas_diarias": 4,
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "detalle": [
+              {
+                "numero_comida": 1,
+                "id_alimento": 7,
+                "nombre_alimento": "Batata",
+                "cantidad_g": 240
+              },
+              {
+                "numero_comida": 1,
+                "id_alimento": 1,
+                "nombre_alimento": "Pechuga de pollo",
+                "cantidad_g": 70
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 6,
+                "nombre_alimento": "Atún en agua",
+                "cantidad_g": 105
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 10,
+                "nombre_alimento": "Quinoa",
+                "cantidad_g": 51
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 10,
+                "nombre_alimento": "Quinoa",
+                "cantidad_g": 90
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 8,
+                "nombre_alimento": "Almendras",
+                "cantidad_g": 73
+              },
+              {
+                "numero_comida": 4,
+                "id_alimento": 3,
+                "nombre_alimento": "Huevo entero",
+                "cantidad_g": 246
+              },
+              {
+                "numero_comida": 4,
+                "id_alimento": 1,
+                "nombre_alimento": "Pechuga de pollo",
+                "cantidad_g": 154
+              }
+            ]
+          },
+          "progreso_fisico": [
+            {
+              "fecha_registro": "2025-01-11",
+              "peso_kg": 65.84,
+              "porcentaje_grasa": 30.92,
+              "medidas_cm": {
+                "cintura": 101.25,
+                "brazo": 42.03,
+                "pierna": 49.01
+              },
+              "observaciones": "Progreso dentro de lo esperado",
+              "registrado_por_id": 1
+            },
+            {
+              "fecha_registro": "2025-02-01",
+              "peso_kg": 64.51,
+              "porcentaje_grasa": 30.67,
+              "medidas_cm": {
+                "cintura": 70.55,
+                "brazo": 27.55,
+                "pierna": 49.96
+              },
+              "observaciones": "Se nota mejoría en composición corporal",
+              "registrado_por_id": 2
+            },
+            {
+              "fecha_registro": "2025-02-20",
+              "peso_kg": 63.57,
+              "porcentaje_grasa": 30.46,
+              "medidas_cm": {
+                "cintura": 80.39,
+                "brazo": 36.44,
+                "pierna": 61.8
+              },
+              "observaciones": "Se nota mejoría en composición corporal",
+              "registrado_por_id": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "_id": 10,
+      "nombres": "Valeria",
+      "apellidos": "Valencia Morales",
+      "documento": 1034188276,
+      "fecha_nacimiento": "1978-02-20",
+      "sexo": "Femenino",
+      "correo": "valeria10@gmail.com",
+      "direccion": "Manizales, Carrera 90 # 19-71",
+      "telefono": "3068526649",
+      "estatura_cm": 169.57,
+      "objetivo_fisico": "Pérdida de grasa",
+      "grupo_muscular_prioritario": null,
+      "nivel_experiencia": "Avanzado",
+      "disponibilidad_semanal_dias": 3,
+      "estado": "Activo",
+      "fecha_registro": "2024-06-18",
+      "fecha_ultima_modificacion": null,
+      "registrado_por_id": 1,
+      "restricciones": [
+        {
+          "id_restriccion": 3,
+          "nombre": "Lesión rodilla derecha",
+          "tipo": "Lesión",
+          "efecto_relevante": "Evitar carga axial sobre rodilla derecha"
+        }
+      ],
+      "ciclos": [
+        {
+          "numero_ciclo": 1,
+          "fecha_inicio": "2024-06-18",
+          "fecha_fin": "2024-09-01",
+          "activo": false,
+          "fecha_creacion": "2024-06-18T08:00:00",
+          "plan_entrenamiento": {
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "rutinas": [
+              {
+                "nombre": "Día 1 — Pecho y Tríceps",
+                "enfoque_muscular": "Pecho",
+                "dia_numero": 3,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 6,
+                    "nombre": "Extensión de tríceps",
+                    "series": 3,
+                    "repeticiones": 10,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 5,
+                    "nombre": "Curl de bíceps",
+                    "series": 4,
+                    "repeticiones": 8,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 8,
+                    "nombre": "Dominadas",
+                    "series": 4,
+                    "repeticiones": 12,
+                    "orden": 3
+                  },
+                  {
+                    "id_ejercicio": 2,
+                    "nombre": "Press de banca",
+                    "series": 5,
+                    "repeticiones": 13,
+                    "orden": 4
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 2 — Espalda y Bíceps",
+                "enfoque_muscular": "Espalda",
+                "dia_numero": 4,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 4,
+                    "nombre": "Press militar",
+                    "series": 5,
+                    "repeticiones": 9,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 3,
+                    "nombre": "Peso muerto",
+                    "series": 3,
+                    "repeticiones": 12,
+                    "orden": 2
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 3 — Piernas y Glúteos",
+                "enfoque_muscular": "Piernas",
+                "dia_numero": 5,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 6,
+                    "nombre": "Extensión de tríceps",
+                    "series": 4,
+                    "repeticiones": 11,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 3,
+                    "nombre": "Peso muerto",
+                    "series": 5,
+                    "repeticiones": 15,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 4,
+                    "nombre": "Press militar",
+                    "series": 3,
+                    "repeticiones": 15,
+                    "orden": 3
+                  },
+                  {
+                    "id_ejercicio": 2,
+                    "nombre": "Press de banca",
+                    "series": 3,
+                    "repeticiones": 14,
+                    "orden": 4
+                  }
+                ]
+              }
+            ]
+          },
+          "plan_nutricional": {
+            "calorias_estimadas": 1541.76,
+            "num_comidas_diarias": 3,
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "detalle": [
+              {
+                "numero_comida": 1,
+                "id_alimento": 3,
+                "nombre_alimento": "Huevo entero",
+                "cantidad_g": 250
+              },
+              {
+                "numero_comida": 1,
+                "id_alimento": 7,
+                "nombre_alimento": "Batata",
+                "cantidad_g": 240
+              },
+              {
+                "numero_comida": 1,
+                "id_alimento": 8,
+                "nombre_alimento": "Almendras",
+                "cantidad_g": 162
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 8,
+                "nombre_alimento": "Almendras",
+                "cantidad_g": 112
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 5,
+                "nombre_alimento": "Brócoli",
+                "cantidad_g": 98
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 6,
+                "nombre_alimento": "Atún en agua",
+                "cantidad_g": 105
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 8,
+                "nombre_alimento": "Almendras",
+                "cantidad_g": 148
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 4,
+                "nombre_alimento": "Avena",
+                "cantidad_g": 243
+              }
+            ]
+          },
+          "progreso_fisico": [
+            {
+              "fecha_registro": "2024-06-18",
+              "peso_kg": 58.3,
+              "porcentaje_grasa": 18.6,
+              "medidas_cm": {
+                "cintura": 88.25,
+                "brazo": 28.9,
+                "pierna": 69.24
+              },
+              "observaciones": "Se nota mejoría en composición corporal",
+              "registrado_por_id": 2
+            },
+            {
+              "fecha_registro": "2024-07-06",
+              "peso_kg": 58.13,
+              "porcentaje_grasa": 18.23,
+              "medidas_cm": {
+                "cintura": 73.87,
+                "brazo": 30.77,
+                "pierna": 63.23
+              },
+              "observaciones": "Progreso dentro de lo esperado",
+              "registrado_por_id": 2
+            },
+            {
+              "fecha_registro": "2024-07-31",
+              "peso_kg": 56.77,
+              "porcentaje_grasa": 17.84,
+              "medidas_cm": {
+                "cintura": 68.55,
+                "brazo": 40.4,
+                "pierna": 56.06
+              },
+              "observaciones": null,
+              "registrado_por_id": 2
+            }
+          ]
+        },
+        {
+          "numero_ciclo": 2,
+          "fecha_inicio": "2024-08-30",
+          "fecha_fin": "2024-11-25",
+          "activo": true,
+          "fecha_creacion": "2024-08-30T08:00:00",
+          "plan_entrenamiento": {
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "rutinas": [
+              {
+                "nombre": "Día 1 — Pecho y Tríceps",
+                "enfoque_muscular": "Pecho",
+                "dia_numero": 3,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 8,
+                    "nombre": "Dominadas",
+                    "series": 4,
+                    "repeticiones": 11,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 5,
+                    "nombre": "Curl de bíceps",
+                    "series": 5,
+                    "repeticiones": 13,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 6,
+                    "nombre": "Extensión de tríceps",
+                    "series": 3,
+                    "repeticiones": 13,
+                    "orden": 3
+                  },
+                  {
+                    "id_ejercicio": 2,
+                    "nombre": "Press de banca",
+                    "series": 5,
+                    "repeticiones": 9,
+                    "orden": 4
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 2 — Espalda y Bíceps",
+                "enfoque_muscular": "Espalda",
+                "dia_numero": 4,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 8,
+                    "nombre": "Dominadas",
+                    "series": 4,
+                    "repeticiones": 8,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 3,
+                    "nombre": "Peso muerto",
+                    "series": 4,
+                    "repeticiones": 10,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 4,
+                    "nombre": "Press militar",
+                    "series": 3,
+                    "repeticiones": 15,
+                    "orden": 3
+                  },
+                  {
+                    "id_ejercicio": 2,
+                    "nombre": "Press de banca",
+                    "series": 4,
+                    "repeticiones": 13,
+                    "orden": 4
+                  }
+                ]
+              },
+              {
+                "nombre": "Día 3 — Piernas y Glúteos",
+                "enfoque_muscular": "Piernas",
+                "dia_numero": 5,
+                "ejercicios": [
+                  {
+                    "id_ejercicio": 8,
+                    "nombre": "Dominadas",
+                    "series": 3,
+                    "repeticiones": 8,
+                    "orden": 1
+                  },
+                  {
+                    "id_ejercicio": 5,
+                    "nombre": "Curl de bíceps",
+                    "series": 5,
+                    "repeticiones": 10,
+                    "orden": 2
+                  },
+                  {
+                    "id_ejercicio": 6,
+                    "nombre": "Extensión de tríceps",
+                    "series": 5,
+                    "repeticiones": 10,
+                    "orden": 3
+                  }
+                ]
+              }
+            ]
+          },
+          "plan_nutricional": {
+            "calorias_estimadas": 1885.8,
+            "num_comidas_diarias": 3,
+            "es_automatico": true,
+            "modificado_por_id": null,
+            "observaciones": null,
+            "detalle": [
+              {
+                "numero_comida": 1,
+                "id_alimento": 5,
+                "nombre_alimento": "Brócoli",
+                "cantidad_g": 54
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 1,
+                "nombre_alimento": "Pechuga de pollo",
+                "cantidad_g": 181
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 4,
+                "nombre_alimento": "Avena",
+                "cantidad_g": 98
+              },
+              {
+                "numero_comida": 2,
+                "id_alimento": 10,
+                "nombre_alimento": "Quinoa",
+                "cantidad_g": 230
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 7,
+                "nombre_alimento": "Batata",
+                "cantidad_g": 62
+              },
+              {
+                "numero_comida": 3,
+                "id_alimento": 5,
+                "nombre_alimento": "Brócoli",
+                "cantidad_g": 94
+              }
+            ]
+          },
+          "progreso_fisico": [
+            {
+              "fecha_registro": "2024-08-30",
+              "peso_kg": 58.93,
+              "porcentaje_grasa": 23.2,
+              "medidas_cm": {
+                "cintura": 97.95,
+                "brazo": 42.9,
+                "pierna": 52.13
+              },
+              "observaciones": "Se nota mejoría en composición corporal",
+              "registrado_por_id": 2
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

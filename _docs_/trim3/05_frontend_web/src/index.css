@@ -1,0 +1,192 @@
+:root {
+  --text: #6b6375;
+  --text-h: #08060d;
+  --bg: #fff;
+  --border: #e5e4e7;
+  --code-bg: #f4f3ec;
+  --accent: #aa3bff;
+  --accent-bg: rgba(170, 59, 255, 0.1);
+  --accent-border: rgba(170, 59, 255, 0.5);
+  --social-bg: rgba(244, 243, 236, 0.5);
+  --shadow:
+    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+
+  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, Consolas, monospace;
+
+  font: 18px/145% var(--sans);
+  letter-spacing: 0.18px;
+  color-scheme: light dark;
+  color: var(--text);
+  background: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  @media (max-width: 1024px) {
+    font-size: 16px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #9ca3af;
+    --text-h: #f3f4f6;
+    --bg: #16171d;
+    --border: #2e303a;
+    --code-bg: #1f2028;
+    --accent: #c084fc;
+    --accent-bg: rgba(192, 132, 252, 0.15);
+    --accent-border: rgba(192, 132, 252, 0.5);
+    --social-bg: rgba(47, 48, 58, 0.5);
+    --shadow:
+      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+  }
+
+  #social .button-icon {
+    filter: invert(1) brightness(2);
+  }
+}
+
+body {
+  margin: 0;
+}
+
+/* ── #root ─────────────────────────────────────────────────────────────────────
+   El dashboard usa AppLayout con sidebar, por lo que #root NO debe restringir
+   el ancho a 1126px ni añadir bordes laterales que recorten el contenido.
+   Se eliminan width fijo y border-inline para permitir layouts full-width.
+──────────────────────────────────────────────────────────────────────────── */
+#root {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  text-align: left;
+  border-inline: none;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+h1,
+h2 {
+  font-family: var(--heading);
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+h1 {
+  font-size: 56px;
+  letter-spacing: -1.68px;
+  margin: 32px 0;
+  @media (max-width: 1024px) {
+    font-size: 36px;
+    margin: 20px 0;
+  }
+}
+h2 {
+  font-size: 24px;
+  line-height: 118%;
+  letter-spacing: -0.24px;
+  margin: 0 0 8px;
+  @media (max-width: 1024px) {
+    font-size: 20px;
+  }
+}
+p {
+  margin: 0;
+}
+
+code,
+.counter {
+  font-family: var(--mono);
+  display: inline-flex;
+  border-radius: 4px;
+  color: var(--text-h);
+}
+
+code {
+  font-size: 15px;
+  line-height: 135%;
+  padding: 4px 8px;
+  background: var(--code-bg);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   TABLAS RESPONSIVAS — MetaFit Dashboard
+   Clases utilitarias para todas las tablas de datos del sistema.
+   Uso: <div class="mf-table-wrap"><table class="table mf-table">...</table></div>
+══════════════════════════════════════════════════════════════════════════════ */
+
+/* Contenedor con scroll horizontal — nunca corta columnas */
+.mf-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Tabla: fuente compacta (0.875rem = 14px) */
+.mf-table {
+  font-size: 0.875rem;
+}
+
+/* Celdas: padding reducido + nowrap para badges/fechas/botones */
+.mf-table th,
+.mf-table td {
+  padding: 0.45rem 0.55rem;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+/* Columna # (índice): muy estrecha */
+.mf-table th:first-child,
+.mf-table td:first-child {
+  min-width: 32px;
+  width: 32px;
+}
+
+/* Columna Nombre/Afiliado: puede hacer wrap porque los nombres son largos */
+.mf-table .col-nombre {
+  min-width: 155px;
+  max-width: 210px;
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* Estado / Membresía */
+.mf-table .col-estado {
+  min-width: 105px;
+  text-align: center;
+}
+
+/* Acceso (switch Activo/Inactivo) */
+.mf-table .col-acceso {
+  min-width: 90px;
+  text-align: center;
+}
+
+/* Días restantes (badge numérico) */
+.mf-table .col-dias {
+  min-width: 80px;
+  text-align: center;
+}
+
+/* Fechas (YYYY-MM-DD) */
+.mf-table .col-fecha {
+  min-width: 96px;
+}
+
+/* Restricciones / Badges */
+.mf-table .col-tags {
+  min-width: 140px;
+}
+
+/* Acciones — siempre al final, nunca recortada */
+.mf-table .col-acciones {
+  min-width: 130px;
+  text-align: center;
+  white-space: nowrap;
+}

@@ -1,0 +1,728 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36" version="28.2.5">
+  <diagram name="Página-1" id="FUm0BL266MdsMGMsEwCM">
+    <mxGraphModel grid="1" page="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-1" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-210" y="-130" width="4930" height="435" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-2" value="&lt;span style=&quot;font-size: 18px;&quot;&gt;colaboradores&lt;/span&gt;" style="rounded=0;whiteSpace=wrap;html=1;textDirection=vertical-lr;" vertex="1" parent="1">
+          <mxGeometry x="-210" y="-145" width="50" height="445" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-3" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-201.87" y="-584" width="4900" height="450" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-4" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;secretaria&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;textDirection=vertical-lr;" vertex="1" parent="1">
+          <mxGeometry x="-210" y="-570" width="50" height="440" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-5" value="" style="rounded=0;whiteSpace=wrap;html=1;textDirection=vertical-lr;" vertex="1" parent="1">
+          <mxGeometry x="-160" y="-930" width="4880" height="360" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-6" value="administrador&amp;nbsp;" style="rounded=0;whiteSpace=wrap;html=1;textDirection=vertical-lr;" vertex="1" parent="1">
+          <mxGeometry x="-210" y="-930" width="50" height="360" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-11" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="fECl6MIjfq_cAdd7NXQC-9" target="fECl6MIjfq_cAdd7NXQC-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-9" value="inicio&amp;nbsp;" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="-160" y="165" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-15" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="fECl6MIjfq_cAdd7NXQC-10" target="fECl6MIjfq_cAdd7NXQC-14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-10" value="cliente llega al gimnacio&amp;nbsp;" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-50" y="150" width="80" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-12" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="fECl6MIjfq_cAdd7NXQC-10" target="fECl6MIjfq_cAdd7NXQC-13">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="170" y="-30" as="sourcePoint" />
+            <mxPoint x="220" y="-80" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="-10" y="100" />
+              <mxPoint x="-70" y="100" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-17" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="fECl6MIjfq_cAdd7NXQC-13">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="35" y="-175" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-13" value="la recepcionista explica planes y servicios&amp;nbsp;&amp;nbsp;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-140" y="-210" width="140" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-44" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="fECl6MIjfq_cAdd7NXQC-14" target="fECl6MIjfq_cAdd7NXQC-45">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="170" y="186.4000000000001" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-14" value="cliente completa el formulario&amp;nbsp;" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="150" width="90" height="72.5" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-19" value="" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="fECl6MIjfq_cAdd7NXQC-25">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="83.38" y="-215" as="sourcePoint" />
+            <mxPoint x="30" y="-220" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-29" value="no" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="fECl6MIjfq_cAdd7NXQC-19">
+          <mxGeometry x="-0.2711" y="-4" relative="1" as="geometry">
+            <mxPoint y="1" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-24" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" target="fECl6MIjfq_cAdd7NXQC-35">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="72.5" y="-430" as="sourcePoint" />
+            <mxPoint x="-92" y="-490" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="-92" y="-430" />
+              <mxPoint x="-92" y="-500" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-57" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="fECl6MIjfq_cAdd7NXQC-25" target="fECl6MIjfq_cAdd7NXQC-56">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-25" value="cliente desea afiliarse&amp;nbsp;" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="-220" width="96.25" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-30" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="fECl6MIjfq_cAdd7NXQC-25">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="170" y="-30" as="sourcePoint" />
+            <mxPoint x="130" y="-240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-32" value="si" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="fECl6MIjfq_cAdd7NXQC-30">
+          <mxGeometry x="-0.13" relative="1" as="geometry">
+            <mxPoint y="1" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-33" value="fin del proceso&amp;nbsp;" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry y="-270" width="50" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-34" value="subproceso de registro y activacion&amp;nbsp;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="-280" width="110" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-35" value="estos datos se ingresan al sistema de gestion del gimnasio para crear perfil del cliente&amp;nbsp;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-150" y="-684" width="120" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-38" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="fECl6MIjfq_cAdd7NXQC-36" target="fECl6MIjfq_cAdd7NXQC-39">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-36" value="recepcion solicita al cliente sus datos basicos&amp;nbsp;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="75" y="-360" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-37" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="fECl6MIjfq_cAdd7NXQC-34" target="fECl6MIjfq_cAdd7NXQC-36">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="170" y="-230" as="sourcePoint" />
+            <mxPoint x="220" y="-280" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-39" value="nombre completo,&lt;div&gt;docuento,edad,genero&lt;/div&gt;&lt;div&gt;telefono y correo&amp;nbsp;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="75" y="-460" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-42" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="fECl6MIjfq_cAdd7NXQC-40" target="fECl6MIjfq_cAdd7NXQC-14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-40" value="resepcion le entrega un formulario al cliente de salud y experiencia&amp;nbsp;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="220" y="-290" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-41" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="fECl6MIjfq_cAdd7NXQC-34" target="fECl6MIjfq_cAdd7NXQC-40">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="170" y="-370" as="sourcePoint" />
+            <mxPoint x="220" y="-420" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-47" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="fECl6MIjfq_cAdd7NXQC-45" target="fECl6MIjfq_cAdd7NXQC-46">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-49" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="fECl6MIjfq_cAdd7NXQC-45" target="fECl6MIjfq_cAdd7NXQC-48">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-45" value="estado de salud actual&amp;nbsp;" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="180" y="80" width="90" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-55" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="fECl6MIjfq_cAdd7NXQC-46" target="fECl6MIjfq_cAdd7NXQC-54">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-46" value="lesiones,cirugias&lt;div&gt;,enfermedades&amp;nbsp;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="165" y="-10" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-51" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="fECl6MIjfq_cAdd7NXQC-48" target="fECl6MIjfq_cAdd7NXQC-50">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-48" value="experiencia en entrenamiento fisico" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="310" y="77.5" width="120" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-53" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="fECl6MIjfq_cAdd7NXQC-50" target="fECl6MIjfq_cAdd7NXQC-52">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-50" value="odjetivos personales&amp;nbsp;" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="470" y="82.5" width="100" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-52" value="bejar de peso,ganar musculo,mejorar resistencia&amp;nbsp;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="460" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-54" value="si se detecta una condicion medica se le informa que debe taer autoizacion mdica&amp;nbsp;" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="290" y="-90" width="130" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-59" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="fECl6MIjfq_cAdd7NXQC-56" target="fECl6MIjfq_cAdd7NXQC-58">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-61" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="fECl6MIjfq_cAdd7NXQC-56" target="fECl6MIjfq_cAdd7NXQC-60">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-56" value="la resepcion explica al cliente los palnes y beneficios incluidos&amp;nbsp;" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="-260" width="150" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-58" value="mnesual,trimestral ,anual,premium&amp;nbsp;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="335" y="-360" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-63" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="fECl6MIjfq_cAdd7NXQC-60" target="fECl6MIjfq_cAdd7NXQC-62">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-60" value="clases grupales,asesorias,acceso a maquinas,horarios especiales." style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="510" y="-280" width="130" height="117.5" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-65" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="fECl6MIjfq_cAdd7NXQC-62" target="fECl6MIjfq_cAdd7NXQC-64">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-62" value="cliente elije el plan que mejor se ajuste a sus necesidades&amp;nbsp;" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="515" y="-100" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-67" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="fECl6MIjfq_cAdd7NXQC-64" target="fECl6MIjfq_cAdd7NXQC-66">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-78" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="fECl6MIjfq_cAdd7NXQC-64" target="fECl6MIjfq_cAdd7NXQC-77">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-64" value="la reseccion le ofrese metodo de pago&amp;nbsp;" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="680" y="-240" width="90" height="68.75" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-66" value="tarejeta&amp;nbsp;" style="rhombus;whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="600" y="-420.005" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-68" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" target="fECl6MIjfq_cAdd7NXQC-70">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="720" y="-290" as="sourcePoint" />
+            <mxPoint x="790" y="-270" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="810" y="-290" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-70" value="efectivo" style="rhombus;whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="770" y="-420.005" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-72" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" target="fECl6MIjfq_cAdd7NXQC-74">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="725" y="-240" as="sourcePoint" />
+            <mxPoint x="220" y="-220" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="725" y="-310" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-74" value="transferencia&amp;nbsp;" style="rhombus;whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="685" y="-439.995" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-84" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="fECl6MIjfq_cAdd7NXQC-77" target="fECl6MIjfq_cAdd7NXQC-83">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-77" value="se genera resibo de pago y&amp;nbsp; un contarto de membresia" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="830" y="-242.82" width="90" height="74.38" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-86" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="fECl6MIjfq_cAdd7NXQC-83" target="fECl6MIjfq_cAdd7NXQC-85">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="940" y="-40" />
+              <mxPoint x="940" y="-330" />
+              <mxPoint x="890" y="-330" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="fECl6MIjfq_cAdd7NXQC-83" target="15iPU_hPuYXEvEwhlB32-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-83" value="cliente firma el contrato&amp;nbsp;" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="770" y="-70" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="fECl6MIjfq_cAdd7NXQC-85" value="se actualizan el estado a miembro activo&amp;nbsp;" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="830" y="-650" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-1" target="15iPU_hPuYXEvEwhlB32-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-1" value="cliente odtiene credenciales de acceso&amp;nbsp;" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="770" y="22.5" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-3" target="15iPU_hPuYXEvEwhlB32-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-3" value="odtene tarjeta de acceso,codigo QR y usuario en la app metafit&amp;nbsp;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="770" y="112.5" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-8" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" edge="1" parent="1" target="15iPU_hPuYXEvEwhlB32-7">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1000" y="40" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-9" value="si" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" connectable="0" vertex="1" parent="15iPU_hPuYXEvEwhlB32-8">
+          <mxGeometry x="-0.0794" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-5" value="el cliente obtiene acceso total a todas las instalaciones&amp;nbsp;" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="940" y="120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-7" value="cuenta con experiencia puede empesar sus entrenamientos&amp;nbsp;" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="960" y="-85" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-13" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-5">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="640" y="-100" as="sourcePoint" />
+            <mxPoint x="1000" y="100" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-16" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-14">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1100" y="62.5" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-17" value="no" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" connectable="0" vertex="1" parent="15iPU_hPuYXEvEwhlB32-16">
+          <mxGeometry x="-0.0111" y="-2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-14" value="cuenta con experiencia&amp;nbsp;" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="960" y="22.5" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-20" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-18" target="15iPU_hPuYXEvEwhlB32-19">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-18" value="subproceso 2:valoracuon y cracion de plan de entranamiento&amp;nbsp;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1100" y="42.5" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-22" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-19" target="15iPU_hPuYXEvEwhlB32-21">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-19" value="programacion de la valoracion inicial&amp;nbsp;" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="1250" y="42.5" width="120" height="57.5" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-24" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-21" target="15iPU_hPuYXEvEwhlB32-23">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-21" value="la resepcion agenda al cliente una cita con el entrenador de planta&amp;nbsp;" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="1250" y="-251.25" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-23" value="el cliente elige el horario disponible el que mas le convenga&amp;nbsp;" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="1380" y="-120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-28" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-205.5" y="-1620" width="4931" height="700" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-29" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;entrenador&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;textDirection=vertical-lr;" vertex="1" parent="1">
+          <mxGeometry x="-210" y="-1620" width="50" height="700" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-41" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-31" target="15iPU_hPuYXEvEwhlB32-40">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-31" value="se verifica en el calendario si el entrenador esta disponible en ese horario y dia escojido por el usuario" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="1240" y="-1070" width="140" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-36" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-21" target="15iPU_hPuYXEvEwhlB32-31">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1000" y="-560" as="sourcePoint" />
+            <mxPoint x="1050" y="-610" as="targetPoint" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-46" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-40">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1590" y="-20" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-40" value="sele envia un mensaje sms al cliente este es la confirmacion&amp;nbsp;" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="1530" y="-120" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-53" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-49">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1747.33" y="42.1" as="sourcePoint" />
+            <mxPoint x="1747.33" y="-1010.4" as="targetPoint" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-49" value="el cliente se presenta en el horario acordado&amp;nbsp;" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="1690" y="110" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-55" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-52" target="15iPU_hPuYXEvEwhlB32-54">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-59" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-52" target="15iPU_hPuYXEvEwhlB32-58">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-61" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-52" target="15iPU_hPuYXEvEwhlB32-62">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1870" y="-1100" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-65" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-52" target="15iPU_hPuYXEvEwhlB32-64">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-52" value="entrenador realiza entrevista y evaluacion fisica&amp;nbsp;" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="1690" y="-1070" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-57" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-54" target="15iPU_hPuYXEvEwhlB32-56">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-54" value="medidas corporales&amp;nbsp;" style="rhombus;whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="1570" y="-1200" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-56" value="peso, altura, IMC&amp;nbsp;" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="1430" y="-1190" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-58" value="Pruebas de movilidad y flexibilidad." style="rhombus;whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="1700" y="-1215" width="100" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-62" value="Test de fuerza/resistencia básica.&amp;nbsp;" style="rhombus;whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="1830" y="-1215" width="100" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-64" value="Revisión de los objetivos del cliente" style="rhombus;whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="1960" y="-1225" width="110" height="105" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-66" value="" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" target="15iPU_hPuYXEvEwhlB32-67">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1810" y="-1020" as="sourcePoint" />
+            <mxPoint x="1620" y="-990" as="targetPoint" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-69" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-67" target="15iPU_hPuYXEvEwhlB32-68">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-99" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="2110" y="-705" as="sourcePoint" />
+            <mxPoint x="2110" y="-450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-67" value="&amp;nbsp;Elaboración del plan de entrenamiento" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="2050" y="-1050" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-71" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-68" target="15iPU_hPuYXEvEwhlB32-70">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-68" value="Con la información recolectada, el entrenador diseña un plan de entrenamiento&lt;br/&gt;personalizado que incluye:" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="2070" y="-1160" width="180" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-73" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-70" target="15iPU_hPuYXEvEwhlB32-72">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-74" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-70" target="15iPU_hPuYXEvEwhlB32-72">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-76" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-70" target="15iPU_hPuYXEvEwhlB32-75">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-78" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-70" target="15iPU_hPuYXEvEwhlB32-77">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-81" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-82" target="15iPU_hPuYXEvEwhlB32-80">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-70" value="el plan contiene&amp;nbsp;" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="2300" y="-1155" width="70" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-72" value="Rutina semanal con días, ejercicios, series y repeticiones" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="2210" y="-1040" width="100" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-75" value="Recomendaciones básicas de calentamiento y estiramiento.&amp;nbsp;" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="2340" y="-1040" width="110" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-77" value="Horarios sugeridos según disponibilidad del cliente." style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="2470" y="-1035" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-80" value="El plan debe estar listo en un plazo máximo de 12 horas después de la valoración" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="2410" y="-1400" width="125" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-82" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="2286.25" y="-1288.75" width="97.5" height="97.5" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-85" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-70" target="15iPU_hPuYXEvEwhlB32-82">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="2370" y="-1090" as="sourcePoint" />
+            <mxPoint x="2420" y="-1140" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-91" value="" style="shape=collate;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="2302.5" y="-1270" width="65" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-92" value="" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1550" y="-30" width="80" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-93" value="cliente espera hasta el dia de la cita&amp;nbsp;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1530" y="112.5" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-94" value="" style="shape=collate;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1560" y="-10" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-96" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-92" target="15iPU_hPuYXEvEwhlB32-93">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1670" y="-210" as="sourcePoint" />
+            <mxPoint x="1720" y="-260" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-97" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-93" target="15iPU_hPuYXEvEwhlB32-49">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1670" y="-210" as="sourcePoint" />
+            <mxPoint x="1720" y="-260" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-101" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-98">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="2110" y="-450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-104" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-98">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="2110" y="-705" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-98" value="&amp;nbsp;Entrega del plan al cliente" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="2050" y="-540" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-105" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-67">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="2110" y="-990" as="sourcePoint" />
+            <mxPoint x="2110" y="-795" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-107" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-108" target="15iPU_hPuYXEvEwhlB32-106">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="2205" y="-750" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-111" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-106" target="15iPU_hPuYXEvEwhlB32-110">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-106" value="El cliente recibe notificación de que ya puede revisar su rutina y horarios" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="2185" y="87.5" width="126.25" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-108" value="la enrega del plan desde administracion se puede mandar de forma digital atraves del usuaro creado en la app METAFIT" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="2050" y="-795" width="130" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-109" value="si el cliente solicita la entrega del plan por medio de secretaria se ara entrega de na carpeta con el plan que fue diseñado para el cliente&amp;nbsp;&amp;nbsp;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="2045" y="-450.01" width="140" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-113" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-110" target="15iPU_hPuYXEvEwhlB32-112">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-110" value="subproceso 3: Inducción y Primer Entrenamiento" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="2360" y="92.5" width="126.26" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-115" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-112" target="15iPU_hPuYXEvEwhlB32-114">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-112" value="Primera sesión guiada" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="2363.13" y="-10" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-118" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-114" target="15iPU_hPuYXEvEwhlB32-117">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-114" value="El cliente asiste a su primera sesión en el gimnasio con ayuda del entrenador de&lt;br/&gt;planta" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="2610" y="-1230" width="150" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-120" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-117" target="15iPU_hPuYXEvEwhlB32-119">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-126" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-117" target="15iPU_hPuYXEvEwhlB32-125">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-117" value="el entrenador explica como usar corectamente las maquinas&amp;nbsp;" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="2855" y="-1210" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-122" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-119" target="15iPU_hPuYXEvEwhlB32-121">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-119" value="Enseña la técnica de los ejercicios básicos" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="2855" y="-1320" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-121" value="Supervisa la ejecución del plan inicial" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="3010" y="-1320" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-125" value="Validación de autonomía" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="3050" y="-1210" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-136" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-127" target="15iPU_hPuYXEvEwhlB32-135">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-127" value="&amp;nbsp;Si sí está preparado" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="2960" y="-1000" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-140" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-128" target="15iPU_hPuYXEvEwhlB32-139">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="3189.5" y="-930" as="sourcePoint" />
+            <mxPoint x="3199.5" y="20" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="3190" y="20" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-128" value="no está preparado" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="3130" y="-1000" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-129" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-131" target="15iPU_hPuYXEvEwhlB32-127">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="2620" y="-990" as="sourcePoint" />
+            <mxPoint x="2670" y="-1040" as="targetPoint" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-133" value="si" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" connectable="0" vertex="1" parent="15iPU_hPuYXEvEwhlB32-129">
+          <mxGeometry x="0.0097" relative="1" as="geometry">
+            <mxPoint x="1" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-130" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-131" target="15iPU_hPuYXEvEwhlB32-128">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="3190" y="-1035" as="sourcePoint" />
+            <mxPoint x="2670" y="-1040" as="targetPoint" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-134" value="no" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" connectable="0" vertex="1" parent="15iPU_hPuYXEvEwhlB32-130">
+          <mxGeometry x="0.0428" y="2" relative="1" as="geometry">
+            <mxPoint x="-1" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-142" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-131">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="3580" y="-5" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-131" value="El entrenador evalúa si el cliente está preparado para entrenar de manera&lt;br/&gt;autónoma" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="3035" y="-1115" width="150" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-132" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-125" target="15iPU_hPuYXEvEwhlB32-131">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="2990" y="-990" as="sourcePoint" />
+            <mxPoint x="3040" y="-1040" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-135" value="el cliente queda autorizado para entrenar solo&lt;br/&gt;siguiendo su plan" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="2870" y="-10" width="130" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-139" value="se le asignan sesiones adicionales de seguimiento&lt;br/&gt;hasta que cumpla con las condiciones de seguridad y técnica" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="3220" y="-30" width="130" height="105" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-145" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-143" target="15iPU_hPuYXEvEwhlB32-144">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-143" value="Finalización del proceso" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="3520" y="-5" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-149" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-144" target="15iPU_hPuYXEvEwhlB32-146">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-150" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-144" target="15iPU_hPuYXEvEwhlB32-148">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-151" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-144" target="15iPU_hPuYXEvEwhlB32-147">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-144" value="El cliente ya es un miembro activo del gimnasio MetaFit con:" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="3500" y="112.5" width="140" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-146" value="Membresía pagada y registrada." style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="3320" y="115" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-147" value="Credenciales de acceso al gimnasio." style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="3510" y="220" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-148" value="Plan de entrenamiento y horarios definidos" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="3710" y="115" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-152" value="Capacidad de entrenar solo (o con acompañamiento si lo necesita)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="3690" y="222.5" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-154" value="Primera sesión guiada con el entrenador." style="rounded=1;whiteSpace=wrap;html=1;rotation=0;direction=south;arcSize=14;" vertex="1" parent="1">
+          <mxGeometry x="3330" y="222.5" width="130" height="68.75" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-156" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-144" target="15iPU_hPuYXEvEwhlB32-152">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="3250" y="-20" as="sourcePoint" />
+            <mxPoint x="3300" y="-70" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-157" value="" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-144">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="3250" y="-20" as="sourcePoint" />
+            <mxPoint x="3460" y="220" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-160" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-158">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="3760" y="-760" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-158" value="Excepciones contempladas&amp;nbsp;" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="3610" y="-810" width="100" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-162" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" target="15iPU_hPuYXEvEwhlB32-161">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="3820" y="-730" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-161" value="se cancela el registro" style="whiteSpace=wrap;html=1;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="3760" y="-650" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-165" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-163" target="15iPU_hPuYXEvEwhlB32-164">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-163" value="El cliente no paga" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="3760" y="-790" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-167" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-164" target="15iPU_hPuYXEvEwhlB32-166">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-169" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-164" target="15iPU_hPuYXEvEwhlB32-168">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-164" value="● El cliente no asiste a la valoración" style="whiteSpace=wrap;html=1;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="3960" y="-790" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-166" value="se reprograma la cita; si se repite, se&lt;br/&gt;informa a administración." style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="3960" y="-650" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-171" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-168" target="15iPU_hPuYXEvEwhlB32-170">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-173" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-168" target="15iPU_hPuYXEvEwhlB32-172">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-168" value="El entrenador no entrega el plan en ≤12 horas" style="whiteSpace=wrap;html=1;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="4160" y="-790" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-170" value="se genera alerta para el&lt;br/&gt;administrador y se reasigna." style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="4160" y="-650" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-175" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-172" target="15iPU_hPuYXEvEwhlB32-174">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-177" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="15iPU_hPuYXEvEwhlB32-172" target="15iPU_hPuYXEvEwhlB32-176">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-172" value="El cliente presenta contraindicación médica" style="whiteSpace=wrap;html=1;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="4330" y="-790" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-174" value="se detiene el proceso hasta&lt;br/&gt;autorización médica" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="4330" y="-650" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="15iPU_hPuYXEvEwhlB32-176" value="fin de excepciones&amp;nbsp;" style="ellipse;whiteSpace=wrap;html=1;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="4520" y="-800" width="80" height="80" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
