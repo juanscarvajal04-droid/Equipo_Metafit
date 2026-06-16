@@ -1,0 +1,488 @@
+{
+  "info": {
+    "_postman_id": "metafit-api-collection-v1",
+    "name": "MetaFit API",
+    "description": "Colección completa de la API REST de MetaFit — Sport Gym Sede 80.\n\n**Configuración inicial:**\n1. Crea un entorno (Environment) con la variable `base_url = http://localhost:3001`\n2. Ejecuta 'Login Admin' primero — el script automático guardará el token en `{{token}}`\n3. El resto de requests autenticadas usarán `{{token}}` automáticamente.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3001",
+      "type": "string",
+      "description": "URL base del backend MetaFit (desarrollo local)"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string",
+      "description": "JWT — se rellena automáticamente al ejecutar 'Login Admin'"
+    }
+  ],
+  "item": [
+    {
+      "name": "🟢 Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": ["{{base_url}}"],
+          "path": ["health"]
+        },
+        "description": "Verifica que el servidor y la conexión a MySQL estén activos.\n\n**Respuesta esperada 200:**\n```json\n{ \"status\": \"ok\", \"db\": \"MySQL conectado\", \"timestamp\": \"...\" }\n```\n\n**Sin autenticación requerida.**"
+      },
+      "response": [
+        {
+          "name": "200 OK — Servidor y DB activos",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{base_url}}/health", "host": ["{{base_url}}"], "path": ["health"] }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"status\": \"ok\",\n  \"db\": \"MySQL conectado\",\n  \"timestamp\": \"2026-06-16T22:00:00.000Z\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "🔐 Auth",
+      "item": [
+        {
+          "name": "Login Admin (carlos@metafit.com)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  var jsonData = pm.response.json();",
+                  "  pm.environment.set('token', jsonData.accessToken);",
+                  "  pm.collectionVariables.set('token', jsonData.accessToken);",
+                  "  console.log('✅ Token guardado. Rol:', jsonData.user.role);",
+                  "} else {",
+                  "  console.error('❌ Login fallido:', pm.response.status, pm.response.text());",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["console.log('🔐 Intentando login como Administrador...');"]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"carlos@metafit.com\",\n  \"password\": \"Admin123!\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": ["{{base_url}}"],
+              "path": ["login"]
+            },
+            "description": "Autentica al Administrador principal.\n\n**Respuesta esperada 200:**\n```json\n{\n  \"accessToken\": \"eyJ...\",\n  \"user\": {\n    \"id\": 1,\n    \"email\": \"carlos@metafit.com\",\n    \"role\": \"Administrador\",\n    \"nombres\": \"Carlos\",\n    \"apellidos\": \"García\"\n  }\n}\n```\n\n⚡ El token se guarda automáticamente en `{{token}}` via script post-respuesta."
+          },
+          "response": [
+            {
+              "name": "200 OK — Administrador autenticado",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{ \"email\": \"carlos@metafit.com\", \"password\": \"Admin123!\" }"
+                },
+                "url": { "raw": "{{base_url}}/login", "host": ["{{base_url}}"], "path": ["login"] }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"user\": {\n    \"id\": 1,\n    \"email\": \"carlos@metafit.com\",\n    \"role\": \"Administrador\",\n    \"nombres\": \"Carlos\",\n    \"apellidos\": \"García\"\n  }\n}"
+            },
+            {
+              "name": "401 — Credenciales inválidas",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{ \"email\": \"carlos@metafit.com\", \"password\": \"wrongpassword\" }"
+                },
+                "url": { "raw": "{{base_url}}/login", "host": ["{{base_url}}"], "path": ["login"] }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{ \"error\": \"Correo o contraseña incorrectos\" }"
+            }
+          ]
+        },
+        {
+          "name": "Login Recepcionista (maria@metafit.com)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  var jsonData = pm.response.json();",
+                  "  pm.environment.set('token', jsonData.accessToken);",
+                  "  pm.collectionVariables.set('token', jsonData.accessToken);",
+                  "  console.log('✅ Token Recepcionista guardado. Rol:', jsonData.user.role);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"maria@metafit.com\",\n  \"password\": \"Maria111!\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": ["{{base_url}}"],
+              "path": ["login"]
+            },
+            "description": "Autentica a la Recepcionista.\n\n**Permisos:** Afiliados (CRUD), Rutinas/Dietas (solo lectura). Sin acceso a Dashboard ni Gestión de Personal."
+          },
+          "response": []
+        },
+        {
+          "name": "Login Entrenador (laura@metafit.com)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  var jsonData = pm.response.json();",
+                  "  pm.environment.set('token', jsonData.accessToken);",
+                  "  pm.collectionVariables.set('token', jsonData.accessToken);",
+                  "  console.log('✅ Token Entrenador guardado. Rol:', jsonData.user.role);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"laura@metafit.com\",\n  \"password\": \"Laura456!\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": ["{{base_url}}"],
+              "path": ["login"]
+            },
+            "description": "Autentica al Entrenador.\n\n**Permisos:** Afiliados (solo lectura), Rutinas (CRUD), Dietas (CRUD). Sin acceso a Dashboard ni Gestión de Personal."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "👥 Afiliados",
+      "item": [
+        {
+          "name": "Listar Afiliados",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados",
+              "host": ["{{base_url}}"],
+              "path": ["afiliados"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Página (default: 1)",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "50",
+                  "description": "Registros por página (max: 200, default: 50)",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Devuelve todos los afiliados con sus ciclos activos, restricciones y último progreso físico.\n\n**Campos clave en cada objeto:**\n- `estado_cuenta` → estado en tabla USUARIO ('Activo', 'Inactivo', 'Pendiente')\n- `estado_afiliacion` → estado en tabla AFILIADO ('Activo', 'Inactivo', 'Suspendido')\n- `ciclo_activo` → objeto con el ciclo de entrenamiento actual (null si no tiene)\n- `restricciones` → array de restricciones alimenticias/médicas\n\n**Roles permitidos:** Administrador, Recepcionista, Entrenador"
+          },
+          "response": [
+            {
+              "name": "200 OK — Lista de afiliados",
+              "originalRequest": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": { "raw": "{{base_url}}/afiliados", "host": ["{{base_url}}"], "path": ["afiliados"] }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "[\n  {\n    \"id_usuario\": 5,\n    \"nombres\": \"Ana\",\n    \"apellidos\": \"López\",\n    \"correo\": \"ana.lopez@gmail.com\",\n    \"estado_cuenta\": \"Activo\",\n    \"documento\": \"987654321\",\n    \"fecha_nacimiento\": \"1995-03-15\",\n    \"edad\": 31,\n    \"sexo\": \"Femenino\",\n    \"telefono\": \"3001234567\",\n    \"estatura_cm\": 162.5,\n    \"estado_afiliacion\": \"Activo\",\n    \"restricciones\": [],\n    \"ciclo_activo\": {\n      \"id_ciclo\": 3,\n      \"objetivo_fisico\": \"Pérdida de grasa\",\n      \"nivel_experiencia\": \"Intermedio\",\n      \"activo\": 1\n    },\n    \"objetivo_fisico\": \"Pérdida de grasa\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Crear Afiliado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  var jsonData = pm.response.json();",
+                  "  console.log('✅ Afiliado creado con ID:', jsonData.id);",
+                  "  pm.environment.set('ultimo_afiliado_id', jsonData.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Juan\",\n  \"apellidos\": \"Postman\",\n  \"correo\": \"juan.postman@test.com\",\n  \"documento\": \"1234567890\",\n  \"fecha_nacimiento\": \"04/05/1987\",\n  \"sexo\": \"Masculino\",\n  \"telefono\": \"3000000000\",\n  \"direccion\": \"Calle 80 # 50-30, Bogotá\",\n  \"estatura_cm\": 175.5\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/afiliados",
+              "host": ["{{base_url}}"],
+              "path": ["afiliados"]
+            },
+            "description": "Crea un nuevo afiliado.\n\n**Notas importantes:**\n- `fecha_nacimiento` acepta formato `DD/MM/YYYY` o `YYYY-MM-DD` (normalizado automáticamente por `normalizarFecha()`)\n- Si no se envía `contrasena`, se genera automáticamente: `MF_{documento}@2025`\n- `estado_afiliacion` por defecto: `'Activo'`\n\n**Roles permitidos:** Administrador, Recepcionista\n\n**Respuesta esperada:** `201 Created` con `{ id, message }`"
+          },
+          "response": [
+            {
+              "name": "201 Created — Afiliado creado",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{ \"nombres\": \"Juan\", \"apellidos\": \"Postman\", \"documento\": \"1234567890\", \"fecha_nacimiento\": \"04/05/1987\", \"correo\": \"juan.postman@test.com\", \"estatura_cm\": 175.5 }"
+                },
+                "url": { "raw": "{{base_url}}/afiliados", "host": ["{{base_url}}"], "path": ["afiliados"] }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"id\": 42,\n  \"message\": \"Afiliado creado correctamente\"\n}"
+            },
+            {
+              "name": "400 — Documento o correo duplicado",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Authorization", "value": "Bearer {{token}}" }
+                ],
+                "body": { "mode": "raw", "raw": "{}" },
+                "url": { "raw": "{{base_url}}/afiliados", "host": ["{{base_url}}"], "path": ["afiliados"] }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{ \"error\": \"Ya existe un afiliado con ese documento o correo\" }"
+            }
+          ]
+        },
+        {
+          "name": "Obtener Afiliado por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/{{ultimo_afiliado_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["afiliados", "{{ultimo_afiliado_id}}"]
+            },
+            "description": "Devuelve el detalle completo de un afiliado incluyendo ciclo activo con rutinas, plan nutricional y progreso físico."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📊 Dashboard",
+      "item": [
+        {
+          "name": "Dashboard KPIs",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dashboard/kpis",
+              "host": ["{{base_url}}"],
+              "path": ["dashboard", "kpis"]
+            },
+            "description": "Devuelve métricas agregadas del gimnasio en una sola query optimizada.\n\n**Campos de respuesta:**\n- `total_afiliados` — conteo total en tabla AFILIADO\n- `afiliados_activos` — con `estado_afiliacion = 'Activo'`\n- `afiliados_inactivos` — con `estado_afiliacion = 'Inactivo'`\n- `entrenadores` — usuarios con `rol = 'Entrenador'`\n- `recepcionistas` — usuarios con `rol = 'Recepcionista'`\n- `ciclos_en_curso` — ciclos con `activo = 1`\n- `con_restricciones` — afiliados con restricciones médicas/alimenticias\n- `pagos_registrados` — total de pagos en tabla PAGO\n- `ingresos` — suma de `valor_pagado`\n- `proximos_vencimientos` — pagos vencidos no pagados\n- `por_objetivo` — distribución por objetivo físico (array)\n\n**⚠️ Solo Administrador puede acceder a este endpoint.**"
+          },
+          "response": [
+            {
+              "name": "200 OK — KPIs del sistema",
+              "originalRequest": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": { "raw": "{{base_url}}/dashboard/kpis", "host": ["{{base_url}}"], "path": ["dashboard", "kpis"] }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"total_afiliados\": 1247,\n  \"afiliados_activos\": 1189,\n  \"afiliados_inactivos\": 58,\n  \"entrenadores\": 20,\n  \"recepcionistas\": 5,\n  \"ciclos_en_curso\": 834,\n  \"con_restricciones\": 312,\n  \"pagos_registrados\": 3891,\n  \"ingresos\": 58750000,\n  \"proximos_vencimientos\": 47,\n  \"por_objetivo\": [\n    { \"objetivo\": \"Pérdida de grasa\", \"cantidad\": 445 },\n    { \"objetivo\": \"Hipertrofia\", \"cantidad\": 278 },\n    { \"objetivo\": \"Resistencia cardiovascular\", \"cantidad\": 111 }\n  ]\n}"
+            },
+            {
+              "name": "403 — Forbidden (no es Administrador)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": { "raw": "{{base_url}}/dashboard/kpis", "host": ["{{base_url}}"], "path": ["dashboard", "kpis"] }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{ \"error\": \"Acceso denegado: se requiere rol Administrador\" }"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "📋 Catálogo",
+      "item": [
+        {
+          "name": "Listar Ejercicios",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/catalogo/ejercicios",
+              "host": ["{{base_url}}"],
+              "path": ["catalogo", "ejercicios"]
+            },
+            "description": "Lista todos los ejercicios del catálogo con sus restricciones excluidas."
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Alimentos",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/catalogo/alimentos",
+              "host": ["{{base_url}}"],
+              "path": ["catalogo", "alimentos"]
+            },
+            "description": "Lista todos los alimentos del catálogo con macronutrientes y calorías calculadas desde la vista `v_alimento_calorias`."
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Restricciones",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/catalogo/restricciones",
+              "host": ["{{base_url}}"],
+              "path": ["catalogo", "restricciones"]
+            },
+            "description": "Lista todas las restricciones alimenticias/médicas disponibles para asignar a afiliados."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "👤 Usuarios / Personal",
+      "item": [
+        {
+          "name": "Listar Personal",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/usuarios",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios"]
+            },
+            "description": "Lista usuarios del sistema (Administrador, Recepcionista, Entrenador). **Solo Administrador.**"
+          },
+          "response": []
+        },
+        {
+          "name": "Crear Empleado",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Pedro\",\n  \"apellidos\": \"Ramírez\",\n  \"correo\": \"pedro.ramirez@metafit.com\",\n  \"password\": \"Empleado123!\",\n  \"rol\": \"Entrenador\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/usuarios",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios"]
+            },
+            "description": "Crea un nuevo usuario del sistema (empleado). **Solo Administrador.**"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

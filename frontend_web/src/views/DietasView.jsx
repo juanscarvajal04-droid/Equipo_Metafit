@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
 import { getId, nombreCompleto, inicial, cicloActivo } from "../utils/afiliadoHelpers";
+import s from "./DietasView.module.css";
 
 const OBJETIVO_CONFIG = {
   "Pérdida de grasa": { icono: "🔥", color: "#e94560", bg: "#e9456018" },
@@ -228,8 +229,7 @@ export default function DietasView() {
       {/* Toast */}
       {toast.msg && (
         <div
-          className={`position-fixed bottom-0 end-0 m-4 alert alert-${toast.type === "danger" ? "danger" : "dark"} shadow-lg py-2 px-3`}
-          style={{ zIndex: 9999, minWidth: 300 }}
+          className={`${s.toast} alert alert-${toast.type === "danger" ? "danger" : "dark"} shadow-lg`}
         >
           {toast.msg}
         </div>
@@ -242,8 +242,7 @@ export default function DietasView() {
           <div>
             <h1 className="h4 fw-bold mb-0 d-flex align-items-center gap-2">
               <span
-                className="d-inline-flex align-items-center justify-content-center rounded-2 text-white"
-                style={{ width: 36, height: 36, background: "linear-gradient(135deg,#0891b2,#0d9488)", fontSize: "1.1rem" }}
+                className={`d-inline-flex align-items-center justify-content-center rounded-2 text-white ${s.headerIcon}`}
               >
                 🥗
               </span>
@@ -265,13 +264,12 @@ export default function DietasView() {
             ].map((k) => (
               <div
                 key={k.label}
-                className="card border-0 shadow-sm text-center px-3 py-2"
-                style={{ minWidth: 115 }}
+                className={`card border-0 shadow-sm text-center px-3 py-2 ${s.kpiCard}`}
               >
-                <div className="fw-bold fs-5" style={{ color: k.color }}>
+                <div className={`fw-bold fs-5 ${s.kpiValor}`} style={{ color: k.color }}>
                   {loading ? "—" : k.valor}
                 </div>
-                <div className="text-muted" style={{ fontSize: "0.68rem" }}>{k.label}</div>
+                <div className={`text-muted ${s.kpiLabel}`}>{k.label}</div>
               </div>
             ))}
           </div>
@@ -285,16 +283,14 @@ export default function DietasView() {
               <input
                 id="busqueda-dietas"
                 type="text"
-                className="form-control form-control-sm"
-                style={{ maxWidth: 240 }}
+                className={`form-control form-control-sm ${s.searchInput}`}
                 placeholder="🔍 Nombre, objetivo, restricción..."
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
               />
               <button
                 id="btn-refresh-dietas"
-                className="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1"
-                style={{ whiteSpace: "nowrap", fontSize: "0.78rem" }}
+                className={`btn btn-sm btn-outline-secondary d-flex align-items-center gap-1 ${s.btnRefresh}`}
                 onClick={() => cargarAfiliados(true)}
                 disabled={refreshing}
                 title="Recargar lista de afiliados"
@@ -309,7 +305,7 @@ export default function DietasView() {
 
           <div className="card-body p-0">
             {error   && <div className="alert alert-danger m-3 py-2"><small>⚠️ {error}</small></div>}
-            {loading && <div className="text-center py-5"><div className="spinner-border" style={{ color: "#0891b2" }} /></div>}
+            {loading && <div className="text-center py-5"><div className={`spinner-border ${s.spinnerTeal}`} /></div>}
 
             {!loading && !error && (
               <div className="table-responsive">
@@ -343,10 +339,7 @@ export default function DietasView() {
                       return (
                         <tr
                           key={getId(a)}
-                          style={{
-                            background: !plan ? "#fff8f0" : hayAlerta ? "#fff8f8" : "transparent",
-                            borderLeft: !plan ? "3px solid #f97316" : hayAlerta ? "3px solid #ef4444" : "none",
-                          }}
+                          className={!plan ? s.rowSinPlan : hayAlerta ? s.rowConAlerta : ""}
                         >
                           <td className="ps-4 text-muted small">{idx + 1}</td>
 
@@ -354,9 +347,8 @@ export default function DietasView() {
                           <td>
                             <div className="d-flex align-items-center gap-2">
                               <div
-                                className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0"
+                                className={s.avatar}
                                 style={{
-                                  width: 36, height: 36, fontSize: "0.85rem",
                                   background: `hsl(${(getId(a) * 47) % 360},65%,55%)`,
                                 }}
                               >
@@ -364,7 +356,7 @@ export default function DietasView() {
                               </div>
                               <div>
                                 <div className="fw-semibold small">{nombreCompleto(a)}</div>
-                                <div className="text-muted" style={{ fontSize: "0.7rem" }}>{a.correo || "—"}</div>
+                                <div className={`text-muted ${s.emailText}`}>{a.correo || "\u2014"}</div>
                               </div>
                             </div>
                           </td>
@@ -465,7 +457,7 @@ export default function DietasView() {
                                 </button>
                               )}
                               <button
-                                className="btn btn-sm fw-semibold text-white"
+                                className={`btn btn-sm fw-semibold text-white ${s.btnAsignar}`}
                                 id={`btn-asignar-dieta-${getId(a)}`}
                                 title={plan ? "Cambiar plan" : "Asignar plan"}
                                 style={{ background: "linear-gradient(135deg,#0891b2,#0d9488)", border: "none", fontSize: "0.78rem" }}
@@ -487,7 +479,7 @@ export default function DietasView() {
 
         {/* ── Catálogo de planes nutricionales ── */}
         <div>
-          <h2 className="h6 fw-bold text-muted text-uppercase mb-3" style={{ letterSpacing: "0.06em" }}>
+          <h2 className={`h6 fw-bold text-muted text-uppercase mb-3 ${s.catalogTitle}`}>
             🍽️ Catálogo de Planes Nutricionales
           </h2>
           <div className="row g-3">
@@ -552,8 +544,7 @@ export default function DietasView() {
       ═══════════════════════════════════════════════════════════════════════ */}
       {asignarModal && (
         <div
-          className="modal d-block"
-          style={{ background: "rgba(0,0,0,0.6)", zIndex: 1055 }}
+          className={`modal d-block ${s.modalOverlay}`}
           onClick={() => !saving && setAsignarModal(null)}
         >
           <div
@@ -562,8 +553,7 @@ export default function DietasView() {
           >
             <div className="modal-content border-0 shadow-lg">
               <div
-                className="modal-header text-white border-0"
-                style={{ background: "linear-gradient(135deg,#0891b2,#0d9488)" }}
+                className={`modal-header ${s.modalHeaderTeal}`}
               >
                 <h5 className="modal-title">
                   🥗 Asignar Plan Nutricional — {nombreCompleto(asignarModal)}
@@ -576,7 +566,7 @@ export default function DietasView() {
               </div>
 
               <form onSubmit={handleAsignar}>
-                <div className="modal-body" style={{ maxHeight: "75vh", overflowY: "auto" }}>
+                <div className={`modal-body ${s.modalBodyScroll}`}>
                   {asigError && (
                     <div className="alert alert-danger py-2 mb-3">
                       <small>⚠️ {asigError}</small>
@@ -740,8 +730,7 @@ export default function DietasView() {
                   <button
                     id="btn-confirmar-asignar-dieta"
                     type="submit"
-                    className="btn btn-sm text-white fw-semibold px-4"
-                    style={{ background: "linear-gradient(135deg,#0891b2,#0d9488)", border: "none" }}
+                    className={`btn btn-sm ${s.btnConfirmar}`}
                     disabled={saving || !planSelec}
                   >
                     {saving
@@ -767,8 +756,7 @@ export default function DietasView() {
 
         return (
           <div
-            className="modal d-block"
-            style={{ background: "rgba(0,0,0,0.6)", zIndex: 1055 }}
+            className={`modal d-block ${s.modalOverlay}`}
             onClick={() => setVerModal(null)}
           >
             <div
@@ -777,8 +765,7 @@ export default function DietasView() {
             >
               <div className="modal-content border-0 shadow-lg">
                 <div
-                  className="modal-header text-white border-0"
-                  style={{ background: "linear-gradient(135deg,#1a1a2e,#16213e)" }}
+                  className={`modal-header ${s.modalHeaderDark}`}
                 >
                   <h5 className="modal-title">
                     🥗 Plan activo — {nombreCompleto(verModal)}

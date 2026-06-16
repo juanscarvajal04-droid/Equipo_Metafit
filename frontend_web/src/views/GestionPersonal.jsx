@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
 import { getId } from "../utils/afiliadoHelpers";
 import { useToast } from "../hooks/useToast";
+import s from "./GestionPersonal.module.css";
 
 // ── Constantes ────────────────────────────────────────────────────────────────
 const ROLES       = ["Administrador", "Recepcionista", "Entrenador"];
@@ -200,14 +201,7 @@ export default function GestionPersonal() {
         <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
           <div>
             <h1 className="h4 fw-bold mb-0 d-flex align-items-center gap-2">
-              <span
-                className="d-inline-flex align-items-center justify-content-center rounded-2"
-                style={{
-                  width: 36, height: 36,
-                  background: "linear-gradient(135deg,#7c3aed,#4f46e5)",
-                  fontSize: "1.1rem",
-                }}
-              >
+              <span className={`d-inline-flex align-items-center justify-content-center rounded-2 ${s.headerIcon}`}>
                 🛡️
               </span>
               Gestión de Personal
@@ -219,20 +213,12 @@ export default function GestionPersonal() {
 
           {/* Badge Admin */}
           <div className="d-flex align-items-center gap-2">
-            <span
-              className="badge px-3 py-2"
-              style={{
-                background: "linear-gradient(135deg,#7c3aed,#4f46e5)",
-                fontSize: "0.72rem",
-                letterSpacing: "0.04em",
-              }}
-            >
+            <span className={`badge px-3 py-2 ${s.badgeAdmin}`}>
               👑 Super Usuario — Acceso Total
             </span>
             <button
               id="btn-crear-personal"
-              className="btn btn-sm fw-semibold text-white px-4"
-              style={{ background: "linear-gradient(135deg,#7c3aed,#4f46e5)", border: "none" }}
+              className={`btn btn-sm ${s.btnCrear}`}
               onClick={() => { setCrearModal(true); setFormData(FORM_VACÍO); setFormError(""); }}
             >
               ➕ Nuevo empleado
@@ -240,7 +226,6 @@ export default function GestionPersonal() {
           </div>
         </div>
 
-        {/* ── Tabla de Personal ── */}
         <div className="card border-0 shadow-sm">
           <div className="card-header bg-white py-3 d-flex justify-content-between align-items-center border-0 flex-wrap gap-2">
             <span className="fw-semibold text-muted small">
@@ -249,8 +234,7 @@ export default function GestionPersonal() {
             <input
               id="busqueda-personal"
               type="text"
-              className="form-control form-control-sm"
-              style={{ maxWidth: 280 }}
+              className={`form-control form-control-sm ${s.searchInput}`}
               placeholder="🔍 Nombre, correo, rol..."
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
@@ -259,7 +243,7 @@ export default function GestionPersonal() {
 
           <div className="card-body p-0">
             {error   && <div className="alert alert-danger m-3 py-2"><small>⚠️ {error}</small></div>}
-            {loading && <div className="text-center py-5"><div className="spinner-border" style={{ color: "#7c3aed" }} /></div>}
+            {loading && <div className="text-center py-5"><div className={`spinner-border ${s.spinnerPurple}`} /></div>}
 
             {!loading && !error && (
               <div className="table-responsive">
@@ -287,60 +271,37 @@ export default function GestionPersonal() {
                       const badge    = ROLE_BADGE[rolKey] || ROLE_BADGE.Recepcionista;
                       const isMe     = getId(u) === getId(adminUser);
                       const estado   = u.estado_cuenta || "Activo";
-                      const estadoB  = ESTADO_BADGE[estado] || ESTADO_BADGE.Activo;
                       const nombre   = [u.nombres, u.apellidos].filter(Boolean).join(" ") || u.email;
 
                       return (
                         <tr key={getId(u)}>
                           <td className="ps-4 text-muted small">{idx + 1}</td>
 
-                          {/* Empleado */}
                           <td>
                             <div className="d-flex align-items-center gap-2">
-                              <div
-                                className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0"
-                                style={{
-                                  width: 36, height: 36, fontSize: "0.85rem",
-                                  background: badge.bg,
-                                  boxShadow: isMe ? "0 0 0 2px #a78bfa" : "none",
-                                }}
-                              >
+                              <div className={`${s.avatar} ${isMe ? s.avatarMe : ""}`} style={{ background: badge.bg }}>
                                 {(u.email || "?")[0].toUpperCase()}
                               </div>
                               <div>
                                 <div className="fw-semibold small">{nombre}</div>
-                                {isMe && (
-                                  <span className="badge" style={{ background: "#a78bfa22", color: "#7c3aed", fontSize: "0.6rem" }}>
-                                    Tú
-                                  </span>
-                                )}
+                                {isMe && <span className={s.badgeTu}>Tú</span>}
                               </div>
                             </div>
                           </td>
 
-                          {/* Email */}
-                          <td>
-                            <small className="text-muted">{u.email}</small>
-                          </td>
+                          <td><small className="text-muted">{u.email}</small></td>
 
-                          {/* Rol */}
                           <td>
-                            <span
-                              className="badge px-2 py-1"
-                              style={{ background: badge.bg, fontSize: "0.65rem" }}
-                            >
+                            <span className={`badge px-2 py-1 ${s.badgeRol}`} style={{ background: badge.bg }}>
                               {badge.label}
                             </span>
                           </td>
 
-                          {/* Estado — dropdown rápido */}
                           <td>
                             <select
-                              className="form-select form-select-sm border-0 p-0"
-                              style={{ width: "auto", background: "transparent", cursor: "pointer", fontSize: "0.8rem" }}
+                              className={`form-select form-select-sm border-0 p-0 ${s.estadoSelect}`}
                               value={estado}
                               onChange={(e) => cambiarEstado(u, e.target.value)}
-                              title="Cambiar estado de cuenta"
                             >
                               {["Activo", "Inactivo", "Pendiente"].map((s) => (
                                 <option key={s}>{s}</option>
@@ -348,33 +309,24 @@ export default function GestionPersonal() {
                             </select>
                           </td>
 
-                          {/* Fecha */}
                           <td>
                             <small className="text-muted">
-                              {u.fecha_registro
-                                ? new Date(u.fecha_registro).toLocaleDateString("es-CO")
-                                : "—"}
+                              {u.fecha_registro ? new Date(u.fecha_registro).toLocaleDateString("es-CO") : "—"}
                             </small>
                           </td>
 
-                          {/* Acciones */}
                           <td className="text-center pe-4">
                             <div className="d-flex gap-1 justify-content-center">
-                              {/* Editar (siempre disponible) */}
                               <button
-                                className="btn btn-outline-primary btn-sm"
-                                id={`btn-editar-personal-${getId(u)}`}
+                                className={`btn btn-sm ${s.btnIcon}`}
                                 title="Editar empleado"
                                 onClick={() => abrirEditar(u)}
                               >
                                 ✏️
                               </button>
-
-                              {/* Eliminar — deshabilitado para el propio Admin */}
                               <button
-                                className="btn btn-outline-danger btn-sm"
-                                id={`btn-eliminar-personal-${getId(u)}`}
-                                title={isMe ? "No puedes eliminarte a ti mismo" : "Eliminar empleado"}
+                                className={`btn btn-sm ${s.btnIconDelete}`}
+                                title="Eliminar empleado"
                                 disabled={isMe}
                                 onClick={() => !isMe && setDeleteModal(u)}
                               >
@@ -392,53 +344,25 @@ export default function GestionPersonal() {
           </div>
         </div>
 
-        {/* ── Leyenda de permisos por rol ── */}
         <div className="mt-4">
           <div className="row g-3">
             {[
-              {
-                rol: "Administrador",
-                icon: "👑",
-                color: "#7c3aed",
-                permisos: ["✅ Dashboard financiero", "✅ Afiliados (CRUD)", "✅ Rutinas (CRUD)", "✅ Dietas (CRUD)", "✅ Gestión de Personal"],
-              },
-              {
-                rol: "Recepcionista",
-                icon: "🗂️",
-                color: "#2563eb",
-                permisos: ["✅ Afiliados (CRUD)", "👁️ Rutinas (Solo lectura)", "👁️ Dietas (Solo lectura)", "🚫 Gestión de Personal"],
-              },
-              {
-                rol: "Entrenador",
-                icon: "🏆",
-                color: "#059669",
-                permisos: ["👁️ Afiliados (Solo lectura)", "✅ Rutinas (CRUD)", "✅ Dietas (CRUD)", "🚫 Gestión de Personal"],
-              },
+              { rol: "Administrador", icon: "👑", color: "#7c3aed", permisos: ["✅ Dashboard", "✅ Afiliados", "✅ Personal"] },
+              { rol: "Recepcionista", icon: "🗂️", color: "#2563eb", permisos: ["✅ Afiliados", "👁️ Lectura"] },
+              { rol: "Entrenador", icon: "🏆", color: "#059669", permisos: ["👁️ Lectura", "✅ Rutinas"] },
             ].map(({ rol, icon, color, permisos }) => (
               <div key={rol} className="col-md-4">
-                <div
-                  className="card border-0 h-100"
-                  style={{
-                    background: `${color}08`,
-                    border: `1px solid ${color}22 !important`,
-                    boxShadow: `0 2px 12px ${color}10`,
-                  }}
-                >
+                <div className={`card border-0 h-100 ${s.cardRol}`} style={{ borderColor: color }}>
                   <div className="card-body p-3">
                     <div className="d-flex align-items-center gap-2 mb-3">
-                      <span
-                        className="rounded-2 d-flex align-items-center justify-content-center text-white"
-                        style={{ width: 32, height: 32, background: color, fontSize: "1rem" }}
-                      >
+                      <span className="rounded-2 d-flex align-items-center justify-content-center text-white" style={{ width: 32, height: 32, background: color }}>
                         {icon}
                       </span>
-                      <strong style={{ color, fontSize: "0.85rem" }}>{rol}</strong>
+                      <strong className={s.rolTitle} style={{ color }}>{rol}</strong>
                     </div>
                     <ul className="list-unstyled mb-0">
                       {permisos.map((p) => (
-                        <li key={p} className="small text-muted mb-1" style={{ fontSize: "0.78rem" }}>
-                          {p}
-                        </li>
+                        <li key={p} className={`small text-muted mb-1 ${s.permisosItem}`}>{p}</li>
                       ))}
                     </ul>
                   </div>
@@ -449,13 +373,10 @@ export default function GestionPersonal() {
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════════════════
-          MODAL: CREAR EMPLEADO
-      ═══════════════════════════════════════════════════════════════════════ */}
       {crearModal && (
         <ModalPersonal
           titulo="➕ Nuevo Empleado"
-          colorHeader="linear-gradient(135deg,#7c3aed,#4f46e5)"
+          colorHeader={s.modalHeaderPurple}
           formData={formData}
           setFormData={setFormData}
           onSubmit={handleCrear}
@@ -466,13 +387,10 @@ export default function GestionPersonal() {
         />
       )}
 
-      {/* ═══════════════════════════════════════════════════════════════════════
-          MODAL: EDITAR EMPLEADO
-      ═══════════════════════════════════════════════════════════════════════ */}
       {editModal && (
         <ModalPersonal
           titulo={`✏️ Editar — ${editModal.email}`}
-          colorHeader="linear-gradient(135deg,#e94560,#c62a47)"
+          colorHeader={s.modalHeaderRed}
           formData={formData}
           setFormData={setFormData}
           onSubmit={handleEditar}
@@ -483,48 +401,22 @@ export default function GestionPersonal() {
         />
       )}
 
-      {/* ═══════════════════════════════════════════════════════════════════════
-          MODAL: CONFIRMAR ELIMINACIÓN
-      ═══════════════════════════════════════════════════════════════════════ */}
       {deleteModal && (
-        <div
-          className="modal d-block"
-          style={{ background: "rgba(0,0,0,0.65)", zIndex: 1055 }}
-          onClick={() => !saving && setDeleteModal(null)}
-        >
-          <div
-            className="modal-dialog modal-dialog-centered"
-            style={{ maxWidth: 420 }}
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className={`modal d-block ${s.modalOverlay}`} onClick={() => !saving && setDeleteModal(null)}>
+          <div className="modal-dialog modal-dialog-centered" onClick={(e) => e.stopPropagation()}>
             <div className="modal-content border-0 shadow-lg">
-              <div className="modal-header border-0 text-white" style={{ background: "linear-gradient(135deg,#dc2626,#991b1b)" }}>
+              <div className={`modal-header ${s.modalHeaderRed}`}>
                 <h5 className="modal-title">⚠️ Eliminar empleado</h5>
                 <button className="btn-close btn-close-white" onClick={() => setDeleteModal(null)} />
               </div>
               <div className="modal-body text-center py-4">
-                <div className="mb-3" style={{ fontSize: "2.5rem" }}>🗑️</div>
-                <p className="mb-1">
-                  ¿Estás seguro de eliminar a{" "}
-                  <strong className="text-danger">{deleteModal.email}</strong>?
-                </p>
-                <small className="text-muted">Esta acción no se puede deshacer.</small>
+                <div className={s.deleteEmoji}>🗑️</div>
+                <p className="mb-1">¿Estás seguro de eliminar a <strong>{deleteModal.email}</strong>?</p>
               </div>
-              <div className="modal-footer border-0 justify-content-center gap-2">
-                <button
-                  className="btn btn-outline-secondary btn-sm px-4"
-                  onClick={() => setDeleteModal(null)}
-                  disabled={saving}
-                >
-                  Cancelar
-                </button>
-                <button
-                  id="btn-confirmar-eliminar-personal"
-                  className="btn btn-danger btn-sm px-4 fw-semibold"
-                  onClick={handleEliminar}
-                  disabled={saving}
-                >
-                  {saving ? <><span className="spinner-border spinner-border-sm me-2" />Eliminando...</> : "🗑️ Sí, eliminar"}
+              <div className="modal-footer border-0 justify-content-center">
+                <button className="btn btn-outline-secondary btn-sm px-4" onClick={() => setDeleteModal(null)}>Cancelar</button>
+                <button className="btn btn-danger btn-sm px-4" onClick={handleEliminar} disabled={saving}>
+                  {saving ? "..." : "🗑️ Sí, eliminar"}
                 </button>
               </div>
             </div>
@@ -535,34 +427,21 @@ export default function GestionPersonal() {
   );
 }
 
-// ── Sub-componente modal reutilizable ─────────────────────────────────────────
 function ModalPersonal({ titulo, colorHeader, formData, setFormData, onSubmit, onCancel, saving, formError, isEdit }) {
   const set = (key, val) => setFormData((prev) => ({ ...prev, [key]: val }));
 
   return (
-    <div
-      className="modal d-block"
-      style={{ background: "rgba(0,0,0,0.6)", zIndex: 1055 }}
-      onClick={() => !saving && onCancel()}
-    >
-      <div
-        className="modal-dialog modal-lg modal-dialog-scrollable"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <div className={`modal d-block ${s.modalOverlay}`} onClick={() => !saving && onCancel()}>
+      <div className="modal-dialog modal-lg modal-dialog-scrollable" onClick={(e) => e.stopPropagation()}>
         <div className="modal-content border-0 shadow-lg">
-          <div className="modal-header text-white border-0" style={{ background: colorHeader }}>
-            <h5 className="modal-title">{titulo}</h5>
+          <div className={`modal-header ${colorHeader}`}>
+            <h5 className="modal-title text-white">{titulo}</h5>
             <button className="btn-close btn-close-white" onClick={onCancel} disabled={saving} />
           </div>
 
           <form onSubmit={onSubmit}>
-            <div className="modal-body" style={{ maxHeight: "75vh", overflowY: "auto" }}>
-              {formError && (
-                <div className="alert alert-danger py-2 mb-3">
-                  <small>⚠️ {formError}</small>
-                </div>
-              )}
-
+            <div className={`modal-body ${s.modalBodyScroll}`}>
+              {formError && <div className="alert alert-danger py-2 mb-3"><small>⚠️ {formError}</small></div>}
               <div className="row g-3">
                 {/* Nombres y Apellidos */}
                 <div className="col-md-6">
@@ -623,13 +502,9 @@ function ModalPersonal({ titulo, colorHeader, formData, setFormData, onSubmit, o
                     Rol del empleado <span className="text-danger">*</span>
                   </label>
                   <select
-                    className="form-select fw-semibold"
+                    className={`form-select fw-semibold ${s.rolSelect}`}
                     value={formData.role}
                     onChange={(e) => set("role", e.target.value)}
-                    style={{
-                      borderColor: "#7c3aed44",
-                      color: "#1e1b4b",
-                    }}
                   >
                     {(isEdit ? ROLES : ROLES_CREAR).map((r) => (
                       <option key={r} value={r}>{r}</option>
@@ -670,8 +545,8 @@ function ModalPersonal({ titulo, colorHeader, formData, setFormData, onSubmit, o
               <button
                 id={isEdit ? "btn-guardar-personal" : "btn-confirmar-crear-personal"}
                 type="submit"
-                className="btn btn-sm text-white fw-semibold px-4"
-                style={{ background: colorHeader, border: "none" }}
+                className={`btn btn-sm ${s.btnGuardar}`}
+                style={{ background: colorHeader }}
                 disabled={saving}
               >
                 {saving

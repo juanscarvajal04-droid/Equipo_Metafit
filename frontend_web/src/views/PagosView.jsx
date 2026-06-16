@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
 import { getId, nombreCompleto, inicial } from "../utils/afiliadoHelpers";
+import s from "./PagosView.module.css";
 
 /** Calcula días restantes entre hoy y una fecha dada (puede ser negativo = vencido) */
 const diasRestantes = (fechaStr) => {
@@ -426,8 +427,7 @@ export default function PagosView() {
 
         return (
           <div
-            className="modal d-block"
-            style={{ background: "rgba(0,0,0,0.6)", zIndex: 1055 }}
+            className={`modal d-block ${s.modalOverlay}`}
             onClick={() => !saving && setPagoModal(null)}
           >
             <div
@@ -555,8 +555,7 @@ export default function PagosView() {
       ═══════════════════════════════════════════════════════════════════════ */}
       {histModal && (
         <div
-          className="modal d-block"
-          style={{ background: "rgba(0,0,0,0.6)", zIndex: 1055 }}
+          className={`modal d-block ${s.modalOverlay}`}
           onClick={() => setHistModal(null)}
         >
           <div

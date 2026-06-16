@@ -1,0 +1,165 @@
+/* ── GestionPersonal.module.css ─────────────────────────────────────────── */
+
+/* ─ Ícono del header (escudo) ─────────────────────────────────────────────── */
+.headerIcon {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  font-size: 1.1rem;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ─ Badge "Super Usuario" ──────────────────────────────────────────────────── */
+.badgeAdmin {
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: #fff;
+  border-radius: 6px;
+  padding: 0.35rem 0.75rem;
+}
+
+/* ─ Botón crear empleado ───────────────────────────────────────────────────── */
+.btnCrear {
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  padding: 0.35rem 1.25rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: opacity 0.15s, transform 0.15s;
+}
+.btnCrear:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* ─ Input búsqueda ─────────────────────────────────────────────────────────── */
+.searchInput {
+  max-width: 280px;
+}
+
+/* ─ Spinner violeta ────────────────────────────────────────────────────────── */
+.spinnerPurple {
+  color: #7c3aed;
+}
+
+/* ─ Avatar circular con gradiente ─────────────────────────────────────────── */
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+/* ─ Badge "Tú" ─────────────────────────────────────────────────────────────── */
+.badgeTu {
+  background: #a78bfa22;
+  color: #7c3aed;
+  font-size: 0.6rem;
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+}
+
+/* ─ Badge de rol ────────────────────────────────────────────────────────────── */
+.badgeRol {
+  font-size: 0.65rem;
+  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+  color: #fff;
+}
+
+/* ─ Select de estado ───────────────────────────────────────────────────────── */
+.estadoSelect {
+  width: auto;
+  background: transparent;
+  cursor: pointer;
+  border: 0;
+  padding: 0;
+  font-size: 0.8rem;
+}
+
+/* ─ Select de rol con borde violeta ───────────────────────────────────────── */
+.rolSelect {
+  border-color: #7c3aed44;
+  color: #1e1b4b;
+}
+
+/* ─ Cards de permisos por rol ─────────────────────────────────────────────── */
+.permisosCard {
+  border: none;
+  height: 100%;
+  border-radius: 8px;
+}
+.permisosIcono {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+.permisosItem {
+  font-size: 0.78rem;
+}
+
+/* ─ Modal header violeta ───────────────────────────────────────────────────── */
+.modalHeaderPurple {
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  color: #fff;
+  border: none;
+}
+.modalHeaderRed {
+  background: linear-gradient(135deg, #e94560, #c62a47);
+  color: #fff;
+  border: none;
+}
+.modalHeaderDanger {
+  background: linear-gradient(135deg, #dc2626, #991b1b);
+  color: #fff;
+  border: none;
+}
+
+/* ─ Modal body scroll ──────────────────────────────────────────────────────── */
+.modalBodyScroll {
+  max-height: 75vh;
+  overflow-y: auto;
+}
+
+/* ─ Botón confirmar (heredado del modal) ──────────────────────────────────── */
+.btnGuardar {
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  padding: 0.35rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.btnGuardar:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* ─ Emoji del modal de confirmación ──────────────────────────────────────── */
+.deleteEmoji {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  display: block;
+  text-align: center;
+}

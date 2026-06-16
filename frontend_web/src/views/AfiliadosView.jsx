@@ -8,6 +8,7 @@ import { useAfiliados } from "../hooks/useAfiliados";
 import AfiliadoVerModal from "../components/AfiliadoVerModal";
 import AfiliadoEditModal from "../components/AfiliadoEditModal";
 import AfiliadoCrearModal from "../components/AfiliadoCrearModal";
+import s from "./AfiliadosView.module.css";
 
 const OBJETIVO_CONFIG = {
   "Pérdida de grasa": { icono: "🔥", color: "#e94560" },
@@ -227,8 +228,7 @@ export default function AfiliadosView() {
     <AppLayout>
       {/* Toast */}
       {toast.msg && (
-        <div className="position-fixed bottom-0 end-0 m-4 alert alert-dark shadow-lg py-2 px-3"
-          style={{ zIndex: 9999, minWidth: 280 }}>
+        <div className={s.toast}>
           {toast.msg}
         </div>
       )}
@@ -244,8 +244,7 @@ export default function AfiliadosView() {
             </small>
           </div>
           {(role === "Recepcionista" || role === "Administrador") && (
-            <button id="btn-crear-afiliado" className="btn btn-sm fw-semibold text-white px-4"
-              style={{ background: "linear-gradient(135deg,#e94560,#c62a47)", border: "none" }}
+            <button id="btn-crear-afiliado" className={`btn btn-sm ${s.btnCrear}`}
               onClick={() => { setCrearModal(true); setFormNuevo(FORM_NUEVO); setNewError(""); }}>
               ➕ Nuevo afiliado
             </button>
@@ -256,8 +255,8 @@ export default function AfiliadosView() {
         <div className="card border-0 shadow-sm">
           <div className="card-header bg-white py-3 d-flex justify-content-between align-items-center border-0 flex-wrap gap-2">
             <span className="fw-semibold text-muted small">{filtrados.length} afiliados</span>
-            <input type="text" id="busqueda-afiliados" className="form-control form-control-sm"
-              style={{ maxWidth: 280 }} placeholder="🔍 Nombre, correo, documento..."
+            <input type="text" id="busqueda-afiliados" className={`form-control form-control-sm ${s.searchInput}`}
+              placeholder="🔍 Nombre, correo, documento..."
               value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
           </div>
           <div className="card-body p-0">
@@ -290,16 +289,15 @@ export default function AfiliadosView() {
                           <td className="ps-4 text-muted small">{idx + 1}</td>
                           <td>
                             <div className="d-flex align-items-center gap-2">
-                              <div className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
-                                style={{
-                                  width: 36, height: 36, flexShrink: 0, fontSize: "0.8rem",
-                                  background: `hsl(${(getId(a) * 47) % 360},65%,55%)`
-                                }}>
+                              <div
+                                className={s.avatar}
+                                style={{ background: `hsl(${(getId(a) * 47) % 360},65%,55%)` }}
+                              >
                                 {inicial(a)}
                               </div>
                               <div>
                                 <div className="fw-semibold small">{nombreCompleto(a)}</div>
-                                <div className="text-muted" style={{ fontSize: "0.72rem" }}>Doc: {a.documento || "—"}</div>
+                                <div className={`text-muted ${s.docText}`}>Doc: {a.documento || "—"}</div>
                               </div>
                             </div>
                           </td>
@@ -320,12 +318,13 @@ export default function AfiliadosView() {
                           <td>
                             {role === "Recepcionista" ? (
                               // FIX 1.2: usar estado_cuenta (campo real del USUARIO en el backend)
-                              <select className="form-select form-select-sm border-0 p-0 text-center"
-                                style={{ width: "auto", background: "transparent", cursor: "pointer" }}
+                              <select
+                                className={`form-select form-select-sm border-0 p-0 text-center ${s.estadoSelect}`}
                                 value={a.estado_cuenta || "Activo"}
                                 onChange={(e) => cambiarEstado(a, e.target.value)}
-                                title="Cambiar estado">
-                                {ESTADOS.map((s) => <option key={s}>{s}</option>)}
+                                title="Cambiar estado"
+                              >
+                                {ESTADOS.map((st) => <option key={st}>{st}</option>)}
                               </select>
                             ) : badgeEstado(a.estado_cuenta)}
                           </td>
@@ -358,11 +357,10 @@ export default function AfiliadosView() {
           MODAL: VER AFILIADO (pestañas por rol)
       ═══════════════════════════════════════════════════════════════════════ */}
       {verModal && (
-        <div className="modal d-block" style={{ background: "rgba(0,0,0,0.5)" }} onClick={() => setVerModal(null)}>
+        <div className={`modal d-block ${s.modalOverlay}`} onClick={() => setVerModal(null)}>
           <div className="modal-dialog modal-lg modal-dialog-scrollable" onClick={(e) => e.stopPropagation()}>
             <div className="modal-content border-0 shadow">
-              <div className="modal-header text-white border-0"
-                style={{ background: "linear-gradient(135deg,#1a1a2e,#16213e)" }}>
+              <div className={`modal-header ${s.modalHeaderDark}`}>
                 <h5 className="modal-title">👤 {nombreCompleto(verModal)}</h5>
                 <button type="button" className="btn-close btn-close-white" onClick={() => setVerModal(null)} />
               </div>
@@ -523,12 +521,11 @@ export default function AfiliadosView() {
           MODAL: EDITAR AFILIADO
       ═══════════════════════════════════════════════════════════════════════ */}
       {editModal && (
-        <div className="modal d-block" style={{ background: "rgba(0,0,0,0.55)" }}
+        <div className={`modal d-block ${s.modalOverlay}`}
           onClick={() => !savingEdit && setEditModal(null)}>
           <div className="modal-dialog modal-lg modal-dialog-scrollable" onClick={(e) => e.stopPropagation()}>
             <div className="modal-content border-0 shadow">
-              <div className="modal-header text-white border-0"
-                style={{ background: "linear-gradient(135deg,#e94560,#c62a47)" }}>
+              <div className={`modal-header ${s.modalHeaderRed}`}>
                 <h5 className="modal-title">✏️ Editar — {nombreCompleto(editModal)}</h5>
                 <button type="button" className="btn-close btn-close-white"
                   onClick={() => !savingEdit && setEditModal(null)} />
@@ -587,8 +584,7 @@ export default function AfiliadosView() {
                     Cancelar
                   </button>
                   <button id="btn-guardar-edicion" type="submit"
-                    className="btn btn-sm text-white fw-semibold px-4"
-                    style={{ background: "linear-gradient(135deg,#e94560,#c62a47)", border: "none" }}
+                    className={`btn btn-sm ${s.btnGuardar}`}
                     disabled={savingEdit}>
                     {savingEdit ? <><span className="spinner-border spinner-border-sm me-2" />Guardando...</> : "💾 Guardar"}
                   </button>
@@ -603,18 +599,17 @@ export default function AfiliadosView() {
           MODAL: CREAR AFILIADO (Recepcionista / Admin)
       ═══════════════════════════════════════════════════════════════════════ */}
       {crearModal && (
-        <div className="modal d-block" style={{ background: "rgba(0,0,0,0.55)" }}
+        <div className={`modal d-block ${s.modalOverlay}`}
           onClick={() => !savingNew && setCrearModal(false)}>
           <div className="modal-dialog modal-lg modal-dialog-scrollable" onClick={(e) => e.stopPropagation()}>
             <div className="modal-content border-0 shadow">
-              <div className="modal-header text-white border-0"
-                style={{ background: "linear-gradient(135deg,#198754,#146c43)" }}>
+              <div className={`modal-header ${s.modalHeaderGreen}`}>
                 <h5 className="modal-title">➕ Nuevo Afiliado</h5>
                 <button type="button" className="btn-close btn-close-white"
                   onClick={() => !savingNew && setCrearModal(false)} />
               </div>
               <form onSubmit={handleCrear}>
-                <div className="modal-body" style={{ maxHeight: "75vh", overflowY: "auto" }}>
+                <div className={`modal-body ${s.modalBodyScroll}`}>
                   {newError && <div className="alert alert-danger py-2"><small>⚠️ {newError}</small></div>}
 
                   <h6 className="fw-bold text-muted text-uppercase small mb-3">👤 Datos personales</h6>
@@ -725,8 +720,7 @@ export default function AfiliadosView() {
                     Cancelar
                   </button>
                   <button id="btn-confirmar-crear" type="submit"
-                    className="btn btn-sm text-white fw-semibold px-4"
-                    style={{ background: "linear-gradient(135deg,#198754,#146c43)", border: "none" }}
+                    className={`btn btn-sm ${s.btnCrearAfiliado}`}
                     disabled={savingNew}>
                     {savingNew ? <><span className="spinner-border spinner-border-sm me-2" />Guardando...</> : "✅ Crear afiliado"}
                   </button>
