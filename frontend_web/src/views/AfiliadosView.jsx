@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
 import { getId, nombreCompleto, inicial, cicloActivo, toDateInput } from "../utils/afiliadoHelpers";
 import { useToast } from "../hooks/useToast";
+import { useAfiliados } from "../hooks/useAfiliados";
 import AfiliadoVerModal from "../components/AfiliadoVerModal";
 import AfiliadoEditModal from "../components/AfiliadoEditModal";
 import AfiliadoCrearModal from "../components/AfiliadoCrearModal";
@@ -43,13 +44,22 @@ const TABS_ENTRENADOR = ["Progreso Físico", "Ciclo Activo"];
 const TABS_ADMIN = ["Estado de Cuenta", "Progreso Físico", "Ciclo Activo"];
 
 export default function AfiliadosView() {
-  const { user, logout, authAxios } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const role = user?.role || "Recepcionista";
 
-  const [afiliados, setAfiliados] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  // ISO 25000 / 3.3: lógica de afiliados encapsulada en custom hook
+  const {
+    afiliados,
+    loading,
+    error,
+    fetchAfiliados,
+    createAfiliado,
+    updateAfiliado,
+    setAfiliados,
+    setError,
+  } = useAfiliados();
+
   const [busqueda, setBusqueda] = useState("");
   const { toast, showToast } = useToast();
 
@@ -67,18 +77,7 @@ export default function AfiliadosView() {
 
   // ── Carga ──────────────────────────────────────────────────────────────────
   useEffect(() => {
-    // FIX: la ruta correcta es /afiliados. /660/afiliados no existe.
-    // requireAuth permite todos los roles (Admin, Entrenador, Recepcionista).
-    authAxios.get("/afiliados")
-      .then(({ data }) => {
-        setAfiliados(data);
-      })
-      .catch((err) => {
-        console.error('[AfiliadosView] Error:', err.response?.status, err.response?.data || err.message);
-        if (err?.response?.status === 401) { logout(); navigate("/login"); }
-        else setError("No se pudieron cargar los afiliados.");
-      })
-      .finally(() => setLoading(false));
+    fetchAfiliados();
   }, []);
 
   // ── Filtrado ───────────────────────────────────────────────────────────────
@@ -108,6 +107,10 @@ export default function AfiliadosView() {
         ? String(formNuevo.fecha_nacimiento).split("T")[0].split(" ")[0]
         : null;
 
+      // FIX 2.1: evitar enviar NaN al backend
+      const estVal = parseFloat(formNuevo.estatura_cm);
+      const diasVal = parseInt(formNuevo.disponibilidad_semanal_dias, 10);
+
       const payload = {
         nombres: formNuevo.nombres,
         apellidos: formNuevo.apellidos,
@@ -117,16 +120,17 @@ export default function AfiliadosView() {
         documento: formNuevo.documento,
         fecha_nacimiento: fn,
         sexo: formNuevo.sexo,
-        estatura_cm: parseFloat(formNuevo.estatura_cm) || null,
+        estatura_cm: isNaN(estVal) ? null : estVal,
         estado_afiliacion: formNuevo.estado || "Activo",
         // Campos de ciclo (no van a AFILIADO directamente, el backend los ignora por ahora)
         objetivo_fisico: formNuevo.objetivo_fisico,
         grupo_muscular_prioritario: formNuevo.grupo_muscular_prioritario,
         nivel_experiencia: formNuevo.nivel_experiencia,
-        disponibilidad_semanal_dias: parseInt(formNuevo.disponibilidad_semanal_dias) || 3,
+        disponibilidad_semanal_dias: isNaN(diasVal) ? 3 : diasVal,
       };
 
-      const { data } = await authAxios.post("/afiliados", payload);
+      // ISO 25000 / 3.3: usar createAfiliado del hook en lugar de authAxios directo
+      const data = await createAfiliado(payload);
       // El backend devuelve { id, message } — construimos el objeto para el estado local
       const nuevoAfiliado = {
         ...payload,
@@ -140,7 +144,6 @@ export default function AfiliadosView() {
       setFormNuevo(FORM_NUEVO);
       showToast(`✅ ${nombreCompleto(nuevoAfiliado)} creado correctamente`);
     } catch (err) {
-      // ── FIX: mostrar el error real del backend, no un string genérico ──
       const msg = err?.response?.data?.error || err.message || "Error desconocido";
       console.error('[AfiliadosView.handleCrear]', err.response?.data || err);
       setNewError(`Error al crear: ${msg}`);
@@ -177,8 +180,9 @@ export default function AfiliadosView() {
     setEditError("");
     try {
       const id = getId(editModal);
-      await authAxios.patch(`/afiliados/${id}`, formEdit);
-      // FIX: el backend devuelve {message}, NO el afiliado actualizado.
+      // ISO 25000 / 3.3: usar updateAfiliado del hook en lugar de authAxios directo
+      await updateAfiliado(id, formEdit);
+      // El backend devuelve {message}, NO el afiliado actualizado.
       // Mergeamos formEdit sobre el objeto existente para reflejar los cambios.
       const actualizado = { ...editModal, ...formEdit };
       setAfiliados((prev) => prev.map((a) => getId(a) === id ? actualizado : a));
@@ -193,17 +197,27 @@ export default function AfiliadosView() {
     }
   };
 
-  // ── Cambio rápido de estado (Recepcionista) ────────────────────────────────
+  // FIX 1.2: cambiar estado_cuenta (campo del USUARIO)
   const cambiarEstado = async (a, nuevoEstado) => {
     try {
       const id = getId(a);
-      const { data } = await authAxios.patch(`/afiliados/${id}`, { estado: nuevoEstado });
-      setAfiliados((prev) => prev.map((x) => getId(x) === id ? data : x));
+      // ISO 25000 / 3.3: usar updateAfiliado del hook
+      // El backend mapea { estado } → estado_afiliacion y estado_cuenta según corresponda
+      await updateAfiliado(id, { estado: nuevoEstado });
+      // El backend devuelve { message }, NO el afiliado actualizado: actualizamos localmente
+      setAfiliados((prev) =>
+        prev.map((x) => getId(x) === id
+          ? { ...x, estado_cuenta: nuevoEstado, estado_afiliacion: nuevoEstado }
+          : x
+        )
+      );
       showToast(`🔄 Estado cambiado a "${nuevoEstado}"`);
     } catch {
       showToast("❌ Error al cambiar estado.");
     }
   };
+
+
 
   const tabs = role === "Recepcionista" ? TABS_RECEPCIONISTA
     : role === "Entrenador" ? TABS_ENTRENADOR
@@ -305,14 +319,15 @@ export default function AfiliadosView() {
 
                           <td>
                             {role === "Recepcionista" ? (
+                              // FIX 1.2: usar estado_cuenta (campo real del USUARIO en el backend)
                               <select className="form-select form-select-sm border-0 p-0 text-center"
                                 style={{ width: "auto", background: "transparent", cursor: "pointer" }}
-                                value={a.estado || "Activo"}
+                                value={a.estado_cuenta || "Activo"}
                                 onChange={(e) => cambiarEstado(a, e.target.value)}
                                 title="Cambiar estado">
                                 {ESTADOS.map((s) => <option key={s}>{s}</option>)}
                               </select>
-                            ) : badgeEstado(a.estado)}
+                            ) : badgeEstado(a.estado_cuenta)}
                           </td>
 
                           <td className="text-center pe-4">
@@ -391,7 +406,8 @@ export default function AfiliadosView() {
                       <div className="col-md-4">
                         <div className="card border-0 bg-light text-center p-3">
                           <div className="small text-muted text-uppercase fw-semibold mb-1">Estado actual</div>
-                          {badgeEstado(verModal.estado)}
+                          {/* FIX 1.2: usar estado_cuenta */}
+                          {badgeEstado(verModal.estado_cuenta)}
                         </div>
                       </div>
                       <div className="col-md-4">
@@ -536,8 +552,9 @@ export default function AfiliadosView() {
                     ))}
                     <div className="col-md-6">
                       <label className="form-label small fw-semibold">Estado</label>
-                      <select className="form-select" value={formEdit.estado}
-                        onChange={(e) => setFormEdit({ ...formEdit, estado: e.target.value })}>
+                      {/* FIX 1.2: formEdit usa estado_afiliacion (nombre correcto) */}
+                      <select className="form-select" value={formEdit.estado_afiliacion}
+                        onChange={(e) => setFormEdit({ ...formEdit, estado_afiliacion: e.target.value })}>
                         {ESTADOS.map((s) => <option key={s}>{s}</option>)}
                       </select>
                     </div>

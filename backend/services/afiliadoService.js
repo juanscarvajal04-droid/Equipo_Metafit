@@ -5,6 +5,11 @@ const AfiliadoModel = require('../models/afiliadoModel');
 const CicloModel    = require('../models/cicloModel');
 const CatalogoModel = require('../models/catalogoModel');
 
+// FIX 1.3 / ISO 25000: normalizarFecha extraída a utils/fechaUtils.js
+// para que sea testeable sin dependencia de BD.
+const { normalizarFecha } = require('../utils/fechaUtils');
+
+
 const AfiliadoService = {
 
   getAll: async ({ page, limit }) => {
@@ -19,7 +24,14 @@ const AfiliadoService = {
     if (!datos.nombres || !datos.documento) {
       throw new Error('Nombre y documento son requeridos');
     }
-    const id = await AfiliadoModel.create(datos, creatorId);
+
+    // FIX 1.3: normalizar fecha_nacimiento antes de insertar
+    const datosNormalizados = {
+      ...datos,
+      fecha_nacimiento: normalizarFecha(datos.fecha_nacimiento),
+    };
+
+    const id = await AfiliadoModel.create(datosNormalizados, creatorId);
     return { id, message: 'Afiliado creado correctamente' };
   },
 

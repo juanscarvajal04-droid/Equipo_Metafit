@@ -1,0 +1,20 @@
+/* frontend_web/src/components/AfiliadoVerModal.module.css */
+
+.overlay {
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1050;
+}
+
+.modalHeader {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+}
+
+/* Etiqueta de campo en datos básicos */
+.fieldLabel {
+  font-size: 0.68rem;
+}
+
+/* Etiqueta de campo en progreso físico */
+.progresoLabel {
+  font-size: 0.68rem;
+}

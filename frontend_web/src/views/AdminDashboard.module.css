@@ -1,0 +1,61 @@
+/* frontend_web/src/views/AdminDashboard.module.css */
+
+/* ── KPI cards ── */
+.kpiIconWrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  /* background es DINÁMICO (kpi.color + "22") → inline */
+}
+
+/* ── Cards de objetivo físico ── */
+.objCountWrap {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.5rem;
+  /* background y color DINÁMICOS → inline */
+}
+
+/* ── Barra de progreso ── */
+.progressBar {
+  height: 6px;
+}
+
+/* ── Tabla: avatar de afiliado ── */
+.avatarTd {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  /* background es DINÁMICO (hsl basado en id) → inline */
+}
+
+.emailSm {
+  font-size: 0.72rem;
+}
+
+/* ── Buscador ── */
+.searchInput {
+  max-width: 280px;
+}
+
+/* ── Footer de tabla ── */
+.tableFooter {
+  /* usa Bootstrap card-footer */
+}

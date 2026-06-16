@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { nombreCompleto, inicial, cicloActivo } from "../utils/afiliadoHelpers";
+import styles from "./AfiliadoVerModal.module.css";
 
 const TABS_RECEPCIONISTA = ["Estado de Cuenta"];
 const TABS_ENTRENADOR    = ["Progreso Físico", "Ciclo Activo"];
@@ -21,11 +22,10 @@ export default function AfiliadoVerModal({ afiliado, role, onClose, onEdit }) {
              :                           TABS_ADMIN;
 
   return (
-    <div className="modal d-block" style={{ background: "rgba(0,0,0,0.5)", zIndex: 1050 }} onClick={onClose}>
+    <div className={`modal d-block ${styles.overlay}`} onClick={onClose}>
       <div className="modal-dialog modal-lg modal-dialog-scrollable" onClick={(e) => e.stopPropagation()}>
         <div className="modal-content border-0 shadow">
-          <div className="modal-header text-white border-0"
-            style={{ background: "linear-gradient(135deg,#1a1a2e,#16213e)" }}>
+          <div className={`modal-header text-white border-0 ${styles.modalHeader}`}>
             <h5 className="modal-title">👤 {nombreCompleto(afiliado)}</h5>
             <button type="button" className="btn-close btn-close-white" onClick={onClose} />
           </div>
@@ -45,7 +45,7 @@ export default function AfiliadoVerModal({ afiliado, role, onClose, onEdit }) {
                 { label: "Plan",       v: afiliado.plan_membresia || "Básico" },
               ].map((f) => (
                 <div key={f.label} className="col-6 col-md-4">
-                  <small className="text-muted d-block text-uppercase fw-semibold" style={{ fontSize: "0.68rem" }}>{f.label}</small>
+                  <small className={`text-muted d-block text-uppercase fw-semibold ${styles.fieldLabel}`}>{f.label}</small>
                   <span className="small fw-semibold">{f.v || "—"}</span>
                 </div>
               ))}
@@ -120,7 +120,7 @@ export default function AfiliadoVerModal({ afiliado, role, onClose, onEdit }) {
                         { label: "Pierna",   v: `${p.medidas_cm?.pierna} cm` },
                       ].map((f) => (
                         <div key={f.label} className="col-3">
-                          <small className="text-muted d-block" style={{ fontSize: "0.68rem" }}>{f.label}</small>
+                            <small className={`text-muted d-block ${styles.progresoLabel}`}>{f.label}</small>
                           <strong className="small">{f.v || "—"}</strong>
                         </div>
                       ))}

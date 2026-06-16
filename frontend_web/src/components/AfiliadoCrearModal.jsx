@@ -1,5 +1,8 @@
+import styles from "./AfiliadoCrearModal.module.css";
+
 const ESTADOS    = ["Activo", "Inactivo", "Pendiente"];
 const PLANES     = ["Básico", "Premium", "VIP"];
+
 const OBJETIVOS  = ["Pérdida de grasa", "Aumento de masa", "Mantenimiento"];
 const NIVELES    = ["Principiante", "Intermedio", "Avanzado"];
 const SEXOS      = ["Masculino", "Femenino", "Otro"];
@@ -17,18 +20,17 @@ export default function AfiliadoCrearModal({
   if (!crearModal) return null;
 
   return (
-    <div className="modal d-block" style={{ background: "rgba(0,0,0,0.55)", zIndex: 1050 }}
+    <div className={`modal d-block ${styles.overlay}`}
       onClick={() => !savingNew && onCancel()}>
       <div className="modal-dialog modal-lg modal-dialog-scrollable" onClick={(e) => e.stopPropagation()}>
         <div className="modal-content border-0 shadow">
-          <div className="modal-header text-white border-0"
-            style={{ background: "linear-gradient(135deg,#198754,#146c43)" }}>
+          <div className={`modal-header text-white border-0 ${styles.modalHeader}`}>
             <h5 className="modal-title">➕ Nuevo Afiliado</h5>
             <button type="button" className="btn-close btn-close-white"
               onClick={() => !savingNew && onCancel()} />
           </div>
           <form onSubmit={onSubmit}>
-            <div className="modal-body" style={{ maxHeight: "75vh", overflowY: "auto" }}>
+            <div className={`modal-body ${styles.modalBody}`}>
               {newError && <div className="alert alert-danger py-2"><small>⚠️ {newError}</small></div>}
 
               <h6 className="fw-bold text-muted text-uppercase small mb-3">👤 Datos personales</h6>
@@ -139,8 +141,7 @@ export default function AfiliadoCrearModal({
                 Cancelar
               </button>
               <button id="btn-confirmar-crear" type="submit"
-                className="btn btn-sm text-white fw-semibold px-4"
-                style={{ background: "linear-gradient(135deg,#198754,#146c43)", border: "none" }}
+                className={`btn btn-sm text-white fw-semibold px-4 ${styles.btnConfirmar}`}
                 disabled={savingNew}>
                 {savingNew ? <><span className="spinner-border spinner-border-sm me-2" />Guardando...</> : "✅ Crear afiliado"}
               </button>

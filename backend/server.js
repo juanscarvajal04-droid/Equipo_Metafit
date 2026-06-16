@@ -7,12 +7,14 @@
 
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger');
 const app = express();
 
 const IS_PROD = process.env.NODE_ENV === 'production';
+
 
 // ── CORS ──────────────────────────────────────────────────────
 const ALLOWED_ORIGINS = (process.env.CORS_ORIGINS || 'http://localhost:5173,http://localhost:3000')
@@ -48,9 +50,15 @@ app.use((req, res, next) => {
   })(req, res, next);
 });
 
+// ── ISO 25000 / 3.1: Helmet — cabeceras HTTP seguras ──────────
+// Desactivamos contentSecurityPolicy para que Swagger UI pueda
+// cargar sus scripts y estilos inline sin bloquearse.
+app.use(helmet({ contentSecurityPolicy: false }));
+
 // ── Límite de tamaño de body (evita DoS por payloads enormes) ─
 app.use(express.json({ limit: '50kb' }));
 app.use(express.urlencoded({ extended: true, limit: '50kb' }));
+
 
 // ── BUG-003: Validación de Content-Type ───────────────────────
 // Los endpoints POST, PUT y PATCH deben recibir JSON.

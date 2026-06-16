@@ -1,4 +1,5 @@
 import { nombreCompleto } from "../utils/afiliadoHelpers";
+import styles from "./AfiliadoEditModal.module.css";
 
 const ESTADOS    = ["Activo", "Inactivo", "Pendiente"];
 const PLANES     = ["Básico", "Premium", "VIP"];
@@ -17,12 +18,11 @@ export default function AfiliadoEditModal({
   if (!editModal) return null;
 
   return (
-    <div className="modal d-block" style={{ background: "rgba(0,0,0,0.55)", zIndex: 1050 }}
+    <div className={`modal d-block ${styles.overlay}`}
       onClick={() => !savingEdit && onCancel()}>
       <div className="modal-dialog modal-lg modal-dialog-scrollable" onClick={(e) => e.stopPropagation()}>
         <div className="modal-content border-0 shadow">
-          <div className="modal-header text-white border-0"
-            style={{ background: "linear-gradient(135deg,#e94560,#c62a47)" }}>
+          <div className={`modal-header text-white border-0 ${styles.modalHeader}`}>
             <h5 className="modal-title">✏️ Editar — {nombreCompleto(editModal)}</h5>
             <button type="button" className="btn-close btn-close-white"
               onClick={() => !savingEdit && onCancel()} />
@@ -80,8 +80,7 @@ export default function AfiliadoEditModal({
                 Cancelar
               </button>
               <button id="btn-guardar-edicion" type="submit"
-                className="btn btn-sm text-white fw-semibold px-4"
-                style={{ background: "linear-gradient(135deg,#e94560,#c62a47)", border: "none" }}
+                className={`btn btn-sm text-white fw-semibold px-4 ${styles.btnGuardar}`}
                 disabled={savingEdit}>
                 {savingEdit ? <><span className="spinner-border spinner-border-sm me-2" />Guardando...</> : "💾 Guardar"}
               </button>

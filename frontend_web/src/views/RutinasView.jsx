@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
 import { getId, nombreCompleto, inicial, cicloActivo } from "../utils/afiliadoHelpers";
 import { useToast } from "../hooks/useToast";
+import styles from "./RutinasView.module.css";
 
 const NIVEL_COLOR = {
   Principiante: { bg: "#0ea5e922", text: "#0284c7", label: "Principiante" },
@@ -160,10 +161,7 @@ export default function RutinasView() {
     <AppLayout>
       {/* Toast */}
       {toast.msg && (
-        <div
-          className={`position-fixed bottom-0 end-0 m-4 alert alert-${toast.type === "danger" ? "danger" : "dark"} shadow-lg py-2 px-3`}
-          style={{ zIndex: 9999, minWidth: 300 }}
-        >
+        <div className={`position-fixed bottom-0 end-0 m-4 alert alert-${toast.type === "danger" ? "danger" : "dark"} shadow-lg py-2 px-3 ${styles.toast}`}>
           {toast.msg}
         </div>
       )}
@@ -174,10 +172,7 @@ export default function RutinasView() {
         <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
           <div>
             <h1 className="h4 fw-bold mb-0 d-flex align-items-center gap-2">
-              <span
-                className="d-inline-flex align-items-center justify-content-center rounded-2 text-white"
-                style={{ width: 36, height: 36, background: "linear-gradient(135deg,#059669,#0d9488)", fontSize: "1.1rem" }}
-              >
+              <span className={`d-inline-flex align-items-center justify-content-center rounded-2 text-white ${styles.titleIcon}`}>
                 🏋️
               </span>
               Planes de Entrenamiento
@@ -196,15 +191,12 @@ export default function RutinasView() {
               { label: "Con rutina activa", valor: afiliados.filter((a) => cicloActivo(a)).length, color: "#7c3aed" },
               { label: "Sin rutina",       valor: afiliados.filter((a) => !cicloActivo(a)).length, color: "#e94560" },
             ].map((k) => (
-              <div
-                key={k.label}
-                className="card border-0 shadow-sm text-center px-3 py-2"
-                style={{ minWidth: 110 }}
-              >
+              <div key={k.label} className={`card border-0 shadow-sm text-center px-3 py-2 ${styles.kpiCard}`}>
+                {/* Dinámico: color viene de k.color (dato) */}
                 <div className="fw-bold fs-5" style={{ color: k.color }}>
                   {loading ? "—" : k.valor}
                 </div>
-                <div className="text-muted" style={{ fontSize: "0.68rem" }}>{k.label}</div>
+                <div className={`text-muted ${styles.kpiLabel}`}>{k.label}</div>
               </div>
             ))}
           </div>
@@ -218,22 +210,20 @@ export default function RutinasView() {
               <input
                 id="busqueda-rutinas"
                 type="text"
-                className="form-control form-control-sm"
-                style={{ maxWidth: 240 }}
+                className={`form-control form-control-sm ${styles.searchInput}`}
                 placeholder="🔍 Nombre, objetivo, nivel..."
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
               />
               <button
                 id="btn-refresh-rutinas"
-                className="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1"
-                style={{ whiteSpace: "nowrap", fontSize: "0.78rem" }}
+                className={`btn btn-sm btn-outline-secondary d-flex align-items-center gap-1 ${styles.exportBtn}`}
                 onClick={() => cargarAfiliados(true)}
                 disabled={refreshing}
                 title="Recargar lista de afiliados"
               >
                 {refreshing
-                  ? <span className="spinner-border spinner-border-sm" style={{ width: 12, height: 12, borderWidth: 2 }} />
+                  ? <span className={`spinner-border spinner-border-sm ${styles.spinnerSm}`} />
                   : "🔄"}
                 Actualizar
               </button>
@@ -242,7 +232,7 @@ export default function RutinasView() {
 
           <div className="card-body p-0">
             {error   && <div className="alert alert-danger m-3 py-2"><small>⚠️ {error}</small></div>}
-            {loading && <div className="text-center py-5"><div className="spinner-border" style={{ color: "#059669" }} /></div>}
+            {loading && <div className="text-center py-5"><div className={`spinner-border ${styles.spinnerBrand}`} /></div>}
 
             {!loading && !error && (
               <div className="table-responsive">
@@ -281,18 +271,14 @@ export default function RutinasView() {
                           {/* Afiliado */}
                           <td>
                             <div className="d-flex align-items-center gap-2">
-                              <div
-                                className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0"
-                                style={{
-                                  width: 36, height: 36, fontSize: "0.85rem",
-                                  background: `hsl(${(getId(a) * 47) % 360},65%,55%)`,
-                                }}
-                              >
+                              {/* Dinámico: hsl generado por id del afiliado */}
+                              <div className={styles.avatarTd}
+                                style={{ background: `hsl(${(getId(a) * 47) % 360},65%,55%)` }}>
                                 {inicial(a)}
                               </div>
                               <div>
                                 <div className="fw-semibold small">{nombreCompleto(a)}</div>
-                                <div className="text-muted" style={{ fontSize: "0.7rem" }}>{a.correo || "—"}</div>
+                                <div className={`text-muted ${styles.emailSm}`}>{a.correo || "—"}</div>
                               </div>
                             </div>
                           </td>
@@ -304,10 +290,9 @@ export default function RutinasView() {
 
                           {/* Nivel */}
                           <td>
-                            <span
-                              className="badge px-2 py-1"
-                              style={{ background: nivelCfg.bg, color: nivelCfg.text, fontSize: "0.7rem" }}
-                            >
+                            {/* Dinámico: background y color vienen de nivelCfg (por nivel_experiencia) */}
+                            <span className={`badge px-2 py-1 ${styles.badgeSm}`}
+                              style={{ background: nivelCfg.bg, color: nivelCfg.text }}>
                               {nivelCfg.label}
                             </span>
                           </td>
@@ -322,15 +307,15 @@ export default function RutinasView() {
                           {/* Rutina activa */}
                           <td>
                             {ciclo?.plan_entrenamiento?.nombre_rutina ? (
-                              <span className="badge px-2 py-1" style={{ background: "#05966918", color: "#059669", fontSize: "0.7rem" }}>
+                              <span className={`badge px-2 py-1 ${styles.badgeCiclo}`}>
                                 ✅ {ciclo.plan_entrenamiento.nombre_rutina}
                               </span>
                             ) : ciclo ? (
-                              <span className="badge bg-warning bg-opacity-15 text-warning" style={{ fontSize: "0.7rem" }}>
+                              <span className={`badge bg-warning bg-opacity-15 text-warning ${styles.badgeSm}`}>
                                 ⚙️ Plan personalizado
                               </span>
                             ) : (
-                              <span className="badge bg-danger bg-opacity-10 text-danger" style={{ fontSize: "0.7rem" }}>
+                              <span className={`badge bg-danger bg-opacity-10 text-danger ${styles.badgeSm}`}>
                                 ❌ Sin rutina
                               </span>
                             )}
@@ -363,10 +348,9 @@ export default function RutinasView() {
                               )}
                               {/* Asignar / Cambiar rutina */}
                               <button
-                                className="btn btn-sm fw-semibold text-white"
+                                className={`btn btn-sm fw-semibold text-white ${styles.btnAsignar}`}
                                 id={`btn-asignar-rutina-${getId(a)}`}
                                 title={ciclo ? "Cambiar rutina" : "Asignar rutina"}
-                                style={{ background: "linear-gradient(135deg,#059669,#0d9488)", border: "none", fontSize: "0.78rem" }}
                                 onClick={() => abrirAsignar(a)}
                               >
                                 {ciclo ? "🔄 Cambiar" : "➕ Asignar"}
@@ -385,7 +369,7 @@ export default function RutinasView() {
 
         {/* ── Catálogo de rutinas disponibles ── */}
         <div className="mt-4">
-          <h2 className="h6 fw-bold text-muted text-uppercase mb-3" style={{ letterSpacing: "0.06em" }}>
+          <h2 className={`h6 fw-bold text-muted text-uppercase mb-3 ${styles.sectionLabel}`}>
             📋 Catálogo de Rutinas Disponibles
           </h2>
           <div className="row g-2">
@@ -393,19 +377,17 @@ export default function RutinasView() {
               const nivelCfg = NIVEL_COLOR[r.nivel] || NIVEL_COLOR.Principiante;
               return (
                 <div key={r.id} className="col-md-4 col-lg-2">
-                  <div
-                    className="card border-0 shadow-sm h-100"
-                    style={{ borderLeft: `3px solid ${nivelCfg.text}` }}
-                  >
+                  {/* Dinámico: borderLeft usa nivelCfg.text (por nivel de la rutina) */}
+                  <div className="card border-0 shadow-sm h-100"
+                    style={{ borderLeft: `3px solid ${nivelCfg.text}` }}>
                     <div className="card-body p-3">
                       <div className="fw-semibold small mb-1">{r.nombre}</div>
-                      <div className="text-muted" style={{ fontSize: "0.68rem" }}>
+                      <div className={`text-muted ${styles.fechaSm}`}>
                         🎯 {r.enfoque} · {r.dias}d/sem
                       </div>
-                      <span
-                        className="badge mt-2 px-2 py-1"
-                        style={{ background: nivelCfg.bg, color: nivelCfg.text, fontSize: "0.6rem" }}
-                      >
+                      {/* Dinámico: background y color del badge vienen de nivelCfg */}
+                      <span className={`badge mt-2 px-2 py-1 ${styles.nivelBadge}`}
+                        style={{ background: nivelCfg.bg, color: nivelCfg.text }}>
                         {r.nivel}
                       </span>
                     </div>
@@ -421,20 +403,14 @@ export default function RutinasView() {
           MODAL: ASIGNAR / CAMBIAR RUTINA
       ═══════════════════════════════════════════════════════════════════════ */}
       {asignarModal && (
-        <div
-          className="modal d-block"
-          style={{ background: "rgba(0,0,0,0.6)", zIndex: 1055 }}
-          onClick={() => !saving && setAsignarModal(null)}
-        >
+        <div className={`modal d-block ${styles.modalOverlay}`}
+          onClick={() => !saving && setAsignarModal(null)}>
           <div
             className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="modal-content border-0 shadow-lg">
-              <div
-                className="modal-header text-white border-0"
-                style={{ background: "linear-gradient(135deg,#059669,#0d9488)" }}
-              >
+              <div className={`modal-header text-white border-0 ${styles.modalHeaderVerde}`}>
                 <h5 className="modal-title">
                   🏋️ Asignar Rutina — {nombreCompleto(asignarModal)}
                 </h5>
@@ -446,7 +422,7 @@ export default function RutinasView() {
               </div>
 
               <form onSubmit={handleAsignar}>
-                <div className="modal-body" style={{ maxHeight: "75vh", overflowY: "auto" }}>
+                <div className={`modal-body ${styles.modalBody}`}>
                   {asigError && (
                     <div className="alert alert-danger py-2 mb-3">
                       <small>⚠️ {asigError}</small>
@@ -454,17 +430,10 @@ export default function RutinasView() {
                   )}
 
                   {/* Info del afiliado */}
-                  <div
-                    className="rounded-3 p-3 mb-4 d-flex align-items-center gap-3"
-                    style={{ background: "#f8fafc", border: "1px solid #e2e8f0" }}
-                  >
-                    <div
-                      className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0"
-                      style={{
-                        width: 44, height: 44, fontSize: "1rem",
-                        background: `hsl(${(getId(asignarModal) * 47) % 360},65%,55%)`,
-                      }}
-                    >
+                  <div className={`rounded-3 p-3 mb-4 d-flex align-items-center gap-3 ${styles.afiliadoSection}`}>
+                    {/* Dinámico: hsl generado por id del afiliado seleccionado */}
+                    <div className={styles.avatarModal}
+                      style={{ background: `hsl(${(getId(asignarModal) * 47) % 360},65%,55%)` }}>
                       {inicial(asignarModal)}
                     </div>
                     <div>
@@ -504,12 +473,12 @@ export default function RutinasView() {
                                   <span style={{ color: nivelCfg.text, fontSize: "1rem" }}>✓</span>
                                 )}
                               </div>
-                              <div className="text-muted mt-1" style={{ fontSize: "0.7rem" }}>
+                              <div className={`text-muted mt-1 ${styles.rutinaInfo}`}>
                                 🎯 {r.enfoque} &nbsp;·&nbsp; 📅 {r.dias} días/sem
                               </div>
                               <span
-                                className="badge mt-2 px-2"
-                                style={{ background: nivelCfg.bg, color: nivelCfg.text, fontSize: "0.62rem" }}
+                                className={`badge mt-2 px-2 ${styles.nivelBadgeMd}`}
+                                style={{ background: nivelCfg.bg, color: nivelCfg.text }}
                               >
                                 {r.nivel}
                               </span>
@@ -572,8 +541,7 @@ export default function RutinasView() {
                   <button
                     id="btn-confirmar-asignar-rutina"
                     type="submit"
-                    className="btn btn-sm text-white fw-semibold px-4"
-                    style={{ background: "linear-gradient(135deg,#059669,#0d9488)", border: "none" }}
+                    className={`btn btn-sm text-white fw-semibold px-4 ${styles.btnConfirmar}`}
                     disabled={saving || !rutinaSelec}
                   >
                     {saving
@@ -596,20 +564,14 @@ export default function RutinasView() {
         const ciclo = cicloActivo(verModal);
         const plan  = ciclo?.plan_entrenamiento;
         return (
-          <div
-            className="modal d-block"
-            style={{ background: "rgba(0,0,0,0.6)", zIndex: 1055 }}
-            onClick={() => setVerModal(null)}
-          >
+        <div className={`modal d-block ${styles.modalOverlay}`}
+          onClick={() => setVerModal(null)}>
             <div
               className="modal-dialog modal-lg modal-dialog-scrollable"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="modal-content border-0 shadow-lg">
-                <div
-                  className="modal-header text-white border-0"
-                  style={{ background: "linear-gradient(135deg,#1a1a2e,#16213e)" }}
-                >
+                <div className={`modal-header text-white border-0 ${styles.modalHeaderOscuro}`}>
                   <h5 className="modal-title">
                     🏋️ Rutina activa — {nombreCompleto(verModal)}
                   </h5>
@@ -627,7 +589,7 @@ export default function RutinasView() {
                       { label: "Días/sem",       v: plan?.dias_semana   ? `${plan.dias_semana} días` : "—" },
                     ].map((f) => (
                       <div key={f.label} className="col-6 col-md-4">
-                        <small className="text-muted d-block text-uppercase fw-semibold" style={{ fontSize: "0.65rem" }}>
+                        <small className={`text-muted d-block text-uppercase fw-semibold ${styles.dataLabel}`}>
                           {f.label}
                         </small>
                         <span className="small fw-semibold">{f.v || "—"}</span>
@@ -676,7 +638,7 @@ export default function RutinasView() {
                               { l: "Pierna",   v: `${p.medidas_cm?.pierna} cm`   },
                             ].map((f) => (
                               <div key={f.l} className="col-3">
-                                <small className="text-muted d-block" style={{ fontSize: "0.65rem" }}>{f.l}</small>
+                                <small className={`text-muted d-block ${styles.progresoLabel}`}>{f.l}</small>
                                 <strong className="small">{f.v || "—"}</strong>
                               </div>
                             ))}

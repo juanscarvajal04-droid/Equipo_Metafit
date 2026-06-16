@@ -1,0 +1,222 @@
+/* frontend_web/src/views/Login.module.css */
+/* Estilos del formulario de login. Los colores dinámicos (de rol) permanecen inline. */
+
+/* ── Contenedor principal ── */
+.wrapper {
+  position: relative;
+}
+
+/* ── Glow de fondo decorativo ── */
+.glow {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border-radius: 60%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-60%, -60%);
+  pointer-events: none;
+  z-index: 0;
+  /* background se pone inline porque usa la variable RED_GLOW */
+}
+
+/* ── Card principal ── */
+.card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 500px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 16px;
+  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.65),
+              0 0 0 1px rgba(255, 255, 255, 0.04),
+              0 0 40px rgba(227, 28, 37, 0.06);
+  overflow: hidden;
+  /* background se pone inline porque usa las variables DARK2/DARK3 */
+}
+
+/* ── Cabecera roja del card ── */
+.cardHeader {
+  padding: 30px 40px 26px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  /* background es inline porque es el gradiente de marca (RED constant) */
+}
+
+/* Círculos decorativos de la cabecera */
+.deco1 {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  top: -70px;
+  right: -50px;
+  pointer-events: none;
+}
+
+.deco2 {
+  position: absolute;
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  bottom: -55px;
+  left: -25px;
+  pointer-events: none;
+}
+
+.logoIcon {
+  font-size: 2.6rem;
+  margin-bottom: 10px;
+  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.35));
+}
+
+.logoTitle {
+  margin: 0 0 5px;
+  font-size: 1.75rem;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 0.05em;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+
+.logoSubtitle {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.82rem;
+  letter-spacing: 0.03em;
+  font-weight: 500;
+}
+
+/* ── Cuerpo del formulario ── */
+.cardBody {
+  padding: 32px 40px 28px;
+}
+
+.formTitle {
+  margin: 0 0 24px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+/* ── Mensajes de error ── */
+.errorBox {
+  background: rgba(227, 28, 37, 0.12);
+  /* border usa inline porque combina con RED constante */
+  border-radius: 8px;
+  padding: 6px 10px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: #ff6b6b;
+}
+
+/* ── Campos del formulario ── */
+.fieldGroup {
+  margin-bottom: 18px;
+}
+
+.fieldGroupLast {
+  margin-bottom: 26px;
+}
+
+.label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.input {
+  width: 100%;
+  padding: 12px 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 9px;
+  color: #fff;
+  font-size: 0.93rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.honeypot {
+  display: none;
+}
+
+/* ── Spinner loading mientras no está listo ── */
+.loadingSlot {
+  min-height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: mfSpin 0.7s linear infinite;
+  /* border color se pone inline (usa RED) */
+}
+
+.spinnerSm {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  animation: mfSpin 0.7s linear infinite;
+}
+
+@keyframes mfSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Botón submit ── */
+.submitBtn {
+  width: 100%;
+  padding: 14px 24px;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.97rem;
+  font-weight: 700;
+  transition: all 0.2s ease;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  /* background, boxShadow, cursor son inline porque dependen del estado `loading` */
+}
+
+.arrowIcon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+/* ── Footer del card ── */
+.cardFooter {
+  padding: 12px 40px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  text-align: center;
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.22);
+  letter-spacing: 0.03em;
+}
