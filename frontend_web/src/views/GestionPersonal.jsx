@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
+import { getId } from "../utils/afiliadoHelpers";
+import { useToast } from "../hooks/useToast";
 
 // ── Constantes ────────────────────────────────────────────────────────────────
 const ROLES       = ["Administrador", "Recepcionista", "Entrenador"];
@@ -38,7 +40,7 @@ export default function GestionPersonal() {
   const [loading,      setLoading]      = useState(true);
   const [error,        setError]        = useState("");
   const [busqueda,     setBusqueda]     = useState("");
-  const [toast,        setToast]        = useState({ msg: "", type: "success" });
+  const { toast, showToast }            = useToast();
 
   // Modales
   const [crearModal,   setCrearModal]   = useState(false);
@@ -60,12 +62,6 @@ export default function GestionPersonal() {
   }, []);
 
   // ── Helpers ────────────────────────────────────────────────────────────────
-  const showToast = (msg, type = "success") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast({ msg: "", type: "success" }), 3000);
-  };
-
-  const getId = (u) => u._id ?? u.id;
 
   const filtrados = personal.filter((u) => {
     const t = busqueda.toLowerCase();
@@ -95,18 +91,18 @@ export default function GestionPersonal() {
       // El frontend NUNCA debe hashear: solo el servidor tiene acceso al salt.
       // MVP: se envía en texto por HTTPS (TLS cifra el canal de transporte).
       const newUser = {
-        ...formData,
-        id: Date.now(),
+        nombres: formData.nombres,
+        apellidos: formData.apellidos,
+        correo: formData.email,
+        contrasena: formData.password,
         rol: formData.role,
-        estado_cuenta: formData.estado_cuenta || "Activo",
-        fecha_registro: new Date().toISOString(),
-        // password_hash: "", // ← En producción este campo reemplaza a 'password'
+        estado: formData.estado_cuenta || "Activo",
       };
       const { data } = await authAxios.post("/usuarios", newUser);
       setPersonal((prev) => [...prev, data]);
       setCrearModal(false);
       setFormData(FORM_VACÍO);
-      showToast(`✅ Usuario "${data.email}" creado correctamente.`);
+      showToast(`✅ Usuario "${data.email || data.correo}" creado correctamente.`);
     } catch {
       setFormError("Error al crear. Verifica el servidor.");
     } finally {
@@ -119,10 +115,10 @@ export default function GestionPersonal() {
     setEditModal(u);
     setFormError("");
     setFormData({
-      email:         u.email         || "",
-      password:      u.password      || "",
+      email:         u.email         || u.correo || "",
+      password:      "",
       role:          u.role          || u.rol || "Recepcionista",
-      estado_cuenta: u.estado_cuenta || "Activo",
+      estado_cuenta: u.estado_cuenta || u.estado || "Activo",
       nombres:       u.nombres       || "",
       apellidos:     u.apellidos     || "",
     });
@@ -136,9 +132,15 @@ export default function GestionPersonal() {
     try {
       const id = getId(editModal);
       const payload = {
-        ...formData,
-        rol: formData.role,   // sincronizar campo 'rol' también
+        nombres: formData.nombres,
+        apellidos: formData.apellidos,
+        correo: formData.email,
+        rol: formData.role,
+        estado: formData.estado_cuenta,
       };
+      if (formData.password) {
+        payload.contrasena = formData.password;
+      }
       const { data } = await authAxios.patch(`/usuarios/${id}`, payload);
       setPersonal((prev) => prev.map((u) => getId(u) === id ? data : u));
       setEditModal(null);

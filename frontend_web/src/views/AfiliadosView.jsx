@@ -2,32 +2,28 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-const getId          = (doc) => doc.id_usuario ?? doc._id ?? doc.id;
-const nombreCompleto = (a)   => [a.nombres, a.apellidos].filter(Boolean).join(" ") || "Sin nombre";
-const inicial        = (a)   => (a.nombres || a.correo || "?")[0].toUpperCase();
-// FIX: el backend devuelve `ciclo_activo` (objeto único), NO `ciclos` (array)
-const cicloActivo    = (a)   => a.ciclo_activo || null;
-// FIX: MySQL devuelve '2000-01-30T00:00:00.000Z'. <input type="date"> necesita 'YYYY-MM-DD'.
-const toDateInput    = (v)   => { if (!v) return ""; if (typeof v === "string") return v.split("T")[0].split(" ")[0]; if (v instanceof Date) return v.toISOString().split("T")[0]; return ""; };
+import { getId, nombreCompleto, inicial, cicloActivo, toDateInput } from "../utils/afiliadoHelpers";
+import { useToast } from "../hooks/useToast";
+import AfiliadoVerModal from "../components/AfiliadoVerModal";
+import AfiliadoEditModal from "../components/AfiliadoEditModal";
+import AfiliadoCrearModal from "../components/AfiliadoCrearModal";
 
 const OBJETIVO_CONFIG = {
   "Pérdida de grasa": { icono: "🔥", color: "#e94560" },
-  "Aumento de masa":  { icono: "💪", color: "#0d6efd" },
-  "Mantenimiento":    { icono: "⚖️", color: "#198754" },
+  "Aumento de masa": { icono: "💪", color: "#0d6efd" },
+  "Mantenimiento": { icono: "⚖️", color: "#198754" },
 };
 
-const OBJETIVOS  = Object.keys(OBJETIVO_CONFIG);
-const NIVELES    = ["Principiante", "Intermedio", "Avanzado"];
-const ESTADOS    = ["Activo", "Inactivo", "Pendiente"];
-const PLANES     = ["Básico", "Premium", "VIP"];
-const SEXOS      = ["Masculino", "Femenino", "Otro"];
-const MUSCULOS   = ["Pecho", "Espalda", "Piernas", "Glúteos", "Hombros", "Bíceps", "Tríceps", "Abdomen"];
+const OBJETIVOS = Object.keys(OBJETIVO_CONFIG);
+const NIVELES = ["Principiante", "Intermedio", "Avanzado"];
+const ESTADOS = ["Activo", "Inactivo", "Pendiente"];
+const PLANES = ["Básico", "Premium", "VIP"];
+const SEXOS = ["Masculino", "Femenino", "Otro"];
+const MUSCULOS = ["Pecho", "Espalda", "Piernas", "Glúteos", "Hombros", "Bíceps", "Tríceps", "Abdomen"];
 
 const badgeEstado = (e) => {
   const map = { activo: "success", inactivo: "danger", pendiente: "warning" };
-  const c   = map[(e || "").toLowerCase()] || "secondary";
+  const c = map[(e || "").toLowerCase()] || "secondary";
   return <span className={`badge bg-${c}`}>{e || "—"}</span>;
 };
 
@@ -43,31 +39,31 @@ const FORM_NUEVO = {
 
 // ── Pestañas por rol ──────────────────────────────────────────────────────────
 const TABS_RECEPCIONISTA = ["Estado de Cuenta"];
-const TABS_ENTRENADOR    = ["Progreso Físico", "Ciclo Activo"];
-const TABS_ADMIN         = ["Estado de Cuenta", "Progreso Físico", "Ciclo Activo"];
+const TABS_ENTRENADOR = ["Progreso Físico", "Ciclo Activo"];
+const TABS_ADMIN = ["Estado de Cuenta", "Progreso Físico", "Ciclo Activo"];
 
 export default function AfiliadosView() {
   const { user, logout, authAxios } = useAuth();
   const navigate = useNavigate();
-  const role     = user?.role || "Recepcionista";
+  const role = user?.role || "Recepcionista";
 
-  const [afiliados,  setAfiliados]  = useState([]);
-  const [loading,    setLoading]    = useState(true);
-  const [error,      setError]      = useState("");
-  const [busqueda,   setBusqueda]   = useState("");
-  const [toast,      setToast]      = useState("");
+  const [afiliados, setAfiliados] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [busqueda, setBusqueda] = useState("");
+  const { toast, showToast } = useToast();
 
   // Modales
-  const [verModal,    setVerModal]    = useState(null);
-  const [verTab,      setVerTab]      = useState(0);
-  const [editModal,   setEditModal]   = useState(null);
-  const [formEdit,    setFormEdit]    = useState(FORM_NUEVO);
-  const [savingEdit,  setSavingEdit]  = useState(false);
-  const [editError,   setEditError]   = useState("");
-  const [crearModal,  setCrearModal]  = useState(false);
-  const [formNuevo,   setFormNuevo]   = useState(FORM_NUEVO);
-  const [savingNew,   setSavingNew]   = useState(false);
-  const [newError,    setNewError]    = useState("");
+  const [verModal, setVerModal] = useState(null);
+  const [verTab, setVerTab] = useState(0);
+  const [editModal, setEditModal] = useState(null);
+  const [formEdit, setFormEdit] = useState(FORM_NUEVO);
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [editError, setEditError] = useState("");
+  const [crearModal, setCrearModal] = useState(false);
+  const [formNuevo, setFormNuevo] = useState(FORM_NUEVO);
+  const [savingNew, setSavingNew] = useState(false);
+  const [newError, setNewError] = useState("");
 
   // ── Carga ──────────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -85,14 +81,12 @@ export default function AfiliadosView() {
       .finally(() => setLoading(false));
   }, []);
 
-  const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(""), 3000); };
-
   // ── Filtrado ───────────────────────────────────────────────────────────────
   const filtrados = afiliados.filter((a) => {
     const t = busqueda.toLowerCase();
     return nombreCompleto(a).toLowerCase().includes(t) ||
-           (a.correo || "").toLowerCase().includes(t)  ||
-           String(a.documento || "").includes(t);
+      (a.correo || "").toLowerCase().includes(t) ||
+      String(a.documento || "").includes(t);
   });
 
   // ── Crear afiliado (Recepcionista / Admin) ─────────────────────────────────
@@ -115,21 +109,21 @@ export default function AfiliadosView() {
         : null;
 
       const payload = {
-        nombres:              formNuevo.nombres,
-        apellidos:            formNuevo.apellidos,
-        correo:               formNuevo.correo,
-        telefono:             formNuevo.telefono || "",
-        direccion:            formNuevo.direccion || "",
-        documento:            formNuevo.documento,
-        fecha_nacimiento:     fn,
-        sexo:                 formNuevo.sexo,
-        estatura_cm:          parseFloat(formNuevo.estatura_cm) || null,
-        estado_afiliacion:    formNuevo.estado || "Activo",
+        nombres: formNuevo.nombres,
+        apellidos: formNuevo.apellidos,
+        correo: formNuevo.correo,
+        telefono: formNuevo.telefono || "",
+        direccion: formNuevo.direccion || "",
+        documento: formNuevo.documento,
+        fecha_nacimiento: fn,
+        sexo: formNuevo.sexo,
+        estatura_cm: parseFloat(formNuevo.estatura_cm) || null,
+        estado_afiliacion: formNuevo.estado || "Activo",
         // Campos de ciclo (no van a AFILIADO directamente, el backend los ignora por ahora)
-        objetivo_fisico:              formNuevo.objetivo_fisico,
-        grupo_muscular_prioritario:   formNuevo.grupo_muscular_prioritario,
-        nivel_experiencia:            formNuevo.nivel_experiencia,
-        disponibilidad_semanal_dias:  parseInt(formNuevo.disponibilidad_semanal_dias) || 3,
+        objetivo_fisico: formNuevo.objetivo_fisico,
+        grupo_muscular_prioritario: formNuevo.grupo_muscular_prioritario,
+        nivel_experiencia: formNuevo.nivel_experiencia,
+        disponibilidad_semanal_dias: parseInt(formNuevo.disponibilidad_semanal_dias) || 3,
       };
 
       const { data } = await authAxios.post("/afiliados", payload);
@@ -212,16 +206,16 @@ export default function AfiliadosView() {
   };
 
   const tabs = role === "Recepcionista" ? TABS_RECEPCIONISTA
-             : role === "Entrenador"    ? TABS_ENTRENADOR
-             :                           TABS_ADMIN;
+    : role === "Entrenador" ? TABS_ENTRENADOR
+      : TABS_ADMIN;
 
   return (
     <AppLayout>
       {/* Toast */}
-      {toast && (
+      {toast.msg && (
         <div className="position-fixed bottom-0 end-0 m-4 alert alert-dark shadow-lg py-2 px-3"
           style={{ zIndex: 9999, minWidth: 280 }}>
-          {toast}
+          {toast.msg}
         </div>
       )}
 
@@ -253,7 +247,7 @@ export default function AfiliadosView() {
               value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
           </div>
           <div className="card-body p-0">
-            {error   && <div className="alert alert-danger m-3 py-2"><small>⚠️ {error}</small></div>}
+            {error && <div className="alert alert-danger m-3 py-2"><small>⚠️ {error}</small></div>}
             {loading && <div className="text-center py-5"><div className="spinner-border text-primary" /></div>}
             {!loading && !error && (
               <div className="mf-table-wrap">
@@ -265,7 +259,7 @@ export default function AfiliadosView() {
                       <th>Objetivo</th>
                       <th>Nivel</th>
                       {(role === "Recepcionista" || role === "Administrador") && <th>Plan</th>}
-                      {(role === "Entrenador"    || role === "Administrador") && <th>Ciclo activo</th>}
+                      {(role === "Entrenador" || role === "Administrador") && <th>Ciclo activo</th>}
                       <th className="col-estado">Estado</th>
                       <th className="col-acciones pe-3">Acciones</th>
                     </tr>
@@ -283,8 +277,10 @@ export default function AfiliadosView() {
                           <td>
                             <div className="d-flex align-items-center gap-2">
                               <div className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
-                                style={{ width: 36, height: 36, flexShrink: 0, fontSize: "0.8rem",
-                                  background: `hsl(${(getId(a) * 47) % 360},65%,55%)` }}>
+                                style={{
+                                  width: 36, height: 36, flexShrink: 0, fontSize: "0.8rem",
+                                  background: `hsl(${(getId(a) * 47) % 360},65%,55%)`
+                                }}>
                                 {inicial(a)}
                               </div>
                               <div>
@@ -359,16 +355,16 @@ export default function AfiliadosView() {
                 {/* Datos básicos */}
                 <div className="row g-2 mb-3">
                   {[
-                    { label: "Correo",     v: verModal.correo },
-                    { label: "Teléfono",   v: verModal.telefono },
-                    { label: "Documento",  v: verModal.documento },
-                    { label: "Sexo",       v: verModal.sexo },
+                    { label: "Correo", v: verModal.correo },
+                    { label: "Teléfono", v: verModal.telefono },
+                    { label: "Documento", v: verModal.documento },
+                    { label: "Sexo", v: verModal.sexo },
                     { label: "Nacimiento", v: verModal.fecha_nacimiento },
-                    { label: "Estatura",   v: verModal.estatura_cm ? `${verModal.estatura_cm} cm` : "—" },
-                    { label: "Objetivo",   v: verModal.objetivo_fisico },
-                    { label: "Nivel",      v: verModal.nivel_experiencia },
-                    { label: "Días/sem",   v: verModal.disponibilidad_semanal_dias },
-                    { label: "Plan",       v: verModal.plan_membresia || "Básico" },
+                    { label: "Estatura", v: verModal.estatura_cm ? `${verModal.estatura_cm} cm` : "—" },
+                    { label: "Objetivo", v: verModal.objetivo_fisico },
+                    { label: "Nivel", v: verModal.nivel_experiencia },
+                    { label: "Días/sem", v: verModal.disponibilidad_semanal_dias },
+                    { label: "Plan", v: verModal.plan_membresia || "Básico" },
                   ].map((f) => (
                     <div key={f.label} className="col-6 col-md-4">
                       <small className="text-muted d-block text-uppercase fw-semibold" style={{ fontSize: "0.68rem" }}>{f.label}</small>
@@ -441,9 +437,9 @@ export default function AfiliadosView() {
                         <div className="row g-2 text-center">
                           {[
                             { label: "% Grasa", v: `${p.porcentaje_grasa}%` },
-                            { label: "Cintura",  v: `${p.medidas_cm?.cintura} cm` },
-                            { label: "Brazo",    v: `${p.medidas_cm?.brazo} cm` },
-                            { label: "Pierna",   v: `${p.medidas_cm?.pierna} cm` },
+                            { label: "Cintura", v: `${p.medidas_cm?.cintura} cm` },
+                            { label: "Brazo", v: `${p.medidas_cm?.brazo} cm` },
+                            { label: "Pierna", v: `${p.medidas_cm?.pierna} cm` },
                           ].map((f) => (
                             <div key={f.label} className="col-3">
                               <small className="text-muted d-block" style={{ fontSize: "0.68rem" }}>{f.label}</small>
@@ -526,11 +522,11 @@ export default function AfiliadosView() {
                   {editError && <div className="alert alert-danger py-2"><small>⚠️ {editError}</small></div>}
                   <div className="row g-3">
                     {[
-                      { label: "Nombres",   key: "nombres",   type: "text"   },
-                      { label: "Apellidos", key: "apellidos", type: "text"   },
-                      { label: "Correo",    key: "correo",    type: "email"  },
-                      { label: "Teléfono", key: "telefono",   type: "text"   },
-                      { label: "Documento", key: "documento", type: "text"   },
+                      { label: "Nombres", key: "nombres", type: "text" },
+                      { label: "Apellidos", key: "apellidos", type: "text" },
+                      { label: "Correo", key: "correo", type: "email" },
+                      { label: "Teléfono", key: "telefono", type: "text" },
+                      { label: "Documento", key: "documento", type: "text" },
                     ].map(({ label, key, type }) => (
                       <div key={key} className="col-md-6">
                         <label className="form-label small fw-semibold">{label}</label>
@@ -607,12 +603,12 @@ export default function AfiliadosView() {
                   <h6 className="fw-bold text-muted text-uppercase small mb-3">👤 Datos personales</h6>
                   <div className="row g-3 mb-4">
                     {[
-                      { label: "Nombres *",    key: "nombres",    type: "text",  required: true  },
-                      { label: "Apellidos *",  key: "apellidos",  type: "text",  required: true  },
-                      { label: "Email",        key: "correo",     type: "email", required: false },
-                      { label: "Teléfono",     key: "telefono",   type: "text",  required: false },
-                      { label: "DNI / Doc. *", key: "documento",  type: "text",  required: true  },
-                      { label: "Nacimiento",   key: "fecha_nacimiento", type: "date", required: false },
+                      { label: "Nombres *", key: "nombres", type: "text", required: true },
+                      { label: "Apellidos *", key: "apellidos", type: "text", required: true },
+                      { label: "Email", key: "correo", type: "email", required: false },
+                      { label: "Teléfono", key: "telefono", type: "text", required: false },
+                      { label: "DNI / Doc. *", key: "documento", type: "text", required: true },
+                      { label: "Nacimiento", key: "fecha_nacimiento", type: "date", required: false },
                     ].map(({ label, key, type, required }) => (
                       <div key={key} className="col-md-6">
                         <label className="form-label small fw-semibold">{label}</label>

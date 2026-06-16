@@ -2,11 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-const getId          = (doc) => doc.id_usuario ?? doc._id ?? doc.id;
-const nombreCompleto = (a)   => [a.nombres, a.apellidos].filter(Boolean).join(" ") || "Sin nombre";
-const inicial        = (a)   => (a.nombres || a.correo || "?")[0].toUpperCase();
+import { getId, nombreCompleto, inicial } from "../utils/afiliadoHelpers";
 
 /** Calcula días restantes entre hoy y una fecha dada (puede ser negativo = vencido) */
 const diasRestantes = (fechaStr) => {
@@ -37,6 +33,8 @@ const estadoMembresia = (dias) => {
 };
 
 // ── Componente principal ──────────────────────────────────────────────────────
+import { useToast } from "../hooks/useToast";
+
 export default function PagosView() {
   const { user, authAxios, logout } = useAuth();
   const navigate = useNavigate();
@@ -46,7 +44,7 @@ export default function PagosView() {
   const [loading,   setLoading]   = useState(true);
   const [error,     setError]     = useState("");
   const [busqueda,  setBusqueda]  = useState("");
-  const [toast,     setToast]     = useState({ msg: "", type: "success" });
+  const { toast, showToast }      = useToast();
 
   // Modal registrar pago
   const [pagoModal,  setPagoModal]  = useState(null);  // afiliado seleccionado
@@ -69,10 +67,6 @@ export default function PagosView() {
   }, []);
 
   // ── Helpers ────────────────────────────────────────────────────────────────
-  const showToast = (msg, type = "success") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast({ msg: "", type: "success" }), 3500);
-  };
 
   /** Extrae los datos de pago de un afiliado (guardados en a.membresia) */
   const membresia = (a) => a.membresia || null;

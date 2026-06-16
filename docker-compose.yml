@@ -107,14 +107,14 @@ services:
     container_name: metafit_phpmyadmin
     restart: unless-stopped
     environment:
-      PMA_HOST: db          # <- nombre exacto del servicio MySQL en esta red
+      PMA_HOST: db # <- nombre exacto del servicio MySQL en esta red
       PMA_PORT: 3306
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "8080:80"           # phpMyAdmin escucha en el 80 interno; lo exponemos en el 8080 local
+      - "8080:80" # phpMyAdmin escucha en el 80 interno; lo exponemos en el 8080 local
     depends_on:
       db:
-        condition: service_healthy  # arranca solo cuando MySQL ya responde el healthcheck
+        condition: service_healthy # arranca solo cuando MySQL ya responde el healthcheck
     networks:
       - metafit_net
 
