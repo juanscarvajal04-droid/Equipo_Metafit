@@ -84,7 +84,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"carlos@metafit.com\",\n  \"password\": \"Admin123!\"\n}",
+              "raw": "{\n  \"email\": \"carlos@metafit.com\",\n  \"password\": \"{{password_admin}}\"\n}",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
@@ -102,14 +102,14 @@
                 "header": [{ "key": "Content-Type", "value": "application/json" }],
                 "body": {
                   "mode": "raw",
-                  "raw": "{ \"email\": \"carlos@metafit.com\", \"password\": \"Admin123!\" }"
+                  "raw": "{ \"email\": \"carlos@metafit.com\", \"password\": \"{{password_admin}}\" }"
                 },
                 "url": { "raw": "{{base_url}}/login", "host": ["{{base_url}}"], "path": ["login"] }
               },
               "status": "OK",
               "code": 200,
               "header": [{ "key": "Content-Type", "value": "application/json" }],
-              "body": "{\n  \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"user\": {\n    \"id\": 1,\n    \"email\": \"carlos@metafit.com\",\n    \"role\": \"Administrador\",\n    \"nombres\": \"Carlos\",\n    \"apellidos\": \"García\"\n  }\n}"
+              "body": "{\n  \"accessToken\": \"TU_TOKEN_AQUI\",\n  \"user\": {\n    \"id\": 1,\n    \"email\": \"carlos@metafit.com\",\n    \"role\": \"Administrador\",\n    \"nombres\": \"Carlos\",\n    \"apellidos\": \"García\"\n  }\n}"
             },
             {
               "name": "401 — Credenciales inválidas",
@@ -154,7 +154,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"maria@metafit.com\",\n  \"password\": \"Maria111!\"\n}",
+              "raw": "{\n  \"email\": \"maria@metafit.com\",\n  \"password\": \"{{password_recepcionista}}\"\n}",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
@@ -191,7 +191,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"laura@metafit.com\",\n  \"password\": \"Laura456!\"\n}",
+              "raw": "{\n  \"email\": \"laura@metafit.com\",\n  \"password\": \"{{password_entrenador}}\"\n}",
               "options": { "raw": { "language": "json" } }
             },
             "url": {

@@ -1,4 +1,5 @@
 import { createContext, useContext, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import api, { loginRequest } from "../services/api";
 
 const AuthContext = createContext(null);
@@ -33,20 +34,32 @@ export function AuthProvider({ children }) {
   /**
    * Login contra el backend real (Node.js → MySQL).
    * Retorna el objeto user plano: { id, email, role, nombres, apellidos }
+   *
+   * IMPORTANTE: Usamos flushSync para forzar que React aplique setToken/setUser
+   * de forma síncrona ANTES de que el llamador ejecute navigate().
+   * Sin flushSync, React 18 batcha los setState y ProtectedRoute puede renderizar
+   * con ctxToken/ctxUser = null en el primer frame tras la navegación.
+   *
+   * También guardamos en localStorage como respaldo síncrono adicional.
    */
   const login = async ({ correo, contrasena }) => {
-    // loginRequest usa api.js → VITE_API_URL/login
     const response = await loginRequest(correo, contrasena);
 
     const { accessToken, user: userData } = response.data;
 
-    // Guardar en localStorage
+    // ✅ Primero localStorage (respaldo síncrono — ProtectedRoute lo lee si el
+    //    estado React aún no llegó al componente)
     localStorage.setItem("metafit_token", accessToken);
     localStorage.setItem("metafit_user",  JSON.stringify(userData));
+    localStorage.setItem("metafit_role",  userData.role || "");
 
-    // Actualizar estado global
-    setToken(accessToken);
-    setUser(userData);
+    // ✅ flushSync: fuerza React a procesar los setState AHORA, de forma síncrona,
+    //    antes de que login() retorne. Así, cuando Login.jsx llame navigate()
+    //    justo después del await, el Context ya tiene token y user válidos.
+    flushSync(() => {
+      setToken(accessToken);
+      setUser(userData);
+    });
 
     return userData;   // { id, email, role, nombres, apellidos }
   };

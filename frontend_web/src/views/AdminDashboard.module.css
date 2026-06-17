@@ -54,8 +54,3 @@
 .searchInput {
   max-width: 280px;
 }
-
-/* ── Footer de tabla ── */
-.tableFooter {
-  /* usa Bootstrap card-footer */
-}
