@@ -65,6 +65,22 @@ const requireAdminOrEntrenador = (req, res, next) => {
   next();
 };
 
+// ─────────────────────────────────────────────────────────────
+// MIDDLEWARE: requireAdminOrRecepcionista
+// Pasa si role es 'Administrador' o 'Recepcionista'.
+// FIX 5: Necesario para el endpoint POST /afiliados/:id/pagos.
+// ─────────────────────────────────────────────────────────────
+const requireAdminOrRecepcionista = (req, res, next) => {
+  if (!req.user) return res.status(401).json({ error: 'No autenticado' });
+  const allowed = ['Administrador', 'Recepcionista'];
+  if (!allowed.includes(req.user.role)) {
+    return res.status(403).json({
+      error: 'Acceso denegado: se requiere rol Administrador o Recepcionista',
+    });
+  }
+  next();
+};
+
 module.exports = {
   signJWT,
   hashPassword,
@@ -72,4 +88,5 @@ module.exports = {
   requireAuth,
   requireAdmin,
   requireAdminOrEntrenador,
+  requireAdminOrRecepcionista,
 };

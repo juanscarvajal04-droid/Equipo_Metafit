@@ -183,7 +183,7 @@ router.patch('/:id', requireAuth, AfiliadoController.update);
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.delete('/:id', requireAdmin, AfiliadoController.delete);
+router.delete('/:id', requireAuth, requireAdmin, AfiliadoController.delete);
 
 // ─────────────────────────────────────────────────────────────
 // CICLOS
@@ -269,7 +269,7 @@ router.get('/:id/ciclos', requireAuth, AfiliadoController.getCiclos);
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.post('/ciclos', requireAdminOrEntrenador, AfiliadoController.createCiclo);
+router.post('/ciclos', requireAuth, requireAdminOrEntrenador, AfiliadoController.createCiclo);
 
 // ─────────────────────────────────────────────────────────────
 // RESTRICCIONES MÉDICAS
@@ -330,7 +330,7 @@ router.get('/:id/restricciones', requireAuth, AfiliadoController.getRestriccione
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.post('/:id/restricciones', requireAdminOrEntrenador, AfiliadoController.addRestriccion);
+router.post('/:id/restricciones', requireAuth, requireAdminOrEntrenador, AfiliadoController.addRestriccion);
 
 /**
  * @swagger
@@ -357,7 +357,7 @@ router.post('/:id/restricciones', requireAdminOrEntrenador, AfiliadoController.a
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.delete('/:id/restricciones/:id_restriccion', requireAdminOrEntrenador, AfiliadoController.removeRestriccion);
+router.delete('/:id/restricciones/:id_restriccion', requireAuth, requireAdminOrEntrenador, AfiliadoController.removeRestriccion);
 
 // ─────────────────────────────────────────────────────────────
 // PROGRESO FÍSICO
@@ -441,6 +441,6 @@ router.get('/:id/progreso', requireAuth, AfiliadoController.getProgreso);
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.post('/progreso', requireAdminOrEntrenador, AfiliadoController.createProgreso);
+router.post('/progreso', requireAuth, requireAdminOrEntrenador, AfiliadoController.createProgreso);
 
 module.exports = router;

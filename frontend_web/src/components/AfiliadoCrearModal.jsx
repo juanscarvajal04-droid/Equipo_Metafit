@@ -1,6 +1,6 @@
 import styles from "./AfiliadoCrearModal.module.css";
 
-const ESTADOS    = ["Activo", "Inactivo", "Pendiente"];
+const ESTADOS    = ["Activo", "Inactivo", "Suspendido"];
 const PLANES     = ["Básico", "Premium", "VIP"];
 
 const OBJETIVOS  = ["Pérdida de grasa", "Aumento de masa", "Mantenimiento"];

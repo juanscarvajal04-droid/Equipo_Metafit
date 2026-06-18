@@ -115,3 +115,7 @@ export const getDashboardKPIs = () => api.get('/dashboard/kpis');
 
 /** HEALTH CHECK */
 export const healthCheck = () => api.get('/health');
+
+/** PAGOS (FIX 5) */
+export const getPagos   = (id)        => api.get(`/afiliados/${id}/pagos`);
+export const createPago = (id, data)  => api.post(`/afiliados/${id}/pagos`, data);

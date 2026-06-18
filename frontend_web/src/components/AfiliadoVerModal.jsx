@@ -90,7 +90,7 @@ export default function AfiliadoVerModal({ afiliado, role, onClose, onEdit }) {
                     <h6 className="fw-bold">⚠️ Restricciones médicas</h6>
                     {afiliado.restricciones.map((r) => (
                       <div key={r.id_restriccion} className="alert alert-warning py-2 mb-2">
-                        <strong>{r.nombre}</strong>
+                        <strong>{r.nombre_restriccion}</strong>
                         <span className="badge bg-warning text-dark ms-2">{r.tipo}</span>
                         {r.efecto_relevante && <div className="small mt-1 text-muted">{r.efecto_relevante}</div>}
                       </div>
@@ -115,9 +115,9 @@ export default function AfiliadoVerModal({ afiliado, role, onClose, onEdit }) {
                     <div className="row g-2 text-center">
                       {[
                         { label: "% Grasa", v: `${p.porcentaje_grasa}%` },
-                        { label: "Cintura",  v: `${p.medidas_cm?.cintura} cm` },
-                        { label: "Brazo",    v: `${p.medidas_cm?.brazo} cm` },
-                        { label: "Pierna",   v: `${p.medidas_cm?.pierna} cm` },
+                        { label: "Cintura",  v: p.medida_cintura ? `${p.medida_cintura} cm` : "—" },
+                        { label: "Brazo",    v: p.medida_brazo   ? `${p.medida_brazo} cm`   : "—" },
+                        { label: "Pierna",   v: p.medida_pierna  ? `${p.medida_pierna} cm`  : "—" },
                       ].map((f) => (
                         <div key={f.label} className="col-3">
                             <small className={`text-muted d-block ${styles.progresoLabel}`}>{f.label}</small>
@@ -144,7 +144,7 @@ export default function AfiliadoVerModal({ afiliado, role, onClose, onEdit }) {
                     <div className="mb-3">
                       <h6 className="fw-bold mb-2">🥗 Plan Nutricional</h6>
                       <p className="small text-muted mb-2">
-                        {ciclo.plan_nutricional.calorias_estimadas} kcal · {ciclo.plan_nutricional.num_comidas_diarias} comidas/día
+                        {ciclo.plan_nutricional.calorias_objetivo} kcal · {ciclo.plan_nutricional.num_comidas} comidas/día
                       </p>
                     </div>
                   )}
@@ -153,10 +153,10 @@ export default function AfiliadoVerModal({ afiliado, role, onClose, onEdit }) {
                       <h6 className="fw-bold mb-2">🏋️ Rutinas</h6>
                       {ciclo.plan_entrenamiento.rutinas.map((r) => (
                         <div key={r.dia_numero} className="border rounded p-2 mb-2">
-                          <div className="fw-semibold small mb-1">{r.nombre}</div>
+                          <div className="fw-semibold small mb-1">{r.nombre_rutina || r.nombre}</div>
                           {r.ejercicios?.map((ej, i) => (
                             <div key={i} className="d-flex justify-content-between small text-muted">
-                              <span>{ej.nombre}</span>
+                              <span>{ej.nombre_ejercicio || ej.nombre}</span>
                               <span>{ej.series}×{ej.repeticiones}</span>
                             </div>
                           ))}

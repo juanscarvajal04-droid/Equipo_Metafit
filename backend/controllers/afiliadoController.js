@@ -82,7 +82,7 @@ const AfiliadoController = {
 
   createCiclo: async (req, res) => {
     try {
-      const result = await AfiliadoService.createCiclo(req.body);
+      const result = await AfiliadoService.createCiclo(req.body, req.user.sub);
       return res.status(201).json(result);
     } catch (err) {
       if (err.message === 'id_afiliado, fecha_inicio y fecha_fin son requeridos') {

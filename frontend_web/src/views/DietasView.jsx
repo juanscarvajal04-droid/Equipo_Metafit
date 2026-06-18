@@ -184,28 +184,34 @@ export default function DietasView() {
     try {
       const id        = getId(asignarModal);
       const tienePlan = !!cicloActivo(asignarModal);
-      // FIX: el backend MySQL maneja planes en tabla PLAN_NUTRICIONAL + CICLO.
-      // Usamos el endpoint /afiliados/ciclos en lugar de PATCH con array JSON.
-      await authAxios.post(`/afiliados/ciclos`, {
-        id_afiliado:          id,
-        fecha_inicio:         new Date().toISOString().split("T")[0],
-        fecha_fin:            (() => { const d = new Date(); d.setDate(d.getDate() + 84); return d.toISOString().split("T")[0]; })(),
-        asignado_por_id:      getId(user),
-        plan_base_id:         planSelec.id,
-        nombre_plan:          planSelec.nombre,
-        objetivo_dieta:       planSelec.objetivo,
-        calorias_estimadas:   Number(calorias),
-        num_comidas_diarias:  numComidas,
-        observaciones:        obs || null,
+      // FIX 6: Primero creamos el CICLO (capturando el id_ciclo que devuelve)
+      // y luego insertamos el PLAN_NUTRICIONAL vinculado a ese ciclo.
+      const cicloPayload = {
+        id_afiliado:                id,
+        fecha_inicio:               new Date().toISOString().split("T")[0],
+        fecha_fin:                  (() => { const d = new Date(); d.setDate(d.getDate() + 84); return d.toISOString().split("T")[0]; })(),
+        objetivo_fisico:            asignarModal.objetivo_fisico,
+        nivel_experiencia:          asignarModal.nivel_experiencia,
+        disponibilidad_dias:        asignarModal.disponibilidad_semanal_dias || 3,
+        grupo_muscular_prioritario: asignarModal.grupo_muscular_prioritario || null,
+        observaciones:              planSelec ? `Plan: ${planSelec.nombre}` : null,
+      };
+      const { data: cicloData } = await authAxios.post(`/afiliados/ciclos`, cicloPayload);
+      // FIX 6: segunda llamada — persiste el PLAN_NUTRICIONAL vinculado al ciclo creado
+      await authAxios.post('/planes/nutricional', {
+        id_ciclo:          cicloData.id_ciclo,
+        calorias_objetivo: Number(calorias),
+        num_comidas:       numComidas,
+        observaciones:     obs || null,
       });
       // FIX: el backend devuelve {message}, NO el afiliado actualizado.
       // Mergeamos localmente el nuevo plan activo para reflejar el cambio en UI.
       const nuevoCicloLocal = {
         plan_nutricional: {
-          nombre_plan:          planSelec.nombre,
-          calorias_estimadas:   Number(calorias),
-          num_comidas_diarias:  numComidas,
-          objetivo_dieta:       planSelec.objetivo,
+          nombre_plan:       planSelec.nombre,
+          calorias_objetivo: Number(calorias),
+          num_comidas:       numComidas,
+          objetivo_dieta:    planSelec.objetivo,
         },
       };
       setAfiliados((prev) => prev.map((a) =>
@@ -423,9 +429,9 @@ export default function DietasView() {
 
                           {/* Calorías */}
                           <td className="text-center">
-                            {plan?.calorias_estimadas ? (
+                            {plan?.calorias_objetivo ? (
                               <span className="badge bg-light text-dark border">
-                                {plan.calorias_estimadas} kcal
+                                {plan.calorias_objetivo} kcal
                               </span>
                             ) : (
                               <small className="text-muted">—</small>
@@ -434,9 +440,9 @@ export default function DietasView() {
 
                           {/* Comidas/día */}
                           <td className="text-center">
-                            {plan?.num_comidas_diarias ? (
+                            {plan?.num_comidas ? (
                               <span className="badge bg-light text-dark border">
-                                {plan.num_comidas_diarias}×/día
+                                {plan.num_comidas}×/día
                               </span>
                             ) : (
                               <small className="text-muted">—</small>
@@ -779,8 +785,8 @@ export default function DietasView() {
                     {[
                       { label: "Plan",          v: plan?.nombre_plan           || "Personalizado" },
                       { label: "Objetivo",       v: plan?.objetivo_dieta        || verModal.objetivo_fisico },
-                      { label: "Calorías",       v: plan?.calorias_estimadas ? `${plan.calorias_estimadas} kcal` : "—" },
-                      { label: "Comidas/día",    v: plan?.num_comidas_diarias   || "—" },
+                      { label: "Calorías",       v: plan?.calorias_objetivo ? `${plan.calorias_objetivo} kcal` : "—" },
+                      { label: "Comidas/día",    v: plan?.num_comidas   || "—" },
                       { label: "Inicio ciclo",   v: ciclo?.fecha_inicio         || "—" },
                       { label: "Fin ciclo",      v: ciclo?.fecha_fin            || "—" },
                     ].map((f) => (
@@ -831,10 +837,10 @@ export default function DietasView() {
                   {plan?.detalle?.length > 0 && (
                     <>
                       <h6 className="fw-bold mb-3">📋 Distribución de comidas</h6>
-                      {Array.from(new Set(plan.detalle.map((d) => d.numero_comida))).map((nc) => (
+                      {Array.from(new Set(plan.detalle.map((d) => d.num_comida))).map((nc) => (
                         <div key={nc} className="border rounded-3 p-3 mb-2">
                           <div className="fw-semibold small mb-2">Comida {nc}</div>
-                          {plan.detalle.filter((d) => d.numero_comida === nc).map((d, i) => (
+                          {plan.detalle.filter((d) => d.num_comida === nc).map((d, i) => (
                             <div key={i} className="d-flex justify-content-between small text-muted border-bottom py-1">
                               <span>🍽️ {d.nombre_alimento}</span>
                               <span className="fw-semibold">{d.cantidad_g} g</span>

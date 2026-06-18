@@ -118,20 +118,20 @@ export default function RutinasView() {
     setSaving(true); setAsigError("");
     try {
       const id = getId(asignarModal);
-      // FIX: el backend MySQL maneja ciclos en la tabla CICLO, no como array en JSON.
-      // Enviamos solo los datos del nuevo ciclo al endpoint correcto.
+      // FIX 4: payload alineado con la tabla CICLO (NOT NULL fields incluidos)
       const payload = {
-        fecha_inicio:       fechaInicio,
-        fecha_fin:          fechaFin,
-        asignado_por_id:    getId(user),
-        nombre_rutina:      rutinaSelec.nombre,
-        enfoque:            rutinaSelec.enfoque,
-        dias_semana:        rutinaSelec.dias,
+        id_afiliado:                id,  // createCiclo acepta id_afiliado por compatibilidad
+        fecha_inicio:               fechaInicio,
+        fecha_fin:                  fechaFin,
+        objetivo_fisico:            asignarModal.objetivo_fisico,
+        nivel_experiencia:          asignarModal.nivel_experiencia,
+        disponibilidad_dias:        asignarModal.disponibilidad_semanal_dias || 3,
+        grupo_muscular_prioritario: asignarModal.grupo_muscular_prioritario || null,
+        observaciones:              rutinaSelec
+          ? `Rutina base: ${rutinaSelec.nombre} — ${rutinaSelec.enfoque}`
+          : null,
       };
-      await authAxios.post(`/afiliados/ciclos`, {
-        id_afiliado: id,
-        ...payload,
-      });
+      await authAxios.post(`/afiliados/ciclos`, payload);
       // FIX: el backend devuelve {message}, NO el afiliado actualizado.
       // Actualizamos el estado local mergeando el nuevo ciclo activo.
       const nuevoCicloLocal = {
@@ -603,10 +603,10 @@ export default function RutinasView() {
                       <h6 className="fw-bold mb-3">📋 Días de entrenamiento</h6>
                       {plan.rutinas.map((r) => (
                         <div key={r.dia_numero} className="border rounded-3 p-3 mb-2">
-                          <div className="fw-semibold small mb-2">{r.nombre}</div>
+                          <div className="fw-semibold small mb-2">{r.nombre_rutina || r.nombre || `Día ${r.dia_numero}`}</div>
                           {r.ejercicios?.map((ej, i) => (
                             <div key={i} className="d-flex justify-content-between small text-muted border-bottom py-1">
-                              <span>🏃 {ej.nombre}</span>
+                              <span>🏃 {ej.nombre_ejercicio || ej.nombre}</span>
                               <span className="fw-semibold">{ej.series}×{ej.repeticiones}</span>
                             </div>
                           ))}
@@ -632,10 +632,10 @@ export default function RutinasView() {
                           </div>
                           <div className="row g-2 text-center">
                             {[
-                              { l: "% Grasa",  v: `${p.porcentaje_grasa}%`       },
-                              { l: "Cintura",  v: `${p.medidas_cm?.cintura} cm`  },
-                              { l: "Brazo",    v: `${p.medidas_cm?.brazo} cm`    },
-                              { l: "Pierna",   v: `${p.medidas_cm?.pierna} cm`   },
+                              { l: "% Grasa",  v: `${p.porcentaje_grasa}%`                                    },
+                              { l: "Cintura",  v: p.medida_cintura ? `${p.medida_cintura} cm` : "—"   },
+                              { l: "Brazo",    v: p.medida_brazo   ? `${p.medida_brazo} cm`   : "—"   },
+                              { l: "Pierna",   v: p.medida_pierna  ? `${p.medida_pierna} cm`  : "—"   },
                             ].map((f) => (
                               <div key={f.l} className="col-3">
                                 <small className={`text-muted d-block ${styles.progresoLabel}`}>{f.l}</small>

@@ -1,7 +1,7 @@
 import { nombreCompleto } from "../utils/afiliadoHelpers";
 import styles from "./AfiliadoEditModal.module.css";
 
-const ESTADOS    = ["Activo", "Inactivo", "Pendiente"];
+const ESTADOS    = ["Activo", "Inactivo", "Suspendido"];
 const PLANES     = ["Básico", "Premium", "VIP"];
 const OBJETIVOS  = ["Pérdida de grasa", "Aumento de masa", "Mantenimiento"];
 const NIVELES    = ["Principiante", "Intermedio", "Avanzado"];

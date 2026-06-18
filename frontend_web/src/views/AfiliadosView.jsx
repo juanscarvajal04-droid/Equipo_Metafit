@@ -18,7 +18,7 @@ const OBJETIVO_CONFIG = {
 
 const OBJETIVOS = Object.keys(OBJETIVO_CONFIG);
 const NIVELES = ["Principiante", "Intermedio", "Avanzado"];
-const ESTADOS = ["Activo", "Inactivo", "Pendiente"];
+const ESTADOS = ["Activo", "Inactivo", "Suspendido"];
 const PLANES = ["Básico", "Premium", "VIP"];
 const SEXOS = ["Masculino", "Femenino", "Otro"];
 const MUSCULOS = ["Pecho", "Espalda", "Piernas", "Glúteos", "Hombros", "Bíceps", "Tríceps", "Abdomen"];
@@ -426,7 +426,7 @@ export default function AfiliadosView() {
                         <h6 className="fw-bold">⚠️ Restricciones médicas</h6>
                         {verModal.restricciones.map((r) => (
                           <div key={r.id_restriccion} className="alert alert-warning py-2 mb-2">
-                            <strong>{r.nombre}</strong>
+                            <strong>{r.nombre_restriccion}</strong>
                             <span className="badge bg-warning text-dark ms-2">{r.tipo}</span>
                             {r.efecto_relevante && <div className="small mt-1 text-muted">{r.efecto_relevante}</div>}
                           </div>
@@ -451,9 +451,9 @@ export default function AfiliadosView() {
                         <div className="row g-2 text-center">
                           {[
                             { label: "% Grasa", v: `${p.porcentaje_grasa}%` },
-                            { label: "Cintura", v: `${p.medidas_cm?.cintura} cm` },
-                            { label: "Brazo", v: `${p.medidas_cm?.brazo} cm` },
-                            { label: "Pierna", v: `${p.medidas_cm?.pierna} cm` },
+                            { label: "Cintura", v: p.medida_cintura ? `${p.medida_cintura} cm` : "—" },
+                            { label: "Brazo", v: p.medida_brazo ? `${p.medida_brazo} cm` : "—" },
+                            { label: "Pierna", v: p.medida_pierna ? `${p.medida_pierna} cm` : "—" },
                           ].map((f) => (
                             <div key={f.label} className="col-3">
                               <small className="text-muted d-block" style={{ fontSize: "0.68rem" }}>{f.label}</small>
@@ -480,7 +480,7 @@ export default function AfiliadosView() {
                         <div className="mb-3">
                           <h6 className="fw-bold mb-2">🥗 Plan Nutricional</h6>
                           <p className="small text-muted mb-2">
-                            {ciclo.plan_nutricional.calorias_estimadas} kcal · {ciclo.plan_nutricional.num_comidas_diarias} comidas/día
+                            {ciclo.plan_nutricional.calorias_objetivo} kcal · {ciclo.plan_nutricional.num_comidas} comidas/día
                           </p>
                         </div>
                       )}
