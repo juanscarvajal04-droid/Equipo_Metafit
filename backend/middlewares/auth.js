@@ -3,6 +3,7 @@
 // Refactorizado: BUG-004 (límite 72 bytes bcrypt), BUG-009 (JWT_SECRET sin fallback inseguro)
 'use strict';
 
+const jwt = require('jsonwebtoken'); // FIX 1: jwt era undefined → todos los requireAuth fallaban con 401
 const AuthService = require('../services/authService');
 const SECRET = AuthService.SECRET;
 

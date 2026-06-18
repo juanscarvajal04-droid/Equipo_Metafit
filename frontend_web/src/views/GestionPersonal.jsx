@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
 import { getId } from "../utils/afiliadoHelpers";
@@ -34,8 +33,7 @@ const FORM_EDIT_VACÍO = {
 
 // ── Componente principal ──────────────────────────────────────────────────────
 export default function GestionPersonal() {
-  const { user: adminUser, authAxios, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user: adminUser, authAxios } = useAuth();
 
   const [personal,     setPersonal]     = useState([]);
   const [loading,      setLoading]      = useState(true);
@@ -56,7 +54,7 @@ export default function GestionPersonal() {
     authAxios.get("/usuarios")
       .then(({ data }) => setPersonal(data))
       .catch((err) => {
-        if (err?.response?.status === 401) { logout(); navigate("/login"); }
+        if (err?.response?.status === 401) { /* interceptor global lo maneja */ }
         else setError("No se pudo cargar el personal.");
       })
       .finally(() => setLoading(false));

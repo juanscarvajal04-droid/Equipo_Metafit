@@ -1,5 +1,4 @@
 import { useEffect, useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
 import { getId, nombreCompleto, inicial } from "../utils/afiliadoHelpers";
@@ -37,8 +36,7 @@ const estadoMembresia = (dias) => {
 import { useToast } from "../hooks/useToast";
 
 export default function PagosView() {
-  const { user, authAxios, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user, authAxios } = useAuth();
   const isAdmin  = user?.role === "Administrador";
 
   const [afiliados, setAfiliados] = useState([]);
@@ -61,7 +59,7 @@ export default function PagosView() {
     authAxios.get("/afiliados")
       .then(({ data }) => setAfiliados(data))
       .catch((err) => {
-        if (err?.response?.status === 401) { logout(); navigate("/login"); }
+        if (err?.response?.status === 401) { /* interceptor global lo maneja */ }
         else setError("No se pudieron cargar los afiliados.");
       })
       .finally(() => setLoading(false));

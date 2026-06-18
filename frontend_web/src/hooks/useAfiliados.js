@@ -20,7 +20,7 @@ import { getId } from "../utils/afiliadoHelpers";
  * }}
  */
 export function useAfiliados() {
-  const { authAxios, logout } = useAuth();
+  const { authAxios } = useAuth();
 
   const [afiliados, setAfiliados] = useState([]);
   const [loading,   setLoading]   = useState(false);
@@ -35,15 +35,12 @@ export function useAfiliados() {
       setAfiliados(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("[useAfiliados] fetchAfiliados:", err);
-      if (err?.response?.status === 401) {
-        logout();
-      } else {
-        setError("No se pudieron cargar los afiliados.");
-      }
+      // El interceptor global de api.js ya maneja 401 de token expirado.
+      setError("No se pudieron cargar los afiliados.");
     } finally {
       setLoading(false);
     }
-  }, [authAxios, logout]);
+  }, [authAxios]);
 
   /**
    * Crea un nuevo afiliado.

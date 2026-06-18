@@ -28,6 +28,17 @@ export function AuthProvider({ children }) {
   const [user,  setUser]  = useState(() => loadStoredUser());
   const [token, setToken] = useState(() => localStorage.getItem("metafit_token") || null);
 
+  /**
+   * isAuthReady — Indica que el estado de autenticación ya fue resuelto.
+   *
+   * Se inicializa en `true` porque loadStoredUser() y la lectura de localStorage
+   * son síncronas: al montar AuthProvider ya sabemos si hay sesión o no.
+   * Se pone en `false` SOLO durante el instante en que login() guarda en
+   * localStorage pero antes de que flushSync actualice el contexto React.
+   * ProtectedRoute espera (spinner) mientras sea `false`.
+   */
+  const [isAuthReady, setIsAuthReady] = useState(true);
+
   // authAxios estable (reutiliza la instancia de api.js)
   const axiosRef = useRef(api);
 
@@ -56,9 +67,12 @@ export function AuthProvider({ children }) {
     // ✅ flushSync: fuerza React a procesar los setState AHORA, de forma síncrona,
     //    antes de que login() retorne. Así, cuando Login.jsx llame navigate()
     //    justo después del await, el Context ya tiene token y user válidos.
+    //    isAuthReady se pone en true al mismo tiempo para que ProtectedRoute
+    //    nunca vea un estado intermedio donde token existe pero user es null.
     flushSync(() => {
       setToken(accessToken);
       setUser(userData);
+      setIsAuthReady(true);
     });
 
     return userData;   // { id, email, role, nombres, apellidos }
@@ -68,12 +82,15 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("metafit_token");
     localStorage.removeItem("metafit_user");
     localStorage.removeItem("metafit_role");
-    setToken(null);
-    setUser(null);
+    flushSync(() => {
+      setToken(null);
+      setUser(null);
+      setIsAuthReady(true);
+    });
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, authAxios: axiosRef.current }}>
+    <AuthContext.Provider value={{ user, token, isAuthReady, login, logout, authAxios: axiosRef.current }}>
       {children}
     </AuthContext.Provider>
   );
@@ -83,4 +100,4 @@ export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) throw new Error("useAuth debe usarse dentro de un <AuthProvider>");
   return context;
-}
+}

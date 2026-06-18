@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
 import { useToast } from "../hooks/useToast";
 import styles from "./Dashboard.module.css";
 
 export default function Dashboard() {
-  const { authAxios, logout } = useAuth();
-  const navigate = useNavigate();
+  const { authAxios } = useAuth();
   const { toast, showToast } = useToast();
 
   const [kpis, setKpis] = useState(null);
@@ -22,12 +20,10 @@ export default function Dashboard() {
       setKpis(data);
     } catch (err) {
       console.error("[Dashboard] Error al cargar KPIs:", err);
-      if (err?.response?.status === 401 || err?.response?.status === 403) {
-        logout();
-        navigate("/login");
-      } else {
-        setError("No se pudieron cargar las estadísticas del sistema.");
-      }
+      // ⚠️ No llamar logout() aquí: el interceptor global de api.js ya maneja
+      // los 401 de token expirado. Llamarlo localmente provoca un logout
+      // inmediato tras el login si el backend responde lento o con 403.
+      setError("No se pudieron cargar las estadísticas del sistema.");
     } finally {
       setLoading(false);
     }

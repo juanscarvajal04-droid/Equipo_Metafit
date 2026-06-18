@@ -49,18 +49,34 @@ const AfiliadoService = {
     return CicloModel.findByAfiliado(id);
   },
 
-  createCiclo: async (datos) => {
-    const id_afiliado = datos.id_afiliado;
-    const fecha_inicio_ciclo = datos.fecha_inicio_ciclo || datos.fecha_inicio;
-    const fecha_fin_ciclo = datos.fecha_fin_ciclo || datos.fecha_fin;
+  createCiclo: async (datos, registradoPor) => {
+    // FIX 2: la tabla CICLO usa id_usuario (no id_afiliado) y requiere
+    //         objetivo_fisico, nivel_experiencia, disponibilidad_dias, registrado_por (NOT NULL).
+    const id_usuario = datos.id_usuario || datos.id_afiliado; // acepta ambos por compat. frontend
+    const fecha_inicio = datos.fecha_inicio;
+    const fecha_fin    = datos.fecha_fin;
 
-    if (!id_afiliado || !fecha_inicio_ciclo || !fecha_fin_ciclo) {
-      throw new Error('id_afiliado, fecha_inicio y fecha_fin son requeridos');
+    if (!id_usuario || !fecha_inicio || !fecha_fin) {
+      throw new Error('id_usuario, fecha_inicio y fecha_fin son requeridos');
+    }
+    if (!datos.objetivo_fisico || !datos.nivel_experiencia || !datos.disponibilidad_dias) {
+      throw new Error('objetivo_fisico, nivel_experiencia y disponibilidad_dias son requeridos');
     }
 
-    const id = await CicloModel.create(id_afiliado, fecha_inicio_ciclo, fecha_fin_ciclo);
+    const id = await CicloModel.create({
+      id_usuario,
+      fecha_inicio,
+      fecha_fin,
+      objetivo_fisico:            datos.objetivo_fisico,
+      nivel_experiencia:          datos.nivel_experiencia,
+      disponibilidad_dias:        Number(datos.disponibilidad_dias),
+      grupo_muscular_prioritario: datos.grupo_muscular_prioritario || null,
+      observaciones:              datos.observaciones || null,
+      registrado_por:             registradoPor,
+    });
     return { id_ciclo: id, message: 'Ciclo creado correctamente' };
   },
+
 
   getRestricciones: async (id) => {
     return CatalogoModel.getRestriccionesByAfiliado(id);

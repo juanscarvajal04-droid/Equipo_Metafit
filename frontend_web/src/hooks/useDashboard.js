@@ -18,7 +18,7 @@ import { useAuth } from "../context/AuthContext";
  * }}
  */
 export function useDashboard() {
-  const { authAxios, logout } = useAuth();
+  const { authAxios } = useAuth();
 
   const [kpis,    setKpis]    = useState(null);
   const [loading, setLoading] = useState(false);
@@ -43,15 +43,12 @@ export function useDashboard() {
       setKpis(data);
     } catch (err) {
       console.error("[useDashboard] fetchKpis:", err);
-      if (err?.response?.status === 401 || err?.response?.status === 403) {
-        logout();
-      } else {
-        setError("No se pudieron cargar las estadísticas del sistema.");
-      }
+      // El interceptor global de api.js ya maneja 401 de token expirado.
+      setError("No se pudieron cargar las estadísticas del sistema.");
     } finally {
       setLoading(false);
     }
-  }, [authAxios, logout]);
+  }, [authAxios]);
 
   return { kpis, loading, error, fetchKpis };
 }
