@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
+import { useDashboard } from "../hooks/useDashboard";
+import { useAfiliados } from "../hooks/useAfiliados";
+import styles from "./AdminDashboard.module.css";
+
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const getId          = (doc) => doc.id_usuario ?? doc._id ?? doc.id;
 const nombreCompleto = (a)   => [a.nombres, a.apellidos].filter(Boolean).join(" ") || "Sin nombre";
 const inicial        = (a)   => (a.nombres || a.correo || "?")[0].toUpperCase();
 const cicloActivo    = (a)   => a.ciclo_activo || null;
-const numRestr       = (a)   => a.restricciones?.length || 0;
+// numRestr eliminado — ya no se usa (KPIs vienen del endpoint /dashboard/kpis)
 
 const OBJETIVO_CONFIG = {
   "Pérdida de grasa": { icono: "🔥", color: "#e94560", bg: "#e9456022" },
@@ -30,35 +32,33 @@ const badgeNivel = (n) => {
 };
 
 export default function AdminDashboard() {
-  const { logout, authAxios } = useAuth();
-  const navigate = useNavigate();
+  // ISO 25000 / 3.3: datos desde hooks especializados
+  // Nota: useAuth ya no se necesita aquí; los hooks manejan el logout 401 internamente.
+  const { kpis, loading: loadingKpis, error: errorKpis, fetchKpis } = useDashboard();
+  const { afiliados, loading: loadingAfil, error: errorAfil, fetchAfiliados } = useAfiliados();
 
-  const [afiliados, setAfiliados] = useState([]);
-  const [loading,   setLoading]   = useState(true);
-  const [error,     setError]     = useState("");
-  const [busqueda,  setBusqueda]  = useState("");
+  const loading = loadingKpis || loadingAfil;
+  const error   = errorKpis   || errorAfil;
+
+  const [busqueda, setBusqueda] = useState("");
 
   useEffect(() => {
-    // FIX: ruta correcta /afiliados (no /660/afiliados — legado json-server)
-    authAxios.get("/afiliados")
-      .then(({ data }) => setAfiliados(data))
-      .catch((err) => {
-        if (err?.response?.status === 401) { logout(); navigate("/login"); }
-        else setError("No se pudieron cargar los afiliados.");
-      })
-      .finally(() => setLoading(false));
+    fetchKpis();
+    fetchAfiliados();
   }, []);
 
-  const filtrados        = afiliados.filter((a) => {
+  const filtrados = afiliados.filter((a) => {
     const t = busqueda.toLowerCase();
     return nombreCompleto(a).toLowerCase().includes(t) ||
            (a.correo || "").toLowerCase().includes(t)  ||
            (a.objetivo_fisico || "").toLowerCase().includes(t);
   });
-  // FIX: el campo real del backend es estado_cuenta (de USUARIO), no estado
-  const totalActivos     = afiliados.filter((a) => (a.estado_cuenta || "").toLowerCase() === "activo").length;
-  const conCicloActivo   = afiliados.filter((a) => cicloActivo(a)).length;
-  const conRestricciones = afiliados.filter((a) => numRestr(a) > 0).length;
+
+  // FIX 2.2: KPIs vienen del endpoint, no calculados sobre la lista paginada
+  const totalAfiliados   = kpis?.total_afiliados   ?? afiliados.length;
+  const totalActivos     = kpis?.afiliados_activos  ?? 0;
+  const conCicloActivo   = kpis?.ciclos_en_curso    ?? 0;
+  const conRestricciones = kpis?.con_restricciones  ?? 0;
   const conteoPorObj     = OBJETIVOS.map((obj) => ({
     objetivo: obj, cantidad: afiliados.filter((a) => a.objetivo_fisico === obj).length,
     ...OBJETIVO_CONFIG[obj],
@@ -77,16 +77,16 @@ export default function AdminDashboard() {
         {/* KPIs */}
         <div className="row g-3 mb-4">
           {[
-            { label: "Total Afiliados",   valor: afiliados.length,   icono: "👥", color: "#0d6efd" },
-            { label: "Activos",           valor: totalActivos,        icono: "✅", color: "#198754" },
-            { label: "Ciclos en curso",   valor: conCicloActivo,      icono: "🔄", color: "#6f42c1" },
-            { label: "Con restricciones", valor: conRestricciones,    icono: "⚠️", color: "#fd7e14" },
+            { label: "Total Afiliados",   valor: totalAfiliados,  icono: "👥", color: "#0d6efd" },
+            { label: "Activos",           valor: totalActivos,    icono: "✅",    color: "#198754" },
+            { label: "Ciclos en curso",   valor: conCicloActivo,  icono: "🔄",    color: "#6f42c1" },
+            { label: "Con restricciones", valor: conRestricciones,icono: "⚠️",   color: "#fd7e14" },
           ].map((kpi) => (
             <div key={kpi.label} className="col-6 col-md-3">
               <div className="card border-0 shadow-sm h-100">
                 <div className="card-body d-flex align-items-center gap-3">
-                  <div className="rounded-circle d-flex align-items-center justify-content-center fs-4"
-                    style={{ width: 52, height: 52, background: kpi.color + "22", flexShrink: 0 }}>
+                  {/* Dinámico: background usa kpi.color */}
+                  <div className={styles.kpiIconWrap} style={{ background: kpi.color + "22" }}>
                     {kpi.icono}
                   </div>
                   <div>
@@ -110,12 +110,13 @@ export default function AdminDashboard() {
                 <div className="card-body">
                   <div className="d-flex align-items-center justify-content-between mb-2">
                     <span className="fs-1">{obj.icono}</span>
-                    <div className="rounded-circle d-flex align-items-center justify-content-center fw-bold fs-3"
-                      style={{ width: 60, height: 60, background: obj.bg, color: obj.color }}>
+                    {/* DINÁMICO: background y color son datos de OBJETIVO_CONFIG */}
+                    <div className={styles.objCountWrap} style={{ background: obj.bg, color: obj.color }}>
                       {loading ? <span className="spinner-border spinner-border-sm" /> : obj.cantidad}
                     </div>
                   </div>
                   <h3 className="h6 fw-bold mb-1" style={{ color: obj.color }}>{obj.objetivo}</h3>
+                  {/* DINÁMICO: width es proporcional a datos */}
                   <div className="progress mt-2" style={{ height: 6 }}>
                     <div className="progress-bar"
                       style={{ width: afiliados.length > 0 ? `${(obj.cantidad / afiliados.length) * 100}%` : "0%", background: obj.color }} />
@@ -130,8 +131,8 @@ export default function AdminDashboard() {
         <div className="card border-0 shadow-sm">
           <div className="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2 border-0">
             <h2 className="h5 fw-bold mb-0">👥 Afiliados</h2>
-            <input type="text" id="busqueda-dashboard" className="form-control form-control-sm"
-              style={{ maxWidth: 280 }} placeholder="🔍 Buscar..."
+            <input type="text" id="busqueda-dashboard" className={`form-control form-control-sm ${styles.searchInput}`}
+              placeholder="🔍 Buscar..."
               value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
           </div>
           <div className="card-body p-0">
@@ -160,14 +161,14 @@ export default function AdminDashboard() {
                           <td className="ps-4 text-muted small">{i + 1}</td>
                           <td>
                             <div className="d-flex align-items-center gap-2">
-                              <div className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
-                                style={{ width: 36, height: 36, flexShrink: 0, fontSize: "0.8rem",
-                                  background: `hsl(${(getId(a) * 47) % 360},65%,55%)` }}>
+                              {/* DINÁMICO: hsl generado por el id del afiliado */}
+                              <div className={styles.avatarTd}
+                                style={{ background: `hsl(${(getId(a) * 47) % 360},65%,55%)` }}>
                                 {inicial(a)}
                               </div>
                               <div>
                                 <div className="fw-semibold small">{nombreCompleto(a)}</div>
-                                <div className="text-muted" style={{ fontSize: "0.72rem" }}>{a.correo}</div>
+                                <div className={styles.emailSm}>{a.correo}</div>
                               </div>
                             </div>
                           </td>
@@ -178,7 +179,8 @@ export default function AdminDashboard() {
                               ? <span className="badge bg-primary bg-opacity-10 text-primary">Ciclo {ciclo.numero_ciclo}</span>
                               : <span className="text-muted small">—</span>}
                           </td>
-                          <td>{badgeEstado(a.estado)}</td>
+                          {/* FIX 1.2: usar estado_cuenta (campo real del backend) */}
+                          <td>{badgeEstado(a.estado_cuenta)}</td>
                         </tr>
                       );
                     })}
@@ -188,7 +190,7 @@ export default function AdminDashboard() {
             )}
             {!loading && !error && (
               <div className="card-footer bg-white text-muted small py-2 px-4 border-0">
-                {filtrados.length} de {afiliados.length} afiliados
+                  {filtrados.length} de {totalAfiliados} afiliados
               </div>
             )}
           </div>

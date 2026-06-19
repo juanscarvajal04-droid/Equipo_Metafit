@@ -1,0 +1,128 @@
+/* ── AfiliadosView.module.css ─────────────────────────────────────────────── */
+
+/* ─ Toast de notificación ─────────────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  margin: 1.5rem;
+  z-index: 9999;
+  min-width: 280px;
+  padding: 0.5rem 1rem;
+  background: #212529;
+  color: #fff;
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+/* ─ Botón "Nuevo afiliado" ────────────────────────────────────────────────── */
+.btnCrear {
+  background: linear-gradient(135deg, #e94560, #c62a47);
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  padding: 0.35rem 1.25rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: opacity 0.15s, transform 0.15s;
+}
+.btnCrear:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* ─ Input búsqueda ────────────────────────────────────────────────────────── */
+.searchInput {
+  max-width: 280px;
+}
+
+/* ─ Avatar circular ───────────────────────────────────────────────────────── */
+.avatar {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+}
+
+/* ─ Texto secundario pequeño ──────────────────────────────────────────────── */
+.docText {
+  font-size: 0.72rem;
+}
+
+/* ─ Select de estado inline ──────────────────────────────────────────────── */
+.estadoSelect {
+  width: auto;
+  background: transparent;
+  cursor: pointer;
+  border: 0;
+  padding: 0;
+  font-size: inherit;
+}
+
+/* ─ Header de modal oscuro ────────────────────────────────────────────────── */
+.modalHeaderDark {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  color: #fff;
+  border: none;
+}
+.modalHeaderRed {
+  background: linear-gradient(135deg, #e94560, #c62a47);
+  color: #fff;
+  border: none;
+}
+.modalHeaderGreen {
+  background: linear-gradient(135deg, #198754, #146c43);
+  color: #fff;
+  border: none;
+}
+
+/* ─ Botón guardar con gradiente ──────────────────────────────────────────── */
+.btnGuardar {
+  background: linear-gradient(135deg, #e94560, #c62a47);
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  padding: 0.35rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.btnGuardar:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.btnCrearAfiliado {
+  background: linear-gradient(135deg, #198754, #146c43);
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  padding: 0.35rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.btnCrearAfiliado:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+
+/* ─ Modal body con scroll ─────────────────────────────────────────────────── */
+.modalBodyScroll {
+  max-height: 75vh;
+  overflow-y: auto;
+}
+
+/* ─ Overlay de modales ────────────────────────────────────────────────────── */
+.modalOverlay {
+  background: rgba(0,0,0,0.55);
+  z-index: 1055;
+}

@@ -1,0 +1,199 @@
+/* frontend_web/src/views/RutinasView.module.css */
+
+/* ── Toast de notificación ── */
+.toast {
+  z-index: 9999;
+  min-width: 300px;
+}
+
+/* ── Icono del título ── */
+.titleIcon {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #059669, #0d9488);
+  border-radius: 6px;
+  font-size: 1.1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+/* ── Buscador ── */
+.searchInput {
+  max-width: 240px;
+}
+
+/* ── Botón exportar ── */
+.exportBtn {
+  white-space: nowrap;
+  font-size: 0.78rem;
+}
+
+/* ── Spinner pequeño en botón ── */
+.spinnerSm {
+  width: 12px;
+  height: 12px;
+  border-width: 2px;
+}
+
+/* ── Spinner de color de marca ── */
+.spinnerBrand {
+  color: #059669;
+}
+
+/* ── Tabla: email del afiliado ── */
+.emailSm {
+  font-size: 0.7rem;
+}
+
+/* ── Avatar del afiliado en tabla ── */
+/* background es DINÁMICO (hsl por id) → inline */
+.avatarTd {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  flex-shrink: 0;
+  font-size: 0.8rem;
+}
+
+/* ── Columna de KPI card en tabla ── */
+.kpiCard {
+  min-width: 110px;
+}
+
+/* ── Valor de KPI en tabla ── */
+/* color es DINÁMICO (k.color) → inline */
+
+/* ── Label del KPI ── */
+.kpiLabel {
+  font-size: 0.68rem;
+}
+
+/* ── Badge de estado en tabla ── */
+.badgeSm {
+  font-size: 0.7rem;
+}
+
+/* ── Badge de ciclo activo ── */
+.badgeCiclo {
+  background: #05966918;
+  color: #059669;
+  font-size: 0.7rem;
+}
+
+/* ── Badge "Sin rutina" ── */
+/* usa Bootstrap bg-warning */
+
+/* ── Fila "Sin rutina" — background DINÁMICO (sinRutina ? ...) → inline ── */
+
+/* ── Botón asignar rutina ── */
+.btnAsignar {
+  background: linear-gradient(135deg, #059669, #0d9488);
+  border: none;
+  font-size: 0.78rem;
+}
+
+.btnAsignar:hover {
+  opacity: 0.9;
+}
+
+/* ── Section label (Asignaciones recientes) ── */
+.sectionLabel {
+  letter-spacing: 0.06em;
+}
+
+/* ── Card de asignación reciente ── */
+/* borderLeft es DINÁMICO (nivelCfg.text) → inline */
+
+/* ── Fecha en card ── */
+.fechaSm {
+  font-size: 0.68rem;
+}
+
+/* ── Nivel badge en card asignación ── */
+/* background, color DINÁMICOS (nivelCfg) → inline */
+.nivelBadge {
+  font-size: 0.6rem;
+}
+
+/* ── Modal overlay ── */
+.modalOverlay {
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1055;
+}
+
+/* ── Modal header verde ── */
+.modalHeaderVerde {
+  background: linear-gradient(135deg, #059669, #0d9488);
+}
+
+/* ── Modal body scrollable ── */
+.modalBody {
+  max-height: 75vh;
+  overflow-y: auto;
+}
+
+/* ── Sección de afiliado en modal ── */
+.afiliadoSection {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+/* ── Avatar del afiliado seleccionado en modal ── */
+/* background DINÁMICO (nivelCfg.bg) → inline */
+.avatarModal {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+/* ── Nombre en modal ── */
+/* color DINÁMICO (nivelCfg.text) → inline */
+
+/* ── Check mark en item de rutina ── */
+/* color DINÁMICO → inline */
+
+/* ── Info debajo del nombre de rutina ── */
+.rutinaInfo {
+  font-size: 0.7rem;
+}
+
+/* ── Badge de nivel en ítem de rutina en modal ── */
+/* background, color DINÁMICOS → inline */
+.nivelBadgeMd {
+  font-size: 0.62rem;
+}
+
+/* ── Botón confirmar asignación ── */
+.btnConfirmar {
+  background: linear-gradient(135deg, #059669, #0d9488);
+  border: none;
+}
+
+/* ── Modal Ver Rutina header ── */
+.modalHeaderOscuro {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+}
+
+/* ── Label en filas de datos del modal Ver ── */
+.dataLabel {
+  font-size: 0.65rem;
+}
+
+/* ── Label dato progreso ── */
+.progresoLabel {
+  font-size: 0.65rem;
+}

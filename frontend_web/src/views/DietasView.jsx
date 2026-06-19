@@ -2,13 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-const getId          = (doc) => doc.id_usuario ?? doc._id ?? doc.id;
-const nombreCompleto = (a)   => [a.nombres, a.apellidos].filter(Boolean).join(" ") || "Sin nombre";
-const inicial        = (a)   => (a.nombres || a.correo || "?")[0].toUpperCase();
-// FIX: el backend devuelve `ciclo_activo` (objeto), NO `ciclos` (array)
-const cicloActivo    = (a)   => a.ciclo_activo || null;
+import { getId, nombreCompleto, inicial, cicloActivo } from "../utils/afiliadoHelpers";
+import s from "./DietasView.module.css";
 
 const OBJETIVO_CONFIG = {
   "Pérdida de grasa": { icono: "🔥", color: "#e94560", bg: "#e9456018" },
@@ -93,6 +88,8 @@ const PLANES_NUTRICIONALES = [
 ];
 
 // ── Componente principal ──────────────────────────────────────────────────────
+import { useToast } from "../hooks/useToast";
+
 export default function DietasView() {
   const { user, authAxios, logout } = useAuth();
   const navigate = useNavigate();
@@ -104,7 +101,7 @@ export default function DietasView() {
   const [refreshing, setRefreshing] = useState(false);
   const [error,      setError]      = useState("");
   const [busqueda,   setBusqueda]   = useState("");
-  const [toast,      setToast]      = useState({ msg: "", type: "success" });
+  const { toast, showToast }        = useToast();
 
   // Modal asignar plan
   const [asignarModal, setAsignarModal] = useState(null);
@@ -117,12 +114,6 @@ export default function DietasView() {
 
   // Modal ver plan activo
   const [verModal, setVerModal] = useState(null);
-
-  // ── Helpers (definidos antes de cargarAfiliados para poder usar showToast) ──
-  const showToast = (msg, type = "success") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast({ msg: "", type: "success" }), 3000);
-  };
 
   // ── Carga (reutilizable para el botón Actualizar) ──────────────────────────
   const cargarAfiliados = useCallback(async (esRefresh = false) => {
@@ -140,7 +131,7 @@ export default function DietasView() {
     } finally {
       esRefresh ? setRefreshing(false) : setLoading(false);
     }
-  }, [authAxios, logout, navigate]);
+  }, [authAxios, logout, navigate, showToast]);
 
   useEffect(() => { cargarAfiliados(); }, []);
 
@@ -193,28 +184,34 @@ export default function DietasView() {
     try {
       const id        = getId(asignarModal);
       const tienePlan = !!cicloActivo(asignarModal);
-      // FIX: el backend MySQL maneja planes en tabla PLAN_NUTRICIONAL + CICLO.
-      // Usamos el endpoint /afiliados/ciclos en lugar de PATCH con array JSON.
-      await authAxios.post(`/afiliados/ciclos`, {
-        id_afiliado:          id,
-        fecha_inicio:         new Date().toISOString().split("T")[0],
-        fecha_fin:            (() => { const d = new Date(); d.setDate(d.getDate() + 84); return d.toISOString().split("T")[0]; })(),
-        asignado_por_id:      getId(user),
-        plan_base_id:         planSelec.id,
-        nombre_plan:          planSelec.nombre,
-        objetivo_dieta:       planSelec.objetivo,
-        calorias_estimadas:   Number(calorias),
-        num_comidas_diarias:  numComidas,
-        observaciones:        obs || null,
+      // FIX 6: Primero creamos el CICLO (capturando el id_ciclo que devuelve)
+      // y luego insertamos el PLAN_NUTRICIONAL vinculado a ese ciclo.
+      const cicloPayload = {
+        id_afiliado:                id,
+        fecha_inicio:               new Date().toISOString().split("T")[0],
+        fecha_fin:                  (() => { const d = new Date(); d.setDate(d.getDate() + 84); return d.toISOString().split("T")[0]; })(),
+        objetivo_fisico:            asignarModal.objetivo_fisico,
+        nivel_experiencia:          asignarModal.nivel_experiencia,
+        disponibilidad_dias:        asignarModal.disponibilidad_semanal_dias || 3,
+        grupo_muscular_prioritario: asignarModal.grupo_muscular_prioritario || null,
+        observaciones:              planSelec ? `Plan: ${planSelec.nombre}` : null,
+      };
+      const { data: cicloData } = await authAxios.post(`/afiliados/ciclos`, cicloPayload);
+      // FIX 6: segunda llamada — persiste el PLAN_NUTRICIONAL vinculado al ciclo creado
+      await authAxios.post('/planes/nutricional', {
+        id_ciclo:          cicloData.id_ciclo,
+        calorias_objetivo: Number(calorias),
+        num_comidas:       numComidas,
+        observaciones:     obs || null,
       });
       // FIX: el backend devuelve {message}, NO el afiliado actualizado.
       // Mergeamos localmente el nuevo plan activo para reflejar el cambio en UI.
       const nuevoCicloLocal = {
         plan_nutricional: {
-          nombre_plan:          planSelec.nombre,
-          calorias_estimadas:   Number(calorias),
-          num_comidas_diarias:  numComidas,
-          objetivo_dieta:       planSelec.objetivo,
+          nombre_plan:       planSelec.nombre,
+          calorias_objetivo: Number(calorias),
+          num_comidas:       numComidas,
+          objetivo_dieta:    planSelec.objetivo,
         },
       };
       setAfiliados((prev) => prev.map((a) =>
@@ -238,8 +235,7 @@ export default function DietasView() {
       {/* Toast */}
       {toast.msg && (
         <div
-          className={`position-fixed bottom-0 end-0 m-4 alert alert-${toast.type === "danger" ? "danger" : "dark"} shadow-lg py-2 px-3`}
-          style={{ zIndex: 9999, minWidth: 300 }}
+          className={`${s.toast} alert alert-${toast.type === "danger" ? "danger" : "dark"} shadow-lg`}
         >
           {toast.msg}
         </div>
@@ -252,8 +248,7 @@ export default function DietasView() {
           <div>
             <h1 className="h4 fw-bold mb-0 d-flex align-items-center gap-2">
               <span
-                className="d-inline-flex align-items-center justify-content-center rounded-2 text-white"
-                style={{ width: 36, height: 36, background: "linear-gradient(135deg,#0891b2,#0d9488)", fontSize: "1.1rem" }}
+                className={`d-inline-flex align-items-center justify-content-center rounded-2 text-white ${s.headerIcon}`}
               >
                 🥗
               </span>
@@ -275,13 +270,12 @@ export default function DietasView() {
             ].map((k) => (
               <div
                 key={k.label}
-                className="card border-0 shadow-sm text-center px-3 py-2"
-                style={{ minWidth: 115 }}
+                className={`card border-0 shadow-sm text-center px-3 py-2 ${s.kpiCard}`}
               >
-                <div className="fw-bold fs-5" style={{ color: k.color }}>
+                <div className={`fw-bold fs-5 ${s.kpiValor}`} style={{ color: k.color }}>
                   {loading ? "—" : k.valor}
                 </div>
-                <div className="text-muted" style={{ fontSize: "0.68rem" }}>{k.label}</div>
+                <div className={`text-muted ${s.kpiLabel}`}>{k.label}</div>
               </div>
             ))}
           </div>
@@ -295,16 +289,14 @@ export default function DietasView() {
               <input
                 id="busqueda-dietas"
                 type="text"
-                className="form-control form-control-sm"
-                style={{ maxWidth: 240 }}
+                className={`form-control form-control-sm ${s.searchInput}`}
                 placeholder="🔍 Nombre, objetivo, restricción..."
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
               />
               <button
                 id="btn-refresh-dietas"
-                className="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1"
-                style={{ whiteSpace: "nowrap", fontSize: "0.78rem" }}
+                className={`btn btn-sm btn-outline-secondary d-flex align-items-center gap-1 ${s.btnRefresh}`}
                 onClick={() => cargarAfiliados(true)}
                 disabled={refreshing}
                 title="Recargar lista de afiliados"
@@ -319,7 +311,7 @@ export default function DietasView() {
 
           <div className="card-body p-0">
             {error   && <div className="alert alert-danger m-3 py-2"><small>⚠️ {error}</small></div>}
-            {loading && <div className="text-center py-5"><div className="spinner-border" style={{ color: "#0891b2" }} /></div>}
+            {loading && <div className="text-center py-5"><div className={`spinner-border ${s.spinnerTeal}`} /></div>}
 
             {!loading && !error && (
               <div className="table-responsive">
@@ -353,10 +345,7 @@ export default function DietasView() {
                       return (
                         <tr
                           key={getId(a)}
-                          style={{
-                            background: !plan ? "#fff8f0" : hayAlerta ? "#fff8f8" : "transparent",
-                            borderLeft: !plan ? "3px solid #f97316" : hayAlerta ? "3px solid #ef4444" : "none",
-                          }}
+                          className={!plan ? s.rowSinPlan : hayAlerta ? s.rowConAlerta : ""}
                         >
                           <td className="ps-4 text-muted small">{idx + 1}</td>
 
@@ -364,9 +353,8 @@ export default function DietasView() {
                           <td>
                             <div className="d-flex align-items-center gap-2">
                               <div
-                                className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0"
+                                className={s.avatar}
                                 style={{
-                                  width: 36, height: 36, fontSize: "0.85rem",
                                   background: `hsl(${(getId(a) * 47) % 360},65%,55%)`,
                                 }}
                               >
@@ -374,7 +362,7 @@ export default function DietasView() {
                               </div>
                               <div>
                                 <div className="fw-semibold small">{nombreCompleto(a)}</div>
-                                <div className="text-muted" style={{ fontSize: "0.7rem" }}>{a.correo || "—"}</div>
+                                <div className={`text-muted ${s.emailText}`}>{a.correo || "\u2014"}</div>
                               </div>
                             </div>
                           </td>
@@ -441,9 +429,9 @@ export default function DietasView() {
 
                           {/* Calorías */}
                           <td className="text-center">
-                            {plan?.calorias_estimadas ? (
+                            {plan?.calorias_objetivo ? (
                               <span className="badge bg-light text-dark border">
-                                {plan.calorias_estimadas} kcal
+                                {plan.calorias_objetivo} kcal
                               </span>
                             ) : (
                               <small className="text-muted">—</small>
@@ -452,9 +440,9 @@ export default function DietasView() {
 
                           {/* Comidas/día */}
                           <td className="text-center">
-                            {plan?.num_comidas_diarias ? (
+                            {plan?.num_comidas ? (
                               <span className="badge bg-light text-dark border">
-                                {plan.num_comidas_diarias}×/día
+                                {plan.num_comidas}×/día
                               </span>
                             ) : (
                               <small className="text-muted">—</small>
@@ -475,7 +463,7 @@ export default function DietasView() {
                                 </button>
                               )}
                               <button
-                                className="btn btn-sm fw-semibold text-white"
+                                className={`btn btn-sm fw-semibold text-white ${s.btnAsignar}`}
                                 id={`btn-asignar-dieta-${getId(a)}`}
                                 title={plan ? "Cambiar plan" : "Asignar plan"}
                                 style={{ background: "linear-gradient(135deg,#0891b2,#0d9488)", border: "none", fontSize: "0.78rem" }}
@@ -497,7 +485,7 @@ export default function DietasView() {
 
         {/* ── Catálogo de planes nutricionales ── */}
         <div>
-          <h2 className="h6 fw-bold text-muted text-uppercase mb-3" style={{ letterSpacing: "0.06em" }}>
+          <h2 className={`h6 fw-bold text-muted text-uppercase mb-3 ${s.catalogTitle}`}>
             🍽️ Catálogo de Planes Nutricionales
           </h2>
           <div className="row g-3">
@@ -562,8 +550,7 @@ export default function DietasView() {
       ═══════════════════════════════════════════════════════════════════════ */}
       {asignarModal && (
         <div
-          className="modal d-block"
-          style={{ background: "rgba(0,0,0,0.6)", zIndex: 1055 }}
+          className={`modal d-block ${s.modalOverlay}`}
           onClick={() => !saving && setAsignarModal(null)}
         >
           <div
@@ -572,8 +559,7 @@ export default function DietasView() {
           >
             <div className="modal-content border-0 shadow-lg">
               <div
-                className="modal-header text-white border-0"
-                style={{ background: "linear-gradient(135deg,#0891b2,#0d9488)" }}
+                className={`modal-header ${s.modalHeaderTeal}`}
               >
                 <h5 className="modal-title">
                   🥗 Asignar Plan Nutricional — {nombreCompleto(asignarModal)}
@@ -586,7 +572,7 @@ export default function DietasView() {
               </div>
 
               <form onSubmit={handleAsignar}>
-                <div className="modal-body" style={{ maxHeight: "75vh", overflowY: "auto" }}>
+                <div className={`modal-body ${s.modalBodyScroll}`}>
                   {asigError && (
                     <div className="alert alert-danger py-2 mb-3">
                       <small>⚠️ {asigError}</small>
@@ -750,8 +736,7 @@ export default function DietasView() {
                   <button
                     id="btn-confirmar-asignar-dieta"
                     type="submit"
-                    className="btn btn-sm text-white fw-semibold px-4"
-                    style={{ background: "linear-gradient(135deg,#0891b2,#0d9488)", border: "none" }}
+                    className={`btn btn-sm ${s.btnConfirmar}`}
                     disabled={saving || !planSelec}
                   >
                     {saving
@@ -777,8 +762,7 @@ export default function DietasView() {
 
         return (
           <div
-            className="modal d-block"
-            style={{ background: "rgba(0,0,0,0.6)", zIndex: 1055 }}
+            className={`modal d-block ${s.modalOverlay}`}
             onClick={() => setVerModal(null)}
           >
             <div
@@ -787,8 +771,7 @@ export default function DietasView() {
             >
               <div className="modal-content border-0 shadow-lg">
                 <div
-                  className="modal-header text-white border-0"
-                  style={{ background: "linear-gradient(135deg,#1a1a2e,#16213e)" }}
+                  className={`modal-header ${s.modalHeaderDark}`}
                 >
                   <h5 className="modal-title">
                     🥗 Plan activo — {nombreCompleto(verModal)}
@@ -802,8 +785,8 @@ export default function DietasView() {
                     {[
                       { label: "Plan",          v: plan?.nombre_plan           || "Personalizado" },
                       { label: "Objetivo",       v: plan?.objetivo_dieta        || verModal.objetivo_fisico },
-                      { label: "Calorías",       v: plan?.calorias_estimadas ? `${plan.calorias_estimadas} kcal` : "—" },
-                      { label: "Comidas/día",    v: plan?.num_comidas_diarias   || "—" },
+                      { label: "Calorías",       v: plan?.calorias_objetivo ? `${plan.calorias_objetivo} kcal` : "—" },
+                      { label: "Comidas/día",    v: plan?.num_comidas   || "—" },
                       { label: "Inicio ciclo",   v: ciclo?.fecha_inicio         || "—" },
                       { label: "Fin ciclo",      v: ciclo?.fecha_fin            || "—" },
                     ].map((f) => (
@@ -854,10 +837,10 @@ export default function DietasView() {
                   {plan?.detalle?.length > 0 && (
                     <>
                       <h6 className="fw-bold mb-3">📋 Distribución de comidas</h6>
-                      {Array.from(new Set(plan.detalle.map((d) => d.numero_comida))).map((nc) => (
+                      {Array.from(new Set(plan.detalle.map((d) => d.num_comida))).map((nc) => (
                         <div key={nc} className="border rounded-3 p-3 mb-2">
                           <div className="fw-semibold small mb-2">Comida {nc}</div>
-                          {plan.detalle.filter((d) => d.numero_comida === nc).map((d, i) => (
+                          {plan.detalle.filter((d) => d.num_comida === nc).map((d, i) => (
                             <div key={i} className="d-flex justify-content-between small text-muted border-bottom py-1">
                               <span>🍽️ {d.nombre_alimento}</span>
                               <span className="fw-semibold">{d.cantidad_g} g</span>

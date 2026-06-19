@@ -44,11 +44,23 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Token expirado o inválido → limpia sesión
+    const requestUrl = error.config?.url || '';
+    const is401      = error.response?.status === 401;
+
+    // ⚠️ IMPORTANTE: NO limpiar sesión si el 401 viene del propio /login.
+    // Un 401 en /login significa "credenciales incorrectas", no "token expirado".
+    // Si limpiáramos aquí, borraríamos una sesión activa de otro usuario.
+    const isLoginEndpoint = requestUrl.includes('/login');
+
+    if (is401 && !isLoginEndpoint) {
+      // Token expirado o inválido desde una ruta protegida → limpia sesión
       localStorage.removeItem('metafit_token');
       localStorage.removeItem('metafit_user');
-      window.location.href = '/login';
+      localStorage.removeItem('metafit_role');
+      // Usamos window.location solo como último recurso (fuera del contexto de React Router)
+      if (!window.location.pathname.startsWith('/login')) {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
@@ -103,3 +115,7 @@ export const getDashboardKPIs = () => api.get('/dashboard/kpis');
 
 /** HEALTH CHECK */
 export const healthCheck = () => api.get('/health');
+
+/** PAGOS (FIX 5) */
+export const getPagos   = (id)        => api.get(`/afiliados/${id}/pagos`);
+export const createPago = (id, data)  => api.post(`/afiliados/${id}/pagos`, data);

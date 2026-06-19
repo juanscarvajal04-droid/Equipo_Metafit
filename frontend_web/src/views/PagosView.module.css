@@ -1,0 +1,172 @@
+/* frontend_web/src/views/PagosView.module.css */
+
+/* ── Toast ── */
+.toast {
+  z-index: 9999;
+  min-width: 320px;
+  border-left: 4px solid #059669;
+}
+
+/* ── Icono del título ── */
+.titleIcon {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  border-radius: 6px;
+  font-size: 1.1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+/* ── KPI cards ── */
+.kpiCard {
+  min-width: 150px;
+}
+
+/* ── Valor KPI — color DINÁMICO (k.color) → inline */
+/* ── Label KPI ── */
+.kpiLabel {
+  font-size: 0.65rem;
+}
+
+/* ── Buscador ── */
+.searchInput {
+  max-width: 260px;
+}
+
+/* ── Spinner de color de marca ── */
+.spinnerBrand {
+  color: #2563eb;
+}
+
+/* ── Avatar del afiliado ── */
+/* background DINÁMICO (hsl por id) → inline */
+.avatarTd {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  flex-shrink: 0;
+  font-size: 0.85rem;
+}
+
+/* ── Email en tabla ── */
+.emailSm {
+  font-size: 0.7rem;
+}
+
+/* ── Pago info ── */
+.pagoInfo {
+  font-size: 0.7rem;
+}
+
+/* ── Badge de días restantes ── */
+/* background, color DINÁMICOS (est.bg, est.color) → inline */
+.diasBadge {
+  min-width: 48px;
+  font-size: 0.75rem;
+}
+
+/* ── Badge de estado membresía ── */
+/* background, color DINÁMICOS → inline */
+.estadoBadge {
+  font-size: 0.72rem;
+}
+
+/* ── Badge de acceso (fila tabla) ── */
+.accesoBadge {
+  font-size: 0.7rem;
+}
+
+/* ── Botón registrar pago ── */
+.btnPago {
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  border: none;
+  font-size: 0.78rem;
+}
+
+/* ── Modal overlay ── */
+.modalOverlay {
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1055;
+}
+
+/* ── Modal header azul/violeta ── */
+.modalHeaderAzul {
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+}
+
+/* ── Modal header oscuro (historial) ── */
+.modalHeaderOscuro {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+}
+
+/* ── Sección info del afiliado en modal ── */
+.afiliadoBox {
+  background: #f0f4ff;
+  border: 1px solid #c7d2fe;
+}
+
+/* ── Avatar en modal (más grande) ── */
+/* background DINÁMICO → inline */
+.avatarModal {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  flex-shrink: 0;
+  font-size: 1.1rem;
+}
+
+/* ── Etiquetas pequeñas en modal ── */
+.dataLabel {
+  font-size: 0.65rem;
+}
+
+/* ── Badge de estado en modal ── */
+/* background, color DINÁMICOS → inline */
+
+/* ── Sección de confirmación de pago ── */
+.confirmBox {
+  background: #f0fdf4;
+  border: 2px solid #86efac;
+}
+
+/* ── Badge nuevo vencimiento ── */
+.vencBadge {
+  background: #05966918;
+  color: #059669;
+  font-size: 0.85rem;
+}
+
+/* ── Badge de mora ── */
+.moraBadge {
+  font-size: 0.7rem;
+}
+
+/* ── Botón confirmar pago ── */
+.btnConfirmar {
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  border: none;
+}
+
+/* ── Historial: badge de método ── */
+.metodoBadge {
+  font-size: 0.7rem;
+}
+
+/* ── Historial: registrado por ── */
+.registradoPor {
+  font-size: 0.7rem;
+}

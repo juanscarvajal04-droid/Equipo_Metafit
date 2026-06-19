@@ -1,253 +1,210 @@
-// ============================================================
-// src/views/Login.jsx — MetaFit Auth View
-//
-// RESPONSABILIDAD: Vista pura (ISO 25000 - MVC / SoC)
-//   ✅ Maneja únicamente: renderizado JSX + estado local de UI
-//   ❌ NO contiene: llamadas a API, lógica de negocio, estilos inline
-//
-// Dependencias externas:
-//   - authService.js  → toda la comunicación con el backend
-//   - Login.css       → todos los estilos visuales
-//   - AuthContext     → estado global de sesión
-// ============================================================
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import PublicLayout from "../components/PublicLayout";
+import styles from "./Login.module.css";
 
-import { useState, useEffect } from 'react';
-import { useAuth }             from '../context/AuthContext';
-import PublicLayout            from '../components/PublicLayout';
-import {
-  loginUser,
-  persistUserRole,
-  AVAILABLE_ROLES,
-  ROLE_REDIRECT_MAP,
-}                              from '../services/authService';
-import                              './Login.css';
+/* ── Paleta de marca — constantes de color ───────────────────────────────── */
+// Estos permanecen como JS porque son valores de color usados en estilos dinámicos
+// (hover handlers, focus handlers, estado loading del botón).
+const RED      = "#e31c25";
+const RED_DARK = "#b71c1c";
+const RED_GLOW = "rgba(227,28,37,0.30)";
+const DARK2    = "#12121e";
+const DARK3    = "#1a1a2e";
 
-/* ── Mapa de clase CSS por rol (SoC: lógica visual, no estilo) ── */
-const ROLE_SELECT_CLASS = {
-  Administrador: 'login-form__select login-form__select--admin',
-  Entrenador:    'login-form__select login-form__select--trainer',
-  Recepcionista: 'login-form__select login-form__select--receptionist',
+const ROLES = [
+  { value: "Administrador", label: "👑 Administrador" },
+  { value: "Entrenador",    label: "🏆 Entrenador"    },
+  { value: "Recepcionista", label: "🗂️ Recepcionista" },
+];
+
+const ROLE_COLOR = {
+  Administrador: "#7c3aed",
+  Entrenador:    "#059669",
+  Recepcionista: "#2563eb",
 };
 
-/* ────────────────────────────────────────────────────────────── */
+const ROLE_MAP = {
+  Administrador: "/dashboard",
+  Recepcionista: "/afiliados",
+  Entrenador:    "/rutinas",
+};
 
 export default function Login() {
   const { login } = useAuth();
+  const navigate  = useNavigate();
 
-  /* ── Estado local de UI ── */
-  const [form, setForm] = useState({
-    meta_user: '',
-    meta_pass: '',
-    rol:       'Administrador',
-  });
-  const [error,   setError]   = useState('');
-  const [loading, setLoading] = useState(false);
-
-  /**
-   * Táctica anti-autocompletado del navegador:
-   * el campo de contraseña se renderiza como "text" por 800 ms
-   * y luego el interceptor onFocus lo convierte a "password".
-   * Esto evita que los gestores de contraseñas rellenen el campo
-   * antes de que el usuario interactúe.
-   */
-  const [passType, setPassType] = useState('text');
+  const [form, setForm] = useState({ meta_user: "", meta_pass: "", rol: "Administrador" });
+  const [passType, setPassType] = useState("text");
   const [isReady,  setIsReady]  = useState(false);
+  const [error,    setError]    = useState("");
+  const [loading,  setLoading]  = useState(false);
 
+  /* Táctica anti-autocompletado: delayed render del email/pass */
   useEffect(() => {
-    const timer = setTimeout(() => setIsReady(true), 800);
-    return () => clearTimeout(timer);
+    const t = setTimeout(() => setIsReady(true), 800);
+    return () => clearTimeout(t);
   }, []);
 
-  /* ── Handlers de formulario ── */
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-    setError('');
+    setError("");
   };
 
-  const handlePasswordFocus = () => setPassType('password');
-
-  /**
-   * handleSubmit: delega la autenticación a authService.
-   * Si tiene éxito, persiste el rol y redirige según ROLE_REDIRECT_MAP.
-   * En caso de error, muestra el mensaje correspondiente al status HTTP.
-   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
-
+    setError("");
     try {
-      const userData = await login({
-        correo:    form.meta_user,
-        contrasena: form.meta_pass,
-      });
-
-      persistUserRole(userData?.role);
-
-      const destino = ROLE_REDIRECT_MAP[userData?.role] || '/afiliados';
-      window.location.href = destino;
-
+      const userData = await login({ correo: form.meta_user, contrasena: form.meta_pass });
+      const role = userData?.role;
+      localStorage.setItem("metafit_role", role || "");
+      navigate(ROLE_MAP[role] || "/afiliados", { replace: true });
     } catch (err) {
       const status = err?.response?.status;
-      if (status === 400 || status === 401) {
-        setError('Correo o contraseña incorrectos.');
-      } else {
-        setError('Error de conexión. Verifica que el servidor esté activo en el puerto 3001.');
-      }
+      setError(
+        status === 400 || status === 401
+          ? "Correo o contraseña incorrectos."
+          : "Error de conexión. Verifica que el servidor esté activo en el puerto 3001."
+      );
       setLoading(false);
     }
   };
 
-  /* ── Clase dinámica del selector de rol ── */
-  const selectClass = ROLE_SELECT_CLASS[form.rol] || 'login-form__select';
+  // DINÁMICO: color varía según el rol seleccionado en el formulario
+  const roleColor = ROLE_COLOR[form.rol] || RED;
 
-  /* ────────────────────────────── RENDER ────────────────────── */
   return (
     <PublicLayout>
-      <div className="login-wrapper">
+      <div className={styles.wrapper}>
 
-        {/* ── Glow radial de fondo ── */}
-        <div className="login-bg-glow" aria-hidden="true" />
+        {/* ── Glow decorativo — background es dinámico (usa RED_GLOW) ── */}
+        <div className={styles.glow} style={{
+          background: `radial-gradient(circle, ${RED_GLOW} 0%, rgba(227,28,37,0.08) 55%, transparent 72%)`,
+        }} />
 
-        {/* ── Card principal ── */}
-        <div className="login-card">
+        {/* ── Card de Login ── */}
+        <div className={styles.card}
+          style={{ background: `linear-gradient(160deg, ${DARK2} 0%, ${DARK3} 100%)` }}>
 
-          {/* ── Cabecera ── */}
-          <div className="login-card__header">
-            <div className="login-card__header-circle--top"  aria-hidden="true" />
-            <div className="login-card__header-circle--bottom" aria-hidden="true" />
-            <div className="login-card__icon" aria-hidden="true">💪</div>
-            <h1 className="login-card__title">MetaFit</h1>
-            <p  className="login-card__subtitle">Sistema de Gestión Deportiva</p>
+          {/* ── Cabecera — gradient de marca ── */}
+          <div className={styles.cardHeader}
+            style={{ background: `linear-gradient(135deg, ${RED} 0%, ${RED_DARK} 100%)` }}>
+            <div className={styles.deco1} />
+            <div className={styles.deco2} />
+            <div className={styles.logoIcon}>💪</div>
+            <h1 className={styles.logoTitle}>MetaFit</h1>
+            <p className={styles.logoSubtitle}>Sistema de Gestión Deportiva</p>
           </div>
 
-          {/* ── Cuerpo ── */}
-          <div className="login-card__body">
-            <h2 className="login-card__body-title">Iniciar Sesión</h2>
+          {/* ── Cuerpo del formulario ── */}
+          <div className={styles.cardBody}>
+            <h2 className={styles.formTitle}>Iniciar Sesión</h2>
 
-            {/* Mensaje de error */}
+            {/* Error */}
             {error && (
-              <div className="login-error" role="alert">
+              <div className={styles.errorBox}
+                style={{ border: `1px solid ${RED}50` }}>
                 ⚠️ {error}
               </div>
             )}
 
             <form onSubmit={handleSubmit} noValidate autoComplete="off">
-
               {/* Honeypots anti-autocompletado */}
-              <input
-                className="login-form__honeypot"
-                type="text"
-                name="username_trap"
-                tabIndex={-1}
-                aria-hidden="true"
-                autoComplete="username"
-                readOnly
-              />
-              <input
-                className="login-form__honeypot"
-                type="password"
-                name="password_trap"
-                tabIndex={-1}
-                aria-hidden="true"
-                autoComplete="current-password"
-                readOnly
-              />
+              <input type="text"     name="username_trap" tabIndex={-1} aria-hidden="true" className={styles.honeypot} autoComplete="username"         readOnly />
+              <input type="password" name="password_trap" tabIndex={-1} aria-hidden="true" className={styles.honeypot} autoComplete="current-password" readOnly />
 
-              {/* ── Selector de Rol ── */}
-              <div className="login-form__group">
-                <label htmlFor="rol" className="login-form__label">
-                  Tipo de usuario
-                </label>
+              {/* Selector de Rol — border DINÁMICO según rol */}
+              <div className={styles.fieldGroup}>
+                <label className={styles.label}>Tipo de usuario</label>
                 <select
-                  id="rol"
-                  name="rol"
+                  id="rol" name="rol"
                   value={form.rol}
                   onChange={handleChange}
-                  className={selectClass}
+                  className={styles.input}
+                  style={{ borderColor: `${roleColor}50`, color: "#fff" }}
+                  onFocus={e => { e.target.style.borderColor = roleColor; e.target.style.boxShadow = `0 0 0 3px ${roleColor}22`; }}
+                  onBlur={e  => { e.target.style.borderColor = `${roleColor}50`; e.target.style.boxShadow = "none"; }}
                 >
-                  {AVAILABLE_ROLES.map((r) => (
-                    <option key={r.value} value={r.value} className="login-form__option">
+                  {ROLES.map(r => (
+                    <option key={r.value} value={r.value} style={{ background: DARK2 }}>
                       {r.label}
                     </option>
                   ))}
                 </select>
               </div>
 
-              {/* ── Carga diferida (anti-autocompletado) ── */}
+              {/* Delayed render: Email + Password */}
               {!isReady ? (
-                <div className="login-skeleton" aria-label="Cargando formulario...">
-                  <div className="login-spinner" role="status" />
+                <div className={styles.loadingSlot}>
+                  <div className={styles.spinner}
+                    style={{ border: `2px solid ${RED}`, borderTopColor: "transparent" }} />
                 </div>
               ) : (
                 <>
-                  {/* ── Email ── */}
-                  <div className="login-form__group">
-                    <label htmlFor="meta_user" className="login-form__label">
-                      Correo Electrónico
-                    </label>
+                  <div className={styles.fieldGroup}>
+                    <label className={styles.label}>Correo Electrónico</label>
                     <input
-                      type="text"
-                      id="meta_user"
-                      name="meta_user"
-                      value={form.meta_user}
-                      onChange={handleChange}
+                      type="text" id="meta_user" name="meta_user"
+                      value={form.meta_user} onChange={handleChange}
                       placeholder="Ingresa tu correo electrónico"
-                      className="login-form__input"
-                      required
-                      autoComplete="new-password"
+                      required autoComplete="new-password"
+                      className={styles.input}
+                      onFocus={e => { e.target.style.borderColor = RED;                      e.target.style.boxShadow = `0 0 0 3px ${RED_GLOW}`; }}
+                      onBlur={e  => { e.target.style.borderColor = "rgba(255,255,255,0.1)"; e.target.style.boxShadow = "none"; }}
                     />
                   </div>
 
-                  {/* ── Contraseña ── */}
-                  <div className="login-form__group login-form__group--last">
-                    <label htmlFor="meta_pass" className="login-form__label">
-                      Contraseña
-                    </label>
+                  <div className={styles.fieldGroupLast}>
+                    <label className={styles.label}>Contraseña</label>
                     <input
-                      type={passType}
-                      id="meta_pass"
-                      name="meta_pass"
-                      value={form.meta_pass}
-                      onChange={handleChange}
-                      onFocus={handlePasswordFocus}
+                      type={passType} id="meta_pass" name="meta_pass"
+                      value={form.meta_pass} onChange={handleChange}
                       placeholder="Ingresa tu contraseña"
-                      className="login-form__input"
-                      required
-                      autoComplete="new-password"
+                      required autoComplete="new-password"
+                      className={styles.input}
+                      onFocus={e => { setPassType("password"); e.target.style.borderColor = RED; e.target.style.boxShadow = `0 0 0 3px ${RED_GLOW}`; }}
+                      onBlur={e  => { e.target.style.borderColor = "rgba(255,255,255,0.1)"; e.target.style.boxShadow = "none"; }}
                     />
                   </div>
                 </>
               )}
 
-              {/* ── Botón de submit ── */}
+              {/* Botón Submit — background/boxShadow/cursor son DINÁMICOS (dependen de `loading`) */}
               <button
-                id="btn-login"
-                type="submit"
+                id="btn-login" type="submit"
                 disabled={loading || !isReady}
-                className="login-btn"
+                className={styles.submitBtn}
+                style={{
+                  background:  loading ? "rgba(255,255,255,0.08)" : `linear-gradient(135deg, ${RED} 0%, ${RED_DARK} 100%)`,
+                  cursor:      loading ? "not-allowed" : "pointer",
+                  boxShadow:   loading ? "none" : `0 8px 28px ${RED_GLOW}`,
+                }}
+                onMouseEnter={e => {
+                  if (!loading) {
+                    e.currentTarget.style.transform  = "translateY(-1px)";
+                    e.currentTarget.style.boxShadow  = `0 12px 36px ${RED_GLOW}`;
+                  }
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = `0 8px 28px ${RED_GLOW}`;
+                }}
               >
                 {loading ? (
-                  <>
-                    <div className="login-spinner login-spinner--sm" role="status" aria-label="Iniciando sesión..." />
-                    Ingresando...
-                  </>
+                  <><div className={styles.spinnerSm} /> Ingresando...</>
                 ) : (
-                  <>
-                    Ingresar al Sistema
-                    <span className="login-btn__arrow" aria-hidden="true">→</span>
-                  </>
+                  <>Ingresar al Sistema <span className={styles.arrowIcon}>→</span></>
                 )}
               </button>
-
             </form>
           </div>
 
           {/* ── Footer del card ── */}
-          <div className="login-card__footer">
+          <div className={styles.cardFooter}>
             MetaFit v1.0 &nbsp;·&nbsp; {new Date().getFullYear()} &nbsp;·&nbsp; Sport Gym Sede 80
           </div>
-
         </div>
       </div>
     </PublicLayout>

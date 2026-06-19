@@ -1,0 +1,158 @@
+/* frontend_web/src/components/Sidebar.module.css */
+/* ISO 25000 — Separación de concerns: estilos estáticos extraídos del JSX.
+   Los estilos dinámicos (color por rol, gradient) permanecen como inline props. */
+
+.sidebar {
+  width: 248px;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #0f0f1a 0%, #14142b 55%, #0d1b3e 100%);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.35);
+}
+
+/* ── Logo ── */
+.logoSection {
+  text-align: center;
+  padding: 1.5rem 0.75rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.logoIcon {
+  font-size: 2.1rem;
+  filter: drop-shadow(0 0 8px rgba(124, 58, 237, 0.6));
+}
+
+.logoTitle {
+  color: #fff;
+  font-weight: 700;
+  margin-top: 0.25rem;
+  font-size: 1.15rem;
+  letter-spacing: 0.05em;
+}
+
+.logoSubtitle {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ── Perfil ── */
+.profileSection {
+  padding: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.profileRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  flex-shrink: 0;
+  font-size: 1rem;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.12);
+}
+
+.profileInfo {
+  min-width: 0;
+}
+
+.profileEmail {
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.78rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profileBadge {
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  margin-top: 0.25rem;
+}
+
+.adminBanner {
+  margin-top: 0.5rem;
+  text-align: center;
+  border-radius: 0.375rem;
+  padding: 0.25rem 0;
+  background: linear-gradient(90deg, rgba(124, 58, 237, 0.25), rgba(79, 70, 229, 0.25));
+  border: 1px solid rgba(124, 58, 237, 0.4);
+  font-size: 0.63rem;
+  color: #a78bfa;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ── Navegación ── */
+.nav {
+  padding: 0.5rem 0;
+  flex: 1;
+}
+
+.navSectionLabel {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.25);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 10px 20px 4px;
+}
+
+.navSectionLabelAdmin {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: rgba(167, 139, 250, 0.5);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 14px 20px 4px;
+}
+
+.navIcon {
+  font-size: 1rem;
+  width: 20px;
+  text-align: center;
+}
+
+/* ── Footer (logout) ── */
+.logoutSection {
+  padding: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.logoutButton {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.375rem;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.logoutButton:hover {
+  background: rgba(233, 69, 96, 0.2);
+  color: #fff;
+  border-color: rgba(233, 69, 96, 0.4);
+}

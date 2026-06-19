@@ -586,6 +586,31 @@ CREATE OR REPLACE VIEW `v_catalogo_ejercicios_disponibles` AS
   );
 
 
+-- ============================================================================================================================
+-- BLOQUE 9B - PAGOS (Manejo de membresías en efectivo)
+-- ============================================================================================================================
+CREATE TABLE IF NOT EXISTS `PAGO` (
+  `id_pago`           INT          NOT NULL AUTO_INCREMENT,
+  `id_usuario`        INT          NOT NULL,
+  `fecha_pago`        DATE         NOT NULL,
+  `valor_pagado`      DECIMAL(10,2) NOT NULL DEFAULT 80000.00 CHECK (`valor_pagado` >= 0),
+  `estado`            ENUM('Pagado','Vencido','Pendiente') NOT NULL DEFAULT 'Pagado',
+  `fecha_vencimiento` DATE         NOT NULL,
+  `observaciones`     VARCHAR(200) NULL,
+  `fecha_creacion`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+  PRIMARY KEY (`id_pago`),
+  INDEX `idx_pago_afiliado` (`id_usuario`),
+  INDEX `idx_pago_fecha` (`fecha_pago`),
+
+  CONSTRAINT `fk_pago_afiliado`
+    FOREIGN KEY (`id_usuario`)
+    REFERENCES `AFILIADO` (`id_usuario`)
+    ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE = InnoDB
+  COMMENT = 'Registro de pagos de membresia en efectivo. Valor mensual unico.';
+
+
 -- Reactivar checks de FK
 SET FOREIGN_KEY_CHECKS = 1;
 

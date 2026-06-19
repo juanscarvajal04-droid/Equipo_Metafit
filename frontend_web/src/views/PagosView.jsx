@@ -1,18 +1,15 @@
 import { useEffect, useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-const getId          = (doc) => doc.id_usuario ?? doc._id ?? doc.id;
-const nombreCompleto = (a)   => [a.nombres, a.apellidos].filter(Boolean).join(" ") || "Sin nombre";
-const inicial        = (a)   => (a.nombres || a.correo || "?")[0].toUpperCase();
+import { getId, nombreCompleto, inicial } from "../utils/afiliadoHelpers";
+import { getPagos, createPago } from "../services/api";
+import s from "./PagosView.module.css";
 
 /** Calcula días restantes entre hoy y una fecha dada (puede ser negativo = vencido) */
 const diasRestantes = (fechaStr) => {
   if (!fechaStr) return null;
-  const hoy     = new Date(); hoy.setHours(0, 0, 0, 0);
-  const vence   = new Date(fechaStr); vence.setHours(0, 0, 0, 0);
+  const hoy   = new Date(); hoy.setHours(0, 0, 0, 0);
+  const vence = new Date(fechaStr); vence.setHours(0, 0, 0, 0);
   return Math.round((vence - hoy) / (1000 * 60 * 60 * 24));
 };
 
@@ -37,16 +34,16 @@ const estadoMembresia = (dias) => {
 };
 
 // ── Componente principal ──────────────────────────────────────────────────────
+import { useToast } from "../hooks/useToast";
+
 export default function PagosView() {
-  const { user, authAxios, logout } = useAuth();
-  const navigate = useNavigate();
-  const isAdmin  = user?.role === "Administrador";
+  const { user, authAxios } = useAuth();
 
   const [afiliados, setAfiliados] = useState([]);
   const [loading,   setLoading]   = useState(true);
   const [error,     setError]     = useState("");
   const [busqueda,  setBusqueda]  = useState("");
-  const [toast,     setToast]     = useState({ msg: "", type: "success" });
+  const { toast, showToast }      = useToast();
 
   // Modal registrar pago
   const [pagoModal,  setPagoModal]  = useState(null);  // afiliado seleccionado
@@ -56,37 +53,54 @@ export default function PagosView() {
   // Modal historial de pagos
   const [histModal, setHistModal] = useState(null);
 
-  // ── Carga ──────────────────────────────────────────────────────────────────
+  // ── Helpers para leer pagos del estado local ───────────────────────────────
+
+  /** Array de pagos del afiliado (adjuntos como a.pagos = [...]) */
+  const pagosDeAfiliado = (a) => a.pagos || [];
+
+  /** Último pago (el más reciente, pues vienen ORDER BY fecha_pago DESC) */
+  const ultimoPago = (a) => pagosDeAfiliado(a)[0] || null;
+
+  /** fecha_vencimiento del último pago */
+  const fechaVenc = (a) => ultimoPago(a)?.fecha_vencimiento || null;
+
+  // ── Carga inicial: afiliados + sus pagos ────────────────────────────────────
   useEffect(() => {
-    // FIX: ruta correcta /afiliados (no /660/afiliados — legado json-server)
-    authAxios.get("/afiliados")
-      .then(({ data }) => setAfiliados(data))
-      .catch((err) => {
-        if (err?.response?.status === 401) { logout(); navigate("/login"); }
+    const cargar = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const { data: lista } = await authAxios.get("/afiliados");
+
+        // Para cada afiliado, intentar cargar su historial de pagos.
+        // Si falla una llamada individual no rompemos la vista completa.
+        const conPagos = await Promise.all(
+          lista.map(async (a) => {
+            try {
+              const { data: pagos } = await getPagos(getId(a));
+              return { ...a, pagos };
+            } catch {
+              return { ...a, pagos: [] };
+            }
+          })
+        );
+        setAfiliados(conPagos);
+      } catch (err) {
+        if (err?.response?.status === 401) { /* interceptor global lo maneja */ }
         else setError("No se pudieron cargar los afiliados.");
-      })
-      .finally(() => setLoading(false));
+      } finally {
+        setLoading(false);
+      }
+    };
+    cargar();
   }, []);
-
-  // ── Helpers ────────────────────────────────────────────────────────────────
-  const showToast = (msg, type = "success") => {
-    setToast({ msg, type });
-    setTimeout(() => setToast({ msg: "", type: "success" }), 3500);
-  };
-
-  /** Extrae los datos de pago de un afiliado (guardados en a.membresia) */
-  const membresia = (a) => a.membresia || null;
-  const fechaVenc = (a) => membresia(a)?.fecha_vencimiento || null;
-  const ultPago   = (a) => membresia(a)?.ultimo_pago       || null;
-  const histPagos = (a) => membresia(a)?.historial          || [];
 
   // ── KPIs calculados en vivo ────────────────────────────────────────────────
   const kpis = useMemo(() => {
     const hoy = hoyISO();
     const recaudadoHoy = afiliados.reduce((acc, a) => {
-      const hist = histPagos(a);
-      const pagoHoy = hist.find((p) => p.fecha_pago === hoy);
-      return acc + (pagoHoy ? (pagoHoy.monto || 80000) : 0);
+      const pagoHoy = pagosDeAfiliado(a).find((p) => p.fecha_pago === hoy);
+      return acc + (pagoHoy ? Number(pagoHoy.valor_pagado || 80000) : 0);
     }, 0);
 
     const porVencer = afiliados.filter((a) => {
@@ -120,37 +134,34 @@ export default function PagosView() {
       const vencActual = fechaVenc(a);
       const baseCalculo = vencActual && diasRestantes(vencActual) > 0 ? vencActual : hoyISO();
       const nuevaFecha  = sumarDias(baseCalculo, 30);
-      const montoPago   = 80000;
 
-      const nuevoPago = {
-        fecha_pago:     hoyISO(),
-        monto:          montoPago,
-        metodo:         "Efectivo",
-        registrado_por: user?.email || "sistema",
-      };
-
-      const membresiaActualizada = {
-        ultimo_pago:       hoyISO(),
+      // FIX 5: usar createPago (POST /afiliados/:id/pagos) en lugar de PATCH
+      await createPago(id, {
+        fecha_pago:        hoyISO(),
+        valor_pagado:      80000,
+        estado:            "Pagado",
         fecha_vencimiento: nuevaFecha,
-        monto_mensualidad: montoPago,
-        historial: [...histPagos(a), nuevoPago],
+      });
+
+      // Actualizar estado local: prepend del nuevo pago al array del afiliado
+      const nuevoPagoLocal = {
+        fecha_pago:        hoyISO(),
+        valor_pagado:      80000,
+        estado:            "Pagado",
+        fecha_vencimiento: nuevaFecha,
       };
-
-      const nuevoEstado = (a.estado_afiliacion || a.estado_cuenta || "").toLowerCase() === "inactivo"
-        ? "Activo" : (a.estado_afiliacion || a.estado_cuenta);
-
-      const payload = { membresia: membresiaActualizada, estado_afiliacion: nuevoEstado };
-      await authAxios.patch(`/afiliados/${id}`, payload);
-
-      // FIX: el backend devuelve {message}, NO el afiliado actualizado.
-      // Mergeamos localmente para reflejar el pago en la UI sin refetch.
-      const actualizado = { ...a, membresia: membresiaActualizada, estado_afiliacion: nuevoEstado };
-      setAfiliados((prev) => prev.map((af) => getId(af) === id ? actualizado : af));
+      setAfiliados((prev) =>
+        prev.map((af) =>
+          getId(af) === id
+            ? { ...af, pagos: [nuevoPagoLocal, ...pagosDeAfiliado(af)] }
+            : af
+        )
+      );
       setPagoModal(null);
       showToast(`✅ ¡Pago registrado! Nuevo vencimiento: ${nuevaFecha}`);
     } catch (err) {
       const msg = err?.response?.data?.error || err.message || "Error desconocido";
-      console.error('[PagosView.handlePago]', err);
+      console.error("[PagosView.handlePago]", err);
       setPagoError(`Error al guardar el pago: ${msg}`);
     } finally {
       setSaving(false);
@@ -264,6 +275,7 @@ export default function PagosView() {
                         </td>
                       </tr>
                     ) : filtrados.map((a, idx) => {
+                      const ult   = ultimoPago(a);
                       const dias  = diasRestantes(fechaVenc(a));
                       const est   = estadoMembresia(dias);
                       const vencido = dias !== null && dias < 0;
@@ -298,11 +310,11 @@ export default function PagosView() {
 
                           {/* Último pago */}
                           <td className="col-fecha">
-                            {ultPago(a) ? (
+                            {ult ? (
                               <div>
-                                <div className="small fw-semibold">{ultPago(a)}</div>
+                                <div className="small fw-semibold">{ult.fecha_pago}</div>
                                 <div className="text-muted" style={{ fontSize: "0.7rem" }}>
-                                  💵 Efectivo
+                                  💵 ${Number(ult.valor_pagado || 80000).toLocaleString("es-CO")}
                                 </div>
                               </div>
                             ) : (
@@ -357,7 +369,7 @@ export default function PagosView() {
                             </span>
                           </td>
 
-                          {/* Acceso (estado del afiliado) */}
+                          {/* Acceso */}
                           <td className="col-acceso">
                             {vencido ? (
                               <span className="badge bg-danger bg-opacity-15 text-danger" style={{ fontSize: "0.7rem" }}>
@@ -374,7 +386,7 @@ export default function PagosView() {
                           <td className="col-acciones pe-3">
                             <div className="d-flex gap-1 justify-content-center">
                               {/* Historial */}
-                              {histPagos(a).length > 0 && (
+                              {pagosDeAfiliado(a).length > 0 && (
                                 <button
                                   className="btn btn-outline-secondary btn-sm"
                                   id={`btn-historial-${getId(a)}`}
@@ -432,8 +444,7 @@ export default function PagosView() {
 
         return (
           <div
-            className="modal d-block"
-            style={{ background: "rgba(0,0,0,0.6)", zIndex: 1055 }}
+            className={`modal d-block ${s.modalOverlay}`}
             onClick={() => !saving && setPagoModal(null)}
           >
             <div
@@ -561,8 +572,7 @@ export default function PagosView() {
       ═══════════════════════════════════════════════════════════════════════ */}
       {histModal && (
         <div
-          className="modal d-block"
-          style={{ background: "rgba(0,0,0,0.6)", zIndex: 1055 }}
+          className={`modal d-block ${s.modalOverlay}`}
           onClick={() => setHistModal(null)}
         >
           <div
@@ -581,32 +591,32 @@ export default function PagosView() {
               </div>
 
               <div className="modal-body p-0">
-                {histPagos(histModal).length === 0 ? (
+                {pagosDeAfiliado(histModal).length === 0 ? (
                   <div className="text-center text-muted py-5">Sin pagos registrados.</div>
                 ) : (
                   <table className="table align-middle mb-0">
                     <thead className="table-light">
                       <tr>
                         <th className="ps-4">Fecha pago</th>
-                        <th className="text-center">Método</th>
+                        <th className="text-center">Estado</th>
                         <th className="text-center">Monto</th>
-                        <th className="text-center pe-4">Registrado por</th>
+                        <th className="text-center pe-4">Vencimiento</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {[...histPagos(histModal)].reverse().map((p, i) => (
+                      {pagosDeAfiliado(histModal).map((p, i) => (
                         <tr key={i}>
                           <td className="ps-4 small fw-semibold">{p.fecha_pago}</td>
                           <td className="text-center">
                             <span className="badge bg-success bg-opacity-15 text-success" style={{ fontSize: "0.7rem" }}>
-                              💵 {p.metodo}
+                              💵 {p.estado || "Pagado"}
                             </span>
                           </td>
                           <td className="text-center small fw-semibold text-success">
-                            ${(p.monto || 80000).toLocaleString("es-CO")}
+                            ${Number(p.valor_pagado || 80000).toLocaleString("es-CO")}
                           </td>
                           <td className="text-center text-muted pe-4" style={{ fontSize: "0.7rem" }}>
-                            {p.registrado_por || "—"}
+                            {p.fecha_vencimiento || "—"}
                           </td>
                         </tr>
                       ))}
@@ -617,10 +627,10 @@ export default function PagosView() {
 
               <div className="modal-footer border-0">
                 <div className="text-muted small">
-                  Total registros: <strong>{histPagos(histModal).length}</strong>
+                  Total registros: <strong>{pagosDeAfiliado(histModal).length}</strong>
                   &nbsp;·&nbsp; Total recaudado:&nbsp;
                   <strong className="text-success">
-                    ${histPagos(histModal).reduce((s, p) => s + (p.monto || 80000), 0).toLocaleString("es-CO")} COP
+                    ${pagosDeAfiliado(histModal).reduce((s, p) => s + Number(p.valor_pagado || 80000), 0).toLocaleString("es-CO")} COP
                   </strong>
                 </div>
                 <button className="btn btn-secondary btn-sm" onClick={() => setHistModal(null)}>

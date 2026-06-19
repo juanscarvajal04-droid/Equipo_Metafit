@@ -7,6 +7,8 @@ import { useAuth } from "../context/AuthContext";
  * Administrador → /dashboard  (acceso total)
  * Recepcionista → /afiliados  (gestión de membresías)
  * Entrenador    → /rutinas    (su módulo principal; /afiliados es solo lectura para él)
+ *
+ * NOTA: Lee localStorage como fallback por el timing asíncrono de React setState.
  */
 const ROLE_HOME = {
   Administrador: "/dashboard",
@@ -15,7 +17,17 @@ const ROLE_HOME = {
 };
 
 export default function HomeRedirect() {
-  const { user } = useAuth();
+  const { user: ctxUser } = useAuth();
+
+  // ✅ Fallback síncrono a localStorage
+  let user = ctxUser;
+  if (!user) {
+    try {
+      const raw = localStorage.getItem("metafit_user");
+      if (raw) user = JSON.parse(raw);
+    } catch { /* ignorar */ }
+  }
+
   const to = ROLE_HOME[user?.role] || "/login";
   return <Navigate to={to} replace />;
 }

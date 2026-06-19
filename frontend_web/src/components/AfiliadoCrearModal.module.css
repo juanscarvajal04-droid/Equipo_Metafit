@@ -1,0 +1,28 @@
+/* frontend_web/src/components/AfiliadoCrearModal.module.css */
+
+/* ── Overlay del modal ── */
+.overlay {
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 1050;
+}
+
+/* ── Cuerpo scrollable ── */
+.modalBody {
+  max-height: 75vh;
+  overflow-y: auto;
+}
+
+/* ── Header del modal ── */
+.modalHeader {
+  background: linear-gradient(135deg, #198754, #146c43);
+}
+
+/* ── Botón de confirmar (submit) ── */
+.btnConfirmar {
+  background: linear-gradient(135deg, #198754, #146c43);
+  border: none;
+}
+
+.btnConfirmar:disabled {
+  opacity: 0.65;
+}

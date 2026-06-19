@@ -1,0 +1,202 @@
+/* ── DietasView.module.css ───────────────────────────────────────────────── */
+
+/* ─ Toast ─────────────────────────────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  margin: 1.5rem;
+  z-index: 9999;
+  min-width: 300px;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+/* ─ Ícono header ──────────────────────────────────────────────────────────── */
+.headerIcon {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #0891b2, #0d9488);
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+/* ─ KPI cards ─────────────────────────────────────────────────────────────── */
+.kpiCard {
+  min-width: 115px;
+}
+.kpiValor {
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+.kpiLabel {
+  font-size: 0.68rem;
+}
+
+/* ─ Input búsqueda ────────────────────────────────────────────────────────── */
+.searchInput {
+  max-width: 240px;
+}
+
+/* ─ Botón refresh ─────────────────────────────────────────────────────────── */
+.btnRefresh {
+  white-space: nowrap;
+  font-size: 0.78rem;
+}
+
+/* ─ Spinner de carga teal ────────────────────────────────────────────────── */
+.spinnerTeal {
+  color: #0891b2;
+}
+
+/* ─ Filas de tabla con prioridad ──────────────────────────────────────────── */
+.rowSinPlan {
+  background: #fff8f0;
+  border-left: 3px solid #f97316;
+}
+.rowConAlerta {
+  background: #fff8f8;
+  border-left: 3px solid #ef4444;
+}
+
+/* ─ Avatar circular ───────────────────────────────────────────────────────── */
+.avatar {
+  width: 36px;
+  height: 36px;
+  font-size: 0.85rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ─ Texto email pequeño ───────────────────────────────────────────────────── */
+.emailText {
+  font-size: 0.7rem;
+}
+
+/* ─ Botón asignar plan ────────────────────────────────────────────────────── */
+.btnAsignar {
+  background: linear-gradient(135deg, #0891b2, #0d9488);
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.78rem;
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 0.25rem 0.75rem;
+  transition: opacity 0.15s, transform 0.15s;
+}
+.btnAsignar:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* ─ Título del catálogo ───────────────────────────────────────────────────── */
+.catalogTitle {
+  letter-spacing: 0.06em;
+}
+
+/* ─ Card catálogo con borde coloreado ────────────────────────────────────── */
+.catalogCard {
+  border-left-width: 4px;
+  border-left-style: solid;
+  border-top: none;
+  border-right: none;
+  border-bottom: none;
+}
+
+/* ─ Texto macroto pequeño ─────────────────────────────────────────────────── */
+.macroText { font-size: 0.65rem; }
+.alimentoText { font-size: 0.62rem; }
+
+/* ─ Modal header teal ─────────────────────────────────────────────────────── */
+.modalHeaderTeal {
+  background: linear-gradient(135deg, #0891b2, #0d9488);
+  color: #fff;
+  border: none;
+}
+.modalHeaderDark {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  color: #fff;
+  border: none;
+}
+
+/* ─ Info afiliado dentro del modal ───────────────────────────────────────── */
+.afiliadoInfoBox {
+  background: #f0fdfa;
+  border: 1px solid #99f6e4;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.avatarLg {
+  width: 44px;
+  height: 44px;
+  font-size: 1rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ─ Card de plan seleccionable ────────────────────────────────────────────── */
+.planCard {
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+  height: 100%;
+}
+.planCardInfo {
+  font-size: 0.68rem;
+}
+
+/* ─ Modal body scroll ─────────────────────────────────────────────────────── */
+.modalBodyScroll {
+  max-height: 75vh;
+  overflow-y: auto;
+}
+
+/* ─ Botón confirmar asignar ──────────────────────────────────────────────── */
+.btnConfirmar {
+  background: linear-gradient(135deg, #0891b2, #0d9488);
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  padding: 0.35rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.btnConfirmar:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* ─ Plan detail rows en modal ver ────────────────────────────────────────── */
+.planDetailLabel {
+  font-size: 0.68rem;
+}
+
+/* ─ Overlay de modales ───────────────────────────────────────────────────── */
+.modalOverlay {
+  background: rgba(0,0,0,0.6);
+  z-index: 1055;
+}
+

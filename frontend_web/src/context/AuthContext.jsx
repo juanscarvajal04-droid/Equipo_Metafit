@@ -1,100 +1,103 @@
-// ============================================================
-// src/context/AuthContext.jsx — MetaFit Global Auth State
-//
-// RESPONSABILIDAD ÚNICA (ISO 25000 - SoC):
-// Este Contexto es el ÚNICO responsable de:
-//   ✅ Proveer el estado global de sesión (user, token)
-//   ✅ Exponer acciones de alto nivel: login(), logout()
-//
-// NO es responsable de:
-//   ❌ Hacer peticiones HTTP directas
-//   ❌ Manipular localStorage directamente
-//   ❌ Conocer la estructura de la respuesta del backend
-//
-// Toda la lógica de infraestructura es delegada a:
-//   → src/services/authService.js
-// ============================================================
-
-import { createContext, useContext, useState } from 'react';
-import {
-  loginUser,
-  persistSession,
-  clearSession,
-  loadStoredUser,
-  loadStoredToken,
-} from '../services/authService';
+import { createContext, useContext, useRef, useState } from "react";
+import { flushSync } from "react-dom";
+import api, { loginRequest } from "../services/api";
 
 const AuthContext = createContext(null);
 
-/* ────────────────────────────────────────────────────────────── */
+/** Limpia y valida el user guardado en localStorage. Si está corrupto, retorna null. */
+const loadStoredUser = () => {
+  try {
+    const raw = localStorage.getItem("metafit_user");
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    // Descartar si no tiene role (datos corruptos / de otra app)
+    if (!parsed?.role) {
+      localStorage.removeItem("metafit_user");
+      localStorage.removeItem("metafit_token");
+      return null;
+    }
+    return parsed;
+  } catch {
+    localStorage.removeItem("metafit_user");
+    localStorage.removeItem("metafit_token");
+    return null;
+  }
+};
 
 export function AuthProvider({ children }) {
-  /**
-   * Inicialización lazy: intenta restaurar la sesión desde
-   * localStorage al montar la app. Si los datos están corruptos,
-   * loadStoredUser() y loadStoredToken() retornan null de forma segura.
-   */
   const [user,  setUser]  = useState(() => loadStoredUser());
-  const [token, setToken] = useState(() => loadStoredToken());
+  const [token, setToken] = useState(() => localStorage.getItem("metafit_token") || null);
 
   /**
-   * login: delega la autenticación al authService.
-   * El Contexto solo recibe el resultado ya procesado y
-   * actualiza el estado global de la aplicación.
+   * isAuthReady — Indica que el estado de autenticación ya fue resuelto.
    *
-   * @param {{ correo: string, contrasena: string }} credentials
-   * @returns {Promise<object>} userData — { id, email, role, nombres, apellidos }
+   * Se inicializa en `true` porque loadStoredUser() y la lectura de localStorage
+   * son síncronas: al montar AuthProvider ya sabemos si hay sesión o no.
+   * Se pone en `false` SOLO durante el instante en que login() guarda en
+   * localStorage pero antes de que flushSync actualice el contexto React.
+   * ProtectedRoute espera (spinner) mientras sea `false`.
+   */
+  const [isAuthReady, setIsAuthReady] = useState(true);
+
+  // authAxios estable (reutiliza la instancia de api.js)
+  const axiosRef = useRef(api);
+
+  /**
+   * Login contra el backend real (Node.js → MySQL).
+   * Retorna el objeto user plano: { id, email, role, nombres, apellidos }
+   *
+   * IMPORTANTE: Usamos flushSync para forzar que React aplique setToken/setUser
+   * de forma síncrona ANTES de que el llamador ejecute navigate().
+   * Sin flushSync, React 18 batcha los setState y ProtectedRoute puede renderizar
+   * con ctxToken/ctxUser = null en el primer frame tras la navegación.
+   *
+   * También guardamos en localStorage como respaldo síncrono adicional.
    */
   const login = async ({ correo, contrasena }) => {
-    const { accessToken, user: userData } = await loginUser({ correo, contrasena });
+    const response = await loginRequest(correo, contrasena);
 
-    // Delega la persistencia al servicio
-    persistSession(accessToken, userData);
+    const { accessToken, user: userData } = response.data;
 
-    // Actualiza el estado global del Contexto
-    setToken(accessToken);
-    setUser(userData);
+    // ✅ Primero localStorage (respaldo síncrono — ProtectedRoute lo lee si el
+    //    estado React aún no llegó al componente)
+    localStorage.setItem("metafit_token", accessToken);
+    localStorage.setItem("metafit_user",  JSON.stringify(userData));
+    localStorage.setItem("metafit_role",  userData.role || "");
 
-    return userData;
+    // ✅ flushSync: fuerza React a procesar los setState AHORA, de forma síncrona,
+    //    antes de que login() retorne. Así, cuando Login.jsx llame navigate()
+    //    justo después del await, el Context ya tiene token y user válidos.
+    //    isAuthReady se pone en true al mismo tiempo para que ProtectedRoute
+    //    nunca vea un estado intermedio donde token existe pero user es null.
+    flushSync(() => {
+      setToken(accessToken);
+      setUser(userData);
+      setIsAuthReady(true);
+    });
+
+    return userData;   // { id, email, role, nombres, apellidos }
   };
 
-  /**
-   * logout: delega la limpieza de sesión al authService
-   * y resetea el estado global a null.
-   */
   const logout = () => {
-    clearSession();
-    setToken(null);
-    setUser(null);
-  };
-
-  /* ── Valor expuesto al árbol de componentes ── */
-  const contextValue = {
-    user,
-    token,
-    isAuthenticated: !!token,
-    login,
-    logout,
+    localStorage.removeItem("metafit_token");
+    localStorage.removeItem("metafit_user");
+    localStorage.removeItem("metafit_role");
+    flushSync(() => {
+      setToken(null);
+      setUser(null);
+      setIsAuthReady(true);
+    });
   };
 
   return (
-    <AuthContext.Provider value={contextValue}>
+    <AuthContext.Provider value={{ user, token, isAuthReady, login, logout, authAxios: axiosRef.current }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
-/* ────────────────────────────────────────────────────────────── */
-
-/**
- * useAuth: hook de consumo del contexto.
- * Lanza un error descriptivo si se usa fuera del AuthProvider,
- * facilitando el diagnóstico durante el desarrollo.
- */
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth() debe ser usado dentro de un <AuthProvider>.');
-  }
+  if (!context) throw new Error("useAuth debe usarse dentro de un <AuthProvider>");
   return context;
 }

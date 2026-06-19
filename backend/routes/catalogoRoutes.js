@@ -81,7 +81,7 @@ router.get('/ejercicios', requireAuth, CatalogoController.getAllEjercicios);
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.post('/ejercicios', requireAdmin, CatalogoController.createEjercicio);
+router.post('/ejercicios', requireAuth, requireAdmin, CatalogoController.createEjercicio);
 
 /**
  * @swagger
@@ -153,7 +153,7 @@ router.get('/alimentos', requireAuth, CatalogoController.getAllAlimentos);
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.post('/alimentos', requireAdmin, CatalogoController.createAlimento);
+router.post('/alimentos', requireAuth, requireAdmin, CatalogoController.createAlimento);
 
 /**
  * @swagger

@@ -145,15 +145,21 @@ const CatalogoModel = {
   },
 
   // ── DASHBOARD KPIs ────────────────────────────────────────
-  // Consolidado en una sola query para evitar 5 roundtrips
+  // Consolidado en una sola query para evitar roundtrips
   getDashboardKPIs: async () => {
     // Campos reales del schema: estado en USUARIO, estado_afiliacion en AFILIADO
     const [[kpis]] = await pool.query(`
       SELECT
         (SELECT COUNT(*) FROM AFILIADO)                                          AS total_afiliados,
         (SELECT COUNT(*) FROM AFILIADO WHERE estado_afiliacion = 'Activo')       AS afiliados_activos,
+        (SELECT COUNT(*) FROM AFILIADO WHERE estado_afiliacion = 'Inactivo')     AS afiliados_inactivos,
+        (SELECT COUNT(*) FROM USUARIO WHERE rol = 'Entrenador')                  AS entrenadores,
+        (SELECT COUNT(*) FROM USUARIO WHERE rol = 'Recepcionista')                AS recepcionistas,
         (SELECT COUNT(*) FROM CICLO WHERE activo = 1)                            AS ciclos_en_curso,
-        (SELECT COUNT(DISTINCT id_usuario) FROM AFILIADO_RESTRICCION)            AS con_restricciones
+        (SELECT COUNT(DISTINCT id_usuario) FROM AFILIADO_RESTRICCION)            AS con_restricciones,
+        (SELECT COUNT(*) FROM PAGO)                                              AS pagos_registrados,
+        (SELECT IFNULL(SUM(valor_pagado), 0) FROM PAGO)                          AS ingresos,
+        (SELECT COUNT(*) FROM PAGO WHERE fecha_vencimiento < CURDATE() AND estado <> 'Pagado') AS proximos_vencimientos
     `);
 
     const [por_objetivo] = await pool.query(`

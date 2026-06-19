@@ -101,7 +101,7 @@ router.get('/:id', requireAuth, UsuarioController.getById);
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.post('/', requireAdmin, UsuarioController.create);
+router.post('/', requireAuth, requireAdmin, UsuarioController.create);
 
 /**
  * @swagger
@@ -139,7 +139,7 @@ router.post('/', requireAdmin, UsuarioController.create);
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.patch('/:id', requireAdmin, UsuarioController.update);
+router.patch('/:id', requireAuth, requireAdmin, UsuarioController.update);
 
 /**
  * @swagger
@@ -170,6 +170,6 @@ router.patch('/:id', requireAdmin, UsuarioController.update);
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.delete('/:id', requireAdmin, UsuarioController.delete);
+router.delete('/:id', requireAuth, requireAdmin, UsuarioController.delete);
 
 module.exports = router;
