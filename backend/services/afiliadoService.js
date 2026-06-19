@@ -95,6 +95,14 @@ const AfiliadoService = {
     return affected > 0;
   },
 
+  getEjerciciosDisponibles: async (id) => {
+    return CatalogoModel.getEjerciciosDisponibles(id);
+  },
+
+  getAlimentosDisponibles: async (id) => {
+    return CatalogoModel.getAlimentosDisponibles(id);
+  },
+
   getProgreso: async (id) => {
     return CatalogoModel.getProgresoByAfiliado(id);
   },

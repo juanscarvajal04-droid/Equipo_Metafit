@@ -1,19 +1,18 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import AppLayout from "../components/AppLayout";
+import { useAuth } from "../context/AuthContext";
 import { useDashboard } from "../hooks/useDashboard";
 import { useAfiliados } from "../hooks/useAfiliados";
+import { useToast } from "../hooks/useToast";
 import styles from "./AdminDashboard.module.css";
 
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
 const getId          = (doc) => doc.id_usuario ?? doc._id ?? doc.id;
 const nombreCompleto = (a)   => [a.nombres, a.apellidos].filter(Boolean).join(" ") || "Sin nombre";
 const inicial        = (a)   => (a.nombres || a.correo || "?")[0].toUpperCase();
 const cicloActivo    = (a)   => a.ciclo_activo || null;
-// numRestr eliminado — ya no se usa (KPIs vienen del endpoint /dashboard/kpis)
 
 const OBJETIVO_CONFIG = {
-  "Pérdida de grasa": { icono: "🔥", color: "#e94560", bg: "#e9456022" },
+  "Perdida de grasa": { icono: "🔥", color: "#e94560", bg: "#e9456022" },
   "Aumento de masa":  { icono: "💪", color: "#0d6efd", bg: "#0d6efd22" },
   "Mantenimiento":    { icono: "⚖️", color: "#198754", bg: "#19875422" },
 };
@@ -32,20 +31,61 @@ const badgeNivel = (n) => {
 };
 
 export default function AdminDashboard() {
-  // ISO 25000 / 3.3: datos desde hooks especializados
-  // Nota: useAuth ya no se necesita aquí; los hooks manejan el logout 401 internamente.
+  const { authAxios } = useAuth();
   const { kpis, loading: loadingKpis, error: errorKpis, fetchKpis } = useDashboard();
   const { afiliados, loading: loadingAfil, error: errorAfil, fetchAfiliados } = useAfiliados();
+  const { toast, showToast } = useToast();
 
   const loading = loadingKpis || loadingAfil;
   const error   = errorKpis   || errorAfil;
 
   const [busqueda, setBusqueda] = useState("");
 
+  // Precio membresia
+  const [precio, setPrecio] = useState(80000);
+  const [editPrecio, setEditPrecio] = useState(false);
+  const [nuevoPrecio, setNuevoPrecio] = useState("");
+  const [guardando, setGuardando] = useState(false);
+
   useEffect(() => {
     fetchKpis();
     fetchAfiliados();
   }, []);
+
+  // Cargar precio desde backend
+  const cargarPrecio = useCallback(async () => {
+    try {
+      const { data } = await authAxios.get("/configuracion/precio-membresia");
+      if (data.valor) setPrecio(Number(data.valor));
+    } catch (err) {
+      console.error("[AdminDashboard] Error al cargar precio:", err);
+    }
+  }, [authAxios]);
+
+  useEffect(() => {
+    cargarPrecio();
+  }, [cargarPrecio]);
+
+  const handleGuardarPrecio = async () => {
+    const val = parseInt(nuevoPrecio, 10);
+    if (isNaN(val) || val <= 0) {
+      showToast("Ingresa un precio valido", "danger");
+      return;
+    }
+    setGuardando(true);
+    try {
+      await authAxios.put("/configuracion/precio-membresia", { valor: val });
+      setPrecio(val);
+      setEditPrecio(false);
+      showToast(`Precio de membresia actualizado a $${val.toLocaleString("es-CO")} COP`);
+      fetchKpis();
+    } catch (err) {
+      const msg = err?.response?.data?.error || "Error al guardar";
+      showToast(msg, "danger");
+    } finally {
+      setGuardando(false);
+    }
+  };
 
   const filtrados = afiliados.filter((a) => {
     const t = busqueda.toLowerCase();
@@ -54,18 +94,30 @@ export default function AdminDashboard() {
            (a.objetivo_fisico || "").toLowerCase().includes(t);
   });
 
-  // FIX 2.2: KPIs vienen del endpoint, no calculados sobre la lista paginada
   const totalAfiliados   = kpis?.total_afiliados   ?? afiliados.length;
   const totalActivos     = kpis?.afiliados_activos  ?? 0;
   const conCicloActivo   = kpis?.ciclos_en_curso    ?? 0;
   const conRestricciones = kpis?.con_restricciones  ?? 0;
-  const conteoPorObj     = OBJETIVOS.map((obj) => ({
+  const ingresos         = kpis?.ingresos           ?? 0;
+  const pagosRegistrados = kpis?.pagos_registrados  ?? 0;
+
+  const precioFormateado = `$${precio.toLocaleString("es-CO")}`;
+  const ingresosFormateado = `$${Number(ingresos).toLocaleString("es-CO")}`;
+
+  const conteoPorObj = OBJETIVOS.map((obj) => ({
     objetivo: obj, cantidad: afiliados.filter((a) => a.objetivo_fisico === obj).length,
     ...OBJETIVO_CONFIG[obj],
   }));
 
   return (
     <AppLayout>
+      {toast.msg && (
+        <div className={`position-fixed bottom-0 end-0 m-4 alert alert-${toast.type === "danger" ? "danger" : "dark"} shadow-lg py-2 px-3`}
+          style={{ zIndex: 9999, minWidth: 300 }}>
+          {toast.msg}
+        </div>
+      )}
+
       <div className="container-fluid py-4 px-3 px-md-4">
 
         {/* Título */}
@@ -81,16 +133,17 @@ export default function AdminDashboard() {
             { label: "Activos",           valor: totalActivos,    icono: "✅",    color: "#198754" },
             { label: "Ciclos en curso",   valor: conCicloActivo,  icono: "🔄",    color: "#6f42c1" },
             { label: "Con restricciones", valor: conRestricciones,icono: "⚠️",   color: "#fd7e14" },
+            { label: "Ingresos",          valor: ingresosFormateado, icono: "💰", color: "#e94560" },
+            { label: "Pagos registrados", valor: pagosRegistrados, icono: "🧾", color: "#0891b2" },
           ].map((kpi) => (
-            <div key={kpi.label} className="col-6 col-md-3">
+            <div key={kpi.label} className="col-6 col-md-4 col-lg-2">
               <div className="card border-0 shadow-sm h-100">
                 <div className="card-body d-flex align-items-center gap-3">
-                  {/* Dinámico: background usa kpi.color */}
                   <div className={styles.kpiIconWrap} style={{ background: kpi.color + "22" }}>
                     {kpi.icono}
                   </div>
                   <div>
-                    <div className="fw-bold fs-3 lh-1" style={{ color: kpi.color }}>
+                    <div className="fw-bold lh-1" style={{ color: kpi.color, fontSize: kpi.label === "Ingresos" ? "1rem" : "1.5rem" }}>
                       {loading ? <span className="spinner-border spinner-border-sm" /> : kpi.valor}
                     </div>
                     <small className="text-muted">{kpi.label}</small>
@@ -101,30 +154,75 @@ export default function AdminDashboard() {
           ))}
         </div>
 
-        {/* Distribución por objetivo */}
-        <h2 className="h5 fw-bold mb-3">🎯 Distribución por Objetivo Físico</h2>
+        {/* ── Configuracion: Precio de Membresia ── */}
         <div className="row g-3 mb-4">
-          {conteoPorObj.map((obj) => (
-            <div key={obj.objetivo} className="col-12 col-md-4">
-              <div className="card border-0 shadow-sm h-100" style={{ borderLeft: `5px solid ${obj.color}` }}>
-                <div className="card-body">
-                  <div className="d-flex align-items-center justify-content-between mb-2">
-                    <span className="fs-1">{obj.icono}</span>
-                    {/* DINÁMICO: background y color son datos de OBJETIVO_CONFIG */}
-                    <div className={styles.objCountWrap} style={{ background: obj.bg, color: obj.color }}>
-                      {loading ? <span className="spinner-border spinner-border-sm" /> : obj.cantidad}
+          <div className="col-12 col-md-6">
+            <div className="card border-0 shadow-sm h-100">
+              <div className="card-body">
+                <div className="d-flex align-items-center justify-content-between mb-2">
+                  <h6 className="fw-bold mb-0">💳 Precio de Membresía</h6>
+                  {!editPrecio && (
+                    <button className="btn btn-outline-primary btn-sm" onClick={() => { setNuevoPrecio(String(precio)); setEditPrecio(true); }}>
+                      ✏️ Editar
+                    </button>
+                  )}
+                </div>
+                {editPrecio ? (
+                  <div className="d-flex gap-2 align-items-center">
+                    <div className="input-group input-group-sm" style={{ maxWidth: 220 }}>
+                      <span className="input-group-text">$</span>
+                      <input type="number" className="form-control" min={1000} step={1000}
+                        value={nuevoPrecio}
+                        onChange={(e) => setNuevoPrecio(e.target.value)} />
+                      <span className="input-group-text">COP</span>
+                    </div>
+                    <button className="btn btn-success btn-sm" onClick={handleGuardarPrecio} disabled={guardando}>
+                      {guardando ? <span className="spinner-border spinner-border-sm" /> : "💾 Guardar"}
+                    </button>
+                    <button className="btn btn-outline-secondary btn-sm" onClick={() => setEditPrecio(false)} disabled={guardando}>
+                      Cancelar
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    <span className="fw-bold fs-4" style={{ color: "#0d6efd" }}>
+                      {loading ? <span className="spinner-border spinner-border-sm" /> : precioFormateado}
+                    </span>
+                    <small className="text-muted ms-2">COP / mes</small>
+                    <div className="text-muted small mt-1">
+                      {totalActivos} afiliados activos × {precioFormateado} = <strong>${(totalActivos * precio).toLocaleString("es-CO")} COP</strong> / mes
                     </div>
                   </div>
-                  <h3 className="h6 fw-bold mb-1" style={{ color: obj.color }}>{obj.objetivo}</h3>
-                  {/* DINÁMICO: width es proporcional a datos */}
-                  <div className="progress mt-2" style={{ height: 6 }}>
-                    <div className="progress-bar"
-                      style={{ width: afiliados.length > 0 ? `${(obj.cantidad / afiliados.length) * 100}%` : "0%", background: obj.color }} />
-                  </div>
-                </div>
+                )}
               </div>
             </div>
-          ))}
+          </div>
+
+          {/* Distribución por objetivo */}
+          <div className="col-12 col-md-6">
+            <h6 className="fw-bold mb-3">🎯 Distribución por Objetivo Físico</h6>
+            <div className="row g-2">
+              {conteoPorObj.map((obj) => (
+                <div key={obj.objetivo} className="col-12 col-sm-4">
+                  <div className="card border-0 shadow-sm h-100" style={{ borderLeft: `5px solid ${obj.color}` }}>
+                    <div className="card-body">
+                      <div className="d-flex align-items-center justify-content-between mb-2">
+                        <span className="fs-1">{obj.icono}</span>
+                        <div className={styles.objCountWrap} style={{ background: obj.bg, color: obj.color }}>
+                          {loading ? <span className="spinner-border spinner-border-sm" /> : obj.cantidad}
+                        </div>
+                      </div>
+                      <h3 className="h6 fw-bold mb-1" style={{ color: obj.color }}>{obj.objetivo}</h3>
+                      <div className="progress mt-2" style={{ height: 6 }}>
+                        <div className="progress-bar"
+                          style={{ width: afiliados.length > 0 ? `${(obj.cantidad / afiliados.length) * 100}%` : "0%", background: obj.color }} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Tabla */}
@@ -161,7 +259,6 @@ export default function AdminDashboard() {
                           <td className="ps-4 text-muted small">{i + 1}</td>
                           <td>
                             <div className="d-flex align-items-center gap-2">
-                              {/* DINÁMICO: hsl generado por el id del afiliado */}
                               <div className={styles.avatarTd}
                                 style={{ background: `hsl(${(getId(a) * 47) % 360},65%,55%)` }}>
                                 {inicial(a)}
@@ -179,7 +276,6 @@ export default function AdminDashboard() {
                               ? <span className="badge bg-primary bg-opacity-10 text-primary">Ciclo {ciclo.numero_ciclo}</span>
                               : <span className="text-muted small">—</span>}
                           </td>
-                          {/* FIX 1.2: usar estado_cuenta (campo real del backend) */}
                           <td>{badgeEstado(a.estado_cuenta)}</td>
                         </tr>
                       );

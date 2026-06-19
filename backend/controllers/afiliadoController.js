@@ -132,6 +132,26 @@ const AfiliadoController = {
     }
   },
 
+  getEjerciciosDisponibles: async (req, res) => {
+    try {
+      const data = await AfiliadoService.getEjerciciosDisponibles(req.params.id);
+      return res.json(data);
+    } catch (err) {
+      console.error('[afiliadoController.getEjerciciosDisponibles]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
+  getAlimentosDisponibles: async (req, res) => {
+    try {
+      const data = await AfiliadoService.getAlimentosDisponibles(req.params.id);
+      return res.json(data);
+    } catch (err) {
+      console.error('[afiliadoController.getAlimentosDisponibles]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
   getProgreso: async (req, res) => {
     try {
       const progreso = await AfiliadoService.getProgreso(req.params.id);

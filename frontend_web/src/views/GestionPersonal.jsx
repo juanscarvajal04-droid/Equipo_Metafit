@@ -102,8 +102,8 @@ export default function GestionPersonal() {
       setCrearModal(false);
       setFormData(FORM_VACÍO);
       showToast(`✅ Usuario "${data.email || data.correo}" creado correctamente.`);
-    } catch {
-      setFormError("Error al crear. Verifica el servidor.");
+    } catch (err) {
+      setFormError(err?.response?.data?.error || err.message || "Error al crear. Verifica el servidor.");
     } finally {
       setSaving(false);
     }
@@ -427,6 +427,7 @@ export default function GestionPersonal() {
 }
 
 function ModalPersonal({ titulo, colorHeader, formData, setFormData, onSubmit, onCancel, saving, formError, isEdit }) {
+  const [showPassword, setShowPassword] = useState(false);
   const set = (key, val) => setFormData((prev) => ({ ...prev, [key]: val }));
 
   return (
@@ -479,21 +480,32 @@ function ModalPersonal({ titulo, colorHeader, formData, setFormData, onSubmit, o
                   />
                 </div>
 
-                {/* Contraseña */}
-                <div className="col-md-6">
-                  <label className="form-label small fw-semibold">
-                    Contraseña {!isEdit && <span className="text-danger">*</span>}
-                    {isEdit && <span className="text-muted small"> (dejar vacío para no cambiar)</span>}
-                  </label>
-                  <input
-                    type="password"
-                    className="form-control"
-                    required={!isEdit}
-                    value={formData.password}
-                    onChange={(e) => set("password", e.target.value)}
-                    placeholder={isEdit ? "••••••••" : "Nueva contraseña"}
-                  />
-                </div>
+                  {/* Contraseña */}
+                  <div className="col-md-6">
+                    <label className="form-label small fw-semibold">
+                      Contraseña {!isEdit && <span className="text-danger">*</span>}
+                      {isEdit && <span className="text-muted small"> (dejar vacío para no cambiar)</span>}
+                    </label>
+                    <div className="input-group">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        className="form-control"
+                        required={!isEdit}
+                        value={formData.password}
+                        onChange={(e) => set("password", e.target.value)}
+                        placeholder={isEdit ? "••••••••" : "Nueva contraseña"}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={() => setShowPassword((prev) => !prev)}
+                        style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
+                        tabIndex={-1}
+                      >
+                        {showPassword ? "🙈" : "👁️"}
+                      </button>
+                    </div>
+                  </div>
 
                 {/* Rol — selector destacado */}
                 <div className="col-md-6">

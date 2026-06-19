@@ -79,6 +79,54 @@ const CatalogoModel = {
     return rows;
   },
 
+  // ── EJERCICIOS DISPONIBLES POR AFILIADO ────────────────────
+  // Excluye los ejercicios que estén en EJERCICIO_RESTRICCION_EXCLUIDA
+  // para las restricciones del afiliado, y filtra por nivel de experiencia
+  // (solo muestra ejercicios con nivel_minimo <= el último ciclo del afiliado,
+  //  o todos si el afiliado no tiene ningún ciclo aún)
+  getEjerciciosDisponibles: async (id_usuario) => {
+    const [rows] = await pool.query(`
+      SELECT e.id_ejercicio, e.nombre_ejercicio, e.grupo_muscular,
+             e.nivel_minimo, e.descripcion
+      FROM EJERCICIO e
+      WHERE e.id_ejercicio NOT IN (
+        SELECT ere.id_ejercicio
+        FROM AFILIADO_RESTRICCION ar
+        JOIN EJERCICIO_RESTRICCION_EXCLUIDA ere ON ar.id_restriccion = ere.id_restriccion
+        WHERE ar.id_usuario = ?
+      )
+      AND e.nivel_minimo <= COALESCE(
+        (SELECT c.nivel_experiencia
+         FROM CICLO c
+         WHERE c.id_usuario = ?
+         ORDER BY c.fecha_inicio DESC
+         LIMIT 1),
+        e.nivel_minimo
+      )
+      ORDER BY e.grupo_muscular, e.nombre_ejercicio
+    `, [id_usuario, id_usuario]);
+    return rows;
+  },
+
+  // ── ALIMENTOS DISPONIBLES POR AFILIADO ─────────────────────
+  // Excluye los alimentos que estén en ALIMENTO_RESTRICCION_EXCLUIDA
+  // para las restricciones del afiliado
+  getAlimentosDisponibles: async (id_usuario) => {
+    const [rows] = await pool.query(`
+      SELECT al.id_alimento, al.nombre_alimento,
+             al.proteinas, al.carbohidratos, al.grasas
+      FROM ALIMENTO al
+      WHERE al.id_alimento NOT IN (
+        SELECT are.id_alimento
+        FROM AFILIADO_RESTRICCION ar
+        JOIN ALIMENTO_RESTRICCION_EXCLUIDA are ON ar.id_restriccion = are.id_restriccion
+        WHERE ar.id_usuario = ?
+      )
+      ORDER BY al.nombre_alimento
+    `, [id_usuario]);
+    return rows;
+  },
+
   // ── RESTRICCIONES POR AFILIADO ────────────────────────────
   // Schema: AFILIADO_RESTRICCION tiene id_usuario, no id_afiliado
   getRestriccionesByAfiliado: async (id_usuario) => {

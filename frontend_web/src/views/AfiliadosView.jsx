@@ -19,7 +19,6 @@ const OBJETIVO_CONFIG = {
 const OBJETIVOS = Object.keys(OBJETIVO_CONFIG);
 const NIVELES = ["Principiante", "Intermedio", "Avanzado"];
 const ESTADOS = ["Activo", "Inactivo", "Suspendido"];
-const PLANES = ["Básico", "Premium", "VIP"];
 const SEXOS = ["Masculino", "Femenino", "Otro"];
 const MUSCULOS = ["Pecho", "Espalda", "Piernas", "Glúteos", "Hombros", "Bíceps", "Tríceps", "Abdomen"];
 
@@ -35,7 +34,6 @@ const FORM_NUEVO = {
   estatura_cm: "", objetivo_fisico: "Pérdida de grasa",
   grupo_muscular_prioritario: "Pecho", nivel_experiencia: "Principiante",
   disponibilidad_semanal_dias: 3, estado: "Activo",
-  plan_membresia: "Básico",
   restricciones_medicas: "",
 };
 
@@ -171,7 +169,6 @@ export default function AfiliadosView() {
       disponibilidad_semanal_dias: a.disponibilidad_semanal_dias || 3,
       // FIX: el campo real del backend es estado_afiliacion
       estado_afiliacion: a.estado_afiliacion || "Activo",
-      plan_membresia: a.plan_membresia || "Básico",
     });
   };
 
@@ -213,8 +210,9 @@ export default function AfiliadosView() {
         )
       );
       showToast(`🔄 Estado cambiado a "${nuevoEstado}"`);
-    } catch {
-      showToast("❌ Error al cambiar estado.");
+    } catch (err) {
+      const msg = err?.response?.data?.error || err.message || "Error desconocido";
+      showToast(`❌ ${msg}`);
     }
   };
 
@@ -271,7 +269,6 @@ export default function AfiliadosView() {
                       <th className="col-nombre">Afiliado</th>
                       <th>Objetivo</th>
                       <th>Nivel</th>
-                      {(role === "Recepcionista" || role === "Administrador") && <th>Plan</th>}
                       {(role === "Entrenador" || role === "Administrador") && <th>Ciclo activo</th>}
                       <th className="col-estado">Estado</th>
                       <th className="col-acciones pe-3">Acciones</th>
@@ -304,9 +301,6 @@ export default function AfiliadosView() {
                           <td><small>{OBJETIVO_CONFIG[a.objetivo_fisico]?.icono} {a.objetivo_fisico || "—"}</small></td>
                           <td><span className="badge bg-primary bg-opacity-10 text-primary">{a.nivel_experiencia || "—"}</span></td>
 
-                          {(role === "Recepcionista" || role === "Administrador") && (
-                            <td><small className="text-muted">{a.plan_membresia || "Básico"}</small></td>
-                          )}
                           {(role === "Entrenador" || role === "Administrador") && (
                             <td className="text-center">
                               {ciclo
@@ -377,7 +371,6 @@ export default function AfiliadosView() {
                     { label: "Objetivo", v: verModal.objetivo_fisico },
                     { label: "Nivel", v: verModal.nivel_experiencia },
                     { label: "Días/sem", v: verModal.disponibilidad_semanal_dias },
-                    { label: "Plan", v: verModal.plan_membresia || "Básico" },
                   ].map((f) => (
                     <div key={f.label} className="col-6 col-md-4">
                       <small className="text-muted d-block text-uppercase fw-semibold" style={{ fontSize: "0.68rem" }}>{f.label}</small>
@@ -406,12 +399,6 @@ export default function AfiliadosView() {
                           <div className="small text-muted text-uppercase fw-semibold mb-1">Estado actual</div>
                           {/* FIX 1.2: usar estado_cuenta */}
                           {badgeEstado(verModal.estado_cuenta)}
-                        </div>
-                      </div>
-                      <div className="col-md-4">
-                        <div className="card border-0 bg-light text-center p-3">
-                          <div className="small text-muted text-uppercase fw-semibold mb-1">Plan</div>
-                          <strong>{verModal.plan_membresia || "Básico"}</strong>
                         </div>
                       </div>
                       <div className="col-md-4">
@@ -556,13 +543,6 @@ export default function AfiliadosView() {
                       </select>
                     </div>
                     <div className="col-md-6">
-                      <label className="form-label small fw-semibold">Plan membresía</label>
-                      <select className="form-select" value={formEdit.plan_membresia}
-                        onChange={(e) => setFormEdit({ ...formEdit, plan_membresia: e.target.value })}>
-                        {PLANES.map((p) => <option key={p}>{p}</option>)}
-                      </select>
-                    </div>
-                    <div className="col-md-6">
                       <label className="form-label small fw-semibold">Objetivo físico</label>
                       <select className="form-select" value={formEdit.objetivo_fisico}
                         onChange={(e) => setFormEdit({ ...formEdit, objetivo_fisico: e.target.value })}>
@@ -648,15 +628,8 @@ export default function AfiliadosView() {
                     </div>
                   </div>
 
-                  <h6 className="fw-bold text-muted text-uppercase small mb-3">🏋️ Plan de membresía</h6>
+                  <h6 className="fw-bold text-muted text-uppercase small mb-3">🏋️ Configuración inicial</h6>
                   <div className="row g-3">
-                    <div className="col-md-4">
-                      <label className="form-label small fw-semibold">Plan *</label>
-                      <select className="form-select" required value={formNuevo.plan_membresia}
-                        onChange={(e) => setFormNuevo({ ...formNuevo, plan_membresia: e.target.value })}>
-                        {PLANES.map((p) => <option key={p}>{p}</option>)}
-                      </select>
-                    </div>
                     <div className="col-md-4">
                       <label className="form-label small fw-semibold">Estado inicial</label>
                       <select className="form-select" value={formNuevo.estado}

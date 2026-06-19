@@ -360,6 +360,50 @@ router.post('/:id/restricciones', requireAuth, requireAdminOrEntrenador, Afiliad
 router.delete('/:id/restricciones/:id_restriccion', requireAuth, requireAdminOrEntrenador, AfiliadoController.removeRestriccion);
 
 // ─────────────────────────────────────────────────────────────
+// CATÁLOGOS FILTRADOS POR RESTRICCIONES DEL AFILIADO
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * @swagger
+ * /afiliados/{id}/ejercicios-disponibles:
+ *   get:
+ *     summary: Ejercicios disponibles para el afiliado (excluye los prohibidos por sus restricciones)
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/idParam'
+ *     responses:
+ *       200:
+ *         description: Lista de ejercicios permitidos para el afiliado
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.get('/:id/ejercicios-disponibles', requireAuth, AfiliadoController.getEjerciciosDisponibles);
+
+/**
+ * @swagger
+ * /afiliados/{id}/alimentos-disponibles:
+ *   get:
+ *     summary: Alimentos disponibles para el afiliado (excluye los prohibidos por sus restricciones)
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/idParam'
+ *     responses:
+ *       200:
+ *         description: Lista de alimentos permitidos para el afiliado
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.get('/:id/alimentos-disponibles', requireAuth, AfiliadoController.getAlimentosDisponibles);
+
+// ─────────────────────────────────────────────────────────────
 // PROGRESO FÍSICO
 // ─────────────────────────────────────────────────────────────
 

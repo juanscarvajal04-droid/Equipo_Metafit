@@ -42,7 +42,6 @@ export default function AfiliadoVerModal({ afiliado, role, onClose, onEdit }) {
                 { label: "Objetivo",   v: afiliado.objetivo_fisico },
                 { label: "Nivel",      v: afiliado.nivel_experiencia },
                 { label: "Días/sem",   v: afiliado.disponibilidad_semanal_dias },
-                { label: "Plan",       v: afiliado.plan_membresia || "Básico" },
               ].map((f) => (
                 <div key={f.label} className="col-6 col-md-4">
                   <small className={`text-muted d-block text-uppercase fw-semibold ${styles.fieldLabel}`}>{f.label}</small>
@@ -70,12 +69,6 @@ export default function AfiliadoVerModal({ afiliado, role, onClose, onEdit }) {
                     <div className="card border-0 bg-light text-center p-3">
                       <div className="small text-muted text-uppercase fw-semibold mb-1">Estado actual</div>
                       {badgeEstado(afiliado.estado || afiliado.estado_afiliacion)}
-                    </div>
-                  </div>
-                  <div className="col-md-4">
-                    <div className="card border-0 bg-light text-center p-3">
-                      <div className="small text-muted text-uppercase fw-semibold mb-1">Plan</div>
-                      <strong>{afiliado.plan_membresia || "Básico"}</strong>
                     </div>
                   </div>
                   <div className="col-md-4">

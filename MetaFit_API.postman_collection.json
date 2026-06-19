@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "metafit-api-collection-v1",
+    "_postman_id": "metafit-api-collection-v2",
     "name": "MetaFit API",
     "description": "Colección completa de la API REST de MetaFit — Sport Gym Sede 80.\n\n**Configuración inicial:**\n1. Crea un entorno (Environment) con la variable `base_url = http://localhost:3001`\n2. Ejecuta 'Login Admin' primero — el script automático guardará el token en `{{token}}`\n3. El resto de requests autenticadas usarán `{{token}}` automáticamente.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -234,7 +234,7 @@
                 }
               ]
             },
-            "description": "Devuelve todos los afiliados con sus ciclos activos, restricciones y último progreso físico.\n\n**Campos clave en cada objeto:**\n- `estado_cuenta` → estado en tabla USUARIO ('Activo', 'Inactivo', 'Pendiente')\n- `estado_afiliacion` → estado en tabla AFILIADO ('Activo', 'Inactivo', 'Suspendido')\n- `ciclo_activo` → objeto con el ciclo de entrenamiento actual (null si no tiene)\n- `restricciones` → array de restricciones alimenticias/médicas\n\n**Roles permitidos:** Administrador, Recepcionista, Entrenador"
+            "description": "Devuelve todos los afiliados con sus ciclos activos, restricciones y último progreso físico.\n\n**Roles permitidos:** Administrador, Recepcionista, Entrenador"
           },
           "response": [
             {
@@ -284,7 +284,7 @@
               "host": ["{{base_url}}"],
               "path": ["afiliados"]
             },
-            "description": "Crea un nuevo afiliado.\n\n**Notas importantes:**\n- `fecha_nacimiento` acepta formato `DD/MM/YYYY` o `YYYY-MM-DD` (normalizado automáticamente por `normalizarFecha()`)\n- Si no se envía `contrasena`, se genera automáticamente: `MF_{documento}@2025`\n- `estado_afiliacion` por defecto: `'Activo'`\n\n**Roles permitidos:** Administrador, Recepcionista\n\n**Respuesta esperada:** `201 Created` con `{ id, message }`"
+            "description": "Crea un nuevo afiliado.\n\n**Roles permitidos:** Administrador, Recepcionista"
           },
           "response": [
             {
@@ -343,6 +343,107 @@
       ]
     },
     {
+      "name": "🗂️ Catálogos Filtrados",
+      "item": [
+        {
+          "name": "GET Ejercicios Disponibles",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/1/ejercicios-disponibles",
+              "host": ["{{base_url}}"],
+              "path": ["afiliados", "1", "ejercicios-disponibles"]
+            },
+            "description": "Devuelve los ejercicios del catálogo que NO están contraindicados por las restricciones médicas del afiliado y cuyo nivel mínimo es compatible con su nivel de experiencia."
+          },
+          "response": []
+        },
+        {
+          "name": "GET Alimentos Disponibles",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/1/alimentos-disponibles",
+              "host": ["{{base_url}}"],
+              "path": ["afiliados", "1", "alimentos-disponibles"]
+            },
+            "description": "Devuelve los alimentos del catálogo que NO están contraindicados por las restricciones médicas del afiliado."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "⚙️ Configuración",
+      "item": [
+        {
+          "name": "GET Precio Membresía",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/configuracion/precio-membresia",
+              "host": ["{{base_url}}"],
+              "path": ["configuracion", "precio-membresia"]
+            },
+            "description": "Obtiene el precio actual de la membresía desde la tabla CONFIGURACION.\n\n**⚠️ Solo Administrador.**"
+          },
+          "response": []
+        },
+        {
+          "name": "PUT Precio Membresía",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"valor\": \"100000\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/configuracion/precio-membresia",
+              "host": ["{{base_url}}"],
+              "path": ["configuracion", "precio-membresia"]
+            },
+            "description": "Actualiza el precio de la membresía. El cambio se refleja inmediatamente en el Dashboard.\n\n**⚠️ Solo Administrador.**"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "💳 Pagos",
+      "item": [
+        {
+          "name": "GET Pagos de Afiliado",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/1/pagos",
+              "host": ["{{base_url}}"],
+              "path": ["afiliados", "1", "pagos"]
+            },
+            "description": "Devuelve el historial de pagos de un afiliado, ordenado del más reciente al más antiguo."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "📊 Dashboard",
       "item": [
         {
@@ -357,7 +458,7 @@
               "host": ["{{base_url}}"],
               "path": ["dashboard", "kpis"]
             },
-            "description": "Devuelve métricas agregadas del gimnasio en una sola query optimizada.\n\n**Campos de respuesta:**\n- `total_afiliados` — conteo total en tabla AFILIADO\n- `afiliados_activos` — con `estado_afiliacion = 'Activo'`\n- `afiliados_inactivos` — con `estado_afiliacion = 'Inactivo'`\n- `entrenadores` — usuarios con `rol = 'Entrenador'`\n- `recepcionistas` — usuarios con `rol = 'Recepcionista'`\n- `ciclos_en_curso` — ciclos con `activo = 1`\n- `con_restricciones` — afiliados con restricciones médicas/alimenticias\n- `pagos_registrados` — total de pagos en tabla PAGO\n- `ingresos` — suma de `valor_pagado`\n- `proximos_vencimientos` — pagos vencidos no pagados\n- `por_objetivo` — distribución por objetivo físico (array)\n\n**⚠️ Solo Administrador puede acceder a este endpoint.**"
+            "description": "Devuelve métricas agregadas del gimnasio en una sola query optimizada.\n\n**⚠️ Solo Administrador puede acceder a este endpoint.**"
           },
           "response": [
             {

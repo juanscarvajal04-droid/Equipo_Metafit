@@ -1,7 +1,6 @@
 import styles from "./AfiliadoCrearModal.module.css";
 
 const ESTADOS    = ["Activo", "Inactivo", "Suspendido"];
-const PLANES     = ["Básico", "Premium", "VIP"];
 
 const OBJETIVOS  = ["Pérdida de grasa", "Aumento de masa", "Mantenimiento"];
 const NIVELES    = ["Principiante", "Intermedio", "Avanzado"];
@@ -69,15 +68,8 @@ export default function AfiliadoCrearModal({
                 </div>
               </div>
 
-              <h6 className="fw-bold text-muted text-uppercase small mb-3">🏋️ Plan de membresía</h6>
+              <h6 className="fw-bold text-muted text-uppercase small mb-3">🏋️ Configuración inicial</h6>
               <div className="row g-3">
-                <div className="col-md-4">
-                  <label className="form-label small fw-semibold">Plan *</label>
-                  <select className="form-select" required value={formNuevo.plan_membresia}
-                    onChange={(e) => setFormNuevo({ ...formNuevo, plan_membresia: e.target.value })}>
-                    {PLANES.map((p) => <option key={p}>{p}</option>)}
-                  </select>
-                </div>
                 <div className="col-md-4">
                   <label className="form-label small fw-semibold">Estado inicial</label>
                   <select className="form-select" value={formNuevo.estado}

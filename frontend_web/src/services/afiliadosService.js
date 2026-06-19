@@ -25,7 +25,6 @@ export const OBJETIVO_CONFIG = {
 export const OBJETIVOS = Object.keys(OBJETIVO_CONFIG);
 export const NIVELES   = ['Principiante', 'Intermedio', 'Avanzado'];
 export const ESTADOS   = ['Activo', 'Inactivo', 'Pendiente'];
-export const PLANES    = ['Básico', 'Premium', 'VIP'];
 export const SEXOS     = ['Masculino', 'Femenino', 'Otro'];
 export const MUSCULOS  = ['Pecho', 'Espalda', 'Piernas', 'Glúteos', 'Hombros', 'Bíceps', 'Tríceps', 'Abdomen'];
 
@@ -43,7 +42,7 @@ export const FORM_VACIO = {
   estatura_cm: '', objetivo_fisico: 'Pérdida de grasa',
   grupo_muscular_prioritario: 'Pecho', nivel_experiencia: 'Principiante',
   disponibilidad_semanal_dias: 3, estado: 'Activo',
-  plan_membresia: 'Básico', restricciones_medicas: '',
+  restricciones_medicas: '',
 };
 
 // ── 2. HELPERS DE TRANSFORMACIÓN (funciones puras) ───────────

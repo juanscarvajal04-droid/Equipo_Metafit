@@ -98,6 +98,10 @@ export const createProgreso = (data) => api.post('/afiliados/progreso', data);
 /** RESTRICCIONES */
 export const getRestricciones = (id) => api.get(`/afiliados/${id}/restricciones`);
 
+/** CATÁLOGOS FILTRADOS POR RESTRICCIONES DEL AFILIADO */
+export const getEjerciciosDisponibles = (id) => api.get(`/afiliados/${id}/ejercicios-disponibles`);
+export const getAlimentosDisponibles = (id) => api.get(`/afiliados/${id}/alimentos-disponibles`);
+
 /** CATÁLOGOS (ejercicios, alimentos, restricciones médicas) */
 export const getEjercicios    = () => api.get('/catalogo/ejercicios');
 export const getAlimentos     = () => api.get('/catalogo/alimentos');
@@ -115,6 +119,9 @@ export const getDashboardKPIs = () => api.get('/dashboard/kpis');
 
 /** HEALTH CHECK */
 export const healthCheck = () => api.get('/health');
+
+/** NOTIFICACIONES */
+export const getNotificaciones = () => api.get('/notificaciones');
 
 /** PAGOS (FIX 5) */
 export const getPagos   = (id)        => api.get(`/afiliados/${id}/pagos`);

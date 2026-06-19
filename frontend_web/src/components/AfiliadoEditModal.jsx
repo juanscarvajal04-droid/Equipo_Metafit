@@ -2,7 +2,6 @@ import { nombreCompleto } from "../utils/afiliadoHelpers";
 import styles from "./AfiliadoEditModal.module.css";
 
 const ESTADOS    = ["Activo", "Inactivo", "Suspendido"];
-const PLANES     = ["Básico", "Premium", "VIP"];
 const OBJETIVOS  = ["Pérdida de grasa", "Aumento de masa", "Mantenimiento"];
 const NIVELES    = ["Principiante", "Intermedio", "Avanzado"];
 
@@ -49,13 +48,6 @@ export default function AfiliadoEditModal({
                   <select className="form-select" value={formEdit.estado}
                     onChange={(e) => setFormEdit({ ...formEdit, estado: e.target.value })}>
                     {ESTADOS.map((s) => <option key={s}>{s}</option>)}
-                  </select>
-                </div>
-                <div className="col-md-6">
-                  <label className="form-label small fw-semibold">Plan membresía</label>
-                  <select className="form-select" value={formEdit.plan_membresia}
-                    onChange={(e) => setFormEdit({ ...formEdit, plan_membresia: e.target.value })}>
-                    {PLANES.map((p) => <option key={p}>{p}</option>)}
                   </select>
                 </div>
                 <div className="col-md-6">

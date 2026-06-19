@@ -106,15 +106,25 @@ VALUES
 INSERT INTO `EJERCICIO`
   (id_ejercicio, nombre_ejercicio, grupo_muscular, descripcion, nivel_minimo)
 VALUES
-  (1, 'Sentadilla',            'Piernas',  NULL, 'Principiante'),
-  (2, 'Press de banca',        'Pecho',    NULL, 'Principiante'),
-  (3, 'Peso muerto',           'Espalda',  NULL, 'Intermedio'),
-  (4, 'Press militar',         'Hombros',  NULL, 'Intermedio'),
-  (5, 'Curl de biceps',        'Biceps',   NULL, 'Principiante'),
-  (6, 'Extension de triceps',  'Triceps',  NULL, 'Principiante'),
-  (7, 'Hip thrust',            'Gluteos',  NULL, 'Intermedio'),
-  (8, 'Dominadas',             'Espalda',  NULL, 'Avanzado'),
-  (9, 'Zancadas',              'Piernas',  NULL, 'Intermedio');
+   (1, 'Sentadilla',            'Piernas',  NULL, 'Principiante'),
+   (2, 'Press de banca',        'Pecho',    NULL, 'Principiante'),
+   (3, 'Peso muerto',           'Espalda',  NULL, 'Intermedio'),
+   (4, 'Press militar',         'Hombros',  NULL, 'Intermedio'),
+   (5, 'Curl de biceps',        'Biceps',   NULL, 'Principiante'),
+   (6, 'Extension de triceps',  'Triceps',  NULL, 'Principiante'),
+   (7, 'Hip thrust',            'Gluteos',  NULL, 'Intermedio'),
+   (8, 'Dominadas',             'Espalda',  NULL, 'Avanzado'),
+   (9, 'Zancadas',              'Piernas',  NULL, 'Intermedio'),
+  (10, 'Plancha',               'Core',     NULL, 'Principiante'),
+  (11, 'Remo con barra',        'Espalda',  NULL, 'Intermedio'),
+  (12, 'Press inclinado',       'Pecho',    NULL, 'Intermedio'),
+  (13, 'Sentadilla bulgara',    'Piernas',  NULL, 'Avanzado'),
+  (14, 'Elevaciones laterales', 'Hombros',  NULL, 'Principiante'),
+  (15, 'Curl martillo',         'Biceps',   NULL, 'Intermedio'),
+  (16, 'Fondos en paralelas',   'Triceps',  NULL, 'Avanzado'),
+  (17, 'Peso muerto rumano',    'Gluteos',  NULL, 'Intermedio'),
+  (18, 'Abdominales',           'Core',     NULL, 'Principiante'),
+  (19, 'Jalon al pecho',        'Espalda',  NULL, 'Principiante');
 
 
 -- ============================================================================================================================
@@ -125,16 +135,26 @@ VALUES
 INSERT INTO `ALIMENTO`
   (id_alimento, nombre_alimento, proteinas, carbohidratos, grasas)
 VALUES
-  (1,  'Pechuga de pollo',    31.00,  0.00, 3.60),
-  (2,  'Arroz blanco',         2.70, 28.00, 0.30),
-  (3,  'Huevo entero',        13.00,  1.10,11.00),
-  (4,  'Avena',               17.00, 66.00, 7.00),
-  (5,  'Brocoli',              2.80,  7.00, 0.40),
-  (6,  'Atun en agua',        29.00,  0.00, 0.50),
-  (7,  'Batata',               1.60, 20.00, 0.10),
-  (8,  'Almendras',           21.00, 22.00,50.00),
-  (9,  'Leche deslactosada',   3.40,  4.80, 3.60),
-  (10, 'Quinoa',              14.00, 64.00, 6.00);
+   (1,  'Pechuga de pollo',    31.00,  0.00, 3.60),
+   (2,  'Arroz blanco',         2.70, 28.00, 0.30),
+   (3,  'Huevo entero',        13.00,  1.10,11.00),
+   (4,  'Avena',               17.00, 66.00, 7.00),
+   (5,  'Brocoli',              2.80,  7.00, 0.40),
+   (6,  'Atun en agua',        29.00,  0.00, 0.50),
+   (7,  'Batata',               1.60, 20.00, 0.10),
+   (8,  'Almendras',           21.00, 22.00,50.00),
+   (9,  'Leche deslactosada',   3.40,  4.80, 3.60),
+   (10, 'Quinoa',              14.00, 64.00, 6.00),
+   (11, 'Salmon',              20.00,  0.00,13.00),
+   (12, 'Yogur griego',        10.00,  3.60, 5.00),
+   (13, 'Espinacas',            2.90,  3.60, 0.40),
+   (14, 'Papa',                 2.00, 17.00, 0.10),
+   (15, 'Aguacate',             2.00,  9.00,15.00),
+   (16, 'Lentejas',             9.00, 20.00, 0.40),
+   (17, 'Pechuga de pavo',     22.00,  0.00, 1.00),
+   (18, 'Queso cottage',       11.00,  3.40, 4.30),
+   (19, 'Platano',              1.10, 23.00, 0.30),
+   (20, 'Arroz integral',       2.60, 23.00, 0.90);
 
 
 -- ============================================================================================================================
@@ -629,14 +649,21 @@ VALUES
 
 
 -- ============================================================================================================================
+-- BLOQUE 16 — CONFIGURACION DEL SISTEMA
+-- ============================================================================================================================
+
+INSERT INTO `CONFIGURACION` (`clave`, `valor`)
+VALUES ('precio_membresia', '80000');
+
+-- ============================================================================================================================
 -- Reactivar FK checks y resetear AUTO_INCREMENT para futuros inserts
 -- ============================================================================================================================
 
 SET FOREIGN_KEY_CHECKS = 1;
 
 ALTER TABLE `USUARIO`   AUTO_INCREMENT = 10;
-ALTER TABLE `EJERCICIO` AUTO_INCREMENT = 10;
-ALTER TABLE `ALIMENTO`  AUTO_INCREMENT = 11;
+ALTER TABLE `EJERCICIO` AUTO_INCREMENT = 20;
+ALTER TABLE `ALIMENTO`  AUTO_INCREMENT = 21;
 ALTER TABLE `RESTRICCION` AUTO_INCREMENT = 7;
 ALTER TABLE `CICLO`     AUTO_INCREMENT = 9;
 ALTER TABLE `RUTINA`    AUTO_INCREMENT = 25;

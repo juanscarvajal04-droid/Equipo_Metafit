@@ -6,88 +6,17 @@ import { getId, nombreCompleto, inicial, cicloActivo } from "../utils/afiliadoHe
 import s from "./DietasView.module.css";
 
 const OBJETIVO_CONFIG = {
-  "Pérdida de grasa": { icono: "🔥", color: "#e94560", bg: "#e9456018" },
+  "Perdida de grasa": { icono: "🔥", color: "#e94560", bg: "#e9456018" },
   "Aumento de masa":  { icono: "💪", color: "#2563eb", bg: "#2563eb18" },
   "Mantenimiento":    { icono: "⚖️", color: "#059669", bg: "#05966918" },
 };
 
-// Restricciones tipo alerta
 const RESTRICCION_COLOR = {
   "Enfermedad": { bg: "#ef444418", text: "#dc2626" },
   "Alergia":    { bg: "#f9731618", text: "#ea580c" },
-  "Lesión":     { bg: "#eab30818", text: "#ca8a04" },
+  "Lesion":     { bg: "#eab30818", text: "#ca8a04" },
 };
 
-// ── Catálogo de planes nutricionales ─────────────────────────────────────────
-const PLANES_NUTRICIONALES = [
-  {
-    id: 1,
-    nombre: "Plan Hipercalórico",
-    objetivo: "Aumento de masa",
-    calorias: 3200,
-    comidas: 6,
-    icono: "💪",
-    color: "#2563eb",
-    descripcion: "Superávit calórico con alto contenido proteico. Ideal para ganar masa muscular.",
-    macros: { proteinas: "35%", carbos: "45%", grasas: "20%" },
-    compatible: ["Aumento de masa"],
-    alimentos: ["Pollo", "Arroz", "Avena", "Huevo", "Almendras"],
-  },
-  {
-    id: 2,
-    nombre: "Dieta Mediterránea",
-    objetivo: "Mantenimiento",
-    calorias: 2000,
-    comidas: 4,
-    icono: "🫒",
-    color: "#059669",
-    descripcion: "Rica en grasas saludables, vegetales y proteínas magras. Equilibrada y sostenible.",
-    macros: { proteinas: "25%", carbos: "40%", grasas: "35%" },
-    compatible: ["Mantenimiento", "Pérdida de grasa"],
-    alimentos: ["Pescado", "Aceite de oliva", "Quinoa", "Brócoli", "Tomate"],
-  },
-  {
-    id: 3,
-    nombre: "Plan de Definición",
-    objetivo: "Pérdida de grasa",
-    calorias: 1600,
-    comidas: 5,
-    icono: "🔥",
-    color: "#e94560",
-    descripcion: "Déficit calórico controlado. Alto en proteínas para preservar músculo.",
-    macros: { proteinas: "40%", carbos: "30%", grasas: "30%" },
-    compatible: ["Pérdida de grasa"],
-    alimentos: ["Atún", "Pechuga", "Brócoli", "Batata", "Claras"],
-  },
-  {
-    id: 4,
-    nombre: "Plan Low-Carb",
-    objetivo: "Pérdida de grasa",
-    calorias: 1800,
-    comidas: 4,
-    icono: "🥩",
-    color: "#7c3aed",
-    descripcion: "Reducción de carbohidratos para acelerar la quema de grasa sin perder músculo.",
-    macros: { proteinas: "35%", carbos: "15%", grasas: "50%" },
-    compatible: ["Pérdida de grasa", "Mantenimiento"],
-    alimentos: ["Carne magra", "Huevo", "Aguacate", "Espinaca", "Almendras"],
-  },
-  {
-    id: 5,
-    nombre: "Plan Plant-Based",
-    objetivo: "Mantenimiento",
-    calorias: 1900,
-    comidas: 5,
-    icono: "🌱",
-    color: "#0d9488",
-    descripcion: "100% basado en plantas. Alto en fibra y micronutrientes esenciales.",
-    macros: { proteinas: "20%", carbos: "55%", grasas: "25%" },
-    compatible: ["Mantenimiento", "Pérdida de grasa"],
-    alimentos: ["Lentejas", "Garbanzos", "Quinoa", "Tofu", "Batata"],
-  },
-];
-
-// ── Componente principal ──────────────────────────────────────────────────────
 import { useToast } from "../hooks/useToast";
 
 export default function DietasView() {
@@ -105,25 +34,25 @@ export default function DietasView() {
 
   // Modal asignar plan
   const [asignarModal, setAsignarModal] = useState(null);
-  const [planSelec,    setPlanSelec]    = useState(null);
-  const [calorias,     setCalorias]     = useState("");
-  const [numComidas,   setNumComidas]   = useState(4);
-  const [obs,          setObs]          = useState("");
-  const [saving,       setSaving]       = useState(false);
-  const [asigError,    setAsigError]    = useState("");
+  const [alimentosDisp, setAlimentosDisp] = useState([]);
+  const [alimentosSel, setAlimentosSel] = useState({});
+  const [calorias, setCalorias] = useState("");
+  const [numComidas, setNumComidas] = useState(4);
+  const [obs, setObs] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [asigError, setAsigError] = useState("");
+  const [loadingAl, setLoadingAl] = useState(false);
 
   // Modal ver plan activo
   const [verModal, setVerModal] = useState(null);
 
-  // ── Carga (reutilizable para el botón Actualizar) ──────────────────────────
   const cargarAfiliados = useCallback(async (esRefresh = false) => {
     esRefresh ? setRefreshing(true) : setLoading(true);
     setError("");
     try {
-      // FIX: ruta correcta /afiliados (no /660/afiliados)
       const { data } = await authAxios.get("/afiliados");
       setAfiliados(data);
-      if (esRefresh) showToast(`✅ Lista actualizada — ${data.length} afiliados`);
+      if (esRefresh) showToast(`Lista actualizada — ${data.length} afiliados`);
     } catch (err) {
       console.error('[DietasView] Error al cargar:', err.response?.status, err.response?.data || err.message);
       if (err?.response?.status === 401) { logout(); navigate("/login"); }
@@ -135,10 +64,7 @@ export default function DietasView() {
 
   useEffect(() => { cargarAfiliados(); }, []);
 
-  // ── Helpers ────────────────────────────────────────────────────────────────
   const tienePlanNutricional = (a) => !!cicloActivo(a)?.plan_nutricional;
-  const tieneAlergia         = (a) => (a.restricciones || []).some((r) => r.tipo === "Alergia");
-  const tieneEnfermedad      = (a) => (a.restricciones || []).some((r) => r.tipo === "Enfermedad");
 
   const filtrados = afiliados
     .filter((a) => {
@@ -146,10 +72,9 @@ export default function DietasView() {
       return (
         nombreCompleto(a).toLowerCase().includes(t) ||
         (a.objetivo_fisico || "").toLowerCase().includes(t) ||
-        (a.restricciones || []).some((r) => r.nombre.toLowerCase().includes(t))
+        (a.restricciones || []).some((r) => (r.nombre_restriccion || r.nombre || "").toLowerCase().includes(t))
       );
     })
-    // ⬇️ Sin plan nutricional primero (prioridad para el entrenador)
     .sort((a, b) => {
       const aConPlan = tienePlanNutricional(a);
       const bConPlan = tienePlanNutricional(b);
@@ -158,68 +83,112 @@ export default function DietasView() {
       return 0;
     });
 
-  // KPIs
-  const totalConPlan     = afiliados.filter((a) => tienePlanNutricional(a)).length;
-  const alertasAlergia   = afiliados.filter((a) => tieneAlergia(a) || tieneEnfermedad(a)).length;
+  const totalConPlan   = afiliados.filter((a) => tienePlanNutricional(a)).length;
+  const alertasAlergia = afiliados.filter((a) => (a.restricciones || []).some((r) => r.tipo === "Alergia" || r.tipo === "Enfermedad")).length;
 
-  // ── Asignar plan nutricional ───────────────────────────────────────────────
-  const abrirAsignar = (afiliado) => {
+  const abrirAsignar = async (afiliado) => {
     setAsignarModal(afiliado);
-    const compatible = PLANES_NUTRICIONALES.find(
-      (p) => p.compatible.includes(afiliado.objetivo_fisico)
-    ) || PLANES_NUTRICIONALES[0];
-    setPlanSelec(compatible);
-    setCalorias(String(compatible.calorias));
-    setNumComidas(compatible.comidas);
+    setAlimentosSel({});
+    setCalorias("");
+    setNumComidas(4);
     setObs("");
     setAsigError("");
+
+    setLoadingAl(true);
+    try {
+      const { data } = await authAxios.get(`/afiliados/${getId(afiliado)}/alimentos-disponibles`);
+      setAlimentosDisp(Array.isArray(data) ? data : []);
+      if (Array.isArray(data) && data.length > 0) {
+        const calAuto = Math.round(data.reduce((sum, a) => sum + (a.proteinas * 4 + a.carbohidratos * 4 + a.grasas * 9), 0) / data.length * 2.2);
+        setCalorias(String(Math.min(5000, Math.max(800, calAuto))));
+      }
+    } catch (err) {
+      console.error('[DietasView] Error cargando alimentos:', err);
+      setAlimentosDisp([]);
+      setAsigError("No se pudieron cargar los alimentos disponibles.");
+    } finally {
+      setLoadingAl(false);
+    }
+  };
+
+  const toggleAlimento = (idAl) => {
+    setAlimentosSel((prev) => {
+      if (prev[idAl]) {
+        const copy = { ...prev };
+        delete copy[idAl];
+        return copy;
+      }
+      return {
+        ...prev,
+        [idAl]: { cantidad_g: 100, num_comida: 1 },
+      };
+    });
+  };
+
+  const updateAlimento = (idAl, field, value) => {
+    setAlimentosSel((prev) => ({
+      ...prev,
+      [idAl]: { ...prev[idAl], [field]: value },
+    }));
   };
 
   const handleAsignar = async (e) => {
     e.preventDefault();
-    if (!planSelec) { setAsigError("Selecciona un plan nutricional."); return; }
+    const ids = Object.keys(alimentosSel);
+    if (ids.length === 0) { setAsigError("Selecciona al menos un alimento."); return; }
     if (!calorias || isNaN(Number(calorias))) { setAsigError("Ingresa las calorías estimadas."); return; }
 
     setSaving(true); setAsigError("");
     try {
-      const id        = getId(asignarModal);
-      const tienePlan = !!cicloActivo(asignarModal);
-      // FIX 6: Primero creamos el CICLO (capturando el id_ciclo que devuelve)
-      // y luego insertamos el PLAN_NUTRICIONAL vinculado a ese ciclo.
+      const id = getId(asignarModal);
+
+      // 1. Crear ciclo
       const cicloPayload = {
-        id_afiliado:                id,
-        fecha_inicio:               new Date().toISOString().split("T")[0],
-        fecha_fin:                  (() => { const d = new Date(); d.setDate(d.getDate() + 84); return d.toISOString().split("T")[0]; })(),
-        objetivo_fisico:            asignarModal.objetivo_fisico,
-        nivel_experiencia:          asignarModal.nivel_experiencia,
-        disponibilidad_dias:        asignarModal.disponibilidad_semanal_dias || 3,
+        id_afiliado: id,
+        fecha_inicio: new Date().toISOString().split("T")[0],
+        fecha_fin: (() => { const d = new Date(); d.setDate(d.getDate() + 84); return d.toISOString().split("T")[0]; })(),
+        objetivo_fisico: asignarModal.objetivo_fisico,
+        nivel_experiencia: asignarModal.nivel_experiencia,
+        disponibilidad_dias: asignarModal.disponibilidad_semanal_dias || 3,
         grupo_muscular_prioritario: asignarModal.grupo_muscular_prioritario || null,
-        observaciones:              planSelec ? `Plan: ${planSelec.nombre}` : null,
       };
-      const { data: cicloData } = await authAxios.post(`/afiliados/ciclos`, cicloPayload);
-      // FIX 6: segunda llamada — persiste el PLAN_NUTRICIONAL vinculado al ciclo creado
-      await authAxios.post('/planes/nutricional', {
-        id_ciclo:          cicloData.id_ciclo,
+      const { data: cicloData } = await authAxios.post("/afiliados/ciclos", cicloPayload);
+      const idCiclo = cicloData.id_ciclo;
+
+      // 2. Crear plan nutricional
+      await authAxios.post("/planes/nutricional", {
+        id_ciclo: idCiclo,
         calorias_objetivo: Number(calorias),
-        num_comidas:       numComidas,
-        observaciones:     obs || null,
+        num_comidas: numComidas,
+        observaciones: obs || null,
       });
-      // FIX: el backend devuelve {message}, NO el afiliado actualizado.
-      // Mergeamos localmente el nuevo plan activo para reflejar el cambio en UI.
-      const nuevoCicloLocal = {
-        plan_nutricional: {
-          nombre_plan:       planSelec.nombre,
-          calorias_objetivo: Number(calorias),
-          num_comidas:       numComidas,
-          objetivo_dieta:    planSelec.objetivo,
-        },
-      };
+
+      // 3. Agregar cada alimento seleccionado al detalle
+      for (const idAl of ids) {
+        const al = alimentosSel[idAl];
+        await authAxios.post(`/planes/nutricional/${idCiclo}/detalle`, {
+          id_alimento: parseInt(idAl),
+          num_comida: al.num_comida,
+          cantidad_g: al.cantidad_g,
+        });
+      }
+
+      // 4. Actualizar estado local
       setAfiliados((prev) => prev.map((a) =>
-        getId(a) === id ? { ...a, ciclo_activo: { ...a.ciclo_activo, ...nuevoCicloLocal } } : a
+        getId(a) === id ? {
+          ...a,
+          ciclo_activo: {
+            ...a.ciclo_activo,
+            id_ciclo: idCiclo,
+            plan_nutricional: {
+              calorias_objetivo: Number(calorias),
+              num_comidas: numComidas,
+            },
+          },
+        } : a
       ));
       setAsignarModal(null);
-      const accion = tienePlan ? "actualizado" : "asignado";
-      showToast(`✅ Plan "${planSelec.nombre}" ${accion} a ${nombreCompleto(asignarModal)}`);
+      showToast(`Plan nutricional creado para ${nombreCompleto(asignarModal)} con ${ids.length} alimentos`);
     } catch (err) {
       const msg = err?.response?.data?.error || err.message || "Error desconocido";
       console.error('[DietasView.handleAsignar]', err);
@@ -229,49 +198,36 @@ export default function DietasView() {
     }
   };
 
-  // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <AppLayout>
-      {/* Toast */}
       {toast.msg && (
-        <div
-          className={`${s.toast} alert alert-${toast.type === "danger" ? "danger" : "dark"} shadow-lg`}
-        >
+        <div className={`${s.toast} alert alert-${toast.type === "danger" ? "danger" : "dark"} shadow-lg`}>
           {toast.msg}
         </div>
       )}
 
       <div className="container-fluid py-4 px-3 px-md-4">
-
         {/* ── Encabezado ── */}
         <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
           <div>
             <h1 className="h4 fw-bold mb-0 d-flex align-items-center gap-2">
-              <span
-                className={`d-inline-flex align-items-center justify-content-center rounded-2 text-white ${s.headerIcon}`}
-              >
-                🥗
-              </span>
+              <span className={`d-inline-flex align-items-center justify-content-center rounded-2 text-white ${s.headerIcon}`}>🥗</span>
               Planes de Dieta
             </h1>
             <small className="text-muted">
               {isAdmin
                 ? "Vista de administrador — supervisión de planes nutricionales activos"
-                : "Asigna y gestiona planes nutricionales personalizados para cada afiliado"}
+                : "Crea planes nutricionales personalizados con alimentos del catálogo disponible"}
             </small>
           </div>
 
-          {/* KPIs */}
           <div className="d-flex gap-2 flex-wrap">
             {[
-              { label: "Total afiliados",    valor: afiliados.length,   color: "#0891b2" },
-              { label: "Con plan activo",    valor: totalConPlan,        color: "#059669" },
-              { label: "Alertas nutrición",  valor: alertasAlergia,      color: "#e94560" },
+              { label: "Total afiliados", valor: afiliados.length, color: "#0891b2" },
+              { label: "Con plan activo", valor: totalConPlan, color: "#059669" },
+              { label: "Alertas nutrición", valor: alertasAlergia, color: "#e94560" },
             ].map((k) => (
-              <div
-                key={k.label}
-                className={`card border-0 shadow-sm text-center px-3 py-2 ${s.kpiCard}`}
-              >
+              <div key={k.label} className={`card border-0 shadow-sm text-center px-3 py-2 ${s.kpiCard}`}>
                 <div className={`fw-bold fs-5 ${s.kpiValor}`} style={{ color: k.color }}>
                   {loading ? "—" : k.valor}
                 </div>
@@ -286,21 +242,11 @@ export default function DietasView() {
           <div className="card-header bg-white py-3 d-flex justify-content-between align-items-center border-0 flex-wrap gap-2">
             <span className="fw-semibold text-muted small">{filtrados.length} afiliados</span>
             <div className="d-flex gap-2 align-items-center">
-              <input
-                id="busqueda-dietas"
-                type="text"
-                className={`form-control form-control-sm ${s.searchInput}`}
+              <input type="text" className={`form-control form-control-sm ${s.searchInput}`}
                 placeholder="🔍 Nombre, objetivo, restricción..."
-                value={busqueda}
-                onChange={(e) => setBusqueda(e.target.value)}
-              />
-              <button
-                id="btn-refresh-dietas"
-                className={`btn btn-sm btn-outline-secondary d-flex align-items-center gap-1 ${s.btnRefresh}`}
-                onClick={() => cargarAfiliados(true)}
-                disabled={refreshing}
-                title="Recargar lista de afiliados"
-              >
+                value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
+              <button className={`btn btn-sm btn-outline-secondary d-flex align-items-center gap-1 ${s.btnRefresh}`}
+                onClick={() => cargarAfiliados(true)} disabled={refreshing}>
                 {refreshing
                   ? <span className="spinner-border spinner-border-sm" style={{ width: 12, height: 12, borderWidth: 2 }} />
                   : "🔄"}
@@ -336,48 +282,33 @@ export default function DietasView() {
                         </td>
                       </tr>
                     ) : filtrados.map((a, idx) => {
-                      const ciclo    = cicloActivo(a);
-                      const plan     = ciclo?.plan_nutricional;
-                      const objCfg   = OBJETIVO_CONFIG[a.objetivo_fisico] || OBJETIVO_CONFIG["Mantenimiento"];
-                      const restr    = a.restricciones || [];
-                      const hayAlerta = tieneAlergia(a) || tieneEnfermedad(a);
+                      const ciclo = cicloActivo(a);
+                      const plan = ciclo?.plan_nutricional;
+                      const objCfg = OBJETIVO_CONFIG[a.objetivo_fisico] || OBJETIVO_CONFIG["Mantenimiento"];
+                      const restr = a.restricciones || [];
+                      const hayAlerta = restr.some((r) => r.tipo === "Alergia" || r.tipo === "Enfermedad");
 
                       return (
-                        <tr
-                          key={getId(a)}
-                          className={!plan ? s.rowSinPlan : hayAlerta ? s.rowConAlerta : ""}
-                        >
+                        <tr key={getId(a)} className={!plan ? s.rowSinPlan : hayAlerta ? s.rowConAlerta : ""}>
                           <td className="ps-4 text-muted small">{idx + 1}</td>
-
-                          {/* Afiliado */}
                           <td>
                             <div className="d-flex align-items-center gap-2">
-                              <div
-                                className={s.avatar}
-                                style={{
-                                  background: `hsl(${(getId(a) * 47) % 360},65%,55%)`,
-                                }}
-                              >
+                              <div className={s.avatar}
+                                style={{ background: `hsl(${(getId(a) * 47) % 360},65%,55%)` }}>
                                 {inicial(a)}
                               </div>
                               <div>
                                 <div className="fw-semibold small">{nombreCompleto(a)}</div>
-                                <div className={`text-muted ${s.emailText}`}>{a.correo || "\u2014"}</div>
+                                <div className={`text-muted ${s.emailText}`}>{a.correo || "—"}</div>
                               </div>
                             </div>
                           </td>
-
-                          {/* Objetivo */}
                           <td>
-                            <span
-                              className="badge px-2 py-1"
-                              style={{ background: objCfg.bg, color: objCfg.color, fontSize: "0.7rem" }}
-                            >
+                            <span className="badge px-2 py-1"
+                              style={{ background: objCfg.bg, color: objCfg.color, fontSize: "0.7rem" }}>
                               {objCfg.icono} {a.objetivo_fisico || "—"}
                             </span>
                           </td>
-
-                          {/* Restricciones */}
                           <td>
                             {restr.length === 0 ? (
                               <span className="badge bg-success bg-opacity-10 text-success" style={{ fontSize: "0.7rem" }}>
@@ -388,13 +319,10 @@ export default function DietasView() {
                                 {restr.slice(0, 2).map((r) => {
                                   const cfg = RESTRICCION_COLOR[r.tipo] || { bg: "#e2e8f0", text: "#64748b" };
                                   return (
-                                    <span
-                                      key={r.id_restriccion}
-                                      className="badge px-2 py-1"
+                                    <span key={r.id_restriccion} className="badge px-2 py-1"
                                       title={r.efecto_relevante || r.nombre}
-                                      style={{ background: cfg.bg, color: cfg.text, fontSize: "0.65rem" }}
-                                    >
-                                      ⚠️ {r.nombre}
+                                      style={{ background: cfg.bg, color: cfg.text, fontSize: "0.65rem" }}>
+                                      ⚠️ {r.nombre_restriccion}
                                     </span>
                                   );
                                 })}
@@ -406,14 +334,10 @@ export default function DietasView() {
                               </div>
                             )}
                           </td>
-
-                          {/* Plan activo */}
                           <td>
                             {plan?.nombre_plan ? (
-                              <span
-                                className="badge px-2 py-1"
-                                style={{ background: "#0891b218", color: "#0891b2", fontSize: "0.7rem" }}
-                              >
+                              <span className="badge px-2 py-1"
+                                style={{ background: "#0891b218", color: "#0891b2", fontSize: "0.7rem" }}>
                                 ✅ {plan.nombre_plan}
                               </span>
                             ) : plan ? (
@@ -426,50 +350,30 @@ export default function DietasView() {
                               </span>
                             )}
                           </td>
-
-                          {/* Calorías */}
                           <td className="text-center">
                             {plan?.calorias_objetivo ? (
-                              <span className="badge bg-light text-dark border">
-                                {plan.calorias_objetivo} kcal
-                              </span>
+                              <span className="badge bg-light text-dark border">{plan.calorias_objetivo} kcal</span>
                             ) : (
                               <small className="text-muted">—</small>
                             )}
                           </td>
-
-                          {/* Comidas/día */}
                           <td className="text-center">
                             {plan?.num_comidas ? (
-                              <span className="badge bg-light text-dark border">
-                                {plan.num_comidas}×/día
-                              </span>
+                              <span className="badge bg-light text-dark border">{plan.num_comidas}×/día</span>
                             ) : (
                               <small className="text-muted">—</small>
                             )}
                           </td>
-
-                          {/* Acciones */}
                           <td className="text-center pe-4">
                             <div className="d-flex gap-1 justify-content-center">
                               {plan && (
-                                <button
-                                  className="btn btn-outline-primary btn-sm"
-                                  id={`btn-ver-dieta-${getId(a)}`}
-                                  title="Ver plan activo"
-                                  onClick={() => setVerModal(a)}
-                                >
-                                  👁️
-                                </button>
+                                <button className="btn btn-outline-primary btn-sm"
+                                  title="Ver plan activo" onClick={() => setVerModal(a)}>👁️</button>
                               )}
-                              <button
-                                className={`btn btn-sm fw-semibold text-white ${s.btnAsignar}`}
-                                id={`btn-asignar-dieta-${getId(a)}`}
-                                title={plan ? "Cambiar plan" : "Asignar plan"}
-                                style={{ background: "linear-gradient(135deg,#0891b2,#0d9488)", border: "none", fontSize: "0.78rem" }}
-                                onClick={() => abrirAsignar(a)}
-                              >
-                                {plan ? "🔄 Cambiar" : "➕ Asignar"}
+                              <button className={`btn btn-sm fw-semibold text-white ${s.btnAsignar}`}
+                                title={plan ? "Crear nuevo plan" : "Asignar plan"}
+                                onClick={() => abrirAsignar(a)}>
+                                {plan ? "🔄 Nueva" : "➕ Asignar"}
                               </button>
                             </div>
                           </td>
@@ -482,137 +386,51 @@ export default function DietasView() {
             )}
           </div>
         </div>
-
-        {/* ── Catálogo de planes nutricionales ── */}
-        <div>
-          <h2 className={`h6 fw-bold text-muted text-uppercase mb-3 ${s.catalogTitle}`}>
-            🍽️ Catálogo de Planes Nutricionales
-          </h2>
-          <div className="row g-3">
-            {PLANES_NUTRICIONALES.map((p) => (
-              <div key={p.id} className="col-md-6 col-xl-4">
-                <div
-                  className="card border-0 shadow-sm h-100"
-                  style={{ borderLeft: `4px solid ${p.color}` }}
-                >
-                  <div className="card-body p-3">
-                    {/* Header tarjeta */}
-                    <div className="d-flex justify-content-between align-items-start mb-2">
-                      <div>
-                        <div className="fw-bold" style={{ color: p.color }}>
-                          {p.icono} {p.nombre}
-                        </div>
-                        <small className="text-muted">{p.descripcion}</small>
-                      </div>
-                    </div>
-
-                    {/* Macros */}
-                    <div className="d-flex gap-2 my-2 flex-wrap">
-                      {Object.entries(p.macros).map(([key, val]) => (
-                        <span
-                          key={key}
-                          className="badge px-2 py-1"
-                          style={{ background: `${p.color}18`, color: p.color, fontSize: "0.65rem" }}
-                        >
-                          {key === "proteinas" ? "🥩" : key === "carbos" ? "🌾" : "🥑"} {val}
-                        </span>
-                      ))}
-                    </div>
-
-                    {/* Calorías y comidas */}
-                    <div className="d-flex gap-3 text-muted small mb-2">
-                      <span>🔥 {p.calorias} kcal/día</span>
-                      <span>🍽️ {p.comidas} comidas/día</span>
-                    </div>
-
-                    {/* Alimentos típicos */}
-                    <div className="d-flex flex-wrap gap-1 mt-2">
-                      {p.alimentos.map((al) => (
-                        <span
-                          key={al}
-                          className="badge bg-light text-secondary border"
-                          style={{ fontSize: "0.62rem" }}
-                        >
-                          {al}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════════════
-          MODAL: ASIGNAR PLAN NUTRICIONAL
+          MODAL: ASIGNAR PLAN NUTRICIONAL PERSONALIZADO
       ═══════════════════════════════════════════════════════════════════════ */}
       {asignarModal && (
-        <div
-          className={`modal d-block ${s.modalOverlay}`}
-          onClick={() => !saving && setAsignarModal(null)}
-        >
-          <div
-            className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className={`modal d-block ${s.modalOverlay}`}
+          onClick={() => !saving && setAsignarModal(null)}>
+          <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable"
+            onClick={(e) => e.stopPropagation()}>
             <div className="modal-content border-0 shadow-lg">
-              <div
-                className={`modal-header ${s.modalHeaderTeal}`}
-              >
-                <h5 className="modal-title">
-                  🥗 Asignar Plan Nutricional — {nombreCompleto(asignarModal)}
-                </h5>
-                <button
-                  className="btn-close btn-close-white"
-                  onClick={() => !saving && setAsignarModal(null)}
-                  disabled={saving}
-                />
+              <div className={`modal-header ${s.modalHeaderTeal}`}>
+                <h5 className="modal-title">🥗 Crear Plan Nutricional — {nombreCompleto(asignarModal)}</h5>
+                <button className="btn-close btn-close-white"
+                  onClick={() => !saving && setAsignarModal(null)} disabled={saving} />
               </div>
 
               <form onSubmit={handleAsignar}>
                 <div className={`modal-body ${s.modalBodyScroll}`}>
                   {asigError && (
-                    <div className="alert alert-danger py-2 mb-3">
-                      <small>⚠️ {asigError}</small>
-                    </div>
+                    <div className="alert alert-danger py-2 mb-3"><small>⚠️ {asigError}</small></div>
                   )}
 
-                  {/* Info del afiliado */}
-                  <div
-                    className="rounded-3 p-3 mb-4 d-flex align-items-start gap-3 flex-wrap"
-                    style={{ background: "#f0fdfa", border: "1px solid #99f6e4" }}
-                  >
-                    <div
-                      className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0"
-                      style={{
-                        width: 44, height: 44, fontSize: "1rem",
-                        background: `hsl(${(getId(asignarModal) * 47) % 360},65%,55%)`,
-                      }}
-                    >
+                  {/* ── Info del afiliado + restricciones ── */}
+                  <div className={s.afiliadoInfoBox}>
+                    <div className={s.avatarLg}
+                      style={{ background: `hsl(${(getId(asignarModal) * 47) % 360},65%,55%)` }}>
                       {inicial(asignarModal)}
                     </div>
                     <div className="flex-grow-1">
                       <div className="fw-semibold">{nombreCompleto(asignarModal)}</div>
                       <div className="text-muted small">
                         {OBJETIVO_CONFIG[asignarModal.objetivo_fisico]?.icono} {asignarModal.objetivo_fisico}
-                        &nbsp;·&nbsp; {asignarModal.nivel_experiencia}
-                        &nbsp;·&nbsp; {asignarModal.disponibilidad_semanal_dias}d/sem
+                        &nbsp;·&nbsp;{asignarModal.nivel_experiencia}
+                        &nbsp;·&nbsp;{asignarModal.disponibilidad_semanal_dias}d/sem
                       </div>
-                      {/* Restricciones del afiliado */}
                       {(asignarModal.restricciones || []).length > 0 && (
                         <div className="mt-2 d-flex flex-wrap gap-1">
                           {asignarModal.restricciones.map((r) => {
                             const cfg = RESTRICCION_COLOR[r.tipo] || { bg: "#e2e8f0", text: "#64748b" };
                             return (
-                              <span
-                                key={r.id_restriccion}
-                                className="badge px-2 py-1"
+                              <span key={r.id_restriccion} className="badge px-2 py-1"
                                 style={{ background: cfg.bg, color: cfg.text, fontSize: "0.65rem" }}
-                                title={r.efecto_relevante || ""}
-                              >
-                                ⚠️ {r.nombre}
+                                title={r.efecto_relevante || ""}>
+                                ⚠️ {r.nombre_restriccion}
                               </span>
                             );
                           })}
@@ -621,82 +439,110 @@ export default function DietasView() {
                     </div>
                   </div>
 
-                  {/* Selector de plan */}
+                  {/* ── Selector de alimentos disponibles ── */}
                   <h6 className="fw-bold text-muted text-uppercase small mb-3">
-                    Selecciona un plan nutricional
+                    🍽️ Alimentos disponibles ({alimentosDisp.length})
                   </h6>
-                  <div className="row g-2 mb-4">
-                    {PLANES_NUTRICIONALES.map((p) => {
-                      const selec = planSelec?.id === p.id;
-                      const compatible = p.compatible.includes(asignarModal.objetivo_fisico);
-                      return (
-                        <div key={p.id} className="col-md-6 col-xl-4">
-                          <div
-                            className="card border-0 h-100"
-                            style={{
-                              cursor: "pointer",
-                              background: selec ? `${p.color}12` : "#f8fafc",
-                              border:     selec ? `2px solid ${p.color}` : "2px solid #e2e8f0",
-                              transition: "all 0.15s ease",
-                              opacity:    1,
-                            }}
-                            onClick={() => {
-                              setPlanSelec(p);
-                              setCalorias(String(p.calorias));
-                              setNumComidas(p.comidas);
-                            }}
-                          >
-                            <div className="card-body p-3">
-                              <div className="d-flex justify-content-between align-items-start">
-                                <div className="fw-semibold small" style={{ color: p.color }}>
-                                  {p.icono} {p.nombre}
-                                </div>
-                                {selec && <span style={{ color: p.color }}>✓</span>}
-                              </div>
-                              <div className="text-muted mt-1" style={{ fontSize: "0.68rem" }}>
-                                🔥 {p.calorias} kcal · 🍽️ {p.comidas} comidas/día
-                              </div>
-                              {compatible && (
-                                <span
-                                  className="badge mt-2 px-2"
-                                  style={{ background: `${p.color}18`, color: p.color, fontSize: "0.6rem" }}
-                                >
-                                  ⭐ Recomendado para este objetivo
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
 
-                  {/* Personalización */}
-                  <h6 className="fw-bold text-muted text-uppercase small mb-3">
-                    Ajustar parámetros
-                  </h6>
+                  {loadingAl ? (
+                    <div className="text-center py-4">
+                      <div className={`spinner-border ${s.spinnerTeal}`} />
+                      <p className="text-muted small mt-2">Cargando alimentos disponibles...</p>
+                    </div>
+                  ) : (
+                    <div className="table-responsive mb-4" style={{ maxHeight: "300px", overflowY: "auto" }}>
+                      <table className="table table-sm table-hover align-middle mb-0">
+                        <thead className="table-light" style={{ position: "sticky", top: 0, zIndex: 1 }}>
+                          <tr>
+                            <th style={{ width: 40 }}></th>
+                            <th>Alimento</th>
+                            <th className="text-center">Prot (g)</th>
+                            <th className="text-center">Carb (g)</th>
+                            <th className="text-center">Gras (g)</th>
+                            <th className="text-center">Kcal/100g</th>
+                            <th style={{ width: 80 }}>Gramos</th>
+                            <th style={{ width: 100 }}>Comida</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {alimentosDisp.length === 0 ? (
+                            <tr>
+                              <td colSpan={8} className="text-center text-muted py-3">
+                                No hay alimentos disponibles para este afiliado.
+                              </td>
+                            </tr>
+                          ) : (
+                            alimentosDisp.map((al) => {
+                              const sel = alimentosSel[al.id_alimento];
+                              const kcal = Math.round(al.proteinas * 4 + al.carbohidratos * 4 + al.grasas * 9);
+                              return (
+                                <tr key={al.id_alimento}
+                                  style={sel ? { background: "#f0fdfa" } : {}}>
+                                  <td>
+                                    <input type="checkbox" className="form-check-input"
+                                      checked={!!sel}
+                                      onChange={() => toggleAlimento(al.id_alimento)} />
+                                  </td>
+                                  <td><span className="small">{al.nombre_alimento}</span></td>
+                                  <td className="text-center small">{al.proteinas}</td>
+                                  <td className="text-center small">{al.carbohidratos}</td>
+                                  <td className="text-center small">{al.grasas}</td>
+                                  <td className="text-center small fw-semibold">{kcal}</td>
+                                  {sel ? (
+                                    <>
+                                      <td>
+                                        <input type="number" className="form-control form-control-sm" min={1} max={2000}
+                                          value={sel.cantidad_g} style={{ width: 70 }}
+                                          onChange={(e) => updateAlimento(al.id_alimento, "cantidad_g", Math.max(1, parseFloat(e.target.value) || 1))} />
+                                      </td>
+                                      <td>
+                                        <select className="form-select form-select-sm"
+                                          value={sel.num_comida}
+                                          onChange={(e) => updateAlimento(al.id_alimento, "num_comida", parseInt(e.target.value))}>
+                                          {[1, 2, 3, 4, 5, 6].map((n) => (
+                                            <option key={n} value={n}>Comida {n}</option>
+                                          ))}
+                                        </select>
+                                      </td>
+                                    </>
+                                  ) : (
+                                    <td colSpan={2} className="text-muted small text-center">—</td>
+                                  )}
+                                </tr>
+                              );
+                            })
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {/* ── Resumen de selección ── */}
+                  {Object.keys(alimentosSel).length > 0 && (
+                    <div className="rounded-3 p-3 mb-3" style={{ background: "#f0fdfa", border: "1px solid #99f6e4" }}>
+                      <small className="fw-semibold">
+                        {Object.keys(alimentosSel).length} alimentos seleccionados
+                        &nbsp;·&nbsp;
+                        {new Set(Object.values(alimentosSel).map((a) => a.num_comida)).size} comida(s)
+                      </small>
+                    </div>
+                  )}
+
+                  {/* ── Parámetros del plan ── */}
+                  <h6 className="fw-bold text-muted text-uppercase small mb-3">Ajustar parámetros</h6>
                   <div className="row g-3">
                     <div className="col-md-4">
                       <label className="form-label small fw-semibold">Calorías estimadas/día *</label>
                       <div className="input-group">
-                        <input
-                          type="number"
-                          className="form-control"
-                          min={800} max={6000} step={50}
-                          value={calorias}
-                          onChange={(e) => setCalorias(e.target.value)}
-                          required
-                        />
+                        <input type="number" className="form-control" min={800} max={6000} step={50}
+                          value={calorias} onChange={(e) => setCalorias(e.target.value)} required />
                         <span className="input-group-text text-muted small">kcal</span>
                       </div>
                     </div>
                     <div className="col-md-4">
                       <label className="form-label small fw-semibold">Comidas por día</label>
-                      <select
-                        className="form-select"
-                        value={numComidas}
-                        onChange={(e) => setNumComidas(Number(e.target.value))}
-                      >
+                      <select className="form-select" value={numComidas}
+                        onChange={(e) => setNumComidas(Number(e.target.value))}>
                         {[3, 4, 5, 6].map((n) => (
                           <option key={n} value={n}>{n} comidas/día</option>
                         ))}
@@ -704,46 +550,28 @@ export default function DietasView() {
                     </div>
                     <div className="col-md-4">
                       <label className="form-label small fw-semibold">Observaciones</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Ej: evitar lácteos..."
-                        value={obs}
-                        onChange={(e) => setObs(e.target.value)}
-                      />
+                      <input type="text" className="form-control" placeholder="Ej: evitar lácteos..."
+                        value={obs} onChange={(e) => setObs(e.target.value)} />
                     </div>
                   </div>
 
-                  {/* Advertencia si ya tiene plan */}
                   {tienePlanNutricional(asignarModal) && (
                     <div className="alert alert-warning mt-3 py-2">
-                      <small>
-                        ⚠️ Este afiliado ya tiene un plan activo. Asignar uno nuevo reemplazará el ciclo anterior.
-                      </small>
+                      <small>⚠️ Este afiliado ya tiene un plan activo. Crear uno nuevo reemplazará el ciclo anterior.</small>
                     </div>
                   )}
                 </div>
 
                 <div className="modal-footer border-0">
-                  <button
-                    type="button"
-                    className="btn btn-outline-secondary btn-sm px-4"
-                    onClick={() => setAsignarModal(null)}
-                    disabled={saving}
-                  >
+                  <button type="button" className="btn btn-outline-secondary btn-sm px-4"
+                    onClick={() => setAsignarModal(null)} disabled={saving}>
                     Cancelar
                   </button>
-                  <button
-                    id="btn-confirmar-asignar-dieta"
-                    type="submit"
-                    className={`btn btn-sm ${s.btnConfirmar}`}
-                    disabled={saving || !planSelec}
-                  >
+                  <button type="submit" className={`btn btn-sm ${s.btnConfirmar}`}
+                    disabled={saving || Object.keys(alimentosSel).length === 0}>
                     {saving
                       ? <><span className="spinner-border spinner-border-sm me-2" />Guardando...</>
-                      : tienePlanNutricional(asignarModal)
-                        ? "💾 Actualizar Plan"
-                        : "✅ Crear Plan"}
+                      : "✅ Crear Plan Nutricional"}
                   </button>
                 </div>
               </form>
@@ -757,38 +585,27 @@ export default function DietasView() {
       ═══════════════════════════════════════════════════════════════════════ */}
       {verModal && (() => {
         const ciclo = cicloActivo(verModal);
-        const plan  = ciclo?.plan_nutricional;
+        const plan = ciclo?.plan_nutricional;
         const objCfg = OBJETIVO_CONFIG[verModal.objetivo_fisico] || OBJETIVO_CONFIG["Mantenimiento"];
 
         return (
-          <div
-            className={`modal d-block ${s.modalOverlay}`}
-            onClick={() => setVerModal(null)}
-          >
-            <div
-              className="modal-dialog modal-lg modal-dialog-scrollable"
-              onClick={(e) => e.stopPropagation()}
-            >
+          <div className={`modal d-block ${s.modalOverlay}`} onClick={() => setVerModal(null)}>
+            <div className="modal-dialog modal-lg modal-dialog-scrollable" onClick={(e) => e.stopPropagation()}>
               <div className="modal-content border-0 shadow-lg">
-                <div
-                  className={`modal-header ${s.modalHeaderDark}`}
-                >
-                  <h5 className="modal-title">
-                    🥗 Plan activo — {nombreCompleto(verModal)}
-                  </h5>
+                <div className={`modal-header ${s.modalHeaderDark}`}>
+                  <h5 className="modal-title">🥗 Plan activo — {nombreCompleto(verModal)}</h5>
                   <button className="btn-close btn-close-white" onClick={() => setVerModal(null)} />
                 </div>
 
                 <div className="modal-body">
-                  {/* Resumen del plan */}
                   <div className="row g-3 mb-4">
                     {[
-                      { label: "Plan",          v: plan?.nombre_plan           || "Personalizado" },
-                      { label: "Objetivo",       v: plan?.objetivo_dieta        || verModal.objetivo_fisico },
-                      { label: "Calorías",       v: plan?.calorias_objetivo ? `${plan.calorias_objetivo} kcal` : "—" },
-                      { label: "Comidas/día",    v: plan?.num_comidas   || "—" },
-                      { label: "Inicio ciclo",   v: ciclo?.fecha_inicio         || "—" },
-                      { label: "Fin ciclo",      v: ciclo?.fecha_fin            || "—" },
+                      { label: "Plan", v: plan?.nombre_plan || "Personalizado" },
+                      { label: "Objetivo", v: plan?.objetivo_dieta || verModal.objetivo_fisico },
+                      { label: "Calorías", v: plan?.calorias_objetivo ? `${plan.calorias_objetivo} kcal` : "—" },
+                      { label: "Comidas/día", v: plan?.num_comidas || "—" },
+                      { label: "Inicio ciclo", v: ciclo?.fecha_inicio || "—" },
+                      { label: "Fin ciclo", v: ciclo?.fecha_fin || "—" },
                     ].map((f) => (
                       <div key={f.label} className="col-6 col-md-4">
                         <small className="text-muted d-block text-uppercase fw-semibold" style={{ fontSize: "0.65rem" }}>
@@ -799,41 +616,32 @@ export default function DietasView() {
                     ))}
                   </div>
 
-                  {/* Macros */}
-                  {plan?.macros && (
+                  {/* Restricciones */}
+                  {(verModal.restricciones || []).length > 0 && (
                     <>
-                      <h6 className="fw-bold mb-3">📊 Distribución de macronutrientes</h6>
-                      <div className="row g-2 mb-4">
-                        {Object.entries(plan.macros).map(([key, val]) => (
-                          <div key={key} className="col-4">
-                            <div
-                              className="card border-0 text-center p-3"
-                              style={{ background: "#0891b218" }}
-                            >
-                              <div className="fw-bold fs-5" style={{ color: "#0891b2" }}>{val}</div>
-                              <small className="text-muted text-capitalize">{key}</small>
+                      <h6 className="fw-bold mb-3">⚠️ Restricciones del afiliado</h6>
+                      {verModal.restricciones.map((r) => {
+                        const cfg = RESTRICCION_COLOR[r.tipo] || { bg: "#e2e8f0", text: "#64748b" };
+                        return (
+                          <div key={r.id_restriccion} className="rounded-3 p-2 mb-2 d-flex align-items-center gap-2"
+                            style={{ background: cfg.bg }}>
+                            <span style={{ color: cfg.text, fontWeight: 700 }}>⚠️</span>
+                            <div>
+                              <div className="small fw-semibold" style={{ color: cfg.text }}>{r.nombre_restriccion}</div>
+                              {r.efecto_relevante && (
+                                <div className="text-muted" style={{ fontSize: "0.7rem" }}>{r.efecto_relevante}</div>
+                              )}
                             </div>
+                            <span className="badge ms-auto" style={{ background: cfg.bg, color: cfg.text, fontSize: "0.6rem", border: `1px solid ${cfg.text}44` }}>
+                              {r.tipo}
+                            </span>
                           </div>
-                        ))}
-                      </div>
+                        );
+                      })}
                     </>
                   )}
 
-                  {/* Alimentos base */}
-                  {plan?.alimentos_base?.length > 0 && (
-                    <>
-                      <h6 className="fw-bold mb-3">🍱 Alimentos base del plan</h6>
-                      <div className="d-flex flex-wrap gap-2 mb-4">
-                        {plan.alimentos_base.map((al) => (
-                          <span key={al} className="badge bg-light text-dark border px-3 py-2">
-                            {al}
-                          </span>
-                        ))}
-                      </div>
-                    </>
-                  )}
-
-                  {/* Detalle de comidas (si existe) */}
+                  {/* Detalle de comidas */}
                   {plan?.detalle?.length > 0 && (
                     <>
                       <h6 className="fw-bold mb-3">📋 Distribución de comidas</h6>
@@ -851,38 +659,6 @@ export default function DietasView() {
                     </>
                   )}
 
-                  {/* Restricciones del afiliado */}
-                  {(verModal.restricciones || []).length > 0 && (
-                    <>
-                      <h6 className="fw-bold mt-4 mb-3">⚠️ Restricciones del afiliado</h6>
-                      {verModal.restricciones.map((r) => {
-                        const cfg = RESTRICCION_COLOR[r.tipo] || { bg: "#e2e8f0", text: "#64748b" };
-                        return (
-                          <div
-                            key={r.id_restriccion}
-                            className="rounded-3 p-2 mb-2 d-flex align-items-center gap-2"
-                            style={{ background: cfg.bg }}
-                          >
-                            <span style={{ color: cfg.text, fontWeight: 700 }}>⚠️</span>
-                            <div>
-                              <div className="small fw-semibold" style={{ color: cfg.text }}>{r.nombre}</div>
-                              {r.efecto_relevante && (
-                                <div className="text-muted" style={{ fontSize: "0.7rem" }}>{r.efecto_relevante}</div>
-                              )}
-                            </div>
-                            <span
-                              className="badge ms-auto"
-                              style={{ background: cfg.bg, color: cfg.text, fontSize: "0.6rem", border: `1px solid ${cfg.text}44` }}
-                            >
-                              {r.tipo}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </>
-                  )}
-
-                  {/* Observaciones */}
                   {plan?.observaciones && (
                     <div className="alert alert-info py-2 mt-3">
                       <small>📝 {plan.observaciones}</small>
@@ -891,17 +667,12 @@ export default function DietasView() {
                 </div>
 
                 <div className="modal-footer border-0">
-                  <button
-                    className="btn btn-sm px-3 fw-semibold"
+                  <button className="btn btn-sm px-3 fw-semibold"
                     style={{ background: "linear-gradient(135deg,#0891b2,#0d9488)", color: "#fff", border: "none" }}
-                    onClick={() => { setVerModal(null); abrirAsignar(verModal); }}
-                  >
-                    🔄 Cambiar plan
+                    onClick={() => { setVerModal(null); abrirAsignar(verModal); }}>
+                    🔄 Crear nuevo plan
                   </button>
-                  <button
-                    className="btn btn-secondary btn-sm px-3"
-                    onClick={() => setVerModal(null)}
-                  >
+                  <button className="btn btn-secondary btn-sm px-3" onClick={() => setVerModal(null)}>
                     Cerrar
                   </button>
                 </div>

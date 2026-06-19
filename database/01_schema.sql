@@ -611,6 +611,57 @@ CREATE TABLE IF NOT EXISTS `PAGO` (
   COMMENT = 'Registro de pagos de membresia en efectivo. Valor mensual unico.';
 
 
+-- ============================================================================================================================
+-- BLOQUE 10 — CONFIGURACION DEL SISTEMA (clave-valor)
+-- Parametros editables por el Administrador desde el Dashboard.
+-- ============================================================================================================================
+
+CREATE TABLE IF NOT EXISTS `CONFIGURACION` (
+  `clave` VARCHAR(50)  NOT NULL,
+  `valor` VARCHAR(255) NOT NULL,
+
+  PRIMARY KEY (`clave`)
+
+) ENGINE = InnoDB
+  COMMENT = 'Parametros configurables del sistema (ej: precio_membresia).';
+
+-- ============================================================================================================================
+-- BLOQUE 11 — TRIGGERS
+-- ============================================================================================================================
+
+DELIMITER $$
+
+-- Rechaza ciclos con fechas que se solapen con ciclos ACTIVOS del mismo afiliado
+CREATE TRIGGER trg_ciclo_no_solapamiento_insert
+BEFORE INSERT ON CICLO
+FOR EACH ROW
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM CICLO
+    WHERE id_usuario = NEW.id_usuario
+      AND activo = 1
+      AND NEW.fecha_inicio <= fecha_fin
+      AND NEW.fecha_fin  >= fecha_inicio
+  ) THEN
+    SIGNAL SQLSTATE '45000'
+      SET MESSAGE_TEXT = 'El ciclo se solapa con un ciclo activo existente del afiliado.';
+  END IF;
+END$$
+
+-- Desactiva el ciclo activo anterior al insertar uno nuevo
+CREATE TRIGGER trg_ciclo_un_activo_insert
+BEFORE INSERT ON CICLO
+FOR EACH ROW
+BEGIN
+  IF NEW.activo = 1 THEN
+    UPDATE CICLO
+    SET activo = 0
+    WHERE id_usuario = NEW.id_usuario AND activo = 1;
+  END IF;
+END$$
+
+DELIMITER ;
+
 -- Reactivar checks de FK
 SET FOREIGN_KEY_CHECKS = 1;
 

@@ -100,6 +100,8 @@ const planRoutes = require('./routes/planRoutes');
 const catalogoRoutes = require('./routes/catalogoRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const pagoRoutes = require('./routes/pagoRoutes');   // FIX 5: rutas de pagos
+const configuracionRoutes = require('./routes/configuracionRoutes');
+const notificacionRoutes = require('./routes/notificacionRoutes');
 
 // BUG-005: El rate limiter se aplica SOLO al endpoint de login
 app.use('/', loginLimiter, authRoutes);   // POST /login (con rate limit)
@@ -109,6 +111,8 @@ app.use('/afiliados', pagoRoutes);                // FIX 5: GET|POST /afiliados/
 app.use('/planes', planRoutes);                 // Planes entrenamiento y nutricional
 app.use('/catalogo', catalogoRoutes);             // GET /catalogo/ejercicios|alimentos|restricciones
 app.use('/dashboard', dashboardRoutes);            // GET /dashboard/kpis
+app.use('/configuracion', configuracionRoutes);     // GET|PUT /configuracion/precio-membresia
+app.use('/notificaciones', notificacionRoutes);    // GET /notificaciones
 
 // ── Swagger UI — /api-docs y /swagger (alias) ────────────────
 const swaggerSetup = swaggerUi.setup(swaggerSpec, {

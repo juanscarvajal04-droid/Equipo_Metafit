@@ -13,22 +13,19 @@ const NIVEL_COLOR = {
 };
 
 const OBJETIVO_ICON = {
-  "Pérdida de grasa": "🔥",
+  "Perdida de grasa": "🔥",
   "Aumento de masa":  "💪",
   "Mantenimiento":    "⚖️",
 };
 
-// Rutinas predefinidas que el Entrenador puede asignar
-const RUTINAS_PREDEFINIDAS = [
-  { id: 1, nombre: "Full Body — Principiante",  dias: 3, enfoque: "Cuerpo completo",  nivel: "Principiante" },
-  { id: 2, nombre: "Upper/Lower — Intermedio",  dias: 4, enfoque: "Fuerza",           nivel: "Intermedio"   },
-  { id: 3, nombre: "Push/Pull/Legs — Avanzado", dias: 6, enfoque: "Hipertrofia",      nivel: "Avanzado"     },
-  { id: 4, nombre: "Cardio + Fuerza",           dias: 4, enfoque: "Pérdida de grasa", nivel: "Principiante" },
-  { id: 5, nombre: "Glúteos & Core",            dias: 3, enfoque: "Glúteos",          nivel: "Intermedio"   },
-  { id: 6, nombre: "Powerlifting Base",         dias: 4, enfoque: "Fuerza máxima",    nivel: "Avanzado"     },
-];
+const RESTRICCION_COLOR = {
+  "Enfermedad": { bg: "#ef444418", text: "#dc2626" },
+  "Alergia":    { bg: "#f9731618", text: "#ea580c" },
+  "Lesion":     { bg: "#eab30818", text: "#ca8a04" },
+};
 
-// ── Componente principal ──────────────────────────────────────────────────────
+const DAY_LABELS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+
 export default function RutinasView() {
   const { user, authAxios, logout } = useAuth();
   const navigate = useNavigate();
@@ -42,26 +39,26 @@ export default function RutinasView() {
   const [busqueda,    setBusqueda]   = useState("");
   const { toast, showToast }         = useToast();
 
-  // Modal asignar rutina
+  // Modal crear rutina personalizada
   const [asignarModal, setAsignarModal] = useState(null);
-  const [rutinaSelec,  setRutinaSelec]  = useState(null);
-  const [fechaInicio,  setFechaInicio]  = useState(new Date().toISOString().split("T")[0]);
-  const [fechaFin,     setFechaFin]     = useState("");
-  const [saving,       setSaving]       = useState(false);
-  const [asigError,    setAsigError]    = useState("");
+  const [ejerciciosDisp, setEjerciciosDisp] = useState([]);
+  const [ejerciciosSel, setEjerciciosSel] = useState({});
+  const [fechaInicio, setFechaInicio] = useState(new Date().toISOString().split("T")[0]);
+  const [fechaFin, setFechaFin] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [asigError, setAsigError] = useState("");
+  const [loadingEj, setLoadingEj] = useState(false);
 
   // Modal ver rutina activa
   const [verModal, setVerModal] = useState(null);
 
-  // ── Carga (reutilizable para el botón Actualizar) ──────────────────────────
   const cargarAfiliados = useCallback(async (esRefresh = false) => {
     esRefresh ? setRefreshing(true) : setLoading(true);
     setError("");
     try {
-      // FIX: ruta correcta /afiliados (no /660/afiliados)
       const { data } = await authAxios.get("/afiliados");
       setAfiliados(data);
-      if (esRefresh) showToast(`✅ Lista actualizada — ${data.length} afiliados`);
+      if (esRefresh) showToast(`Lista actualizada — ${data.length} afiliados`);
     } catch (err) {
       console.error('[RutinasView] Error al cargar:', err.response?.status, err.response?.data || err.message);
       if (err?.response?.status === 401) { logout(); navigate("/login"); }
@@ -73,7 +70,6 @@ export default function RutinasView() {
 
   useEffect(() => { cargarAfiliados(); }, []);
 
-
   const filtrados = afiliados
     .filter((a) => {
       const t = busqueda.toLowerCase();
@@ -83,7 +79,6 @@ export default function RutinasView() {
         (a.nivel_experiencia || "").toLowerCase().includes(t)
       );
     })
-    // ⬇️ Sin rutina primero (prioridad para el entrenador)
     .sort((a, b) => {
       const aConRutina = !!cicloActivo(a);
       const bConRutina = !!cicloActivo(b);
@@ -92,74 +87,134 @@ export default function RutinasView() {
       return 0;
     });
 
-  // ── Asignar rutina (crea/actualiza ciclo activo) ───────────────────────────
-  const abrirAsignar = (afiliado) => {
+  const abrirAsignar = async (afiliado) => {
     setAsignarModal(afiliado);
-    const ciclo = cicloActivo(afiliado);
-    // Pre-seleccionar rutina compatible con el nivel
-    const compatible = RUTINAS_PREDEFINIDAS.find(
-      (r) => r.nivel === afiliado.nivel_experiencia
-    ) || RUTINAS_PREDEFINIDAS[0];
-    setRutinaSelec(compatible);
+    setEjerciciosSel({});
+    setAsigError("");
     setFechaInicio(new Date().toISOString().split("T")[0]);
-    // Fecha fin = 8 semanas por defecto
     const fin = new Date();
     fin.setDate(fin.getDate() + 56);
     setFechaFin(fin.toISOString().split("T")[0]);
-    setAsigError("");
+
+    setLoadingEj(true);
+    try {
+      const { data } = await authAxios.get(`/afiliados/${getId(afiliado)}/ejercicios-disponibles`);
+      setEjerciciosDisp(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('[RutinasView] Error cargando ejercicios:', err);
+      setEjerciciosDisp([]);
+      setAsigError("No se pudieron cargar los ejercicios disponibles.");
+    } finally {
+      setLoadingEj(false);
+    }
+  };
+
+  const toggleEjercicio = (idEj) => {
+    setEjerciciosSel((prev) => {
+      if (prev[idEj]) {
+        const copy = { ...prev };
+        delete copy[idEj];
+        return copy;
+      }
+      return {
+        ...prev,
+        [idEj]: { series: 3, repeticiones: 12, dia: 1 },
+      };
+    });
+  };
+
+  const updateEjercicio = (idEj, field, value) => {
+    setEjerciciosSel((prev) => ({
+      ...prev,
+      [idEj]: { ...prev[idEj], [field]: value },
+    }));
   };
 
   const handleAsignar = async (e) => {
     e.preventDefault();
-    if (!rutinaSelec) { setAsigError("Selecciona una rutina."); return; }
+    const ids = Object.keys(ejerciciosSel);
+    if (ids.length === 0) { setAsigError("Selecciona al menos un ejercicio."); return; }
     if (!fechaInicio || !fechaFin) { setAsigError("Las fechas son obligatorias."); return; }
     if (fechaFin <= fechaInicio) { setAsigError("La fecha de fin debe ser posterior al inicio."); return; }
 
     setSaving(true); setAsigError("");
     try {
       const id = getId(asignarModal);
-      // FIX 4: payload alineado con la tabla CICLO (NOT NULL fields incluidos)
-      const payload = {
-        id_afiliado:                id,  // createCiclo acepta id_afiliado por compatibilidad
-        fecha_inicio:               fechaInicio,
-        fecha_fin:                  fechaFin,
-        objetivo_fisico:            asignarModal.objetivo_fisico,
-        nivel_experiencia:          asignarModal.nivel_experiencia,
-        disponibilidad_dias:        asignarModal.disponibilidad_semanal_dias || 3,
+      // 1. Crear ciclo
+      const cicloPayload = {
+        id_afiliado: id,
+        fecha_inicio: fechaInicio,
+        fecha_fin: fechaFin,
+        objetivo_fisico: asignarModal.objetivo_fisico,
+        nivel_experiencia: asignarModal.nivel_experiencia,
+        disponibilidad_dias: asignarModal.disponibilidad_semanal_dias || 3,
         grupo_muscular_prioritario: asignarModal.grupo_muscular_prioritario || null,
-        observaciones:              rutinaSelec
-          ? `Rutina base: ${rutinaSelec.nombre} — ${rutinaSelec.enfoque}`
-          : null,
+        observaciones: "Plan creado desde el asistente inteligente",
       };
-      await authAxios.post(`/afiliados/ciclos`, payload);
-      // FIX: el backend devuelve {message}, NO el afiliado actualizado.
-      // Actualizamos el estado local mergeando el nuevo ciclo activo.
-      const nuevoCicloLocal = {
-        numero_ciclo:       (asignarModal.ciclo_activo?.numero_ciclo || 0) + 1,
-        fecha_inicio:       fechaInicio,
-        fecha_fin:          fechaFin,
-        plan_entrenamiento: { nombre_rutina: rutinaSelec.nombre, enfoque: rutinaSelec.enfoque, dias_semana: rutinaSelec.dias },
-        progreso_fisico:    [],
-      };
+      const { data: cicloData } = await authAxios.post("/afiliados/ciclos", cicloPayload);
+      const idCiclo = cicloData.id_ciclo;
+
+      // 2. Crear plan de entrenamiento
+      await authAxios.post("/planes/entrenamiento", { id_ciclo: idCiclo });
+
+      // 3. Agrupar ejercicios por día y crear rutinas + ejercicios
+      const dias = {};
+      for (const idEj of ids) {
+        const ej = ejerciciosSel[idEj];
+        if (!dias[ej.dia]) dias[ej.dia] = [];
+        dias[ej.dia].push(idEj);
+      }
+
+      for (const [diaNum, ejerciciosDiaIds] of Object.entries(dias)) {
+        const nombreDia = DAY_LABELS[parseInt(diaNum) - 1] || `Día ${diaNum}`;
+        const { data: rutinaData } = await authAxios.post("/planes/rutinas", {
+          id_ciclo: idCiclo,
+          nombre_rutina: `Día ${diaNum} — ${nombreDia}`,
+          enfoque_muscular: "Full Body",
+          dia_numero: parseInt(diaNum),
+        });
+        const idRutina = rutinaData.id;
+
+        for (let i = 0; i < ejerciciosDiaIds.length; i++) {
+          const idEj = ejerciciosDiaIds[i];
+          const ej = ejerciciosSel[idEj];
+          await authAxios.post(`/planes/rutinas/${idRutina}/ejercicios`, {
+            id_ejercicio: parseInt(idEj),
+            series: ej.series,
+            repeticiones: ej.repeticiones,
+            orden: i + 1,
+          });
+        }
+      }
+
+      // 4. Actualizar estado local
       setAfiliados((prev) => prev.map((a) =>
-        getId(a) === id ? { ...a, ciclo_activo: nuevoCicloLocal } : a
+        getId(a) === id ? {
+          ...a,
+          ciclo_activo: {
+            id_ciclo: idCiclo,
+            fecha_inicio: fechaInicio,
+            fecha_fin: fechaFin,
+            plan_entrenamiento: { nombre_rutina: "Personalizado", enfoque: "Asistente inteligente" },
+            numero_ciclo: (asignarModal.ciclo_activo?.numero_ciclo || 0) + 1,
+          },
+        } : a
       ));
       setAsignarModal(null);
-      const accion = cicloActivo(asignarModal) ? "actualizada" : "asignada";
-      showToast(`✅ Rutina "${rutinaSelec.nombre}" ${accion} a ${nombreCompleto(asignarModal)}`);
+      showToast(`Plan de entrenamiento creado para ${nombreCompleto(asignarModal)} con ${ids.length} ejercicios`);
     } catch (err) {
       const msg = err?.response?.data?.error || err.message || "Error desconocido";
-      console.error('[RutinasView.handleAsignar]', err);
+      console.error('[RutinasView.handleAsignar]', err.response?.data || err);
       setAsigError(`Error al guardar: ${msg}`);
     } finally {
       setSaving(false);
     }
   };
 
-  // ── Render ─────────────────────────────────────────────────────────────────
+  const gruposMusculares = [...new Set(ejerciciosDisp.map((e) => e.grupo_muscular))];
+
   return (
     <AppLayout>
-      {/* Toast */}
       {toast.msg && (
         <div className={`position-fixed bottom-0 end-0 m-4 alert alert-${toast.type === "danger" ? "danger" : "dark"} shadow-lg py-2 px-3 ${styles.toast}`}>
           {toast.msg}
@@ -167,7 +222,6 @@ export default function RutinasView() {
       )}
 
       <div className="container-fluid py-4 px-3 px-md-4">
-
         {/* ── Encabezado ── */}
         <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
           <div>
@@ -180,19 +234,17 @@ export default function RutinasView() {
             <small className="text-muted">
               {isAdmin
                 ? "Vista de administrador — supervisión de rutinas asignadas"
-                : "Asigna y gestiona rutinas personalizadas para cada afiliado"}
+                : "Crea rutinas personalizadas seleccionando ejercicios del catálogo disponible"}
             </small>
           </div>
 
-          {/* KPIs rápidos */}
           <div className="d-flex gap-2 flex-wrap">
             {[
-              { label: "Total afiliados", valor: afiliados.length,                          color: "#059669" },
+              { label: "Total afiliados", valor: afiliados.length, color: "#059669" },
               { label: "Con rutina activa", valor: afiliados.filter((a) => cicloActivo(a)).length, color: "#7c3aed" },
-              { label: "Sin rutina",       valor: afiliados.filter((a) => !cicloActivo(a)).length, color: "#e94560" },
+              { label: "Sin rutina", valor: afiliados.filter((a) => !cicloActivo(a)).length, color: "#e94560" },
             ].map((k) => (
               <div key={k.label} className={`card border-0 shadow-sm text-center px-3 py-2 ${styles.kpiCard}`}>
-                {/* Dinámico: color viene de k.color (dato) */}
                 <div className="fw-bold fs-5" style={{ color: k.color }}>
                   {loading ? "—" : k.valor}
                 </div>
@@ -208,7 +260,6 @@ export default function RutinasView() {
             <span className="fw-semibold text-muted small">{filtrados.length} afiliados</span>
             <div className="d-flex gap-2 align-items-center">
               <input
-                id="busqueda-rutinas"
                 type="text"
                 className={`form-control form-control-sm ${styles.searchInput}`}
                 placeholder="🔍 Nombre, objetivo, nivel..."
@@ -216,7 +267,6 @@ export default function RutinasView() {
                 onChange={(e) => setBusqueda(e.target.value)}
               />
               <button
-                id="btn-refresh-rutinas"
                 className={`btn btn-sm btn-outline-secondary d-flex align-items-center gap-1 ${styles.exportBtn}`}
                 onClick={() => cargarAfiliados(true)}
                 disabled={refreshing}
@@ -258,20 +308,14 @@ export default function RutinasView() {
                       </tr>
                     ) : filtrados.map((a, idx) => {
                       const sinRutina = !cicloActivo(a);
-                      const ciclo   = cicloActivo(a);
+                      const ciclo = cicloActivo(a);
                       const nivelCfg = NIVEL_COLOR[a.nivel_experiencia] || NIVEL_COLOR.Principiante;
 
                       return (
-                        <tr
-                          key={getId(a)}
-                          style={sinRutina ? { background: "#fff8f0", borderLeft: "3px solid #f97316" } : {}}
-                        >
+                        <tr key={getId(a)} style={sinRutina ? { background: "#fff8f0", borderLeft: "3px solid #f97316" } : {}}>
                           <td className="ps-4 text-muted small">{idx + 1}</td>
-
-                          {/* Afiliado */}
                           <td>
                             <div className="d-flex align-items-center gap-2">
-                              {/* Dinámico: hsl generado por id del afiliado */}
                               <div className={styles.avatarTd}
                                 style={{ background: `hsl(${(getId(a) * 47) % 360},65%,55%)` }}>
                                 {inicial(a)}
@@ -282,29 +326,18 @@ export default function RutinasView() {
                               </div>
                             </div>
                           </td>
-
-                          {/* Objetivo */}
+                          <td><small>{OBJETIVO_ICON[a.objetivo_fisico]} {a.objetivo_fisico || "—"}</small></td>
                           <td>
-                            <small>{OBJETIVO_ICON[a.objetivo_fisico]} {a.objetivo_fisico || "—"}</small>
-                          </td>
-
-                          {/* Nivel */}
-                          <td>
-                            {/* Dinámico: background y color vienen de nivelCfg (por nivel_experiencia) */}
                             <span className={`badge px-2 py-1 ${styles.badgeSm}`}
                               style={{ background: nivelCfg.bg, color: nivelCfg.text }}>
                               {nivelCfg.label}
                             </span>
                           </td>
-
-                          {/* Días */}
                           <td className="text-center">
                             <span className="badge bg-light text-dark border">
                               {a.disponibilidad_semanal_dias || "—"}d
                             </span>
                           </td>
-
-                          {/* Rutina activa */}
                           <td>
                             {ciclo?.plan_entrenamiento?.nombre_rutina ? (
                               <span className={`badge px-2 py-1 ${styles.badgeCiclo}`}>
@@ -320,40 +353,24 @@ export default function RutinasView() {
                               </span>
                             )}
                           </td>
-
-                          {/* Período */}
                           <td>
                             {ciclo ? (
-                              <small className="text-muted">
-                                {ciclo.fecha_inicio} → {ciclo.fecha_fin}
-                              </small>
+                              <small className="text-muted">{ciclo.fecha_inicio} → {ciclo.fecha_fin}</small>
                             ) : (
                               <small className="text-muted">—</small>
                             )}
                           </td>
-
-                          {/* Acciones */}
                           <td className="text-center pe-4">
                             <div className="d-flex gap-1 justify-content-center">
-                              {/* Ver detalle del ciclo */}
                               {ciclo && (
-                                <button
-                                  className="btn btn-outline-primary btn-sm"
-                                  id={`btn-ver-rutina-${getId(a)}`}
+                                <button className="btn btn-outline-primary btn-sm"
                                   title="Ver rutina activa"
-                                  onClick={() => setVerModal(a)}
-                                >
-                                  👁️
-                                </button>
+                                  onClick={() => setVerModal(a)}>👁️</button>
                               )}
-                              {/* Asignar / Cambiar rutina */}
-                              <button
-                                className={`btn btn-sm fw-semibold text-white ${styles.btnAsignar}`}
-                                id={`btn-asignar-rutina-${getId(a)}`}
-                                title={ciclo ? "Cambiar rutina" : "Asignar rutina"}
-                                onClick={() => abrirAsignar(a)}
-                              >
-                                {ciclo ? "🔄 Cambiar" : "➕ Asignar"}
+                              <button className={`btn btn-sm fw-semibold text-white ${styles.btnAsignar}`}
+                                title={ciclo ? "Crear nueva rutina" : "Asignar rutina"}
+                                onClick={() => abrirAsignar(a)}>
+                                {ciclo ? "🔄 Nueva" : "➕ Asignar"}
                               </button>
                             </div>
                           </td>
@@ -366,189 +383,207 @@ export default function RutinasView() {
             )}
           </div>
         </div>
-
-        {/* ── Catálogo de rutinas disponibles ── */}
-        <div className="mt-4">
-          <h2 className={`h6 fw-bold text-muted text-uppercase mb-3 ${styles.sectionLabel}`}>
-            📋 Catálogo de Rutinas Disponibles
-          </h2>
-          <div className="row g-2">
-            {RUTINAS_PREDEFINIDAS.map((r) => {
-              const nivelCfg = NIVEL_COLOR[r.nivel] || NIVEL_COLOR.Principiante;
-              return (
-                <div key={r.id} className="col-md-4 col-lg-2">
-                  {/* Dinámico: borderLeft usa nivelCfg.text (por nivel de la rutina) */}
-                  <div className="card border-0 shadow-sm h-100"
-                    style={{ borderLeft: `3px solid ${nivelCfg.text}` }}>
-                    <div className="card-body p-3">
-                      <div className="fw-semibold small mb-1">{r.nombre}</div>
-                      <div className={`text-muted ${styles.fechaSm}`}>
-                        🎯 {r.enfoque} · {r.dias}d/sem
-                      </div>
-                      {/* Dinámico: background y color del badge vienen de nivelCfg */}
-                      <span className={`badge mt-2 px-2 py-1 ${styles.nivelBadge}`}
-                        style={{ background: nivelCfg.bg, color: nivelCfg.text }}>
-                        {r.nivel}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════════════
-          MODAL: ASIGNAR / CAMBIAR RUTINA
+          MODAL: ASIGNAR RUTINA PERSONALIZADA
       ═══════════════════════════════════════════════════════════════════════ */}
       {asignarModal && (
         <div className={`modal d-block ${styles.modalOverlay}`}
           onClick={() => !saving && setAsignarModal(null)}>
-          <div
-            className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable"
+            onClick={(e) => e.stopPropagation()}>
             <div className="modal-content border-0 shadow-lg">
               <div className={`modal-header text-white border-0 ${styles.modalHeaderVerde}`}>
-                <h5 className="modal-title">
-                  🏋️ Asignar Rutina — {nombreCompleto(asignarModal)}
-                </h5>
-                <button
-                  className="btn-close btn-close-white"
-                  onClick={() => !saving && setAsignarModal(null)}
-                  disabled={saving}
-                />
+                <h5 className="modal-title">🏋️ Crear Rutina — {nombreCompleto(asignarModal)}</h5>
+                <button className="btn-close btn-close-white"
+                  onClick={() => !saving && setAsignarModal(null)} disabled={saving} />
               </div>
 
               <form onSubmit={handleAsignar}>
                 <div className={`modal-body ${styles.modalBody}`}>
                   {asigError && (
-                    <div className="alert alert-danger py-2 mb-3">
-                      <small>⚠️ {asigError}</small>
+                    <div className="alert alert-danger py-2 mb-3"><small>⚠️ {asigError}</small></div>
+                  )}
+
+                  {/* ── Info del afiliado + restricciones ── */}
+                  <div className={`rounded-3 p-3 mb-4 ${styles.afiliadoSection}`}>
+                    <div className="d-flex align-items-center gap-3 mb-2">
+                      <div className={styles.avatarModal}
+                        style={{ background: `hsl(${(getId(asignarModal) * 47) % 360},65%,55%)` }}>
+                        {inicial(asignarModal)}
+                      </div>
+                      <div>
+                        <div className="fw-semibold">{nombreCompleto(asignarModal)}</div>
+                        <div className="text-muted small">
+                          {OBJETIVO_ICON[asignarModal.objetivo_fisico]} {asignarModal.objetivo_fisico}
+                          &nbsp;·&nbsp;{asignarModal.nivel_experiencia}
+                          &nbsp;·&nbsp;{asignarModal.disponibilidad_semanal_dias}d/sem
+                          {asignarModal.grupo_muscular_prioritario && (
+                            <>· Grupo prioritario: {asignarModal.grupo_muscular_prioritario}</>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    {/* Restricciones del afiliado */}
+                    {(asignarModal.restricciones || []).length > 0 && (
+                      <div className="d-flex flex-wrap gap-1 mt-2">
+                        {(asignarModal.restricciones || []).map((r) => {
+                          const cfg = RESTRICCION_COLOR[r.tipo] || { bg: "#e2e8f0", text: "#64748b" };
+                          return (
+                            <span key={r.id_restriccion} className="badge px-2 py-1"
+                              style={{ background: cfg.bg, color: cfg.text, fontSize: "0.65rem" }}
+                              title={r.efecto_relevante || ""}>
+                              ⚠️ {r.nombre_restriccion}
+                              {r.efecto_relevante && ` — ${r.efecto_relevante}`}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* ── Selector de ejercicios disponibles ── */}
+                  <h6 className="fw-bold text-muted text-uppercase small mb-3">
+                    🏋️ Ejercicios disponibles ({ejerciciosDisp.length})
+                  </h6>
+
+                  {loadingEj ? (
+                    <div className="text-center py-4">
+                      <div className={`spinner-border ${styles.spinnerBrand}`} />
+                      <p className="text-muted small mt-2">Cargando ejercicios disponibles...</p>
+                    </div>
+                  ) : (
+                    <div className="table-responsive mb-4" style={{ maxHeight: "300px", overflowY: "auto" }}>
+                      <table className="table table-sm table-hover align-middle mb-0">
+                        <thead className="table-light" style={{ position: "sticky", top: 0, zIndex: 1 }}>
+                          <tr>
+                            <th style={{ width: 40 }}></th>
+                            <th>Ejercicio</th>
+                            <th>Grupo muscular</th>
+                            <th>Nivel</th>
+                            <th style={{ width: 70 }}>Series</th>
+                            <th style={{ width: 70 }}>Reps</th>
+                            <th style={{ width: 120 }}>Día</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {ejerciciosDisp.length === 0 ? (
+                            <tr>
+                              <td colSpan={7} className="text-center text-muted py-3">
+                                No hay ejercicios disponibles para este afiliado.
+                              </td>
+                            </tr>
+                          ) : (
+                            gruposMusculares.map((gm) => {
+                              const ejerciciosGM = ejerciciosDisp.filter(e => e.grupo_muscular === gm);
+                              return ejerciciosGM.map((ej, i) => {
+                                const nivelCfg = NIVEL_COLOR[ej.nivel_minimo] || NIVEL_COLOR.Principiante;
+                                const sel = ejerciciosSel[ej.id_ejercicio];
+                                return (
+                                  <tr key={ej.id_ejercicio}
+                                    style={sel ? { background: `${nivelCfg.text}08` } : {}}
+                                    className={i === 0 ? "border-top" : ""}>
+                                    {i === 0 && (
+                                      <td rowSpan={ejerciciosGM.length}
+                                        className="fw-semibold text-muted small align-middle"
+                                        style={{ background: "#f8fafc", fontSize: "0.7rem", writingMode: "vertical-lr", textOrientation: "mixed", width: 20 }}>
+                                        {gm}
+                                      </td>
+                                    )}
+                                    <td>
+                                      <input type="checkbox" className="form-check-input"
+                                        checked={!!sel}
+                                        onChange={() => toggleEjercicio(ej.id_ejercicio)} />
+                                    </td>
+                                    <td>
+                                      <span className="small">{ej.nombre_ejercicio}</span>
+                                    </td>
+                                    <td>
+                                      <span className="badge px-2" style={{ background: nivelCfg.bg, color: nivelCfg.text, fontSize: "0.6rem" }}>
+                                        {nivelCfg.label}
+                                      </span>
+                                    </td>
+                                    {sel ? (
+                                      <>
+                                        <td>
+                                          <input type="number" className="form-control form-control-sm" min={1} max={20}
+                                            value={sel.series} style={{ width: 60 }}
+                                            onChange={(e) => updateEjercicio(ej.id_ejercicio, "series", Math.max(1, parseInt(e.target.value) || 1))} />
+                                        </td>
+                                        <td>
+                                          <input type="number" className="form-control form-control-sm" min={1} max={100}
+                                            value={sel.repeticiones} style={{ width: 60 }}
+                                            onChange={(e) => updateEjercicio(ej.id_ejercicio, "repeticiones", Math.max(1, parseInt(e.target.value) || 1))} />
+                                        </td>
+                                        <td>
+                                          <select className="form-select form-select-sm"
+                                            value={sel.dia}
+                                            onChange={(e) => updateEjercicio(ej.id_ejercicio, "dia", parseInt(e.target.value))}>
+                                            {DAY_LABELS.map((label, i) => (
+                                              <option key={i} value={i + 1}>Día {i + 1} ({label})</option>
+                                            ))}
+                                          </select>
+                                        </td>
+                                      </>
+                                    ) : (
+                                      <td colSpan={3} className="text-muted small text-center">—</td>
+                                    )}
+                                  </tr>
+                                );
+                              });
+                            })
+                          )}
+                        </tbody>
+                      </table>
                     </div>
                   )}
 
-                  {/* Info del afiliado */}
-                  <div className={`rounded-3 p-3 mb-4 d-flex align-items-center gap-3 ${styles.afiliadoSection}`}>
-                    {/* Dinámico: hsl generado por id del afiliado seleccionado */}
-                    <div className={styles.avatarModal}
-                      style={{ background: `hsl(${(getId(asignarModal) * 47) % 360},65%,55%)` }}>
-                      {inicial(asignarModal)}
+                  {/* ── Resumen de la selección ── */}
+                  {Object.keys(ejerciciosSel).length > 0 && (
+                    <div className="rounded-3 p-3 mb-3" style={{ background: "#f0fdfa", border: "1px solid #99f6e4" }}>
+                      <small className="fw-semibold">
+                        {Object.keys(ejerciciosSel).length} ejercicios seleccionados
+                        &nbsp;·&nbsp;
+                        {new Set(Object.values(ejerciciosSel).map(e => e.dia)).size} día(s)
+                      </small>
                     </div>
-                    <div>
-                      <div className="fw-semibold">{nombreCompleto(asignarModal)}</div>
-                      <div className="text-muted small">
-                        {OBJETIVO_ICON[asignarModal.objetivo_fisico]} {asignarModal.objetivo_fisico}
-                        &nbsp;·&nbsp;{asignarModal.nivel_experiencia}
-                        &nbsp;·&nbsp;{asignarModal.disponibilidad_semanal_dias}d/sem
-                      </div>
-                    </div>
-                  </div>
+                  )}
 
-                  {/* Selector de rutina */}
-                  <h6 className="fw-bold text-muted text-uppercase small mb-3">
-                    Selecciona una rutina
-                  </h6>
-                  <div className="row g-2 mb-4">
-                    {RUTINAS_PREDEFINIDAS.map((r) => {
-                      const nivelCfg   = NIVEL_COLOR[r.nivel] || NIVEL_COLOR.Principiante;
-                      const seleccionada = rutinaSelec?.id === r.id;
-                      return (
-                        <div key={r.id} className="col-md-6">
-                          <div
-                            className="card border-0 h-100"
-                            style={{
-                              cursor: "pointer",
-                              background: seleccionada ? `${nivelCfg.text}12` : "#f8fafc",
-                              border:     seleccionada ? `2px solid ${nivelCfg.text}` : "2px solid #e2e8f0",
-                              transition: "all 0.15s ease",
-                            }}
-                            onClick={() => setRutinaSelec(r)}
-                          >
-                            <div className="card-body p-3">
-                              <div className="d-flex justify-content-between align-items-start">
-                                <div className="fw-semibold small">{r.nombre}</div>
-                                {seleccionada && (
-                                  <span style={{ color: nivelCfg.text, fontSize: "1rem" }}>✓</span>
-                                )}
-                              </div>
-                              <div className={`text-muted mt-1 ${styles.rutinaInfo}`}>
-                                🎯 {r.enfoque} &nbsp;·&nbsp; 📅 {r.dias} días/sem
-                              </div>
-                              <span
-                                className={`badge mt-2 px-2 ${styles.nivelBadgeMd}`}
-                                style={{ background: nivelCfg.bg, color: nivelCfg.text }}
-                              >
-                                {r.nivel}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* Fechas */}
-                  <h6 className="fw-bold text-muted text-uppercase small mb-3">
-                    Período del ciclo
-                  </h6>
+                  {/* ── Fechas del ciclo ── */}
+                  <h6 className="fw-bold text-muted text-uppercase small mb-3">Período del ciclo</h6>
                   <div className="row g-3">
                     <div className="col-md-6">
                       <label className="form-label small fw-semibold">Fecha de inicio *</label>
-                      <input
-                        type="date"
-                        className="form-control"
-                        value={fechaInicio}
+                      <input type="date" className="form-control" value={fechaInicio}
                         min={new Date().toISOString().split("T")[0]}
-                        onChange={(e) => setFechaInicio(e.target.value)}
-                        required
-                      />
+                        onChange={(e) => setFechaInicio(e.target.value)} required />
                     </div>
                     <div className="col-md-6">
                       <label className="form-label small fw-semibold">Fecha de fin *</label>
-                      <input
-                        type="date"
-                        className="form-control"
-                        value={fechaFin}
+                      <input type="date" className="form-control" value={fechaFin}
                         min={fechaInicio}
-                        onChange={(e) => setFechaFin(e.target.value)}
-                        required
-                      />
+                        onChange={(e) => setFechaFin(e.target.value)} required />
                     </div>
                   </div>
 
-                  {/* Advertencia si ya tiene ciclo */}
                   {cicloActivo(asignarModal) && (
                     <div className="alert alert-warning mt-3 py-2">
-                      <small>
-                        ⚠️ Este afiliado ya tiene un ciclo activo. Asignar una nueva rutina
-                        finalizará el ciclo anterior.
-                      </small>
+                      <small>⚠️ Este afiliado ya tiene un ciclo activo. Crear uno nuevo finalizará el anterior.</small>
                     </div>
                   )}
                 </div>
 
                 <div className="modal-footer border-0">
-                  <button
-                    type="button"
-                    className="btn btn-outline-secondary btn-sm px-4"
-                    onClick={() => setAsignarModal(null)}
-                    disabled={saving}
-                  >
+                  <button type="button" className="btn btn-outline-secondary btn-sm px-4"
+                    onClick={() => setAsignarModal(null)} disabled={saving}>
                     Cancelar
                   </button>
-                  <button
-                    id="btn-confirmar-asignar-rutina"
-                    type="submit"
-                    className={`btn btn-sm text-white fw-semibold px-4 ${styles.btnConfirmar}`}
-                    disabled={saving || !rutinaSelec}
-                  >
+                  <button type="submit" className={`btn btn-sm text-white fw-semibold px-4 ${styles.btnConfirmar}`}
+                    disabled={saving || Object.keys(ejerciciosSel).length === 0}>
                     {saving
                       ? <><span className="spinner-border spinner-border-sm me-2" />Guardando...</>
-                      : cicloActivo(asignarModal)
-                        ? "💾 Actualizar Plan"
-                        : "✅ Crear Plan"}
+                      : "✅ Crear Plan de Entrenamiento"}
                   </button>
                 </div>
               </form>
@@ -562,31 +597,24 @@ export default function RutinasView() {
       ═══════════════════════════════════════════════════════════════════════ */}
       {verModal && (() => {
         const ciclo = cicloActivo(verModal);
-        const plan  = ciclo?.plan_entrenamiento;
+        const plan = ciclo?.plan_entrenamiento;
         return (
-        <div className={`modal d-block ${styles.modalOverlay}`}
-          onClick={() => setVerModal(null)}>
-            <div
-              className="modal-dialog modal-lg modal-dialog-scrollable"
-              onClick={(e) => e.stopPropagation()}
-            >
+          <div className={`modal d-block ${styles.modalOverlay}`} onClick={() => setVerModal(null)}>
+            <div className="modal-dialog modal-lg modal-dialog-scrollable"
+              onClick={(e) => e.stopPropagation()}>
               <div className="modal-content border-0 shadow-lg">
                 <div className={`modal-header text-white border-0 ${styles.modalHeaderOscuro}`}>
-                  <h5 className="modal-title">
-                    🏋️ Rutina activa — {nombreCompleto(verModal)}
-                  </h5>
+                  <h5 className="modal-title">🏋️ Rutina activa — {nombreCompleto(verModal)}</h5>
                   <button className="btn-close btn-close-white" onClick={() => setVerModal(null)} />
                 </div>
                 <div className="modal-body">
-                  {/* Info del ciclo */}
                   <div className="row g-3 mb-4">
                     {[
-                      { label: "Ciclo Nº",      v: ciclo?.numero_ciclo },
-                      { label: "Inicio",         v: ciclo?.fecha_inicio },
-                      { label: "Fin",            v: ciclo?.fecha_fin    },
-                      { label: "Rutina base",    v: plan?.nombre_rutina || "Personalizada" },
-                      { label: "Enfoque",        v: plan?.enfoque       || "—" },
-                      { label: "Días/sem",       v: plan?.dias_semana   ? `${plan.dias_semana} días` : "—" },
+                      { label: "Ciclo Nº", v: ciclo?.numero_ciclo },
+                      { label: "Inicio", v: ciclo?.fecha_inicio },
+                      { label: "Fin", v: ciclo?.fecha_fin },
+                      { label: "Enfoque", v: plan?.enfoque || "—" },
+                      { label: "Días/sem", v: plan?.dias_semana ? `${plan.dias_semana} días` : "—" },
                     ].map((f) => (
                       <div key={f.label} className="col-6 col-md-4">
                         <small className={`text-muted d-block text-uppercase fw-semibold ${styles.dataLabel}`}>
@@ -597,7 +625,27 @@ export default function RutinasView() {
                     ))}
                   </div>
 
-                  {/* Rutinas del ciclo */}
+                  {(verModal.restricciones || []).length > 0 && (
+                    <div className="mb-3">
+                      <h6 className="fw-bold mb-2">⚠️ Restricciones del afiliado</h6>
+                      {verModal.restricciones.map((r) => {
+                        const cfg = RESTRICCION_COLOR[r.tipo] || { bg: "#e2e8f0", text: "#64748b" };
+                        return (
+                          <div key={r.id_restriccion} className="rounded-3 p-2 mb-1 d-flex align-items-center gap-2"
+                            style={{ background: cfg.bg }}>
+                            <span style={{ color: cfg.text, fontWeight: 700 }}>⚠️</span>
+                            <div>
+                              <div className="small fw-semibold" style={{ color: cfg.text }}>{r.nombre_restriccion}</div>
+                              {r.efecto_relevante && (
+                                <div className="text-muted" style={{ fontSize: "0.7rem" }}>{r.efecto_relevante}</div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
                   {plan?.rutinas?.length > 0 ? (
                     <>
                       <h6 className="fw-bold mb-3">📋 Días de entrenamiento</h6>
@@ -616,52 +664,16 @@ export default function RutinasView() {
                   ) : (
                     <div className="text-center text-muted py-3">
                       <div className="fs-3 mb-2">📋</div>
-                      <p className="small">Los ejercicios detallados se configuran al personalizar el plan.</p>
+                      <p className="small">Sin ejercicios detallados aún.</p>
                     </div>
-                  )}
-
-                  {/* Progreso físico */}
-                  {ciclo?.progreso_fisico?.length > 0 && (
-                    <>
-                      <h6 className="fw-bold mt-4 mb-3">📈 Progreso físico</h6>
-                      {ciclo.progreso_fisico.map((p, i) => (
-                        <div key={i} className="border rounded-3 p-3 mb-2">
-                          <div className="d-flex justify-content-between mb-1">
-                            <strong className="small">{p.fecha_registro}</strong>
-                            <span className="badge bg-primary bg-opacity-10 text-primary">{p.peso_kg} kg</span>
-                          </div>
-                          <div className="row g-2 text-center">
-                            {[
-                              { l: "% Grasa",  v: `${p.porcentaje_grasa}%`                                    },
-                              { l: "Cintura",  v: p.medida_cintura ? `${p.medida_cintura} cm` : "—"   },
-                              { l: "Brazo",    v: p.medida_brazo   ? `${p.medida_brazo} cm`   : "—"   },
-                              { l: "Pierna",   v: p.medida_pierna  ? `${p.medida_pierna} cm`  : "—"   },
-                            ].map((f) => (
-                              <div key={f.l} className="col-3">
-                                <small className={`text-muted d-block ${styles.progresoLabel}`}>{f.l}</small>
-                                <strong className="small">{f.v || "—"}</strong>
-                              </div>
-                            ))}
-                          </div>
-                          {p.observaciones && (
-                            <small className="text-muted mt-1 d-block">📝 {p.observaciones}</small>
-                          )}
-                        </div>
-                      ))}
-                    </>
                   )}
                 </div>
                 <div className="modal-footer border-0">
-                  <button
-                    className="btn btn-outline-success btn-sm"
-                    onClick={() => { setVerModal(null); abrirAsignar(verModal); }}
-                  >
-                    🔄 Cambiar rutina
+                  <button className="btn btn-outline-success btn-sm"
+                    onClick={() => { setVerModal(null); abrirAsignar(verModal); }}>
+                    🔄 Crear nueva rutina
                   </button>
-                  <button
-                    className="btn btn-secondary btn-sm"
-                    onClick={() => setVerModal(null)}
-                  >
+                  <button className="btn btn-secondary btn-sm" onClick={() => setVerModal(null)}>
                     Cerrar
                   </button>
                 </div>
