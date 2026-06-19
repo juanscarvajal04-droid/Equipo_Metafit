@@ -160,8 +160,9 @@ export default function GestionPersonal() {
       setPersonal((prev) => prev.filter((u) => getId(u) !== id));
       setDeleteModal(null);
       showToast(`🗑️ Usuario eliminado correctamente.`, "danger");
-    } catch {
-      showToast("❌ Error al eliminar. Verifica el servidor.", "danger");
+    } catch (err) {
+      const msg = err?.response?.data?.error || "Error al eliminar. Verifica el servidor.";
+      showToast(`❌ ${msg}`, "danger");
     } finally {
       setSaving(false);
     }

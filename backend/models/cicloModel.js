@@ -8,24 +8,24 @@ const CicloModel = {
       SELECT c.*, ccn.numero_ciclo
       FROM CICLO c
       JOIN ciclo_con_numero ccn ON c.id_ciclo = ccn.id_ciclo
-      WHERE c.id_afiliado = ?
-      ORDER BY c.fecha_inicio_ciclo DESC
+      WHERE c.id_usuario = ?
+      ORDER BY c.fecha_inicio DESC
     `, [id_afiliado]);
     return rows;
   },
 
-  create: async (id_afiliado, fecha_inicio_ciclo, fecha_fin_ciclo) => {
+  create: async (id_afiliado, fecha_inicio_ciclo, fecha_fin_ciclo, registrado_por, objetivo_fisico = 'Mantenimiento', nivel_experiencia = 'Principiante', disponibilidad_dias = 3) => {
     const conn = await pool.getConnection();
     try {
       await conn.beginTransaction();
       // Cierra ciclos anteriores activos
       await conn.query(
-        'UPDATE CICLO SET activo = 0 WHERE id_afiliado = ? AND activo = 1',
+        'UPDATE CICLO SET activo = 0 WHERE id_usuario = ? AND activo = 1',
         [id_afiliado]
       );
       const [result] = await conn.query(
-        'INSERT INTO CICLO (id_afiliado, fecha_inicio_ciclo, fecha_fin_ciclo, activo) VALUES (?,?,?,1)',
-        [id_afiliado, fecha_inicio_ciclo, fecha_fin_ciclo]
+        'INSERT INTO CICLO (id_usuario, fecha_inicio, fecha_fin, activo, registrado_por, objetivo_fisico, nivel_experiencia, disponibilidad_dias) VALUES (?,?,?,1,?,?,?,?)',
+        [id_afiliado, fecha_inicio_ciclo, fecha_fin_ciclo, registrado_por, objetivo_fisico, nivel_experiencia, disponibilidad_dias]
       );
       await conn.commit();
       return result.insertId;
@@ -41,7 +41,7 @@ const CicloModel = {
     const sets = [];
     const vals = [];
     if (campos.activo !== undefined)       { sets.push('activo=?');          vals.push(campos.activo); }
-    if (campos.fecha_fin_ciclo)            { sets.push('fecha_fin_ciclo=?'); vals.push(campos.fecha_fin_ciclo); }
+    if (campos.fecha_fin)                  { sets.push('fecha_fin=?');       vals.push(campos.fecha_fin); }
     if (!sets.length) return 0;
     vals.push(id);
     const [r] = await pool.query(`UPDATE CICLO SET ${sets.join(',')} WHERE id_ciclo=?`, vals);

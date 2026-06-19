@@ -1,73 +1,100 @@
-import { createContext, useContext, useRef, useState } from "react";
-import api, { loginRequest } from "../services/api";
+// ============================================================
+// src/context/AuthContext.jsx — MetaFit Global Auth State
+//
+// RESPONSABILIDAD ÚNICA (ISO 25000 - SoC):
+// Este Contexto es el ÚNICO responsable de:
+//   ✅ Proveer el estado global de sesión (user, token)
+//   ✅ Exponer acciones de alto nivel: login(), logout()
+//
+// NO es responsable de:
+//   ❌ Hacer peticiones HTTP directas
+//   ❌ Manipular localStorage directamente
+//   ❌ Conocer la estructura de la respuesta del backend
+//
+// Toda la lógica de infraestructura es delegada a:
+//   → src/services/authService.js
+// ============================================================
+
+import { createContext, useContext, useState } from 'react';
+import {
+  loginUser,
+  persistSession,
+  clearSession,
+  loadStoredUser,
+  loadStoredToken,
+} from '../services/authService';
 
 const AuthContext = createContext(null);
 
-/** Limpia y valida el user guardado en localStorage. Si está corrupto, retorna null. */
-const loadStoredUser = () => {
-  try {
-    const raw = localStorage.getItem("metafit_user");
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    // Descartar si no tiene role (datos corruptos / de otra app)
-    if (!parsed?.role) {
-      localStorage.removeItem("metafit_user");
-      localStorage.removeItem("metafit_token");
-      return null;
-    }
-    return parsed;
-  } catch {
-    localStorage.removeItem("metafit_user");
-    localStorage.removeItem("metafit_token");
-    return null;
-  }
-};
+/* ────────────────────────────────────────────────────────────── */
 
 export function AuthProvider({ children }) {
+  /**
+   * Inicialización lazy: intenta restaurar la sesión desde
+   * localStorage al montar la app. Si los datos están corruptos,
+   * loadStoredUser() y loadStoredToken() retornan null de forma segura.
+   */
   const [user,  setUser]  = useState(() => loadStoredUser());
-  const [token, setToken] = useState(() => localStorage.getItem("metafit_token") || null);
-
-  // authAxios estable (reutiliza la instancia de api.js)
-  const axiosRef = useRef(api);
+  const [token, setToken] = useState(() => loadStoredToken());
 
   /**
-   * Login contra el backend real (Node.js → MySQL).
-   * Retorna el objeto user plano: { id, email, role, nombres, apellidos }
+   * login: delega la autenticación al authService.
+   * El Contexto solo recibe el resultado ya procesado y
+   * actualiza el estado global de la aplicación.
+   *
+   * @param {{ correo: string, contrasena: string }} credentials
+   * @returns {Promise<object>} userData — { id, email, role, nombres, apellidos }
    */
   const login = async ({ correo, contrasena }) => {
-    // loginRequest usa api.js → VITE_API_URL/login
-    const response = await loginRequest(correo, contrasena);
+    const { accessToken, user: userData } = await loginUser({ correo, contrasena });
 
-    const { accessToken, user: userData } = response.data;
+    // Delega la persistencia al servicio
+    persistSession(accessToken, userData);
 
-    // Guardar en localStorage
-    localStorage.setItem("metafit_token", accessToken);
-    localStorage.setItem("metafit_user",  JSON.stringify(userData));
-
-    // Actualizar estado global
+    // Actualiza el estado global del Contexto
     setToken(accessToken);
     setUser(userData);
 
-    return userData;   // { id, email, role, nombres, apellidos }
+    return userData;
   };
 
+  /**
+   * logout: delega la limpieza de sesión al authService
+   * y resetea el estado global a null.
+   */
   const logout = () => {
-    localStorage.removeItem("metafit_token");
-    localStorage.removeItem("metafit_user");
-    localStorage.removeItem("metafit_role");
+    clearSession();
     setToken(null);
     setUser(null);
   };
 
+  /* ── Valor expuesto al árbol de componentes ── */
+  const contextValue = {
+    user,
+    token,
+    isAuthenticated: !!token,
+    login,
+    logout,
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, authAxios: axiosRef.current }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
 }
 
+/* ────────────────────────────────────────────────────────────── */
+
+/**
+ * useAuth: hook de consumo del contexto.
+ * Lanza un error descriptivo si se usa fuera del AuthProvider,
+ * facilitando el diagnóstico durante el desarrollo.
+ */
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) throw new Error("useAuth debe usarse dentro de un <AuthProvider>");
+  if (!context) {
+    throw new Error('useAuth() debe ser usado dentro de un <AuthProvider>.');
+  }
   return context;
-}
+}

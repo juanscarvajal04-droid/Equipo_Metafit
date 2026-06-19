@@ -85,8 +85,14 @@ const AfiliadoModel = {
           FROM CICLO c2
           WHERE c2.id_usuario   = c.id_usuario
             AND c2.fecha_inicio <= c.fecha_inicio
-        ) AS numero_ciclo
+        ) AS numero_ciclo,
+        pe.observaciones AS plan_observaciones,
+        pn.calorias_objetivo,
+        pn.num_comidas,
+        pn.observaciones AS plan_nutricional_obs
       FROM CICLO c
+      LEFT JOIN PLAN_ENTRENAMIENTO pe ON c.id_ciclo = pe.id_ciclo
+      LEFT JOIN PLAN_NUTRICIONAL   pn ON c.id_ciclo = pn.id_ciclo
       WHERE c.id_usuario IN (?) AND c.activo = 1
     `, [ids]);
 
@@ -130,11 +136,40 @@ const AfiliadoModel = {
     for (const p of progreso) progresoMap.set(p.id_ciclo, p);
 
     return afiliados.map(af => {
-      const ciclo = cicloMap.has(af.id_usuario)
-        ? {
-            ...cicloMap.get(af.id_usuario),
-            ultimo_progreso: progresoMap.get(cicloMap.get(af.id_usuario).id_ciclo) || null,
-          }
+      const raw = cicloMap.get(af.id_usuario);
+      const ciclo = raw
+        ? (() => {
+            const planEntrenamiento = raw.plan_observaciones
+              ? { ...JSON.parse(raw.plan_observaciones) }
+              : null;
+            let planNutricional = null;
+            if (raw.calorias_objetivo) {
+              const metaNutricional = raw.plan_nutricional_obs ? JSON.parse(raw.plan_nutricional_obs) : {};
+              planNutricional = {
+                calorias_estimadas: raw.calorias_objetivo,
+                num_comidas_diarias: raw.num_comidas,
+                nombre_plan: metaNutricional.nombre_plan || null,
+                objetivo_dieta: metaNutricional.objetivo_dieta || null,
+                observaciones: metaNutricional.observaciones || null,
+              };
+            }
+            return {
+              id_ciclo: raw.id_ciclo,
+              id_usuario: raw.id_usuario,
+              fecha_inicio: raw.fecha_inicio,
+              fecha_fin: raw.fecha_fin,
+              activo: raw.activo,
+              objetivo_fisico: raw.objetivo_fisico,
+              nivel_experiencia: raw.nivel_experiencia,
+              disponibilidad_dias: raw.disponibilidad_dias,
+              grupo_muscular_prioritario: raw.grupo_muscular_prioritario,
+              observaciones: raw.observaciones,
+              numero_ciclo: raw.numero_ciclo,
+              plan_entrenamiento: planEntrenamiento,
+              plan_nutricional: planNutricional,
+              ultimo_progreso: progresoMap.get(raw.id_ciclo) || null,
+            };
+          })()
         : null;
 
       return {
@@ -234,7 +269,14 @@ const AfiliadoModel = {
         if (typeof r.ejercicios === 'string') r.ejercicios = JSON.parse(r.ejercicios);
         r.ejercicios = (r.ejercicios || []).filter(e => e.id_ejercicio !== null);
       });
-      ciclo.plan_entrenamiento = { ...pe[0], rutinas };
+      const metaEntreno = pe[0].observaciones ? JSON.parse(pe[0].observaciones) : {};
+      ciclo.plan_entrenamiento = {
+        ...pe[0],
+        nombre_rutina: metaEntreno.nombre_rutina || null,
+        enfoque: metaEntreno.enfoque || null,
+        dias_semana: metaEntreno.dias_semana || null,
+        rutinas,
+      };
     }
 
     // Plan nutricional + detalle
@@ -251,7 +293,15 @@ const AfiliadoModel = {
         WHERE dn.id_ciclo = ?
         ORDER BY dn.num_comida
       `, [ciclo.id_ciclo]);
-      ciclo.plan_nutricional = { ...pn[0], detalle };
+      const metaNutri = pn[0].observaciones ? JSON.parse(pn[0].observaciones) : {};
+      ciclo.plan_nutricional = {
+        ...pn[0],
+        calorias_estimadas: pn[0].calorias_objetivo,
+        num_comidas_diarias: pn[0].num_comidas,
+        nombre_plan: metaNutri.nombre_plan || null,
+        objetivo_dieta: metaNutri.objetivo_dieta || null,
+        detalle,
+      };
     }
 
     // Progreso físico

@@ -93,12 +93,30 @@ const AfiliadoController = {
   },
 
   createCiclo: async (req, res) => {
-    const { id_afiliado, fecha_inicio_ciclo, fecha_fin_ciclo } = req.body;
-    if (!id_afiliado || !fecha_inicio_ciclo || !fecha_fin_ciclo)
+    const {
+      id_afiliado, fecha_inicio, fecha_fin,
+      objetivo_fisico, nivel_experiencia, disponibilidad_dias,
+      nombre_rutina, enfoque, dias_semana,
+      nombre_plan, objetivo_dieta, calorias_estimadas, num_comidas_diarias, observaciones,
+    } = req.body;
+    if (!id_afiliado || !fecha_inicio || !fecha_fin)
       return res.status(400).json({ error: 'id_afiliado, fecha_inicio y fecha_fin son requeridos' });
     try {
-      const id = await CicloModel.create(id_afiliado, fecha_inicio_ciclo, fecha_fin_ciclo);
-      return res.status(201).json({ id_ciclo: id, message: 'Ciclo creado correctamente' });
+      const registrado_por = req.user.sub;
+      const id_ciclo = await CicloModel.create(id_afiliado, fecha_inicio, fecha_fin, registrado_por, objetivo_fisico, nivel_experiencia, disponibilidad_dias);
+
+      // Si viene nombre_rutina, crear plan de entrenamiento con metadatos en observaciones
+      if (nombre_rutina) {
+        await PlanModel.createEntrenamiento(id_ciclo, registrado_por, JSON.stringify({ nombre_rutina, enfoque, dias_semana }));
+      }
+
+      // Si viene nombre_plan, crear plan nutricional con metadatos en observaciones
+      if (nombre_plan) {
+        const obs = JSON.stringify({ nombre_plan, objetivo_dieta, observaciones: observaciones || null });
+        await PlanModel.createNutricional(id_ciclo, calorias_estimadas, num_comidas_diarias, registrado_por, obs);
+      }
+
+      return res.status(201).json({ id_ciclo, message: 'Ciclo creado correctamente' });
     } catch (err) {
       if (err.code === 'ER_DUP_ENTRY')
         return res.status(400).json({ error: 'Ya existe un ciclo con esa fecha de inicio para este afiliado' });

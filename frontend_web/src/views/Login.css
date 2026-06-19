@@ -1,0 +1,300 @@
+/* ============================================================
+   Login.css — MetaFit Auth View Styles
+   
+   RESPONSABILIDAD ÚNICA (ISO 25000 - SoC):
+   Este archivo contiene TODOS los estilos visuales del
+   componente Login.jsx. El .jsx no debe contener ningún
+   atributo `style` ni definición de color/layout.
+   ============================================================ */
+
+/* ── Variables de diseño (paleta MetaFit) ────────────────────── */
+:root {
+  --login-red:       #e31c25;
+  --login-red-dark:  #b71c1c;
+  --login-red-glow:  rgba(227, 28, 37, 0.30);
+  --login-dark2:     #12121e;
+  --login-dark3:     #1a1a2e;
+
+  --role-admin:        #7c3aed;
+  --role-trainer:      #059669;
+  --role-receptionist: #2563eb;
+}
+
+/* ── Keyframe compartido para spinners ───────────────────────── */
+@keyframes mf-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Contenedor raíz del login ───────────────────────────────── */
+.login-wrapper {
+  position: relative;
+}
+
+/* ── Glow radial de fondo ────────────────────────────────────── */
+.login-bg-glow {
+  position:       absolute;
+  width:          500px;
+  height:         500px;
+  border-radius:  60%;
+  background:     radial-gradient(
+    circle,
+    var(--login-red-glow)       0%,
+    rgba(227, 28, 37, 0.08)    55%,
+    transparent                72%
+  );
+  top:            50%;
+  left:           50%;
+  transform:      translate(-60%, -60%);
+  pointer-events: none;
+  z-index:        0;
+}
+
+/* ── Card principal ──────────────────────────────────────────── */
+.login-card {
+  position:    relative;
+  z-index:     1;
+  width:       100%;
+  max-width:   500px;
+  background:  linear-gradient(160deg, var(--login-dark2) 0%, var(--login-dark3) 100%);
+  border:      1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 16px;
+  box-shadow:
+    0 20px 70px rgba(0, 0, 0, 0.65),
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 0 40px rgba(227, 28, 37, 0.06);
+  overflow: hidden;
+}
+
+/* ── Cabecera roja del card ──────────────────────────────────── */
+.login-card__header {
+  background:    linear-gradient(135deg, var(--login-red) 0%, var(--login-red-dark) 100%);
+  padding:       30px 40px 26px;
+  text-align:    center;
+  position:      relative;
+  overflow:      hidden;
+}
+
+/* Círculos decorativos de la cabecera */
+.login-card__header-circle--top {
+  position:       absolute;
+  width:          200px;
+  height:         200px;
+  border-radius:  50%;
+  background:     rgba(255, 255, 255, 0.07);
+  top:            -70px;
+  right:          -50px;
+  pointer-events: none;
+}
+
+.login-card__header-circle--bottom {
+  position:       absolute;
+  width:          130px;
+  height:         130px;
+  border-radius:  50%;
+  background:     rgba(255, 255, 255, 0.05);
+  bottom:         -55px;
+  left:           -25px;
+  pointer-events: none;
+}
+
+/* Ícono principal del header */
+.login-card__icon {
+  font-size:   2.6rem;
+  margin-bottom: 10px;
+  filter:      drop-shadow(0 4px 14px rgba(0, 0, 0, 0.35));
+}
+
+/* Título del sistema */
+.login-card__title {
+  margin:         0 0 5px;
+  font-size:      1.75rem;
+  font-weight:    900;
+  color:          #fff;
+  letter-spacing: 0.05em;
+  text-shadow:    0 2px 10px rgba(0, 0, 0, 0.25);
+}
+
+/* Subtítulo del sistema */
+.login-card__subtitle {
+  margin:         0;
+  color:          rgba(255, 255, 255, 0.78);
+  font-size:      0.82rem;
+  letter-spacing: 0.03em;
+  font-weight:    500;
+}
+
+/* ── Cuerpo del formulario ───────────────────────────────────── */
+.login-card__body {
+  padding: 32px 40px 28px;
+}
+
+.login-card__body-title {
+  margin:         0 0 24px;
+  font-size:      1.05rem;
+  font-weight:    700;
+  color:          #fff;
+  text-align:     center;
+  letter-spacing: 0.02em;
+}
+
+/* ── Mensaje de error ────────────────────────────────────────── */
+.login-error {
+  background:    rgba(227, 28, 37, 0.12);
+  border:        1px solid rgba(227, 28, 37, 0.31);
+  border-radius: 8px;
+  padding:       6px 10px;
+  margin-bottom: 18px;
+  display:       flex;
+  align-items:   center;
+  gap:           8px;
+  font-size:     0.78rem;
+  color:         #ff6b6b;
+}
+
+/* ── Campos del formulario ───────────────────────────────────── */
+.login-form__group {
+  margin-bottom: 18px;
+}
+
+.login-form__group--last {
+  margin-bottom: 26px;
+}
+
+.login-form__label {
+  display:        block;
+  margin-bottom:  8px;
+  font-size:      0.72rem;
+  font-weight:    600;
+  color:          rgba(255, 255, 255, 0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.login-form__input,
+.login-form__select {
+  width:            100%;
+  padding:          12px 15px;
+  background:       rgba(255, 255, 255, 0.05);
+  border:           1px solid rgba(255, 255, 255, 0.1);
+  border-radius:    9px;
+  color:            #fff;
+  font-size:        0.93rem;
+  outline:          none;
+  transition:       border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing:       border-box;
+  font-family:      inherit;
+}
+
+.login-form__input:focus,
+.login-form__select:focus {
+  border-color: var(--login-red);
+  box-shadow:   0 0 0 3px var(--login-red-glow);
+}
+
+/* Select con borde dinámico por rol (via clases JS) */
+.login-form__select--admin {
+  border-color: rgba(124, 58, 237, 0.31);
+}
+.login-form__select--admin:focus {
+  border-color: var(--role-admin);
+  box-shadow:   0 0 0 3px rgba(124, 58, 237, 0.13);
+}
+
+.login-form__select--trainer {
+  border-color: rgba(5, 150, 105, 0.31);
+}
+.login-form__select--trainer:focus {
+  border-color: var(--role-trainer);
+  box-shadow:   0 0 0 3px rgba(5, 150, 105, 0.13);
+}
+
+.login-form__select--receptionist {
+  border-color: rgba(37, 99, 235, 0.31);
+}
+.login-form__select--receptionist:focus {
+  border-color: var(--role-receptionist);
+  box-shadow:   0 0 0 3px rgba(37, 99, 235, 0.13);
+}
+
+/* Opciones del select */
+.login-form__option {
+  background: var(--login-dark2);
+}
+
+/* ── Spinner de carga (espera del anti-autocompletado) ───────── */
+.login-skeleton {
+  min-height:      140px;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+}
+
+.login-spinner {
+  width:         22px;
+  height:        22px;
+  border-radius: 50%;
+  border:        2px solid var(--login-red);
+  border-top-color: transparent;
+  animation:     mf-spin 0.7s linear infinite;
+}
+
+/* Variante pequeña del spinner (dentro del botón) */
+.login-spinner--sm {
+  width:            16px;
+  height:           16px;
+  border:           2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+}
+
+/* ── Botón de submit ─────────────────────────────────────────── */
+.login-btn {
+  width:           100%;
+  padding:         14px 24px;
+  background:      linear-gradient(135deg, var(--login-red) 0%, var(--login-red-dark) 100%);
+  color:           #fff;
+  border:          none;
+  border-radius:   10px;
+  font-size:       0.97rem;
+  font-weight:     700;
+  cursor:          pointer;
+  transition:      transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  box-shadow:      0 8px 28px var(--login-red-glow);
+  letter-spacing:  0.04em;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  gap:             10px;
+  font-family:     inherit;
+}
+
+.login-btn:hover:not(:disabled) {
+  transform:  translateY(-1px);
+  box-shadow: 0 12px 36px var(--login-red-glow);
+}
+
+.login-btn:disabled {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: none;
+  cursor:     not-allowed;
+}
+
+/* Flecha del botón */
+.login-btn__arrow {
+  font-size:   1.1rem;
+  line-height: 1;
+}
+
+/* ── Footer del card ─────────────────────────────────────────── */
+.login-card__footer {
+  padding:        12px 40px;
+  border-top:     1px solid rgba(255, 255, 255, 0.06);
+  text-align:     center;
+  font-size:      0.68rem;
+  color:          rgba(255, 255, 255, 0.22);
+  letter-spacing: 0.03em;
+}
+
+/* ── Honeypot (oculto, accesibilidad) ────────────────────────── */
+.login-form__honeypot {
+  display: none;
+}
