@@ -66,19 +66,19 @@ VALUES
 
   -- ── Afiliados (rol=Afiliado, contrasena inicial individual) ──
   (6,  'Juan',  'Martínez', 'juan@gmail.com',
-   '$2a$12$9Z9XY1M1wFf/mcPlNJOK2OfZp3WNuVMvdmDsLh.oKZl/VZvW0ordO',
+   '$2a$12$VyQI5vdVoepQqwPySKKGXO9I4X89GceDV/Q9RBx2Xds1waAlvgGxy',
    'Afiliado', 'Activo', '2024-01-08 08:00:00'),
 
   (7,  'Ana',   'Rodríguez','ana@gmail.com',
-   '$2a$12$/OvH1.U9Z8nEIBclUeSYQeknyJvCMG6BpGHeE5dXAFryLXCfwhaQO',
+   '$2a$12$VyQI5vdVoepQqwPySKKGXO9I4X89GceDV/Q9RBx2Xds1waAlvgGxy',
    'Afiliado', 'Activo', '2024-02-01 08:00:00'),
 
   (8,  'Luis',  'Herrera',  'luis@gmail.com',
-   '$2a$12$mc.uLJ5DLfAX8.wy42P9deJVqXbu8bbJWu2OUoncBxCBZcrpy5t.C',
+   '$2a$12$VyQI5vdVoepQqwPySKKGXO9I4X89GceDV/Q9RBx2Xds1waAlvgGxy',
    'Afiliado', 'Activo', '2024-01-15 08:00:00'),
 
   (9,  'Sofía', 'Castro',   'sofia@gmail.com',
-   '$2a$12$x6tpLYgFMA5e0Vu/3SbqceVv/ZFUjGVdowdVcf9Osr11Vt7FIqhqO',
+   '$2a$12$VyQI5vdVoepQqwPySKKGXO9I4X89GceDV/Q9RBx2Xds1waAlvgGxy',
    'Afiliado', 'Activo', '2024-04-01 08:00:00');
 
 

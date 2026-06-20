@@ -8,8 +8,10 @@ import {
   StyleSheet,
   SafeAreaView,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../context/AuthContext';
 import { getMiPerfil } from '../services/api';
+import { COLORS, GRADIENTS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../theme';
 
 export default function MiPerfilScreen() {
   const { logout } = useAuth();
@@ -22,7 +24,7 @@ export default function MiPerfilScreen() {
       try {
         const res = await getMiPerfil();
         setPerfil(res.data);
-      } catch (err) {
+      } catch {
         setError('Error al cargar perfil');
       } finally {
         setLoading(false);
@@ -34,7 +36,7 @@ export default function MiPerfilScreen() {
   if (loading) {
     return (
       <SafeAreaView style={styles.center}>
-        <ActivityIndicator size="large" color="#208AEF" />
+        <ActivityIndicator size="large" color={COLORS.red} />
       </SafeAreaView>
     );
   }
@@ -49,44 +51,80 @@ export default function MiPerfilScreen() {
 
   if (!perfil) return null;
 
+  const inicial = (perfil.nombres?.charAt(0) || 'U').toUpperCase();
   const restricciones = perfil.restricciones || [];
+  const activo = perfil.estado === 'Activo';
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.name}>
-          {perfil.nombres} {perfil.apellidos}
-        </Text>
-
-        <Section label="Correo" value={perfil.email} />
-        <Section label="Documento" value={perfil.documento} />
-        <Section label="Fecha de nacimiento" value={perfil.fecha_nacimiento} />
-        <Section label="Sexo" value={perfil.sexo} />
-        <Section label="Teléfono" value={perfil.telefono} />
-        <Section label="Estatura" value={perfil.estatura_cm ? `${perfil.estatura_cm} cm` : '-'} />
-        <Section label="Objetivo físico" value={perfil.objetivo_fisico} />
-        <Section label="Nivel de experiencia" value={perfil.nivel_experiencia} />
-
-        {restricciones.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Restricciones médicas</Text>
-            {restricciones.map((r, i) => (
-              <Text key={i} style={styles.restriccion}>• {r.nombre}</Text>
-            ))}
+        <LinearGradient colors={GRADIENTS.oscuro} style={styles.headerGradient}>
+          <View style={styles.avatarRow}>
+            <View style={[styles.avatar, activo ? styles.avatarActive : styles.avatarInactive]}>
+              <Text style={styles.avatarText}>{inicial}</Text>
+            </View>
+            <View style={styles.headerInfo}>
+              <Text style={styles.headerName}>
+                {perfil.nombres} {perfil.apellidos}
+              </Text>
+              <View style={[styles.badge, activo ? styles.badgeActive : styles.badgeInactive]}>
+                <Text style={[styles.badgeText, { color: activo ? COLORS.success : COLORS.textSecondary }]}>
+                  {activo ? 'Activo' : 'Inactivo'}
+                </Text>
+              </View>
+            </View>
           </View>
-        )}
+        </LinearGradient>
 
-        <TouchableOpacity style={styles.logoutButton} onPress={logout}>
-          <Text style={styles.logoutText}>Cerrar sesión</Text>
+        <View style={styles.cardsSection}>
+          <SectionCard title="📋 Datos Personales">
+            <Row label="Correo" value={perfil.email} />
+            <Row label="Documento" value={perfil.documento} />
+            <Row label="Fecha de nacimiento" value={perfil.fecha_nacimiento} />
+            <Row label="Sexo" value={perfil.sexo} />
+            <Row label="Teléfono" value={perfil.telefono} />
+          </SectionCard>
+
+          <SectionCard title="📐 Información Física">
+            <Row label="Estatura" value={perfil.estatura_cm ? `${perfil.estatura_cm} cm` : '-'} />
+            <Row label="Objetivo físico" value={perfil.objetivo_fisico || '-'} />
+            <Row label="Nivel de experiencia" value={perfil.nivel_experiencia || '-'} />
+          </SectionCard>
+
+          {restricciones.length > 0 && (
+            <SectionCard title="⚠️ Restricciones Médicas">
+              {restricciones.map((r, i) => (
+                <View key={i} style={styles.restriccionRow}>
+                  <Text style={styles.restriccionDot}>•</Text>
+                  <Text style={styles.restriccionText}>{r.nombre}</Text>
+                </View>
+              ))}
+            </SectionCard>
+          )}
+        </View>
+
+        <TouchableOpacity style={styles.logoutButton} onPress={logout} activeOpacity={0.8}>
+          <LinearGradient colors={['rgba(227,28,37,0.2)', 'rgba(227,28,37,0.05)']} style={styles.logoutGradient}>
+            <Text style={styles.logoutText}>🚪 Cerrar sesión</Text>
+          </LinearGradient>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-function Section({ label, value }) {
+function SectionCard({ title, children }) {
   return (
-    <View style={styles.section}>
+    <View style={styles.card}>
+      <Text style={styles.cardTitle}>{title}</Text>
+      {children}
+    </View>
+  );
+}
+
+function Row({ label, value }) {
+  return (
+    <View style={styles.row}>
       <Text style={styles.label}>{label}</Text>
       <Text style={styles.value}>{value || '-'}</Text>
     </View>
@@ -96,61 +134,144 @@ function Section({ label, value }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.bg,
   },
   center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.bg,
   },
   container: {
-    padding: 20,
+    paddingBottom: SPACING.xl,
   },
-  name: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 24,
-    textAlign: 'center',
+  headerGradient: {
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.lg,
+    paddingBottom: SPACING.lg,
   },
-  section: {
-    marginBottom: 16,
+  avatarRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  sectionTitle: {
-    fontSize: 16,
+  avatar: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: SPACING.md,
+  },
+  avatarActive: {
+    backgroundColor: COLORS.success,
+  },
+  avatarInactive: {
+    backgroundColor: COLORS.textMuted,
+  },
+  avatarText: {
+    fontSize: 26,
     fontWeight: '700',
-    color: '#208AEF',
-    marginBottom: 8,
+    color: COLORS.text,
+  },
+  headerInfo: {
+    flex: 1,
+  },
+  headerName: {
+    fontSize: FONTS.subtitle,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: SPACING.xs,
+  },
+  badge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: SPACING.sm + 4,
+    paddingVertical: 2,
+    borderRadius: BORDER_RADIUS.sm,
+    borderWidth: 1,
+  },
+  badgeActive: {
+    backgroundColor: 'rgba(5,150,105,0.15)',
+    borderColor: 'rgba(5,150,105,0.4)',
+  },
+  badgeInactive: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderColor: 'rgba(255,255,255,0.15)',
+  },
+  badgeText: {
+    fontSize: FONTS.xsmall,
+    fontWeight: '600',
+  },
+  cardsSection: {
+    paddingHorizontal: SPACING.md,
+    paddingTop: SPACING.md,
+  },
+  card: {
+    backgroundColor: COLORS.bgCard,
+    borderRadius: BORDER_RADIUS.lg,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    ...SHADOWS.card,
+  },
+  cardTitle: {
+    fontSize: FONTS.body,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: SPACING.sm + 4,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: SPACING.xs + 2,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.05)',
   },
   label: {
-    fontSize: 13,
-    color: '#999',
-    marginBottom: 2,
+    fontSize: FONTS.small,
+    color: COLORS.textSecondary,
+    flex: 1,
   },
   value: {
-    fontSize: 16,
-    color: '#333',
+    fontSize: FONTS.small,
+    color: COLORS.text,
+    fontWeight: '500',
+    flex: 1.5,
+    textAlign: 'right',
   },
-  restriccion: {
-    fontSize: 15,
-    color: '#d32f2f',
-    marginBottom: 4,
+  restriccionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: SPACING.xs,
   },
-  errorText: {
-    color: '#d32f2f',
-    fontSize: 16,
+  restriccionDot: {
+    color: COLORS.red,
+    fontSize: FONTS.body,
+    marginRight: SPACING.sm,
+  },
+  restriccionText: {
+    fontSize: FONTS.small,
+    color: COLORS.red,
   },
   logoutButton: {
-    backgroundColor: '#d32f2f',
-    borderRadius: 8,
+    marginHorizontal: SPACING.md,
+    marginTop: SPACING.sm,
+    borderRadius: BORDER_RADIUS.md,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(227,28,37,0.3)',
+  },
+  logoutGradient: {
     paddingVertical: 14,
     alignItems: 'center',
-    marginTop: 24,
   },
   logoutText: {
-    color: '#fff',
-    fontSize: 16,
+    fontSize: FONTS.body,
     fontWeight: '600',
+    color: COLORS.red,
+  },
+  errorText: {
+    color: COLORS.red,
+    fontSize: FONTS.body,
   },
 });

@@ -13,7 +13,7 @@ const TOKEN_KEY = 'metafit_token';
 const USER_KEY  = 'metafit_user';
 const ROLE_KEY  = 'metafit_role';
 
-const API_URL = 'http://CAMBIAR_POR_TU_IP:3001';
+const API_URL = 'http://192.168.0.8:3001';
 
 const api = axios.create({
   baseURL: API_URL,

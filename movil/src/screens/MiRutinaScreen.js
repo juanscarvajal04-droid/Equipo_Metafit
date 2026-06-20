@@ -3,14 +3,62 @@ import {
   View,
   Text,
   ScrollView,
+  TouchableOpacity,
   ActivityIndicator,
   StyleSheet,
   SafeAreaView,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { getMisCiclos, getPlanEntrenamiento } from '../services/api';
+import { COLORS, GRADIENTS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../theme';
+
+function ExpandableCard({ rutina }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <View style={styles.rutinaCard}>
+      <TouchableOpacity
+        style={styles.rutinaHeader}
+        onPress={() => setOpen(!open)}
+        activeOpacity={0.7}
+      >
+        <View style={styles.rutinaHeaderLeft}>
+          <View style={styles.diaBadge}>
+            <Text style={styles.diaBadgeText}>{rutina.dia_numero}</Text>
+          </View>
+          <View style={styles.rutinaHeaderInfo}>
+            <Text style={styles.rutinaName}>{rutina.nombre_rutina}</Text>
+            {rutina.enfoque_muscular ? (
+              <Text style={styles.enfoque}>{rutina.enfoque_muscular}</Text>
+            ) : null}
+          </View>
+        </View>
+        <Text style={styles.expandIcon}>{open ? '▲' : '▼'}</Text>
+      </TouchableOpacity>
+
+      {open && (
+        <View style={styles.ejerciciosContainer}>
+          {rutina.ejercicios && rutina.ejercicios.length > 0 ? (
+            rutina.ejercicios.map((ej, i) => (
+              <View key={i} style={styles.ejercicioRow}>
+                <Text style={styles.ejercicioName}>{ej.nombre_ejercicio}</Text>
+                <Text style={styles.ejercicioDetalle}>
+                  {ej.series} × {ej.repeticiones}
+                </Text>
+              </View>
+            ))
+          ) : (
+            <Text style={styles.sinEjercicios}>Sin ejercicios asignados</Text>
+          )}
+        </View>
+      )}
+    </View>
+  );
+}
 
 export default function MiRutinaScreen() {
   const [plan, setPlan] = useState(null);
+  const [ciclo, setCiclo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -24,10 +72,12 @@ export default function MiRutinaScreen() {
           : null;
 
         if (activo) {
+          setCiclo(activo);
           const planRes = await getPlanEntrenamiento(activo.id_ciclo);
           setPlan(planRes.data);
         } else {
           setPlan(null);
+          setCiclo(null);
         }
       } catch (err) {
         if (err.response?.status === 404) {
@@ -45,7 +95,7 @@ export default function MiRutinaScreen() {
   if (loading) {
     return (
       <SafeAreaView style={styles.center}>
-        <ActivityIndicator size="large" color="#208AEF" />
+        <ActivityIndicator size="large" color={COLORS.red} />
       </SafeAreaView>
     );
   }
@@ -61,9 +111,13 @@ export default function MiRutinaScreen() {
   if (!plan || !plan.rutinas || plan.rutinas.length === 0) {
     return (
       <SafeAreaView style={styles.center}>
-        <Text style={styles.emptyText}>
-          Aún no tienes una rutina asignada. Habla con tu entrenador.
-        </Text>
+        <View style={styles.emptyCard}>
+          <Text style={styles.emptyIcon}>🏋️</Text>
+          <Text style={styles.emptyTitle}>Sin rutina asignada</Text>
+          <Text style={styles.emptyText}>
+            Aún no tienes una rutina asignada.{'\n'}Habla con tu entrenador.
+          </Text>
+        </View>
       </SafeAreaView>
     );
   }
@@ -73,28 +127,25 @@ export default function MiRutinaScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
-        {rutinas.map((rutina) => (
-          <View key={rutina.id_rutina} style={styles.rutinaCard}>
-            <Text style={styles.dia}>Día {rutina.dia_numero}</Text>
-            <Text style={styles.rutinaName}>{rutina.nombre_rutina}</Text>
-            {rutina.enfoque_muscular ? (
-              <Text style={styles.enfoque}>{rutina.enfoque_muscular}</Text>
-            ) : null}
+        <LinearGradient colors={GRADIENTS.oscuro} style={styles.headerGradient}>
+          <Text style={styles.headerTitle}>Plan de Entrenamiento</Text>
+          {ciclo && (
+            <View style={styles.cicloResumen}>
+              {ciclo.objetivo_fisico && (
+                <Text style={styles.cicloText}>🎯 {ciclo.objetivo_fisico}</Text>
+              )}
+              <Text style={styles.cicloText}>
+                📅 {ciclo.fecha_inicio} → {ciclo.fecha_fin || 'Sin fecha'}
+              </Text>
+            </View>
+          )}
+        </LinearGradient>
 
-            {rutina.ejercicios && rutina.ejercicios.length > 0 ? (
-              rutina.ejercicios.map((ej, i) => (
-                <View key={i} style={styles.ejercicioRow}>
-                  <Text style={styles.ejercicioName}>{ej.nombre_ejercicio}</Text>
-                  <Text style={styles.ejercicioDetalle}>
-                    {ej.series} × {ej.repeticiones}
-                  </Text>
-                </View>
-              ))
-            ) : (
-              <Text style={styles.sinEjercicios}>Sin ejercicios asignados</Text>
-            )}
-          </View>
-        ))}
+        <View style={styles.rutinasList}>
+          {rutinas.map((rutina) => (
+            <ExpandableCard key={rutina.id_rutina} rutina={rutina} />
+          ))}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -103,72 +154,150 @@ export default function MiRutinaScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.bg,
   },
   center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    padding: 24,
+    backgroundColor: COLORS.bg,
+    padding: SPACING.lg,
   },
   container: {
-    padding: 16,
+    paddingBottom: SPACING.xl,
+  },
+  headerGradient: {
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.lg,
+    paddingBottom: SPACING.md,
+  },
+  headerTitle: {
+    fontSize: FONTS.title,
+    fontWeight: '700',
+    color: COLORS.text,
+  },
+  cicloResumen: {
+    marginTop: SPACING.sm,
+  },
+  cicloText: {
+    fontSize: FONTS.small,
+    color: COLORS.textSecondary,
+    marginTop: 2,
+  },
+  rutinasList: {
+    paddingHorizontal: SPACING.md,
+    paddingTop: SPACING.md,
   },
   rutinaCard: {
-    backgroundColor: '#f5f5f5',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
+    backgroundColor: COLORS.bgCard,
+    borderRadius: BORDER_RADIUS.lg,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    overflow: 'hidden',
+    ...SHADOWS.card,
   },
-  dia: {
-    fontSize: 12,
-    color: '#208AEF',
+  rutinaHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: SPACING.md,
+  },
+  rutinaHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  diaBadge: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(227,28,37,0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: SPACING.sm + 4,
+    borderWidth: 1,
+    borderColor: 'rgba(227,28,37,0.4)',
+  },
+  diaBadgeText: {
+    fontSize: FONTS.small,
     fontWeight: '700',
-    marginBottom: 4,
+    color: COLORS.red,
+  },
+  rutinaHeaderInfo: {
+    flex: 1,
   },
   rutinaName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 2,
+    fontSize: FONTS.body,
+    fontWeight: '600',
+    color: COLORS.text,
   },
   enfoque: {
-    fontSize: 13,
-    color: '#666',
-    marginBottom: 12,
+    fontSize: FONTS.xsmall,
+    color: COLORS.textSecondary,
+    marginTop: 2,
+  },
+  expandIcon: {
+    fontSize: FONTS.small,
+    color: COLORS.textSecondary,
+    marginLeft: SPACING.sm,
+  },
+  ejerciciosContainer: {
+    paddingHorizontal: SPACING.md,
+    paddingBottom: SPACING.md,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+    paddingTop: SPACING.sm,
   },
   ejercicioRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 6,
+    paddingVertical: SPACING.sm,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: 'rgba(255,255,255,0.04)',
   },
   ejercicioName: {
-    fontSize: 15,
-    color: '#333',
+    fontSize: FONTS.small,
+    color: COLORS.text,
     flex: 1,
   },
   ejercicioDetalle: {
-    fontSize: 15,
-    color: '#208AEF',
+    fontSize: FONTS.small,
+    color: COLORS.red,
     fontWeight: '600',
   },
   sinEjercicios: {
-    fontSize: 13,
-    color: '#999',
+    fontSize: FONTS.small,
+    color: COLORS.textMuted,
     fontStyle: 'italic',
-    marginTop: 4,
   },
-  errorText: {
-    color: '#d32f2f',
-    fontSize: 16,
+  emptyCard: {
+    alignItems: 'center',
+    padding: SPACING.xl,
+    backgroundColor: COLORS.bgCard,
+    borderRadius: BORDER_RADIUS.lg,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    ...SHADOWS.card,
+  },
+  emptyIcon: {
+    fontSize: 48,
+    marginBottom: SPACING.md,
+  },
+  emptyTitle: {
+    fontSize: FONTS.subtitle,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: SPACING.sm,
   },
   emptyText: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: FONTS.body,
+    color: COLORS.textSecondary,
     textAlign: 'center',
-    lineHeight: 24,
+    lineHeight: 22,
+  },
+  errorText: {
+    color: COLORS.red,
+    fontSize: FONTS.body,
   },
 });

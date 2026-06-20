@@ -5,11 +5,13 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import { useAuth } from '../context/AuthContext';
+import LandingScreen from '../screens/LandingScreen';
 import LoginScreen from '../screens/LoginScreen';
 import MiPerfilScreen from '../screens/MiPerfilScreen';
 import MiRutinaScreen from '../screens/MiRutinaScreen';
 import MiDietaScreen from '../screens/MiDietaScreen';
 import MiProgresoScreen from '../screens/MiProgresoScreen';
+import { COLORS, FONTS, BORDER_RADIUS } from '../theme';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -17,7 +19,7 @@ const Tab = createBottomTabNavigator();
 function LoadingScreen() {
   return (
     <View style={styles.loading}>
-      <ActivityIndicator size="large" color="#208AEF" />
+      <ActivityIndicator size="large" color={COLORS.red} />
     </View>
   );
 }
@@ -26,32 +28,57 @@ function MainTabs() {
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarActiveTintColor: '#208AEF',
-        tabBarInactiveTintColor: '#999',
-        tabBarStyle: { paddingBottom: 5, height: 60 },
-        headerStyle: { backgroundColor: '#208AEF' },
-        headerTintColor: '#fff',
+        tabBarActiveTintColor: COLORS.red,
+        tabBarInactiveTintColor: COLORS.textMuted,
+        tabBarStyle: {
+          backgroundColor: COLORS.bgSecondary,
+          borderTopColor: COLORS.border,
+          borderTopWidth: 1,
+          paddingBottom: 5,
+          height: 60,
+        },
+        headerStyle: {
+          backgroundColor: COLORS.bg,
+        },
+        headerTintColor: COLORS.text,
+        headerTitleStyle: {
+          fontWeight: '700',
+          fontSize: FONTS.body,
+        },
+        headerShadowVisible: false,
       }}
     >
       <Tab.Screen
         name="Perfil"
         component={MiPerfilScreen}
-        options={{ tabBarLabel: 'Perfil' }}
+        options={{
+          tabBarLabel: 'Perfil',
+          headerTitle: 'Mi Perfil',
+        }}
       />
       <Tab.Screen
         name="Rutina"
         component={MiRutinaScreen}
-        options={{ tabBarLabel: 'Rutina' }}
+        options={{
+          tabBarLabel: 'Rutina',
+          headerTitle: 'Mi Rutina',
+        }}
       />
       <Tab.Screen
         name="Dieta"
         component={MiDietaScreen}
-        options={{ tabBarLabel: 'Dieta' }}
+        options={{
+          tabBarLabel: 'Dieta',
+          headerTitle: 'Mi Dieta',
+        }}
       />
       <Tab.Screen
         name="Progreso"
         component={MiProgresoScreen}
-        options={{ tabBarLabel: 'Progreso' }}
+        options={{
+          tabBarLabel: 'Progreso',
+          headerTitle: 'Mi Progreso',
+        }}
       />
     </Tab.Navigator>
   );
@@ -70,6 +97,7 @@ export default function AppNavigator() {
         <MainTabs />
       ) : (
         <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="Landing" component={LandingScreen} />
           <Stack.Screen name="Login" component={LoginScreen} />
         </Stack.Navigator>
       )}
@@ -82,6 +110,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.bg,
   },
 });
