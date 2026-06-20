@@ -41,7 +41,9 @@ const { requireAuth, requireAdminOrEntrenador, requireOwnCiclo } = require('../m
  *               type: object
  *               properties:
  *                 id_ciclo:     { type: integer }
- *                 observaciones:{ type: string, nullable: true }
+ *                 observaciones:
+ *                   type: string
+ *                   nullable: true
  *                 rutinas:
  *                   type: array
  *                   items:
@@ -82,7 +84,9 @@ router.get('/entrenamiento/:id_ciclo', requireAuth, requireOwnCiclo, PlanControl
  *             required: [id_ciclo]
  *             properties:
  *               id_ciclo:     { type: integer, example: 1 }
- *               observaciones:{ type: string, nullable: true }
+ *               observaciones:
+ *                 type: string
+ *                 nullable: true
  *     responses:
  *       201:
  *         description: Plan de entrenamiento creado
@@ -312,7 +316,9 @@ router.get('/nutricional/:id_ciclo', requireAuth, requireOwnCiclo, PlanControlle
  *               id_ciclo:          { type: integer, example: 1 }
  *               calorias_objetivo: { type: number,  example: 2200.0, description: 'Rango: 500–10000 kcal' }
  *               num_comidas:       { type: integer, example: 5, description: 'Rango: 1–10 comidas/día' }
- *               observaciones:     { type: string,  nullable: true }
+ *               observaciones:
+ *                 type: string
+ *                 nullable: true
  *     responses:
  *       201:
  *         description: Plan nutricional creado

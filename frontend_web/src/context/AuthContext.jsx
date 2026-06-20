@@ -1,32 +1,13 @@
 import { createContext, useContext, useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import api, { loginRequest } from "../services/api";
+import api from "../services/api";
+import { loginUser, persistSession, clearSession, loadStoredUser, loadStoredToken } from "../services/authService";
 
 const AuthContext = createContext(null);
 
-/** Limpia y valida el user guardado en localStorage. Si está corrupto, retorna null. */
-const loadStoredUser = () => {
-  try {
-    const raw = localStorage.getItem("metafit_user");
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    // Descartar si no tiene role (datos corruptos / de otra app)
-    if (!parsed?.role) {
-      localStorage.removeItem("metafit_user");
-      localStorage.removeItem("metafit_token");
-      return null;
-    }
-    return parsed;
-  } catch {
-    localStorage.removeItem("metafit_user");
-    localStorage.removeItem("metafit_token");
-    return null;
-  }
-};
-
 export function AuthProvider({ children }) {
   const [user,  setUser]  = useState(() => loadStoredUser());
-  const [token, setToken] = useState(() => localStorage.getItem("metafit_token") || null);
+  const [token, setToken] = useState(() => loadStoredToken() || null);
 
   /**
    * isAuthReady — Indica que el estado de autenticación ya fue resuelto.
@@ -54,15 +35,11 @@ export function AuthProvider({ children }) {
    * También guardamos en localStorage como respaldo síncrono adicional.
    */
   const login = async ({ correo, contrasena }) => {
-    const response = await loginRequest(correo, contrasena);
-
-    const { accessToken, user: userData } = response.data;
+    const { accessToken, user: userData } = await loginUser({ correo, contrasena });
 
     // ✅ Primero localStorage (respaldo síncrono — ProtectedRoute lo lee si el
     //    estado React aún no llegó al componente)
-    localStorage.setItem("metafit_token", accessToken);
-    localStorage.setItem("metafit_user",  JSON.stringify(userData));
-    localStorage.setItem("metafit_role",  userData.role || "");
+    persistSession(accessToken, userData);
 
     // ✅ flushSync: fuerza React a procesar los setState AHORA, de forma síncrona,
     //    antes de que login() retorne. Así, cuando Login.jsx llame navigate()
@@ -79,9 +56,7 @@ export function AuthProvider({ children }) {
   };
 
   const logout = () => {
-    localStorage.removeItem("metafit_token");
-    localStorage.removeItem("metafit_user");
-    localStorage.removeItem("metafit_role");
+    clearSession();
     flushSync(() => {
       setToken(null);
       setUser(null);

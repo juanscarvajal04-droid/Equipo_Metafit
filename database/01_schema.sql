@@ -495,7 +495,7 @@ CREATE OR REPLACE VIEW `v_perfil_afiliado` AS
     u.`nombres`,
     u.`apellidos`,
     u.`correo`,
-    u.`estado`               AS `estado_cuenta`,
+    u.`estado`,
     u.`fecha_registro`       AS `fecha_registro_sistema`,
     a.`documento`,
     a.`fecha_nacimiento`,
@@ -648,17 +648,10 @@ BEGIN
   END IF;
 END$$
 
--- Desactiva el ciclo activo anterior al insertar uno nuevo
-CREATE TRIGGER trg_ciclo_un_activo_insert
-BEFORE INSERT ON CICLO
-FOR EACH ROW
-BEGIN
-  IF NEW.activo = 1 THEN
-    UPDATE CICLO
-    SET activo = 0
-    WHERE id_usuario = NEW.id_usuario AND activo = 1;
-  END IF;
-END$$
+-- NOTA: El UPDATE de desactivación del ciclo anterior se maneja en
+--       cicloModel.create (capa de aplicación), NO aquí como trigger,
+--       para evitar MySQL error 1442 (modificar la misma tabla dentro
+--       de un trigger BEFORE INSERT sobre ella misma).
 
 DELIMITER ;
 
@@ -669,10 +662,10 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- ============================================================================================================================
 -- RESUMEN DEL ESQUEMA v4.0
 -- ============================================================================================================================
--- TABLAS (12): USUARIO, RESTRICCION, EJERCICIO, ALIMENTO, AFILIADO,
+-- TABLAS (17): USUARIO, RESTRICCION, EJERCICIO, ALIMENTO, AFILIADO,
 --              AFILIADO_RESTRICCION, EJERCICIO_RESTRICCION_EXCLUIDA, ALIMENTO_RESTRICCION_EXCLUIDA,
 --              CICLO, PLAN_ENTRENAMIENTO, PLAN_NUTRICIONAL, RUTINA, RUTINA_EJERCICIO,
---              DETALLE_NUTRICIONAL, PROGRESO_FISICO
+--              DETALLE_NUTRICIONAL, PROGRESO_FISICO, PAGO, CONFIGURACION
 --
 -- VISTAS (5):  v_alimento_calorias, v_perfil_afiliado, v_ciclo_activo_afiliado,
 --              v_ultimo_progreso, v_catalogo_ejercicios_disponibles

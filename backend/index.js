@@ -33,9 +33,9 @@ app.listen(PORT, () => {
   console.log('║  POST    /planes/rutinas                             ║');
   console.log('║  GET     /planes/nutricional/:id_ciclo               ║');
   console.log('║  POST    /planes/nutricional                         ║');
-  console.log('║  GET     /660/ejercicios                             ║');
-  console.log('║  GET     /660/alimentos                              ║');
-  console.log('║  GET     /660/restricciones                          ║');
+  console.log('║  GET     /catalogo/ejercicios                        ║');
+  console.log('║  GET     /catalogo/alimentos                         ║');
+  console.log('║  GET     /catalogo/restricciones                     ║');
   console.log('║  GET|PUT /configuracion/precio-membresia (Admin)    ║');
   console.log('║  GET     /notificaciones                             ║');
   console.log('║  GET     /dashboard/kpis        (Admin)              ║');

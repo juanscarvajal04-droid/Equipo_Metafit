@@ -30,7 +30,7 @@ const AfiliadoModel = {
         u.nombres,
         u.apellidos,
         u.correo,
-        u.estado                AS estado_cuenta,
+        u.estado,
         u.fecha_registro        AS fecha_registro_sistema,
         a.documento,
         a.fecha_nacimiento,
@@ -194,7 +194,7 @@ const AfiliadoModel = {
       SELECT
         a.id_usuario,
         u.nombres, u.apellidos, u.correo,
-        u.estado AS estado_cuenta,
+        u.estado,
         a.documento, a.fecha_nacimiento,
         TIMESTAMPDIFF(YEAR, a.fecha_nacimiento, CURDATE()) AS edad,
         a.sexo, a.telefono, a.direccion, a.estatura_cm,

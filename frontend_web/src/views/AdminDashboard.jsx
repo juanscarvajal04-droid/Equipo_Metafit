@@ -276,7 +276,7 @@ export default function AdminDashboard() {
                               ? <span className="badge bg-primary bg-opacity-10 text-primary">Ciclo {ciclo.numero_ciclo}</span>
                               : <span className="text-muted small">—</span>}
                           </td>
-                          <td>{badgeEstado(a.estado_cuenta)}</td>
+                          <td>{badgeEstado(a.estado)}</td>
                         </tr>
                       );
                     })}

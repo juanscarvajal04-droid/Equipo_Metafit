@@ -53,7 +53,7 @@ export default function MiPerfilScreen() {
 
   const inicial = (perfil.nombres?.charAt(0) || 'U').toUpperCase();
   const restricciones = perfil.restricciones || [];
-  const activo = perfil.estado === 'Activo';
+  const activo = perfil.estado_cuenta === 'Activo';
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -78,17 +78,17 @@ export default function MiPerfilScreen() {
 
         <View style={styles.cardsSection}>
           <SectionCard title="📋 Datos Personales">
-            <Row label="Correo" value={perfil.email} />
+            <Row label="Correo" value={perfil.correo} />
             <Row label="Documento" value={perfil.documento} />
-            <Row label="Fecha de nacimiento" value={perfil.fecha_nacimiento} />
+            <Row label="Fecha de nacimiento" value={perfil.fecha_nacimiento ? new Date(perfil.fecha_nacimiento).toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'} />
             <Row label="Sexo" value={perfil.sexo} />
             <Row label="Teléfono" value={perfil.telefono} />
           </SectionCard>
 
           <SectionCard title="📐 Información Física">
             <Row label="Estatura" value={perfil.estatura_cm ? `${perfil.estatura_cm} cm` : '-'} />
-            <Row label="Objetivo físico" value={perfil.objetivo_fisico || '-'} />
-            <Row label="Nivel de experiencia" value={perfil.nivel_experiencia || '-'} />
+            <Row label="Objetivo físico" value={perfil.ciclo_activo?.objetivo_fisico || '—'} />
+            <Row label="Nivel de experiencia" value={perfil.ciclo_activo?.nivel_experiencia || '—'} />
           </SectionCard>
 
           {restricciones.length > 0 && (
@@ -96,7 +96,11 @@ export default function MiPerfilScreen() {
               {restricciones.map((r, i) => (
                 <View key={i} style={styles.restriccionRow}>
                   <Text style={styles.restriccionDot}>•</Text>
-                  <Text style={styles.restriccionText}>{r.nombre}</Text>
+                  <Text style={styles.restriccionText}>
+                    {r.nombre_restriccion}
+                    {r.tipo ? ` (${r.tipo})` : ''}
+                    {r.efecto_relevante ? ` — ${r.efecto_relevante}` : ''}
+                  </Text>
                 </View>
               ))}
             </SectionCard>

@@ -1,0 +1,354 @@
+{
+  "info": {
+    "_postman_id": "metafit-movil-v2",
+    "name": "MetaFit API — Móvil (Afiliado)",
+    "description": "Colección para la app MÓVIL de MetaFit (rol Afiliado).\n\n1. Crea un entorno con `base_url = http://192.168.0.8:3001` (IP de tu PC)\n2. Ejecuta \"Login Afiliado\" primero.\n3. Las requests autenticadas usarán `{{token}}`.\n4. Para los planes, primero obtén el id_ciclo de \"Mis Ciclos\".",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3001",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "password_admin",
+      "value": "Admin123!",
+      "type": "string"
+    },
+    {
+      "key": "password_recepcionista",
+      "value": "Maria123!",
+      "type": "string"
+    },
+    {
+      "key": "password_entrenador",
+      "value": "Laura123!",
+      "type": "string"
+    },
+    {
+      "key": "password_afiliado",
+      "value": "Afiliado123!",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "🔐 Auth",
+      "item": [
+        {
+          "name": "🔐 Login Afiliado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  var jsonData = pm.response.json();",
+                  "  pm.environment.set('token', jsonData.accessToken);",
+                  "  pm.collectionVariables.set('token', jsonData.accessToken);",
+                  "  console.log('Ô£à Token guardado. Rol:', jsonData.user.role);",
+                  "} else {",
+                  "  console.error('ÔØî Login fallido:', pm.response.status, pm.response.text());",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "console.log('­ƒöÉ Intentando login como Administrador...');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ana.lopez@example.com\",\n  \"password\": \"{{password_afiliado}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "description": "Autentica al Afiliado en la app móvil.\n\nRespuesta 200: `{ accessToken, user }`"
+          },
+          "response": [
+            {
+              "name": "200 OK ÔÇö Administrador autenticado",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{ \"email\": \"carlos@metafit.com\", \"password\": \"{{password_admin}}\" }"
+                },
+                "url": {
+                  "raw": "{{base_url}}/login",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "login"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"accessToken\": \"TU_TOKEN_AQUI\",\n  \"user\": {\n    \"id\": 1,\n    \"email\": \"carlos@metafit.com\",\n    \"role\": \"Administrador\",\n    \"nombres\": \"Carlos\",\n    \"apellidos\": \"Garc├¡a\"\n  }\n}"
+            },
+            {
+              "name": "401 ÔÇö Credenciales inv├ílidas",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{ \"email\": \"carlos@metafit.com\", \"password\": \"wrongpassword\" }"
+                },
+                "url": {
+                  "raw": "{{base_url}}/login",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "login"
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{ \"error\": \"Correo o contrase├▒a incorrectos\" }"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "👤 Mi Perfil",
+      "item": [
+        {
+          "name": "GET /afiliados/me",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "me"
+              ]
+            },
+            "description": "Perfil completo del afiliado autenticado.\nUso: MiPerfilScreen"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🔄 Mis Ciclos",
+      "item": [
+        {
+          "name": "GET /afiliados/me/ciclos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/me/ciclos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "me",
+                "ciclos"
+              ]
+            },
+            "description": "Ciclos del afiliado.\nUso: MiRutinaScreen, MiDietaScreen (para obtener id_ciclo activo)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📊 Mi Progreso",
+      "item": [
+        {
+          "name": "GET /afiliados/me/progreso",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/me/progreso",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "me",
+                "progreso"
+              ]
+            },
+            "description": "Historial de progreso físico.\nUso: MiProgresoScreen"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "⚠️ Mis Restricciones",
+      "item": [
+        {
+          "name": "GET /afiliados/me/restricciones",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/me/restricciones",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "me",
+                "restricciones"
+              ]
+            },
+            "description": "Restricciones médicas.\nUso: MiPerfilScreen"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🏋️ Plan de Entrenamiento",
+      "item": [
+        {
+          "name": "GET /planes/entrenamiento/:id_ciclo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/planes/entrenamiento/{{id_ciclo}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "planes",
+                "entrenamiento",
+                "{{id_ciclo}}"
+              ]
+            },
+            "description": "Plan de entrenamiento con rutinas y ejercicios.\nUso: MiRutinaScreen\n\nPrimero obtener id_ciclo de GET /afiliados/me/ciclos."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🥗 Plan Nutricional",
+      "item": [
+        {
+          "name": "GET /planes/nutricional/:id_ciclo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/planes/nutricional/{{id_ciclo}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "planes",
+                "nutricional",
+                "{{id_ciclo}}"
+              ]
+            },
+            "description": "Plan nutricional con comidas y alimentos.\nUso: MiDietaScreen\n\nPrimero obtener id_ciclo de GET /afiliados/me/ciclos."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

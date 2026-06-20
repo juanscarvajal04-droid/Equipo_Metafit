@@ -115,7 +115,7 @@ export const buildCrearPayload = (form) => ({
 export const buildAfiliadoLocal = (payload, idRetornado) => ({
   ...payload,
   id_usuario:    idRetornado,
-  estado_cuenta: payload.estado_afiliacion,
+  estado: payload.estado_afiliacion,
   restricciones: [],
   ciclo_activo:  null,
 });

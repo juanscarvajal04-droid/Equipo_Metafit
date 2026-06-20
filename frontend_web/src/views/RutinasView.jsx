@@ -142,7 +142,7 @@ export default function RutinasView() {
       const id = getId(asignarModal);
       // 1. Crear ciclo
       const cicloPayload = {
-        id_afiliado: id,
+        id_usuario: id,
         fecha_inicio: fechaInicio,
         fecha_fin: fechaFin,
         objetivo_fisico: asignarModal.objetivo_fisico,

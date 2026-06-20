@@ -29,7 +29,6 @@ import PagosView from "./views/PagosView";
  *  *      → /login (ruta desconocida sin sesión)
  *
  *  NOTA: Dashboard (antiguo) no tiene AppLayout/Sidebar. Solo se usa en /dashboard.
- *        Las rutas placeholder usan PlaceholderView que sí incluye el Sidebar.
  */
 
 // Grupos de roles

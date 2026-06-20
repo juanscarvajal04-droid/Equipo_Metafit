@@ -85,7 +85,7 @@ const AfiliadoController = {
       const result = await AfiliadoService.createCiclo(req.body, req.user.sub);
       return res.status(201).json(result);
     } catch (err) {
-      if (err.message === 'id_afiliado, fecha_inicio y fecha_fin son requeridos') {
+      if (err.message === 'id_usuario, fecha_inicio y fecha_fin son requeridos') {
         return res.status(400).json({ error: err.message });
       }
       if (err.code === 'ER_DUP_ENTRY') {

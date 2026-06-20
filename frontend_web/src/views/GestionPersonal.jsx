@@ -15,19 +15,13 @@ const ROLE_BADGE = {
   Entrenador:    { bg: "linear-gradient(135deg,#059669,#0d9488)", label: "🏆 Entrenador"     },
 };
 
-const ESTADO_BADGE = {
-  Activo:    { cls: "success", icon: "✅" },
-  Inactivo:  { cls: "danger",  icon: "🚫" },
-  Pendiente: { cls: "warning", icon: "⏳" },
-};
-
 const FORM_VACÍO = {
-  email: "", password: "", role: "Recepcionista", estado_cuenta: "Activo",
+  email: "", password: "", role: "Recepcionista", estado: "Activo",
   nombres: "", apellidos: "",
 };
 
 const FORM_EDIT_VACÍO = {
-  email: "", password: "", role: "Recepcionista", estado_cuenta: "Activo",
+  email: "", password: "", role: "Recepcionista", estado: "Activo",
   nombres: "", apellidos: "",
 };
 
@@ -95,7 +89,7 @@ export default function GestionPersonal() {
         correo: formData.email,
         contrasena: formData.password,
         rol: formData.role,
-        estado: formData.estado_cuenta || "Activo",
+        estado: formData.estado || "Activo",
       };
       const { data } = await authAxios.post("/usuarios", newUser);
       setPersonal((prev) => [...prev, data]);
@@ -117,7 +111,7 @@ export default function GestionPersonal() {
       email:         u.email         || u.correo || "",
       password:      "",
       role:          u.role          || u.rol || "Recepcionista",
-      estado_cuenta: u.estado_cuenta || u.estado || "Activo",
+      estado: u.estado || "Activo",
       nombres:       u.nombres       || "",
       apellidos:     u.apellidos     || "",
     });
@@ -135,7 +129,7 @@ export default function GestionPersonal() {
         apellidos: formData.apellidos,
         correo: formData.email,
         rol: formData.role,
-        estado: formData.estado_cuenta,
+        estado: formData.estado,
       };
       if (formData.password) {
         payload.contrasena = formData.password;
@@ -173,7 +167,7 @@ export default function GestionPersonal() {
   const cambiarEstado = async (u, nuevoEstado) => {
     try {
       const id = getId(u);
-      const { data } = await authAxios.patch(`/usuarios/${id}`, { estado_cuenta: nuevoEstado });
+      const { data } = await authAxios.patch(`/usuarios/${id}`, { estado: nuevoEstado });
       setPersonal((prev) => prev.map((x) => getId(x) === id ? data : x));
       showToast(`🔄 Estado de "${u.email}" → "${nuevoEstado}"`);
     } catch {
@@ -269,7 +263,7 @@ export default function GestionPersonal() {
                       const rolKey   = u.role || u.rol || "Recepcionista";
                       const badge    = ROLE_BADGE[rolKey] || ROLE_BADGE.Recepcionista;
                       const isMe     = getId(u) === getId(adminUser);
-                      const estado   = u.estado_cuenta || "Activo";
+                      const estado   = u.estado || "Activo";
                       const nombre   = [u.nombres, u.apellidos].filter(Boolean).join(" ") || u.email;
 
                       return (
@@ -533,8 +527,8 @@ function ModalPersonal({ titulo, colorHeader, formData, setFormData, onSubmit, o
                   <label className="form-label small fw-semibold">Estado de cuenta</label>
                   <select
                     className="form-select"
-                    value={formData.estado_cuenta}
-                    onChange={(e) => set("estado_cuenta", e.target.value)}
+                    value={formData.estado}
+                    onChange={(e) => set("estado", e.target.value)}
                   >
                     {["Activo", "Inactivo", "Pendiente"].map((s) => (
                       <option key={s}>{s}</option>

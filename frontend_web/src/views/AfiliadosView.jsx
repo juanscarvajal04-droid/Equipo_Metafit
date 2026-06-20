@@ -5,9 +5,6 @@ import AppLayout from "../components/AppLayout";
 import { getId, nombreCompleto, inicial, cicloActivo, toDateInput } from "../utils/afiliadoHelpers";
 import { useToast } from "../hooks/useToast";
 import { useAfiliados } from "../hooks/useAfiliados";
-import AfiliadoVerModal from "../components/AfiliadoVerModal";
-import AfiliadoEditModal from "../components/AfiliadoEditModal";
-import AfiliadoCrearModal from "../components/AfiliadoCrearModal";
 import s from "./AfiliadosView.module.css";
 
 const OBJETIVO_CONFIG = {
@@ -134,7 +131,7 @@ export default function AfiliadosView() {
       const nuevoAfiliado = {
         ...payload,
         id_usuario: data.id,
-        estado_cuenta: payload.estado_afiliacion,
+        estado: payload.estado_afiliacion,
         restricciones: [],
         ciclo_activo: null,
       };
@@ -195,17 +192,15 @@ export default function AfiliadosView() {
     }
   };
 
-  // FIX 1.2: cambiar estado_cuenta (campo del USUARIO)
   const cambiarEstado = async (a, nuevoEstado) => {
     try {
       const id = getId(a);
       // ISO 25000 / 3.3: usar updateAfiliado del hook
-      // El backend mapea { estado } → estado_afiliacion y estado_cuenta según corresponda
       await updateAfiliado(id, { estado: nuevoEstado });
       // El backend devuelve { message }, NO el afiliado actualizado: actualizamos localmente
       setAfiliados((prev) =>
         prev.map((x) => getId(x) === id
-          ? { ...x, estado_cuenta: nuevoEstado, estado_afiliacion: nuevoEstado }
+          ? { ...x, estado: nuevoEstado, estado_afiliacion: nuevoEstado }
           : x
         )
       );
@@ -311,16 +306,15 @@ export default function AfiliadosView() {
 
                           <td>
                             {role === "Recepcionista" ? (
-                              // FIX 1.2: usar estado_cuenta (campo real del USUARIO en el backend)
                               <select
                                 className={`form-select form-select-sm border-0 p-0 text-center ${s.estadoSelect}`}
-                                value={a.estado_cuenta || "Activo"}
+                                value={a.estado || "Activo"}
                                 onChange={(e) => cambiarEstado(a, e.target.value)}
                                 title="Cambiar estado"
                               >
                                 {ESTADOS.map((st) => <option key={st}>{st}</option>)}
                               </select>
-                            ) : badgeEstado(a.estado_cuenta)}
+                            ) : badgeEstado(a.estado)}
                           </td>
 
                           <td className="text-center pe-4">
@@ -366,7 +360,7 @@ export default function AfiliadosView() {
                     { label: "Teléfono", v: verModal.telefono },
                     { label: "Documento", v: verModal.documento },
                     { label: "Sexo", v: verModal.sexo },
-                    { label: "Nacimiento", v: verModal.fecha_nacimiento },
+                    { label: "Nacimiento", v: verModal.fecha_nacimiento ? new Date(verModal.fecha_nacimiento).toLocaleDateString("es-CO") : "—" },
                     { label: "Estatura", v: verModal.estatura_cm ? `${verModal.estatura_cm} cm` : "—" },
                     { label: "Objetivo", v: verModal.objetivo_fisico },
                     { label: "Nivel", v: verModal.nivel_experiencia },
@@ -397,8 +391,7 @@ export default function AfiliadosView() {
                       <div className="col-md-4">
                         <div className="card border-0 bg-light text-center p-3">
                           <div className="small text-muted text-uppercase fw-semibold mb-1">Estado actual</div>
-                          {/* FIX 1.2: usar estado_cuenta */}
-                          {badgeEstado(verModal.estado_cuenta)}
+                          {badgeEstado(verModal.estado)}
                         </div>
                       </div>
                       <div className="col-md-4">
@@ -476,10 +469,10 @@ export default function AfiliadosView() {
                           <h6 className="fw-bold mb-2">🏋️ Rutinas</h6>
                           {ciclo.plan_entrenamiento.rutinas.map((r) => (
                             <div key={r.dia_numero} className="border rounded p-2 mb-2">
-                              <div className="fw-semibold small mb-1">{r.nombre}</div>
+                              <div className="fw-semibold small mb-1">{r.nombre_rutina}</div>
                               {r.ejercicios?.map((ej, i) => (
                                 <div key={i} className="d-flex justify-content-between small text-muted">
-                                  <span>{ej.nombre}</span>
+                                  <span>{ej.nombre_ejercicio}</span>
                                   <span>{ej.series}×{ej.repeticiones}</span>
                                 </div>
                               ))}

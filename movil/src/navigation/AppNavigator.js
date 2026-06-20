@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, View, StyleSheet } from 'react-native';
+import { ActivityIndicator, View, Text, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -11,7 +11,7 @@ import MiPerfilScreen from '../screens/MiPerfilScreen';
 import MiRutinaScreen from '../screens/MiRutinaScreen';
 import MiDietaScreen from '../screens/MiDietaScreen';
 import MiProgresoScreen from '../screens/MiProgresoScreen';
-import { COLORS, FONTS, BORDER_RADIUS } from '../theme';
+import { COLORS, FONTS } from '../theme';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -54,6 +54,9 @@ function MainTabs() {
         options={{
           tabBarLabel: 'Perfil',
           headerTitle: 'Mi Perfil',
+          tabBarIcon: ({ focused, color }) => (
+            <Text style={styles.tabIcon}>👤</Text>
+          ),
         }}
       />
       <Tab.Screen
@@ -62,6 +65,9 @@ function MainTabs() {
         options={{
           tabBarLabel: 'Rutina',
           headerTitle: 'Mi Rutina',
+          tabBarIcon: ({ focused, color }) => (
+            <Text style={styles.tabIcon}>💪</Text>
+          ),
         }}
       />
       <Tab.Screen
@@ -70,6 +76,9 @@ function MainTabs() {
         options={{
           tabBarLabel: 'Dieta',
           headerTitle: 'Mi Dieta',
+          tabBarIcon: ({ focused, color }) => (
+            <Text style={styles.tabIcon}>🥗</Text>
+          ),
         }}
       />
       <Tab.Screen
@@ -78,6 +87,9 @@ function MainTabs() {
         options={{
           tabBarLabel: 'Progreso',
           headerTitle: 'Mi Progreso',
+          tabBarIcon: ({ focused, color }) => (
+            <Text style={styles.tabIcon}>📊</Text>
+          ),
         }}
       />
     </Tab.Navigator>
@@ -111,5 +123,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: COLORS.bg,
+  },
+  tabIcon: {
+    fontSize: 22,
   },
 });

@@ -144,7 +144,7 @@ export default function DietasView() {
 
       // 1. Crear ciclo
       const cicloPayload = {
-        id_afiliado: id,
+        id_usuario: id,
         fecha_inicio: new Date().toISOString().split("T")[0],
         fecha_fin: (() => { const d = new Date(); d.setDate(d.getDate() + 84); return d.toISOString().split("T")[0]; })(),
         objetivo_fisico: asignarModal.objetivo_fisico,

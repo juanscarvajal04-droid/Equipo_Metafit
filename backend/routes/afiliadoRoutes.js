@@ -258,7 +258,7 @@ router.patch('/:id', requireAuth, AfiliadoController.update);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
- *               error: No se puede eliminar: el afiliado tiene datos asociados
+ *               error: 'No se puede eliminar: el afiliado tiene datos asociados'
  *       401:
  *         $ref: '#/components/responses/Unauthorized'
  *       403:
@@ -327,8 +327,12 @@ router.get('/:id/ciclos', requireAuth, AfiliadoController.getCiclos);
  *               objetivo_fisico:             { type: string, enum: [Perdida de grasa, Aumento de masa, Mantenimiento, Rehabilitacion] }
  *               nivel_experiencia:           { type: string, enum: [Principiante, Intermedio, Avanzado] }
  *               disponibilidad_dias:         { type: integer, minimum: 1, maximum: 7 }
- *               grupo_muscular_prioritario:  { type: string, nullable: true }
- *               observaciones:               { type: string, nullable: true }
+ *               grupo_muscular_prioritario:
+ *                 type: string
+ *                 nullable: true
+ *               observaciones:
+ *                 type: string
+ *                 nullable: true
  *     responses:
  *       201:
  *         description: Ciclo creado correctamente
@@ -517,10 +521,18 @@ router.get('/:id/alimentos-disponibles', requireAuth, AfiliadoController.getAlim
  *                   fecha_registro:   { type: string, format: date }
  *                   peso_kg:          { type: number, example: 75.5 }
  *                   imc:              { type: number, example: 24.8, description: 'Calculado: peso_kg / (estatura_cm/100)²' }
- *                   porcentaje_grasa: { type: number, nullable: true }
- *                   medida_cintura:   { type: number, nullable: true }
- *                   medida_brazo:     { type: number, nullable: true }
- *                   medida_pierna:    { type: number, nullable: true }
+ *                   porcentaje_grasa:
+ *                     type: number
+ *                     nullable: true
+ *                   medida_cintura:
+ *                     type: number
+ *                     nullable: true
+ *                   medida_brazo:
+ *                     type: number
+ *                     nullable: true
+ *                   medida_pierna:
+ *                     type: number
+ *                     nullable: true
  *       401:
  *         $ref: '#/components/responses/Unauthorized'
  *       500:
@@ -547,11 +559,25 @@ router.get('/:id/progreso', requireAuth, AfiliadoController.getProgreso);
  *               id_ciclo:         { type: integer,  example: 1 }
  *               fecha_registro:   { type: string,   format: date, example: '2025-02-15' }
  *               peso_kg:          { type: number,   example: 75.5 }
- *               porcentaje_grasa: { type: number,   nullable: true, example: 18.5 }
- *               medida_cintura:   { type: number,   nullable: true, example: 82.0 }
- *               medida_brazo:     { type: number,   nullable: true, example: 35.0 }
- *               medida_pierna:    { type: number,   nullable: true, example: 55.0 }
- *               observaciones:    { type: string,   nullable: true }
+ *               porcentaje_grasa:
+ *                 type: number
+ *                 nullable: true
+ *                 example: 18.5
+ *               medida_cintura:
+ *                 type: number
+ *                 nullable: true
+ *                 example: 82.0
+ *               medida_brazo:
+ *                 type: number
+ *                 nullable: true
+ *                 example: 35.0
+ *               medida_pierna:
+ *                 type: number
+ *                 nullable: true
+ *                 example: 55.0
+ *               observaciones:
+ *                 type: string
+ *                 nullable: true
  *     responses:
  *       201:
  *         description: Progreso registrado correctamente

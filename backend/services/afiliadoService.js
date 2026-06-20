@@ -52,7 +52,7 @@ const AfiliadoService = {
   createCiclo: async (datos, registradoPor) => {
     // FIX 2: la tabla CICLO usa id_usuario (no id_afiliado) y requiere
     //         objetivo_fisico, nivel_experiencia, disponibilidad_dias, registrado_por (NOT NULL).
-    const id_usuario = datos.id_usuario || datos.id_afiliado; // acepta ambos por compat. frontend
+    const id_usuario = datos.id_usuario;
     const fecha_inicio = datos.fecha_inicio;
     const fecha_fin    = datos.fecha_fin;
 
