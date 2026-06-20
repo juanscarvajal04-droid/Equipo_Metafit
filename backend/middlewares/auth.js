@@ -81,6 +81,42 @@ const requireAdminOrRecepcionista = (req, res, next) => {
   next();
 };
 
+// ─────────────────────────────────────────────────────────────
+// MIDDLEWARE: requireOwnCiclo
+// Si el usuario es 'Afiliado', verifica que el id_ciclo del
+// parámetro de ruta le pertenezca (CICLO.id_usuario === req.user.sub).
+// Para Admin/Entrenador pasa automáticamente.
+// ─────────────────────────────────────────────────────────────
+const CicloModel = require('../models/cicloModel');
+
+const requireOwnCiclo = async (req, res, next) => {
+  if (!req.user) return res.status(401).json({ error: 'No autenticado' });
+
+  const allowed = ['Administrador', 'Entrenador'];
+  if (allowed.includes(req.user.role)) {
+    return next();
+  }
+
+  const idCiclo = req.params.id_ciclo;
+  if (!idCiclo) {
+    return res.status(400).json({ error: 'id_ciclo es requerido' });
+  }
+
+  try {
+    const ciclo = await CicloModel.findById(idCiclo);
+    if (!ciclo) {
+      return res.status(404).json({ error: 'Ciclo no encontrado' });
+    }
+    if (ciclo.id_usuario !== req.user.sub) {
+      return res.status(403).json({ error: 'Este ciclo no te pertenece' });
+    }
+    next();
+  } catch (err) {
+    console.error('[requireOwnCiclo]', err);
+    return res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
+
 module.exports = {
   signJWT,
   hashPassword,
@@ -89,4 +125,5 @@ module.exports = {
   requireAdmin,
   requireAdminOrEntrenador,
   requireAdminOrRecepcionista,
+  requireOwnCiclo,
 };

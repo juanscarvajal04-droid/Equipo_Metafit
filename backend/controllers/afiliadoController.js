@@ -177,6 +177,49 @@ const AfiliadoController = {
       return res.status(500).json({ error: 'Error interno del servidor' });
     }
   },
+
+  // ── ENDPOINTS /me (auto‑usan req.user.sub) ────────────────
+
+  getMe: async (req, res) => {
+    try {
+      const af = await AfiliadoService.getById(req.user.sub);
+      if (!af) return res.status(404).json({ error: 'Afiliado no encontrado' });
+      return res.json(af);
+    } catch (err) {
+      console.error('[afiliadoController.getMe]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
+  getMisCiclos: async (req, res) => {
+    try {
+      const ciclos = await AfiliadoService.getCiclos(req.user.sub);
+      return res.json(ciclos);
+    } catch (err) {
+      console.error('[afiliadoController.getMisCiclos]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
+  getMiProgreso: async (req, res) => {
+    try {
+      const progreso = await AfiliadoService.getProgreso(req.user.sub);
+      return res.json(progreso);
+    } catch (err) {
+      console.error('[afiliadoController.getMiProgreso]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
+  getMisRestricciones: async (req, res) => {
+    try {
+      const restr = await AfiliadoService.getRestricciones(req.user.sub);
+      return res.json(restr);
+    } catch (err) {
+      console.error('[afiliadoController.getMisRestricciones]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
 };
 
 module.exports = AfiliadoController;

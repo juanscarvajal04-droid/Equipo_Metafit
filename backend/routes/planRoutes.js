@@ -4,7 +4,7 @@
 const express         = require('express');
 const router          = express.Router();
 const PlanController  = require('../controllers/planController');
-const { requireAuth, requireAdminOrEntrenador } = require('../middlewares/auth');
+const { requireAuth, requireAdminOrEntrenador, requireOwnCiclo } = require('../middlewares/auth');
 
 /**
  * @swagger
@@ -63,7 +63,7 @@ const { requireAuth, requireAdminOrEntrenador } = require('../middlewares/auth')
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.get('/entrenamiento/:id_ciclo', requireAuth, PlanController.getEntrenamiento);
+router.get('/entrenamiento/:id_ciclo', requireAuth, requireOwnCiclo, PlanController.getEntrenamiento);
 
 /**
  * @swagger
@@ -291,7 +291,7 @@ router.delete('/rutinas/:id_rutina/ejercicios/:id_ejercicio', requireAuth, requi
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.get('/nutricional/:id_ciclo', requireAuth, PlanController.getNutricional);
+router.get('/nutricional/:id_ciclo', requireAuth, requireOwnCiclo, PlanController.getNutricional);
 
 /**
  * @swagger

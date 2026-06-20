@@ -47,6 +47,91 @@ router.get('/', requireAuth, AfiliadoController.getAll);
 
 /**
  * @swagger
+ * /afiliados/me:
+ *   get:
+ *     summary: Obtener mi perfil (afiliado autenticado)
+ *     description: Usa automáticamente el id del token JWT. No requiere parámetro :id.
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Perfil completo del afiliado autenticado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Afiliado'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.get('/me', requireAuth, AfiliadoController.getMe);
+
+/**
+ * @swagger
+ * /afiliados/me/ciclos:
+ *   get:
+ *     summary: Obtener mis ciclos (afiliado autenticado)
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de ciclos del afiliado autenticado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Ciclo'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.get('/me/ciclos', requireAuth, AfiliadoController.getMisCiclos);
+
+/**
+ * @swagger
+ * /afiliados/me/progreso:
+ *   get:
+ *     summary: Obtener mi progreso físico (afiliado autenticado)
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de registros de progreso del afiliado autenticado
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.get('/me/progreso', requireAuth, AfiliadoController.getMiProgreso);
+
+/**
+ * @swagger
+ * /afiliados/me/restricciones:
+ *   get:
+ *     summary: Obtener mis restricciones médicas (afiliado autenticado)
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de restricciones activas del afiliado autenticado
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.get('/me/restricciones', requireAuth, AfiliadoController.getMisRestricciones);
+
+/**
+ * @swagger
  * /afiliados/{id}:
  *   get:
  *     summary: Obtener un afiliado por ID

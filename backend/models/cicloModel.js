@@ -76,6 +76,11 @@ const CicloModel = {
     }
   },
 
+  findById: async (id_ciclo) => {
+    const [rows] = await pool.query('SELECT * FROM CICLO WHERE id_ciclo = ?', [id_ciclo]);
+    return rows[0] || null;
+  },
+
   update: async (id, campos) => {
     const sets = [];
     const vals = [];
