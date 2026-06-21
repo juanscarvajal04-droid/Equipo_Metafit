@@ -210,8 +210,9 @@ export default function GestionPersonal() {
               👑 Super Usuario — Acceso Total
             </span>
             <button
+              type="button"
               id="btn-crear-personal"
-              className={`btn btn-sm ${s.btnCrear}`}
+              className={s.btnCrear}
               onClick={() => { setCrearModal(true); setFormData(FORM_VACÍO); setFormError(""); }}
             >
               ➕ Nuevo empleado
@@ -311,14 +312,14 @@ export default function GestionPersonal() {
 
                           <td className="text-center" style={{paddingRight:"1rem"}}>
                             <div className="d-flex gap-1 justify-content-center">
-                              <button
+                              <button type="button"
                                 className={s.btnIcon}
                                 title="Editar empleado"
                                 onClick={() => abrirEditar(u)}
                               >
                                 ✏️
                               </button>
-                              <button
+                              <button type="button"
                                 className={s.btnIconDelete}
                                 title="Eliminar empleado"
                                 disabled={isMe}
@@ -401,15 +402,15 @@ export default function GestionPersonal() {
             <div className={`border-0 shadow-lg ${s.modalContent}`}>
               <div className={`modal-header ${s.modalHeaderDanger}`}>
                 <h5 className="modal-title">⚠️ Eliminar empleado</h5>
-                <button className="btn-close btn-close-white" onClick={() => setDeleteModal(null)} />
+                <button type="button" className={s.btnOutline} onClick={() => setDeleteModal(null)} aria-label="Cerrar">✕</button>
               </div>
               <div className={`modal-body text-center py-4 ${s.modalBody}`}>
                 <div className={s.deleteEmoji}>🗑️</div>
                 <p className="mb-1" style={{color:"#e0e0e0"}}>¿Estás seguro de eliminar a <strong>{deleteModal.email}</strong>?</p>
               </div>
               <div className={`modal-footer justify-content-center ${s.modalFooter}`}>
-                <button className={s.btnOutline} onClick={() => setDeleteModal(null)}>Cancelar</button>
-                <button className={s.btnDangerSolid} onClick={handleEliminar} disabled={saving}>
+                <button type="button" className={s.btnOutline} onClick={() => setDeleteModal(null)}>Cancelar</button>
+                <button type="button" className={s.btnDangerSolid} onClick={handleEliminar} disabled={saving}>
                   {saving ? "..." : "🗑️ Sí, eliminar"}
                 </button>
               </div>
@@ -431,7 +432,7 @@ function ModalPersonal({ titulo, colorHeader, formData, setFormData, onSubmit, o
         <div className={`border-0 shadow-lg ${s.modalContent}`}>
           <div className={`modal-header ${colorHeader}`}>
             <h5 className="modal-title text-white">{titulo}</h5>
-            <button className="btn-close btn-close-white" onClick={onCancel} disabled={saving} />
+            <button type="button" className={s.btnOutline} onClick={onCancel} disabled={saving} aria-label="Cerrar">✕</button>
           </div>
 
           <form onSubmit={onSubmit}>
@@ -551,7 +552,7 @@ function ModalPersonal({ titulo, colorHeader, formData, setFormData, onSubmit, o
               <button
                 id={isEdit ? "btn-guardar-personal" : "btn-confirmar-crear-personal"}
                 type="submit"
-                className={`btn btn-sm ${s.btnGuardar}`}
+                className={s.btnGuardar}
                 style={{ background: "linear-gradient(135deg, #7c3aed, #4f46e5)" }}
                 disabled={saving}
               >

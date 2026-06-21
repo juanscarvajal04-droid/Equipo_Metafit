@@ -295,7 +295,7 @@ export default function PagosView() {
                           <td>
                             {ult ? (
                               <div>
-                                <div className="small fw-semibold" style={{color:"#e0e0e0"}}>{ult.fecha_pago}</div>
+                                <div className="small fw-semibold" style={{color:"#e0e0e0"}}>{new Date(ult.fecha_pago).toLocaleDateString("es-CO")}</div>
                                 <div className={s.pagoInfo}>
                                   💵 ${Number(ult.valor_pagado || 80000).toLocaleString("es-CO")}
                                 </div>
@@ -363,7 +363,7 @@ export default function PagosView() {
                             <div className="d-flex gap-1 justify-content-center">
                               {/* Historial */}
                               {pagosDeAfiliado(a).length > 0 && (
-                                <button className={s.btnOutline}
+                                <button type="button" className={s.btnOutline}
                                   id={`btn-historial-${getId(a)}`}
                                   title="Ver historial de pagos"
                                   onClick={() => setHistModal(a)}
@@ -372,7 +372,7 @@ export default function PagosView() {
                                 </button>
                               )}
                               {/* Registrar pago */}
-                              <button className={`btn btn-sm fw-semibold text-white ${s.btnPago}`}
+                              <button type="button" className={`fw-semibold text-white ${s.btnPago}`}
                                 id={`btn-pago-${getId(a)}`}
                                 title="Registrar pago en efectivo"
                                 onClick={() => { setPagoModal(a); setPagoError(""); }}
@@ -424,11 +424,11 @@ export default function PagosView() {
                 {/* Header */}
                 <div className={`modal-header text-white border-0 ${s.modalHeaderAzul}`}>
                   <h5 className="modal-title">💵 Registrar Pago en Efectivo</h5>
-                  <button
-                    className="btn-close btn-close-white"
+                  <button type="button" className={s.btnOutline}
                     onClick={() => !saving && setPagoModal(null)}
                     disabled={saving}
-                  />
+                    aria-label="Cerrar"
+                  >✕</button>
                 </div>
 
                 <div className={`modal-body py-4 ${s.modalBody}`}>
@@ -509,7 +509,7 @@ export default function PagosView() {
                   <button
                     id="btn-confirmar-pago-efectivo"
                     type="button"
-                    className={`btn btn-sm text-white fw-semibold px-4 ${s.btnConfirmar}`}
+                    className={`text-white fw-semibold px-4 ${s.btnConfirmar}`}
                     disabled={saving}
                     onClick={handlePago}
                   >
@@ -541,7 +541,7 @@ export default function PagosView() {
                 <h5 className="modal-title">
                   🧾 Historial de Pagos — {nombreCompleto(histModal)}
                 </h5>
-                <button className="btn-close btn-close-white" onClick={() => setHistModal(null)} />
+                <button type="button" className={s.btnOutline} onClick={() => setHistModal(null)} aria-label="Cerrar">✕</button>
               </div>
 
               <div className={`modal-body p-0 ${s.modalBody}`}>
@@ -560,7 +560,7 @@ export default function PagosView() {
                     <tbody>
                       {pagosDeAfiliado(histModal).map((p, i) => (
                         <tr key={i}>
-                          <td style={{paddingLeft:"1.25rem",color:"#e0e0e0"}} className="small fw-semibold">{p.fecha_pago}</td>
+                          <td style={{paddingLeft:"1.25rem",color:"#e0e0e0"}} className="small fw-semibold">{new Date(p.fecha_pago).toLocaleDateString("es-CO")}</td>
                           <td className="text-center">
                             <span className={s.accesoBadge} style={{background:"rgba(34,197,94,0.15)",color:"#22c55e",padding:"0.25rem 0.6rem",borderRadius:"6px"}}>
                               💵 {p.estado || "Pagado"}
@@ -587,7 +587,7 @@ export default function PagosView() {
                     ${pagosDeAfiliado(histModal).reduce((s, p) => s + Number(p.valor_pagado || 80000), 0).toLocaleString("es-CO")} COP
                   </strong>
                 </div>
-                <button className={s.btnOutline} onClick={() => setHistModal(null)}>
+                <button type="button" className={s.btnOutline} onClick={() => setHistModal(null)}>
                   Cerrar
                 </button>
               </div>

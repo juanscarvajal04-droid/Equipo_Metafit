@@ -49,6 +49,7 @@
   font-size: 0.82rem;
   padding: 10px 22px;
   border-radius: 10px;
+  cursor: pointer;
   transition: all 0.2s;
   box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3);
   display: flex;

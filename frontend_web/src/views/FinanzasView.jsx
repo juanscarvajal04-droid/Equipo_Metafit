@@ -322,7 +322,7 @@ export default function FinanzasView() {
               solo Administrador
             </p>
           </div>
-          <button
+          <button type="button"
             className={styles.pdfBtn}
             onClick={exportPDF}
             disabled={pdfLoading}
@@ -372,11 +372,11 @@ export default function FinanzasView() {
               </select>
             </div>
             <div className="col-6 col-md-3 d-flex gap-2">
-              <button className={styles.filterBtn} onClick={handleFiltrar}>
+              <button type="button" className={styles.filterBtn} onClick={handleFiltrar}>
                 Filtrar
               </button>
               {hayFiltrosActivos && (
-                <button className={styles.filterBtnClear} onClick={handleLimpiar}>
+                <button type="button" className={styles.filterBtnClear} onClick={handleLimpiar}>
                   Limpiar
                 </button>
               )}

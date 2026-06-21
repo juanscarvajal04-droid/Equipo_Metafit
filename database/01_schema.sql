@@ -152,12 +152,12 @@ CREATE TABLE IF NOT EXISTS `ALIMENTO` (
 
 CREATE TABLE IF NOT EXISTS `AFILIADO` (
   `id_usuario`                INT          NOT NULL,
-  `documento`                 BIGINT       NOT NULL,
-  `fecha_nacimiento`          DATE         NOT NULL CHECK (`fecha_nacimiento` >= '1900-01-01'),
+  `documento`                 VARCHAR(20)  NULL,
+  `fecha_nacimiento`          DATE         NULL,
   `sexo`                      ENUM('Masculino','Femenino','Otro') NOT NULL,
-  `telefono`                  VARCHAR(20)  NOT NULL,
-  `direccion`                 VARCHAR(100) NOT NULL,
-  `estatura_cm`               DECIMAL(5,2) NOT NULL CHECK (`estatura_cm` BETWEEN 100.00 AND 250.00),
+  `telefono`                  VARCHAR(20)  NULL DEFAULT '',
+  `direccion`                 VARCHAR(100) NULL DEFAULT '',
+  `estatura_cm`               DECIMAL(5,2) NULL,
   `estado_afiliacion`         ENUM('Activo','Inactivo','Suspendido') NOT NULL DEFAULT 'Activo',
   `fecha_registro`            DATE         NOT NULL DEFAULT (CURRENT_DATE),
   `fecha_ultima_modificacion` DATETIME     NULL,

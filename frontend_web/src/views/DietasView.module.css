@@ -96,6 +96,7 @@
   color: #94a3b8;
   border-radius: 8px;
   padding: 0.25rem 0.75rem;
+  cursor: pointer;
   transition: all 0.2s ease;
 }
 .btnRefresh:hover:not(:disabled) {
@@ -166,8 +167,15 @@
 .alimentoText { font-size: 0.62rem; color: #94a3b8; }
 
 .modalOverlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: rgba(0,0,0,0.6);
   z-index: 1055;
+  overflow-y: auto;
+  padding: 1rem;
 }
 
 .modalContent {
@@ -388,6 +396,7 @@
   font-size: 0.78rem;
   border-radius: 8px;
   padding: 0.3rem 0.8rem;
+  cursor: pointer;
   transition: all 0.2s ease;
 }
 .btnOutline:hover {
@@ -403,6 +412,7 @@
   font-size: 0.78rem;
   border-radius: 8px;
   padding: 0.3rem 0.8rem;
+  cursor: pointer;
   transition: all 0.2s ease;
 }
 .btnOutlineDanger:hover {
@@ -418,6 +428,7 @@
   font-size: 0.78rem;
   border-radius: 8px;
   padding: 0.3rem 0.8rem;
+  cursor: pointer;
   transition: all 0.2s ease;
 }
 .btnOutlinePrimary:hover {

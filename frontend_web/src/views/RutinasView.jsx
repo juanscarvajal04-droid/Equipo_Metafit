@@ -296,7 +296,7 @@ export default function RutinasView() {
           </div>
 
           <div className="d-flex gap-1 flex-wrap">
-            <button className={`d-flex align-items-center gap-1 ${styles.btnOutline}`}
+            <button type="button" className={`d-flex align-items-center gap-1 ${styles.btnOutline}`}
               onClick={() => {
                 setNuevoEjForm({ nombre_ejercicio: "", grupo_muscular: "Piernas", nivel_minimo: "Principiante", descripcion: "" });
                 setErrorEj("");
@@ -305,7 +305,7 @@ export default function RutinasView() {
               title="Agregar nuevo ejercicio al catálogo">
               🏋️ Agregar
             </button>
-            <button className={`d-flex align-items-center gap-1 ${styles.btnOutlineDanger}`}
+            <button type="button" className={`d-flex align-items-center gap-1 ${styles.btnOutlineDanger}`}
               onClick={async () => {
                 setErrorElimEj("");
                 setElimEjSeleccionado("");
@@ -318,7 +318,7 @@ export default function RutinasView() {
               title="Eliminar ejercicio del catálogo">
               🗑️ Eliminar
             </button>
-            <button className={`d-flex align-items-center gap-1 ${styles.btnOutlineInfo}`}
+            <button type="button" className={`d-flex align-items-center gap-1 ${styles.btnOutlineInfo}`}
               onClick={async () => {
                 setLoadingCatEj(true);
                 setShowCatalogoEj(true);
@@ -346,7 +346,7 @@ export default function RutinasView() {
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
               />
-              <button
+              <button type="button"
                 className={`d-flex align-items-center gap-1 ${styles.exportBtn}`}
                 onClick={() => cargarAfiliados(true)}
                 disabled={refreshing}
@@ -443,11 +443,11 @@ export default function RutinasView() {
                           <td className="text-center" style={{paddingRight:"1rem"}}>
                             <div className="d-flex gap-1 justify-content-center">
                               {ciclo && (
-                                <button className={styles.btnOutline}
+                                <button type="button" className={styles.btnOutline}
                                   title="Ver rutina activa"
                                   onClick={() => setVerModal(a)}>👁️</button>
                               )}
-                              <button className={`btn btn-sm fw-semibold text-white ${styles.btnAsignar}`}
+                              <button type="button" className={`fw-semibold text-white ${styles.btnAsignar}`}
                                 title={ciclo ? "Crear nueva rutina" : "Asignar rutina"}
                                 onClick={() => abrirAsignar(a)}>
                                 {ciclo ? "🔄 Nueva" : "➕ Asignar"}
@@ -476,8 +476,8 @@ export default function RutinasView() {
             <div className={`border-0 shadow-lg ${styles.modalContent}`}>
               <div className={`modal-header text-white border-0 ${styles.modalHeaderVerde}`}>
                 <h5 className="modal-title">🏋️ Crear Rutina — {nombreCompleto(asignarModal)}</h5>
-                <button className="btn-close btn-close-white"
-                  onClick={() => !saving && setAsignarModal(null)} disabled={saving} />
+                <button type="button" className={styles.btnOutline}
+                  onClick={() => !saving && setAsignarModal(null)} disabled={saving} aria-label="Cerrar">✕</button>
               </div>
 
               <form onSubmit={handleAsignar}>
@@ -658,7 +658,7 @@ export default function RutinasView() {
                     onClick={() => setAsignarModal(null)} disabled={saving}>
                     Cancelar
                   </button>
-                  <button type="submit" className={`btn btn-sm text-white fw-semibold px-4 ${styles.btnConfirmar}`}
+                  <button type="submit" className={`text-white fw-semibold px-4 ${styles.btnConfirmar}`}
                     disabled={saving || Object.keys(ejerciciosSel).length === 0}>
                     {saving
                       ? <><span className="spinner-border spinner-border-sm me-2" />Guardando...</>
@@ -684,7 +684,7 @@ export default function RutinasView() {
               <div className={`border-0 shadow-lg ${styles.modalContent}`}>
                 <div className={`modal-header text-white border-0 ${styles.modalHeaderOscuro}`}>
                   <h5 className="modal-title">🏋️ Rutina activa — {nombreCompleto(verModal)}</h5>
-                  <button className="btn-close btn-close-white" onClick={() => setVerModal(null)} />
+                  <button type="button" className={styles.btnOutline} onClick={() => setVerModal(null)} aria-label="Cerrar">✕</button>
                 </div>
                 <div className={`modal-body ${styles.modalBody}`}>
                   <div className="row g-3 mb-4">
@@ -748,11 +748,11 @@ export default function RutinasView() {
                   )}
                 </div>
                 <div className={`modal-footer ${styles.modalFooter}`}>
-                  <button className={styles.btnOutline}
+                  <button type="button" className={styles.btnOutline}
                     onClick={() => { setVerModal(null); abrirAsignar(verModal); }}>
                     🔄 Crear nueva rutina
                   </button>
-                  <button className={styles.btnOutline} onClick={() => setVerModal(null)}>
+                  <button type="button" className={styles.btnOutline} onClick={() => setVerModal(null)}>
                     Cerrar
                   </button>
                 </div>
@@ -771,7 +771,7 @@ export default function RutinasView() {
             <div className={`border-0 shadow-lg ${styles.modalContent}`}>
               <div className={`modal-header text-white border-0 ${styles.modalHeaderVerde}`}>
                 <h5 className="modal-title">🏋️ Nuevo Ejercicio</h5>
-                <button className="btn-close btn-close-white" onClick={() => !guardandoEj && setShowNuevoEj(false)} disabled={guardandoEj} />
+                <button type="button" className={styles.btnOutline} onClick={() => !guardandoEj && setShowNuevoEj(false)} disabled={guardandoEj} aria-label="Cerrar">✕</button>
               </div>
 
               <form onSubmit={async (e) => {
@@ -829,7 +829,7 @@ export default function RutinasView() {
                     onClick={() => !guardandoEj && setShowNuevoEj(false)} disabled={guardandoEj}>
                     Cancelar
                   </button>
-                  <button type="submit" className={`btn btn-sm text-white fw-semibold px-4 ${styles.btnConfirmar}`}
+                  <button type="submit" className={`text-white fw-semibold px-4 ${styles.btnConfirmar}`}
                     disabled={guardandoEj}>
                     {guardandoEj
                       ? <><span className="spinner-border spinner-border-sm me-2" />Guardando...</>
@@ -851,7 +851,7 @@ export default function RutinasView() {
             <div className={`border-0 shadow-lg ${styles.modalContent}`}>
               <div className={`modal-header text-white border-0 ${styles.modalHeaderVerde}`}>
                 <h5 className="modal-title">🗑️ Eliminar Ejercicio</h5>
-                <button className="btn-close btn-close-white" onClick={() => !eliminandoEj && setShowEliminarEj(false)} disabled={eliminandoEj} />
+                <button type="button" className={styles.btnOutline} onClick={() => !eliminandoEj && setShowEliminarEj(false)} disabled={eliminandoEj} aria-label="Cerrar">✕</button>
               </div>
               <div className={`modal-body ${styles.modalBody}`}>
                 {errorElimEj && <div className={styles.alertDanger} style={{marginBottom:"0.75rem",padding:"0.4rem 0.75rem"}}><small>⚠️ {errorElimEj}</small></div>}
@@ -907,7 +907,7 @@ export default function RutinasView() {
             <div className={`border-0 shadow-lg ${styles.modalContent}`}>
               <div className={`modal-header text-white border-0 ${styles.modalHeaderVerde}`}>
                 <h5 className="modal-title">📋 Catálogo de Ejercicios</h5>
-                <button className="btn-close btn-close-white" onClick={() => setShowCatalogoEj(false)} />
+                <button type="button" className={styles.btnOutline} onClick={() => setShowCatalogoEj(false)} aria-label="Cerrar">✕</button>
               </div>
               <div className={`modal-body ${styles.modalBody}`}>
                 {loadingCatEj ? (
@@ -941,7 +941,7 @@ export default function RutinasView() {
                               <td><small className={styles.headerSub}>{ej.descripcion || "—"}</small></td>
                               <td className="text-center">
                                 <div className="d-flex gap-1 justify-content-center">
-                                  <button className={styles.btnOutline} title="Editar"
+                                  <button type="button" className={styles.btnOutline} title="Editar"
                                     onClick={() => {
                                       setEditEjForm({
                                         nombre_ejercicio: ej.nombre_ejercicio,
@@ -952,7 +952,7 @@ export default function RutinasView() {
                                       setErrorEditEj("");
                                       setEditEjModal(ej.id_ejercicio);
                                     }}>✏️</button>
-                                  <button className={styles.btnOutlineDanger} title="Eliminar"
+                                  <button type="button" className={styles.btnOutlineDanger} title="Eliminar"
                                     onClick={async () => {
                                       if (!window.confirm(`¿Eliminar "${ej.nombre_ejercicio}"?`)) return;
                                       try {
@@ -978,7 +978,7 @@ export default function RutinasView() {
                 )}
               </div>
               <div className={`modal-footer ${styles.modalFooter}`}>
-                <button className={styles.btnOutline} onClick={() => setShowCatalogoEj(false)}>Cerrar</button>
+                <button type="button" className={styles.btnOutline} onClick={() => setShowCatalogoEj(false)}>Cerrar</button>
               </div>
             </div>
           </div>
@@ -994,7 +994,7 @@ export default function RutinasView() {
             <div className={`border-0 shadow-lg ${styles.modalContent}`}>
               <div className={`modal-header text-white border-0 ${styles.modalHeaderVerde}`}>
                 <h5 className="modal-title">✏️ Editar Ejercicio</h5>
-                <button className="btn-close btn-close-white" onClick={() => !guardandoEditEj && setEditEjModal(null)} disabled={guardandoEditEj} />
+                <button type="button" className={styles.btnOutline} onClick={() => !guardandoEditEj && setEditEjModal(null)} disabled={guardandoEditEj} aria-label="Cerrar">✕</button>
               </div>
               <form onSubmit={async (e) => {
                 e.preventDefault();
@@ -1048,7 +1048,7 @@ export default function RutinasView() {
                 <div className={`modal-footer ${styles.modalFooter}`}>
                   <button type="button" className={styles.btnOutline}
                     onClick={() => !guardandoEditEj && setEditEjModal(null)} disabled={guardandoEditEj}>Cancelar</button>
-                  <button type="submit" className={`btn btn-sm text-white fw-semibold px-4 ${styles.btnConfirmar}`}
+                  <button type="submit" className={`text-white fw-semibold px-4 ${styles.btnConfirmar}`}
                     disabled={guardandoEditEj}>
                     {guardandoEditEj
                       ? <><span className="spinner-border spinner-border-sm me-2" />Guardando...</>

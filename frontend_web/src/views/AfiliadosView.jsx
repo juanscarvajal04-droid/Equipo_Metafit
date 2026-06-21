@@ -240,7 +240,7 @@ export default function AfiliadosView() {
             </small>
           </div>
           {(role === "Recepcionista" || role === "Administrador") && (
-            <button id="btn-crear-afiliado" className={`btn btn-sm ${s.btnCrear}`}
+            <button type="button" id="btn-crear-afiliado" className={s.btnCrear}
               onClick={() => { setCrearModal(true); setFormNuevo(FORM_NUEVO); setNewError(""); }}>
               ➕ Nuevo afiliado
             </button>
@@ -322,11 +322,11 @@ export default function AfiliadosView() {
 
                           <td className="text-center" style={{paddingRight:"1rem"}}>
                             <div className="d-flex gap-1 justify-content-center">
-                              <button className={s.btnOutline}
+                              <button type="button" className={s.btnOutline}
                                 id={`btn-ver-${getId(a)}`} title="Ver detalle"
                                 onClick={() => { setVerModal(a); setVerTab(0); }}>👁</button>
                               {role !== "Entrenador" && (
-                                <button className={s.btnOutline}
+                                <button type="button" className={s.btnOutline}
                                   id={`btn-editar-${getId(a)}`} title="Editar"
                                   onClick={() => abrirEditar(a)}>✏️</button>
                               )}
@@ -352,7 +352,7 @@ export default function AfiliadosView() {
             <div className={`border-0 shadow ${s.modalContent}`}>
               <div className={`modal-header ${s.modalHeaderDark}`}>
                 <h5 className="modal-title">👤 {nombreCompleto(verModal)}</h5>
-                <button type="button" className="btn-close btn-close-white" onClick={() => setVerModal(null)} />
+                <button type="button" className={s.btnOutline} onClick={() => setVerModal(null)} aria-label="Cerrar">✕</button>
               </div>
               <div className={`modal-body ${s.modalBody}`}>
                 {/* Datos básicos */}
@@ -378,7 +378,7 @@ export default function AfiliadosView() {
                 {/* Pestañas por rol */}
                 <div className={`d-flex gap-0 mb-3 ${s.navTabs}`}>
                   {tabs.map((tab, i) => (
-                    <button key={tab}
+                    <button key={tab} type="button"
                       className={`${s.navTab} ${verTab === i ? s.navTabActive : ""}`}
                       onClick={() => setVerTab(i)}>
                       {tab}
@@ -488,10 +488,10 @@ export default function AfiliadosView() {
               </div>
               <div className={`modal-footer ${s.modalFooter}`}>
                 {role !== "Entrenador" && (
-                  <button className={s.btnOutline}
+                  <button type="button" className={s.btnOutline}
                     onClick={() => { setVerModal(null); abrirEditar(verModal); }}>✏️ Editar</button>
                 )}
-                <button className={s.btnOutline} onClick={() => setVerModal(null)}>Cerrar</button>
+                <button type="button" className={s.btnOutline} onClick={() => setVerModal(null)}>Cerrar</button>
               </div>
             </div>
           </div>
@@ -508,8 +508,8 @@ export default function AfiliadosView() {
             <div className={`border-0 shadow ${s.modalContent}`}>
               <div className={`modal-header ${s.modalHeaderRed}`}>
                 <h5 className="modal-title">✏️ Editar — {nombreCompleto(editModal)}</h5>
-                <button type="button" className="btn-close btn-close-white"
-                  onClick={() => !savingEdit && setEditModal(null)} />
+                <button type="button" className={s.btnOutline}
+                  onClick={() => !savingEdit && setEditModal(null)} aria-label="Cerrar">✕</button>
               </div>
               <form onSubmit={guardarEdicion}>
                 <div className={`modal-body ${s.modalBody}`}>
@@ -557,7 +557,7 @@ export default function AfiliadosView() {
                     Cancelar
                   </button>
                   <button id="btn-guardar-edicion" type="submit"
-                    className={`btn btn-sm ${s.btnGuardar}`}
+                    className={s.btnGuardar}
                     disabled={savingEdit}>
                     {savingEdit ? <><span className="spinner-border spinner-border-sm me-2" />Guardando...</> : "💾 Guardar"}
                   </button>
@@ -578,8 +578,8 @@ export default function AfiliadosView() {
             <div className={`border-0 shadow ${s.modalContent}`}>
               <div className={`modal-header ${s.modalHeaderGreen}`}>
                 <h5 className="modal-title">➕ Nuevo Afiliado</h5>
-                <button type="button" className="btn-close btn-close-white"
-                  onClick={() => !savingNew && setCrearModal(false)} />
+                <button type="button" className={s.btnOutline}
+                  onClick={() => !savingNew && setCrearModal(false)} aria-label="Cerrar">✕</button>
               </div>
               <form onSubmit={handleCrear}>
                 <div className={`modal-body ${s.modalBodyScroll}`}>
@@ -686,7 +686,7 @@ export default function AfiliadosView() {
                     Cancelar
                   </button>
                   <button id="btn-confirmar-crear" type="submit"
-                    className={`btn btn-sm ${s.btnCrearAfiliado}`}
+                    className={s.btnCrearAfiliado}
                     disabled={savingNew}>
                     {savingNew ? <><span className="spinner-border spinner-border-sm me-2" />Guardando...</> : "✅ Crear afiliado"}
                   </button>

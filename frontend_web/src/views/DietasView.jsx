@@ -277,7 +277,7 @@ export default function DietasView() {
           </div>
 
           <div className="d-flex gap-1 flex-wrap">
-            <button className={`d-flex align-items-center gap-1 ${s.btnOutline}`}
+            <button type="button" className={`d-flex align-items-center gap-1 ${s.btnOutline}`}
               onClick={() => {
                 setNuevoAlForm({ nombre_alimento: "", proteinas: "", carbohidratos: "", grasas: "" });
                 setErrorAl("");
@@ -286,7 +286,7 @@ export default function DietasView() {
               title="Agregar nuevo alimento al catálogo">
               🥗 Agregar
             </button>
-            <button className={`d-flex align-items-center gap-1 ${s.btnOutlineDanger}`}
+            <button type="button" className={`d-flex align-items-center gap-1 ${s.btnOutlineDanger}`}
               onClick={async () => {
                 setErrorElimAl("");
                 setElimAlSeleccionado("");
@@ -299,7 +299,7 @@ export default function DietasView() {
               title="Eliminar alimento del catálogo">
               🗑️ Eliminar
             </button>
-            <button className={`d-flex align-items-center gap-1 ${s.btnOutline}`}
+            <button type="button" className={`d-flex align-items-center gap-1 ${s.btnOutline}`}
               onClick={async () => {
                 setLoadingCatAl(true);
                 setShowCatalogoAl(true);
@@ -323,7 +323,7 @@ export default function DietasView() {
               <input type="text" className={`form-control form-control-sm ${s.searchInput}`}
                 placeholder="🔍 Nombre, objetivo, restricción..."
                 value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
-              <button className={`d-flex align-items-center gap-1 ${s.btnRefresh}`}
+              <button type="button" className={`d-flex align-items-center gap-1 ${s.btnRefresh}`}
                 onClick={() => cargarAfiliados(true)} disabled={refreshing}>
                 {refreshing
                   ? <span className="spinner-border spinner-border-sm" style={{ width: 12, height: 12, borderWidth: 2 }} />
@@ -434,10 +434,10 @@ export default function DietasView() {
                           <td className="text-center" style={{paddingRight:"1rem"}}>
                             <div className="d-flex gap-1 justify-content-center">
                               {plan && (
-                                <button className={s.btnOutline}
+                                <button type="button" className={s.btnOutline}
                                   title="Ver plan activo" onClick={() => setVerModal(a)}>👁️</button>
                               )}
-                              <button className={`btn btn-sm fw-semibold text-white ${s.btnAsignar}`}
+                              <button type="button" className={`fw-semibold text-white ${s.btnAsignar}`}
                                 title={plan ? "Crear nuevo plan" : "Asignar plan"}
                                 onClick={() => abrirAsignar(a)}>
                                 {plan ? "🔄 Nueva" : "➕ Asignar"}
@@ -466,8 +466,8 @@ export default function DietasView() {
             <div className={`modal-content border-0 shadow-lg ${s.modalContent}`}>
               <div className={`modal-header ${s.modalHeaderTeal}`}>
                 <h5 className="modal-title">🥗 Crear Plan Nutricional — {nombreCompleto(asignarModal)}</h5>
-                <button className="btn-close btn-close-white"
-                  onClick={() => !saving && setAsignarModal(null)} disabled={saving} />
+                <button type="button" className={s.btnOutline}
+                  onClick={() => !saving && setAsignarModal(null)} disabled={saving} aria-label="Cerrar">✕</button>
               </div>
 
               <form onSubmit={handleAsignar}>
@@ -630,11 +630,11 @@ export default function DietasView() {
                 </div>
 
                 <div className={`modal-footer border-0 ${s.modalFooter}`}>
-                  <button type="button" className={`btn btn-sm px-4 ${s.btnOutline}`}
+                  <button type="button" className={s.btnOutline}
                     onClick={() => setAsignarModal(null)} disabled={saving}>
                     Cancelar
                   </button>
-                  <button type="submit" className={`btn btn-sm ${s.btnConfirmar}`}
+                  <button type="submit" className={s.btnConfirmar}
                     disabled={saving || Object.keys(alimentosSel).length === 0}>
                     {saving
                       ? <><span className="spinner-border spinner-border-sm me-2" />Guardando...</>
@@ -660,7 +660,7 @@ export default function DietasView() {
               <div className={`modal-content border-0 shadow-lg ${s.modalContent}`}>
                 <div className={`modal-header ${s.modalHeaderDark}`}>
                   <h5 className="modal-title">🥗 Plan activo — {nombreCompleto(verModal)}</h5>
-                  <button className="btn-close btn-close-white" onClick={() => setVerModal(null)} />
+                  <button type="button" className={s.btnOutline} onClick={() => setVerModal(null)} aria-label="Cerrar">✕</button>
                 </div>
 
                 <div className={`modal-body ${s.modalBody}`}>
@@ -733,11 +733,11 @@ export default function DietasView() {
                 </div>
 
                 <div className={`modal-footer border-0 ${s.modalFooter}`}>
-                  <button className={`btn btn-sm px-3 fw-semibold ${s.btnConfirmar}`}
+                  <button type="button" className={`fw-semibold ${s.btnConfirmar}`}
                     onClick={() => { setVerModal(null); abrirAsignar(verModal); }}>
                     🔄 Crear nuevo plan
                   </button>
-                  <button className={`btn btn-sm px-3 ${s.btnOutline}`} onClick={() => setVerModal(null)}>
+                  <button type="button" className={s.btnOutline} onClick={() => setVerModal(null)}>
                     Cerrar
                   </button>
                 </div>
@@ -756,7 +756,7 @@ export default function DietasView() {
             <div className={`modal-content border-0 shadow-lg ${s.modalContent}`}>
               <div className={`modal-header ${s.modalHeaderTeal}`}>
                 <h5 className="modal-title">🥗 Nuevo Alimento</h5>
-                <button className="btn-close btn-close-white" onClick={() => !guardandoAl && setShowNuevoAl(false)} disabled={guardandoAl} />
+                <button type="button" className={s.btnOutline} onClick={() => !guardandoAl && setShowNuevoAl(false)} disabled={guardandoAl} aria-label="Cerrar">✕</button>
               </div>
 
               <form onSubmit={async (e) => {
@@ -817,11 +817,11 @@ export default function DietasView() {
                   </div>
                 </div>
                 <div className={`modal-footer border-0 ${s.modalFooter}`}>
-                  <button type="button" className={`btn btn-sm px-4 ${s.btnOutline}`}
+                  <button type="button" className={s.btnOutline}
                     onClick={() => !guardandoAl && setShowNuevoAl(false)} disabled={guardandoAl}>
                     Cancelar
                   </button>
-                  <button type="submit" className={`btn btn-sm fw-semibold px-4 text-white ${s.btnConfirmar}`}
+                  <button type="submit" className={`fw-semibold px-4 text-white ${s.btnConfirmar}`}
                     disabled={guardandoAl}>
                     {guardandoAl
                       ? <><span className="spinner-border spinner-border-sm me-2" />Guardando...</>
@@ -843,7 +843,7 @@ export default function DietasView() {
             <div className={`modal-content border-0 shadow-lg ${s.modalContent}`}>
               <div className={`modal-header ${s.modalHeaderTeal}`}>
                 <h5 className="modal-title">🗑️ Eliminar Alimento</h5>
-                <button className="btn-close btn-close-white" onClick={() => !eliminandoAl && setShowEliminarAl(false)} disabled={eliminandoAl} />
+                <button type="button" className={s.btnOutline} onClick={() => !eliminandoAl && setShowEliminarAl(false)} disabled={eliminandoAl} aria-label="Cerrar">✕</button>
               </div>
               <div className={`modal-body ${s.modalBody}`}>
                 {errorElimAl && <div className={s.alertDanger} style={{padding:"0.4rem 0.75rem",marginBottom:"0.75rem"}}><small>⚠️ {errorElimAl}</small></div>}
@@ -861,9 +861,9 @@ export default function DietasView() {
                 </div>
               </div>
               <div className={`modal-footer border-0 ${s.modalFooter}`}>
-                <button type="button" className={`btn btn-sm px-4 ${s.btnOutline}`}
+                <button type="button" className={s.btnOutline}
                   onClick={() => !eliminandoAl && setShowEliminarAl(false)} disabled={eliminandoAl}>Cancelar</button>
-                <button type="button" className={`btn btn-sm px-4 fw-semibold ${s.btnDanger}`}
+                <button type="button" className={`fw-semibold ${s.btnDanger}`}
                   disabled={!elimAlSeleccionado || eliminandoAl}
                   onClick={async () => {
                     setEliminandoAl(true); setErrorElimAl("");
@@ -898,7 +898,7 @@ export default function DietasView() {
             <div className={`modal-content border-0 shadow-lg ${s.modalContent}`}>
               <div className={`modal-header ${s.modalHeaderTeal}`}>
                 <h5 className="modal-title">📋 Catálogo de Alimentos</h5>
-                <button className="btn-close btn-close-white" onClick={() => setShowCatalogoAl(false)} />
+                <button type="button" className={s.btnOutline} onClick={() => setShowCatalogoAl(false)} aria-label="Cerrar">✕</button>
               </div>
               <div className={`modal-body ${s.modalBody}`}>
                 {loadingCatAl ? (
@@ -930,7 +930,7 @@ export default function DietasView() {
                               <td className="text-center small fw-semibold" style={{color:"#e0e0e0"}}>{al.calorias_por_100g ?? kcal}</td>
                               <td className="text-center">
                                 <div className="d-flex gap-1 justify-content-center">
-                                  <button className={s.btnOutline} title="Editar"
+                                  <button type="button" className={s.btnOutline} title="Editar"
                                     onClick={() => {
                                       setEditAlForm({
                                         nombre_alimento: al.nombre_alimento,
@@ -941,7 +941,7 @@ export default function DietasView() {
                                       setErrorEditAl("");
                                       setEditAlModal(al.id_alimento);
                                     }}>✏️</button>
-                                  <button className={s.btnOutlineDanger} title="Eliminar"
+                                  <button type="button" className={s.btnOutlineDanger} title="Eliminar"
                                     onClick={async () => {
                                       if (!window.confirm(`¿Eliminar "${al.nombre_alimento}"?`)) return;
                                       try {
@@ -967,7 +967,7 @@ export default function DietasView() {
                 )}
               </div>
               <div className={`modal-footer border-0 ${s.modalFooter}`}>
-                <button className={`btn btn-sm px-4 ${s.btnOutline}`} onClick={() => setShowCatalogoAl(false)}>Cerrar</button>
+                <button type="button" className={s.btnOutline} onClick={() => setShowCatalogoAl(false)}>Cerrar</button>
               </div>
             </div>
           </div>
@@ -983,7 +983,7 @@ export default function DietasView() {
             <div className={`modal-content border-0 shadow-lg ${s.modalContent}`}>
               <div className={`modal-header ${s.modalHeaderTeal}`}>
                 <h5 className="modal-title">✏️ Editar Alimento</h5>
-                <button className="btn-close btn-close-white" onClick={() => !guardandoEditAl && setEditAlModal(null)} disabled={guardandoEditAl} />
+                <button type="button" className={s.btnOutline} onClick={() => !guardandoEditAl && setEditAlModal(null)} disabled={guardandoEditAl} aria-label="Cerrar">✕</button>
               </div>
               <form onSubmit={async (e) => {
                 e.preventDefault();
@@ -1040,9 +1040,9 @@ export default function DietasView() {
                   </div>
                 </div>
                 <div className={`modal-footer border-0 ${s.modalFooter}`}>
-                  <button type="button" className={`btn btn-sm px-4 ${s.btnOutline}`}
+                  <button type="button" className={s.btnOutline}
                     onClick={() => !guardandoEditAl && setEditAlModal(null)} disabled={guardandoEditAl}>Cancelar</button>
-                  <button type="submit" className={`btn btn-sm fw-semibold px-4 text-white ${s.btnConfirmar}`}
+                  <button type="submit" className={`fw-semibold px-4 text-white ${s.btnConfirmar}`}
                     disabled={guardandoEditAl}>
                     {guardandoEditAl
                       ? <><span className="spinner-border spinner-border-sm me-2" />Guardando...</>

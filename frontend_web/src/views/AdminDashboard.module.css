@@ -265,6 +265,7 @@
   font-size: 0.78rem;
   border-radius: 8px;
   padding: 0.35rem 1rem;
+  cursor: pointer;
   transition: all 0.3s ease;
 }
 
@@ -280,6 +281,7 @@
   font-size: 0.78rem;
   border-radius: 8px;
   padding: 0.25rem 0.75rem;
+  cursor: pointer;
   transition: all 0.2s ease;
 }
 

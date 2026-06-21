@@ -374,7 +374,7 @@ const AfiliadoModel = {
           sexo || 'Masculino',
           telefono || '',
           direccion || '',
-          parseFloat(estatura_cm) || null,
+          parseFloat(estatura_cm) > 0 ? parseFloat(estatura_cm) : null,
           estado_afiliacion,
           registrado_por,
         ]

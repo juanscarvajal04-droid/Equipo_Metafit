@@ -407,7 +407,7 @@ export default function AdminDashboard() {
                 <div className="d-flex align-items-center justify-content-between mb-2">
                   <h6 className={`fw-bold mb-0 ${styles.sectionTitle}`}>💳 Precio de Membresía</h6>
                   {!editPrecio && (
-                    <button className={`${styles.btnOutline}`} onClick={() => { setNuevoPrecio(String(precio)); setEditPrecio(true); }}>
+                    <button type="button" className={`${styles.btnOutline}`} onClick={() => { setNuevoPrecio(String(precio)); setEditPrecio(true); }}>
                       ✏️ Editar
                     </button>
                   )}
@@ -421,10 +421,10 @@ export default function AdminDashboard() {
                         onChange={(e) => setNuevoPrecio(e.target.value)} />
                       <span className={`input-group-text ${styles.inputGroupText}`}>COP</span>
                     </div>
-                    <button className={`${styles.btnPrimary}`} onClick={handleGuardarPrecio} disabled={guardando} style={{fontSize:"0.78rem"}}>
+                    <button type="button" className={`${styles.btnPrimary}`} onClick={handleGuardarPrecio} disabled={guardando} style={{fontSize:"0.78rem"}}>
                       {guardando ? <span className="spinner-border spinner-border-sm" /> : "💾 Guardar"}
                     </button>
-                    <button className={`${styles.btnOutline}`} onClick={() => setEditPrecio(false)} disabled={guardando}>
+                    <button type="button" className={`${styles.btnOutline}`} onClick={() => setEditPrecio(false)} disabled={guardando}>
                       Cancelar
                     </button>
                   </div>

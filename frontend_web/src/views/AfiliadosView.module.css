@@ -49,6 +49,7 @@
   padding: 0.35rem 1.25rem;
   border-radius: 8px;
   font-size: 0.85rem;
+  cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 16px rgba(124,58,237,0.25);
 }
@@ -182,8 +183,15 @@
 }
 
 .modalOverlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: rgba(0,0,0,0.6);
   z-index: 1055;
+  overflow-y: auto;
+  padding: 1rem;
 }
 
 .modalContent {
@@ -239,6 +247,7 @@
   padding: 0.35rem 1.5rem;
   border-radius: 8px;
   font-size: 0.85rem;
+  cursor: pointer;
   transition: all 0.3s ease;
 }
 .btnGuardar:disabled {
@@ -258,6 +267,7 @@
   padding: 0.35rem 1.5rem;
   border-radius: 8px;
   font-size: 0.85rem;
+  cursor: pointer;
   transition: all 0.3s ease;
 }
 .btnCrearAfiliado:disabled {
@@ -276,6 +286,7 @@
   font-size: 0.78rem;
   border-radius: 8px;
   padding: 0.3rem 0.8rem;
+  cursor: pointer;
   transition: all 0.2s ease;
 }
 .btnOutline:hover {
@@ -370,6 +381,7 @@
   color: #94a3b8;
   font-size: 0.85rem;
   padding: 0.5rem 1rem;
+  cursor: pointer;
   transition: all 0.2s ease;
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
