@@ -53,7 +53,7 @@ export default function MiPerfilScreen() {
 
   const inicial = (perfil.nombres?.charAt(0) || 'U').toUpperCase();
   const restricciones = perfil.restricciones || [];
-  const activo = perfil.estado_cuenta === 'Activo';
+  const activo = perfil.estado === 'Activo';
 
   return (
     <SafeAreaView style={styles.safeArea}>

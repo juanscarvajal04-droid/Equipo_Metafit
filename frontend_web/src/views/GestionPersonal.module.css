@@ -1,56 +1,91 @@
-/* ── GestionPersonal.module.css ─────────────────────────────────────────── */
+.page {
+  min-height: 100vh;
+  background: #0a0a0f;
+}
 
-/* ─ Ícono del header (escudo) ─────────────────────────────────────────────── */
+.toast {
+  z-index: 9999;
+  min-width: 300px;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  border: 1px solid #252545;
+  border-radius: 8px;
+}
+
 .headerIcon {
   width: 36px;
   height: 36px;
-  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  background: linear-gradient(135deg, #4b9ecb, #2d7db5);
   font-size: 1.1rem;
-  border-radius: 6px;
+  border-radius: 8px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-/* ─ Badge "Super Usuario" ──────────────────────────────────────────────────── */
+.headerTitle {
+  font-weight: 700;
+  margin-bottom: 0;
+  color: #e0e0e0;
+}
+
+.headerSub {
+  color: #94a3b8;
+}
+
 .badgeAdmin {
   background: linear-gradient(135deg, #7c3aed, #4f46e5);
   font-size: 0.72rem;
   letter-spacing: 0.04em;
   color: #fff;
-  border-radius: 6px;
+  border-radius: 8px;
   padding: 0.35rem 0.75rem;
+  box-shadow: 0 4px 16px rgba(124,58,237,0.3);
 }
 
-/* ─ Botón crear empleado ───────────────────────────────────────────────────── */
 .btnCrear {
   background: linear-gradient(135deg, #7c3aed, #4f46e5);
   border: none;
   color: #fff;
   font-weight: 600;
   padding: 0.35rem 1.25rem;
-  border-radius: 6px;
-  cursor: pointer;
+  border-radius: 8px;
   font-size: 0.85rem;
-  transition: opacity 0.15s, transform 0.15s;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(124,58,237,0.25);
 }
 .btnCrear:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(124,58,237,0.35);
 }
 
-/* ─ Input búsqueda ─────────────────────────────────────────────────────────── */
 .searchInput {
-  max-width: 280px;
+  max-width: none;
+  flex: 1;
+  min-width: 140px;
+  background: #1a1a2e;
+  border: 1px solid #252545;
+  color: #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+.searchInput::placeholder {
+  color: #94a3b8;
+  opacity: 1;
 }
 
-/* ─ Spinner violeta ────────────────────────────────────────────────────────── */
+.searchInput:focus {
+  border-color: #4b9ecb;
+  box-shadow: 0 0 0 3px rgba(75,158,203,0.2);
+  background: #1a1a2e;
+  color: #e0e0e0;
+}
+
 .spinnerPurple {
-  color: #7c3aed;
+  color: #4b9ecb;
 }
 
-/* ─ Avatar circular con gradiente ─────────────────────────────────────────── */
 .avatar {
   width: 36px;
   height: 36px;
@@ -64,16 +99,18 @@
   flex-shrink: 0;
 }
 
-/* ─ Badge "Tú" ─────────────────────────────────────────────────────────────── */
+.avatarMe {
+  box-shadow: 0 0 0 2px #4b9ecb;
+}
+
 .badgeTu {
-  background: #a78bfa22;
-  color: #7c3aed;
+  background: rgba(75,158,203,0.15);
+  color: #7ab7d9;
   font-size: 0.6rem;
   border-radius: 4px;
   padding: 0.1rem 0.4rem;
 }
 
-/* ─ Badge de rol ────────────────────────────────────────────────────────────── */
 .badgeRol {
   font-size: 0.65rem;
   border-radius: 6px;
@@ -81,32 +118,112 @@
   color: #fff;
 }
 
-/* ─ Select de estado ───────────────────────────────────────────────────────── */
 .estadoSelect {
   width: auto;
-  background: transparent;
+  background: #16213e;
+  border: 1px solid #252545;
+  color: #e0e0e0;
   cursor: pointer;
-  border: 0;
-  padding: 0;
   font-size: 0.8rem;
+  border-radius: 6px;
+  padding: 0.2rem 0.5rem;
+}
+.estadoSelect:focus {
+  border-color: #4b9ecb;
+  box-shadow: 0 0 0 3px rgba(75,158,203,0.2);
+  outline: none;
 }
 
-/* ─ Select de rol con borde violeta ───────────────────────────────────────── */
 .rolSelect {
-  border-color: #7c3aed44;
-  color: #1e1b4b;
-}
-
-/* ─ Cards de permisos por rol ─────────────────────────────────────────────── */
-.permisosCard {
-  border: none;
-  height: 100%;
+  border-color: rgba(75,158,203,0.25);
+  background: #16213e;
+  color: #e0e0e0;
   border-radius: 8px;
 }
-.permisosIcono {
+.rolSelect:focus {
+  border-color: #4b9ecb;
+  box-shadow: 0 0 0 3px rgba(75,158,203,0.2);
+}
+
+.tableCard {
+  width: 100%;
+  background: #1a1a2e;
+  border: 1px solid #252545;
+  border-radius: 14px;
+}
+
+.tableCardHeader {
+  background: #0f0f1a;
+  border-bottom: 1px solid #252545;
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  border-radius: 14px 14px 0 0;
+}
+
+.table {
+  width: 100%;
+  margin-bottom: 0;
+}
+
+.table th {
+  color: #94a3b8;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  background: #0f0f1a;
+  border-bottom: 1px solid #252545;
+  padding: 0.7rem 0.75rem;
+  white-space: nowrap;
+}
+
+.table td {
+  background: transparent;
+  color: #e0e0e0;
+  border-bottom: 1px solid #252545;
+  padding: 0.6rem 0.75rem;
+  vertical-align: middle;
+}
+
+.table tbody tr {
+  transition: background 0.2s ease;
+}
+
+.table tbody tr:hover {
+  background: rgba(75, 158, 203, 0.08);
+}
+
+.table tbody tr:nth-child(even) {
+  background: #16213e;
+}
+
+.table tbody tr:nth-child(even):hover {
+  background: rgba(75, 158, 203, 0.08);
+}
+
+.emptyState {
+  color: #94a3b8;
+}
+
+.cardRol {
+  background: #1a1a2e;
+  border: 1px solid #252545 !important;
+  border-radius: 14px;
+  transition: all 0.3s ease;
+}
+.cardRol:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 32px rgba(124,58,237,0.2);
+}
+
+.rolIcono {
   width: 32px;
   height: 32px;
-  border-radius: 6px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -114,49 +231,204 @@
   font-size: 1rem;
   flex-shrink: 0;
 }
-.permisosItem {
-  font-size: 0.78rem;
+
+.rolTitle {
+  font-weight: 700;
+  font-size: 0.95rem;
 }
 
-/* ─ Modal header violeta ───────────────────────────────────────────────────── */
+.permisosItem {
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.btnIcon {
+  background: transparent;
+  border: 1px solid #252545;
+  color: #94a3b8;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
+}
+.btnIcon:hover {
+  border-color: #4b9ecb;
+  background: rgba(75,158,203,0.1);
+}
+
+.btnIconDelete {
+  background: transparent;
+  border: 1px solid #252545;
+  color: #94a3b8;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
+}
+.btnIconDelete:hover:not(:disabled) {
+  border-color: #ef4444;
+  color: #ef4444;
+  background: rgba(239,68,68,0.1);
+}
+
+.modalOverlay {
+  background: rgba(0,0,0,0.6);
+  z-index: 1055;
+}
+
+.modalContent {
+  background: #1a1a2e;
+  border: 1px solid #252545;
+  border-radius: 14px;
+}
+
 .modalHeaderPurple {
-  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  background: linear-gradient(135deg, #4b9ecb, #2d7db5);
   color: #fff;
   border: none;
+  border-radius: 14px 14px 0 0;
 }
 .modalHeaderRed {
-  background: linear-gradient(135deg, #e94560, #c62a47);
+  background: linear-gradient(135deg, #4b9ecb, #2d7db5);
   color: #fff;
   border: none;
+  border-radius: 14px 14px 0 0;
 }
 .modalHeaderDanger {
   background: linear-gradient(135deg, #dc2626, #991b1b);
   color: #fff;
   border: none;
+  border-radius: 14px 14px 0 0;
 }
 
-/* ─ Modal body scroll ──────────────────────────────────────────────────────── */
+.modalBody {
+  background: #1a1a2e;
+  color: #e0e0e0;
+}
+
 .modalBodyScroll {
   max-height: 75vh;
   overflow-y: auto;
+  background: #1a1a2e;
+  color: #e0e0e0;
 }
 
-/* ─ Botón confirmar (heredado del modal) ──────────────────────────────────── */
+.modalFooter {
+  border-top: 1px solid #252545;
+  background: #1a1a2e;
+  border-radius: 0 0 14px 14px;
+}
+
 .btnGuardar {
   border: none;
   color: #fff;
   font-weight: 600;
   padding: 0.35rem 1.5rem;
-  border-radius: 6px;
-  cursor: pointer;
+  border-radius: 8px;
   font-size: 0.85rem;
+  transition: all 0.3s ease;
 }
 .btnGuardar:disabled {
   opacity: 0.65;
   cursor: not-allowed;
 }
+.btnGuardar:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(124,58,237,0.3);
+}
 
-/* ─ Emoji del modal de confirmación ──────────────────────────────────────── */
+.btnOutline {
+  background: transparent;
+  border: 1px solid #252545;
+  color: #94a3b8;
+  font-size: 0.78rem;
+  border-radius: 8px;
+  padding: 0.3rem 0.8rem;
+  transition: all 0.2s ease;
+}
+.btnOutline:hover {
+  border-color: #4b9ecb;
+  color: #4b9ecb;
+  background: rgba(75,158,203,0.1);
+}
+
+.btnDanger {
+  background: transparent;
+  border: 1px solid #252545;
+  color: #94a3b8;
+  font-size: 0.78rem;
+  border-radius: 8px;
+  padding: 0.3rem 0.8rem;
+  transition: all 0.2s ease;
+}
+.btnDanger:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+  background: rgba(239,68,68,0.1);
+}
+
+.inputDark {
+  background: #16213e;
+  border: 1px solid #252545;
+  color: #e0e0e0;
+  border-radius: 8px;
+}
+.inputDark:focus {
+  border-color: #4b9ecb;
+  box-shadow: 0 0 0 3px rgba(75,158,203,0.2);
+  background: #16213e;
+  color: #e0e0e0;
+}
+
+.selectDark {
+  background: #16213e;
+  border: 1px solid #252545;
+  color: #e0e0e0;
+  border-radius: 8px;
+}
+.selectDark:focus {
+  border-color: #4b9ecb;
+  box-shadow: 0 0 0 3px rgba(75,158,203,0.2);
+  background: #16213e;
+  color: #e0e0e0;
+}
+
+.labelText {
+  color: #94a3b8;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.sectionLabel {
+  color: #94a3b8;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.alertDanger {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.2);
+  color: #ef4444;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+}
+
+.btnDangerSolid {
+  background: #ef4444;
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.78rem;
+  border-radius: 8px;
+  padding: 0.35rem 1rem;
+  transition: all 0.2s ease;
+}
+.btnDangerSolid:hover:not(:disabled) {
+  background: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(239,68,68,0.3);
+}
+
 .deleteEmoji {
   font-size: 2.5rem;
   margin-bottom: 1rem;

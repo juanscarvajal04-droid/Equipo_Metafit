@@ -99,7 +99,7 @@
 
 .navLinks {
   display: flex;
-  gap: 32px;
+  gap: 56px;
   align-items: center;
 }
 .navCtas {
@@ -184,17 +184,19 @@
 .heroBadge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: rgba(227,28,37,0.094);
-  border: 1px solid rgba(227,28,37,0.31);
-  border-radius: 20px;
-  padding: 5px 14px;
-  font-size: 0.72rem;
-  color: var(--lp-red);
-  font-weight: 700;
-  letter-spacing: 0.05em;
+  gap: 8px;
+  background: linear-gradient(135deg, rgba(227,28,37,0.15), rgba(227,28,37,0.05));
+  border: 1px solid rgba(227,28,37,0.4);
+  border-radius: 24px;
+  padding: 7px 18px;
+  font-size: 0.75rem;
+  color: #ff4d4d;
+  font-weight: 800;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
+  box-shadow: 0 0 24px rgba(227,28,37,0.2), inset 0 0 20px rgba(227,28,37,0.05);
+  backdrop-filter: blur(4px);
 }
 
 .heroTitle {

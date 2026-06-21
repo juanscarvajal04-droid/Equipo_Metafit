@@ -225,7 +225,7 @@ export default function LandingPage() {
         {/* Contenido */}
         <div className={s.heroContent}>
           <div className={`${s.heroBadge} ${s.animate} ${s.animateD1}`}>
-            🔴 Sistema de Gestión Deportiva v1.0
+            ⚡ Sistema de Gestión Deportiva v2.0
           </div>
 
           <h1 className={`${s.heroTitle} ${s.animate} ${s.animateD2}`}>

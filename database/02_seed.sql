@@ -669,6 +669,64 @@ ALTER TABLE `CICLO`     AUTO_INCREMENT = 9;
 ALTER TABLE `RUTINA`    AUTO_INCREMENT = 25;
 
 -- ============================================================================================================================
+-- BLOQUE 11 - PAGOS (Ejemplos para el panel de Finanzas)
+-- Varios meses de pagos para que los gráficos tengan contenido.
+-- registrado_por: María (id=4, Recepcionista), Carlos (id=1, Admin)
+-- ============================================================================================================================
+
+INSERT INTO `PAGO` (id_usuario, fecha_pago, valor_pagado, estado, fecha_vencimiento, observaciones, registrado_por)
+VALUES
+  -- Juan Martínez (id=6) — pagos regulares
+  (6, '2025-06-10', 80000.00, 'Pagado', '2025-07-10', 'Pago mensual junio',       4),
+  (6, '2025-07-10', 80000.00, 'Pagado', '2025-08-10', 'Pago mensual julio',       4),
+  (6, '2025-08-10', 80000.00, 'Pagado', '2025-09-10', 'Pago mensual agosto',      4),
+  (6, '2025-09-10', 80000.00, 'Pagado', '2025-10-10', 'Pago mensual septiembre',  1),
+  (6, '2025-10-10', 80000.00, 'Pagado', '2025-11-10', 'Pago mensual octubre',     4),
+  (6, '2025-11-10', 80000.00, 'Pagado', '2025-12-10', 'Pago mensual noviembre',   4),
+  (6, '2025-12-10', 80000.00, 'Pagado', '2026-01-10', 'Pago mensual diciembre',   4),
+  (6, '2026-01-10', 80000.00, 'Pagado', '2026-02-10', 'Pago mensual enero',       4),
+  (6, '2026-02-10', 80000.00, 'Pagado', '2026-03-10', 'Pago mensual febrero',     4),
+  (6, '2026-03-10', 80000.00, 'Pagado', '2026-04-10', 'Pago mensual marzo',       4),
+  (6, '2026-04-10', 80000.00, 'Pagado', '2026-05-10', 'Pago mensual abril',       4),
+  (6, '2026-05-10', 80000.00, 'Pagado', '2026-06-10', 'Pago mensual mayo',        4),
+
+  -- Ana Rodríguez (id=7) — pagos regulares
+  (7, '2025-07-05', 80000.00, 'Pagado', '2025-08-05', 'Pago mensual julio',       4),
+  (7, '2025-08-05', 80000.00, 'Pagado', '2025-09-05', 'Pago mensual agosto',      4),
+  (7, '2025-09-05', 80000.00, 'Pagado', '2025-10-05', 'Pago mensual septiembre',  4),
+  (7, '2025-10-05', 80000.00, 'Pagado', '2025-11-05', 'Pago mensual octubre',     1),
+  (7, '2025-11-05', 80000.00, 'Pagado', '2025-12-05', 'Pago mensual noviembre',   4),
+  (7, '2025-12-05', 80000.00, 'Pagado', '2026-01-05', 'Pago mensual diciembre',   4),
+  (7, '2026-01-05', 80000.00, 'Pagado', '2026-02-05', 'Pago mensual enero',       4),
+  (7, '2026-02-05', 80000.00, 'Pagado', '2026-03-05', 'Pago mensual febrero',     4),
+  (7, '2026-03-05', 80000.00, 'Pagado', '2026-04-05', 'Pago mensual marzo',       4),
+  (7, '2026-04-05', 80000.00, 'Pagado', '2026-05-05', 'Pago mensual abril',       4),
+  (7, '2026-05-05', 80000.00, 'Pagado', '2026-06-05', 'Pago mensual mayo',        4),
+
+  -- Luis Herrera (id=8) — pagos con algunos vencidos y pendientes
+  (8, '2025-08-15', 80000.00, 'Pagado',  '2025-09-15', 'Pago mensual agosto',      4),
+  (8, '2025-09-15', 80000.00, 'Pagado',  '2025-10-15', 'Pago mensual septiembre',  4),
+  (8, '2025-10-15', 80000.00, 'Pagado',  '2025-11-15', 'Pago mensual octubre',     4),
+  (8, '2025-11-15', 80000.00, 'Pagado',  '2025-12-15', 'Pago mensual noviembre',   4),
+  (8, '2025-12-15', 80000.00, 'Vencido', '2026-01-15', 'Se venció, no pagó diciembre a tiempo', 4),
+  (8, '2026-01-20', 80000.00, 'Pagado',  '2026-02-20', 'Pago atrasado de enero',   1),
+  (8, '2026-02-15', 80000.00, 'Pagado',  '2026-03-15', 'Pago mensual febrero',     4),
+  (8, '2026-03-15', 80000.00, 'Pagado',  '2026-04-15', 'Pago mensual marzo',       4),
+  (8, '2026-04-15', 80000.00, 'Pagado',  '2026-05-15', 'Pago mensual abril',       4),
+  (8, '2026-05-15', 80000.00, 'Pagado',  '2026-06-15', 'Pago mensual mayo',        4),
+
+  -- Sofía Castro (id=9) — pagos esporádicos
+  (9, '2025-09-01', 80000.00, 'Pagado',  '2025-10-01', 'Pago mensual septiembre',  4),
+  (9, '2025-10-01', 80000.00, 'Pagado',  '2025-11-01', 'Pago mensual octubre',     4),
+  (9, '2025-11-01', 80000.00, 'Pagado',  '2025-12-01', 'Pago mensual noviembre',   4),
+  (9, '2025-12-01', 80000.00, 'Pagado',  '2026-01-01', 'Pago mensual diciembre',   4),
+  (9, '2026-01-01', 80000.00, 'Pagado',  '2026-02-01', 'Pago mensual enero',       4),
+  (9, '2026-02-01', 80000.00, 'Pagado',  '2026-03-01', 'Pago mensual febrero',     4),
+  (9, '2026-03-01', 80000.00, 'Pagado',  '2026-04-01', 'Pago mensual marzo',       4),
+  (9, '2026-04-01', 80000.00, 'Pagado',  '2026-05-01', 'Pago mensual abril',       4),
+  (9, '2026-05-01', 80000.00, 'Pagado',  '2026-06-01', 'Pago mensual mayo',        4);
+
+-- ============================================================================================================================
 -- VERIFICACION RAPIDA (ejecutar manualmente para validar la carga)
 -- ============================================================================================================================
 -- SELECT COUNT(*) AS total_usuarios   FROM USUARIO;           -- Esperado: 9

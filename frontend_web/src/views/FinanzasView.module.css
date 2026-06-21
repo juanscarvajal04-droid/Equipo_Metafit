@@ -1,0 +1,381 @@
+/* frontend_web/src/views/FinanzasView.module.css */
+
+/* ── Page wrapper ── */
+.page {
+  min-height: 100vh;
+  background: #0a0a0f;
+}
+
+/* ── Header ── */
+.headerRow {
+  margin-bottom: 24px;
+}
+
+.headerTitle {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin: 0;
+  background: linear-gradient(135deg, #e0e0e0, #7ab7d9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.spinnerTeal {
+  color: #7c3aed;
+}
+
+.headerIcon {
+  margin-right: 8px;
+  -webkit-text-fill-color: initial;
+}
+
+.headerSubtitle {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  margin: 4px 0 0;
+}
+
+.headerDot {
+  color: #333;
+}
+
+/* ── PDF Button ── */
+.pdfBtn {
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  color: #fff;
+  border: none;
+  font-weight: 700;
+  font-size: 0.82rem;
+  padding: 10px 22px;
+  border-radius: 10px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pdfBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.45);
+  color: #fff;
+}
+
+.pdfBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.pdfIcon {
+  font-size: 1rem;
+}
+
+/* ── Filter Bar ── */
+.filterBar {
+  background: #16213e;
+  border-radius: 14px;
+  padding: 18px 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  border: 1px solid #252545;
+  margin-bottom: 28px;
+}
+
+.filterLabel {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #94a3b8;
+  margin-bottom: 5px;
+  display: block;
+  font-weight: 600;
+}
+
+.filterInput {
+  background: #1a1a2e;
+  border: 1px solid #252545;
+  color: #e0e0e0;
+  font-size: 0.82rem;
+  padding: 8px 12px;
+  border-radius: 8px;
+  width: 100%;
+  transition: border-color 0.18s, box-shadow 0.18s;
+  outline: none;
+}
+
+.filterInput::placeholder {
+  color: #94a3b8;
+  opacity: 1;
+}
+
+.filterInput:focus {
+  border-color: #4b9ecb;
+  box-shadow: 0 0 0 3px rgba(75, 158, 203, 0.2);
+  color: #fff;
+}
+
+.filterInput option {
+  background: #1a1a2e;
+  color: #e0e0e0;
+}
+
+.filterBtn {
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  color: #fff;
+  border: none;
+  padding: 8px 22px;
+  font-weight: 700;
+  font-size: 0.82rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.18s;
+  box-shadow: 0 3px 10px rgba(124, 58, 237, 0.25);
+  white-space: nowrap;
+}
+
+.filterBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 16px rgba(124, 58, 237, 0.4);
+}
+
+.filterBtnClear {
+  background: transparent;
+  color: #7ab7d9;
+  border: 1px solid #4b9ecb;
+  padding: 8px 18px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.18s;
+  white-space: nowrap;
+}
+
+.filterBtnClear:hover {
+  background: rgba(124, 58, 237, 0.1);
+  color: #7ab7d9;
+}
+
+/* ── KPI Grid ── */
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+@media (max-width: 992px) {
+  .kpiGrid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 576px) {
+  .kpiGrid { grid-template-columns: 1fr; }
+}
+
+.kpiCard {
+  background: #1a1a2e;
+  border: 1px solid #252545;
+  border-radius: 14px;
+  padding: 20px 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.kpiCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(124, 58, 237, 0.18);
+  border-color: rgba(124, 58, 237, 0.3);
+}
+
+.kpiIconWrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+}
+
+.kpiValue {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #e0e0e0;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.kpiLabel {
+  font-size: 0.68rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+/* ── Chart Cards ── */
+.chartCard {
+  background: #1a1a2e;
+  border: 1px solid #252545;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  height: 100%;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.chartCard:hover {
+  border-color: rgba(124, 58, 237, 0.25);
+  box-shadow: 0 6px 24px rgba(124, 58, 237, 0.12);
+}
+
+.chartTitle {
+  color: #ccc;
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+}
+
+.chartIcon {
+  margin-right: 6px;
+}
+
+/* ── Payment Cards Section ── */
+.pagosSection {
+  background: #16213e;
+  border: 1px solid #252545;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.pagosSection h6 {
+  color: #ccc;
+}
+
+.pagosCount {
+  font-size: 0.68rem;
+  color: #94a3b8;
+  background: #1a1a2e;
+  border: 1px solid #252545;
+  padding: 3px 14px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.pagosGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+/* ── Individual Payment Card ── */
+.pagoCard {
+  background: #0a0a0f;
+  border: 1px solid #252545;
+  border-radius: 10px;
+  padding: 14px 16px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pagoCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.15);
+  border-color: rgba(124, 58, 237, 0.3);
+}
+
+.pagoCardTop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pagoAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.pagoInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.pagoNombre {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #e0e0e0;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pagoFecha {
+  font-size: 0.68rem;
+  color: #888;
+  margin-top: 1px;
+}
+
+.pagoMonto {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #a78bfa;
+  white-space: nowrap;
+  flex-shrink: 0;
+  letter-spacing: 0.3px;
+}
+
+.pagoCardBottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 8px;
+  border-top: 1px solid #252545;
+}
+
+.pagoRecepcionista {
+  font-size: 0.7rem;
+  color: #888;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pagoRecepcionistaIcon {
+  font-size: 0.75rem;
+}
+
+/* ── Tablet / mobile ── */
+@media (max-width: 768px) {
+  .pagosGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .pagoCardTop {
+    flex-wrap: wrap;
+  }
+
+  .pagoMonto {
+    width: 100%;
+    text-align: left;
+    padding-left: 52px;
+    margin-top: -4px;
+  }
+}

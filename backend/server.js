@@ -99,7 +99,8 @@ const afiliadoRoutes = require('./routes/afiliadoRoutes');
 const planRoutes = require('./routes/planRoutes');
 const catalogoRoutes = require('./routes/catalogoRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
-const pagoRoutes = require('./routes/pagoRoutes');   // FIX 5: rutas de pagos
+const pagoRoutes = require('./routes/pagoRoutes');        // FIX 5: rutas de pagos
+const pagoAdminRoutes = require('./routes/pagoAdminRoutes'); // FASE FINANZAS: admin
 const configuracionRoutes = require('./routes/configuracionRoutes');
 const notificacionRoutes = require('./routes/notificacionRoutes');
 
@@ -108,6 +109,7 @@ app.use('/', loginLimiter, authRoutes);   // POST /login (con rate limit)
 app.use('/usuarios', usuarioRoutes);              // GET/POST/PATCH/DELETE /usuarios
 app.use('/afiliados', afiliadoRoutes);             // CRUD afiliados + ciclos + progreso
 app.use('/afiliados', pagoRoutes);                // FIX 5: GET|POST /afiliados/:id/pagos
+app.use('/pagos', pagoAdminRoutes);              // FASE FINANZAS: GET /pagos, GET /pagos/metricas
 app.use('/planes', planRoutes);                 // Planes entrenamiento y nutricional
 app.use('/catalogo', catalogoRoutes);             // GET /catalogo/ejercicios|alimentos|restricciones
 app.use('/dashboard', dashboardRoutes);            // GET /dashboard/kpis

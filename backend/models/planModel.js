@@ -32,7 +32,7 @@ const PlanModel = {
             'grupo_muscular', e.grupo_muscular,
             'series',         re.series,
             'repeticiones',   re.repeticiones
-          ) ORDER BY re.orden
+          )
         ) AS ejercicios
       FROM RUTINA r
       LEFT JOIN RUTINA_EJERCICIO re ON r.id_rutina = re.id_rutina
@@ -43,8 +43,10 @@ const PlanModel = {
     `, [id_ciclo]);
 
     rutinas.forEach(r => {
-      if (typeof r.ejercicios === 'string') r.ejercicios = JSON.parse(r.ejercicios);
-      r.ejercicios = (r.ejercicios || []).filter(e => e.id_ejercicio !== null);
+      if (typeof r.ejercicios === 'string') {
+        r.ejercicios = JSON.parse(r.ejercicios);
+      }
+      r.ejercicios = (r.ejercicios || []).filter(e => e && e.id_ejercicio != null);
     });
     plan.rutinas = rutinas;
     return plan;

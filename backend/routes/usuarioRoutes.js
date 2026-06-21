@@ -37,6 +37,8 @@ const { requireAuth, requireAdmin } = require('../middlewares/auth');
  */
 router.get('/', requireAuth, UsuarioController.getAll);
 
+router.get('/recepcionistas', requireAuth, UsuarioController.getRecepcionistas);
+
 /**
  * @swagger
  * /usuarios/{id}:

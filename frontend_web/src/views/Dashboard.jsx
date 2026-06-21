@@ -152,8 +152,8 @@ export default function Dashboard() {
                     label: "Total Afiliados",
                     valor: kpis.total_afiliados,
                     icono: "👥",
-                    color: "#7c3aed",
-                    bg: "#7c3aed15",
+                    color: "#4b9ecb",
+                    bg: "#4b9ecb15",
                     sub: `${kpis.afiliados_activos} activos / ${kpis.afiliados_inactivos} inactivos`,
                   },
                   {
@@ -224,12 +224,12 @@ export default function Dashboard() {
                             const total = kpis.ciclos_en_curso || 1;
                             const pct = Math.round((obj.cantidad * 100) / total);
                             const colors = {
-                              "Pérdida de grasa": "#e94560",
+                              "Perdida de grasa": "#e94560",
                               "Aumento de masa": "#2563eb",
                               "Mantenimiento": "#059669",
                               "Rehabilitación": "#ea580c",
                             };
-                            const col = colors[obj.objetivo] || "#7c3aed";
+                            const col = colors[obj.objetivo] || "#4b9ecb";
                             return (
                               <div key={obj.objetivo}>
                                 <div className="d-flex justify-content-between small fw-semibold text-muted mb-1">

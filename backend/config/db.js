@@ -32,6 +32,14 @@ const pool = mysql.createPool({
   // Reconexión automática en caso de timeout de conexión
   enableKeepAlive   : true,
   keepAliveInitialDelay: 10000,
+  // typeCast: JSON columns → string (mysql2 devuelve JsonBinary que se serializa como @{})
+  typeCast: function (field, next) {
+    if (field.type === 'JSON') {
+      const val = field.string('utf8');
+      if (val != null) return val;
+    }
+    return next();
+  },
 });
 
 // ── Prueba de conexión al iniciar ─────────────────────────────

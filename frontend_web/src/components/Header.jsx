@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { getNotificaciones } from "../services/api";
 import styles from "./Header.module.css";
 
 const ROUTE_META = {
   "/dashboard": { label: "Panel de Control",        icon: "📊", parent: null },
+  "/finanzas":  { label: "Panel de Finanzas",       icon: "💰", parent: "Administración" },
   "/afiliados": { label: "Gestión de Afiliados",     icon: "👥", parent: null },
   "/pagos":     { label: "Gestión de Pagos",          icon: "💳", parent: "Administración" },
   "/rutinas":   { label: "Planes de Entrenamiento",   icon: "🏋️", parent: "Entrenamiento" },
@@ -39,6 +39,7 @@ function BellIcon() {
 
 export default function Header() {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const { user, authAxios } = useAuth();
 
   const meta  = ROUTE_META[pathname] || { label: "MetaFit", icon: "💪", parent: null };
@@ -49,24 +50,30 @@ export default function Header() {
   const [notificaciones, setNotificaciones] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const pollingRef = useRef(null);
 
   const totalNotificaciones = notificaciones.reduce((sum, n) => sum + n.cantidad, 0);
   const hayNotificaciones = totalNotificaciones > 0;
 
-  const cargarNotificaciones = async () => {
+  const cargarNotificaciones = useCallback(async () => {
     try {
       const { data } = await authAxios.get("/notificaciones");
       setNotificaciones(Array.isArray(data) ? data : []);
-    } catch {
-      // Silencioso — no mostrar errores de notificaciones al usuario
+    } catch (err) {
+      if (err?.response?.status === 401 && pollingRef.current) {
+        clearInterval(pollingRef.current);
+        pollingRef.current = null;
+      }
     }
-  };
+  }, [authAxios]);
 
   useEffect(() => {
     cargarNotificaciones();
-    const interval = setInterval(cargarNotificaciones, 60000);
-    return () => clearInterval(interval);
-  }, []);
+    pollingRef.current = setInterval(cargarNotificaciones, 60000);
+    return () => {
+      if (pollingRef.current) clearInterval(pollingRef.current);
+    };
+  }, [cargarNotificaciones]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -77,6 +84,11 @@ export default function Header() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const handleNotificacionClick = (ruta) => {
+    setDropdownOpen(false);
+    if (ruta) navigate(ruta);
+  };
 
   return (
     <header className={styles.header}>
@@ -139,20 +151,30 @@ export default function Header() {
                 {notificaciones.length === 0 ? (
                   <div className={styles.dropdownEmpty}>Todo al día ✅</div>
                 ) : (
-                  notificaciones.map((n) => (
-                    <div key={n.tipo} className={styles.dropdownItem}>
-                      <span className={styles.dropdownIcon}>{n.icono}</span>
-                      <div className={styles.dropdownContent}>
-                        <div className={styles.dropdownMsg}>{n.mensaje}</div>
-                        <div className={styles.dropdownMeta}>
-                          {n.cantidad > 0 ? `${n.cantidad} pendiente(s)` : "Sin novedades"}
+                  notificaciones.map((n) => {
+                    const clickable = !!n.ruta;
+                    return (
+                      <div
+                        key={n.tipo}
+                        className={`${styles.dropdownItem} ${clickable ? styles.dropdownItemClickable : ""}`}
+                        onClick={() => handleNotificacionClick(n.ruta)}
+                        role={clickable ? "button" : undefined}
+                        tabIndex={clickable ? 0 : undefined}
+                        onKeyDown={clickable ? (e) => { if (e.key === "Enter") handleNotificacionClick(n.ruta); } : undefined}
+                      >
+                        <span className={styles.dropdownIcon}>{n.icono}</span>
+                        <div className={styles.dropdownContent}>
+                          <div className={styles.dropdownMsg}>{n.mensaje}</div>
+                          <div className={styles.dropdownMeta}>
+                            {n.cantidad > 0 ? `${n.cantidad} pendiente(s)` : "Sin novedades"}
+                          </div>
                         </div>
+                        <span className={`${styles.dropdownCantidad} ${n.cantidad > 0 ? styles.dropdownCantidadActiva : ""}`}>
+                          {n.cantidad}
+                        </span>
                       </div>
-                      <span className={`${styles.dropdownCantidad} ${n.cantidad > 0 ? styles.dropdownCantidadActiva : ""}`}>
-                        {n.cantidad}
-                      </span>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             </div>

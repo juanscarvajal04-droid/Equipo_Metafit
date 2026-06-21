@@ -1,6 +1,8 @@
-/* ── DietasView.module.css ───────────────────────────────────────────────── */
+.page {
+  min-height: 100vh;
+  background: #0a0a0f;
+}
 
-/* ─ Toast ─────────────────────────────────────────────────────────────────── */
 .toast {
   position: fixed;
   bottom: 0;
@@ -9,16 +11,19 @@
   z-index: 9999;
   min-width: 300px;
   padding: 0.5rem 1rem;
-  border-radius: 6px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  border-radius: 8px;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  border: 1px solid #252545;
+  border-left: 4px solid #4b9ecb;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
 }
 
-/* ─ Ícono header ──────────────────────────────────────────────────────────── */
 .headerIcon {
   width: 36px;
   height: 36px;
-  background: linear-gradient(135deg, #0891b2, #0d9488);
-  border-radius: 6px;
+  background: linear-gradient(135deg, #4b9ecb, #2d7db5);
+  border-radius: 8px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -27,45 +32,90 @@
   flex-shrink: 0;
 }
 
-/* ─ KPI cards ─────────────────────────────────────────────────────────────── */
+.headerTitle {
+  font-weight: 700;
+  margin-bottom: 0;
+  color: #e0e0e0;
+}
+
+.headerSub {
+  color: #94a3b8;
+}
+
 .kpiCard {
   min-width: 115px;
+  background: #1a1a2e;
+  border: 1px solid #252545 !important;
+  border-radius: 14px;
+  padding: 0.5rem 0.75rem;
+  transition: all 0.3s ease;
 }
+
+.kpiCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 32px rgba(124,58,237,0.2);
+}
+
 .kpiValor {
   font-weight: 700;
   font-size: 1.25rem;
 }
+
 .kpiLabel {
   font-size: 0.68rem;
+  color: #94a3b8;
 }
 
-/* ─ Input búsqueda ────────────────────────────────────────────────────────── */
 .searchInput {
-  max-width: 240px;
+  max-width: none;
+  flex: 1;
+  min-width: 140px;
+  background: #1a1a2e;
+  border: 1px solid #252545;
+  color: #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+.searchInput::placeholder {
+  color: #94a3b8;
+  opacity: 1;
 }
 
-/* ─ Botón refresh ─────────────────────────────────────────────────────────── */
+.searchInput:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.2);
+  background: #1a1a2e;
+  color: #e0e0e0;
+}
+
 .btnRefresh {
   white-space: nowrap;
   font-size: 0.78rem;
+  background: transparent;
+  border: 1px solid #252545;
+  color: #94a3b8;
+  border-radius: 8px;
+  padding: 0.25rem 0.75rem;
+  transition: all 0.2s ease;
+}
+.btnRefresh:hover:not(:disabled) {
+  border-color: #4b9ecb;
+  color: #4b9ecb;
+  background: rgba(75,158,203,0.1);
 }
 
-/* ─ Spinner de carga teal ────────────────────────────────────────────────── */
 .spinnerTeal {
-  color: #0891b2;
+  color: #4b9ecb;
 }
 
-/* ─ Filas de tabla con prioridad ──────────────────────────────────────────── */
 .rowSinPlan {
-  background: #fff8f0;
-  border-left: 3px solid #f97316;
+  background: #16213e;
 }
+
 .rowConAlerta {
-  background: #fff8f8;
   border-left: 3px solid #ef4444;
 }
 
-/* ─ Avatar circular ───────────────────────────────────────────────────────── */
 .avatar {
   width: 36px;
   height: 36px;
@@ -79,34 +129,31 @@
   flex-shrink: 0;
 }
 
-/* ─ Texto email pequeño ───────────────────────────────────────────────────── */
 .emailText {
   font-size: 0.7rem;
+  color: #94a3b8;
 }
 
-/* ─ Botón asignar plan ────────────────────────────────────────────────────── */
 .btnAsignar {
-  background: linear-gradient(135deg, #0891b2, #0d9488);
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
   border: none;
   color: #fff;
   font-weight: 600;
   font-size: 0.78rem;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   padding: 0.25rem 0.75rem;
-  transition: opacity 0.15s, transform 0.15s;
+  transition: all 0.3s ease;
 }
 .btnAsignar:hover {
-  opacity: 0.9;
   transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(124,58,237,0.3);
 }
 
-/* ─ Título del catálogo ───────────────────────────────────────────────────── */
 .catalogTitle {
   letter-spacing: 0.06em;
 }
 
-/* ─ Card catálogo con borde coloreado ────────────────────────────────────── */
 .catalogCard {
   border-left-width: 4px;
   border-left-style: solid;
@@ -115,34 +162,64 @@
   border-bottom: none;
 }
 
-/* ─ Texto macroto pequeño ─────────────────────────────────────────────────── */
-.macroText { font-size: 0.65rem; }
-.alimentoText { font-size: 0.62rem; }
+.macroText { font-size: 0.65rem; color: #94a3b8; }
+.alimentoText { font-size: 0.62rem; color: #94a3b8; }
 
-/* ─ Modal header teal ─────────────────────────────────────────────────────── */
+.modalOverlay {
+  background: rgba(0,0,0,0.6);
+  z-index: 1055;
+}
+
+.modalContent {
+  background: #1a1a2e;
+  border: 1px solid #252545;
+  border-radius: 14px;
+}
+
 .modalHeaderTeal {
-  background: linear-gradient(135deg, #0891b2, #0d9488);
+  background: linear-gradient(135deg, #4b9ecb, #2d7db5);
   color: #fff;
   border: none;
+  border-radius: 14px 14px 0 0;
 }
+
 .modalHeaderDark {
   background: linear-gradient(135deg, #1a1a2e, #16213e);
   color: #fff;
   border: none;
+  border-radius: 14px 14px 0 0;
 }
 
-/* ─ Info afiliado dentro del modal ───────────────────────────────────────── */
+.modalBody {
+  background: #1a1a2e;
+  color: #e0e0e0;
+}
+
+.modalBodyScroll {
+  max-height: 75vh;
+  overflow-y: auto;
+  background: #1a1a2e;
+  color: #e0e0e0;
+}
+
+.modalFooter {
+  border-top: 1px solid #252545;
+  background: #1a1a2e;
+  border-radius: 0 0 14px 14px;
+}
+
 .afiliadoInfoBox {
-  background: #f0fdfa;
-  border: 1px solid #99f6e4;
-  border-radius: 12px;
-  padding: 12px;
+  background: #16213e;
+  border: 1px solid #252545;
+  border-radius: 10px;
+  padding: 0.75rem;
   margin-bottom: 1.5rem;
   display: flex;
   align-items: flex-start;
   gap: 12px;
   flex-wrap: wrap;
 }
+
 .avatarLg {
   width: 44px;
   height: 44px;
@@ -156,47 +233,262 @@
   flex-shrink: 0;
 }
 
-/* ─ Card de plan seleccionable ────────────────────────────────────────────── */
 .planCard {
   cursor: pointer;
   border-radius: 8px;
   transition: all 0.15s ease;
   height: 100%;
+  background: #1a1a2e;
+  border: 1px solid #252545;
 }
+
+.planCard:hover {
+  border-color: #7c3aed;
+  box-shadow: 0 4px 16px rgba(124,58,237,0.15);
+}
+
 .planCardInfo {
   font-size: 0.68rem;
+  color: #94a3b8;
 }
 
-/* ─ Modal body scroll ─────────────────────────────────────────────────────── */
-.modalBodyScroll {
-  max-height: 75vh;
-  overflow-y: auto;
-}
-
-/* ─ Botón confirmar asignar ──────────────────────────────────────────────── */
 .btnConfirmar {
-  background: linear-gradient(135deg, #0891b2, #0d9488);
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
   border: none;
   color: #fff;
   font-weight: 600;
   padding: 0.35rem 1.5rem;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 0.85rem;
+  transition: all 0.3s ease;
 }
 .btnConfirmar:disabled {
   opacity: 0.65;
   cursor: not-allowed;
 }
-
-/* ─ Plan detail rows en modal ver ────────────────────────────────────────── */
-.planDetailLabel {
-  font-size: 0.68rem;
+.btnConfirmar:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(124,58,237,0.3);
 }
 
-/* ─ Overlay de modales ───────────────────────────────────────────────────── */
-.modalOverlay {
-  background: rgba(0,0,0,0.6);
-  z-index: 1055;
+.planDetailLabel {
+  font-size: 0.68rem;
+  color: #94a3b8;
+}
+
+.tableCard {
+  width: 100%;
+  background: #1a1a2e;
+  border: 1px solid #252545;
+  border-radius: 14px;
+}
+
+.tableCardHeader {
+  background: #0f0f1a;
+  border-bottom: 1px solid #252545;
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  border-radius: 14px 14px 0 0;
+}
+
+.table {
+  width: 100%;
+  margin-bottom: 0;
+}
+
+.table th {
+  color: #94a3b8;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  background: #0f0f1a;
+  border-bottom: 1px solid #252545;
+  padding: 0.7rem 0.75rem;
+  white-space: nowrap;
+}
+
+.table td {
+  background: transparent;
+  color: #e0e0e0;
+  border-bottom: 1px solid #252545;
+  padding: 0.6rem 0.75rem;
+  vertical-align: middle;
+}
+
+.table tbody tr {
+  transition: background 0.2s ease;
+}
+
+.table tbody tr:hover {
+  background: rgba(124, 58, 237, 0.08);
+}
+
+.table tbody tr:nth-child(even) {
+  background: #16213e;
+}
+
+.table tbody tr:nth-child(even):hover {
+  background: rgba(124, 58, 237, 0.08);
+}
+
+.emptyState {
+  color: #94a3b8;
+}
+
+.alertDanger {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.2);
+  color: #ef4444;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+}
+
+.inputDark {
+  background: #16213e;
+  border: 1px solid #252545;
+  color: #e0e0e0;
+  border-radius: 8px;
+}
+.inputDark:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.2);
+  background: #16213e;
+  color: #e0e0e0;
+}
+
+.selectDark {
+  background: #16213e;
+  border: 1px solid #252545;
+  color: #e0e0e0;
+  border-radius: 8px;
+}
+.selectDark:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.2);
+  background: #16213e;
+  color: #e0e0e0;
+}
+
+.labelText {
+  color: #94a3b8;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.btnOutline {
+  background: transparent;
+  border: 1px solid #252545;
+  color: #94a3b8;
+  font-size: 0.78rem;
+  border-radius: 8px;
+  padding: 0.3rem 0.8rem;
+  transition: all 0.2s ease;
+}
+.btnOutline:hover {
+  border-color: #4b9ecb;
+  color: #4b9ecb;
+  background: rgba(75,158,203,0.1);
+}
+
+.btnOutlineDanger {
+  background: transparent;
+  border: 1px solid #252545;
+  color: #94a3b8;
+  font-size: 0.78rem;
+  border-radius: 8px;
+  padding: 0.3rem 0.8rem;
+  transition: all 0.2s ease;
+}
+.btnOutlineDanger:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+  background: rgba(239,68,68,0.1);
+}
+
+.btnOutlinePrimary {
+  background: transparent;
+  border: 1px solid #252545;
+  color: #94a3b8;
+  font-size: 0.78rem;
+  border-radius: 8px;
+  padding: 0.3rem 0.8rem;
+  transition: all 0.2s ease;
+}
+.btnOutlinePrimary:hover {
+  border-color: #4b9ecb;
+  color: #4b9ecb;
+  background: rgba(75,158,203,0.1);
+}
+
+.checkboxDark {
+  accent-color: #4b9ecb;
+}
+
+.badgeDark {
+  background: rgba(75,158,203,0.15);
+  color: #7ab7d9;
+  font-size: 0.72rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+}
+
+.alertWarning {
+  background: rgba(234,179,8,0.1);
+  border: 1px solid rgba(234,179,8,0.2);
+  color: #eab308;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+}
+
+.alertInfo {
+  background: rgba(75,158,203,0.1);
+  border: 1px solid rgba(124,58,237,0.2);
+  color: #7ab7d9;
+  border-radius: 8px;
+}
+
+.btnDanger {
+  background: transparent;
+  border: 1px solid #ef4444;
+  color: #ef4444;
+  font-size: 0.85rem;
+  border-radius: 8px;
+  padding: 0.35rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btnDanger:hover:not(:disabled) {
+  background: rgba(239,68,68,0.1);
+}
+.btnDanger:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.inputGroupText {
+  background: #16213e;
+  border: 1px solid #252545;
+  color: #94a3b8;
+}
+
+.summaryCard {
+  background: #16213e;
+  border: 1px solid rgba(75,158,203,0.25);
+  border-radius: 10px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.infoCard {
+  background: #16213e;
+  border: 1px solid #252545;
+  border-radius: 10px;
+  padding: 0.75rem;
 }
 

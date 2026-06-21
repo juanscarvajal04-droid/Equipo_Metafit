@@ -1,17 +1,23 @@
-/* frontend_web/src/views/RutinasView.module.css */
+.page {
+  min-height: 100vh;
+  background: #0a0a0f;
+}
 
-/* ── Toast de notificación ── */
 .toast {
   z-index: 9999;
   min-width: 300px;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  border: 1px solid #252545;
+  border-left: 4px solid #4b9ecb;
+  border-radius: 8px;
 }
 
-/* ── Icono del título ── */
-.titleIcon {
+.headerIcon {
   width: 36px;
   height: 36px;
-  background: linear-gradient(135deg, #059669, #0d9488);
-  border-radius: 6px;
+  background: linear-gradient(135deg, #4b9ecb, #2d7db5);
+  border-radius: 8px;
   font-size: 1.1rem;
   display: inline-flex;
   align-items: center;
@@ -20,36 +26,89 @@
   flex-shrink: 0;
 }
 
-/* ── Buscador ── */
-.searchInput {
-  max-width: 240px;
+.headerTitle {
+  font-weight: 700;
+  margin-bottom: 0;
+  color: #e0e0e0;
 }
 
-/* ── Botón exportar ── */
+.headerSub {
+  color: #94a3b8;
+}
+
+.kpiCard {
+  min-width: 110px;
+  background: #1a1a2e;
+  border: 1px solid #252545 !important;
+  border-radius: 14px;
+  padding: 0.5rem 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.kpiCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 32px rgba(124,58,237,0.2);
+}
+
+.kpiLabel {
+  font-size: 0.68rem;
+  color: #94a3b8;
+}
+
+.searchInput {
+  max-width: none;
+  flex: 1;
+  min-width: 140px;
+  background: #1a1a2e;
+  border: 1px solid #252545;
+  color: #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.searchInput::placeholder {
+  color: #94a3b8;
+  opacity: 1;
+}
+
+.searchInput:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.2);
+  background: #1a1a2e;
+  color: #e0e0e0;
+}
+
 .exportBtn {
   white-space: nowrap;
   font-size: 0.78rem;
+  background: transparent;
+  border: 1px solid #252545;
+  color: #94a3b8;
+  border-radius: 8px;
+  padding: 0.25rem 0.75rem;
+  transition: all 0.2s ease;
+}
+.exportBtn:hover:not(:disabled) {
+  border-color: #4b9ecb;
+  color: #4b9ecb;
+  background: rgba(75,158,203,0.1);
 }
 
-/* ── Spinner pequeño en botón ── */
 .spinnerSm {
   width: 12px;
   height: 12px;
   border-width: 2px;
 }
 
-/* ── Spinner de color de marca ── */
 .spinnerBrand {
-  color: #059669;
+  color: #7c3aed;
 }
 
-/* ── Tabla: email del afiliado ── */
 .emailSm {
   font-size: 0.7rem;
+  color: #94a3b8;
 }
 
-/* ── Avatar del afiliado en tabla ── */
-/* background es DINÁMICO (hsl por id) → inline */
 .avatarTd {
   width: 36px;
   height: 36px;
@@ -63,91 +122,135 @@
   font-size: 0.8rem;
 }
 
-/* ── Columna de KPI card en tabla ── */
-.kpiCard {
-  min-width: 110px;
-}
-
-/* ── Valor de KPI en tabla ── */
-/* color es DINÁMICO (k.color) → inline */
-
-/* ── Label del KPI ── */
-.kpiLabel {
-  font-size: 0.68rem;
-}
-
-/* ── Badge de estado en tabla ── */
 .badgeSm {
   font-size: 0.7rem;
+  border-radius: 6px;
+  padding: 0.2rem 0.5rem;
 }
 
-/* ── Badge de ciclo activo ── */
 .badgeCiclo {
-  background: #05966918;
-  color: #059669;
+  background: rgba(75,158,203,0.15);
+  color: #7ab7d9;
   font-size: 0.7rem;
+  border-radius: 6px;
+  padding: 0.2rem 0.5rem;
 }
 
-/* ── Badge "Sin rutina" ── */
-/* usa Bootstrap bg-warning */
-
-/* ── Fila "Sin rutina" — background DINÁMICO (sinRutina ? ...) → inline ── */
-
-/* ── Botón asignar rutina ── */
 .btnAsignar {
-  background: linear-gradient(135deg, #059669, #0d9488);
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
   border: none;
   font-size: 0.78rem;
+  border-radius: 8px;
+  padding: 0.25rem 0.75rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
 }
 
 .btnAsignar:hover {
-  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(124,58,237,0.3);
 }
 
-/* ── Section label (Asignaciones recientes) ── */
+.btnOutline {
+  background: transparent;
+  border: 1px solid #252545;
+  color: #94a3b8;
+  font-size: 0.78rem;
+  border-radius: 8px;
+  padding: 0.3rem 0.8rem;
+  transition: all 0.2s ease;
+}
+.btnOutline:hover {
+  border-color: #4b9ecb;
+  color: #4b9ecb;
+  background: rgba(75,158,203,0.1);
+}
+
+.btnOutlineDanger {
+  background: transparent;
+  border: 1px solid #252545;
+  color: #94a3b8;
+  font-size: 0.78rem;
+  border-radius: 8px;
+  padding: 0.3rem 0.8rem;
+  transition: all 0.2s ease;
+}
+.btnOutlineDanger:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+  background: rgba(239,68,68,0.1);
+}
+
+.btnOutlineInfo {
+  background: transparent;
+  border: 1px solid #252545;
+  color: #94a3b8;
+  font-size: 0.78rem;
+  border-radius: 8px;
+  padding: 0.3rem 0.8rem;
+  transition: all 0.2s ease;
+}
+.btnOutlineInfo:hover {
+  border-color: #22d3ee;
+  color: #22d3ee;
+  background: rgba(34,211,238,0.1);
+}
+
 .sectionLabel {
   letter-spacing: 0.06em;
 }
 
-/* ── Card de asignación reciente ── */
-/* borderLeft es DINÁMICO (nivelCfg.text) → inline */
-
-/* ── Fecha en card ── */
 .fechaSm {
   font-size: 0.68rem;
 }
 
-/* ── Nivel badge en card asignación ── */
-/* background, color DINÁMICOS (nivelCfg) → inline */
 .nivelBadge {
   font-size: 0.6rem;
 }
 
-/* ── Modal overlay ── */
 .modalOverlay {
   background: rgba(0, 0, 0, 0.6);
   z-index: 1055;
 }
 
-/* ── Modal header verde ── */
-.modalHeaderVerde {
-  background: linear-gradient(135deg, #059669, #0d9488);
+.modalContent {
+  background: #1a1a2e;
+  border: 1px solid #252545;
+  border-radius: 14px;
 }
 
-/* ── Modal body scrollable ── */
+.modalHeaderVerde {
+  background: linear-gradient(135deg, #4b9ecb, #2d7db5);
+  border: none;
+  border-radius: 14px 14px 0 0;
+}
+
+.modalHeaderOscuro {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  border: none;
+  border-radius: 14px 14px 0 0;
+}
+
 .modalBody {
   max-height: 75vh;
   overflow-y: auto;
+  background: #1a1a2e;
+  color: #e0e0e0;
 }
 
-/* ── Sección de afiliado en modal ── */
+.modalFooter {
+  border-top: 1px solid #252545;
+  background: #1a1a2e;
+  border-radius: 0 0 14px 14px;
+}
+
 .afiliadoSection {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background: #16213e;
+  border: 1px solid #252545;
+  border-radius: 10px;
+  padding: 0.75rem;
 }
 
-/* ── Avatar del afiliado seleccionado en modal ── */
-/* background DINÁMICO (nivelCfg.bg) → inline */
 .avatarModal {
   width: 44px;
   height: 44px;
@@ -160,40 +263,149 @@
   flex-shrink: 0;
 }
 
-/* ── Nombre en modal ── */
-/* color DINÁMICO (nivelCfg.text) → inline */
-
-/* ── Check mark en item de rutina ── */
-/* color DINÁMICO → inline */
-
-/* ── Info debajo del nombre de rutina ── */
 .rutinaInfo {
   font-size: 0.7rem;
 }
 
-/* ── Badge de nivel en ítem de rutina en modal ── */
-/* background, color DINÁMICOS → inline */
 .nivelBadgeMd {
   font-size: 0.62rem;
 }
 
-/* ── Botón confirmar asignación ── */
 .btnConfirmar {
-  background: linear-gradient(135deg, #059669, #0d9488);
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
   border: none;
+  color: #fff;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.3s ease;
 }
 
-/* ── Modal Ver Rutina header ── */
-.modalHeaderOscuro {
-  background: linear-gradient(135deg, #1a1a2e, #16213e);
+.btnConfirmar:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(124,58,237,0.3);
 }
 
-/* ── Label en filas de datos del modal Ver ── */
 .dataLabel {
   font-size: 0.65rem;
+  color: #94a3b8;
 }
 
-/* ── Label dato progreso ── */
 .progresoLabel {
   font-size: 0.65rem;
+}
+
+.tableCard {
+  width: 100%;
+  background: #1a1a2e;
+  border: 1px solid #252545;
+  border-radius: 14px;
+}
+
+.tableCardHeader {
+  background: #0f0f1a;
+  border-bottom: 1px solid #252545;
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  border-radius: 14px 14px 0 0;
+}
+
+.table {
+  width: 100%;
+  margin-bottom: 0;
+}
+
+.table th {
+  color: #94a3b8;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  background: #0f0f1a;
+  border-bottom: 1px solid #252545;
+  padding: 0.7rem 0.75rem;
+  white-space: nowrap;
+}
+
+.table td {
+  background: transparent;
+  color: #e0e0e0;
+  border-bottom: 1px solid #252545;
+  padding: 0.6rem 0.75rem;
+  vertical-align: middle;
+}
+
+.table tbody tr {
+  transition: background 0.2s ease;
+}
+
+.table tbody tr:hover {
+  background: rgba(124, 58, 237, 0.08);
+}
+
+.table tbody tr:nth-child(even) {
+  background: #16213e;
+}
+
+.table tbody tr:nth-child(even):hover {
+  background: rgba(124, 58, 237, 0.08);
+}
+
+.emptyState {
+  color: #94a3b8;
+}
+
+.alertDanger {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.2);
+  color: #ef4444;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+}
+
+.inputDark {
+  background: #16213e;
+  border: 1px solid #252545;
+  color: #e0e0e0;
+  border-radius: 8px;
+}
+.inputDark:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.2);
+  background: #16213e;
+  color: #e0e0e0;
+}
+
+.selectDark {
+  background: #16213e;
+  border: 1px solid #252545;
+  color: #e0e0e0;
+  border-radius: 8px;
+}
+.selectDark:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.2);
+  background: #16213e;
+  color: #e0e0e0;
+}
+
+.labelText {
+  color: #94a3b8;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.badgeDark {
+  background: rgba(75,158,203,0.15);
+  color: #7ab7d9;
+  font-size: 0.72rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+}
+
+.checkboxDark {
+  accent-color: #4b9ecb;
 }

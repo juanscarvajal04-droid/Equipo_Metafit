@@ -174,28 +174,23 @@ export default function PagosView() {
       {/* Toast */}
       {toast.msg && (
         <div
-          className="position-fixed bottom-0 end-0 m-4 alert alert-dark shadow-lg py-3 px-4"
-          style={{ zIndex: 9999, minWidth: 320, borderLeft: "4px solid #059669" }}
+          className={`position-fixed bottom-0 end-0 m-4 alert shadow-lg py-3 px-4 ${s.toast}`}
+          style={{ zIndex: 9999, minWidth: 320 }}
         >
           {toast.msg}
         </div>
       )}
 
-      <div className="container-fluid py-4 px-3 px-md-4">
+      <div className={`container-fluid py-4 px-3 px-md-4 ${s.page}`}>
 
         {/* ── Encabezado ── */}
         <div className="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-3">
           <div>
-            <h1 className="h4 fw-bold mb-0 d-flex align-items-center gap-2">
-              <span
-                className="d-inline-flex align-items-center justify-content-center rounded-2 text-white"
-                style={{ width: 36, height: 36, background: "linear-gradient(135deg,#2563eb,#7c3aed)", fontSize: "1.1rem" }}
-              >
-                💳
-              </span>
+            <h1 className={`h4 fw-bold mb-0 d-flex align-items-center gap-2 ${s.headerTitle}`}>
+              <span className={`d-inline-flex align-items-center justify-content-center ${s.headerIcon}`}>💳</span>
               Gestión de Pagos
             </h1>
-            <small className="text-muted">
+            <small className={s.headerSub}>
               Registro de mensualidades en efectivo · {new Date().toLocaleDateString("es-CO", { dateStyle: "long" })}
             </small>
           </div>
@@ -206,71 +201,66 @@ export default function PagosView() {
               {
                 label: "Recaudado hoy (Efectivo)",
                 valor: loading ? "—" : `$${kpis.recaudadoHoy.toLocaleString("es-CO")}`,
-                color: "#2563eb", icono: "💵",
+                color: "#4b9ecb", icono: "💵",
               },
               {
                 label: "Por vencer (≤10 días)",
                 valor: loading ? "—" : kpis.porVencer,
-                color: "#f59e0b", icono: "⏳",
+                color: "#eab308", icono: "⏳",
               },
               {
                 label: "En mora",
                 valor: loading ? "—" : kpis.mora,
-                color: "#e94560", icono: "🔴",
+                color: "#ef4444", icono: "🔴",
               },
             ].map((k) => (
-              <div
-                key={k.label}
-                className="card border-0 shadow-sm px-3 py-2 text-center"
-                style={{ minWidth: 150 }}
-              >
-                <div className="fw-bold fs-5" style={{ color: k.color }}>
+              <div key={k.label} className={s.kpiCard}>
+                <div className={s.kpiValor} style={{ color: k.color }}>
                   {k.icono} {k.valor}
                 </div>
-                <div className="text-muted" style={{ fontSize: "0.65rem" }}>{k.label}</div>
+                <div className={s.kpiLabel}>{k.label}</div>
               </div>
             ))}
           </div>
         </div>
 
         {/* ── Tabla ── */}
-        <div className="card border-0 shadow-sm">
-          <div className="card-header bg-white py-3 d-flex justify-content-between align-items-center border-0 flex-wrap gap-2">
-            <span className="fw-semibold text-muted small">{filtrados.length} afiliados</span>
+        <div className={s.tableCard}>
+          <div className={s.tableCardHeader}>
+            <span style={{color:"#94a3b8",fontSize:"0.85rem",fontWeight:600}}>{filtrados.length} afiliados</span>
             <input
               id="busqueda-pagos"
               type="text"
-              className="form-control form-control-sm"
-              style={{ maxWidth: 260 }}
+              className={`form-control form-control-sm ${s.searchInput}`}
               placeholder="🔍 Nombre o correo..."
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
             />
           </div>
 
-          <div className="card-body p-0">
-            {error   && <div className="alert alert-danger m-3 py-2"><small>⚠️ {error}</small></div>}
-            {loading && <div className="text-center py-5"><div className="spinner-border" style={{ color: "#2563eb" }} /></div>}
+          <div style={{borderRadius:"0 0 14px 14px"}}>
+            {error   && <div className={s.alertDanger} style={{margin:"0.75rem",padding:"0.4rem 0.75rem"}}><small>⚠️ {error}</small></div>}
+            {loading && <div className="text-center py-5"><div className={`spinner-border ${s.spinnerBrand}`} /></div>}
 
             {!loading && !error && (
-              <div className="mf-table-wrap">
-                <table className="table table-hover align-middle mb-0 mf-table">
-                  <thead className="table-light">
+              <div className={s.tableCard}>
+                <table className={s.table}>
+                  <thead>
                     <tr>
-                      <th className="ps-3">#</th>
-                      <th className="col-nombre">Afiliado</th>
-                      <th className="col-fecha">Último pago</th>
-                      <th className="col-fecha">Vencimiento</th>
-                      <th className="col-dias">Días restantes</th>
-                      <th className="col-estado">Estado membresía</th>
-                      <th className="col-acceso">Acceso</th>
-                      <th className="col-acciones pe-3">Acciones</th>
+                      <th style={{paddingLeft:"1.25rem"}}>#</th>
+                      <th>Afiliado</th>
+                      <th>Último pago</th>
+                      <th>Vencimiento</th>
+                      <th>Días restantes</th>
+                      <th>Estado membresía</th>
+                      <th>Acceso</th>
+                      <th style={{textAlign:"center",paddingRight:"1rem"}}>Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filtrados.length === 0 ? (
                       <tr>
-                        <td colSpan={8} className="text-center text-muted py-5">
+                        <td colSpan={8} className={`text-center py-5 ${s.emptyState}`}>
                           {busqueda ? `Sin resultados para "${busqueda}"` : "No hay afiliados."}
                         </td>
                       </tr>
@@ -281,73 +271,60 @@ export default function PagosView() {
                       const vencido = dias !== null && dias < 0;
 
                       return (
-                        <tr
-                          key={getId(a)}
-                          style={{
-                            background: vencido ? "#fff5f5" : dias !== null && dias <= 10 ? "#fffbeb" : "transparent",
-                          }}
-                        >
-                          <td className="ps-3 text-muted small">{idx + 1}</td>
+                        <tr key={getId(a)}>
+                          <td style={{paddingLeft:"1.25rem"}} className={s.emptyState}>{idx + 1}</td>
 
                           {/* Afiliado */}
-                          <td className="col-nombre">
+                          <td>
                             <div className="d-flex align-items-center gap-2">
-                              <div
-                                className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0"
+                              <div className={s.avatarTd}
                                 style={{
-                                  width: 36, height: 36, fontSize: "0.85rem",
                                   background: `hsl(${(getId(a) * 47) % 360},65%,55%)`,
                                 }}
                               >
                                 {inicial(a)}
                               </div>
                               <div>
-                                <div className="fw-semibold small">{nombreCompleto(a)}</div>
-                                <div className="text-muted" style={{ fontSize: "0.7rem" }}>{a.correo || "—"}</div>
+                                <div className="fw-semibold small" style={{color:"#e0e0e0"}}>{nombreCompleto(a)}</div>
+                                <div className={s.emailSm}>{a.correo || "—"}</div>
                               </div>
                             </div>
                           </td>
 
                           {/* Último pago */}
-                          <td className="col-fecha">
+                          <td>
                             {ult ? (
                               <div>
-                                <div className="small fw-semibold">{ult.fecha_pago}</div>
-                                <div className="text-muted" style={{ fontSize: "0.7rem" }}>
+                                <div className="small fw-semibold" style={{color:"#e0e0e0"}}>{ult.fecha_pago}</div>
+                                <div className={s.pagoInfo}>
                                   💵 ${Number(ult.valor_pagado || 80000).toLocaleString("es-CO")}
                                 </div>
                               </div>
                             ) : (
-                              <span className="text-muted small">Sin registro</span>
+                              <span className={s.emptyState} style={{fontSize:"0.85rem"}}>Sin registro</span>
                             )}
                           </td>
 
                           {/* Vencimiento */}
-                          <td className="col-fecha">
+                          <td>
                             {fechaVenc(a) ? (
-                              <span
-                                className="small fw-semibold"
-                                style={{ color: est.color }}
-                              >
+                              <span className="small fw-semibold" style={{ color: est.color }}>
                                 {fechaVenc(a)}
                               </span>
                             ) : (
-                              <span className="text-muted small">—</span>
+                              <span className={s.emptyState} style={{fontSize:"0.85rem"}}>—</span>
                             )}
                           </td>
 
                           {/* Días restantes */}
-                          <td className="col-dias">
+                          <td>
                             {dias === null ? (
-                              <span className="text-muted small">—</span>
+                              <span className={s.emptyState} style={{fontSize:"0.85rem"}}>—</span>
                             ) : (
-                              <span
-                                className="badge px-2 py-1 fw-bold"
+                              <span className={`badge px-2 py-1 fw-bold ${s.diasBadge}`}
                                 style={{
                                   background: est.bg,
-                                  color:      est.color,
-                                  fontSize:   "0.75rem",
-                                  minWidth:   48,
+                                  color: est.color,
                                 }}
                               >
                                 {dias < 0 ? `−${Math.abs(dias)}d` : `${dias}d`}
@@ -356,10 +333,9 @@ export default function PagosView() {
                           </td>
 
                           {/* Estado membresía */}
-                          <td className="col-estado">
-                            <span
-                              className="badge px-3 py-1"
-                              style={{ background: est.bg, color: est.color, fontSize: "0.72rem" }}
+                          <td>
+                            <span className={`badge px-3 py-1 ${s.estadoBadge}`}
+                              style={{ background: est.bg, color: est.color }}
                             >
                               {est.label === "Al día"          && "✅ "}
                               {est.label === "Por vencer"      && "⏳ "}
@@ -370,25 +346,24 @@ export default function PagosView() {
                           </td>
 
                           {/* Acceso */}
-                          <td className="col-acceso">
+                          <td>
                             {vencido ? (
-                              <span className="badge bg-danger bg-opacity-15 text-danger" style={{ fontSize: "0.7rem" }}>
+                              <span className={`badge ${s.accesoBadge}`} style={{background:"rgba(239,68,68,0.15)",color:"#ef4444"}}>
                                 🔒 Inactivo
                               </span>
                             ) : (
-                              <span className="badge bg-success bg-opacity-15 text-success" style={{ fontSize: "0.7rem" }}>
+                              <span className={`badge ${s.accesoBadge}`} style={{background:"rgba(34,197,94,0.15)",color:"#22c55e"}}>
                                 🟢 Activo
                               </span>
                             )}
                           </td>
 
                           {/* Acciones */}
-                          <td className="col-acciones pe-3">
+                          <td className="text-center" style={{paddingRight:"1rem"}}>
                             <div className="d-flex gap-1 justify-content-center">
                               {/* Historial */}
                               {pagosDeAfiliado(a).length > 0 && (
-                                <button
-                                  className="btn btn-outline-secondary btn-sm"
+                                <button className={s.btnOutline}
                                   id={`btn-historial-${getId(a)}`}
                                   title="Ver historial de pagos"
                                   onClick={() => setHistModal(a)}
@@ -397,15 +372,9 @@ export default function PagosView() {
                                 </button>
                               )}
                               {/* Registrar pago */}
-                              <button
-                                className="btn btn-sm fw-semibold text-white"
+                              <button className={`btn btn-sm fw-semibold text-white ${s.btnPago}`}
                                 id={`btn-pago-${getId(a)}`}
                                 title="Registrar pago en efectivo"
-                                style={{
-                                  background: "linear-gradient(135deg,#2563eb,#7c3aed)",
-                                  border: "none",
-                                  fontSize: "0.78rem",
-                                }}
                                 onClick={() => { setPagoModal(a); setPagoError(""); }}
                               >
                                 💵 Registrar pago
@@ -421,11 +390,11 @@ export default function PagosView() {
             )}
 
             {!loading && !error && (
-              <div className="card-footer bg-white border-0 text-muted small py-2 px-4 d-flex gap-4">
+              <div className={s.tableCardFooter}>
                 <span>✅ Al día: <strong>{afiliados.filter((a) => { const d = diasRestantes(fechaVenc(a)); return d !== null && d > 10; }).length}</strong></span>
-                <span>⏳ Por vencer: <strong>{kpis.porVencer}</strong></span>
-                <span>🔴 En mora: <strong>{kpis.mora}</strong></span>
-                <span>⚪ Sin registro: <strong>{afiliados.filter((a) => !fechaVenc(a)).length}</strong></span>
+                <span className="ms-3">⏳ Por vencer: <strong>{kpis.porVencer}</strong></span>
+                <span className="ms-3">🔴 En mora: <strong>{kpis.mora}</strong></span>
+                <span className="ms-3">⚪ Sin registro: <strong>{afiliados.filter((a) => !fechaVenc(a)).length}</strong></span>
               </div>
             )}
           </div>
@@ -451,12 +420,9 @@ export default function PagosView() {
               className="modal-dialog modal-dialog-centered"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="modal-content border-0 shadow-lg">
+              <div className={`border-0 shadow-lg ${s.modalContent}`}>
                 {/* Header */}
-                <div
-                  className="modal-header text-white border-0"
-                  style={{ background: "linear-gradient(135deg,#2563eb,#7c3aed)" }}
-                >
+                <div className={`modal-header text-white border-0 ${s.modalHeaderAzul}`}>
                   <h5 className="modal-title">💵 Registrar Pago en Efectivo</h5>
                   <button
                     className="btn-close btn-close-white"
@@ -465,37 +431,32 @@ export default function PagosView() {
                   />
                 </div>
 
-                <div className="modal-body py-4">
+                <div className={`modal-body py-4 ${s.modalBody}`}>
                   {pagoError && (
-                    <div className="alert alert-danger py-2 mb-3">
+                    <div className={s.alertDanger} style={{marginBottom:"0.75rem",padding:"0.4rem 0.75rem"}}>
                       <small>⚠️ {pagoError}</small>
                     </div>
                   )}
 
                   {/* Info afiliado */}
-                  <div
-                    className="rounded-3 p-3 mb-4 d-flex align-items-center gap-3"
-                    style={{ background: "#f0f4ff", border: "1px solid #c7d2fe" }}
-                  >
-                    <div
-                      className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0"
+                  <div className={`rounded-3 p-3 mb-4 d-flex align-items-center gap-3 ${s.afiliadoBox}`}>
+                    <div className={s.avatarModal}
                       style={{
-                        width: 48, height: 48, fontSize: "1.1rem",
                         background: `hsl(${(getId(pagoModal) * 47) % 360},65%,55%)`,
                       }}
                     >
                       {inicial(pagoModal)}
                     </div>
                     <div>
-                      <div className="fw-bold">{nombreCompleto(pagoModal)}</div>
-                      <div className="text-muted small">{pagoModal.correo || "—"}</div>
+                      <div className="fw-bold" style={{color:"#e0e0e0"}}>{nombreCompleto(pagoModal)}</div>
+                      <div className={s.headerSub} style={{fontSize:"0.85rem"}}>{pagoModal.correo || "—"}</div>
                     </div>
                   </div>
 
                   {/* Estado actual */}
                   <div className="row g-3 mb-4">
                     <div className="col-6">
-                      <small className="text-muted d-block text-uppercase fw-semibold" style={{ fontSize: "0.65rem" }}>
+                      <small className={`d-block text-uppercase fw-semibold ${s.dataLabel}`}>
                         Estado actual
                       </small>
                       <span className="badge px-2 py-1 mt-1" style={{ background: est.bg, color: est.color }}>
@@ -504,34 +465,31 @@ export default function PagosView() {
                       </span>
                     </div>
                     <div className="col-6">
-                      <small className="text-muted d-block text-uppercase fw-semibold" style={{ fontSize: "0.65rem" }}>
+                      <small className={`d-block text-uppercase fw-semibold ${s.dataLabel}`}>
                         Vencimiento actual
                       </small>
-                      <div className="fw-semibold small mt-1">{vencActual || "Sin registro"}</div>
+                      <div className={s.dataValue} style={{marginTop:"0.25rem"}}>{vencActual || "Sin registro"}</div>
                     </div>
                   </div>
 
                   {/* Confirmación */}
-                  <div
-                    className="rounded-3 p-3 text-center"
-                    style={{ background: "#f0fdf4", border: "2px solid #86efac" }}
-                  >
+                  <div className={s.confirmBox}>
                     <div className="fs-4 mb-2">💵</div>
-                    <p className="mb-2 fw-semibold">
+                    <p className="mb-2 fw-semibold" style={{color:"#e0e0e0"}}>
                       ¿Confirmas que el afiliado ha pagado la mensualidad en efectivo?
                     </p>
-                    <p className="text-muted small mb-3">
-                      Monto: <strong>$80,000 COP</strong> · Método: <strong>Efectivo</strong>
+                    <p className={s.headerSub} style={{fontSize:"0.85rem",marginBottom:"0.75rem"}}>
+                      Monto: <strong style={{color:"#a78bfa"}}>$80,000 COP</strong> · Método: <strong style={{color:"#a78bfa"}}>Efectivo</strong>
                     </p>
                     <div className="d-flex justify-content-center align-items-center gap-2">
-                      <span className="text-muted small">Nuevo vencimiento:</span>
-                      <span className="badge px-3 py-2" style={{ background: "#05966918", color: "#059669", fontSize: "0.85rem" }}>
+                      <span className={s.headerSub} style={{fontSize:"0.85rem"}}>Nuevo vencimiento:</span>
+                      <span className={`badge px-3 py-2 ${s.vencBadge}`}>
                         📅 {nuevaFecha}
                       </span>
                     </div>
                     {dias < 0 && (
                       <div className="mt-2">
-                        <span className="badge bg-warning text-dark" style={{ fontSize: "0.7rem" }}>
+                        <span className={s.moraBadge} style={{background:"rgba(234,179,8,0.15)",color:"#eab308",padding:"0.25rem 0.6rem",borderRadius:"6px"}}>
                           ⚠️ Afiliado en mora — se reactivará automáticamente
                         </span>
                       </div>
@@ -539,10 +497,10 @@ export default function PagosView() {
                   </div>
                 </div>
 
-                <div className="modal-footer border-0 pt-0">
+                <div className={`modal-footer pt-3 ${s.modalFooter}`}>
                   <button
                     type="button"
-                    className="btn btn-outline-secondary btn-sm px-4"
+                    className={s.btnOutline}
                     onClick={() => setPagoModal(null)}
                     disabled={saving}
                   >
@@ -551,8 +509,7 @@ export default function PagosView() {
                   <button
                     id="btn-confirmar-pago-efectivo"
                     type="button"
-                    className="btn btn-sm text-white fw-semibold px-4"
-                    style={{ background: "linear-gradient(135deg,#2563eb,#7c3aed)", border: "none" }}
+                    className={`btn btn-sm text-white fw-semibold px-4 ${s.btnConfirmar}`}
                     disabled={saving}
                     onClick={handlePago}
                   >
@@ -579,44 +536,41 @@ export default function PagosView() {
             className="modal-dialog modal-dialog-scrollable"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="modal-content border-0 shadow-lg">
-              <div
-                className="modal-header text-white border-0"
-                style={{ background: "linear-gradient(135deg,#1a1a2e,#16213e)" }}
-              >
+            <div className={`border-0 shadow-lg ${s.modalContent}`}>
+              <div className={`modal-header text-white border-0 ${s.modalHeaderOscuro}`}>
                 <h5 className="modal-title">
                   🧾 Historial de Pagos — {nombreCompleto(histModal)}
                 </h5>
                 <button className="btn-close btn-close-white" onClick={() => setHistModal(null)} />
               </div>
 
-              <div className="modal-body p-0">
+              <div className={`modal-body p-0 ${s.modalBody}`}>
                 {pagosDeAfiliado(histModal).length === 0 ? (
-                  <div className="text-center text-muted py-5">Sin pagos registrados.</div>
+                  <div className={`text-center py-5 ${s.emptyState}`}>Sin pagos registrados.</div>
                 ) : (
-                  <table className="table align-middle mb-0">
-                    <thead className="table-light">
+                  <table className={s.table}>
+                    <thead>
                       <tr>
-                        <th className="ps-4">Fecha pago</th>
+                        <th style={{paddingLeft:"1.25rem"}}>Fecha pago</th>
                         <th className="text-center">Estado</th>
                         <th className="text-center">Monto</th>
-                        <th className="text-center pe-4">Vencimiento</th>
+                        <th className="text-center" style={{paddingRight:"1rem"}}>Vencimiento</th>
                       </tr>
                     </thead>
                     <tbody>
                       {pagosDeAfiliado(histModal).map((p, i) => (
                         <tr key={i}>
-                          <td className="ps-4 small fw-semibold">{p.fecha_pago}</td>
+                          <td style={{paddingLeft:"1.25rem",color:"#e0e0e0"}} className="small fw-semibold">{p.fecha_pago}</td>
                           <td className="text-center">
-                            <span className="badge bg-success bg-opacity-15 text-success" style={{ fontSize: "0.7rem" }}>
+                            <span className={s.accesoBadge} style={{background:"rgba(34,197,94,0.15)",color:"#22c55e",padding:"0.25rem 0.6rem",borderRadius:"6px"}}>
                               💵 {p.estado || "Pagado"}
                             </span>
                           </td>
-                          <td className="text-center small fw-semibold text-success">
+                          <td className="text-center small fw-semibold" style={{color:"#22c55e"}}>
                             ${Number(p.valor_pagado || 80000).toLocaleString("es-CO")}
                           </td>
-                          <td className="text-center text-muted pe-4" style={{ fontSize: "0.7rem" }}>
-                            {p.fecha_vencimiento || "—"}
+                          <td className="text-center" style={{paddingRight:"1rem"}}>
+                            <span className={s.headerSub} style={{fontSize:"0.7rem"}}>{p.fecha_vencimiento || "—"}</span>
                           </td>
                         </tr>
                       ))}
@@ -625,15 +579,15 @@ export default function PagosView() {
                 )}
               </div>
 
-              <div className="modal-footer border-0">
-                <div className="text-muted small">
-                  Total registros: <strong>{pagosDeAfiliado(histModal).length}</strong>
+              <div className={`modal-footer ${s.modalFooter}`}>
+                <div className={s.headerSub} style={{fontSize:"0.8rem"}}>
+                  Total registros: <strong style={{color:"#e0e0e0"}}>{pagosDeAfiliado(histModal).length}</strong>
                   &nbsp;·&nbsp; Total recaudado:&nbsp;
-                  <strong className="text-success">
+                  <strong style={{color:"#22c55e"}}>
                     ${pagosDeAfiliado(histModal).reduce((s, p) => s + Number(p.valor_pagado || 80000), 0).toLocaleString("es-CO")} COP
                   </strong>
                 </div>
-                <button className="btn btn-secondary btn-sm" onClick={() => setHistModal(null)}>
+                <button className={s.btnOutline} onClick={() => setHistModal(null)}>
                   Cerrar
                 </button>
               </div>

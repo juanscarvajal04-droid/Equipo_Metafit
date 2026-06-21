@@ -1,5 +1,6 @@
 // backend/models/notificacionModel.js
 // Notificaciones contextuales por rol — queries contra tablas reales
+// FASE NOTIFICACIONES: queries corregidas + campo ruta en todas + progreso_estancado
 'use strict';
 
 const pool = require('../config/db');
@@ -29,7 +30,7 @@ const NotificacionModel = {
     const [[{ nuevos }]] = await pool.query(`
       SELECT COUNT(*) AS nuevos
       FROM AFILIADO
-      WHERE fecha_registro >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+      WHERE fecha_registro >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
     `);
     const [[{ pendientes }]] = await pool.query(`
       SELECT COUNT(*) AS pendientes
@@ -40,8 +41,8 @@ const NotificacionModel = {
 
     return [
       { tipo: 'membresias_por_vencer', mensaje: 'Membresías por vencer esta semana', cantidad: membresias, icono: '💳', ruta: '/pagos' },
-      { tipo: 'nuevos_afiliados', mensaje: 'Nuevos afiliados en los últimos 30 días', cantidad: nuevos,     icono: '👤', ruta: '/afiliados' },
-      { tipo: 'personal_pendiente', mensaje: 'Personal pendiente de activación',      cantidad: pendientes, icono: '🛡️', ruta: '/personal' },
+      { tipo: 'nuevos_afiliados',      mensaje: 'Nuevos afiliados esta semana',       cantidad: nuevos,     icono: '👤', ruta: '/afiliados' },
+      { tipo: 'personal_pendiente',    mensaje: 'Personal pendiente de activación',   cantidad: pendientes, icono: '🛡️', ruta: '/personal' },
     ];
   },
 
@@ -65,14 +66,14 @@ const NotificacionModel = {
     const [[{ nuevos }]] = await pool.query(`
       SELECT COUNT(*) AS nuevos
       FROM AFILIADO
-      WHERE fecha_registro >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+      WHERE fecha_registro >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
     `);
 
     return [
       { tipo: 'pagos_hoy',         mensaje: 'Pagos registrados hoy',                cantidad: pagosHoy, icono: '💵', ruta: '/pagos' },
       { tipo: 'pagos_vencidos',    mensaje: 'Pagos vencidos o pendientes',          cantidad: vencidos, icono: '🔴', ruta: '/pagos' },
       { tipo: 'cumpleaños_mes',    mensaje: 'Cumpleaños del mes',                   cantidad: cumples,  icono: '🎂', ruta: '/afiliados' },
-      { tipo: 'bienvenida_nuevos', mensaje: 'Nuevos afiliados en los últimos 30 d', cantidad: nuevos,   icono: '👤', ruta: '/afiliados' },
+      { tipo: 'bienvenida_nuevos', mensaje: 'Nuevos afiliados esta semana',         cantidad: nuevos,   icono: '👤', ruta: '/afiliados' },
     ];
   },
 
@@ -80,10 +81,20 @@ const NotificacionModel = {
     const [[{ sin_plan }]] = await pool.query(`
       SELECT COUNT(DISTINCT a.id_usuario) AS sin_plan
       FROM AFILIADO a
+      JOIN AFILIADO_RESTRICCION ar ON ar.id_usuario = a.id_usuario
       LEFT JOIN CICLO c ON c.id_usuario = a.id_usuario AND c.activo = 1
       LEFT JOIN PLAN_ENTRENAMIENTO pe ON pe.id_ciclo = c.id_ciclo
       WHERE a.estado_afiliacion = 'Activo'
         AND (c.id_ciclo IS NULL OR pe.id_ciclo IS NULL)
+    `);
+
+    const [[{ estancados }]] = await pool.query(`
+      SELECT COUNT(DISTINCT c.id_usuario) AS estancados
+      FROM CICLO c
+      LEFT JOIN PROGRESO_FISICO pf ON pf.id_ciclo = c.id_ciclo
+        AND pf.fecha_registro >= DATE_SUB(CURDATE(), INTERVAL 15 DAY)
+      WHERE c.activo = 1
+        AND pf.id_ciclo IS NULL
     `);
 
     const [[{ activos }]] = await pool.query(`
@@ -93,16 +104,17 @@ const NotificacionModel = {
     `);
 
     const [[{ con_restricciones }]] = await pool.query(`
-      SELECT COUNT(DISTINCT id_usuario) AS con_restricciones
+      SELECT COUNT(DISTINCT ar.id_usuario) AS con_restricciones
       FROM AFILIADO_RESTRICCION ar
       JOIN AFILIADO a ON ar.id_usuario = a.id_usuario
       WHERE a.estado_afiliacion = 'Activo'
     `);
 
     return [
-      { tipo: 'sin_plan',          mensaje: 'Afiliados activos sin plan de entrenamiento',     cantidad: sin_plan,          icono: '⚠️', ruta: '/rutinas' },
-      { tipo: 'ciclos_activos',    mensaje: 'Ciclos de entrenamiento activos',                  cantidad: activos,           icono: '🔄', ruta: '/afiliados' },
-      { tipo: 'con_restricciones', mensaje: 'Afiliados activos con restricciones médicas',      cantidad: con_restricciones, icono: '🩺', ruta: '/afiliados' },
+      { tipo: 'sin_plan',            mensaje: 'Afiliados con restricciones sin plan',   cantidad: sin_plan,     icono: '⚠️', ruta: '/rutinas' },
+      { tipo: 'progreso_estancado',  mensaje: 'Sin registro de progreso (+15 días)',   cantidad: estancados,   icono: '📉', ruta: '/rutinas' },
+      { tipo: 'ciclos_activos',      mensaje: 'Ciclos de entrenamiento activos',        cantidad: activos,      icono: '🔄', ruta: '/rutinas' },
+      { tipo: 'con_restricciones',   mensaje: 'Afiliados activos con restricciones',    cantidad: con_restricciones, icono: '🩺', ruta: '/afiliados' },
     ];
   },
 };

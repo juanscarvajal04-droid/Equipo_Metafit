@@ -70,6 +70,32 @@ const CatalogoModel = {
     return r.insertId;
   },
 
+  deleteEjercicio: async (id) => {
+    const [r] = await pool.query('DELETE FROM EJERCICIO WHERE id_ejercicio = ?', [id]);
+    return r.affectedRows;
+  },
+
+  deleteAlimento: async (id) => {
+    const [r] = await pool.query('DELETE FROM ALIMENTO WHERE id_alimento = ?', [id]);
+    return r.affectedRows;
+  },
+
+  updateEjercicio: async (id, { nombre_ejercicio, grupo_muscular, nivel_minimo, descripcion }) => {
+    const [r] = await pool.query(
+      'UPDATE EJERCICIO SET nombre_ejercicio = ?, grupo_muscular = ?, nivel_minimo = ?, descripcion = ? WHERE id_ejercicio = ?',
+      [nombre_ejercicio, grupo_muscular, nivel_minimo, descripcion || null, id]
+    );
+    return r.affectedRows;
+  },
+
+  updateAlimento: async (id, { nombre_alimento, proteinas, carbohidratos, grasas }) => {
+    const [r] = await pool.query(
+      'UPDATE ALIMENTO SET nombre_alimento = ?, proteinas = ?, carbohidratos = ?, grasas = ? WHERE id_alimento = ?',
+      [nombre_alimento, proteinas, carbohidratos, grasas, id]
+    );
+    return r.affectedRows;
+  },
+
   // ── RESTRICCIONES ─────────────────────────────────────────
   getAllRestricciones: async () => {
     const [rows] = await pool.query(

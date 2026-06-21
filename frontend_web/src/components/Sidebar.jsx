@@ -9,6 +9,7 @@ const NAV_OPERATIVO = {
   // ADMINISTRADOR — acceso total + módulo exclusivo de personal
   Administrador: [
     { to: "/dashboard", icon: "📊", label: "Dashboard" },
+    { to: "/finanzas",  icon: "💰", label: "Finanzas"  },
     { to: "/afiliados", icon: "👥", label: "Afiliados" },
     { to: "/rutinas",   icon: "🏋️", label: "Rutinas"   },
     { to: "/dietas",    icon: "🥗", label: "Dietas"    },
@@ -33,12 +34,6 @@ const NAV_ADMIN_EXCLUSIVO = [
 ];
 
 /** Paleta de colores por rol — permanecen inline por ser dinámicos */
-const ROLE_COLOR = {
-  Administrador: "#7c3aed",
-  Recepcionista: "#2563eb",
-  Entrenador:    "#059669",
-};
-
 const ROLE_GRADIENT = {
   Administrador: "linear-gradient(135deg,#7c3aed,#4f46e5)",
   Recepcionista: "linear-gradient(135deg,#2563eb,#0891b2)",
@@ -57,34 +52,13 @@ const ROLE_LABEL = {
   Entrenador:    "Entrenador",
 };
 
-/**
- * Estilos del NavLink: solo los valores DINÁMICOS (que dependen del rol)
- * permanecen inline. Los estáticos están en Sidebar.module.css.
- */
-const linkStyle = (isActive, color) => ({
-  display: "flex",
-  alignItems: "center",
-  gap: "10px",
-  padding: "9px 20px",
-  textDecoration: "none",
-  fontSize: "0.82rem",
-  fontWeight: 600,
-  color: isActive ? "#fff" : "rgba(255,255,255,0.55)",
-  background: isActive ? `${color}28` : "transparent",
-  borderLeft: isActive ? `3px solid ${color}` : "3px solid transparent",
-  transition: "all 0.18s ease",
-  borderRadius: "0 6px 6px 0",
-  marginRight: "8px",
-});
-
 export default function Sidebar() {
   const { user, logout } = useAuth();
   const navigate         = useNavigate();
 
   const role     = user?.role || "Recepcionista";
   const links    = NAV_OPERATIVO[role] || [];
-  const color    = ROLE_COLOR[role]    || "#6c757d";
-  const gradient = ROLE_GRADIENT[role] || ROLE_COLOR[role];
+  const gradient = ROLE_GRADIENT[role] || "#7c3aed";
   const isAdmin  = role === "Administrador";
 
   const handleLogout = () => { logout(); navigate("/"); };
@@ -119,7 +93,7 @@ export default function Sidebar() {
               className={`badge mt-1 ${styles.profileBadge}`}
               style={{
                 background: gradient,
-                boxShadow: isAdmin ? `0 2px 8px ${color}55` : "none",
+                boxShadow: isAdmin ? "0 2px 8px rgba(124,58,237,0.45)" : "none",
               }}
             >
               {ROLE_ICON[role]} {ROLE_LABEL[role]}
@@ -143,14 +117,9 @@ export default function Sidebar() {
           <NavLink
             key={link.to}
             to={link.to}
-            style={({ isActive }) => linkStyle(isActive, color)}
-            onMouseEnter={(e) => {
-              if (!e.currentTarget.style.borderLeft.includes(color.slice(1))) {
-                e.currentTarget.style.color = "#fff";
-                e.currentTarget.style.background = "rgba(255,255,255,0.05)";
-              }
-            }}
-            onMouseLeave={() => {/* NavLink resetea el estilo al quitar hover */}}
+            className={({ isActive }) =>
+              `${styles.navLink} ${isActive ? styles.navLinkActive : ""}`
+            }
           >
             <span className={styles.navIcon}>{link.icon}</span>
             <span>{link.label}</span>
@@ -168,15 +137,9 @@ export default function Sidebar() {
               <NavLink
                 key={link.to}
                 to={link.to}
-                style={({ isActive }) => ({
-                  ...linkStyle(isActive, "#7c3aed"),
-                  background: isActive
-                    ? "rgba(124,58,237,0.22)"
-                    : "rgba(124,58,237,0.06)",
-                  borderLeft: isActive
-                    ? "3px solid #a78bfa"
-                    : "3px solid rgba(124,58,237,0.3)",
-                })}
+                className={({ isActive }) =>
+                  `${styles.navLinkAdmin} ${isActive ? styles.navLinkAdminActive : ""}`
+                }
               >
                 <span className={styles.navIcon}>{link.icon}</span>
                 <span>{link.label}</span>

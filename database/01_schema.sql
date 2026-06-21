@@ -597,11 +597,13 @@ CREATE TABLE IF NOT EXISTS `PAGO` (
   `estado`            ENUM('Pagado','Vencido','Pendiente') NOT NULL DEFAULT 'Pagado',
   `fecha_vencimiento` DATE         NOT NULL,
   `observaciones`     VARCHAR(200) NULL,
+  `registrado_por`    INT          NULL COMMENT 'id_usuario de quien registró el pago (Admin/Recepcionista)',
   `fecha_creacion`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
   PRIMARY KEY (`id_pago`),
   INDEX `idx_pago_afiliado` (`id_usuario`),
   INDEX `idx_pago_fecha` (`fecha_pago`),
+  INDEX `idx_pago_registrado_por` (`registrado_por`),
 
   CONSTRAINT `fk_pago_afiliado`
     FOREIGN KEY (`id_usuario`)
@@ -629,38 +631,19 @@ CREATE TABLE IF NOT EXISTS `CONFIGURACION` (
 -- BLOQUE 11 — TRIGGERS
 -- ============================================================================================================================
 
-DELIMITER $$
-
--- Rechaza ciclos con fechas que se solapen con ciclos ACTIVOS del mismo afiliado
-CREATE TRIGGER trg_ciclo_no_solapamiento_insert
-BEFORE INSERT ON CICLO
-FOR EACH ROW
-BEGIN
-  IF EXISTS (
-    SELECT 1 FROM CICLO
-    WHERE id_usuario = NEW.id_usuario
-      AND activo = 1
-      AND NEW.fecha_inicio <= fecha_fin
-      AND NEW.fecha_fin  >= fecha_inicio
-  ) THEN
-    SIGNAL SQLSTATE '45000'
-      SET MESSAGE_TEXT = 'El ciclo se solapa con un ciclo activo existente del afiliado.';
-  END IF;
-END$$
-
--- NOTA: El UPDATE de desactivación del ciclo anterior se maneja en
---       cicloModel.create (capa de aplicación), NO aquí como trigger,
---       para evitar MySQL error 1442 (modificar la misma tabla dentro
---       de un trigger BEFORE INSERT sobre ella misma).
-
-DELIMITER ;
+-- NOTA: Los triggers sobre CICLO fueron eliminados porque:
+--   - trg_ciclo_un_activo_insert: causaba MySQL error 1442 (UPDATE sobre CICLO dentro de BEFORE INSERT)
+--   - trg_ciclo_no_solapamiento_insert: causaba MySQL error 1442 (SELECT sobre CICLO dentro de BEFORE
+--     INSERT después de que la transacción ya modificó CICLO via UPDATE en cicloModel.create)
+--   La desactivación del ciclo anterior se maneja en cicloModel.create (capa de aplicación),
+--   y la validación de fechas está garantizada por CHECK constraints y lógica de negocio en el service.
 
 -- Reactivar checks de FK
 SET FOREIGN_KEY_CHECKS = 1;
 
 
 -- ============================================================================================================================
--- RESUMEN DEL ESQUEMA v4.0
+-- RESUMEN DEL ESQUEMA v4.1
 -- ============================================================================================================================
 -- TABLAS (17): USUARIO, RESTRICCION, EJERCICIO, ALIMENTO, AFILIADO,
 --              AFILIADO_RESTRICCION, EJERCICIO_RESTRICCION_EXCLUIDA, ALIMENTO_RESTRICCION_EXCLUIDA,

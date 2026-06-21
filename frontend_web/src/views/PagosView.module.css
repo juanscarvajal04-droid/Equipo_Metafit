@@ -1,18 +1,23 @@
-/* frontend_web/src/views/PagosView.module.css */
+.page {
+  min-height: 100vh;
+  background: #0a0a0f;
+}
 
-/* ── Toast ── */
 .toast {
   z-index: 9999;
   min-width: 320px;
-  border-left: 4px solid #059669;
+  border-left: 4px solid #22c55e;
+  background: #1a1a2e;
+  color: #e0e0e0;
+  border: 1px solid #252545;
+  border-radius: 8px;
 }
 
-/* ── Icono del título ── */
-.titleIcon {
+.headerIcon {
   width: 36px;
   height: 36px;
-  background: linear-gradient(135deg, #2563eb, #7c3aed);
-  border-radius: 6px;
+  background: linear-gradient(135deg, #4b9ecb, #2d7db5);
+  border-radius: 8px;
   font-size: 1.1rem;
   display: inline-flex;
   align-items: center;
@@ -21,29 +26,66 @@
   flex-shrink: 0;
 }
 
-/* ── KPI cards ── */
+.headerTitle {
+  color: #e0e0e0;
+}
+
+.headerSub {
+  color: #94a3b8;
+}
+
 .kpiCard {
   min-width: 150px;
+  background: #1a1a2e;
+  border: 1px solid #252545;
+  border-radius: 14px;
+  padding: 0.75rem 1rem;
+  text-align: center;
+  transition: all 0.3s ease;
 }
 
-/* ── Valor KPI — color DINÁMICO (k.color) → inline */
-/* ── Label KPI ── */
+.kpiCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 32px rgba(124,58,237,0.2);
+}
+
+.kpiValor {
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
 .kpiLabel {
   font-size: 0.65rem;
+  color: #94a3b8;
 }
 
-/* ── Buscador ── */
 .searchInput {
-  max-width: 260px;
+  max-width: none;
+  flex: 1;
+  min-width: 140px;
+  background: #1a1a2e;
+  border: 1px solid #252545;
+  color: #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.85rem;
 }
 
-/* ── Spinner de color de marca ── */
+.searchInput::placeholder {
+  color: #94a3b8;
+  opacity: 1;
+}
+
+.searchInput:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.2);
+  background: #1a1a2e;
+  color: #e0e0e0;
+}
+
 .spinnerBrand {
-  color: #2563eb;
+  color: #7c3aed;
 }
 
-/* ── Avatar del afiliado ── */
-/* background DINÁMICO (hsl por id) → inline */
 .avatarTd {
   width: 36px;
   height: 36px;
@@ -57,65 +99,85 @@
   font-size: 0.85rem;
 }
 
-/* ── Email en tabla ── */
 .emailSm {
   font-size: 0.7rem;
+  color: #94a3b8;
 }
 
-/* ── Pago info ── */
 .pagoInfo {
   font-size: 0.7rem;
 }
 
-/* ── Badge de días restantes ── */
-/* background, color DINÁMICOS (est.bg, est.color) → inline */
 .diasBadge {
   min-width: 48px;
   font-size: 0.75rem;
 }
 
-/* ── Badge de estado membresía ── */
-/* background, color DINÁMICOS → inline */
 .estadoBadge {
   font-size: 0.72rem;
 }
 
-/* ── Badge de acceso (fila tabla) ── */
 .accesoBadge {
   font-size: 0.7rem;
 }
 
-/* ── Botón registrar pago ── */
 .btnPago {
-  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
   border: none;
+  color: #fff;
+  font-weight: 600;
   font-size: 0.78rem;
+  border-radius: 8px;
+  padding: 0.25rem 0.75rem;
+  transition: all 0.3s ease;
 }
 
-/* ── Modal overlay ── */
+.btnPago:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(124,58,237,0.3);
+}
+
 .modalOverlay {
   background: rgba(0, 0, 0, 0.6);
   z-index: 1055;
 }
 
-/* ── Modal header azul/violeta ── */
-.modalHeaderAzul {
-  background: linear-gradient(135deg, #2563eb, #7c3aed);
+.modalContent {
+  background: #1a1a2e;
+  border: 1px solid #252545;
+  border-radius: 14px;
 }
 
-/* ── Modal header oscuro (historial) ── */
+.modalHeaderAzul {
+  background: linear-gradient(135deg, #4b9ecb, #2d7db5);
+  border: none;
+  border-radius: 14px 14px 0 0;
+}
+
 .modalHeaderOscuro {
   background: linear-gradient(135deg, #1a1a2e, #16213e);
+  border: none;
+  border-radius: 14px 14px 0 0;
 }
 
-/* ── Sección info del afiliado en modal ── */
+.modalBody {
+  background: #1a1a2e;
+  color: #e0e0e0;
+}
+
+.modalFooter {
+  border-top: 1px solid #252545;
+  background: #1a1a2e;
+  border-radius: 0 0 14px 14px;
+}
+
 .afiliadoBox {
-  background: #f0f4ff;
-  border: 1px solid #c7d2fe;
+  background: #16213e;
+  border: 1px solid #252545;
+  border-radius: 10px;
+  padding: 0.75rem;
 }
 
-/* ── Avatar en modal (más grande) ── */
-/* background DINÁMICO → inline */
 .avatarModal {
   width: 48px;
   height: 48px;
@@ -129,44 +191,153 @@
   font-size: 1.1rem;
 }
 
-/* ── Etiquetas pequeñas en modal ── */
 .dataLabel {
   font-size: 0.65rem;
+  color: #94a3b8;
 }
 
-/* ── Badge de estado en modal ── */
-/* background, color DINÁMICOS → inline */
-
-/* ── Sección de confirmación de pago ── */
-.confirmBox {
-  background: #f0fdf4;
-  border: 2px solid #86efac;
-}
-
-/* ── Badge nuevo vencimiento ── */
-.vencBadge {
-  background: #05966918;
-  color: #059669;
+.dataValue {
+  color: #e0e0e0;
+  font-weight: 600;
   font-size: 0.85rem;
 }
 
-/* ── Badge de mora ── */
+.confirmBox {
+  background: #16213e;
+  border: 1px solid #252545;
+  border-radius: 10px;
+  padding: 0.75rem;
+  text-align: center;
+}
+
+.vencBadge {
+  background: rgba(75,158,203,0.15);
+  color: #7ab7d9;
+  font-size: 0.85rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 6px;
+}
+
 .moraBadge {
   font-size: 0.7rem;
 }
 
-/* ── Botón confirmar pago ── */
 .btnConfirmar {
-  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
   border: none;
+  color: #fff;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.3s ease;
 }
 
-/* ── Historial: badge de método ── */
+.btnConfirmar:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(124,58,237,0.3);
+}
+
+.btnOutline {
+  background: transparent;
+  border: 1px solid #252545;
+  color: #94a3b8;
+  font-size: 0.78rem;
+  border-radius: 8px;
+  padding: 0.3rem 0.8rem;
+  transition: all 0.2s ease;
+}
+
+.btnOutline:hover {
+  border-color: #4b9ecb;
+  color: #4b9ecb;
+  background: rgba(75,158,203,0.1);
+}
+
 .metodoBadge {
   font-size: 0.7rem;
 }
 
-/* ── Historial: registrado por ── */
 .registradoPor {
   font-size: 0.7rem;
+  color: #94a3b8;
+}
+
+.tableCard {
+  width: 100%;
+  background: #1a1a2e;
+  border: 1px solid #252545;
+  border-radius: 14px;
+}
+
+.tableCardHeader {
+  background: #0f0f1a;
+  border-bottom: 1px solid #252545;
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  border-radius: 14px 14px 0 0;
+}
+
+.tableCardFooter {
+  background: #0f0f1a;
+  border-top: 1px solid #252545;
+  padding: 0.5rem 1.25rem;
+  border-radius: 0 0 14px 14px;
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+.table {
+  width: 100%;
+  margin-bottom: 0;
+}
+
+.table th {
+  color: #94a3b8;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  background: #0f0f1a;
+  border-bottom: 1px solid #252545;
+  padding: 0.7rem 0.75rem;
+  white-space: nowrap;
+}
+
+.table td {
+  background: transparent;
+  color: #e0e0e0;
+  border-bottom: 1px solid #252545;
+  padding: 0.6rem 0.75rem;
+  vertical-align: middle;
+}
+
+.table tbody tr {
+  transition: background 0.2s ease;
+}
+
+.table tbody tr:hover {
+  background: rgba(124, 58, 237, 0.08);
+}
+
+.table tbody tr:nth-child(even) {
+  background: #16213e;
+}
+
+.table tbody tr:nth-child(even):hover {
+  background: rgba(124, 58, 237, 0.08);
+}
+
+.emptyState {
+  color: #94a3b8;
+}
+
+.alertDanger {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.2);
+  color: #ef4444;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
 }

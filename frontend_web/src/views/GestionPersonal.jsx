@@ -181,25 +181,25 @@ export default function GestionPersonal() {
       {/* Toast */}
       {toast.msg && (
         <div
-          className={`position-fixed bottom-0 end-0 m-4 alert alert-${toast.type === "danger" ? "danger" : "dark"} shadow-lg py-2 px-3`}
-          style={{ zIndex: 9999, minWidth: 300 }}
+          className={`position-fixed bottom-0 end-0 m-4 alert shadow-lg py-2 px-3 ${s.toast}`}
+          style={{ borderLeft: toast.type === "danger" ? "4px solid #ef4444" : "4px solid #4b9ecb" }}
         >
           {toast.msg}
         </div>
       )}
 
-      <div className="container-fluid py-4 px-3 px-md-4">
+      <div className={`container-fluid py-4 px-3 px-md-4 ${s.page}`}>
 
         {/* ── Encabezado ── */}
         <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
           <div>
-            <h1 className="h4 fw-bold mb-0 d-flex align-items-center gap-2">
-              <span className={`d-inline-flex align-items-center justify-content-center rounded-2 ${s.headerIcon}`}>
+            <h1 className={`h4 fw-bold mb-0 d-flex align-items-center gap-2 ${s.headerTitle}`}>
+              <span className={`d-inline-flex align-items-center justify-content-center ${s.headerIcon}`}>
                 🛡️
               </span>
               Gestión de Personal
             </h1>
-            <small className="text-muted">
+            <small className={s.headerSub}>
               Módulo exclusivo del Administrador · Crear, editar, cambiar roles y eliminar empleados
             </small>
           </div>
@@ -219,9 +219,9 @@ export default function GestionPersonal() {
           </div>
         </div>
 
-        <div className="card border-0 shadow-sm">
-          <div className="card-header bg-white py-3 d-flex justify-content-between align-items-center border-0 flex-wrap gap-2">
-            <span className="fw-semibold text-muted small">
+        <div className={s.tableCard}>
+          <div className={s.tableCardHeader}>
+            <span style={{color:"#94a3b8",fontSize:"0.85rem",fontWeight:600}}>
               {filtrados.length} empleado{filtrados.length !== 1 ? "s" : ""}
             </span>
             <input
@@ -234,28 +234,28 @@ export default function GestionPersonal() {
             />
           </div>
 
-          <div className="card-body p-0">
-            {error   && <div className="alert alert-danger m-3 py-2"><small>⚠️ {error}</small></div>}
+          <div style={{borderRadius:"0 0 14px 14px"}}>
+            {error   && <div className={s.alertDanger} style={{margin:"0.75rem",padding:"0.4rem 0.75rem"}}><small>⚠️ {error}</small></div>}
             {loading && <div className="text-center py-5"><div className={`spinner-border ${s.spinnerPurple}`} /></div>}
 
             {!loading && !error && (
               <div className="table-responsive">
-                <table className="table table-hover align-middle mb-0">
-                  <thead className="table-light">
+                <table className={s.table}>
+                  <thead>
                     <tr>
-                      <th className="ps-4">#</th>
+                      <th style={{paddingLeft:"1.25rem"}}>#</th>
                       <th>Empleado</th>
                       <th>Email</th>
                       <th>Rol</th>
                       <th>Estado</th>
                       <th>Registro</th>
-                      <th className="text-center pe-4">Acciones</th>
+                      <th className="text-center" style={{paddingRight:"1rem"}}>Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filtrados.length === 0 ? (
                       <tr>
-                        <td colSpan={7} className="text-center text-muted py-5">
+                        <td colSpan={7} className={`text-center py-5 ${s.emptyState}`}>
                           {busqueda ? `Sin resultados para "${busqueda}"` : "No hay empleados registrados."}
                         </td>
                       </tr>
@@ -268,7 +268,7 @@ export default function GestionPersonal() {
 
                       return (
                         <tr key={getId(u)}>
-                          <td className="ps-4 text-muted small">{idx + 1}</td>
+                          <td style={{paddingLeft:"1.25rem"}} className={s.emptyState}>{idx + 1}</td>
 
                           <td>
                             <div className="d-flex align-items-center gap-2">
@@ -276,13 +276,13 @@ export default function GestionPersonal() {
                                 {(u.email || "?")[0].toUpperCase()}
                               </div>
                               <div>
-                                <div className="fw-semibold small">{nombre}</div>
+                                <div className="fw-semibold small" style={{color:"#e0e0e0"}}>{nombre}</div>
                                 {isMe && <span className={s.badgeTu}>Tú</span>}
                               </div>
                             </div>
                           </td>
 
-                          <td><small className="text-muted">{u.email}</small></td>
+                          <td><small className={s.headerSub}>{u.email}</small></td>
 
                           <td>
                             <span className={`badge px-2 py-1 ${s.badgeRol}`} style={{ background: badge.bg }}>
@@ -292,7 +292,8 @@ export default function GestionPersonal() {
 
                           <td>
                             <select
-                              className={`form-select form-select-sm border-0 p-0 ${s.estadoSelect}`}
+                              className={s.estadoSelect}
+                              style={{padding:"0.2rem 0.5rem"}}
                               value={estado}
                               onChange={(e) => cambiarEstado(u, e.target.value)}
                             >
@@ -303,22 +304,22 @@ export default function GestionPersonal() {
                           </td>
 
                           <td>
-                            <small className="text-muted">
+                            <small className={s.headerSub}>
                               {u.fecha_registro ? new Date(u.fecha_registro).toLocaleDateString("es-CO") : "—"}
                             </small>
                           </td>
 
-                          <td className="text-center pe-4">
+                          <td className="text-center" style={{paddingRight:"1rem"}}>
                             <div className="d-flex gap-1 justify-content-center">
                               <button
-                                className={`btn btn-sm ${s.btnIcon}`}
+                                className={s.btnIcon}
                                 title="Editar empleado"
                                 onClick={() => abrirEditar(u)}
                               >
                                 ✏️
                               </button>
                               <button
-                                className={`btn btn-sm ${s.btnIconDelete}`}
+                                className={s.btnIconDelete}
                                 title="Eliminar empleado"
                                 disabled={isMe}
                                 onClick={() => !isMe && setDeleteModal(u)}
@@ -340,22 +341,22 @@ export default function GestionPersonal() {
         <div className="mt-4">
           <div className="row g-3">
             {[
-              { rol: "Administrador", icon: "👑", color: "#7c3aed", permisos: ["✅ Dashboard", "✅ Afiliados", "✅ Personal"] },
+              { rol: "Administrador", icon: "👑", color: "#4b9ecb", permisos: ["✅ Dashboard", "✅ Afiliados", "✅ Personal"] },
               { rol: "Recepcionista", icon: "🗂️", color: "#2563eb", permisos: ["✅ Afiliados", "👁️ Lectura"] },
               { rol: "Entrenador", icon: "🏆", color: "#059669", permisos: ["👁️ Lectura", "✅ Rutinas"] },
             ].map(({ rol, icon, color, permisos }) => (
               <div key={rol} className="col-md-4">
-                <div className={`card border-0 h-100 ${s.cardRol}`} style={{ borderColor: color }}>
-                  <div className="card-body p-3">
+                <div className={`h-100 ${s.cardRol}`} style={{ borderLeft: `4px solid ${color}` }}>
+                  <div className="p-3">
                     <div className="d-flex align-items-center gap-2 mb-3">
-                      <span className="rounded-2 d-flex align-items-center justify-content-center text-white" style={{ width: 32, height: 32, background: color }}>
+                      <span className={s.rolIcono} style={{ background: color }}>
                         {icon}
                       </span>
                       <strong className={s.rolTitle} style={{ color }}>{rol}</strong>
                     </div>
                     <ul className="list-unstyled mb-0">
                       {permisos.map((p) => (
-                        <li key={p} className={`small text-muted mb-1 ${s.permisosItem}`}>{p}</li>
+                        <li key={p} className={`mb-1 ${s.permisosItem}`}>{p}</li>
                       ))}
                     </ul>
                   </div>
@@ -397,18 +398,18 @@ export default function GestionPersonal() {
       {deleteModal && (
         <div className={`modal d-block ${s.modalOverlay}`} onClick={() => !saving && setDeleteModal(null)}>
           <div className="modal-dialog modal-dialog-centered" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-content border-0 shadow-lg">
-              <div className={`modal-header ${s.modalHeaderRed}`}>
+            <div className={`border-0 shadow-lg ${s.modalContent}`}>
+              <div className={`modal-header ${s.modalHeaderDanger}`}>
                 <h5 className="modal-title">⚠️ Eliminar empleado</h5>
                 <button className="btn-close btn-close-white" onClick={() => setDeleteModal(null)} />
               </div>
-              <div className="modal-body text-center py-4">
+              <div className={`modal-body text-center py-4 ${s.modalBody}`}>
                 <div className={s.deleteEmoji}>🗑️</div>
-                <p className="mb-1">¿Estás seguro de eliminar a <strong>{deleteModal.email}</strong>?</p>
+                <p className="mb-1" style={{color:"#e0e0e0"}}>¿Estás seguro de eliminar a <strong>{deleteModal.email}</strong>?</p>
               </div>
-              <div className="modal-footer border-0 justify-content-center">
-                <button className="btn btn-outline-secondary btn-sm px-4" onClick={() => setDeleteModal(null)}>Cancelar</button>
-                <button className="btn btn-danger btn-sm px-4" onClick={handleEliminar} disabled={saving}>
+              <div className={`modal-footer justify-content-center ${s.modalFooter}`}>
+                <button className={s.btnOutline} onClick={() => setDeleteModal(null)}>Cancelar</button>
+                <button className={s.btnDangerSolid} onClick={handleEliminar} disabled={saving}>
                   {saving ? "..." : "🗑️ Sí, eliminar"}
                 </button>
               </div>
@@ -427,7 +428,7 @@ function ModalPersonal({ titulo, colorHeader, formData, setFormData, onSubmit, o
   return (
     <div className={`modal d-block ${s.modalOverlay}`} onClick={() => !saving && onCancel()}>
       <div className="modal-dialog modal-lg modal-dialog-scrollable" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-content border-0 shadow-lg">
+        <div className={`border-0 shadow-lg ${s.modalContent}`}>
           <div className={`modal-header ${colorHeader}`}>
             <h5 className="modal-title text-white">{titulo}</h5>
             <button className="btn-close btn-close-white" onClick={onCancel} disabled={saving} />
@@ -435,24 +436,24 @@ function ModalPersonal({ titulo, colorHeader, formData, setFormData, onSubmit, o
 
           <form onSubmit={onSubmit}>
             <div className={`modal-body ${s.modalBodyScroll}`}>
-              {formError && <div className="alert alert-danger py-2 mb-3"><small>⚠️ {formError}</small></div>}
+              {formError && <div className={s.alertDanger} style={{marginBottom:"0.75rem",padding:"0.4rem 0.75rem"}}><small>⚠️ {formError}</small></div>}
               <div className="row g-3">
                 {/* Nombres y Apellidos */}
                 <div className="col-md-6">
-                  <label className="form-label small fw-semibold">Nombres</label>
+                  <label className={`form-label ${s.labelText}`}>Nombres</label>
                   <input
                     type="text"
-                    className="form-control"
+                    className={`form-control ${s.inputDark}`}
                     value={formData.nombres}
                     onChange={(e) => set("nombres", e.target.value)}
                     placeholder="Ej: Carlos"
                   />
                 </div>
                 <div className="col-md-6">
-                  <label className="form-label small fw-semibold">Apellidos</label>
+                  <label className={`form-label ${s.labelText}`}>Apellidos</label>
                   <input
                     type="text"
-                    className="form-control"
+                    className={`form-control ${s.inputDark}`}
                     value={formData.apellidos}
                     onChange={(e) => set("apellidos", e.target.value)}
                     placeholder="Ej: Ramírez"
@@ -461,12 +462,12 @@ function ModalPersonal({ titulo, colorHeader, formData, setFormData, onSubmit, o
 
                 {/* Email */}
                 <div className="col-md-6">
-                  <label className="form-label small fw-semibold">
-                    Correo electrónico <span className="text-danger">*</span>
+                  <label className={`form-label ${s.labelText}`}>
+                    Correo electrónico <span style={{color:"#ef4444"}}>*</span>
                   </label>
                   <input
                     type="email"
-                    className="form-control"
+                    className={`form-control ${s.inputDark}`}
                     required
                     value={formData.email}
                     onChange={(e) => set("email", e.target.value)}
@@ -476,14 +477,14 @@ function ModalPersonal({ titulo, colorHeader, formData, setFormData, onSubmit, o
 
                   {/* Contraseña */}
                   <div className="col-md-6">
-                    <label className="form-label small fw-semibold">
-                      Contraseña {!isEdit && <span className="text-danger">*</span>}
-                      {isEdit && <span className="text-muted small"> (dejar vacío para no cambiar)</span>}
+                    <label className={`form-label ${s.labelText}`}>
+                      Contraseña {!isEdit && <span style={{color:"#ef4444"}}>*</span>}
+                      {isEdit && <span className={s.headerSub} style={{fontWeight:400,fontSize:"0.78rem"}}> (dejar vacío para no cambiar)</span>}
                     </label>
                     <div className="input-group">
                       <input
                         type={showPassword ? "text" : "password"}
-                        className="form-control"
+                        className={`form-control ${s.inputDark}`}
                         required={!isEdit}
                         value={formData.password}
                         onChange={(e) => set("password", e.target.value)}
@@ -491,7 +492,7 @@ function ModalPersonal({ titulo, colorHeader, formData, setFormData, onSubmit, o
                       />
                       <button
                         type="button"
-                        className="btn btn-outline-secondary"
+                        className={s.btnOutline}
                         onClick={() => setShowPassword((prev) => !prev)}
                         style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
                         tabIndex={-1}
@@ -503,11 +504,11 @@ function ModalPersonal({ titulo, colorHeader, formData, setFormData, onSubmit, o
 
                 {/* Rol — selector destacado */}
                 <div className="col-md-6">
-                  <label className="form-label small fw-semibold">
-                    Rol del empleado <span className="text-danger">*</span>
+                  <label className={`form-label ${s.labelText}`}>
+                    Rol del empleado <span style={{color:"#ef4444"}}>*</span>
                   </label>
                   <select
-                    className={`form-select fw-semibold ${s.rolSelect}`}
+                    className={`form-select fw-semibold ${s.selectDark}`}
                     value={formData.role}
                     onChange={(e) => set("role", e.target.value)}
                   >
@@ -515,7 +516,7 @@ function ModalPersonal({ titulo, colorHeader, formData, setFormData, onSubmit, o
                       <option key={r} value={r}>{r}</option>
                     ))}
                   </select>
-                  <div className="form-text">
+                  <div className={s.headerSub} style={{fontSize:"0.78rem",marginTop:"0.25rem"}}>
                     {formData.role === "Administrador" && "⚠️ Este empleado tendrá acceso total al sistema."}
                     {formData.role === "Recepcionista" && "🗂️ Puede gestionar afiliados y ver rutinas/dietas."}
                     {formData.role === "Entrenador"    && "🏆 Puede gestionar rutinas/dietas y ver afiliados."}
@@ -524,9 +525,9 @@ function ModalPersonal({ titulo, colorHeader, formData, setFormData, onSubmit, o
 
                 {/* Estado de cuenta */}
                 <div className="col-md-6">
-                  <label className="form-label small fw-semibold">Estado de cuenta</label>
+                  <label className={`form-label ${s.labelText}`}>Estado de cuenta</label>
                   <select
-                    className="form-select"
+                    className={`form-select ${s.selectDark}`}
                     value={formData.estado}
                     onChange={(e) => set("estado", e.target.value)}
                   >
@@ -538,10 +539,10 @@ function ModalPersonal({ titulo, colorHeader, formData, setFormData, onSubmit, o
               </div>
             </div>
 
-            <div className="modal-footer border-0">
+            <div className={`modal-footer ${s.modalFooter}`}>
               <button
                 type="button"
-                className="btn btn-outline-secondary btn-sm px-4"
+                className={s.btnOutline}
                 onClick={onCancel}
                 disabled={saving}
               >
@@ -551,7 +552,7 @@ function ModalPersonal({ titulo, colorHeader, formData, setFormData, onSubmit, o
                 id={isEdit ? "btn-guardar-personal" : "btn-confirmar-crear-personal"}
                 type="submit"
                 className={`btn btn-sm ${s.btnGuardar}`}
-                style={{ background: colorHeader }}
+                style={{ background: "linear-gradient(135deg, #7c3aed, #4f46e5)" }}
                 disabled={saving}
               >
                 {saving

@@ -140,17 +140,14 @@ const AfiliadoModel = {
       const ciclo = raw
         ? (() => {
             const planEntrenamiento = raw.plan_observaciones
-              ? { ...JSON.parse(raw.plan_observaciones) }
+              ? { observaciones: raw.plan_observaciones }
               : null;
             let planNutricional = null;
             if (raw.calorias_objetivo) {
-              const metaNutricional = raw.plan_nutricional_obs ? JSON.parse(raw.plan_nutricional_obs) : {};
               planNutricional = {
                 calorias_estimadas: raw.calorias_objetivo,
                 num_comidas_diarias: raw.num_comidas,
-                nombre_plan: metaNutricional.nombre_plan || null,
-                objetivo_dieta: metaNutricional.objetivo_dieta || null,
-                observaciones: metaNutricional.observaciones || null,
+                observaciones: raw.plan_nutricional_obs || null,
               };
             }
             return {
@@ -248,14 +245,14 @@ const AfiliadoModel = {
         SELECT r.*,
           JSON_ARRAYAGG(
             JSON_OBJECT(
-              'id_rutina_ejercicio', re.id_rutina,
-              'orden', re.orden,
-              'id_ejercicio', e.id_ejercicio,
+              'id_rutina',        re.id_rutina,
+              'orden',            re.orden,
+              'id_ejercicio',     e.id_ejercicio,
               'nombre_ejercicio', e.nombre_ejercicio,
-              'grupo_muscular', e.grupo_muscular,
-              'series', re.series,
-              'repeticiones', re.repeticiones
-            ) ORDER BY re.orden
+              'grupo_muscular',   e.grupo_muscular,
+              'series',           re.series,
+              'repeticiones',     re.repeticiones
+            )
           ) AS ejercicios
         FROM RUTINA r
         LEFT JOIN RUTINA_EJERCICIO re ON r.id_rutina = re.id_rutina
@@ -264,17 +261,16 @@ const AfiliadoModel = {
         GROUP BY r.id_rutina
         ORDER BY r.dia_numero
       `, [ciclo.id_ciclo]);
-      // Parsear ejercicios (JSON_ARRAYAGG devuelve string en algunos drivers)
+      // Parsear ejercicios (JSON_ARRAYAGG devuelve string con typeCast)
       rutinas.forEach(r => {
-        if (typeof r.ejercicios === 'string') r.ejercicios = JSON.parse(r.ejercicios);
-        r.ejercicios = (r.ejercicios || []).filter(e => e.id_ejercicio !== null);
+        if (typeof r.ejercicios === 'string') {
+          r.ejercicios = JSON.parse(r.ejercicios);
+        }
+        r.ejercicios = (r.ejercicios || []).filter(e => e && e.id_ejercicio != null);
+        r.ejercicios.sort((a, b) => a.orden - b.orden);
       });
-      const metaEntreno = pe[0].observaciones ? JSON.parse(pe[0].observaciones) : {};
       ciclo.plan_entrenamiento = {
         ...pe[0],
-        nombre_rutina: metaEntreno.nombre_rutina || null,
-        enfoque: metaEntreno.enfoque || null,
-        dias_semana: metaEntreno.dias_semana || null,
         rutinas,
       };
     }
@@ -293,13 +289,10 @@ const AfiliadoModel = {
         WHERE dn.id_ciclo = ?
         ORDER BY dn.num_comida
       `, [ciclo.id_ciclo]);
-      const metaNutri = pn[0].observaciones ? JSON.parse(pn[0].observaciones) : {};
       ciclo.plan_nutricional = {
         ...pn[0],
         calorias_estimadas: pn[0].calorias_objetivo,
         num_comidas_diarias: pn[0].num_comidas,
-        nombre_plan: metaNutri.nombre_plan || null,
-        objetivo_dieta: metaNutri.objetivo_dieta || null,
         detalle,
       };
     }

@@ -1,6 +1,8 @@
-/* ── AfiliadosView.module.css ─────────────────────────────────────────────── */
+.page {
+  min-height: 100vh;
+  background: #0a0a0f;
+}
 
-/* ─ Toast de notificación ─────────────────────────────────────────────────── */
 .toast {
   position: fixed;
   bottom: 0;
@@ -9,35 +11,74 @@
   z-index: 9999;
   min-width: 280px;
   padding: 0.5rem 1rem;
-  background: #212529;
-  color: #fff;
-  border-radius: 6px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  background: #1a1a2e;
+  color: #e0e0e0;
+  border-radius: 8px;
+  border: 1px solid #252545;
+  border-left: 4px solid #4b9ecb;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
 }
 
-/* ─ Botón "Nuevo afiliado" ────────────────────────────────────────────────── */
+.headerIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #4b9ecb, #2d7db5);
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.headerTitle {
+  font-weight: 700;
+  margin-bottom: 0;
+  color: #e0e0e0;
+}
+
+.headerSub {
+  color: #94a3b8;
+}
+
 .btnCrear {
-  background: linear-gradient(135deg, #e94560, #c62a47);
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
   border: none;
   color: #fff;
   font-weight: 600;
   padding: 0.35rem 1.25rem;
-  border-radius: 6px;
-  cursor: pointer;
+  border-radius: 8px;
   font-size: 0.85rem;
-  transition: opacity 0.15s, transform 0.15s;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(124,58,237,0.25);
 }
 .btnCrear:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(124,58,237,0.35);
 }
 
-/* ─ Input búsqueda ────────────────────────────────────────────────────────── */
 .searchInput {
-  max-width: 280px;
+  max-width: none;
+  flex: 1;
+  min-width: 140px;
+  background: #1a1a2e;
+  border: 1px solid #252545;
+  color: #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+.searchInput::placeholder {
+  color: #94a3b8;
+  opacity: 1;
 }
 
-/* ─ Avatar circular ───────────────────────────────────────────────────────── */
+.searchInput:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.2);
+  background: #1a1a2e;
+  color: #e0e0e0;
+}
+
 .avatar {
   width: 36px;
   height: 36px;
@@ -51,12 +92,11 @@
   font-weight: 700;
 }
 
-/* ─ Texto secundario pequeño ──────────────────────────────────────────────── */
 .docText {
   font-size: 0.72rem;
+  color: #94a3b8;
 }
 
-/* ─ Select de estado inline ──────────────────────────────────────────────── */
 .estadoSelect {
   width: auto;
   background: transparent;
@@ -64,65 +104,317 @@
   border: 0;
   padding: 0;
   font-size: inherit;
+  color: #e0e0e0;
+}
+.estadoSelect:focus {
+  outline: none;
+  box-shadow: none;
 }
 
-/* ─ Header de modal oscuro ────────────────────────────────────────────────── */
+.tableCard {
+  width: 100%;
+  background: #1a1a2e;
+  border: 1px solid #252545;
+  border-radius: 14px;
+}
+
+.tableCardHeader {
+  background: #0f0f1a;
+  border-bottom: 1px solid #252545;
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  border-radius: 14px 14px 0 0;
+}
+
+.tableWrap {
+  width: 100%;
+  max-width: 100%;
+  border-radius: 14px;
+}
+
+.table {
+  width: 100%;
+  margin-bottom: 0;
+}
+
+.table th {
+  color: #94a3b8;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  background: #0f0f1a;
+  border-bottom: 1px solid #252545;
+  padding: 0.7rem 0.75rem;
+  white-space: nowrap;
+}
+
+.table td {
+  background: transparent;
+  color: #e0e0e0;
+  border-bottom: 1px solid #252545;
+  padding: 0.6rem 0.75rem;
+  vertical-align: middle;
+}
+
+.table tbody tr {
+  transition: background 0.2s ease;
+}
+
+.table tbody tr:hover {
+  background: rgba(124, 58, 237, 0.08);
+}
+
+.table tbody tr:nth-child(even) {
+  background: #16213e;
+}
+
+.table tbody tr:nth-child(even):hover {
+  background: rgba(124, 58, 237, 0.08);
+}
+
+.emptyState {
+  color: #94a3b8;
+}
+
+.modalOverlay {
+  background: rgba(0,0,0,0.6);
+  z-index: 1055;
+}
+
+.modalContent {
+  background: #1a1a2e;
+  border: 1px solid #252545;
+  border-radius: 14px;
+}
+
 .modalHeaderDark {
   background: linear-gradient(135deg, #1a1a2e, #16213e);
   color: #fff;
   border: none;
-}
-.modalHeaderRed {
-  background: linear-gradient(135deg, #e94560, #c62a47);
-  color: #fff;
-  border: none;
-}
-.modalHeaderGreen {
-  background: linear-gradient(135deg, #198754, #146c43);
-  color: #fff;
-  border: none;
+  border-radius: 14px 14px 0 0;
 }
 
-/* ─ Botón guardar con gradiente ──────────────────────────────────────────── */
+.modalHeaderRed {
+  background: linear-gradient(135deg, #4b9ecb, #2d7db5);
+  color: #fff;
+  border: none;
+  border-radius: 14px 14px 0 0;
+}
+
+.modalHeaderGreen {
+  background: linear-gradient(135deg, #4b9ecb, #2d7db5);
+  color: #fff;
+  border: none;
+  border-radius: 14px 14px 0 0;
+}
+
+.modalBody {
+  background: #1a1a2e;
+  color: #e0e0e0;
+}
+
+.modalBodyScroll {
+  max-height: 75vh;
+  overflow-y: auto;
+  background: #1a1a2e;
+  color: #e0e0e0;
+}
+
+.modalFooter {
+  border-top: 1px solid #252545;
+  background: #1a1a2e;
+  border-radius: 0 0 14px 14px;
+}
+
 .btnGuardar {
-  background: linear-gradient(135deg, #e94560, #c62a47);
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
   border: none;
   color: #fff;
   font-weight: 600;
   padding: 0.35rem 1.5rem;
-  border-radius: 6px;
-  cursor: pointer;
+  border-radius: 8px;
   font-size: 0.85rem;
+  transition: all 0.3s ease;
 }
 .btnGuardar:disabled {
   opacity: 0.65;
   cursor: not-allowed;
 }
+.btnGuardar:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(124,58,237,0.3);
+}
 
 .btnCrearAfiliado {
-  background: linear-gradient(135deg, #198754, #146c43);
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
   border: none;
   color: #fff;
   font-weight: 600;
   padding: 0.35rem 1.5rem;
-  border-radius: 6px;
-  cursor: pointer;
+  border-radius: 8px;
   font-size: 0.85rem;
+  transition: all 0.3s ease;
 }
 .btnCrearAfiliado:disabled {
   opacity: 0.65;
   cursor: not-allowed;
 }
-
-
-/* ─ Modal body con scroll ─────────────────────────────────────────────────── */
-.modalBodyScroll {
-  max-height: 75vh;
-  overflow-y: auto;
+.btnCrearAfiliado:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(124,58,237,0.3);
 }
 
-/* ─ Overlay de modales ────────────────────────────────────────────────────── */
-.modalOverlay {
-  background: rgba(0,0,0,0.55);
-  z-index: 1055;
+.btnOutline {
+  background: transparent;
+  border: 1px solid #252545;
+  color: #94a3b8;
+  font-size: 0.78rem;
+  border-radius: 8px;
+  padding: 0.3rem 0.8rem;
+  transition: all 0.2s ease;
+}
+.btnOutline:hover {
+  border-color: #4b9ecb;
+  color: #4b9ecb;
+  background: rgba(75,158,203,0.1);
+}
+
+.inputDark {
+  background: #16213e;
+  border: 1px solid #252545;
+  color: #e0e0e0;
+  border-radius: 8px;
+}
+.inputDark:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.2);
+  background: #16213e;
+  color: #e0e0e0;
+}
+
+.selectDark {
+  background: #16213e;
+  border: 1px solid #252545;
+  color: #e0e0e0;
+  border-radius: 8px;
+}
+.selectDark:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.2);
+  background: #16213e;
+  color: #e0e0e0;
+}
+
+.labelText {
+  color: #94a3b8;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.sectionLabel {
+  color: #94a3b8;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badgeDark {
+  background: rgba(75,158,203,0.15);
+  color: #7ab7d9;
+  font-size: 0.72rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+}
+
+.badgeLight {
+  background: rgba(148,163,184,0.15);
+  color: #94a3b8;
+  font-size: 0.72rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+}
+
+.infoCard {
+  background: #16213e;
+  border: 1px solid #252545;
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.infoLabel {
+  color: #94a3b8;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.infoValue {
+  color: #e0e0e0;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.navTabs {
+  border-bottom: 1px solid #252545;
+}
+
+.navTab {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  padding: 0.5rem 1rem;
+  transition: all 0.2s ease;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.navTab:hover {
+  color: #7ab7d9;
+}
+
+.navTabActive {
+  color: #7ab7d9;
+  border-bottom-color: #4b9ecb;
+}
+
+.progressCard {
+  background: #16213e;
+  border: 1px solid #252545;
+  border-radius: 10px;
+  padding: 0.75rem;
+}
+
+.alertDark {
+  background: rgba(75,158,203,0.1);
+  border: 1px solid rgba(124,58,237,0.2);
+  color: #7ab7d9;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+}
+
+.alertWarning {
+  background: rgba(234,179,8,0.1);
+  border: 1px solid rgba(234,179,8,0.2);
+  color: #eab308;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+}
+
+.alertDanger {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.2);
+  color: #ef4444;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+}
+
+.spinnerBrand {
+  color: #7c3aed;
 }

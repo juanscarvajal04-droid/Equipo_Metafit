@@ -20,9 +20,9 @@ const SEXOS = ["Masculino", "Femenino", "Otro"];
 const MUSCULOS = ["Pecho", "Espalda", "Piernas", "Glúteos", "Hombros", "Bíceps", "Tríceps", "Abdomen"];
 
 const badgeEstado = (e) => {
-  const map = { activo: "success", inactivo: "danger", pendiente: "warning" };
-  const c = map[(e || "").toLowerCase()] || "secondary";
-  return <span className={`badge bg-${c}`}>{e || "—"}</span>;
+  const map = { activo: {bg:"rgba(34,197,94,0.15)",color:"#22c55e"}, inactivo: {bg:"rgba(239,68,68,0.15)",color:"#ef4444"}, pendiente: {bg:"rgba(234,179,8,0.15)",color:"#eab308"} };
+  const c = map[(e || "").toLowerCase()] || {bg:"rgba(148,163,184,0.15)",color:"#94a3b8"};
+  return <span style={{background:c.bg,color:c.color,padding:"0.25rem 0.6rem",borderRadius:"6px",fontSize:"0.72rem"}}>{e || "—"}</span>;
 };
 
 const FORM_NUEVO = {
@@ -226,13 +226,16 @@ export default function AfiliadosView() {
         </div>
       )}
 
-      <div className="container-fluid py-4 px-3 px-md-4">
+      <div className={`container-fluid py-4 px-3 px-md-4 ${s.page}`}>
 
         {/* Encabezado */}
         <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
           <div>
-            <h1 className="h4 fw-bold mb-0">👥 Gestión de Afiliados</h1>
-            <small className="text-muted">
+            <h1 className={`h4 fw-bold mb-0 d-flex align-items-center gap-2 ${s.headerTitle}`}>
+              <span className={`d-inline-flex align-items-center justify-content-center ${s.headerIcon}`}>👥</span>
+              Gestión de Afiliados
+            </h1>
+            <small className={s.headerSub}>
               {role === "Recepcionista" ? "Administración de membresías y estados" : "Seguimiento de planes y progreso"}
             </small>
           </div>
@@ -245,69 +248,69 @@ export default function AfiliadosView() {
         </div>
 
         {/* Tabla */}
-        <div className="card border-0 shadow-sm">
-          <div className="card-header bg-white py-3 d-flex justify-content-between align-items-center border-0 flex-wrap gap-2">
-            <span className="fw-semibold text-muted small">{filtrados.length} afiliados</span>
+        <div className={s.tableCard}>
+          <div className={s.tableCardHeader}>
+            <span style={{color:"#94a3b8",fontSize:"0.85rem",fontWeight:600}}>{filtrados.length} afiliados</span>
             <input type="text" id="busqueda-afiliados" className={`form-control form-control-sm ${s.searchInput}`}
               placeholder="🔍 Nombre, correo, documento..."
               value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
           </div>
-          <div className="card-body p-0">
-            {error && <div className="alert alert-danger m-3 py-2"><small>⚠️ {error}</small></div>}
-            {loading && <div className="text-center py-5"><div className="spinner-border text-primary" /></div>}
+          <div className={s.tableWrap}>
+            {error && <div className={s.alertDanger} style={{margin:"0.75rem",padding:"0.4rem 0.75rem"}}><small>⚠️ {error}</small></div>}
+            {loading && <div className="text-center py-5"><div className={`spinner-border ${s.spinnerBrand}`} /></div>}
             {!loading && !error && (
-              <div className="mf-table-wrap">
-                <table className="table table-hover align-middle mb-0 mf-table">
-                  <thead className="table-light">
+              <div className={s.tableWrap}>
+                <table className={s.table}>
+                  <thead>
                     <tr>
-                      <th className="ps-3">#</th>
-                      <th className="col-nombre">Afiliado</th>
+                      <th style={{paddingLeft:"1.25rem"}}>#</th>
+                      <th>Afiliado</th>
                       <th>Objetivo</th>
                       <th>Nivel</th>
                       {(role === "Entrenador" || role === "Administrador") && <th>Ciclo activo</th>}
-                      <th className="col-estado">Estado</th>
-                      <th className="col-acciones pe-3">Acciones</th>
+                      <th>Estado</th>
+                      <th style={{textAlign:"center",paddingRight:"1rem"}}>Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filtrados.length === 0 ? (
-                      <tr><td colSpan={8} className="text-center text-muted py-5">
+                      <tr><td colSpan={8} className={`text-center py-5 ${s.emptyState}`}>
                         {busqueda ? `Sin resultados para "${busqueda}"` : "No hay afiliados."}
                       </td></tr>
                     ) : filtrados.map((a, idx) => {
                       const ciclo = cicloActivo(a);
                       return (
                         <tr key={getId(a)}>
-                          <td className="ps-4 text-muted small">{idx + 1}</td>
+                          <td style={{paddingLeft:"1.25rem"}} className={s.emptyState}>{idx + 1}</td>
                           <td>
                             <div className="d-flex align-items-center gap-2">
-                              <div
-                                className={s.avatar}
+                              <div className={s.avatar}
                                 style={{ background: `hsl(${(getId(a) * 47) % 360},65%,55%)` }}
                               >
                                 {inicial(a)}
                               </div>
                               <div>
-                                <div className="fw-semibold small">{nombreCompleto(a)}</div>
-                                <div className={`text-muted ${s.docText}`}>Doc: {a.documento || "—"}</div>
+                                <div className="fw-semibold small" style={{color:"#e0e0e0"}}>{nombreCompleto(a)}</div>
+                                <div className={s.docText}>Doc: {a.documento || "—"}</div>
                               </div>
                             </div>
                           </td>
-                          <td><small>{OBJETIVO_CONFIG[a.objetivo_fisico]?.icono} {a.objetivo_fisico || "—"}</small></td>
-                          <td><span className="badge bg-primary bg-opacity-10 text-primary">{a.nivel_experiencia || "—"}</span></td>
+                          <td><small style={{color:"#94a3b8"}}>{OBJETIVO_CONFIG[a.objetivo_fisico]?.icono} {a.objetivo_fisico || "—"}</small></td>
+                          <td><span className={s.badgeDark}>{a.nivel_experiencia || "—"}</span></td>
 
                           {(role === "Entrenador" || role === "Administrador") && (
                             <td className="text-center">
                               {ciclo
-                                ? <span className="badge bg-primary bg-opacity-10 text-primary">Ciclo {ciclo.numero_ciclo}</span>
-                                : <span className="text-muted small">Sin ciclo</span>}
+                                ? <span className={s.badgeDark}>Ciclo {ciclo.numero_ciclo}</span>
+                                : <span className={s.emptyState} style={{fontSize:"0.85rem"}}>Sin ciclo</span>}
                             </td>
                           )}
 
                           <td>
                             {role === "Recepcionista" ? (
                               <select
-                                className={`form-select form-select-sm border-0 p-0 text-center ${s.estadoSelect}`}
+                                className={`form-select form-select-sm ${s.selectDark}`}
+                                style={{width:"auto",padding:"0.2rem 0.5rem",fontSize:"0.78rem"}}
                                 value={a.estado || "Activo"}
                                 onChange={(e) => cambiarEstado(a, e.target.value)}
                                 title="Cambiar estado"
@@ -317,14 +320,13 @@ export default function AfiliadosView() {
                             ) : badgeEstado(a.estado)}
                           </td>
 
-                          <td className="text-center pe-4">
+                          <td className="text-center" style={{paddingRight:"1rem"}}>
                             <div className="d-flex gap-1 justify-content-center">
-                              <button className="btn btn-outline-primary btn-sm"
+                              <button className={s.btnOutline}
                                 id={`btn-ver-${getId(a)}`} title="Ver detalle"
                                 onClick={() => { setVerModal(a); setVerTab(0); }}>👁</button>
-                              {/* Solo Administrador y Recepcionista pueden editar afiliados */}
                               {role !== "Entrenador" && (
-                                <button className="btn btn-outline-warning btn-sm"
+                                <button className={s.btnOutline}
                                   id={`btn-editar-${getId(a)}`} title="Editar"
                                   onClick={() => abrirEditar(a)}>✏️</button>
                               )}
@@ -347,12 +349,12 @@ export default function AfiliadosView() {
       {verModal && (
         <div className={`modal d-block ${s.modalOverlay}`} onClick={() => setVerModal(null)}>
           <div className="modal-dialog modal-lg modal-dialog-scrollable" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-content border-0 shadow">
+            <div className={`border-0 shadow ${s.modalContent}`}>
               <div className={`modal-header ${s.modalHeaderDark}`}>
                 <h5 className="modal-title">👤 {nombreCompleto(verModal)}</h5>
                 <button type="button" className="btn-close btn-close-white" onClick={() => setVerModal(null)} />
               </div>
-              <div className="modal-body">
+              <div className={`modal-body ${s.modalBody}`}>
                 {/* Datos básicos */}
                 <div className="row g-2 mb-3">
                   {[
@@ -367,48 +369,48 @@ export default function AfiliadosView() {
                     { label: "Días/sem", v: verModal.disponibilidad_semanal_dias },
                   ].map((f) => (
                     <div key={f.label} className="col-6 col-md-4">
-                      <small className="text-muted d-block text-uppercase fw-semibold" style={{ fontSize: "0.68rem" }}>{f.label}</small>
-                      <span className="small fw-semibold">{f.v || "—"}</span>
+                      <small className={`d-block text-uppercase fw-semibold ${s.infoLabel}`}>{f.label}</small>
+                      <span className="small fw-semibold" style={{color:"#e0e0e0"}}>{f.v || "—"}</span>
                     </div>
                   ))}
                 </div>
 
                 {/* Pestañas por rol */}
-                <ul className="nav nav-tabs mb-3">
+                <div className={`d-flex gap-0 mb-3 ${s.navTabs}`}>
                   {tabs.map((tab, i) => (
-                    <li key={tab} className="nav-item">
-                      <button className={`nav-link ${verTab === i ? "active" : ""}`} onClick={() => setVerTab(i)}>
-                        {tab}
-                      </button>
-                    </li>
+                    <button key={tab}
+                      className={`${s.navTab} ${verTab === i ? s.navTabActive : ""}`}
+                      onClick={() => setVerTab(i)}>
+                      {tab}
+                    </button>
                   ))}
-                </ul>
+                </div>
 
                 {/* TAB: Estado de Cuenta */}
                 {tabs[verTab] === "Estado de Cuenta" && (
                   <div>
                     <div className="row g-3">
                       <div className="col-md-4">
-                        <div className="card border-0 bg-light text-center p-3">
-                          <div className="small text-muted text-uppercase fw-semibold mb-1">Estado actual</div>
-                          {badgeEstado(verModal.estado)}
+                        <div className={s.infoCard}>
+                          <div className={s.infoLabel}>Estado actual</div>
+                          <div className="mt-1">{badgeEstado(verModal.estado)}</div>
                         </div>
                       </div>
                       <div className="col-md-4">
-                        <div className="card border-0 bg-light text-center p-3">
-                          <div className="small text-muted text-uppercase fw-semibold mb-1">Desde</div>
-                          <strong>{verModal.fecha_registro || "—"}</strong>
+                        <div className={s.infoCard}>
+                          <div className={s.infoLabel}>Desde</div>
+                          <div className={s.infoValue}>{verModal.fecha_registro || "—"}</div>
                         </div>
                       </div>
                     </div>
                     {verModal.restricciones?.length > 0 && (
                       <div className="mt-3">
-                        <h6 className="fw-bold">⚠️ Restricciones médicas</h6>
+                        <h6 className="fw-bold" style={{color:"#e0e0e0"}}>⚠️ Restricciones médicas</h6>
                         {verModal.restricciones.map((r) => (
-                          <div key={r.id_restriccion} className="alert alert-warning py-2 mb-2">
-                            <strong>{r.nombre_restriccion}</strong>
-                            <span className="badge bg-warning text-dark ms-2">{r.tipo}</span>
-                            {r.efecto_relevante && <div className="small mt-1 text-muted">{r.efecto_relevante}</div>}
+                          <div key={r.id_restriccion} className={s.alertWarning} style={{marginBottom:"0.5rem"}}>
+                            <strong style={{color:"#eab308"}}>{r.nombre_restriccion}</strong>
+                            <span className={s.badgeDark} style={{marginLeft:"0.5rem"}}>{r.tipo}</span>
+                            {r.efecto_relevante && <div className="small mt-1" style={{color:"#94a3b8"}}>{r.efecto_relevante}</div>}
                           </div>
                         ))}
                       </div>
@@ -421,12 +423,12 @@ export default function AfiliadosView() {
                   const ciclo = cicloActivo(verModal);
                   const progresos = ciclo?.progreso_fisico || [];
                   return progresos.length === 0
-                    ? <p className="text-muted text-center py-3">Sin registros de progreso en el ciclo activo.</p>
+                    ? <p className={s.emptyState} style={{textAlign:"center",padding:"1rem 0"}}>Sin registros de progreso en el ciclo activo.</p>
                     : progresos.map((p, i) => (
-                      <div key={i} className="border rounded p-3 mb-2">
+                      <div key={i} className={s.progressCard} style={{marginBottom:"0.5rem"}}>
                         <div className="d-flex justify-content-between align-items-center mb-1">
-                          <strong className="small">{p.fecha_registro}</strong>
-                          <span className="badge bg-primary bg-opacity-10 text-primary">{p.peso_kg} kg</span>
+                          <strong className="small" style={{color:"#e0e0e0"}}>{p.fecha_registro}</strong>
+                          <span className={s.badgeDark}>{p.peso_kg} kg</span>
                         </div>
                         <div className="row g-2 text-center">
                           {[
@@ -436,12 +438,12 @@ export default function AfiliadosView() {
                             { label: "Pierna", v: p.medida_pierna ? `${p.medida_pierna} cm` : "—" },
                           ].map((f) => (
                             <div key={f.label} className="col-3">
-                              <small className="text-muted d-block" style={{ fontSize: "0.68rem" }}>{f.label}</small>
-                              <strong className="small">{f.v || "—"}</strong>
+                              <small className={s.infoLabel}>{f.label}</small>
+                              <strong className="small" style={{color:"#e0e0e0"}}>{f.v || "—"}</strong>
                             </div>
                           ))}
                         </div>
-                        {p.observaciones && <small className="text-muted mt-1 d-block">📝 {p.observaciones}</small>}
+                        {p.observaciones && <small className={s.headerSub} style={{display:"block",marginTop:"0.25rem"}}>📝 {p.observaciones}</small>}
                       </div>
                     ));
                 })()}
@@ -449,29 +451,29 @@ export default function AfiliadosView() {
                 {/* TAB: Ciclo Activo */}
                 {tabs[verTab] === "Ciclo Activo" && (() => {
                   const ciclo = cicloActivo(verModal);
-                  if (!ciclo) return <p className="text-muted text-center py-3">Sin ciclo activo.</p>;
+                  if (!ciclo) return <p className={s.emptyState} style={{textAlign:"center",padding:"1rem 0"}}>Sin ciclo activo.</p>;
                   return (
                     <div>
-                      <div className="d-flex gap-2 mb-3 flex-wrap">
-                        <span className="badge bg-primary">Ciclo {ciclo.numero_ciclo}</span>
-                        <small className="text-muted">{ciclo.fecha_inicio} → {ciclo.fecha_fin}</small>
+                      <div className="d-flex gap-2 mb-3 flex-wrap" style={{alignItems:"center"}}>
+                        <span className={s.badgeDark}>Ciclo {ciclo.numero_ciclo}</span>
+                        <small className={s.headerSub}>{ciclo.fecha_inicio} → {ciclo.fecha_fin}</small>
                       </div>
                       {ciclo.plan_nutricional && (
                         <div className="mb-3">
-                          <h6 className="fw-bold mb-2">🥗 Plan Nutricional</h6>
-                          <p className="small text-muted mb-2">
+                          <h6 className="fw-bold" style={{color:"#e0e0e0",marginBottom:"0.5rem"}}>🥗 Plan Nutricional</h6>
+                          <p className="small" style={{color:"#94a3b8",marginBottom:"0.5rem"}}>
                             {ciclo.plan_nutricional.calorias_objetivo} kcal · {ciclo.plan_nutricional.num_comidas} comidas/día
                           </p>
                         </div>
                       )}
                       {ciclo.plan_entrenamiento?.rutinas?.length > 0 && (
                         <div>
-                          <h6 className="fw-bold mb-2">🏋️ Rutinas</h6>
+                          <h6 className="fw-bold" style={{color:"#e0e0e0",marginBottom:"0.5rem"}}>🏋️ Rutinas</h6>
                           {ciclo.plan_entrenamiento.rutinas.map((r) => (
-                            <div key={r.dia_numero} className="border rounded p-2 mb-2">
-                              <div className="fw-semibold small mb-1">{r.nombre_rutina}</div>
+                            <div key={r.dia_numero} className={s.progressCard} style={{marginBottom:"0.5rem"}}>
+                              <div className="fw-semibold small" style={{color:"#e0e0e0",marginBottom:"0.25rem"}}>{r.nombre_rutina}</div>
                               {r.ejercicios?.map((ej, i) => (
-                                <div key={i} className="d-flex justify-content-between small text-muted">
+                                <div key={i} className="d-flex justify-content-between small" style={{color:"#94a3b8"}}>
                                   <span>{ej.nombre_ejercicio}</span>
                                   <span>{ej.series}×{ej.repeticiones}</span>
                                 </div>
@@ -484,13 +486,12 @@ export default function AfiliadosView() {
                   );
                 })()}
               </div>
-              <div className="modal-footer border-0">
-                {/* El Entrenador solo puede consultar, no editar */}
+              <div className={`modal-footer ${s.modalFooter}`}>
                 {role !== "Entrenador" && (
-                  <button className="btn btn-outline-warning btn-sm"
+                  <button className={s.btnOutline}
                     onClick={() => { setVerModal(null); abrirEditar(verModal); }}>✏️ Editar</button>
                 )}
-                <button className="btn btn-secondary btn-sm" onClick={() => setVerModal(null)}>Cerrar</button>
+                <button className={s.btnOutline} onClick={() => setVerModal(null)}>Cerrar</button>
               </div>
             </div>
           </div>
@@ -504,15 +505,15 @@ export default function AfiliadosView() {
         <div className={`modal d-block ${s.modalOverlay}`}
           onClick={() => !savingEdit && setEditModal(null)}>
           <div className="modal-dialog modal-lg modal-dialog-scrollable" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-content border-0 shadow">
+            <div className={`border-0 shadow ${s.modalContent}`}>
               <div className={`modal-header ${s.modalHeaderRed}`}>
                 <h5 className="modal-title">✏️ Editar — {nombreCompleto(editModal)}</h5>
                 <button type="button" className="btn-close btn-close-white"
                   onClick={() => !savingEdit && setEditModal(null)} />
               </div>
               <form onSubmit={guardarEdicion}>
-                <div className="modal-body">
-                  {editError && <div className="alert alert-danger py-2"><small>⚠️ {editError}</small></div>}
+                <div className={`modal-body ${s.modalBody}`}>
+                  {editError && <div className={s.alertDanger} style={{marginBottom:"0.75rem",padding:"0.4rem 0.75rem"}}><small>⚠️ {editError}</small></div>}
                   <div className="row g-3">
                     {[
                       { label: "Nombres", key: "nombres", type: "text" },
@@ -522,37 +523,36 @@ export default function AfiliadosView() {
                       { label: "Documento", key: "documento", type: "text" },
                     ].map(({ label, key, type }) => (
                       <div key={key} className="col-md-6">
-                        <label className="form-label small fw-semibold">{label}</label>
-                        <input type={type} className="form-control" value={formEdit[key]}
+                        <label className={`form-label ${s.labelText}`}>{label}</label>
+                        <input type={type} className={`form-control ${s.inputDark}`} value={formEdit[key]}
                           onChange={(e) => setFormEdit({ ...formEdit, [key]: e.target.value })} />
                       </div>
                     ))}
                     <div className="col-md-6">
-                      <label className="form-label small fw-semibold">Estado</label>
-                      {/* FIX 1.2: formEdit usa estado_afiliacion (nombre correcto) */}
-                      <select className="form-select" value={formEdit.estado_afiliacion}
+                      <label className={`form-label ${s.labelText}`}>Estado</label>
+                      <select className={`form-select ${s.selectDark}`} value={formEdit.estado_afiliacion}
                         onChange={(e) => setFormEdit({ ...formEdit, estado_afiliacion: e.target.value })}>
                         {ESTADOS.map((s) => <option key={s}>{s}</option>)}
                       </select>
                     </div>
                     <div className="col-md-6">
-                      <label className="form-label small fw-semibold">Objetivo físico</label>
-                      <select className="form-select" value={formEdit.objetivo_fisico}
+                      <label className={`form-label ${s.labelText}`}>Objetivo físico</label>
+                      <select className={`form-select ${s.selectDark}`} value={formEdit.objetivo_fisico}
                         onChange={(e) => setFormEdit({ ...formEdit, objetivo_fisico: e.target.value })}>
                         {OBJETIVOS.map((o) => <option key={o}>{o}</option>)}
                       </select>
                     </div>
                     <div className="col-md-6">
-                      <label className="form-label small fw-semibold">Nivel</label>
-                      <select className="form-select" value={formEdit.nivel_experiencia}
+                      <label className={`form-label ${s.labelText}`}>Nivel</label>
+                      <select className={`form-select ${s.selectDark}`} value={formEdit.nivel_experiencia}
                         onChange={(e) => setFormEdit({ ...formEdit, nivel_experiencia: e.target.value })}>
                         {NIVELES.map((n) => <option key={n}>{n}</option>)}
                       </select>
                     </div>
                   </div>
                 </div>
-                <div className="modal-footer border-0">
-                  <button type="button" className="btn btn-outline-secondary btn-sm"
+                <div className={`modal-footer ${s.modalFooter}`}>
+                  <button type="button" className={s.btnOutline}
                     onClick={() => !savingEdit && setEditModal(null)} disabled={savingEdit}>
                     Cancelar
                   </button>
@@ -575,7 +575,7 @@ export default function AfiliadosView() {
         <div className={`modal d-block ${s.modalOverlay}`}
           onClick={() => !savingNew && setCrearModal(false)}>
           <div className="modal-dialog modal-lg modal-dialog-scrollable" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-content border-0 shadow">
+            <div className={`border-0 shadow ${s.modalContent}`}>
               <div className={`modal-header ${s.modalHeaderGreen}`}>
                 <h5 className="modal-title">➕ Nuevo Afiliado</h5>
                 <button type="button" className="btn-close btn-close-white"
@@ -583,9 +583,9 @@ export default function AfiliadosView() {
               </div>
               <form onSubmit={handleCrear}>
                 <div className={`modal-body ${s.modalBodyScroll}`}>
-                  {newError && <div className="alert alert-danger py-2"><small>⚠️ {newError}</small></div>}
+                  {newError && <div className={s.alertDanger} style={{marginBottom:"0.75rem",padding:"0.4rem 0.75rem"}}><small>⚠️ {newError}</small></div>}
 
-                  <h6 className="fw-bold text-muted text-uppercase small mb-3">👤 Datos personales</h6>
+                  <h6 className={s.sectionLabel}>👤 Datos personales</h6>
                   <div className="row g-3 mb-4">
                     {[
                       { label: "Nombres *", key: "nombres", type: "text", required: true },
@@ -596,92 +596,92 @@ export default function AfiliadosView() {
                       { label: "Nacimiento", key: "fecha_nacimiento", type: "date", required: false },
                     ].map(({ label, key, type, required }) => (
                       <div key={key} className="col-md-6">
-                        <label className="form-label small fw-semibold">{label}</label>
-                        <input type={type} className="form-control" required={required}
+                        <label className={`form-label ${s.labelText}`}>{label}</label>
+                        <input type={type} className={`form-control ${s.inputDark}`} required={required}
                           value={formNuevo[key]}
                           onChange={(e) => setFormNuevo({ ...formNuevo, [key]: e.target.value })} />
                       </div>
                     ))}
                     <div className="col-md-6">
-                      <label className="form-label small fw-semibold">Sexo</label>
-                      <select className="form-select" value={formNuevo.sexo}
+                      <label className={`form-label ${s.labelText}`}>Sexo</label>
+                      <select className={`form-select ${s.selectDark}`} value={formNuevo.sexo}
                         onChange={(e) => setFormNuevo({ ...formNuevo, sexo: e.target.value })}>
                         {SEXOS.map((s) => <option key={s}>{s}</option>)}
                       </select>
                     </div>
                     <div className="col-md-6">
-                      <label className="form-label small fw-semibold">Estatura (cm)</label>
-                      <input type="number" step="0.1" className="form-control" value={formNuevo.estatura_cm}
+                      <label className={`form-label ${s.labelText}`}>Estatura (cm)</label>
+                      <input type="number" step="0.1" className={`form-control ${s.inputDark}`} value={formNuevo.estatura_cm}
                         onChange={(e) => setFormNuevo({ ...formNuevo, estatura_cm: e.target.value })} />
                     </div>
                     <div className="col-12">
-                      <label className="form-label small fw-semibold">Dirección</label>
-                      <input type="text" className="form-control" value={formNuevo.direccion}
+                      <label className={`form-label ${s.labelText}`}>Dirección</label>
+                      <input type="text" className={`form-control ${s.inputDark}`} value={formNuevo.direccion}
                         onChange={(e) => setFormNuevo({ ...formNuevo, direccion: e.target.value })} />
                     </div>
                   </div>
 
-                  <h6 className="fw-bold text-muted text-uppercase small mb-3">🏋️ Configuración inicial</h6>
+                  <h6 className={s.sectionLabel}>🏋️ Configuración inicial</h6>
                   <div className="row g-3">
                     <div className="col-md-4">
-                      <label className="form-label small fw-semibold">Estado inicial</label>
-                      <select className="form-select" value={formNuevo.estado}
+                      <label className={`form-label ${s.labelText}`}>Estado inicial</label>
+                      <select className={`form-select ${s.selectDark}`} value={formNuevo.estado}
                         onChange={(e) => setFormNuevo({ ...formNuevo, estado: e.target.value })}>
                         {ESTADOS.map((s) => <option key={s}>{s}</option>)}
                       </select>
                     </div>
                     <div className="col-md-4">
-                      <label className="form-label small fw-semibold">Objetivo físico</label>
-                      <select className="form-select" value={formNuevo.objetivo_fisico}
+                      <label className={`form-label ${s.labelText}`}>Objetivo físico</label>
+                      <select className={`form-select ${s.selectDark}`} value={formNuevo.objetivo_fisico}
                         onChange={(e) => setFormNuevo({ ...formNuevo, objetivo_fisico: e.target.value })}>
                         {OBJETIVOS.map((o) => <option key={o}>{o}</option>)}
                       </select>
                     </div>
                     <div className="col-md-4">
-                      <label className="form-label small fw-semibold">Nivel</label>
-                      <select className="form-select" value={formNuevo.nivel_experiencia}
+                      <label className={`form-label ${s.labelText}`}>Nivel</label>
+                      <select className={`form-select ${s.selectDark}`} value={formNuevo.nivel_experiencia}
                         onChange={(e) => setFormNuevo({ ...formNuevo, nivel_experiencia: e.target.value })}>
                         {NIVELES.map((n) => <option key={n}>{n}</option>)}
                       </select>
                     </div>
                     <div className="col-md-4">
-                      <label className="form-label small fw-semibold">Músculo prioritario</label>
-                      <select className="form-select" value={formNuevo.grupo_muscular_prioritario}
+                      <label className={`form-label ${s.labelText}`}>Músculo prioritario</label>
+                      <select className={`form-select ${s.selectDark}`} value={formNuevo.grupo_muscular_prioritario}
                         onChange={(e) => setFormNuevo({ ...formNuevo, grupo_muscular_prioritario: e.target.value })}>
                         {MUSCULOS.map((m) => <option key={m}>{m}</option>)}
                       </select>
                     </div>
                     <div className="col-md-4">
-                      <label className="form-label small fw-semibold">Días disponibles/sem</label>
-                      <input type="number" min="1" max="7" className="form-control"
+                      <label className={`form-label ${s.labelText}`}>Días disponibles/sem</label>
+                      <input type="number" min="1" max="7" className={`form-control ${s.inputDark}`}
                         value={formNuevo.disponibilidad_semanal_dias}
                         onChange={(e) => setFormNuevo({ ...formNuevo, disponibilidad_semanal_dias: parseInt(e.target.value) || 3 })} />
                     </div>
                   </div>
 
-                  <h6 className="fw-bold text-muted text-uppercase small mb-3 mt-4">⚠️ Restricciones Médicas</h6>
+                  <h6 className={s.sectionLabel} style={{marginTop:"1rem"}}>⚠️ Restricciones Médicas</h6>
                   <div className="row g-3">
                     <div className="col-12">
-                      <label className="form-label small fw-semibold">
+                      <label className={`form-label ${s.labelText}`}>
                         Restricciones médicas / condiciones
-                        <span className="text-muted fw-normal ms-2">(una por línea, opcional)</span>
+                        <span className={s.headerSub} style={{fontWeight:400,marginLeft:"0.5rem"}}>(una por línea, opcional)</span>
                       </label>
                       <textarea
                         id="restricciones-medicas-afiliado"
-                        className="form-control"
+                        className={`form-control ${s.inputDark}`}
                         rows={3}
                         placeholder="Ej: Diabetes tipo 2&#10;Hipertensión&#10;Alergia a lactosa"
                         value={formNuevo.restricciones_medicas}
                         onChange={(e) => setFormNuevo({ ...formNuevo, restricciones_medicas: e.target.value })}
                       />
-                      <div className="form-text">
+                      <div className={s.headerSub} style={{fontSize:"0.78rem",marginTop:"0.25rem"}}>
                         💡 Escribe cada condición en una línea separada. Se registrarán como alertas médicas del afiliado.
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className="modal-footer border-0">
-                  <button type="button" className="btn btn-outline-secondary btn-sm"
+                <div className={`modal-footer ${s.modalFooter}`}>
+                  <button type="button" className={s.btnOutline}
                     onClick={() => !savingNew && setCrearModal(false)} disabled={savingNew}>
                     Cancelar
                   </button>

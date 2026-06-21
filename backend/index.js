@@ -38,7 +38,9 @@ app.listen(PORT, () => {
   console.log('║  GET     /catalogo/restricciones                     ║');
   console.log('║  GET|PUT /configuracion/precio-membresia (Admin)    ║');
   console.log('║  GET     /notificaciones                             ║');
-  console.log('║  GET     /dashboard/kpis        (Admin)              ║');
+    console.log('║  GET     /dashboard/kpis        (Admin)              ║');
+  console.log('║  GET     /pagos                 (Admin)              ║');
+  console.log('║  GET     /pagos/metricas        (Admin)              ║');
   console.log('║  GET     /health                                     ║');
   console.log('╚══════════════════════════════════════════════════════╝');
   console.log('');

@@ -4,7 +4,7 @@
 const express             = require('express');
 const router              = express.Router();
 const CatalogoController  = require('../controllers/catalogoController');
-const { requireAuth, requireAdmin } = require('../middlewares/auth');
+const { requireAuth, requireAdmin, requireAdminOrEntrenador } = require('../middlewares/auth');
 
 /**
  * @swagger
@@ -85,7 +85,9 @@ router.get('/ejercicios', requireAuth, CatalogoController.getAllEjercicios);
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.post('/ejercicios', requireAuth, requireAdmin, CatalogoController.createEjercicio);
+router.post('/ejercicios', requireAuth, requireAdminOrEntrenador, CatalogoController.createEjercicio);
+router.put('/ejercicios/:id', requireAuth, requireAdminOrEntrenador, CatalogoController.updateEjercicio);
+router.delete('/ejercicios/:id', requireAuth, requireAdminOrEntrenador, CatalogoController.deleteEjercicio);
 
 /**
  * @swagger
@@ -160,7 +162,9 @@ router.get('/alimentos', requireAuth, CatalogoController.getAllAlimentos);
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.post('/alimentos', requireAuth, requireAdmin, CatalogoController.createAlimento);
+router.post('/alimentos', requireAuth, requireAdminOrEntrenador, CatalogoController.createAlimento);
+router.put('/alimentos/:id', requireAuth, requireAdminOrEntrenador, CatalogoController.updateAlimento);
+router.delete('/alimentos/:id', requireAuth, requireAdminOrEntrenador, CatalogoController.deleteAlimento);
 
 /**
  * @swagger
