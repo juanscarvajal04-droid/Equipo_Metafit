@@ -299,7 +299,24 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchKpis();
     fetchAfiliados();
-  }, []);
+  }, [fetchKpis, fetchAfiliados]);
+
+  useEffect(() => {
+    const refresh = () => { fetchKpis(); fetchAfiliados(); };
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") refresh();
+    };
+    window.addEventListener("pago-registrado", refresh);
+    window.addEventListener("afiliado-modificado", refresh);
+    window.addEventListener("personal-modificado", refresh);
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      window.removeEventListener("pago-registrado", refresh);
+      window.removeEventListener("afiliado-modificado", refresh);
+      window.removeEventListener("personal-modificado", refresh);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [fetchKpis, fetchAfiliados]);
 
   // Cargar precio desde backend
   const cargarPrecio = useCallback(async () => {

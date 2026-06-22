@@ -123,6 +123,7 @@ export default function GestionPersonal() {
       showToast("Empleado creado correctamente");
       closeModal();
       fetchPersonal();
+      window.dispatchEvent(new CustomEvent("personal-modificado"));
     } catch (err) {
       const msg = err?.response?.data?.error || "Error al crear empleado";
       showToast(msg, "danger");
@@ -145,6 +146,7 @@ export default function GestionPersonal() {
       showToast("Empleado actualizado correctamente");
       closeModal();
       fetchPersonal();
+      window.dispatchEvent(new CustomEvent("personal-modificado"));
     } catch (err) {
       const msg = err?.response?.data?.error || "Error al actualizar empleado";
       showToast(msg, "danger");
@@ -161,6 +163,7 @@ export default function GestionPersonal() {
       showToast("Empleado eliminado correctamente");
       setDeleteTarget(null);
       fetchPersonal();
+      window.dispatchEvent(new CustomEvent("personal-modificado"));
     } catch (err) {
       const msg = err?.response?.data?.error || "Error al eliminar empleado";
       showToast(msg, "danger");

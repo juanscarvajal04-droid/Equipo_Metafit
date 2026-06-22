@@ -81,6 +81,19 @@ export default function FinanzasView() {
     fetchMetricas({});
   }, [fetchMetricas]);
 
+  useEffect(() => {
+    const handlePago = () => fetchMetricas({});
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") fetchMetricas({});
+    };
+    window.addEventListener("pago-registrado", handlePago);
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      window.removeEventListener("pago-registrado", handlePago);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [fetchMetricas]);
+
   const handleFiltrar = () => {
     fetchMetricas(filtros);
   };
@@ -412,7 +425,7 @@ export default function FinanzasView() {
               </h6>
               <div style={{ height: 280 }}>
                 {ultimos6.length > 0 ? (
-                  <Bar data={barData} options={barOptions} />
+                  <Bar key={JSON.stringify(valoresBar)} data={barData} options={barOptions} />
                 ) : (
                   <p className="text-muted text-center py-5">Sin datos de ingresos.</p>
                 )}
@@ -426,7 +439,7 @@ export default function FinanzasView() {
               </h6>
               <div style={{ height: 280 }}>
                 {pagos_por_recepcionista.length > 0 ? (
-                  <Doughnut data={doughnutData} options={doughnutOptions} />
+                  <Doughnut key={doughnutValues.join(",")} data={doughnutData} options={doughnutOptions} />
                 ) : (
                   <p className="text-muted text-center py-5">Sin datos de recepcionistas.</p>
                 )}

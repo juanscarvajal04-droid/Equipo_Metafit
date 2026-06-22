@@ -88,6 +88,7 @@ export default function PagosView() {
       const { data } = await authAxios.get("/afiliados");
       setAfiliados(data);
       setPagoModal(null);
+      window.dispatchEvent(new CustomEvent("pago-registrado"));
     } catch (err) {
       console.error("[handlePago]", err);
       showToast(err.response?.data?.message || "Error al registrar pago", "error");

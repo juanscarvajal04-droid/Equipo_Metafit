@@ -18,8 +18,8 @@ const UsuarioService = {
   create: async (datos) => {
     const nombres    = datos.nombres;
     const apellidos  = datos.apellidos;
-    const correo     = datos.correo;
-    const contrasena = datos.contrasena;
+    const correo     = datos.correo || datos.email;
+    const contrasena = datos.contrasena || datos.password;
     const rol        = datos.rol;
     const estado     = datos.estado;
 
@@ -48,8 +48,8 @@ const UsuarioService = {
     const payload = {
       nombres   : datos.nombres,
       apellidos : datos.apellidos,
-      correo    : datos.correo,
-      contrasena: datos.contrasena,
+      correo    : datos.correo || datos.email,
+      contrasena: datos.contrasena || datos.password,
       rol       : rolNuevo,
       estado    : estadoNuevo,
     };

@@ -140,6 +140,7 @@ export default function AfiliadosView() {
       showToast("Afiliado actualizado correctamente", "success");
       setEditandoAfiliado(null);
       fetchAfiliados();
+      window.dispatchEvent(new CustomEvent("afiliado-modificado"));
     } catch (err) {
       console.error("[AfiliadosView] edicion:", err);
       showToast("Error al actualizar afiliado", "danger");
@@ -164,6 +165,7 @@ export default function AfiliadosView() {
       setCreandoAbierto(false);
       setFormCrear(FORM_VACIO);
       fetchAfiliados();
+      window.dispatchEvent(new CustomEvent("afiliado-modificado"));
     } catch (err) {
       console.error("[AfiliadosView] crear:", err);
       showToast("Error al crear afiliado", "danger");
@@ -179,6 +181,7 @@ export default function AfiliadosView() {
       await authAxios.delete(`/afiliados/${id}`);
       showToast("Afiliado eliminado", "success");
       fetchAfiliados();
+      window.dispatchEvent(new CustomEvent("afiliado-modificado"));
     } catch (err) {
       console.error("[AfiliadosView] eliminar:", err);
       showToast("Error al eliminar afiliado", "danger");

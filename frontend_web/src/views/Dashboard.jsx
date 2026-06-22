@@ -33,6 +33,23 @@ export default function Dashboard() {
     cargarKPIs();
   }, []);
 
+  useEffect(() => {
+    const refresh = () => cargarKPIs();
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") cargarKPIs();
+    };
+    window.addEventListener("pago-registrado", refresh);
+    window.addEventListener("afiliado-modificado", refresh);
+    window.addEventListener("personal-modificado", refresh);
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      window.removeEventListener("pago-registrado", refresh);
+      window.removeEventListener("afiliado-modificado", refresh);
+      window.removeEventListener("personal-modificado", refresh);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, []);
+
   return (
     <AppLayout>
       {/* Toast */}
