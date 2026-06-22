@@ -97,6 +97,12 @@ const PlanModel = {
     return r.affectedRows;
   },
 
+  deleteRutina: async (id_rutina) => {
+    await pool.query('DELETE FROM RUTINA_EJERCICIO WHERE id_rutina = ?', [id_rutina]);
+    const [r] = await pool.query('DELETE FROM RUTINA WHERE id_rutina = ?', [id_rutina]);
+    return r.affectedRows;
+  },
+
   // ── NUTRICIONAL ───────────────────────────────────────────
   // Schema: calorias_objetivo (no calorias_estimadas), num_comidas (no num_comidas_diarias)
   // DETALLE_NUTRICIONAL: cantidad_g (no cantidad), num_comida (no numero_comida)
@@ -129,6 +135,24 @@ const PlanModel = {
       [id_ciclo, calorias_objetivo, num_comidas, modificado_por || null, observaciones || null]
     );
     return r.insertId;
+  },
+
+  updateNutricional: async (id_ciclo, campos, modificado_por) => {
+    const [r] = await pool.query(
+      `UPDATE PLAN_NUTRICIONAL
+       SET calorias_objetivo=?, num_comidas=?, modificado_por=?, observaciones=?
+       WHERE id_ciclo=?`,
+      [campos.calorias_objetivo, campos.num_comidas, modificado_por, campos.observaciones || null, id_ciclo]
+    );
+    return r.affectedRows;
+  },
+
+  clearDetalleNutricional: async (id_ciclo) => {
+    const [r] = await pool.query(
+      'DELETE FROM DETALLE_NUTRICIONAL WHERE id_ciclo = ?',
+      [id_ciclo]
+    );
+    return r.affectedRows;
   },
 
   // DETALLE: PK natural (id_ciclo, num_comida, id_alimento)

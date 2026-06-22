@@ -35,9 +35,9 @@ const { requireAuth, requireAdmin } = require('../middlewares/auth');
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.get('/', requireAuth, UsuarioController.getAll);
+router.get('/', requireAuth, requireAdmin, UsuarioController.getAll);
 
-router.get('/recepcionistas', requireAuth, UsuarioController.getRecepcionistas);
+router.get('/recepcionistas', requireAuth, requireAdmin, UsuarioController.getRecepcionistas);
 
 /**
  * @swagger
@@ -63,7 +63,7 @@ router.get('/recepcionistas', requireAuth, UsuarioController.getRecepcionistas);
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.get('/:id', requireAuth, UsuarioController.getById);
+router.get('/:id', requireAuth, requireAdmin, UsuarioController.getById);
 
 /**
  * @swagger

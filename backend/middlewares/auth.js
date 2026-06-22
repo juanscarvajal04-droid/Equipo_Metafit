@@ -82,6 +82,21 @@ const requireAdminOrRecepcionista = (req, res, next) => {
 };
 
 // ─────────────────────────────────────────────────────────────
+// MIDDLEWARE: requireAdminOrTrainerOrRecepcionista (staff)
+// Pasa si role es 'Administrador', 'Entrenador' o 'Recepcionista'.
+// ─────────────────────────────────────────────────────────────
+const requireStaff = (req, res, next) => {
+  if (!req.user) return res.status(401).json({ error: 'No autenticado' });
+  const allowed = ['Administrador', 'Entrenador', 'Recepcionista'];
+  if (!allowed.includes(req.user.role)) {
+    return res.status(403).json({
+      error: 'Acceso denegado: se requiere rol de staff',
+    });
+  }
+  next();
+};
+
+// ─────────────────────────────────────────────────────────────
 // MIDDLEWARE: requireOwnCiclo
 // Si el usuario es 'Afiliado', verifica que el id_ciclo del
 // parámetro de ruta le pertenezca (CICLO.id_usuario === req.user.sub).
@@ -125,5 +140,6 @@ module.exports = {
   requireAdmin,
   requireAdminOrEntrenador,
   requireAdminOrRecepcionista,
+  requireStaff,
   requireOwnCiclo,
 };

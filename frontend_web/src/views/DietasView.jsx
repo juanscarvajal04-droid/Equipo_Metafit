@@ -3,1057 +3,794 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
 import { getId, nombreCompleto, inicial, cicloActivo } from "../utils/afiliadoHelpers";
+import { useToast } from "../hooks/useToast";
 import s from "./DietasView.module.css";
 
 const OBJETIVO_CONFIG = {
-  "Perdida de grasa": { icono: "🔥", color: "#e94560", bg: "#e9456018" },
-  "Aumento de masa":  { icono: "💪", color: "#2563eb", bg: "#2563eb18" },
-  "Mantenimiento":    { icono: "⚖️", color: "#059669", bg: "#05966918" },
+  "Perdida de grasa": { icono:"🔥", color:"#e94560", bg:"#e9456018" },
+  "Aumento de masa":  { icono:"💪", color:"#2563eb", bg:"#2563eb18" },
+  "Mantenimiento":    { icono:"⚖️", color:"#059669", bg:"#05966918" },
 };
-
 const RESTRICCION_COLOR = {
-  "Enfermedad": { bg: "#ef444418", text: "#dc2626" },
-  "Alergia":    { bg: "#f9731618", text: "#ea580c" },
-  "Lesion":     { bg: "#eab30818", text: "#ca8a04" },
+  "Enfermedad": { bg:"#ef444418", text:"#dc2626" },
+  "Alergia":    { bg:"#f9731618", text:"#ea580c" },
+  "Lesion":     { bg:"#eab30818", text:"#ca8a04" },
 };
 
-import { useToast } from "../hooks/useToast";
+const avatarColor = (nombre) => {
+  let hash = 0;
+  for (let i = 0; i < nombre.length; i++) hash = nombre.charCodeAt(i) + ((hash << 5) - hash);
+  return `hsl(${Math.abs(hash) % 360}, 65%, 55%)`;
+};
 
 export default function DietasView() {
-  const { user, authAxios, logout } = useAuth();
+  const { user, authAxios } = useAuth();
+  const { toast, showToast } = useToast();
   const navigate = useNavigate();
-  const role     = user?.role || "Entrenador";
-  const isAdmin  = role === "Administrador";
+  const role = user?.role || "Recepcionista";
 
-  const [afiliados,  setAfiliados]  = useState([]);
-  const [loading,    setLoading]    = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error,      setError]      = useState("");
-  const [busqueda,   setBusqueda]   = useState("");
-  const { toast, showToast }        = useToast();
-
-  // Modal asignar plan
-  const [asignarModal, setAsignarModal] = useState(null);
-  const [alimentosDisp, setAlimentosDisp] = useState([]);
-  const [alimentosSel, setAlimentosSel] = useState({});
-  const [calorias, setCalorias] = useState("");
-  const [numComidas, setNumComidas] = useState(4);
-  const [obs, setObs] = useState("");
+  // ── State ──────────────────────────────────────────────────
+  const [afiliados, setAfiliados] = useState([]);
+  const [catalogoAlimentos, setCatalogoAlimentos] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [asigError, setAsigError] = useState("");
-  const [loadingAl, setLoadingAl] = useState(false);
+  const [search, setSearch] = useState("");
 
-  // Modal crear nuevo alimento en catálogo
-  const [showNuevoAl, setShowNuevoAl] = useState(false);
-  const [nuevoAlForm, setNuevoAlForm] = useState({
-    nombre_alimento: "",
-    proteinas: "",
-    carbohidratos: "",
-    grasas: "",
-  });
-  const [guardandoAl, setGuardandoAl] = useState(false);
-  const [errorAl, setErrorAl] = useState("");
+  // Modal state
+  const [modal, setModal] = useState(null);
+  const [modalAfiliado, setModalAfiliado] = useState(null);
+  const [modalAlimento, setModalAlimento] = useState(null);
 
-  // Modal eliminar alimento
-  const [showEliminarAl, setShowEliminarAl] = useState(false);
-  const [catalogoAlList, setCatalogoAlList] = useState([]);
-  const [elimAlSeleccionado, setElimAlSeleccionado] = useState("");
-  const [eliminandoAl, setEliminandoAl] = useState(false);
-  const [errorElimAl, setErrorElimAl] = useState("");
+  // Asignar state
+  const [asignarAfiliadoId, setAsignarAfiliadoId] = useState("");
+  const [asignarAfiliadoData, setAsignarAfiliadoData] = useState(null);
+  const [alimentosDisponibles, setAlimentosDisponibles] = useState([]);
+  const [selectedAlimentos, setSelectedAlimentos] = useState({});
+  const [formPlan, setFormPlan] = useState({ calorias_objetivo:"", num_comidas:"3", observaciones:"" });
 
-  // Modal catálogo de alimentos
-  const [showCatalogoAl, setShowCatalogoAl] = useState(false);
-  const [catalogoAlData, setCatalogoAlData] = useState([]);
-  const [loadingCatAl, setLoadingCatAl] = useState(false);
+  // Nuevo/Editar alimento form
+  const [formAlimento, setFormAlimento] = useState({ nombre_alimento:"", proteinas:"", carbohidratos:"", grasas:"", calorias_por_100g:"" });
 
-  // Modal editar alimento
-  const [editAlModal, setEditAlModal] = useState(null);
-  const [editAlForm, setEditAlForm] = useState({
-    nombre_alimento: "",
-    proteinas: "",
-    carbohidratos: "",
-    grasas: "",
-  });
-  const [guardandoEditAl, setGuardandoEditAl] = useState(false);
-  const [errorEditAl, setErrorEditAl] = useState("");
+  // Delete
+  const [deleteAlimentoId, setDeleteAlimentoId] = useState("");
 
-  // Modal ver plan activo
-  const [verModal, setVerModal] = useState(null);
-
-  const cargarAfiliados = useCallback(async (esRefresh = false) => {
-    esRefresh ? setRefreshing(true) : setLoading(true);
-    setError("");
+  // ── Data fetching ───────────────────────────────────────────
+  const fetchAfiliados = useCallback(async () => {
+    setLoading(true);
     try {
       const { data } = await authAxios.get("/afiliados");
-      setAfiliados(data);
-      if (esRefresh) showToast(`Lista actualizada — ${data.length} afiliados`);
+      setAfiliados(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error('[DietasView] Error al cargar:', err.response?.status, err.response?.data || err.message);
-      if (err?.response?.status === 401) { logout(); navigate("/login"); }
-      else setError("No se pudieron cargar los afiliados.");
+      console.error("[DietasView]", err);
+      showToast("Error al cargar afiliados", "danger");
     } finally {
-      esRefresh ? setRefreshing(false) : setLoading(false);
+      setLoading(false);
     }
-  }, [authAxios, logout, navigate, showToast]);
+  }, [authAxios, showToast]);
 
-  useEffect(() => { cargarAfiliados(); }, []);
-
-  const tienePlanNutricional = (a) => !!cicloActivo(a)?.plan_nutricional;
-
-  const filtrados = afiliados
-    .filter((a) => {
-      const t = busqueda.toLowerCase();
-      return (
-        nombreCompleto(a).toLowerCase().includes(t) ||
-        (a.objetivo_fisico || "").toLowerCase().includes(t) ||
-        (a.restricciones || []).some((r) => (r.nombre_restriccion || r.nombre || "").toLowerCase().includes(t))
-      );
-    })
-    .sort((a, b) => {
-      const aConPlan = tienePlanNutricional(a);
-      const bConPlan = tienePlanNutricional(b);
-      if (!aConPlan && bConPlan) return -1;
-      if (aConPlan && !bConPlan) return 1;
-      return 0;
-    });
-
-  const totalConPlan   = afiliados.filter((a) => tienePlanNutricional(a)).length;
-  const alertasAlergia = afiliados.filter((a) => (a.restricciones || []).some((r) => r.tipo === "Alergia" || r.tipo === "Enfermedad")).length;
-
-  const abrirAsignar = async (afiliado) => {
-    setAsignarModal(afiliado);
-    setAlimentosSel({});
-    setCalorias("");
-    setNumComidas(4);
-    setObs("");
-    setAsigError("");
-
-    setLoadingAl(true);
+  const fetchAlimentos = useCallback(async () => {
     try {
-      const { data } = await authAxios.get(`/afiliados/${getId(afiliado)}/alimentos-disponibles`);
-      setAlimentosDisp(Array.isArray(data) ? data : []);
-      if (Array.isArray(data) && data.length > 0) {
-        const calAuto = Math.round(data.reduce((sum, a) => sum + (a.proteinas * 4 + a.carbohidratos * 4 + a.grasas * 9), 0) / data.length * 2.2);
-        setCalorias(String(Math.min(5000, Math.max(800, calAuto))));
-      }
+      const { data } = await authAxios.get("/catalogo/alimentos");
+      setCatalogoAlimentos(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error('[DietasView] Error cargando alimentos:', err);
-      setAlimentosDisp([]);
-      setAsigError("No se pudieron cargar los alimentos disponibles.");
-    } finally {
-      setLoadingAl(false);
+      console.error("[DietasView] catálogo:", err);
+      showToast("Error al cargar catálogo de alimentos", "danger");
+    }
+  }, [authAxios, showToast]);
+
+  useEffect(() => { fetchAfiliados(); fetchAlimentos(); }, [fetchAfiliados, fetchAlimentos]);
+
+  // ── Derived data ────────────────────────────────────────────
+  const filtered = afiliados.filter((a) => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return nombreCompleto(a).toLowerCase().includes(q) || (a.correo||a.email||"").toLowerCase().includes(q);
+  });
+  const totalAfiliados = afiliados.length;
+  const conPlan = afiliados.filter((a) => !!cicloActivo(a)?.plan_nutricional).length;
+  const sinPlan = totalAfiliados - conPlan;
+  const totalAlimentos = catalogoAlimentos.length;
+
+  // ── Modal handlers ──────────────────────────────────────────
+  const closeModal = () => {
+    if (saving) return;
+    setModal(null);
+    setModalAfiliado(null);
+    setModalAlimento(null);
+    setAsignarAfiliadoId("");
+    setAsignarAfiliadoData(null);
+    setAlimentosDisponibles([]);
+    setSelectedAlimentos({});
+    setFormPlan({ calorias_objetivo:"", num_comidas:"3", observaciones:"" });
+    setFormAlimento({ nombre_alimento:"", proteinas:"", carbohidratos:"", grasas:"", calorias_por_100g:"" });
+    setDeleteAlimentoId("");
+  };
+
+  const handleAfiliadoSelect = async (e) => {
+    const id = e.target.value;
+    setAsignarAfiliadoId(id);
+    if (!id) { setAsignarAfiliadoData(null); setAlimentosDisponibles([]); return; }
+    const a = afiliados.find((x) => String(getId(x)) === id);
+    setAsignarAfiliadoData(a || null);
+    try {
+      const { data } = await authAxios.get(`/afiliados/${id}/alimentos-disponibles`);
+      setAlimentosDisponibles(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("[DietasView] disponibles:", err);
+      showToast("Error al cargar alimentos disponibles", "danger");
+      setAlimentosDisponibles([]);
     }
   };
 
-  const toggleAlimento = (idAl) => {
-    setAlimentosSel((prev) => {
-      if (prev[idAl]) {
-        const copy = { ...prev };
-        delete copy[idAl];
-        return copy;
-      }
-      return {
-        ...prev,
-        [idAl]: { cantidad_g: 100, num_comida: 1 },
-      };
+  const toggleAlimento = (id) => {
+    setSelectedAlimentos((prev) => {
+      if (prev[id]) { const c={...prev}; delete c[id]; return c; }
+      return { ...prev, [id]: { cantidad_g:100, num_comida:1 } };
     });
   };
 
-  const updateAlimento = (idAl, field, value) => {
-    setAlimentosSel((prev) => ({
-      ...prev,
-      [idAl]: { ...prev[idAl], [field]: value },
-    }));
+  const updateAlimentoSel = (id, field, value) => {
+    setSelectedAlimentos((prev) => ({ ...prev, [id]: { ...prev[id], [field]: value } }));
   };
 
   const handleAsignar = async (e) => {
     e.preventDefault();
-    const ids = Object.keys(alimentosSel);
-    if (ids.length === 0) { setAsigError("Selecciona al menos un alimento."); return; }
-    if (!calorias || isNaN(Number(calorias))) { setAsigError("Ingresa las calorías estimadas."); return; }
-
-    setSaving(true); setAsigError("");
+    const alimentosIds = Object.keys(selectedAlimentos);
+    if (alimentosIds.length === 0) {
+      showToast("Selecciona al menos un alimento", "danger");
+      return;
+    }
+    const a = asignarAfiliadoData;
+    if (!a) { showToast("Selecciona un afiliado", "danger"); return; }
+    setSaving(true);
     try {
-      const id = getId(asignarModal);
-
-      // 1. Reutilizar ciclo activo existente o crear uno nuevo
+      const idAfiliado = getId(a);
       let idCiclo;
-      const cicloExistente = asignarModal.ciclo_activo;
-      if (cicloExistente) {
-        idCiclo = cicloExistente.id_ciclo;
+      const cicloExistente = cicloActivo(a);
+      if (cicloExistente && (cicloExistente.id_ciclo || cicloExistente.id)) {
+        idCiclo = cicloExistente.id_ciclo || cicloExistente.id;
       } else {
-        const cicloPayload = {
-          id_usuario: id,
-          fecha_inicio: new Date().toISOString().split("T")[0],
-          fecha_fin: (() => { const d = new Date(); d.setDate(d.getDate() + 84); return d.toISOString().split("T")[0]; })(),
-          objetivo_fisico: asignarModal.objetivo_fisico,
-          nivel_experiencia: asignarModal.nivel_experiencia,
-          disponibilidad_dias: asignarModal.disponibilidad_semanal_dias || 3,
-          grupo_muscular_prioritario: asignarModal.grupo_muscular_prioritario || null,
-        };
-        const { data: cicloData } = await authAxios.post("/afiliados/ciclos", cicloPayload);
-        idCiclo = cicloData.id_ciclo;
+        const fechaInicio = new Date().toISOString().split("T")[0];
+        const fechaFin = new Date(Date.now()+30*86400000).toISOString().split("T")[0];
+        const { data: cicloRes } = await authAxios.post("/afiliados/ciclos", {
+          id_usuario: idAfiliado,
+          fecha_inicio: fechaInicio,
+          fecha_fin: fechaFin,
+          objetivo_fisico: a.objetivo || a.objetivo_fisico || "Mantenimiento",
+          nivel_experiencia: a.nivel_experiencia || "Principiante",
+          disponibilidad_dias: Number(a.disponibilidad_semanal_dias) || 5,
+        });
+        idCiclo = cicloRes.id_ciclo ?? cicloRes.id;
       }
 
-      // 2. Crear plan nutricional
-      await authAxios.post("/planes/nutricional", {
-        id_ciclo: idCiclo,
-        calorias_objetivo: Number(calorias),
-        num_comidas: numComidas,
-        observaciones: obs || null,
-      });
-
-      // 3. Agregar cada alimento seleccionado al detalle
-      for (const idAl of ids) {
-        const al = alimentosSel[idAl];
-        await authAxios.post(`/planes/nutricional/${idCiclo}/detalle`, {
-          id_alimento: parseInt(idAl),
-          num_comida: al.num_comida,
-          cantidad_g: al.cantidad_g,
+      // Crear o actualizar plan nutricional
+      let planExists = false;
+      try {
+        await authAxios.get(`/planes/nutricional/${idCiclo}`);
+        planExists = true;
+      } catch (getErr) {
+        if (getErr.response?.status !== 404) throw getErr;
+      }
+      if (planExists) {
+        await authAxios.patch(`/planes/nutricional/${idCiclo}`, {
+          calorias_objetivo: Number(formPlan.calorias_objetivo) || 2000,
+          num_comidas: Number(formPlan.num_comidas) || 3,
+          observaciones: formPlan.observaciones,
+        });
+      } else {
+        await authAxios.post("/planes/nutricional", {
+          id_ciclo: idCiclo,
+          calorias_objetivo: Number(formPlan.calorias_objetivo) || 2000,
+          num_comidas: Number(formPlan.num_comidas) || 3,
+          observaciones: formPlan.observaciones,
         });
       }
 
-      // 4. Actualizar estado local
-      setAfiliados((prev) => prev.map((a) =>
-        getId(a) === id ? {
-          ...a,
-          ciclo_activo: {
-            ...a.ciclo_activo,
-            id_ciclo: idCiclo,
-            plan_nutricional: {
-              calorias_objetivo: Number(calorias),
-              num_comidas: numComidas,
-            },
-          },
-        } : a
-      ));
-      setAsignarModal(null);
-      showToast(`Plan nutricional creado para ${nombreCompleto(asignarModal)} con ${ids.length} alimentos`);
+      // Agregar alimentos al detalle
+      for (const idAlimento of alimentosIds) {
+        const sel = selectedAlimentos[idAlimento];
+        await authAxios.post(`/planes/nutricional/${idCiclo}/detalle`, {
+          id_alimento: Number(idAlimento),
+          cantidad_g: Number(sel.cantidad_g) || 100,
+          num_comida: Number(sel.num_comida) || 1,
+        });
+      }
+
+      showToast("Plan nutricional creado exitosamente", "success");
+      closeModal();
+      fetchAfiliados();
     } catch (err) {
-      const msg = err?.response?.data?.error || err.message || "Error desconocido";
-      console.error('[DietasView.handleAsignar]', err);
-      setAsigError(`Error al guardar: ${msg}`);
+      console.error("[DietasView] asignar:", err);
+      showToast(err.response?.data?.error || err.message || "Error al asignar dieta", "danger");
     } finally {
       setSaving(false);
     }
   };
 
+  const handleGuardarAlimento = async (e) => {
+    e.preventDefault();
+    if (!formAlimento.nombre_alimento.trim()) { showToast("El nombre es obligatorio", "danger"); return; }
+    setSaving(true);
+    try {
+      if (modal === "editar" && modalAlimento) {
+        const id = modalAlimento.id_alimento ?? modalAlimento.id;
+        await authAxios.put(`/catalogo/alimentos/${id}`, {
+          nombre_alimento: formAlimento.nombre_alimento,
+          proteinas: Number(formAlimento.proteinas) || 0,
+          carbohidratos: Number(formAlimento.carbohidratos) || 0,
+          grasas: Number(formAlimento.grasas) || 0,
+          calorias_por_100g: Number(formAlimento.calorias_por_100g) || 0,
+        });
+        showToast("Alimento actualizado", "success");
+      } else {
+        await authAxios.post("/catalogo/alimentos", formAlimento);
+        showToast("Alimento creado", "success");
+      }
+      closeModal();
+      fetchAlimentos();
+    } catch (err) {
+      showToast(err.response?.data?.error || err.message || "Error al guardar alimento", "danger");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleEliminarAlimento = async (e) => {
+    e.preventDefault();
+    if (!deleteAlimentoId) { showToast("Selecciona un alimento", "danger"); return; }
+    setSaving(true);
+    try {
+      await authAxios.delete(`/catalogo/alimentos/${deleteAlimentoId}`);
+      showToast("Alimento eliminado", "success");
+      closeModal();
+      fetchAlimentos();
+    } catch (err) {
+      const msg = err.response?.status === 409
+        ? "No se puede eliminar: el alimento está siendo usado en planes activos"
+        : (err.response?.data?.error || err.message || "Error al eliminar");
+      showToast(msg, "danger");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // ── Render helpers ──────────────────────────────────────────
+  const formatRestricciones = (rest) => {
+    if (!rest) return [];
+    if (Array.isArray(rest)) {
+      return rest.map((r) => {
+        if (typeof r === "string") return r;
+        if (r && typeof r === "object") return r.nombre_restriccion || r.tipo || "";
+        return "";
+      }).filter(Boolean);
+    }
+    if (typeof rest === "object") {
+      const arr = [];
+      for (const key of Object.keys(rest)) {
+        const val = rest[key];
+        if (val === true || val === "true") arr.push(key);
+        else if (val && typeof val === "object") arr.push(val.nombre_restriccion || val.tipo || key);
+      }
+      return arr;
+    }
+    return [];
+  };
+
+  const restriccionesBadges = (restricciones) => {
+    const items = formatRestricciones(restricciones);
+    if (items.length === 0) return <span className={s.badgeDark}>Ninguna</span>;
+    return items.map((r, i) => {
+      const cfg = RESTRICCION_COLOR[r] || { bg:"#6b728018", text:"#6b7280" };
+      return <span key={i} className={s.badgeDark} style={{ background:cfg.bg, color:cfg.text, marginRight:4, marginBottom:2 }}>{r}</span>;
+    });
+  };
+
+  // ════════════════════════════════════════════════════════════
+  // RENDER
+  // ════════════════════════════════════════════════════════════
   return (
     <AppLayout>
       {toast.msg && (
-        <div className={`${s.toast} shadow-lg`}>
+        <div style={{ position:"fixed", top:16, right:16, zIndex:9999, padding:"0.5rem 1rem", borderRadius:8,
+          background: toast.type==="danger" ? "rgba(239,68,68,0.1)" : "rgba(34,197,94,0.1)",
+          border: toast.type==="danger" ? "1px solid rgba(239,68,68,0.3)" : "1px solid rgba(34,197,94,0.3)",
+          color: toast.type==="danger" ? "#ef4444" : "#22c55e" }}>
           {toast.msg}
         </div>
       )}
 
-      <div className={`container-fluid py-4 px-3 px-md-4 ${s.page}`}>
-        {/* ── Encabezado ── */}
-        <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+      <div className={s.page}>
+        {/* HEADER */}
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:24, flexWrap:"wrap", gap:12 }}>
           <div>
-            <h1 className={`h4 fw-bold mb-0 d-flex align-items-center gap-2 ${s.headerTitle}`}>
-              <span className={`d-inline-flex align-items-center justify-content-center text-white ${s.headerIcon}`}>🥗</span>
-              Planes de Dieta
-            </h1>
-            <small className={s.headerSub}>
-              {isAdmin
-                ? "Vista de administrador — supervisión de planes nutricionales activos"
-                : "Crea planes nutricionales personalizados con alimentos del catálogo disponible"}
-            </small>
+            <h1 className={s.headerTitle}>🥗 Planes Nutricionales</h1>
+            <p className={s.headerSub}>Gestión de planes nutricionales para afiliados</p>
           </div>
-
-          <div className="d-flex gap-2 flex-wrap">
-            {[
-              { label: "Total afiliados", valor: afiliados.length, color: "#4b9ecb" },
-              { label: "Con plan activo", valor: totalConPlan, color: "#22c55e" },
-              { label: "Alertas nutrición", valor: alertasAlergia, color: "#ef4444" },
-            ].map((k) => (
-              <div key={k.label} className={`text-center px-3 py-2 ${s.kpiCard}`}>
-                <div className={`fw-bold fs-5 ${s.kpiValor}`} style={{ color: k.color }}>
-                  {loading ? "—" : k.valor}
-                </div>
-                <div className={s.kpiLabel}>{k.label}</div>
-              </div>
-            ))}
-          </div>
-
-          <div className="d-flex gap-1 flex-wrap">
-            <button type="button" className={`d-flex align-items-center gap-1 ${s.btnOutline}`}
-              onClick={() => {
-                setNuevoAlForm({ nombre_alimento: "", proteinas: "", carbohidratos: "", grasas: "" });
-                setErrorAl("");
-                setShowNuevoAl(true);
-              }}
-              title="Agregar nuevo alimento al catálogo">
-              🥗 Agregar
-            </button>
-            <button type="button" className={`d-flex align-items-center gap-1 ${s.btnOutlineDanger}`}
-              onClick={async () => {
-                setErrorElimAl("");
-                setElimAlSeleccionado("");
-                try {
-                  const { data } = await authAxios.get("/catalogo/alimentos");
-                  setCatalogoAlList(Array.isArray(data) ? data : []);
-                  setShowEliminarAl(true);
-                } catch { setShowEliminarAl(true); }
-              }}
-              title="Eliminar alimento del catálogo">
-              🗑️ Eliminar
-            </button>
-            <button type="button" className={`d-flex align-items-center gap-1 ${s.btnOutline}`}
-              onClick={async () => {
-                setLoadingCatAl(true);
-                setShowCatalogoAl(true);
-                try {
-                  const { data } = await authAxios.get("/catalogo/alimentos");
-                  setCatalogoAlData(Array.isArray(data) ? data : []);
-                } catch { setCatalogoAlData([]); }
-                setLoadingCatAl(false);
-              }}
-              title="Ver catálogo completo de alimentos">
-              📋 Catálogo
-            </button>
+          <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+            <button type="button" className={s.btnPrimary} onClick={() => setModal("asignar")}>➕ Asignar Dieta</button>
+            <button type="button" className={s.btnOutline} onClick={() => { fetchAlimentos(); setModal("catalogo"); }}>📋 Ver Catálogo</button>
+            <button type="button" className={s.btnAsignar} onClick={() => setModal("nuevo")}>➕ Agregar Alimento</button>
+            <button type="button" className={s.btnOutlineDanger} onClick={() => { fetchAlimentos(); setModal("eliminar"); }}>🗑️ Eliminar Alimento</button>
           </div>
         </div>
 
-        {/* ── Tabla de afiliados ── */}
-        <div className={`mb-4 ${s.tableCard}`}>
-          <div className={s.tableCardHeader}>
-            <span style={{color:"#94a3b8",fontSize:"0.85rem",fontWeight:600}}>{filtrados.length} afiliados</span>
-            <div className="d-flex gap-2 align-items-center" style={{flex:1}}>
-              <input type="text" className={`form-control form-control-sm ${s.searchInput}`}
-                placeholder="🔍 Nombre, objetivo, restricción..."
-                value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
-              <button type="button" className={`d-flex align-items-center gap-1 ${s.btnRefresh}`}
-                onClick={() => cargarAfiliados(true)} disabled={refreshing}>
-                {refreshing
-                  ? <span className="spinner-border spinner-border-sm" style={{ width: 12, height: 12, borderWidth: 2 }} />
-                  : "🔄"}
-                Actualizar
-              </button>
-            </div>
+        {/* KPIs */}
+        <div className={s.kpiRow}>
+          <div className={s.kpiCard}>
+            <div className={s.kpiValue}>{totalAfiliados}</div>
+            <div className={s.kpiLabel}>Total Afiliados</div>
           </div>
+          <div className={s.kpiCard}>
+            <div className={s.kpiValue} style={{ color:"#22c55e" }}>{conPlan}</div>
+            <div className={s.kpiLabel}>Con Plan Nutricional</div>
+          </div>
+          <div className={s.kpiCard}>
+            <div className={s.kpiValue} style={{ color:"#ef4444" }}>{sinPlan}</div>
+            <div className={s.kpiLabel}>Sin Plan Asignado</div>
+          </div>
+          <div className={s.kpiCard}>
+            <div className={s.kpiValue} style={{ color:"#7c3aed" }}>{totalAlimentos}</div>
+            <div className={s.kpiLabel}>Alimentos en Catálogo</div>
+          </div>
+        </div>
 
-          <div style={{borderRadius:"0 0 14px 14px"}}>
-            {error   && <div className={s.alertDanger} style={{margin:"0.75rem",padding:"0.4rem 0.75rem"}}><small>⚠️ {error}</small></div>}
-            {loading && <div className="text-center py-5"><div className={`spinner-border ${s.spinnerTeal}`} /></div>}
+        {/* SEARCH + TABLE */}
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:16, flexWrap:"wrap", gap:12,
+          background:"#1a1a2e", border:"1px solid #252545", borderRadius:14, padding:"0.75rem 1rem" }}>
+          <span className="fw-bold" style={{ fontSize:"0.85rem", color:"#e0e0e0" }}>🥗 Afiliados</span>
+          <div style={{ display:"flex", gap:8, alignItems:"center" }}>
+            <input type="text" className={s.searchInput} placeholder="Buscar afiliado..." value={search} onChange={(e)=>setSearch(e.target.value)} style={{ maxWidth:260, padding:"0.4rem 0.7rem", fontSize:"0.85rem" }} />
+            <button type="button" className={s.btnRefresh} onClick={fetchAfiliados} disabled={loading} title="Refrescar">{loading ? <span className="spinner-border spinner-border-sm" /> : "🔄"}</button>
+          </div>
+        </div>
 
-            {!loading && !error && (
-              <div className="table-responsive">
-                <table className={s.table}>
-                  <thead>
-                    <tr>
-                      <th style={{paddingLeft:"1.25rem"}}>#</th>
-                      <th>Afiliado</th>
-                      <th>Objetivo</th>
-                      <th>Restricciones</th>
-                      <th>Plan activo</th>
-                      <th className="text-center">Calorías</th>
-                      <th className="text-center">Comidas/día</th>
-                      <th className="text-center" style={{paddingRight:"1rem"}}>Acciones</th>
+        {/* TABLE */}
+        <div className={s.tableCard}>
+          <div style={{ overflowX:"auto" }}>
+            <table className={s.table}>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Afiliado</th>
+                  <th>Objetivo</th>
+                  <th>Restricciones</th>
+                  <th>Plan activo</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading && afiliados.length === 0 ? (
+                  <tr><td colSpan={6} className="text-center py-4"><span className="spinner-border spinner-border-sm" /></td></tr>
+                ) : filtered.length === 0 ? (
+                  <tr><td colSpan={6} className={s.emptyState}>{search ? "No se encontraron afiliados" : "No hay afiliados registrados"}</td></tr>
+                ) : filtered.map((a, idx) => {
+                  const ciclo = cicloActivo(a);
+                  const tienePlan = ciclo && !!ciclo.plan_nutricional;
+                  const objConf = OBJETIVO_CONFIG[a.objetivo] || { icono:"🎯", color:"#94a3b8", bg:"#94a3b818" };
+                  const nombre = nombreCompleto(a);
+                  const email = a.correo || a.email || "";
+                  return (
+                    <tr key={getId(a)}>
+                      <td style={{ color:"#94a3b8", fontSize:"0.78rem" }}>{idx + 1}</td>
+                      <td>
+                        <div style={{ display:"flex", alignItems:"center", gap:"0.5rem" }}>
+                          <div className={s.avatar} style={{ background:avatarColor(nombre) }}>{inicial(a)}</div>
+                          <div>
+                            <div style={{ fontSize:"0.85rem", fontWeight:600 }}>{nombre}</div>
+                            <div className={s.emailText}>{email}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span className={s.badgeDark} style={{ background:objConf.bg, color:objConf.color }}>
+                          {objConf.icono} {a.objetivo || "Sin objetivo"}
+                        </span>
+                      </td>
+                      <td>
+                        <div style={{ display:"flex", flexWrap:"wrap", gap:2 }}>
+                          {restriccionesBadges(a.restricciones)}
+                        </div>
+                      </td>
+                      <td>
+                        {tienePlan ? (
+                          <span className={s.badgeSuccess}>✅ Activo</span>
+                        ) : (
+                          <span className={s.badgeDanger}>❌ Sin plan</span>
+                        )}
+                      </td>
+                      <td>
+                        <div className={s.actionBtns}>
+                          {tienePlan && (
+                            <button type="button" className={s.btnOutline} style={{ padding:"0.25rem 0.5rem", fontSize:"0.75rem" }}
+                              onClick={() => { setModalAfiliado(a); setModal("verPerfil"); }} title="Ver">👁️</button>
+                          )}
+                          <button type="button" className={s.btnAsignar} style={{ padding:"0.25rem 0.6rem", fontSize:"0.75rem" }}
+                            onClick={() => {
+                              setAsignarAfiliadoId(String(getId(a)));
+                              setAsignarAfiliadoData(a);
+                              handleAfiliadoSelect({ target: { value: String(getId(a)) } });
+                              setModal("asignar");
+                            }}>
+                            {tienePlan ? "🔄 Nueva" : "➕ Asignar"}
+                          </button>
+                        </div>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {filtrados.length === 0 ? (
-                      <tr>
-                        <td colSpan={8} className={`text-center py-5 ${s.emptyState}`}>
-                          {busqueda ? `Sin resultados para "${busqueda}"` : "No hay afiliados."}
-                        </td>
-                      </tr>
-                    ) : filtrados.map((a, idx) => {
-                      const ciclo = cicloActivo(a);
-                      const plan = ciclo?.plan_nutricional;
-                      const objCfg = OBJETIVO_CONFIG[a.objetivo_fisico] || OBJETIVO_CONFIG["Mantenimiento"];
-                      const restr = a.restricciones || [];
-                      const hayAlerta = restr.some((r) => r.tipo === "Alergia" || r.tipo === "Enfermedad");
-
-                      return (
-                        <tr key={getId(a)} className={!plan ? s.rowSinPlan : hayAlerta ? s.rowConAlerta : ""}>
-                          <td style={{paddingLeft:"1.25rem"}} className={s.emptyState}>{idx + 1}</td>
-                          <td>
-                            <div className="d-flex align-items-center gap-2">
-                              <div className={s.avatar}
-                                style={{ background: `hsl(${(getId(a) * 47) % 360},65%,55%)` }}>
-                                {inicial(a)}
-                              </div>
-                              <div>
-                                <div className="fw-semibold small" style={{color:"#e0e0e0"}}>{nombreCompleto(a)}</div>
-                                <div className={s.emailText}>{a.correo || "—"}</div>
-                              </div>
-                            </div>
-                          </td>
-                          <td>
-                            <span className="badge px-2 py-1"
-                              style={{ background: objCfg.bg, color: objCfg.color, fontSize: "0.7rem" }}>
-                              {objCfg.icono} {a.objetivo_fisico || "—"}
-                            </span>
-                          </td>
-                          <td>
-                            {restr.length === 0 ? (
-                              <span className={s.badgeDark} style={{fontSize:"0.7rem"}}>✓ Sin restricciones</span>
-                            ) : (
-                              <div className="d-flex flex-wrap gap-1">
-                                {restr.slice(0, 2).map((r) => {
-                                  const cfg = RESTRICCION_COLOR[r.tipo] || { bg: "#e2e8f0", text: "#64748b" };
-                                  return (
-                                    <span key={r.id_restriccion} className="badge px-2 py-1"
-                                      title={r.efecto_relevante || r.nombre}
-                                      style={{ background: cfg.bg, color: cfg.text, fontSize: "0.65rem" }}>
-                                      ⚠️ {r.nombre_restriccion}
-                                    </span>
-                                  );
-                                })}
-                                {restr.length > 2 && (
-                                  <span className={s.badgeDark} style={{fontSize:"0.65rem"}}>+{restr.length - 2}</span>
-                                )}
-                              </div>
-                            )}
-                          </td>
-                          <td>
-                            {plan?.nombre_plan ? (
-                              <span className={s.badgeDark} style={{fontSize:"0.7rem"}}>✅ {plan.nombre_plan}</span>
-                            ) : plan ? (
-                              <span className={s.badgeDark} style={{fontSize:"0.7rem",background:"rgba(234,179,8,0.15)",color:"#eab308"}}>⚙️ Plan personalizado</span>
-                            ) : (
-                              <span className={s.badgeDark} style={{fontSize:"0.7rem",background:"rgba(239,68,68,0.1)",color:"#ef4444"}}>❌ Sin plan</span>
-                            )}
-                          </td>
-                          <td className="text-center">
-                            {plan?.calorias_objetivo ? (
-                              <span className={s.badgeDark} style={{fontSize:"0.7rem"}}>{plan.calorias_objetivo} kcal</span>
-                            ) : (
-                              <small className={s.emptyState}>—</small>
-                            )}
-                          </td>
-                          <td className="text-center">
-                            {plan?.num_comidas ? (
-                              <span className={s.badgeDark} style={{fontSize:"0.7rem"}}>{plan.num_comidas}×/día</span>
-                            ) : (
-                              <small className={s.emptyState}>—</small>
-                            )}
-                          </td>
-                          <td className="text-center" style={{paddingRight:"1rem"}}>
-                            <div className="d-flex gap-1 justify-content-center">
-                              {plan && (
-                                <button type="button" className={s.btnOutline}
-                                  title="Ver plan activo" onClick={() => setVerModal(a)}>👁️</button>
-                              )}
-                              <button type="button" className={`fw-semibold text-white ${s.btnAsignar}`}
-                                title={plan ? "Crear nuevo plan" : "Asignar plan"}
-                                onClick={() => abrirAsignar(a)}>
-                                {plan ? "🔄 Nueva" : "➕ Asignar"}
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════════════════
-          MODAL: ASIGNAR PLAN NUTRICIONAL PERSONALIZADO
-      ═══════════════════════════════════════════════════════════════════════ */}
-      {asignarModal && (
-        <div className={`modal d-block ${s.modalOverlay}`}
-          onClick={() => !saving && setAsignarModal(null)}>
-          <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable"
-            onClick={(e) => e.stopPropagation()}>
-            <div className={`modal-content border-0 shadow-lg ${s.modalContent}`}>
-              <div className={`modal-header ${s.modalHeaderTeal}`}>
-                <h5 className="modal-title">🥗 Crear Plan Nutricional — {nombreCompleto(asignarModal)}</h5>
-                <button type="button" className={s.btnOutline}
-                  onClick={() => !saving && setAsignarModal(null)} disabled={saving} aria-label="Cerrar">✕</button>
-              </div>
-
-              <form onSubmit={handleAsignar}>
-                <div className={`modal-body ${s.modalBodyScroll}`}>
-                  {asigError && (
-                    <div className={s.alertDanger} style={{padding:"0.4rem 0.75rem",marginBottom:"0.75rem"}}><small>⚠️ {asigError}</small></div>
-                  )}
-
-                  {/* ── Info del afiliado + restricciones ── */}
-                  <div className={s.afiliadoInfoBox}>
-                    <div className={s.avatarLg}
-                      style={{ background: `hsl(${(getId(asignarModal) * 47) % 360},65%,55%)` }}>
-                      {inicial(asignarModal)}
-                    </div>
-                    <div className="flex-grow-1">
-                      <div className="fw-semibold">{nombreCompleto(asignarModal)}</div>
-                      <div className="text-muted small">
-                        {OBJETIVO_CONFIG[asignarModal.objetivo_fisico]?.icono} {asignarModal.objetivo_fisico}
-                        &nbsp;·&nbsp;{asignarModal.nivel_experiencia}
-                        &nbsp;·&nbsp;{asignarModal.disponibilidad_semanal_dias}d/sem
-                      </div>
-                      {(asignarModal.restricciones || []).length > 0 && (
-                        <div className="mt-2 d-flex flex-wrap gap-1">
-                          {asignarModal.restricciones.map((r) => {
-                            const cfg = RESTRICCION_COLOR[r.tipo] || { bg: "#e2e8f0", text: "#64748b" };
-                            return (
-                              <span key={r.id_restriccion} className="badge px-2 py-1"
-                                style={{ background: cfg.bg, color: cfg.text, fontSize: "0.65rem" }}
-                                title={r.efecto_relevante || ""}>
-                                ⚠️ {r.nombre_restriccion}
-                              </span>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* ── Selector de alimentos disponibles ── */}
-                  <h6 className="fw-bold text-muted text-uppercase small mb-3">
-                    🍽️ Alimentos disponibles ({alimentosDisp.length})
-                  </h6>
-
-                  {loadingAl ? (
-                    <div className="text-center py-4">
-                      <div className={`spinner-border ${s.spinnerTeal}`} />
-                      <p className="text-muted small mt-2">Cargando alimentos disponibles...</p>
-                    </div>
-                  ) : (
-                    <div className="table-responsive mb-4" style={{ maxHeight: "300px", overflowY: "auto" }}>
-                      <table className={s.table}>
-                        <thead style={{ position: "sticky", top: 0, zIndex: 1 }}>
-                          <tr>
-                            <th style={{ width: 40 }}></th>
-                            <th>Alimento</th>
-                            <th className="text-center">Prot (g)</th>
-                            <th className="text-center">Carb (g)</th>
-                            <th className="text-center">Gras (g)</th>
-                            <th className="text-center">Kcal/100g</th>
-                            <th style={{ width: 80 }}>Gramos</th>
-                            <th style={{ width: 100 }}>Comida</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {alimentosDisp.length === 0 ? (
-                            <tr>
-                              <td colSpan={8} className={`text-center py-3 ${s.emptyState}`}>
-                                No hay alimentos disponibles para este afiliado.
-                              </td>
-                            </tr>
-                          ) : (
-                            alimentosDisp.map((al) => {
-                              const sel = alimentosSel[al.id_alimento];
-                              const kcal = Math.round(al.proteinas * 4 + al.carbohidratos * 4 + al.grasas * 9);
-                              return (
-                                <tr key={al.id_alimento}
-                                  style={sel ? { background: "rgba(124,58,237,0.15)" } : {}}>
-                                  <td>
-                                    <input type="checkbox" className={s.checkboxDark}
-                                      checked={!!sel}
-                                      onChange={() => toggleAlimento(al.id_alimento)} />
-                                  </td>
-                                  <td><span className="small" style={{color:"#e0e0e0"}}>{al.nombre_alimento}</span></td>
-                                  <td className="text-center small" style={{color:"#94a3b8"}}>{al.proteinas}</td>
-                                  <td className="text-center small" style={{color:"#94a3b8"}}>{al.carbohidratos}</td>
-                                  <td className="text-center small" style={{color:"#94a3b8"}}>{al.grasas}</td>
-                                  <td className="text-center small fw-semibold" style={{color:"#e0e0e0"}}>{kcal}</td>
-                                  {sel ? (
-                                    <>
-                                      <td>
-                                        <input type="number" className={`form-control form-control-sm ${s.inputDark}`} min={1} max={2000}
-                                          value={sel.cantidad_g} style={{ width: 70 }}
-                                          onChange={(e) => updateAlimento(al.id_alimento, "cantidad_g", Math.max(1, parseFloat(e.target.value) || 1))} />
-                                      </td>
-                                      <td>
-                                        <select className={`form-select form-select-sm ${s.selectDark}`}
-                                          value={sel.num_comida}
-                                          onChange={(e) => updateAlimento(al.id_alimento, "num_comida", parseInt(e.target.value))}>
-                                          {[1, 2, 3, 4, 5, 6].map((n) => (
-                                            <option key={n} value={n}>Comida {n}</option>
-                                          ))}
-                                        </select>
-                                      </td>
-                                    </>
-                                  ) : (
-                                    <td colSpan={2} className={s.emptyState} style={{fontSize:"0.85rem",textAlign:"center"}}>—</td>
-                                  )}
-                                </tr>
-                              );
-                            })
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-
-                  {/* ── Resumen de selección ── */}
-                  {Object.keys(alimentosSel).length > 0 && (
-                    <div className={s.summaryCard}>
-                      <small className="fw-semibold" style={{color:"#a78bfa"}}>
-                        {Object.keys(alimentosSel).length} alimentos seleccionados
-                        &nbsp;·&nbsp;
-                        {new Set(Object.values(alimentosSel).map((a) => a.num_comida)).size} comida(s)
-                      </small>
-                    </div>
-                  )}
-
-                  {/* ── Parámetros del plan ── */}
-                  <h6 className="fw-bold text-uppercase small mb-3" style={{color:"#94a3b8"}}>Ajustar parámetros</h6>
-                  <div className="row g-3">
-                    <div className="col-md-4">
-                      <label className={`form-label small fw-semibold ${s.labelText}`}>Calorías estimadas/día *</label>
-                      <div className="input-group">
-                        <input type="number" className={`form-control ${s.inputDark}`} min={800} max={6000} step={50}
-                          value={calorias} onChange={(e) => setCalorias(e.target.value)} required />
-                        <span className={`input-group-text small ${s.inputGroupText}`}>kcal</span>
-                      </div>
-                    </div>
-                    <div className="col-md-4">
-                      <label className={`form-label small fw-semibold ${s.labelText}`}>Comidas por día</label>
-                      <select className={`form-select ${s.selectDark}`} value={numComidas}
-                        onChange={(e) => setNumComidas(Number(e.target.value))}>
-                        {[3, 4, 5, 6].map((n) => (
-                          <option key={n} value={n}>{n} comidas/día</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="col-md-4">
-                      <label className={`form-label small fw-semibold ${s.labelText}`}>Observaciones</label>
-                      <input type="text" className={`form-control ${s.inputDark}`} placeholder="Ej: evitar lácteos..."
-                        value={obs} onChange={(e) => setObs(e.target.value)} />
-                    </div>
-                  </div>
-
-                  {tienePlanNutricional(asignarModal) && (
-                    <div className={s.alertWarning} style={{marginTop:"1rem",padding:"0.4rem 0.75rem"}}>
-                      <small>⚠️ Este afiliado ya tiene un plan activo. Crear uno nuevo reemplazará el ciclo anterior.</small>
-                    </div>
-                  )}
-                </div>
-
-                <div className={`modal-footer border-0 ${s.modalFooter}`}>
-                  <button type="button" className={s.btnOutline}
-                    onClick={() => setAsignarModal(null)} disabled={saving}>
-                    Cancelar
-                  </button>
-                  <button type="submit" className={s.btnConfirmar}
-                    disabled={saving || Object.keys(alimentosSel).length === 0}>
-                    {saving
-                      ? <><span className="spinner-border spinner-border-sm me-2" />Guardando...</>
-                      : "✅ Crear Plan Nutricional"}
-                  </button>
-                </div>
-              </form>
+      {/* ════════════════════════════════════════════ */}
+      {/* MODAL: ASIGNAR DIETA                          */}
+      {/* ════════════════════════════════════════════ */}
+      {modal === "asignar" && (
+        <div className={s.modalOverlay} onClick={closeModal}>
+          <div className={s.modalContent} onClick={(e)=>e.stopPropagation()} style={{ maxWidth:800 }}>
+            <div className={s.modalHeader}>
+              <h5 className={s.modalTitle}>{asignarAfiliadoData && cicloActivo(asignarAfiliadoData) ? "🔄 Nueva Dieta" : "➕ Asignar Dieta"}</h5>
+              <button type="button" className={s.btnOutline} onClick={closeModal} disabled={saving}>✕</button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* ═══════════════════════════════════════════════════════════════════════
-          MODAL: VER PLAN NUTRICIONAL ACTIVO
-      ═══════════════════════════════════════════════════════════════════════ */}
-      {verModal && (() => {
-        const ciclo = cicloActivo(verModal);
-        const plan = ciclo?.plan_nutricional;
-
-        return (
-          <div className={`modal d-block ${s.modalOverlay}`} onClick={() => setVerModal(null)}>
-            <div className="modal-dialog modal-lg modal-dialog-scrollable" onClick={(e) => e.stopPropagation()}>
-              <div className={`modal-content border-0 shadow-lg ${s.modalContent}`}>
-                <div className={`modal-header ${s.modalHeaderDark}`}>
-                  <h5 className="modal-title">🥗 Plan activo — {nombreCompleto(verModal)}</h5>
-                  <button type="button" className={s.btnOutline} onClick={() => setVerModal(null)} aria-label="Cerrar">✕</button>
-                </div>
-
-                <div className={`modal-body ${s.modalBody}`}>
-                  <div className="row g-3 mb-4">
-                    {[
-                      { label: "Plan", v: plan?.nombre_plan || "Personalizado" },
-                      { label: "Objetivo", v: plan?.objetivo_dieta || verModal.objetivo_fisico },
-                      { label: "Calorías", v: plan?.calorias_objetivo ? `${plan.calorias_objetivo} kcal` : "—" },
-                      { label: "Comidas/día", v: plan?.num_comidas || "—" },
-                      { label: "Inicio ciclo", v: ciclo?.fecha_inicio || "—" },
-                      { label: "Fin ciclo", v: ciclo?.fecha_fin || "—" },
-                    ].map((f) => (
-                      <div key={f.label} className="col-6 col-md-4">
-                        <small className="d-block text-uppercase fw-semibold" style={{ fontSize: "0.65rem", color:"#94a3b8" }}>
-                          {f.label}
-                        </small>
-                        <span className="small fw-semibold" style={{color:"#e0e0e0"}}>{f.v || "—"}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Restricciones */}
-                  {(verModal.restricciones || []).length > 0 && (
-                    <>
-                      <h6 className="fw-bold mb-3" style={{color:"#e0e0e0"}}>⚠️ Restricciones del afiliado</h6>
-                      {verModal.restricciones.map((r) => {
-                        const cfg = RESTRICCION_COLOR[r.tipo] || { bg: "#e2e8f0", text: "#64748b" };
-                        return (
-                          <div key={r.id_restriccion} className="rounded-3 p-2 mb-2 d-flex align-items-center gap-2"
-                            style={{ background: cfg.bg }}>
-                            <span style={{ color: cfg.text, fontWeight: 700 }}>⚠️</span>
-                            <div>
-                              <div className="small fw-semibold" style={{ color: cfg.text }}>{r.nombre_restriccion}</div>
-                              {r.efecto_relevante && (
-                                <div style={{ fontSize: "0.7rem", color:"#94a3b8" }}>{r.efecto_relevante}</div>
-                              )}
-                            </div>
-                            <span className="badge ms-auto" style={{ background: cfg.bg, color: cfg.text, fontSize: "0.6rem", border: `1px solid ${cfg.text}44` }}>
-                              {r.tipo}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </>
-                  )}
-
-                  {/* Detalle de comidas */}
-                  {plan?.detalle?.length > 0 && (
-                    <>
-                      <h6 className="fw-bold mb-3" style={{color:"#e0e0e0"}}>📋 Distribución de comidas</h6>
-                      {Array.from(new Set(plan.detalle.map((d) => d.num_comida))).map((nc) => (
-                        <div key={nc} className={s.infoCard} style={{marginBottom:"0.5rem"}}>
-                          <div className="fw-semibold small mb-2" style={{color:"#e0e0e0"}}>Comida {nc}</div>
-                          {plan.detalle.filter((d) => d.num_comida === nc).map((d, i) => (
-                            <div key={i} className="d-flex justify-content-between small py-1" style={{color:"#94a3b8",borderBottom:"1px solid #252545"}}>
-                              <span>🍽️ {d.nombre_alimento}</span>
-                              <span className="fw-semibold" style={{color:"#e0e0e0"}}>{d.cantidad_g} g</span>
-                            </div>
-                          ))}
-                        </div>
-                      ))}
-                    </>
-                  )}
-
-                  {plan?.observaciones && (
-                    <div className={s.alertInfo} style={{padding:"0.4rem 0.75rem",marginTop:"0.75rem"}}>
-                      <small>📝 {plan.observaciones}</small>
-                    </div>
-                  )}
-                </div>
-
-                <div className={`modal-footer border-0 ${s.modalFooter}`}>
-                  <button type="button" className={`fw-semibold ${s.btnConfirmar}`}
-                    onClick={() => { setVerModal(null); abrirAsignar(verModal); }}>
-                    🔄 Crear nuevo plan
-                  </button>
-                  <button type="button" className={s.btnOutline} onClick={() => setVerModal(null)}>
-                    Cerrar
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* ═══════════════════════════════════════════════════════════════════════
-          MODAL: NUEVO ALIMENTO EN CATÁLOGO
-      ═══════════════════════════════════════════════════════════════════════ */}
-      {showNuevoAl && (
-        <div className={`modal d-block ${s.modalOverlay}`} onClick={() => !guardandoAl && setShowNuevoAl(false)}>
-          <div className="modal-dialog modal-dialog-centered" onClick={(e) => e.stopPropagation()}>
-            <div className={`modal-content border-0 shadow-lg ${s.modalContent}`}>
-              <div className={`modal-header ${s.modalHeaderTeal}`}>
-                <h5 className="modal-title">🥗 Nuevo Alimento</h5>
-                <button type="button" className={s.btnOutline} onClick={() => !guardandoAl && setShowNuevoAl(false)} disabled={guardandoAl} aria-label="Cerrar">✕</button>
-              </div>
-
-              <form onSubmit={async (e) => {
-                e.preventDefault();
-                if (!nuevoAlForm.nombre_alimento.trim()) { setErrorAl("El nombre del alimento es obligatorio."); return; }
-                const proteinas = parseFloat(nuevoAlForm.proteinas);
-                const carbohidratos = parseFloat(nuevoAlForm.carbohidratos);
-                const grasas = parseFloat(nuevoAlForm.grasas);
-                if (isNaN(proteinas) || isNaN(carbohidratos) || isNaN(grasas)) { setErrorAl("Todos los macros deben ser valores numéricos."); return; }
-                setGuardandoAl(true); setErrorAl("");
-                try {
-                  await authAxios.post("/catalogo/alimentos", {
-                    nombre_alimento: nuevoAlForm.nombre_alimento.trim(),
-                    proteinas,
-                    carbohidratos,
-                    grasas,
-                  });
-                  setShowNuevoAl(false);
-                  showToast(`Alimento "${nuevoAlForm.nombre_alimento}" creado correctamente`);
-                  // Refrescar alimentos disponibles si el modal de asignación está abierto
-                  if (asignarModal) {
-                    const { data } = await authAxios.get(`/afiliados/${getId(asignarModal)}/alimentos-disponibles`);
-                    setAlimentosDisp(Array.isArray(data) ? data : []);
-                  }
-                } catch (err) {
-                  setErrorAl(err?.response?.data?.error || "Error al crear el alimento");
-                } finally {
-                  setGuardandoAl(false);
-                }
-              }}>
-                <div className={`modal-body ${s.modalBody}`}>
-                  {errorAl && <div className={s.alertDanger} style={{padding:"0.4rem 0.75rem",marginBottom:"0.75rem"}}><small>⚠️ {errorAl}</small></div>}
-                  <div className="mb-3">
-                    <label className={`form-label small fw-semibold ${s.labelText}`}>Nombre del alimento *</label>
-                    <input type="text" className={`form-control ${s.inputDark}`} required
-                      value={nuevoAlForm.nombre_alimento}
-                      onChange={(e) => setNuevoAlForm({ ...nuevoAlForm, nombre_alimento: e.target.value })} />
-                  </div>
-                  <div className="row g-3">
-                    <div className="col-md-4">
-                      <label className={`form-label small fw-semibold ${s.labelText}`}>Proteínas (g) *</label>
-                      <input type="number" className={`form-control ${s.inputDark}`} min={0} step={0.1} required
-                        value={nuevoAlForm.proteinas}
-                        onChange={(e) => setNuevoAlForm({ ...nuevoAlForm, proteinas: e.target.value })} />
-                    </div>
-                    <div className="col-md-4">
-                      <label className={`form-label small fw-semibold ${s.labelText}`}>Carbohidratos (g) *</label>
-                      <input type="number" className={`form-control ${s.inputDark}`} min={0} step={0.1} required
-                        value={nuevoAlForm.carbohidratos}
-                        onChange={(e) => setNuevoAlForm({ ...nuevoAlForm, carbohidratos: e.target.value })} />
-                    </div>
-                    <div className="col-md-4">
-                      <label className={`form-label small fw-semibold ${s.labelText}`}>Grasas (g) *</label>
-                      <input type="number" className={`form-control ${s.inputDark}`} min={0} step={0.1} required
-                        value={nuevoAlForm.grasas}
-                        onChange={(e) => setNuevoAlForm({ ...nuevoAlForm, grasas: e.target.value })} />
-                    </div>
-                  </div>
-                </div>
-                <div className={`modal-footer border-0 ${s.modalFooter}`}>
-                  <button type="button" className={s.btnOutline}
-                    onClick={() => !guardandoAl && setShowNuevoAl(false)} disabled={guardandoAl}>
-                    Cancelar
-                  </button>
-                  <button type="submit" className={`fw-semibold px-4 text-white ${s.btnConfirmar}`}
-                    disabled={guardandoAl}>
-                    {guardandoAl
-                      ? <><span className="spinner-border spinner-border-sm me-2" />Guardando...</>
-                      : "💾 Guardar Alimento"}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ═══════════════════════════════════════════════════════════════════════
-          MODAL: ELIMINAR ALIMENTO
-      ═══════════════════════════════════════════════════════════════════════ */}
-      {showEliminarAl && (
-        <div className={`modal d-block ${s.modalOverlay}`} onClick={() => !eliminandoAl && setShowEliminarAl(false)}>
-          <div className="modal-dialog modal-dialog-centered" onClick={(e) => e.stopPropagation()}>
-            <div className={`modal-content border-0 shadow-lg ${s.modalContent}`}>
-              <div className={`modal-header ${s.modalHeaderTeal}`}>
-                <h5 className="modal-title">🗑️ Eliminar Alimento</h5>
-                <button type="button" className={s.btnOutline} onClick={() => !eliminandoAl && setShowEliminarAl(false)} disabled={eliminandoAl} aria-label="Cerrar">✕</button>
-              </div>
-              <div className={`modal-body ${s.modalBody}`}>
-                {errorElimAl && <div className={s.alertDanger} style={{padding:"0.4rem 0.75rem",marginBottom:"0.75rem"}}><small>⚠️ {errorElimAl}</small></div>}
-                <div className="mb-3">
-                  <label className={`form-label small fw-semibold ${s.labelText}`}>Seleccioná el alimento a eliminar *</label>
-                  <select className={`form-select ${s.selectDark}`} value={elimAlSeleccionado}
-                    onChange={(e) => setElimAlSeleccionado(e.target.value)}>
-                    <option value="">— Seleccionar —</option>
-                    {catalogoAlList.map((al) => (
-                      <option key={al.id_alimento} value={al.id_alimento}>
-                        {al.nombre_alimento} ({al.proteinas}g prot · {al.carbohidratos}g carb · {al.grasas}g gras)
-                      </option>
+            <form onSubmit={handleAsignar}>
+              <div className={s.modalBody}>
+                {/* Selector de afiliado */}
+                <div style={{ marginBottom:16 }}>
+                  <label className={s.labelText}>Afiliado</label>
+                  <select className={s.selectDark} value={asignarAfiliadoId} onChange={handleAfiliadoSelect} required style={{ width:"100%" }}>
+                    <option value="">-- Selecciona un afiliado --</option>
+                    {afiliados.map((a) => (
+                      <option key={getId(a)} value={getId(a)}>{nombreCompleto(a)} — {a.correo||a.email||""}</option>
                     ))}
                   </select>
                 </div>
-              </div>
-              <div className={`modal-footer border-0 ${s.modalFooter}`}>
-                <button type="button" className={s.btnOutline}
-                  onClick={() => !eliminandoAl && setShowEliminarAl(false)} disabled={eliminandoAl}>Cancelar</button>
-                <button type="button" className={`fw-semibold ${s.btnDanger}`}
-                  disabled={!elimAlSeleccionado || eliminandoAl}
-                  onClick={async () => {
-                    setEliminandoAl(true); setErrorElimAl("");
-                    try {
-                      await authAxios.delete(`/catalogo/alimentos/${elimAlSeleccionado}`);
-                      setShowEliminarAl(false);
-                      const nombre = catalogoAlList.find(a => String(a.id_alimento) === elimAlSeleccionado)?.nombre_alimento || "";
-                      showToast(`Alimento "${nombre}" eliminado correctamente`);
-                      if (asignarModal) {
-                        const { data } = await authAxios.get(`/afiliados/${getId(asignarModal)}/alimentos-disponibles`);
-                        setAlimentosDisp(Array.isArray(data) ? data : []);
-                      }
-                    } catch (err) {
-                      setErrorElimAl(err?.response?.data?.error || "Error al eliminar el alimento");
-                    } finally { setEliminandoAl(false); }
-                  }}>
-                  {eliminandoAl ? <><span className="spinner-border spinner-border-sm me-2" />Eliminando...</> : "🗑️ Confirmar Eliminación"}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* ═══════════════════════════════════════════════════════════════════════
-          MODAL: CATÁLOGO DE ALIMENTOS
-      ═══════════════════════════════════════════════════════════════════════ */}
-      {showCatalogoAl && (
-        <div className={`modal d-block ${s.modalOverlay}`} onClick={() => setShowCatalogoAl(false)}>
-          <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable"
-            onClick={(e) => e.stopPropagation()}>
-            <div className={`modal-content border-0 shadow-lg ${s.modalContent}`}>
-              <div className={`modal-header ${s.modalHeaderTeal}`}>
-                <h5 className="modal-title">📋 Catálogo de Alimentos</h5>
-                <button type="button" className={s.btnOutline} onClick={() => setShowCatalogoAl(false)} aria-label="Cerrar">✕</button>
-              </div>
-              <div className={`modal-body ${s.modalBody}`}>
-                {loadingCatAl ? (
-                  <div className="text-center py-4"><div className={`spinner-border ${s.spinnerTeal}`} /></div>
-                ) : catalogoAlData.length === 0 ? (
-                  <p className={`text-center py-3 ${s.emptyState}`}>No hay alimentos en el catálogo.</p>
-                ) : (
-                  <div className="table-responsive" style={{ maxHeight: "400px", overflowY: "auto" }}>
-                    <table className={s.table}>
-                      <thead style={{ position: "sticky", top: 0, zIndex: 1 }}>
-                        <tr>
-                          <th>Nombre</th>
-                          <th className="text-center">Prot (g)</th>
-                          <th className="text-center">Carb (g)</th>
-                          <th className="text-center">Gras (g)</th>
-                          <th className="text-center">Kcal/100g</th>
-                          <th className="text-center">Acciones</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {catalogoAlData.map((al) => {
-                          const kcal = Math.round(al.proteinas * 4 + al.carbohidratos * 4 + al.grasas * 9);
-                          return (
-                            <tr key={al.id_alimento}>
-                              <td><span className="small fw-semibold" style={{color:"#e0e0e0"}}>{al.nombre_alimento}</span></td>
-                              <td className="text-center small" style={{color:"#94a3b8"}}>{al.proteinas}</td>
-                              <td className="text-center small" style={{color:"#94a3b8"}}>{al.carbohidratos}</td>
-                              <td className="text-center small" style={{color:"#94a3b8"}}>{al.grasas}</td>
-                              <td className="text-center small fw-semibold" style={{color:"#e0e0e0"}}>{al.calorias_por_100g ?? kcal}</td>
-                              <td className="text-center">
-                                <div className="d-flex gap-1 justify-content-center">
-                                  <button type="button" className={s.btnOutline} title="Editar"
-                                    onClick={() => {
-                                      setEditAlForm({
-                                        nombre_alimento: al.nombre_alimento,
-                                        proteinas: String(al.proteinas),
-                                        carbohidratos: String(al.carbohidratos),
-                                        grasas: String(al.grasas),
-                                      });
-                                      setErrorEditAl("");
-                                      setEditAlModal(al.id_alimento);
-                                    }}>✏️</button>
-                                  <button type="button" className={s.btnOutlineDanger} title="Eliminar"
-                                    onClick={async () => {
-                                      if (!window.confirm(`¿Eliminar "${al.nombre_alimento}"?`)) return;
-                                      try {
-                                        await authAxios.delete(`/catalogo/alimentos/${al.id_alimento}`);
-                                        setCatalogoAlData((prev) => prev.filter((a) => a.id_alimento !== al.id_alimento));
-                                        showToast(`Alimento "${al.nombre_alimento}" eliminado`);
-                                        if (asignarModal) {
-                                          const { data } = await authAxios.get(`/afiliados/${getId(asignarModal)}/alimentos-disponibles`);
-                                          setAlimentosDisp(Array.isArray(data) ? data : []);
-                                        }
-                                      } catch (err) {
-                                        showToast(err?.response?.data?.error || "Error al eliminar", "danger");
-                                      }
-                                    }}>🗑️</button>
-                                </div>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
+                {asignarAfiliadoData && (
+                  <div className={s.afiliadoInfoBox}>
+                    <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+                      <div className={s.avatarModal} style={{ background:avatarColor(nombreCompleto(asignarAfiliadoData)) }}>{inicial(asignarAfiliadoData)}</div>
+                      <div>
+                        <div style={{ fontWeight:600 }}>{nombreCompleto(asignarAfiliadoData)}</div>
+                        <small style={{ color:"#94a3b8" }}>{asignarAfiliadoData.correo||asignarAfiliadoData.email||""}{asignarAfiliadoData.objetivo ? ` · ${asignarAfiliadoData.objetivo}` : ""}</small>
+                        <div style={{ display:"flex", gap:4, marginTop:4, flexWrap:"wrap" }}>
+                          {restriccionesBadges(asignarAfiliadoData.restricciones)}
+                        </div>
+                      </div>
+                    </div>
+                    {cicloActivo(asignarAfiliadoData) && (
+                      <div style={{ marginTop:8, color:"#22c55e", fontSize:"0.78rem" }}>
+                        ✅ Ciclo activo detectado (ID: {cicloActivo(asignarAfiliadoData).id_ciclo}) — se reutilizará
+                      </div>
+                    )}
+                    {/* Fechas y parámetros del plan */}
+                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:12, marginTop:12 }}>
+                      <div>
+                        <label className={s.labelText}>Calorías objetivo</label>
+                        <input type="number" className={s.inputDark} value={formPlan.calorias_objetivo} onChange={(e)=>setFormPlan((f)=>({...f, calorias_objetivo:e.target.value}))} placeholder="Ej: 2000" style={{ width:"100%" }} />
+                      </div>
+                      <div>
+                        <label className={s.labelText}>Nº de comidas</label>
+                        <select className={s.selectDark} value={formPlan.num_comidas} onChange={(e)=>setFormPlan((f)=>({...f, num_comidas:e.target.value}))} style={{ width:"100%" }}>
+                          {[1,2,3,4,5,6].map((n) => <option key={n} value={n}>{n}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label className={s.labelText}>Observaciones</label>
+                        <input type="text" className={s.inputDark} value={formPlan.observaciones} onChange={(e)=>setFormPlan((f)=>({...f, observaciones:e.target.value}))} placeholder="Opcional" style={{ width:"100%" }} />
+                      </div>
+                    </div>
                   </div>
                 )}
+
+                {/* Alimentos disponibles */}
+                {asignarAfiliadoData && (
+                  <>
+                    <label className={s.labelText}>Alimentos disponibles ({alimentosDisponibles.length})</label>
+                    {alimentosDisponibles.length === 0 ? (
+                      <div className={s.emptyState}>No hay alimentos disponibles para este afiliado</div>
+                    ) : (
+                      <div style={{ maxHeight:350, overflowY:"auto", border:"1px solid #252545", borderRadius:8, padding:"0.5rem", marginBottom:12 }}>
+                        {alimentosDisponibles.map((al) => {
+                          const id = al.id_alimento;
+                          const checked = !!selectedAlimentos[id];
+                          return (
+                            <div key={id} className={`${s.alimentoItem} ${checked ? s.alimentoChecked : ""}`}>
+                              <div className={s.alimentoRow}>
+                                <input type="checkbox" className={s.checkboxDark} checked={checked} onChange={() => toggleAlimento(id)} />
+                                <span className={s.alimentoName}>{al.nombre_alimento}</span>
+                                <span className={s.alimentoNutrition}>
+                                  P:{al.proteinas}g · C:{al.carbohidratos}g · G:{al.grasas}g · {al.calorias_por_100g} kcal/100g
+                                </span>
+                              </div>
+                              {checked && (
+                                <div className={s.formRow}>
+                                  <div className={s.formGroup}>
+                                    <label className={s.inlineLabel}>Gramos/comida</label>
+                                    <input type="number" className={s.inlineInput} value={selectedAlimentos[id]?.cantidad_g??100} min={1}
+                                      onChange={(e) => updateAlimentoSel(id, "cantidad_g", e.target.value)} />
+                                  </div>
+                                  <div className={s.formGroup}>
+                                    <label className={s.inlineLabel}>N° Comida</label>
+                                    <input type="number" className={s.inlineInput} value={selectedAlimentos[id]?.num_comida??1} min={1} max={10}
+                                      onChange={(e) => updateAlimentoSel(id, "num_comida", e.target.value)} />
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
-              <div className={`modal-footer border-0 ${s.modalFooter}`}>
-                <button type="button" className={s.btnOutline} onClick={() => setShowCatalogoAl(false)}>Cerrar</button>
+              <div className={s.modalFooter}>
+                <button type="button" className={s.btnOutline} onClick={closeModal} disabled={saving}>Cancelar</button>
+                <button type="submit" className={s.btnConfirmar} disabled={saving || !asignarAfiliadoData || Object.keys(selectedAlimentos).length === 0}>
+                  {saving ? <span className="spinner-border spinner-border-sm" /> : "✅ Crear Plan Nutricional"}
+                </button>
               </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ════════════════════════════════════════════ */}
+      {/* MODAL: VER PERFIL                            */}
+      {/* ════════════════════════════════════════════ */}
+      {modal === "verPerfil" && modalAfiliado && (
+        <div className={s.modalOverlay} onClick={closeModal}>
+          <div className={s.modalContent} onClick={(e)=>e.stopPropagation()} style={{ maxWidth:700 }}>
+            <div className={s.modalHeader}>
+              <h5 className={s.modalTitle}>👁️ Plan Nutricional: {nombreCompleto(modalAfiliado)}</h5>
+              <button type="button" className={s.btnOutline} onClick={closeModal}>✕</button>
+            </div>
+            <div className={s.modalBody}>
+              <div className={s.afiliadoInfoBox}>
+                <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+                  <div className={s.avatarModal} style={{ background:avatarColor(nombreCompleto(modalAfiliado)) }}>{inicial(modalAfiliado)}</div>
+                  <div>
+                    <div style={{ fontWeight:600 }}>{nombreCompleto(modalAfiliado)}</div>
+                    <small style={{ color:"#94a3b8" }}>{modalAfiliado.correo||modalAfiliado.email||""}</small>
+                    <div style={{ display:"flex", gap:4, marginTop:4, flexWrap:"wrap" }}>
+                      {restriccionesBadges(modalAfiliado.restricciones)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <DietaDisplay afiliado={modalAfiliado} authAxios={authAxios} />
+            </div>
+            <div className={s.modalFooter}>
+              <button type="button" className={s.btnOutline} onClick={closeModal}>Cerrar</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ═══════════════════════════════════════════════════════════════════════
-          MODAL: EDITAR ALIMENTO
-      ═══════════════════════════════════════════════════════════════════════ */}
-      {editAlModal && (
-        <div className={`modal d-block ${s.modalOverlay}`} onClick={() => !guardandoEditAl && setEditAlModal(null)}>
-          <div className="modal-dialog modal-dialog-centered" onClick={(e) => e.stopPropagation()}>
-            <div className={`modal-content border-0 shadow-lg ${s.modalContent}`}>
-              <div className={`modal-header ${s.modalHeaderTeal}`}>
-                <h5 className="modal-title">✏️ Editar Alimento</h5>
-                <button type="button" className={s.btnOutline} onClick={() => !guardandoEditAl && setEditAlModal(null)} disabled={guardandoEditAl} aria-label="Cerrar">✕</button>
-              </div>
-              <form onSubmit={async (e) => {
-                e.preventDefault();
-                if (!editAlForm.nombre_alimento.trim()) { setErrorEditAl("El nombre del alimento es obligatorio."); return; }
-                const proteinas = parseFloat(editAlForm.proteinas);
-                const carbohidratos = parseFloat(editAlForm.carbohidratos);
-                const grasas = parseFloat(editAlForm.grasas);
-                if (isNaN(proteinas) || isNaN(carbohidratos) || isNaN(grasas)) { setErrorEditAl("Todos los macros deben ser valores numéricos."); return; }
-                setGuardandoEditAl(true); setErrorEditAl("");
-                try {
-                  await authAxios.put(`/catalogo/alimentos/${editAlModal}`, {
-                    nombre_alimento: editAlForm.nombre_alimento.trim(),
-                    proteinas, carbohidratos, grasas,
-                  });
-                  setEditAlModal(null);
-                  showToast(`Alimento "${editAlForm.nombre_alimento}" actualizado`);
-                  const { data } = await authAxios.get("/catalogo/alimentos");
-                  setCatalogoAlData(Array.isArray(data) ? data : []);
-                  if (asignarModal) {
-                    const { data: disp } = await authAxios.get(`/afiliados/${getId(asignarModal)}/alimentos-disponibles`);
-                    setAlimentosDisp(Array.isArray(disp) ? disp : []);
-                  }
-                } catch (err) {
-                  setErrorEditAl(err?.response?.data?.error || "Error al actualizar");
-                } finally { setGuardandoEditAl(false); }
-              }}>
-                <div className={`modal-body ${s.modalBody}`}>
-                  {errorEditAl && <div className={s.alertDanger} style={{padding:"0.4rem 0.75rem",marginBottom:"0.75rem"}}><small>⚠️ {errorEditAl}</small></div>}
-                  <div className="mb-3">
-                    <label className={`form-label small fw-semibold ${s.labelText}`}>Nombre del alimento *</label>
-                    <input type="text" className={`form-control ${s.inputDark}`} required
-                      value={editAlForm.nombre_alimento}
-                      onChange={(e) => setEditAlForm({ ...editAlForm, nombre_alimento: e.target.value })} />
-                  </div>
-                  <div className="row g-3">
-                    <div className="col-md-4">
-                      <label className={`form-label small fw-semibold ${s.labelText}`}>Proteínas (g) *</label>
-                      <input type="number" className={`form-control ${s.inputDark}`} min={0} step={0.1} required
-                        value={editAlForm.proteinas}
-                        onChange={(e) => setEditAlForm({ ...editAlForm, proteinas: e.target.value })} />
-                    </div>
-                    <div className="col-md-4">
-                      <label className={`form-label small fw-semibold ${s.labelText}`}>Carbohidratos (g) *</label>
-                      <input type="number" className={`form-control ${s.inputDark}`} min={0} step={0.1} required
-                        value={editAlForm.carbohidratos}
-                        onChange={(e) => setEditAlForm({ ...editAlForm, carbohidratos: e.target.value })} />
-                    </div>
-                    <div className="col-md-4">
-                      <label className={`form-label small fw-semibold ${s.labelText}`}>Grasas (g) *</label>
-                      <input type="number" className={`form-control ${s.inputDark}`} min={0} step={0.1} required
-                        value={editAlForm.grasas}
-                        onChange={(e) => setEditAlForm({ ...editAlForm, grasas: e.target.value })} />
-                    </div>
-                  </div>
-                </div>
-                <div className={`modal-footer border-0 ${s.modalFooter}`}>
-                  <button type="button" className={s.btnOutline}
-                    onClick={() => !guardandoEditAl && setEditAlModal(null)} disabled={guardandoEditAl}>Cancelar</button>
-                  <button type="submit" className={`fw-semibold px-4 text-white ${s.btnConfirmar}`}
-                    disabled={guardandoEditAl}>
-                    {guardandoEditAl
-                      ? <><span className="spinner-border spinner-border-sm me-2" />Guardando...</>
-                      : "💾 Guardar Cambios"}
-                  </button>
-                </div>
-              </form>
+      {/* ════════════════════════════════════════════ */}
+      {/* MODAL: CATÁLOGO DE ALIMENTOS                 */}
+      {/* ════════════════════════════════════════════ */}
+      {modal === "catalogo" && (
+        <div className={s.modalOverlay} onClick={closeModal}>
+          <div className={s.modalContent} onClick={(e)=>e.stopPropagation()} style={{ maxWidth:800 }}>
+            <div className={s.modalHeader}>
+              <h5 className={s.modalTitle}>📋 Catálogo de Alimentos</h5>
+              <button type="button" className={s.btnOutline} onClick={closeModal}>✕</button>
             </div>
+            <div className={s.modalBody}>
+              {catalogoAlimentos.length === 0 ? (
+                <div className={s.emptyState}>No hay alimentos en el catálogo</div>
+              ) : (
+                <div style={{ overflowX:"auto" }}>
+                  <table className={s.table}>
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Nombre</th>
+                        <th>Proteínas</th>
+                        <th>Carbos</th>
+                        <th>Grasas</th>
+                        <th>Kcal/100g</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {catalogoAlimentos.map((al, idx) => (
+                        <tr key={al.id_alimento}>
+                          <td style={{ color:"#94a3b8", fontSize:"0.78rem" }}>{idx + 1}</td>
+                          <td style={{ fontWeight:600 }}>{al.nombre_alimento}</td>
+                          <td>{al.proteinas}g</td>
+                          <td>{al.carbohidratos}g</td>
+                          <td>{al.grasas}g</td>
+                          <td>{al.calorias_por_100g}</td>
+                          <td>
+                            <div className={s.actionBtns}>
+                              <button type="button" className={s.btnOutline} style={{ padding:"0.2rem 0.5rem", fontSize:"0.72rem" }}
+                                onClick={() => { setModalAlimento(al); setFormAlimento({ nombre_alimento:al.nombre_alimento, proteinas:String(al.proteinas), carbohidratos:String(al.carbohidratos), grasas:String(al.grasas), calorias_por_100g:String(al.calorias_por_100g) }); setModal("editar"); }}>✏️</button>
+                              <button type="button" className={s.btnOutlineDanger} style={{ padding:"0.2rem 0.5rem", fontSize:"0.72rem" }}
+                                onClick={() => { setDeleteAlimentoId(al.id_alimento); setModal("eliminar"); }}>🗑️</button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+            <div className={s.modalFooter}>
+              <button type="button" className={s.btnPrimary} onClick={() => setModal("nuevo")}>➕ Nuevo Alimento</button>
+              <button type="button" className={s.btnOutline} onClick={closeModal}>Cerrar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ════════════════════════════════════════════ */}
+      {/* MODAL: NUEVO / EDITAR ALIMENTO               */}
+      {/* ════════════════════════════════════════════ */}
+      {(modal === "nuevo" || modal === "editar") && (
+        <div className={s.modalOverlay} onClick={closeModal}>
+          <div className={s.modalContent} onClick={(e)=>e.stopPropagation()} style={{ maxWidth:500 }}>
+            <div className={s.modalHeader}>
+              <h5 className={s.modalTitle}>{modal === "nuevo" ? "🥗 Nuevo Alimento" : "✏️ Editar Alimento"}</h5>
+              <button type="button" className={s.btnOutline} onClick={closeModal} disabled={saving}>✕</button>
+            </div>
+            <form onSubmit={handleGuardarAlimento}>
+              <div className={s.modalBody}>
+                <div style={{ marginBottom:12 }}>
+                  <label className={s.labelText}>Nombre del alimento *</label>
+                  <input className={s.inputDark} value={formAlimento.nombre_alimento} onChange={(e)=>setFormAlimento((f)=>({...f, nombre_alimento:e.target.value}))} placeholder="Ej: Pechuga de pollo" required style={{ width:"100%" }} />
+                </div>
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:12 }}>
+                  <div>
+                    <label className={s.labelText}>Proteínas (g)</label>
+                    <input type="number" className={s.inputDark} value={formAlimento.proteinas} onChange={(e)=>setFormAlimento((f)=>({...f, proteinas:e.target.value}))} step="0.1" style={{ width:"100%" }} />
+                  </div>
+                  <div>
+                    <label className={s.labelText}>Carbohidratos (g)</label>
+                    <input type="number" className={s.inputDark} value={formAlimento.carbohidratos} onChange={(e)=>setFormAlimento((f)=>({...f, carbohidratos:e.target.value}))} step="0.1" style={{ width:"100%" }} />
+                  </div>
+                </div>
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:12 }}>
+                  <div>
+                    <label className={s.labelText}>Grasas (g)</label>
+                    <input type="number" className={s.inputDark} value={formAlimento.grasas} onChange={(e)=>setFormAlimento((f)=>({...f, grasas:e.target.value}))} step="0.1" style={{ width:"100%" }} />
+                  </div>
+                  <div>
+                    <label className={s.labelText}>Calorías por 100g</label>
+                    <input type="number" className={s.inputDark} value={formAlimento.calorias_por_100g} onChange={(e)=>setFormAlimento((f)=>({...f, calorias_por_100g:e.target.value}))} step="0.1" style={{ width:"100%" }} />
+                  </div>
+                </div>
+              </div>
+              <div className={s.modalFooter}>
+                <button type="button" className={s.btnOutline} onClick={closeModal} disabled={saving}>Cancelar</button>
+                <button type="submit" className={s.btnConfirmar} disabled={saving}>
+                  {saving ? <span className="spinner-border spinner-border-sm" /> : (modal === "nuevo" ? "💾 Guardar" : "💾 Guardar Cambios")}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ════════════════════════════════════════════ */}
+      {/* MODAL: ELIMINAR ALIMENTO                     */}
+      {/* ════════════════════════════════════════════ */}
+      {modal === "eliminar" && (
+        <div className={s.modalOverlay} onClick={closeModal}>
+          <div className={s.modalContent} onClick={(e)=>e.stopPropagation()} style={{ maxWidth:450 }}>
+            <div className={s.modalHeader}>
+              <h5 className={s.modalTitle}>🗑️ Eliminar Alimento</h5>
+              <button type="button" className={s.btnOutline} onClick={closeModal} disabled={saving}>✕</button>
+            </div>
+            <form onSubmit={handleEliminarAlimento}>
+              <div className={s.modalBody}>
+                <div className={s.alertDanger} style={{ marginBottom:"0.75rem", padding:"0.5rem 0.75rem", fontSize:"0.82rem" }}>⚠️ Esta acción no se puede deshacer.</div>
+                {catalogoAlimentos.length === 0 ? (
+                  <div className={s.emptyState}>No hay alimentos en el catálogo</div>
+                ) : (
+                  <>
+                    <label className={s.labelText}>Seleccionar alimento</label>
+                    <select className={s.selectDark} value={deleteAlimentoId} onChange={(e)=>setDeleteAlimentoId(e.target.value)} style={{ width:"100%" }}>
+                      <option value="">-- Selecciona --</option>
+                      {catalogoAlimentos.map((al) => (
+                        <option key={al.id_alimento} value={al.id_alimento}>{al.nombre_alimento}</option>
+                      ))}
+                    </select>
+                  </>
+                )}
+              </div>
+              <div className={s.modalFooter}>
+                <button type="button" className={s.btnOutline} onClick={closeModal} disabled={saving}>Cancelar</button>
+                <button type="submit" className={s.btnDanger} disabled={saving || !deleteAlimentoId}>
+                  {saving ? <span className="spinner-border spinner-border-sm" /> : "🗑️ Eliminar"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
     </AppLayout>
   );
+}
+
+// ── Sub-component: DietaDisplay ──────────────────────────────
+function DietaDisplay({ afiliado, authAxios }) {
+  const [plan, setPlan] = useState(null);
+  const [error, setError] = useState(null);
+  useEffect(() => {
+    (async () => {
+      try {
+        const ciclo = cicloActivo(afiliado);
+        if (!ciclo) { setError("Sin ciclo activo"); return; }
+        const idCiclo = ciclo.id_ciclo ?? ciclo.id;
+        const { data } = await authAxios.get(`/planes/nutricional/${idCiclo}`);
+        setPlan(data);
+      } catch (err) {
+        console.error("[DietasView] ver plan:", err);
+        setError(err.response?.status === 404 ? "No tiene plan nutricional" : "Error al cargar plan");
+      }
+    })();
+  }, [afiliado, authAxios]);
+
+  if (error) return <div className={s.emptyState}>{error}</div>;
+  if (!plan) return <div className={s.emptyState}>Cargando plan...</div>;
+
+  return (
+    <>
+      <div className={s.infoCard} style={{ marginBottom:"1rem" }}>
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
+          <div>
+            <small style={{ color:"#94a3b8", fontSize:"0.72rem" }}>Calorías objetivo</small>
+            <div style={{ fontWeight:600 }}>{plan.calorias_objetivo || "—"} kcal</div>
+          </div>
+          <div>
+            <small style={{ color:"#94a3b8", fontSize:"0.72rem" }}>Comidas / día</small>
+            <div style={{ fontWeight:600 }}>{plan.num_comidas || "—"}</div>
+          </div>
+          {plan.observaciones && (
+            <div style={{ gridColumn:"1/-1" }}>
+              <small style={{ color:"#94a3b8", fontSize:"0.72rem" }}>Observaciones</small>
+              <div style={{ fontSize:"0.85rem" }}>{plan.observaciones}</div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {Array.isArray(plan.detalle) && plan.detalle.length > 0 ? (
+        <PlanDetalle detalle={plan.detalle} numComidas={plan.num_comidas} />
+      ) : (
+        <div className={s.emptyState}>Este plan no tiene alimentos asignados</div>
+      )}
+    </>
+  );
+}
+
+function PlanDetalle({ detalle, numComidas }) {
+  const grouped = {};
+  for (const d of detalle) {
+    const key = d.num_comida || 1;
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(d);
+  }
+  const keys = Object.keys(grouped).sort((a, b) => Number(a) - Number(b));
+
+  return keys.map((key) => (
+    <div key={key} className={s.infoCard} style={{ marginBottom:"0.5rem" }}>
+      <div style={{ fontWeight:600, fontSize:"0.85rem", marginBottom:"0.25rem", color:"#7c3aed" }}>
+        🍽️ Comida #{key}
+      </div>
+      <div style={{ display:"flex", flexDirection:"column", gap:"0.25rem" }}>
+        {grouped[key].map((d, i) => (
+          <div key={i} style={{ display:"flex", justifyContent:"space-between", fontSize:"0.82rem" }}>
+            <span>{d.nombre_alimento || "Alimento"}</span>
+            <span style={{ color:"#94a3b8" }}>{d.cantidad_g || 0}g</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  ));
 }

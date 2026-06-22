@@ -1,698 +1,630 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
-import { getId, nombreCompleto, inicial, cicloActivo, toDateInput } from "../utils/afiliadoHelpers";
+import { getId, nombreCompleto, inicial } from "../utils/afiliadoHelpers";
 import { useToast } from "../hooks/useToast";
-import { useAfiliados } from "../hooks/useAfiliados";
 import s from "./AfiliadosView.module.css";
 
-const OBJETIVO_CONFIG = {
-  "Pérdida de grasa": { icono: "🔥", color: "#e94560" },
-  "Aumento de masa": { icono: "💪", color: "#0d6efd" },
-  "Mantenimiento": { icono: "⚖️", color: "#198754" },
-};
-
-const OBJETIVOS = Object.keys(OBJETIVO_CONFIG);
-const NIVELES = ["Principiante", "Intermedio", "Avanzado"];
 const ESTADOS = ["Activo", "Inactivo", "Suspendido"];
+const NIVELES = ["Principiante", "Intermedio", "Avanzado"];
+const OBJETIVOS = ["Pérdida de grasa", "Aumento de masa", "Mantenimiento"];
 const SEXOS = ["Masculino", "Femenino", "Otro"];
-const MUSCULOS = ["Pecho", "Espalda", "Piernas", "Glúteos", "Hombros", "Bíceps", "Tríceps", "Abdomen"];
 
-const badgeEstado = (e) => {
-  const map = { activo: {bg:"rgba(34,197,94,0.15)",color:"#22c55e"}, inactivo: {bg:"rgba(239,68,68,0.15)",color:"#ef4444"}, pendiente: {bg:"rgba(234,179,8,0.15)",color:"#eab308"} };
-  const c = map[(e || "").toLowerCase()] || {bg:"rgba(148,163,184,0.15)",color:"#94a3b8"};
-  return <span style={{background:c.bg,color:c.color,padding:"0.25rem 0.6rem",borderRadius:"6px",fontSize:"0.72rem"}}>{e || "—"}</span>;
+const TABS_POR_ROL = {
+  Administrador: ["Estado de Cuenta", "Progreso Físico", "Ciclo Activo"],
+  Recepcionista: ["Estado de Cuenta"],
+  Entrenador: ["Progreso Físico", "Ciclo Activo"],
 };
 
-const FORM_NUEVO = {
-  nombres: "", apellidos: "", correo: "", telefono: "", direccion: "",
-  documento: "", fecha_nacimiento: "", sexo: "Masculino",
-  estatura_cm: "", objetivo_fisico: "Pérdida de grasa",
-  grupo_muscular_prioritario: "Pecho", nivel_experiencia: "Principiante",
-  disponibilidad_semanal_dias: 3, estado: "Activo",
+const FORM_VACIO = {
+  nombres: "",
+  apellidos: "",
+  correo: "",
+  telefono: "",
+  direccion: "",
+  documento: "",
+  fecha_nacimiento: "",
+  sexo: "Masculino",
+  estatura_cm: "",
+  objetivo_fisico: "Pérdida de grasa",
+  grupo_muscular_prioritario: "Pecho",
+  nivel_experiencia: "Principiante",
+  disponibilidad_semanal_dias: 3,
+  estado: "Activo",
   restricciones_medicas: "",
 };
 
-// ── Pestañas por rol ──────────────────────────────────────────────────────────
-const TABS_RECEPCIONISTA = ["Estado de Cuenta"];
-const TABS_ENTRENADOR = ["Progreso Físico", "Ciclo Activo"];
-const TABS_ADMIN = ["Estado de Cuenta", "Progreso Físico", "Ciclo Activo"];
+const badgeEstado = (estado) => {
+  const cls =
+    estado === "Activo"
+      ? s.badgeActivo
+      : estado === "Inactivo"
+      ? s.badgeInactivo
+      : estado === "Suspendido"
+      ? s.badgeSuspendido
+      : s.badgeOutline;
+  return <span className={cls}>{estado}</span>;
+};
+
+const avatarColor = (nombre) => {
+  let hash = 0;
+  for (let i = 0; i < nombre.length; i++) hash = nombre.charCodeAt(i) + ((hash << 5) - hash);
+  return `hsl(${Math.abs(hash) % 360}, 65%, 55%)`;
+};
 
 export default function AfiliadosView() {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const role = user?.role || "Recepcionista";
-
-  // ISO 25000 / 3.3: lógica de afiliados encapsulada en custom hook
-  const {
-    afiliados,
-    loading,
-    error,
-    fetchAfiliados,
-    createAfiliado,
-    updateAfiliado,
-    setAfiliados,
-    setError,
-  } = useAfiliados();
-
-  const [busqueda, setBusqueda] = useState("");
+  const { user, authAxios } = useAuth();
   const { toast, showToast } = useToast();
 
-  // Modales
-  const [verModal, setVerModal] = useState(null);
-  const [verTab, setVerTab] = useState(0);
-  const [editModal, setEditModal] = useState(null);
-  const [formEdit, setFormEdit] = useState(FORM_NUEVO);
-  const [savingEdit, setSavingEdit] = useState(false);
-  const [editError, setEditError] = useState("");
-  const [crearModal, setCrearModal] = useState(false);
-  const [formNuevo, setFormNuevo] = useState(FORM_NUEVO);
-  const [savingNew, setSavingNew] = useState(false);
-  const [newError, setNewError] = useState("");
+  const [afiliados, setAfiliados] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [saving, setSaving] = useState(false);
 
-  // ── Carga ──────────────────────────────────────────────────────────────────
+  const [detalleAfiliado, setDetalleAfiliado] = useState(null);
+  const [editandoAfiliado, setEditandoAfiliado] = useState(null);
+  const [creandoAbierto, setCreandoAbierto] = useState(false);
+
+  const [tabActivo, setTabActivo] = useState(0);
+  const [formEdit, setFormEdit] = useState(FORM_VACIO);
+  const [formCrear, setFormCrear] = useState(FORM_VACIO);
+
+  const role = user?.role || "Recepcionista";
+  const tabsDisponibles = TABS_POR_ROL[role] || TABS_POR_ROL.Recepcionista;
+
+  const fetchAfiliados = async () => {
+    setLoading(true);
+    try {
+      const { data } = await authAxios.get("/afiliados");
+      setAfiliados(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("[AfiliadosView]", err);
+      showToast("Error al cargar afiliados", "danger");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchAfiliados();
   }, []);
 
-  // ── Filtrado ───────────────────────────────────────────────────────────────
-  const filtrados = afiliados.filter((a) => {
-    const t = busqueda.toLowerCase();
-    return nombreCompleto(a).toLowerCase().includes(t) ||
-      (a.correo || "").toLowerCase().includes(t) ||
-      String(a.documento || "").includes(t);
+  const afiliadosFiltrados = afiliados.filter((a) => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    const nombre = nombreCompleto(a).toLowerCase();
+    const email = (a.correo || a.email || "").toLowerCase();
+    const doc = (a.documento || "").toLowerCase();
+    return nombre.includes(q) || email.includes(q) || doc.includes(q);
   });
 
-  // ── Crear afiliado (Recepcionista / Admin) ─────────────────────────────────
-  const handleCrear = async (e) => {
-    e.preventDefault();
-    setSavingNew(true);
-    setNewError("");
+  const abrirDetalle = async (a) => {
     try {
-      // ── FIX: construir payload limpio con los nombres exactos del schema MySQL ──
-      // - Se elimina `_id` (era campo MongoDB, ya no aplica)
-      // - `estado` → `estado_afiliacion` (nombre real en tabla AFILIADO)
-      // - `fecha_nacimiento` ya llega en YYYY-MM-DD desde <input type="date">,
-      //   pero si viene en otro formato lo normalizamos aquí también
-      // - `disponibilidad_semanal_dias` se mapea al campo MySQL
-      //   (en la tabla CICLO es `disponibilidad_dias`; el backend lo maneja)
-      // - La contraseña es generada automáticamente en el backend: MF_{documento}@2025
-
-      const fn = formNuevo.fecha_nacimiento
-        ? String(formNuevo.fecha_nacimiento).split("T")[0].split(" ")[0]
-        : null;
-
-      // FIX 2.1: evitar enviar NaN al backend
-      const estVal = parseFloat(formNuevo.estatura_cm);
-      const diasVal = parseInt(formNuevo.disponibilidad_semanal_dias, 10);
-
-      const payload = {
-        nombres: formNuevo.nombres,
-        apellidos: formNuevo.apellidos,
-        correo: formNuevo.correo,
-        telefono: formNuevo.telefono || "",
-        direccion: formNuevo.direccion || "",
-        documento: formNuevo.documento,
-        fecha_nacimiento: fn,
-        sexo: formNuevo.sexo,
-        estatura_cm: isNaN(estVal) ? null : estVal,
-        estado_afiliacion: formNuevo.estado || "Activo",
-        // Campos de ciclo (no van a AFILIADO directamente, el backend los ignora por ahora)
-        objetivo_fisico: formNuevo.objetivo_fisico,
-        grupo_muscular_prioritario: formNuevo.grupo_muscular_prioritario,
-        nivel_experiencia: formNuevo.nivel_experiencia,
-        disponibilidad_semanal_dias: isNaN(diasVal) ? 3 : diasVal,
-      };
-
-      // ISO 25000 / 3.3: usar createAfiliado del hook en lugar de authAxios directo
-      const data = await createAfiliado(payload);
-      // El backend devuelve { id, message } — construimos el objeto para el estado local
-      const nuevoAfiliado = {
-        ...payload,
-        id_usuario: data.id,
-        estado: payload.estado_afiliacion,
-        restricciones: [],
-        ciclo_activo: null,
-      };
-      setAfiliados((prev) => [...prev, nuevoAfiliado]);
-      setCrearModal(false);
-      setFormNuevo(FORM_NUEVO);
-      showToast(`✅ ${nombreCompleto(nuevoAfiliado)} creado correctamente`);
+      const id = getId(a);
+      const { data } = await authAxios.get(`/afiliados/${id}`);
+      setDetalleAfiliado(data);
+      setTabActivo(0);
     } catch (err) {
-      const msg = err?.response?.data?.error || err.message || "Error desconocido";
-      console.error('[AfiliadosView.handleCrear]', err.response?.data || err);
-      setNewError(`Error al crear: ${msg}`);
-    } finally {
-      setSavingNew(false);
+      console.error("[AfiliadosView] detalle:", err);
+      showToast("Error al cargar detalle del afiliado", "danger");
     }
   };
 
-  // ── Editar afiliado ────────────────────────────────────────────────────────
-  const abrirEditar = (a) => {
-    setEditModal(a);
-    setEditError("");
+  const abrirEdicion = (a) => {
+    setEditandoAfiliado(a);
     setFormEdit({
-      nombres: a.nombres || "", apellidos: a.apellidos || "",
-      correo: a.correo || "", telefono: a.telefono || "",
-      direccion: a.direccion || "", documento: a.documento || "",
-      // FIX: convertir ISO a YYYY-MM-DD para que <input type="date"> lo muestre
-      fecha_nacimiento: toDateInput(a.fecha_nacimiento),
+      nombres: a.nombres || "",
+      apellidos: a.apellidos || "",
+      correo: a.correo || a.email || "",
+      telefono: a.telefono || "",
+      direccion: a.direccion || "",
+      documento: a.documento || "",
+      fecha_nacimiento: a.fecha_nacimiento ? a.fecha_nacimiento.split("T")[0] : "",
       sexo: a.sexo || "Masculino",
       estatura_cm: a.estatura_cm || "",
       objetivo_fisico: a.objetivo_fisico || "Pérdida de grasa",
-      grupo_muscular_prioritario: a.grupo_muscular_prioritario || "",
+      grupo_muscular_prioritario: a.grupo_muscular_prioritario || "Pecho",
       nivel_experiencia: a.nivel_experiencia || "Principiante",
       disponibilidad_semanal_dias: a.disponibilidad_semanal_dias || 3,
-      // FIX: el campo real del backend es estado_afiliacion
-      estado_afiliacion: a.estado_afiliacion || "Activo",
+      estado: a.estado || "Activo",
+      restricciones_medicas: a.restricciones_medicas || "",
     });
   };
 
   const guardarEdicion = async (e) => {
     e.preventDefault();
-    setSavingEdit(true);
-    setEditError("");
+    setSaving(true);
     try {
-      const id = getId(editModal);
-      // ISO 25000 / 3.3: usar updateAfiliado del hook en lugar de authAxios directo
-      await updateAfiliado(id, formEdit);
-      // El backend devuelve {message}, NO el afiliado actualizado.
-      // Mergeamos formEdit sobre el objeto existente para reflejar los cambios.
-      const actualizado = { ...editModal, ...formEdit };
-      setAfiliados((prev) => prev.map((a) => getId(a) === id ? actualizado : a));
-      setEditModal(null);
-      showToast(`✅ ${nombreCompleto(actualizado)} actualizado`);
+      const id = getId(editandoAfiliado);
+      await authAxios.patch(`/afiliados/${id}`, formEdit);
+      showToast("Afiliado actualizado correctamente", "success");
+      setEditandoAfiliado(null);
+      fetchAfiliados();
     } catch (err) {
-      const msg = err?.response?.data?.error || err.message || "Error desconocido";
-      console.error('[AfiliadosView.guardarEdicion]', err);
-      setEditError(`Error al guardar: ${msg}`);
+      console.error("[AfiliadosView] edicion:", err);
+      showToast("Error al actualizar afiliado", "danger");
     } finally {
-      setSavingEdit(false);
+      setSaving(false);
     }
   };
 
-  const cambiarEstado = async (a, nuevoEstado) => {
+  const handleCrear = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const payload = {
+        ...formCrear,
+        estatura_cm: parseFloat(formCrear.estatura_cm) || null,
+        disponibilidad_semanal_dias: parseInt(formCrear.disponibilidad_semanal_dias) || 3,
+        estado_afiliacion: formCrear.estado,
+      };
+      delete payload.estado;
+      await authAxios.post("/afiliados", payload);
+      showToast("Afiliado creado correctamente", "success");
+      setCreandoAbierto(false);
+      setFormCrear(FORM_VACIO);
+      fetchAfiliados();
+    } catch (err) {
+      console.error("[AfiliadosView] crear:", err);
+      showToast("Error al crear afiliado", "danger");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleEliminar = async (a) => {
+    if (!window.confirm(`¿Eliminar a ${nombreCompleto(a)}?`)) return;
     try {
       const id = getId(a);
-      // ISO 25000 / 3.3: usar updateAfiliado del hook
-      await updateAfiliado(id, { estado: nuevoEstado });
-      // El backend devuelve { message }, NO el afiliado actualizado: actualizamos localmente
-      setAfiliados((prev) =>
-        prev.map((x) => getId(x) === id
-          ? { ...x, estado: nuevoEstado, estado_afiliacion: nuevoEstado }
-          : x
-        )
-      );
-      showToast(`🔄 Estado cambiado a "${nuevoEstado}"`);
+      await authAxios.delete(`/afiliados/${id}`);
+      showToast("Afiliado eliminado", "success");
+      fetchAfiliados();
     } catch (err) {
-      const msg = err?.response?.data?.error || err.message || "Error desconocido";
-      showToast(`❌ ${msg}`);
+      console.error("[AfiliadosView] eliminar:", err);
+      showToast("Error al eliminar afiliado", "danger");
     }
   };
 
-
-
-  const tabs = role === "Recepcionista" ? TABS_RECEPCIONISTA
-    : role === "Entrenador" ? TABS_ENTRENADOR
-      : TABS_ADMIN;
+  const puedeCrear = role === "Administrador" || role === "Recepcionista";
 
   return (
     <AppLayout>
-      {/* Toast */}
       {toast.msg && (
-        <div className={s.toast}>
+        <div className={toast.type === "danger" ? s.alertDanger : s.alertSuccess}
+          style={{ position: "fixed", top: 16, right: 16, zIndex: 9999, padding: "0.5rem 1rem", borderRadius: 8 }}>
           {toast.msg}
         </div>
       )}
 
-      <div className={`container-fluid py-4 px-3 px-md-4 ${s.page}`}>
-
-        {/* Encabezado */}
-        <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+      <div style={{ padding: "1.25rem 1.5rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
           <div>
-            <h1 className={`h4 fw-bold mb-0 d-flex align-items-center gap-2 ${s.headerTitle}`}>
-              <span className={`d-inline-flex align-items-center justify-content-center ${s.headerIcon}`}>👥</span>
-              Gestión de Afiliados
+            <h1 className={s.headerTitle} style={{ fontSize: "1.35rem", fontWeight: 700, margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
+              👥 Afiliados
             </h1>
-            <small className={s.headerSub}>
-              {role === "Recepcionista" ? "Administración de membresías y estados" : "Seguimiento de planes y progreso"}
-            </small>
+            <p className={s.headerSub} style={{ margin: "2px 0 0 0" }}>
+              {role === "Administrador"
+                ? "Gestión completa de afiliados · Crear, editar, suspender"
+                : role === "Recepcionista"
+                ? "Registro y consulta de afiliados"
+                : "Seguimiento de afiliados asignados"}
+            </p>
           </div>
-          {(role === "Recepcionista" || role === "Administrador") && (
-            <button type="button" id="btn-crear-afiliado" className={s.btnCrear}
-              onClick={() => { setCrearModal(true); setFormNuevo(FORM_NUEVO); setNewError(""); }}>
+          {puedeCrear && (
+            <button type="button" className={s.btnPrimary} onClick={() => setCreandoAbierto(true)}>
               ➕ Nuevo afiliado
             </button>
           )}
         </div>
 
-        {/* Tabla */}
+        <input
+          type="text"
+          className={s.searchInput}
+          placeholder="Buscar por nombre, correo o documento..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{ width: "100%", maxWidth: 400, padding: "0.5rem 0.75rem", marginBottom: 20 }}
+        />
+
         <div className={s.tableCard}>
-          <div className={s.tableCardHeader}>
-            <span style={{color:"#94a3b8",fontSize:"0.85rem",fontWeight:600}}>{filtrados.length} afiliados</span>
-            <input type="text" id="busqueda-afiliados" className={`form-control form-control-sm ${s.searchInput}`}
-              placeholder="🔍 Nombre, correo, documento..."
-              value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
-          </div>
-          <div className={s.tableWrap}>
-            {error && <div className={s.alertDanger} style={{margin:"0.75rem",padding:"0.4rem 0.75rem"}}><small>⚠️ {error}</small></div>}
-            {loading && <div className="text-center py-5"><div className={`spinner-border ${s.spinnerBrand}`} /></div>}
-            {!loading && !error && (
-              <div className={s.tableWrap}>
-                <table className={s.table}>
-                  <thead>
-                    <tr>
-                      <th style={{paddingLeft:"1.25rem"}}>#</th>
-                      <th>Afiliado</th>
-                      <th>Objetivo</th>
-                      <th>Nivel</th>
-                      {(role === "Entrenador" || role === "Administrador") && <th>Ciclo activo</th>}
-                      <th>Estado</th>
-                      <th style={{textAlign:"center",paddingRight:"1rem"}}>Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filtrados.length === 0 ? (
-                      <tr><td colSpan={8} className={`text-center py-5 ${s.emptyState}`}>
-                        {busqueda ? `Sin resultados para "${busqueda}"` : "No hay afiliados."}
-                      </td></tr>
-                    ) : filtrados.map((a, idx) => {
-                      const ciclo = cicloActivo(a);
-                      return (
-                        <tr key={getId(a)}>
-                          <td style={{paddingLeft:"1.25rem"}} className={s.emptyState}>{idx + 1}</td>
-                          <td>
-                            <div className="d-flex align-items-center gap-2">
-                              <div className={s.avatar}
-                                style={{ background: `hsl(${(getId(a) * 47) % 360},65%,55%)` }}
-                              >
-                                {inicial(a)}
-                              </div>
-                              <div>
-                                <div className="fw-semibold small" style={{color:"#e0e0e0"}}>{nombreCompleto(a)}</div>
-                                <div className={s.docText}>Doc: {a.documento || "—"}</div>
-                              </div>
+          {loading ? (
+            <div style={{ padding: "3rem 0", textAlign: "center", color: "#94a3b8" }}>Cargando afiliados...</div>
+          ) : afiliadosFiltrados.length === 0 ? (
+            <div style={{ padding: "3rem 0", textAlign: "center" }}>
+              <p className={s.emptyState}>No se encontraron afiliados.</p>
+            </div>
+          ) : (
+            <div style={{ overflowX: "auto" }}>
+              <table className={s.table}>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Afiliado</th>
+                    <th>Objetivo</th>
+                    <th>Nivel</th>
+                    <th>Días/sem</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {afiliadosFiltrados.map((a, idx) => {
+                    const nombre = nombreCompleto(a);
+                    const email = a.correo || a.email || "";
+                    return (
+                      <tr key={getId(a)}>
+                        <td style={{ color: "#94a3b8", fontSize: "0.78rem" }}>{idx + 1}</td>
+                        <td>
+                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                            <div className={s.avatarTd} style={{ background: avatarColor(nombre) }}>
+                              {inicial(a)}
                             </div>
-                          </td>
-                          <td><small style={{color:"#94a3b8"}}>{OBJETIVO_CONFIG[a.objetivo_fisico]?.icono} {a.objetivo_fisico || "—"}</small></td>
-                          <td><span className={s.badgeDark}>{a.nivel_experiencia || "—"}</span></td>
-
-                          {(role === "Entrenador" || role === "Administrador") && (
-                            <td className="text-center">
-                              {ciclo
-                                ? <span className={s.badgeDark}>Ciclo {ciclo.numero_ciclo}</span>
-                                : <span className={s.emptyState} style={{fontSize:"0.85rem"}}>Sin ciclo</span>}
-                            </td>
-                          )}
-
-                          <td>
-                            {role === "Recepcionista" ? (
-                              <select
-                                className={`form-select form-select-sm ${s.selectDark}`}
-                                style={{width:"auto",padding:"0.2rem 0.5rem",fontSize:"0.78rem"}}
-                                value={a.estado || "Activo"}
-                                onChange={(e) => cambiarEstado(a, e.target.value)}
-                                title="Cambiar estado"
-                              >
-                                {ESTADOS.map((st) => <option key={st}>{st}</option>)}
-                              </select>
-                            ) : badgeEstado(a.estado)}
-                          </td>
-
-                          <td className="text-center" style={{paddingRight:"1rem"}}>
-                            <div className="d-flex gap-1 justify-content-center">
-                              <button type="button" className={s.btnOutline}
-                                id={`btn-ver-${getId(a)}`} title="Ver detalle"
-                                onClick={() => { setVerModal(a); setVerTab(0); }}>👁</button>
-                              {role !== "Entrenador" && (
-                                <button type="button" className={s.btnOutline}
-                                  id={`btn-editar-${getId(a)}`} title="Editar"
-                                  onClick={() => abrirEditar(a)}>✏️</button>
-                              )}
+                            <div>
+                              <div style={{ fontWeight: 600, fontSize: "0.85rem" }}>{nombre}</div>
+                              <div className={s.emailSm}>{email}</div>
                             </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
+                          </div>
+                        </td>
+                        <td>{a.objetivo_fisico || "—"}</td>
+                        <td>{a.nivel_experiencia || "—"}</td>
+                        <td>{a.disponibilidad_semanal_dias || "—"}</td>
+                        <td>{badgeEstado(a.estado)}</td>
+                        <td>
+                          <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                            <button type="button" className={s.btnIcon} title="Ver" onClick={() => abrirDetalle(a)}>👁</button>
+                            <button type="button" className={s.btnIcon} title="Editar" onClick={() => abrirEdicion(a)}>✏️</button>
+                            {role === "Administrador" && (
+                              <button type="button" className={s.btnIcon} title="Eliminar" onClick={() => handleEliminar(a)}>🗑️</button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════════════════
-          MODAL: VER AFILIADO (pestañas por rol)
-      ═══════════════════════════════════════════════════════════════════════ */}
-      {verModal && (
-        <div className={`modal d-block ${s.modalOverlay}`} onClick={() => setVerModal(null)}>
-          <div className="modal-dialog modal-lg modal-dialog-scrollable" onClick={(e) => e.stopPropagation()}>
-            <div className={`border-0 shadow ${s.modalContent}`}>
-              <div className={`modal-header ${s.modalHeaderDark}`}>
-                <h5 className="modal-title">👤 {nombreCompleto(verModal)}</h5>
-                <button type="button" className={s.btnOutline} onClick={() => setVerModal(null)} aria-label="Cerrar">✕</button>
+      {detalleAfiliado && (
+        <div className={s.modalOverlay} onClick={() => !saving && setDetalleAfiliado(null)}>
+          <div className={s.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: 650 }}>
+            <div className={s.modalHeader}>
+              <h5 className={s.modalTitle}>👁 {nombreCompleto(detalleAfiliado)}</h5>
+              <button type="button" className={s.btnOutline} onClick={() => !saving && setDetalleAfiliado(null)}>✕</button>
+            </div>
+            <div className={s.modalBody}>
+              <div className={s.detailGrid}>
+                <div className={s.detailItem}>
+                  <div className={s.detailLabel}>Correo</div>
+                  <div className={s.detailValue}>{detalleAfiliado.correo || detalleAfiliado.email || "—"}</div>
+                </div>
+                <div className={s.detailItem}>
+                  <div className={s.detailLabel}>Teléfono</div>
+                  <div className={s.detailValue}>{detalleAfiliado.telefono || "—"}</div>
+                </div>
+                <div className={s.detailItem}>
+                  <div className={s.detailLabel}>Documento</div>
+                  <div className={s.detailValue}>{detalleAfiliado.documento || "—"}</div>
+                </div>
+                <div className={s.detailItem}>
+                  <div className={s.detailLabel}>Sexo</div>
+                  <div className={s.detailValue}>{detalleAfiliado.sexo || "—"}</div>
+                </div>
+                <div className={s.detailItem}>
+                  <div className={s.detailLabel}>Fecha Nac.</div>
+                  <div className={s.detailValue}>
+                    {detalleAfiliado.fecha_nacimiento
+                      ? new Date(detalleAfiliado.fecha_nacimiento).toLocaleDateString("es-CO")
+                      : "—"}
+                  </div>
+                </div>
+                <div className={s.detailItem}>
+                  <div className={s.detailLabel}>Estatura</div>
+                  <div className={s.detailValue}>{detalleAfiliado.estatura_cm ? `${detalleAfiliado.estatura_cm} cm` : "—"}</div>
+                </div>
+                <div className={s.detailItem}>
+                  <div className={s.detailLabel}>Dirección</div>
+                  <div className={s.detailValue}>{detalleAfiliado.direccion || "—"}</div>
+                </div>
+                <div className={s.detailItem}>
+                  <div className={s.detailLabel}>Objetivo</div>
+                  <div className={s.detailValue}>{detalleAfiliado.objetivo_fisico || "—"}</div>
+                </div>
+                <div className={s.detailItem}>
+                  <div className={s.detailLabel}>Grupo Muscular</div>
+                  <div className={s.detailValue}>{detalleAfiliado.grupo_muscular_prioritario || "—"}</div>
+                </div>
+                <div className={s.detailItem}>
+                  <div className={s.detailLabel}>Nivel</div>
+                  <div className={s.detailValue}>{detalleAfiliado.nivel_experiencia || "—"}</div>
+                </div>
+                <div className={s.detailItem}>
+                  <div className={s.detailLabel}>Días/semana</div>
+                  <div className={s.detailValue}>{detalleAfiliado.disponibilidad_semanal_dias || "—"}</div>
+                </div>
+                <div className={s.detailItem}>
+                  <div className={s.detailLabel}>Estado</div>
+                  <div className={s.detailValue}>{badgeEstado(detalleAfiliado.estado)}</div>
+                </div>
               </div>
-              <div className={`modal-body ${s.modalBody}`}>
-                {/* Datos básicos */}
-                <div className="row g-2 mb-3">
-                  {[
-                    { label: "Correo", v: verModal.correo },
-                    { label: "Teléfono", v: verModal.telefono },
-                    { label: "Documento", v: verModal.documento },
-                    { label: "Sexo", v: verModal.sexo },
-                    { label: "Nacimiento", v: verModal.fecha_nacimiento ? new Date(verModal.fecha_nacimiento).toLocaleDateString("es-CO") : "—" },
-                    { label: "Estatura", v: verModal.estatura_cm ? `${verModal.estatura_cm} cm` : "—" },
-                    { label: "Objetivo", v: verModal.objetivo_fisico },
-                    { label: "Nivel", v: verModal.nivel_experiencia },
-                    { label: "Días/sem", v: verModal.disponibilidad_semanal_dias },
-                  ].map((f) => (
-                    <div key={f.label} className="col-6 col-md-4">
-                      <small className={`d-block text-uppercase fw-semibold ${s.infoLabel}`}>{f.label}</small>
-                      <span className="small fw-semibold" style={{color:"#e0e0e0"}}>{f.v || "—"}</span>
-                    </div>
-                  ))}
-                </div>
 
-                {/* Pestañas por rol */}
-                <div className={`d-flex gap-0 mb-3 ${s.navTabs}`}>
-                  {tabs.map((tab, i) => (
-                    <button key={tab} type="button"
-                      className={`${s.navTab} ${verTab === i ? s.navTabActive : ""}`}
-                      onClick={() => setVerTab(i)}>
-                      {tab}
-                    </button>
-                  ))}
+              {detalleAfiliado.restricciones_medicas && (
+                <div style={{ marginTop: 12 }}>
+                  <div className={s.detailLabel}>Restricciones médicas</div>
+                  <div className={s.detailValue}>{detalleAfiliado.restricciones_medicas}</div>
                 </div>
+              )}
 
-                {/* TAB: Estado de Cuenta */}
-                {tabs[verTab] === "Estado de Cuenta" && (
+              <div style={{ display: "flex", gap: 4, marginTop: 20, borderBottom: "1px solid #252545" }}>
+                {tabsDisponibles.map((tab, i) => (
+                  <button
+                    key={tab}
+                    type="button"
+                    className={`${s.navTab} ${i === tabActivo ? s.navTabActive : ""}`}
+                    onClick={() => setTabActivo(i)}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
+
+              <div style={{ marginTop: 16, minHeight: 80 }}>
+                {tabsDisponibles[tabActivo] === "Estado de Cuenta" && (
                   <div>
-                    <div className="row g-3">
-                      <div className="col-md-4">
-                        <div className={s.infoCard}>
-                          <div className={s.infoLabel}>Estado actual</div>
-                          <div className="mt-1">{badgeEstado(verModal.estado)}</div>
+                    {detalleAfiliado.ultimo_pago ? (
+                      <div className={s.kpiCard} style={{ textAlign: "left" }}>
+                        <div className={s.kpiLabel}>Último pago</div>
+                        <div className={s.kpiValue} style={{ fontSize: "1rem" }}>
+                          ${Number(detalleAfiliado.ultimo_pago.valor_pagado || 0).toLocaleString("es-CO")}
+                        </div>
+                        <div style={{ fontSize: "0.75rem", color: "#94a3b8", marginTop: 4 }}>
+                          {new Date(detalleAfiliado.ultimo_pago.fecha_pago).toLocaleDateString("es-CO")}
                         </div>
                       </div>
-                      <div className="col-md-4">
-                        <div className={s.infoCard}>
-                          <div className={s.infoLabel}>Desde</div>
-                          <div className={s.infoValue}>{verModal.fecha_registro || "—"}</div>
-                        </div>
-                      </div>
-                    </div>
-                    {verModal.restricciones?.length > 0 && (
-                      <div className="mt-3">
-                        <h6 className="fw-bold" style={{color:"#e0e0e0"}}>⚠️ Restricciones médicas</h6>
-                        {verModal.restricciones.map((r) => (
-                          <div key={r.id_restriccion} className={s.alertWarning} style={{marginBottom:"0.5rem"}}>
-                            <strong style={{color:"#eab308"}}>{r.nombre_restriccion}</strong>
-                            <span className={s.badgeDark} style={{marginLeft:"0.5rem"}}>{r.tipo}</span>
-                            {r.efecto_relevante && <div className="small mt-1" style={{color:"#94a3b8"}}>{r.efecto_relevante}</div>}
-                          </div>
-                        ))}
-                      </div>
+                    ) : (
+                      <p className={s.emptyState}>No hay información de pagos disponible.</p>
                     )}
                   </div>
                 )}
-
-                {/* TAB: Progreso Físico */}
-                {tabs[verTab] === "Progreso Físico" && (() => {
-                  const ciclo = cicloActivo(verModal);
-                  const progresos = ciclo?.progreso_fisico || [];
-                  return progresos.length === 0
-                    ? <p className={s.emptyState} style={{textAlign:"center",padding:"1rem 0"}}>Sin registros de progreso en el ciclo activo.</p>
-                    : progresos.map((p, i) => (
-                      <div key={i} className={s.progressCard} style={{marginBottom:"0.5rem"}}>
-                        <div className="d-flex justify-content-between align-items-center mb-1">
-                          <strong className="small" style={{color:"#e0e0e0"}}>{p.fecha_registro}</strong>
-                          <span className={s.badgeDark}>{p.peso_kg} kg</span>
+                {tabsDisponibles[tabActivo] === "Progreso Físico" && (
+                  <div>
+                    {detalleAfiliado.progreso_fisico && detalleAfiliado.progreso_fisico.length > 0 ? (
+                      detalleAfiliado.progreso_fisico.map((p, i) => (
+                        <div key={i} className={s.kpiCard} style={{ textAlign: "left", marginBottom: 8 }}>
+                          <div className={s.kpiLabel}>{new Date(p.fecha_registro).toLocaleDateString("es-CO")}</div>
+                          <div className={s.detailValue}>Peso: {p.peso_kg || "—"} kg</div>
                         </div>
-                        <div className="row g-2 text-center">
-                          {[
-                            { label: "% Grasa", v: `${p.porcentaje_grasa}%` },
-                            { label: "Cintura", v: p.medida_cintura ? `${p.medida_cintura} cm` : "—" },
-                            { label: "Brazo", v: p.medida_brazo ? `${p.medida_brazo} cm` : "—" },
-                            { label: "Pierna", v: p.medida_pierna ? `${p.medida_pierna} cm` : "—" },
-                          ].map((f) => (
-                            <div key={f.label} className="col-3">
-                              <small className={s.infoLabel}>{f.label}</small>
-                              <strong className="small" style={{color:"#e0e0e0"}}>{f.v || "—"}</strong>
-                            </div>
-                          ))}
-                        </div>
-                        {p.observaciones && <small className={s.headerSub} style={{display:"block",marginTop:"0.25rem"}}>📝 {p.observaciones}</small>}
-                      </div>
-                    ));
-                })()}
-
-                {/* TAB: Ciclo Activo */}
-                {tabs[verTab] === "Ciclo Activo" && (() => {
-                  const ciclo = cicloActivo(verModal);
-                  if (!ciclo) return <p className={s.emptyState} style={{textAlign:"center",padding:"1rem 0"}}>Sin ciclo activo.</p>;
-                  return (
-                    <div>
-                      <div className="d-flex gap-2 mb-3 flex-wrap" style={{alignItems:"center"}}>
-                        <span className={s.badgeDark}>Ciclo {ciclo.numero_ciclo}</span>
-                        <small className={s.headerSub}>{ciclo.fecha_inicio} → {ciclo.fecha_fin}</small>
-                      </div>
-                      {ciclo.plan_nutricional && (
-                        <div className="mb-3">
-                          <h6 className="fw-bold" style={{color:"#e0e0e0",marginBottom:"0.5rem"}}>🥗 Plan Nutricional</h6>
-                          <p className="small" style={{color:"#94a3b8",marginBottom:"0.5rem"}}>
-                            {ciclo.plan_nutricional.calorias_objetivo} kcal · {ciclo.plan_nutricional.num_comidas} comidas/día
-                          </p>
-                        </div>
-                      )}
-                      {ciclo.plan_entrenamiento?.rutinas?.length > 0 && (
-                        <div>
-                          <h6 className="fw-bold" style={{color:"#e0e0e0",marginBottom:"0.5rem"}}>🏋️ Rutinas</h6>
-                          {ciclo.plan_entrenamiento.rutinas.map((r) => (
-                            <div key={r.dia_numero} className={s.progressCard} style={{marginBottom:"0.5rem"}}>
-                              <div className="fw-semibold small" style={{color:"#e0e0e0",marginBottom:"0.25rem"}}>{r.nombre_rutina}</div>
-                              {r.ejercicios?.map((ej, i) => (
-                                <div key={i} className="d-flex justify-content-between small" style={{color:"#94a3b8"}}>
-                                  <span>{ej.nombre_ejercicio}</span>
-                                  <span>{ej.series}×{ej.repeticiones}</span>
-                                </div>
-                              ))}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })()}
-              </div>
-              <div className={`modal-footer ${s.modalFooter}`}>
-                {role !== "Entrenador" && (
-                  <button type="button" className={s.btnOutline}
-                    onClick={() => { setVerModal(null); abrirEditar(verModal); }}>✏️ Editar</button>
+                      ))
+                    ) : (
+                      <p className={s.emptyState}>No hay registros de progreso físico.</p>
+                    )}
+                  </div>
                 )}
-                <button type="button" className={s.btnOutline} onClick={() => setVerModal(null)}>Cerrar</button>
+                {tabsDisponibles[tabActivo] === "Ciclo Activo" && (
+                  <div>
+                    {detalleAfiliado.ciclo_activo ? (
+                      <div>
+                        <span className={s.cycleBadge}>Ciclo activo</span>
+                        <div style={{ marginTop: 8 }}>
+                          <div className={s.detailItem}>
+                            <div className={s.detailLabel}>Inicio</div>
+                            <div className={s.detailValue}>
+                              {new Date(detalleAfiliado.ciclo_activo.fecha_inicio).toLocaleDateString("es-CO")}
+                            </div>
+                          </div>
+                          <div className={s.detailItem} style={{ marginTop: 8 }}>
+                            <div className={s.detailLabel}>Fin estimado</div>
+                            <div className={s.detailValue}>
+                              {new Date(detalleAfiliado.ciclo_activo.fecha_fin).toLocaleDateString("es-CO")}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className={s.emptyState}>No tiene un ciclo activo actualmente.</p>
+                    )}
+                  </div>
+                )}
               </div>
+            </div>
+            <div className={s.modalFooter}>
+              <button type="button" className={s.btnOutline} onClick={() => setDetalleAfiliado(null)} disabled={saving}>
+                Cerrar
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ═══════════════════════════════════════════════════════════════════════
-          MODAL: EDITAR AFILIADO
-      ═══════════════════════════════════════════════════════════════════════ */}
-      {editModal && (
-        <div className={`modal d-block ${s.modalOverlay}`}
-          onClick={() => !savingEdit && setEditModal(null)}>
-          <div className="modal-dialog modal-lg modal-dialog-scrollable" onClick={(e) => e.stopPropagation()}>
-            <div className={`border-0 shadow ${s.modalContent}`}>
-              <div className={`modal-header ${s.modalHeaderRed}`}>
-                <h5 className="modal-title">✏️ Editar — {nombreCompleto(editModal)}</h5>
-                <button type="button" className={s.btnOutline}
-                  onClick={() => !savingEdit && setEditModal(null)} aria-label="Cerrar">✕</button>
+      {editandoAfiliado && (
+        <div className={s.modalOverlay} onClick={() => !saving && setEditandoAfiliado(null)}>
+          <div className={s.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: 650 }}>
+            <form onSubmit={guardarEdicion}>
+              <div className={s.modalHeader}>
+                <h5 className={s.modalTitle}>✏️ Editar: {nombreCompleto(editandoAfiliado)}</h5>
+                <button type="button" className={s.btnOutline} onClick={() => !saving && setEditandoAfiliado(null)}>✕</button>
               </div>
-              <form onSubmit={guardarEdicion}>
-                <div className={`modal-body ${s.modalBody}`}>
-                  {editError && <div className={s.alertDanger} style={{marginBottom:"0.75rem",padding:"0.4rem 0.75rem"}}><small>⚠️ {editError}</small></div>}
-                  <div className="row g-3">
-                    {[
-                      { label: "Nombres", key: "nombres", type: "text" },
-                      { label: "Apellidos", key: "apellidos", type: "text" },
-                      { label: "Correo", key: "correo", type: "email" },
-                      { label: "Teléfono", key: "telefono", type: "text" },
-                      { label: "Documento", key: "documento", type: "text" },
-                    ].map(({ label, key, type }) => (
-                      <div key={key} className="col-md-6">
-                        <label className={`form-label ${s.labelText}`}>{label}</label>
-                        <input type={type} className={`form-control ${s.inputDark}`} value={formEdit[key]}
-                          onChange={(e) => setFormEdit({ ...formEdit, [key]: e.target.value })} />
-                      </div>
-                    ))}
-                    <div className="col-md-6">
-                      <label className={`form-label ${s.labelText}`}>Estado</label>
-                      <select className={`form-select ${s.selectDark}`} value={formEdit.estado_afiliacion}
-                        onChange={(e) => setFormEdit({ ...formEdit, estado_afiliacion: e.target.value })}>
-                        {ESTADOS.map((s) => <option key={s}>{s}</option>)}
-                      </select>
-                    </div>
-                    <div className="col-md-6">
-                      <label className={`form-label ${s.labelText}`}>Objetivo físico</label>
-                      <select className={`form-select ${s.selectDark}`} value={formEdit.objetivo_fisico}
-                        onChange={(e) => setFormEdit({ ...formEdit, objetivo_fisico: e.target.value })}>
-                        {OBJETIVOS.map((o) => <option key={o}>{o}</option>)}
-                      </select>
-                    </div>
-                    <div className="col-md-6">
-                      <label className={`form-label ${s.labelText}`}>Nivel</label>
-                      <select className={`form-select ${s.selectDark}`} value={formEdit.nivel_experiencia}
-                        onChange={(e) => setFormEdit({ ...formEdit, nivel_experiencia: e.target.value })}>
-                        {NIVELES.map((n) => <option key={n}>{n}</option>)}
-                      </select>
-                    </div>
+              <div className={s.modalBody}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                  <div>
+                    <label className={s.labelText}>Nombres</label>
+                    <input className={s.inputDark} value={formEdit.nombres} onChange={(e) => setFormEdit({ ...formEdit, nombres: e.target.value })} required />
+                  </div>
+                  <div>
+                    <label className={s.labelText}>Apellidos</label>
+                    <input className={s.inputDark} value={formEdit.apellidos} onChange={(e) => setFormEdit({ ...formEdit, apellidos: e.target.value })} required />
+                  </div>
+                  <div>
+                    <label className={s.labelText}>Correo</label>
+                    <input className={s.inputDark} type="email" value={formEdit.correo} onChange={(e) => setFormEdit({ ...formEdit, correo: e.target.value })} required />
+                  </div>
+                  <div>
+                    <label className={s.labelText}>Teléfono</label>
+                    <input className={s.inputDark} value={formEdit.telefono} onChange={(e) => setFormEdit({ ...formEdit, telefono: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className={s.labelText}>Documento</label>
+                    <input className={s.inputDark} value={formEdit.documento} onChange={(e) => setFormEdit({ ...formEdit, documento: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className={s.labelText}>Sexo</label>
+                    <select className={s.selectDark} value={formEdit.sexo} onChange={(e) => setFormEdit({ ...formEdit, sexo: e.target.value })}>
+                      {SEXOS.map((sx) => <option key={sx} value={sx}>{sx}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className={s.labelText}>Fecha Nacimiento</label>
+                    <input className={s.inputDark} type="date" value={formEdit.fecha_nacimiento} onChange={(e) => setFormEdit({ ...formEdit, fecha_nacimiento: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className={s.labelText}>Estatura (cm)</label>
+                    <input className={s.inputDark} type="number" value={formEdit.estatura_cm} onChange={(e) => setFormEdit({ ...formEdit, estatura_cm: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className={s.labelText}>Dirección</label>
+                    <input className={s.inputDark} value={formEdit.direccion} onChange={(e) => setFormEdit({ ...formEdit, direccion: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className={s.labelText}>Objetivo físico</label>
+                    <select className={s.selectDark} value={formEdit.objetivo_fisico} onChange={(e) => setFormEdit({ ...formEdit, objetivo_fisico: e.target.value })}>
+                      {OBJETIVOS.map((o) => <option key={o} value={o}>{o}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className={s.labelText}>Nivel experiencia</label>
+                    <select className={s.selectDark} value={formEdit.nivel_experiencia} onChange={(e) => setFormEdit({ ...formEdit, nivel_experiencia: e.target.value })}>
+                      {NIVELES.map((n) => <option key={n} value={n}>{n}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className={s.labelText}>Días/semana</label>
+                    <input className={s.inputDark} type="number" min={1} max={7} value={formEdit.disponibilidad_semanal_dias} onChange={(e) => setFormEdit({ ...formEdit, disponibilidad_semanal_dias: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className={s.labelText}>Estado</label>
+                    <select className={s.selectDark} value={formEdit.estado} onChange={(e) => setFormEdit({ ...formEdit, estado: e.target.value })}>
+                      {ESTADOS.map((es) => <option key={es} value={es}>{es}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className={s.labelText}>Grupo muscular</label>
+                    <select className={s.selectDark} value={formEdit.grupo_muscular_prioritario} onChange={(e) => setFormEdit({ ...formEdit, grupo_muscular_prioritario: e.target.value })}>
+                      {["Pecho", "Espalda", "Piernas", "Glúteos", "Hombros", "Bíceps", "Tríceps", "Abdomen"].map((g) => <option key={g} value={g}>{g}</option>)}
+                    </select>
                   </div>
                 </div>
-                <div className={`modal-footer ${s.modalFooter}`}>
-                  <button type="button" className={s.btnOutline}
-                    onClick={() => !savingEdit && setEditModal(null)} disabled={savingEdit}>
-                    Cancelar
-                  </button>
-                  <button id="btn-guardar-edicion" type="submit"
-                    className={s.btnGuardar}
-                    disabled={savingEdit}>
-                    {savingEdit ? <><span className="spinner-border spinner-border-sm me-2" />Guardando...</> : "💾 Guardar"}
-                  </button>
+                <div style={{ marginTop: 12 }}>
+                  <label className={s.labelText}>Restricciones médicas</label>
+                  <textarea className={s.inputDark} rows={2} value={formEdit.restricciones_medicas} onChange={(e) => setFormEdit({ ...formEdit, restricciones_medicas: e.target.value })} />
                 </div>
-              </form>
-            </div>
+              </div>
+              <div className={s.modalFooter}>
+                <button type="button" className={s.btnOutline} onClick={() => setEditandoAfiliado(null)} disabled={saving}>
+                  Cancelar
+                </button>
+                <button type="submit" className={s.btnPrimary} disabled={saving}>
+                  {saving ? "Guardando..." : "Guardar"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
 
-      {/* ═══════════════════════════════════════════════════════════════════════
-          MODAL: CREAR AFILIADO (Recepcionista / Admin)
-      ═══════════════════════════════════════════════════════════════════════ */}
-      {crearModal && (
-        <div className={`modal d-block ${s.modalOverlay}`}
-          onClick={() => !savingNew && setCrearModal(false)}>
-          <div className="modal-dialog modal-lg modal-dialog-scrollable" onClick={(e) => e.stopPropagation()}>
-            <div className={`border-0 shadow ${s.modalContent}`}>
-              <div className={`modal-header ${s.modalHeaderGreen}`}>
-                <h5 className="modal-title">➕ Nuevo Afiliado</h5>
-                <button type="button" className={s.btnOutline}
-                  onClick={() => !savingNew && setCrearModal(false)} aria-label="Cerrar">✕</button>
+      {creandoAbierto && (
+        <div className={s.modalOverlay} onClick={() => !saving && setCreandoAbierto(null)}>
+          <div className={s.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: 650 }}>
+            <form onSubmit={handleCrear}>
+              <div className={s.modalHeader}>
+                <h5 className={s.modalTitle}>➕ Nuevo afiliado</h5>
+                <button type="button" className={s.btnOutline} onClick={() => !saving && setCreandoAbierto(null)}>✕</button>
               </div>
-              <form onSubmit={handleCrear}>
-                <div className={`modal-body ${s.modalBodyScroll}`}>
-                  {newError && <div className={s.alertDanger} style={{marginBottom:"0.75rem",padding:"0.4rem 0.75rem"}}><small>⚠️ {newError}</small></div>}
-
-                  <h6 className={s.sectionLabel}>👤 Datos personales</h6>
-                  <div className="row g-3 mb-4">
-                    {[
-                      { label: "Nombres *", key: "nombres", type: "text", required: true },
-                      { label: "Apellidos *", key: "apellidos", type: "text", required: true },
-                      { label: "Email", key: "correo", type: "email", required: false },
-                      { label: "Teléfono", key: "telefono", type: "text", required: false },
-                      { label: "DNI / Doc. *", key: "documento", type: "text", required: true },
-                      { label: "Nacimiento", key: "fecha_nacimiento", type: "date", required: false },
-                    ].map(({ label, key, type, required }) => (
-                      <div key={key} className="col-md-6">
-                        <label className={`form-label ${s.labelText}`}>{label}</label>
-                        <input type={type} className={`form-control ${s.inputDark}`} required={required}
-                          value={formNuevo[key]}
-                          onChange={(e) => setFormNuevo({ ...formNuevo, [key]: e.target.value })} />
-                      </div>
-                    ))}
-                    <div className="col-md-6">
-                      <label className={`form-label ${s.labelText}`}>Sexo</label>
-                      <select className={`form-select ${s.selectDark}`} value={formNuevo.sexo}
-                        onChange={(e) => setFormNuevo({ ...formNuevo, sexo: e.target.value })}>
-                        {SEXOS.map((s) => <option key={s}>{s}</option>)}
-                      </select>
-                    </div>
-                    <div className="col-md-6">
-                      <label className={`form-label ${s.labelText}`}>Estatura (cm)</label>
-                      <input type="number" step="0.1" className={`form-control ${s.inputDark}`} value={formNuevo.estatura_cm}
-                        onChange={(e) => setFormNuevo({ ...formNuevo, estatura_cm: e.target.value })} />
-                    </div>
-                    <div className="col-12">
-                      <label className={`form-label ${s.labelText}`}>Dirección</label>
-                      <input type="text" className={`form-control ${s.inputDark}`} value={formNuevo.direccion}
-                        onChange={(e) => setFormNuevo({ ...formNuevo, direccion: e.target.value })} />
-                    </div>
+              <div className={s.modalBody}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                  <div>
+                    <label className={s.labelText}>Nombres</label>
+                    <input className={s.inputDark} value={formCrear.nombres} onChange={(e) => setFormCrear({ ...formCrear, nombres: e.target.value })} required />
                   </div>
-
-                  <h6 className={s.sectionLabel}>🏋️ Configuración inicial</h6>
-                  <div className="row g-3">
-                    <div className="col-md-4">
-                      <label className={`form-label ${s.labelText}`}>Estado inicial</label>
-                      <select className={`form-select ${s.selectDark}`} value={formNuevo.estado}
-                        onChange={(e) => setFormNuevo({ ...formNuevo, estado: e.target.value })}>
-                        {ESTADOS.map((s) => <option key={s}>{s}</option>)}
-                      </select>
-                    </div>
-                    <div className="col-md-4">
-                      <label className={`form-label ${s.labelText}`}>Objetivo físico</label>
-                      <select className={`form-select ${s.selectDark}`} value={formNuevo.objetivo_fisico}
-                        onChange={(e) => setFormNuevo({ ...formNuevo, objetivo_fisico: e.target.value })}>
-                        {OBJETIVOS.map((o) => <option key={o}>{o}</option>)}
-                      </select>
-                    </div>
-                    <div className="col-md-4">
-                      <label className={`form-label ${s.labelText}`}>Nivel</label>
-                      <select className={`form-select ${s.selectDark}`} value={formNuevo.nivel_experiencia}
-                        onChange={(e) => setFormNuevo({ ...formNuevo, nivel_experiencia: e.target.value })}>
-                        {NIVELES.map((n) => <option key={n}>{n}</option>)}
-                      </select>
-                    </div>
-                    <div className="col-md-4">
-                      <label className={`form-label ${s.labelText}`}>Músculo prioritario</label>
-                      <select className={`form-select ${s.selectDark}`} value={formNuevo.grupo_muscular_prioritario}
-                        onChange={(e) => setFormNuevo({ ...formNuevo, grupo_muscular_prioritario: e.target.value })}>
-                        {MUSCULOS.map((m) => <option key={m}>{m}</option>)}
-                      </select>
-                    </div>
-                    <div className="col-md-4">
-                      <label className={`form-label ${s.labelText}`}>Días disponibles/sem</label>
-                      <input type="number" min="1" max="7" className={`form-control ${s.inputDark}`}
-                        value={formNuevo.disponibilidad_semanal_dias}
-                        onChange={(e) => setFormNuevo({ ...formNuevo, disponibilidad_semanal_dias: parseInt(e.target.value) || 3 })} />
-                    </div>
+                  <div>
+                    <label className={s.labelText}>Apellidos</label>
+                    <input className={s.inputDark} value={formCrear.apellidos} onChange={(e) => setFormCrear({ ...formCrear, apellidos: e.target.value })} required />
                   </div>
-
-                  <h6 className={s.sectionLabel} style={{marginTop:"1rem"}}>⚠️ Restricciones Médicas</h6>
-                  <div className="row g-3">
-                    <div className="col-12">
-                      <label className={`form-label ${s.labelText}`}>
-                        Restricciones médicas / condiciones
-                        <span className={s.headerSub} style={{fontWeight:400,marginLeft:"0.5rem"}}>(una por línea, opcional)</span>
-                      </label>
-                      <textarea
-                        id="restricciones-medicas-afiliado"
-                        className={`form-control ${s.inputDark}`}
-                        rows={3}
-                        placeholder="Ej: Diabetes tipo 2&#10;Hipertensión&#10;Alergia a lactosa"
-                        value={formNuevo.restricciones_medicas}
-                        onChange={(e) => setFormNuevo({ ...formNuevo, restricciones_medicas: e.target.value })}
-                      />
-                      <div className={s.headerSub} style={{fontSize:"0.78rem",marginTop:"0.25rem"}}>
-                        💡 Escribe cada condición en una línea separada. Se registrarán como alertas médicas del afiliado.
-                      </div>
-                    </div>
+                  <div>
+                    <label className={s.labelText}>Correo</label>
+                    <input className={s.inputDark} type="email" value={formCrear.correo} onChange={(e) => setFormCrear({ ...formCrear, correo: e.target.value })} required />
+                  </div>
+                  <div>
+                    <label className={s.labelText}>Teléfono</label>
+                    <input className={s.inputDark} value={formCrear.telefono} onChange={(e) => setFormCrear({ ...formCrear, telefono: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className={s.labelText}>Documento</label>
+                    <input className={s.inputDark} value={formCrear.documento} onChange={(e) => setFormCrear({ ...formCrear, documento: e.target.value })} required />
+                  </div>
+                  <div>
+                    <label className={s.labelText}>Sexo</label>
+                    <select className={s.selectDark} value={formCrear.sexo} onChange={(e) => setFormCrear({ ...formCrear, sexo: e.target.value })}>
+                      {SEXOS.map((sx) => <option key={sx} value={sx}>{sx}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className={s.labelText}>Fecha Nacimiento</label>
+                    <input className={s.inputDark} type="date" value={formCrear.fecha_nacimiento} onChange={(e) => setFormCrear({ ...formCrear, fecha_nacimiento: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className={s.labelText}>Estatura (cm)</label>
+                    <input className={s.inputDark} type="number" value={formCrear.estatura_cm} onChange={(e) => setFormCrear({ ...formCrear, estatura_cm: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className={s.labelText}>Dirección</label>
+                    <input className={s.inputDark} value={formCrear.direccion} onChange={(e) => setFormCrear({ ...formCrear, direccion: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className={s.labelText}>Objetivo físico</label>
+                    <select className={s.selectDark} value={formCrear.objetivo_fisico} onChange={(e) => setFormCrear({ ...formCrear, objetivo_fisico: e.target.value })}>
+                      {OBJETIVOS.map((o) => <option key={o} value={o}>{o}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className={s.labelText}>Nivel experiencia</label>
+                    <select className={s.selectDark} value={formCrear.nivel_experiencia} onChange={(e) => setFormCrear({ ...formCrear, nivel_experiencia: e.target.value })}>
+                      {NIVELES.map((n) => <option key={n} value={n}>{n}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className={s.labelText}>Días/semana</label>
+                    <input className={s.inputDark} type="number" min={1} max={7} value={formCrear.disponibilidad_semanal_dias} onChange={(e) => setFormCrear({ ...formCrear, disponibilidad_semanal_dias: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className={s.labelText}>Estado</label>
+                    <select className={s.selectDark} value={formCrear.estado} onChange={(e) => setFormCrear({ ...formCrear, estado: e.target.value })}>
+                      {ESTADOS.map((es) => <option key={es} value={es}>{es}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className={s.labelText}>Grupo muscular</label>
+                    <select className={s.selectDark} value={formCrear.grupo_muscular_prioritario} onChange={(e) => setFormCrear({ ...formCrear, grupo_muscular_prioritario: e.target.value })}>
+                      {["Pecho", "Espalda", "Piernas", "Glúteos", "Hombros", "Bíceps", "Tríceps", "Abdomen"].map((g) => <option key={g} value={g}>{g}</option>)}
+                    </select>
                   </div>
                 </div>
-                <div className={`modal-footer ${s.modalFooter}`}>
-                  <button type="button" className={s.btnOutline}
-                    onClick={() => !savingNew && setCrearModal(false)} disabled={savingNew}>
-                    Cancelar
-                  </button>
-                  <button id="btn-confirmar-crear" type="submit"
-                    className={s.btnCrearAfiliado}
-                    disabled={savingNew}>
-                    {savingNew ? <><span className="spinner-border spinner-border-sm me-2" />Guardando...</> : "✅ Crear afiliado"}
-                  </button>
+                <div style={{ marginTop: 12 }}>
+                  <label className={s.labelText}>Restricciones médicas</label>
+                  <textarea className={s.inputDark} rows={2} value={formCrear.restricciones_medicas} onChange={(e) => setFormCrear({ ...formCrear, restricciones_medicas: e.target.value })} />
                 </div>
-              </form>
-            </div>
+              </div>
+              <div className={s.modalFooter}>
+                <button type="button" className={s.btnOutline} onClick={() => setCreandoAbierto(null)} disabled={saving}>
+                  Cancelar
+                </button>
+                <button type="submit" className={s.btnPrimary} disabled={saving}>
+                  {saving ? "Creando..." : "Crear afiliado"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

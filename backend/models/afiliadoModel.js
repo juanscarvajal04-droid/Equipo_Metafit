@@ -86,6 +86,7 @@ const AfiliadoModel = {
           WHERE c2.id_usuario   = c.id_usuario
             AND c2.fecha_inicio <= c.fecha_inicio
         ) AS numero_ciclo,
+        pe.id_ciclo     AS plan_entrenamiento_id,
         pe.observaciones AS plan_observaciones,
         pn.calorias_objetivo,
         pn.num_comidas,
@@ -139,7 +140,7 @@ const AfiliadoModel = {
       const raw = cicloMap.get(af.id_usuario);
       const ciclo = raw
         ? (() => {
-            const planEntrenamiento = raw.plan_observaciones
+            const planEntrenamiento = raw.plan_entrenamiento_id
               ? { observaciones: raw.plan_observaciones }
               : null;
             let planNutricional = null;

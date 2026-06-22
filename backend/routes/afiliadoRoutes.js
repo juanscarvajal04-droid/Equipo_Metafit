@@ -4,7 +4,7 @@
 const express              = require('express');
 const router               = express.Router();
 const AfiliadoController   = require('../controllers/afiliadoController');
-const { requireAuth, requireAdmin, requireAdminOrEntrenador } = require('../middlewares/auth');
+const { requireAuth, requireAdmin, requireAdminOrEntrenador, requireStaff } = require('../middlewares/auth');
 
 /**
  * @swagger
@@ -43,7 +43,7 @@ const { requireAuth, requireAdmin, requireAdminOrEntrenador } = require('../midd
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.get('/', requireAuth, AfiliadoController.getAll);
+router.get('/', requireAuth, requireStaff, AfiliadoController.getAll);
 
 /**
  * @swagger
@@ -155,7 +155,7 @@ router.get('/me/restricciones', requireAuth, AfiliadoController.getMisRestriccio
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.get('/:id', requireAuth, AfiliadoController.getById);
+router.get('/:id', requireAuth, requireStaff, AfiliadoController.getById);
 
 /**
  * @swagger

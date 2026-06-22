@@ -255,6 +255,31 @@ router.post('/rutinas/:id_rutina/ejercicios', requireAuth, requireAdminOrEntrena
  */
 router.delete('/rutinas/:id_rutina/ejercicios/:id_ejercicio', requireAuth, requireAdminOrEntrenador, PlanController.removeEjercicio);
 
+/**
+ * @swagger
+ * /planes/rutinas/{id_rutina}:
+ *   delete:
+ *     summary: Eliminar rutina y sus ejercicios asociados (Admin o Entrenador)
+ *     tags: [Planes]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id_rutina
+ *         in: path
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Rutina eliminada correctamente
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.delete('/rutinas/:id_rutina', requireAuth, requireAdminOrEntrenador, PlanController.deleteRutina);
+
 // ─────────────────────────────────────────────────────────────
 // PLANES NUTRICIONALES
 // ─────────────────────────────────────────────────────────────
@@ -378,6 +403,8 @@ router.post('/nutricional', requireAuth, requireAdminOrEntrenador, PlanControlle
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
+router.patch('/nutricional/:id', requireAuth, requireAdminOrEntrenador, PlanController.updateNutricional);
+
 router.post('/nutricional/:id_plan/detalle', requireAuth, requireAdminOrEntrenador, PlanController.addAlimento);
 
 module.exports = router;

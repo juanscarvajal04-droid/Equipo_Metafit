@@ -105,7 +105,8 @@ const configuracionRoutes = require('./routes/configuracionRoutes');
 const notificacionRoutes = require('./routes/notificacionRoutes');
 
 // BUG-005: El rate limiter se aplica SOLO al endpoint de login
-app.use('/', loginLimiter, authRoutes);   // POST /login (con rate limit)
+app.use('/login', loginLimiter);          // rate limit solo en /login
+app.use('/', authRoutes);                // POST /login (con rate limit)
 app.use('/usuarios', usuarioRoutes);              // GET/POST/PATCH/DELETE /usuarios
 app.use('/afiliados', afiliadoRoutes);             // CRUD afiliados + ciclos + progreso
 app.use('/afiliados', pagoRoutes);                // FIX 5: GET|POST /afiliados/:id/pagos
