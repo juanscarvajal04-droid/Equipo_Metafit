@@ -65,16 +65,16 @@ Tests:       16 passed, 16 total
 
 ## 📬 Postman
 
-Se proporcionan **dos** colecciones Postman:
+Se proporcionan **dos** colecciones Postman (dentro de [`postman/`](./postman)):
 
 | Colección | Archivo | Para quién |
 |-----------|---------|------------|
-| Web (Staff) | `MetaFit_API_Web.postman_collection.json` | Admin / Recepcionista / Entrenador |
-| Móvil (Afiliado) | `MetaFit_API_Movil.postman_collection.json` | Afiliado (app móvil) |
+| Web (Staff) | `postman/MetaFit_API_Web.postman_collection.json` | Admin / Recepcionista / Entrenador |
+| Móvil (Afiliado) | `postman/MetaFit_API_Movil.postman_collection.json` | Afiliado (app móvil) |
 
 **Configuración:**
-1. Crea un entorno Postman con `base_url = http://localhost:3001`
-2. Importa la colección correspondiente
+1. Importa los 3 archivos de la carpeta `postman/` en Postman
+2. Selecciona el entorno `MetaFit Environment`
 3. Ejecuta primero el login — el token JWT se guarda automáticamente
 
 ## 📊 ISO 25000 — Cumplimiento
@@ -90,12 +90,17 @@ Se proporcionan **dos** colecciones Postman:
 
 ## 📚 Documentación
 
+Todos los documentos se encuentran en la carpeta [`documentacion/`](./documentacion).
+
 | Documento | Descripción |
 |---|---|
-| `MANUAL_TECNICO.md` | Manual técnico completo: arquitectura, endpoints, BD, seguridad, despliegue |
-| `MANUAL_USUARIO.md` | Guías paso a paso para cada rol del sistema |
-| `DIAGRAMAS.md` | Diagramas de arquitectura, componentes, navegación, BD y flujos |
-| `PRESENTACION.md` | Guion de sustentación (15-20 min) con diapositivas |
+| `documentacion/MANUAL_TECNICO.md` | Manual técnico completo: arquitectura, endpoints, BD, seguridad, despliegue |
+| `documentacion/MANUAL_USUARIO.md` | Guías paso a paso para cada rol del sistema |
+| `documentacion/MANUAL_POSTMAN.md` | Guía para probar la API con Postman desde cero |
+| `documentacion/DIAGRAMAS.md` | Diagramas de arquitectura, componentes, navegación, BD y flujos |
+| `documentacion/PRESENTACION.md` | Guion de sustentación (15-20 min) con diapositivas |
+| `documentacion/QA_REPORT.md` | Reporte de aseguramiento de calidad |
+| `documentacion/AUDITORIA_FINAL.md` | Auditoría final del proyecto |
 
 ---
 *MetaFit Inc. · Sport Gym Sede 80 · Bogotá, Colombia* 
