@@ -32,8 +32,12 @@ export default function LoginScreen() {
     try {
       await login(correo.trim(), contrasena);
     } catch (err) {
-      const msg = err.response?.data?.error || 'Correo o contraseña incorrectos';
-      setError(msg);
+      if (!err.response) {
+        setError('Error de conexión. Verificá que el servidor esté activo.');
+      } else {
+        const msg = err.response?.data?.error || 'Correo o contraseña incorrectos';
+        setError(msg);
+      }
     } finally {
       setLoading(false);
     }

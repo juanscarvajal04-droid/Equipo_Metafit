@@ -35,8 +35,13 @@
   │  │ Catálogo │ │Dashboard │ │  Pagos   │ │  Config  │            │
   │  │  Routes  │ │  Routes  │ │  Routes  │ │  Routes  │            │
   │  └──────────┘ └──────────┘ └──────────┘ └──────────┘            │
+  │  ┌──────────┐                                                   │
+  │  │Notificaci│                                                   │
+  │  │  Routes  │                                                   │
+  │  └──────────┘                                                   │
   │                                                                  │
-  │  Middlewares: requireAuth │ requireAdmin │ rateLimit │ helmet    │
+  │  Middlewares: requireAuth | requireAdmin | requireStaff |        │
+  │              requireOwnCiclo | rateLimit | helmet                │
   └──────────────────────────┬───────────────────────────────────────┘
                              │ SQL
                              ▼
@@ -48,6 +53,9 @@
   │  ├───────────┤ ├───────────┤ ├───────────┤ ├───────────┤       │
   │  │ RESTRICC. │ │ EJERCICIO │ │ ALIMENTO  │ │ RUTINA    │       │
   │  └───────────┘ └───────────┘ └───────────┘ └───────────┘       │
+  │  ┌───────────┐ ┌───────────┐ ┌───────────┐                     │
+  │  │ CONFIGUR. │ │NOTIFICAC. │ │ PROGRESO  │                     │
+  │  └───────────┘ └───────────┘ └───────────┘                     │
   │                                                                  │
   │  5 Vistas · 1 Trigger · 15 Índices · 18 FK (RESTRICT/CASCADE)  │
   └─────────────────────────────────────────────────────────────────┘
@@ -56,18 +64,21 @@
   │           App Móvil (React Native / Expo SDK 55)                │
   │  Dispositivo físico o emulador                                  │
   │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐           │
-  │  │ MiPerfil │ │MiRutina  │ │ MiDieta  │ │MiProgreso│            │
+  │  │ Landing  │ │MiPerfil  │ │MiRutina  │ │ MiDieta  │            │
   │  └──────────┘ └──────────┘ └──────────┘ └──────────┘            │
-  │  Navegación: Stack (Auth) → Bottom Tabs (App)                   │
+  │  ┌──────────┐                                                   │
+  │  │MiProgreso│                                                   │
+  │  └──────────┘                                                   │
+  │  Navegación: Stack (Landing → Login) → Bottom Tabs (App)       │
   └─────────────────────────────────────────────────────────────────┘
 ```
 
 ### Capas del sistema
 
-1. **Frontend Web (React + Vite + Bootstrap 5)** — Interfaz de escritorio para Administración, Recepción y Entrenadores. Consume la API REST via axios. Renderizado del lado del cliente con React Router v7.
+1. **Frontend Web (React + Vite + Bootstrap 5)** — Interfaz de escritorio para Administración, Recepción y Entrenadores. Consume la API REST via axios. Renderizado del lado del cliente con React Router v7. Incluye Header con notificaciones en tiempo real.
 2. **Backend API (Node.js + Express)** — API REST con patrón MVC. Procesa peticiones, aplica middlewares de seguridad, orquesta lógica de negocio y accede a la base de datos.
 3. **Base de Datos (MySQL 8.0)** — Almacenamiento relacional normalizado en 3FN. 17 tablas, 5 vistas, 1 trigger.
-4. **App Móvil (React Native + Expo SDK 55)** — Aplicación nativa para afiliados. Consulta perfil, rutinas, dietas y progreso. Autenticación con JWT + AsyncStorage.
+4. **App Móvil (React Native + Expo SDK 55)** — Aplicación nativa para afiliados. Landing page informativa, consulta de perfil, rutinas, dietas y progreso. Autenticación con JWT + AsyncStorage.
 
 ### Stack Tecnológico Completo
 
@@ -78,7 +89,10 @@
 | | React Router | 7.14.0 |
 | | Bootstrap | 5.3.8 |
 | | Chart.js | 4.5.1 |
+| | chartjs-plugin-datalabels | 2.2.0 |
+| | jsPDF + jspdf-autotable | 4.2.1 / 5.0.8 |
 | | Axios | 1.14.0 |
+| | Lucide React | 0.511.0 |
 | **Backend API** | Node.js | 22+ |
 | | Express | 4.18.2 |
 | | MySQL2 | 3.9.7 |
@@ -148,14 +162,18 @@ Equipo_Metafit/
 │   ├── 02_seed.sql                   # Datos de seed
 │   └── 03_datos_demo.sql             # Datos demo opcionales
 │
+├── documentacion/                    # Documentación técnica
+│   ├── MANUAL_TECNICO.md             # ← Este archivo
+│   ├── MANUAL_USUARIO.md             # Manual de usuario
+│   ├── AUDITORIA_FINAL.md            # Auditoría completa
+│   ├── DIAGRAMAS.md                  # Diagramas
+│   ├── QA_REPORT.md                  # Reporte QA (51 pruebas)
+│   ├── PRESENTACION.md               # Guion de sustentación
+│   └── MANUAL_POSTMAN.md             # Uso de colecciones Postman
+│
 ├── docker-compose.yml                # Orquestación Docker
 ├── .env                              # Variables de entorno
 ├── README.md                         # Documentación general
-├── AUDITORIA_FINAL.md                # Auditoría completa
-├── MANUAL_TECNICO.md                 # ← Este archivo
-├── MANUAL_USUARIO.md                 # Manual de usuario
-├── DIAGRAMAS.md                      # Diagramas
-├── PRESENTACION.md                   # Guion de sustentación
 ├── MetaFit_API_Web.postman_collection.json
 ├── MetaFit_API_Movil.postman_collection.json
 └── .gitignore
@@ -170,8 +188,9 @@ Equipo_Metafit/
 | `backend/services/` | Lógica de negocio pura, desacoplada de Express |
 | `backend/models/` | Queries SQL a la base de datos |
 | `frontend_web/` | Interfaz web responsive con roles RBAC |
-| `movil/` | App nativa para afiliados con 4 tabs |
+| `movil/` | App nativa para afiliados con Landing + 4 tabs |
 | `database/` | Schema SQL, seed data, datos demo |
+| `documentacion/` | Manuales técnico, usuario, QA, postman, diagramas |
 | `docker-compose.yml` | Orquestación de 4 servicios |
 
 ---
@@ -191,6 +210,23 @@ Equipo_Metafit/
    de auth         servicios                          resultados
 ```
 
+### Middlewares Implementados
+
+| Middleware | Archivo | Función |
+|---|---|---|
+| `requireAuth` | `middlewares/auth.js` | Verifica token JWT Bearer en header Authorization. Fallo → 401 |
+| `requireAdmin` | `middlewares/auth.js` | Requiere rol `Administrador`. Fallo → 403 |
+| `requireAdminOrEntrenador` | `middlewares/auth.js` | Requiere Admin o Entrenador. Fallo → 403 |
+| `requireAdminOrRecepcionista` | `middlewares/auth.js` | Requiere Admin o Recepcionista. Fallo → 403 |
+| `requireStaff` | `middlewares/auth.js` | Requiere Admin, Entrenador o Recepcionista (excluye Afiliado). Fallo → 403 |
+| `requireOwnCiclo` | `middlewares/auth.js` | Verifica que el ciclo pertenezca al afiliado autenticado o que el rol sea staff. Fallo → 403 |
+| `loginLimiter` | `server.js` (rateLimit) | 10 intentos por ventana de 15 min en `/login`. Solo cuenta intentos fallidos |
+| `helmet()` | `server.js` | Headers de seguridad HTTP (CSP desactivado para Swagger UI) |
+| `cors()` | `server.js` | CORS configurable por origen, abierto para Swagger y health |
+| Content-Type validator | `server.js` | Rechaza POST/PUT/PATCH sin `application/json` → 415 |
+| Error handler global | `server.js` | Captura errores no manejados, responde 500 con `{ error }`. También maneja CORS (403), JWT (401), JSON malformado (400) |
+| 404 handler | `server.js` | Captura rutas no registradas, responde 404 |
+
 ### Lista Completa de Endpoints
 
 | # | Método | Ruta | Descripción | Rol Requerido |
@@ -201,14 +237,14 @@ Equipo_Metafit/
 | 4 | POST | `/usuarios` | Crear nuevo empleado | Admin |
 | 5 | PATCH | `/usuarios/:id` | Actualizar empleado | Admin |
 | 6 | DELETE | `/usuarios/:id` | Eliminar empleado | Admin |
-| 7 | GET | `/afiliados` | Listar afiliados (paginado) | Cualquier auth |
+| 7 | GET | `/afiliados` | Listar afiliados (paginado) | Staff (Admin, Recepcionista, Entrenador) |
 | 8 | GET | `/afiliados/me` | Perfil del afiliado autenticado | Cualquier auth |
 | 9 | GET | `/afiliados/me/ciclos` | Ciclos del afiliado autenticado | Cualquier auth |
 | 10 | GET | `/afiliados/me/progreso` | Progreso del afiliado autenticado | Cualquier auth |
 | 11 | GET | `/afiliados/me/restricciones` | Restricciones del afiliado auth | Cualquier auth |
-| 12 | GET | `/afiliados/:id` | Obtener afiliado por ID | Cualquier auth |
-| 13 | POST | `/afiliados` | Registrar nuevo afiliado | Cualquier auth |
-| 14 | PATCH | `/afiliados/:id` | Actualizar afiliado | Cualquier auth |
+| 12 | GET | `/afiliados/:id` | Obtener afiliado por ID | Staff |
+| 13 | POST | `/afiliados` | Registrar nuevo afiliado | Staff |
+| 14 | PATCH | `/afiliados/:id` | Actualizar afiliado | Staff |
 | 15 | DELETE | `/afiliados/:id` | Eliminar afiliado | Admin |
 | 16 | GET | `/afiliados/:id/ciclos` | Ciclos de un afiliado | Cualquier auth |
 | 17 | POST | `/afiliados/ciclos` | Crear ciclo (asignar plan) | Admin o Entrenador |
@@ -219,46 +255,163 @@ Equipo_Metafit/
 | 22 | GET | `/afiliados/:id/alimentos-disponibles` | Alimentos filtrados por restricciones | Cualquier auth |
 | 23 | GET | `/afiliados/:id/progreso` | Historial de progreso físico | Cualquier auth |
 | 24 | POST | `/afiliados/progreso` | Registrar medición de progreso | Admin o Entrenador |
-| 25 | GET | `/afiliados/:id/pagos` | Historial de pagos | Cualquier auth |
+| 25 | GET | `/afiliados/:id/pagos` | Historial de pagos del afiliado | Cualquier auth |
 | 26 | POST | `/afiliados/:id/pagos` | Registrar pago | Admin o Recepcionista |
-| 27 | GET | `/planes/entrenamiento/:id_ciclo` | Plan de entrenamiento | Propietario o Staff |
-| 28 | POST | `/planes/entrenamiento` | Crear plan de entrenamiento | Admin o Entrenador |
-| 29 | PATCH | `/planes/entrenamiento/:id` | Actualizar plan | Admin o Entrenador |
-| 30 | POST | `/planes/rutinas` | Crear rutina en plan | Admin o Entrenador |
-| 31 | POST | `/planes/rutinas/:id_rutina/ejercicios` | Agregar ejercicio a rutina | Admin o Entrenador |
-| 32 | DELETE | `/planes/rutinas/:id_rutina/ejercicios/:id_ej` | Quitar ejercicio de rutina | Admin o Entrenador |
-| 33 | GET | `/planes/nutricional/:id_ciclo` | Plan nutricional | Propietario o Staff |
-| 34 | POST | `/planes/nutricional` | Crear plan nutricional | Admin o Entrenador |
-| 35 | POST | `/planes/nutricional/:id_plan/detalle` | Agregar alimento a plan | Admin o Entrenador |
-| 36 | GET | `/catalogo/ejercicios` | Listar ejercicios del catálogo | Cualquier auth |
-| 37 | POST | `/catalogo/ejercicios` | Crear ejercicio en catálogo | Admin |
-| 38 | GET | `/catalogo/alimentos` | Listar alimentos del catálogo | Cualquier auth |
-| 39 | POST | `/catalogo/alimentos` | Crear alimento en catálogo | Admin |
-| 40 | GET | `/catalogo/restricciones` | Listar restricciones médicas | Cualquier auth |
-| 41 | GET | `/dashboard/kpis` | KPIs del gimnasio | Admin |
-| 42 | GET | `/configuracion/precio-membresia` | Obtener precio membresía | Admin |
-| 43 | PUT | `/configuracion/precio-membresia` | Actualizar precio membresía | Admin |
-| 44 | GET | `/notificaciones` | Obtener notificaciones | Cualquier auth |
-| 45 | GET | `/api-docs` | Swagger UI | Público |
-| 46 | GET | `/swagger` | Swagger UI (alias) | Público |
-| 47 | GET | `/api-docs.json` | OpenAPI spec JSON | Público |
-| 48 | GET | `/health` | Health check del servidor | Público |
+| 27 | GET | `/pagos` | Todos los pagos (con filtros: fecha, recepcionista) | Admin |
+| 28 | GET | `/pagos/metricas` | Métricas financieras agregadas (ingresos por mes, por recepcionista, total, últimos 10 pagos) | Admin |
+| 29 | GET | `/planes/entrenamiento/:id_ciclo` | Plan de entrenamiento | Propietario o Staff |
+| 30 | POST | `/planes/entrenamiento` | Crear plan de entrenamiento | Admin o Entrenador |
+| 31 | PATCH | `/planes/entrenamiento/:id` | Actualizar plan | Admin o Entrenador |
+| 32 | POST | `/planes/rutinas` | Crear rutina en plan | Admin o Entrenador |
+| 33 | POST | `/planes/rutinas/:id_rutina/ejercicios` | Agregar ejercicio a rutina | Admin o Entrenador |
+| 34 | DELETE | `/planes/rutinas/:id_rutina/ejercicios/:id_ej` | Quitar ejercicio de rutina | Admin o Entrenador |
+| 35 | GET | `/planes/nutricional/:id_ciclo` | Plan nutricional | Propietario o Staff |
+| 36 | POST | `/planes/nutricional` | Crear plan nutricional | Admin o Entrenador |
+| 37 | POST | `/planes/nutricional/:id_plan/detalle` | Agregar alimento a plan | Admin o Entrenador |
+| 38 | GET | `/catalogo/ejercicios` | Listar ejercicios del catálogo | Cualquier auth |
+| 39 | POST | `/catalogo/ejercicios` | Crear ejercicio en catálogo | Admin o Entrenador |
+| 40 | PATCH | `/catalogo/ejercicios/:id` | Actualizar ejercicio | Admin o Entrenador |
+| 41 | DELETE | `/catalogo/ejercicios/:id` | Eliminar ejercicio (con detección de conflictos FK) | Admin o Entrenador |
+| 42 | GET | `/catalogo/alimentos` | Listar alimentos del catálogo | Cualquier auth |
+| 43 | POST | `/catalogo/alimentos` | Crear alimento en catálogo | Admin o Entrenador |
+| 44 | PATCH | `/catalogo/alimentos/:id` | Actualizar alimento | Admin o Entrenador |
+| 45 | DELETE | `/catalogo/alimentos/:id` | Eliminar alimento (con detección de conflictos FK) | Admin o Entrenador |
+| 46 | GET | `/catalogo/restricciones` | Listar restricciones médicas | Cualquier auth |
+| 47 | GET | `/dashboard/kpis` | KPIs del gimnasio (totales, distribución, ingresos, personal) | Admin |
+| 48 | GET | `/configuracion/precio-membresia` | Obtener precio de membresía | Admin |
+| 49 | PUT | `/configuracion/precio-membresia` | Actualizar precio de membresía | Admin |
+| 50 | GET | `/notificaciones` | Obtener notificaciones según el rol del usuario | Cualquier auth |
+| 51 | GET | `/api-docs` | Swagger UI | Público |
+| 52 | GET | `/swagger` | Swagger UI (alias) | Público |
+| 53 | GET | `/api-docs.json` | OpenAPI spec JSON | Público |
+| 54 | GET | `/health` | Health check del servidor | Público |
 
-### Middlewares Implementados
+---
 
-| Middleware | Archivo | Función |
+### 1.4.1 Módulo de Notificaciones Inteligentes
+
+El sistema de notificaciones permite a cada rol recibir alertas contextuales sobre eventos relevantes del gimnasio.
+
+#### Endpoint
+
+```
+GET /notificaciones
+Auth: requireAuth (cualquier rol autenticado)
+```
+
+#### Lógica por Rol
+
+| Rol | Notificaciones que recibe |
+|---|---|
+| **Administrador** | Afiliados con pago vencido, afiliados sin ciclo activo, afiliados sin plan asignado |
+| **Recepcionista** | Afiliados con pago vencido, afiliados sin ciclo activo |
+| **Entrenador** | Afiliados sin ciclo activo, afiliados sin plan asignado |
+
+#### Formato de Respuesta
+
+```json
+[
+  {
+    "tipo": "pago_vencido",
+    "cantidad": 3,
+    "mensaje": "3 afiliados tienen pago vencido",
+    "ruta": "/pagos"
+  },
+  {
+    "tipo": "sin_ciclo",
+    "cantidad": 2,
+    "mensaje": "2 afiliados sin ciclo activo",
+    "ruta": "/rutinas"
+  }
+]
+```
+
+#### Frontend (Header.jsx)
+
+- **Polling** cada 60 segundos al endpoint `/notificaciones`
+- **Badge** numérico rojo sobre el icono de campana
+- **Dropdown** con lista de notificaciones clickeables
+- **Redirección** a la ruta correspondiente al hacer clic
+- **Auto-cancelación** del polling al recibir 401
+
+---
+
+### 1.4.2 Módulo de Finanzas y Pagos
+
+#### Endpoints de Pagos (Admin)
+
+| Método | Ruta | Descripción |
 |---|---|---|
-| `requireAuth` | `middlewares/auth.js` | Verifica token JWT Bearer en header Authorization. Fallo → 401 |
-| `requireAdmin` | `middlewares/auth.js` | Requiere rol `Administrador`. Fallo → 403 |
-| `requireAdminOrEntrenador` | `middlewares/auth.js` | Requiere Admin o Entrenador. Fallo → 403 |
-| `requireAdminOrRecepcionista` | `middlewares/auth.js` | Requiere Admin o Recepcionista. Fallo → 403 |
-| `requireOwnCiclo` | `middlewares/auth.js` | Verifica que el ciclo pertenezca al afiliado o que el rol sea staff |
-| `loginLimiter` | `server.js` (rateLimit) | 10 intentos por ventana de 15 min en `/login` |
-| `helmet()` | `server.js` | Headers de seguridad HTTP (CSP desactivado para Swagger UI) |
-| `cors()` | `server.js` | CORS configurable por origen, abierto para Swagger y health |
-| Content-Type validator | `server.js` | Rechaza POST/PUT/PATCH sin `application/json` → 415 |
-| Error handler global | `server.js` | Captura errores no manejados, responde 500 con `{ error }` |
-| 404 handler | `server.js` | Captura rutas no registradas, responde 404 |
+| GET | `/pagos` | Lista completa de pagos. Filtros opcionales: `fecha_inicio`, `fecha_fin`, `id_recepcionista` |
+| GET | `/pagos/metricas` | Métricas agregadas: ingresos por mes, pagos por recepcionista, total recaudado, últimos 10 pagos |
+
+#### Endpoints de Pagos (Afiliado)
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| GET | `/afiliados/:id/pagos` | Historial de pagos del afiliado |
+| POST | `/afiliados/:id/pagos` | Registrar pago. Calcula automáticamente `fecha_vencimiento` (+30 días) |
+
+#### Modelo de Datos (PAGO)
+
+| Columna | Tipo | Descripción |
+|---|---|---|
+| id_pago | INT (PK, AUTO_INCREMENT) | Identificador único |
+| id_usuario | INT (FK → USUARIO) | Afiliado que paga |
+| fecha_pago | DATE | Fecha del pago |
+| valor_pagado | DECIMAL(10,2) | Monto pagado |
+| estado | ENUM('Pagado','Vencido','Pendiente') | Estado del pago |
+| fecha_vencimiento | DATE | Próximo vencimiento calculado |
+| id_recepcionista | INT (FK → USUARIO) | Quien registró el pago |
+
+---
+
+### 1.4.3 Precio de Membresía Configurable
+
+#### Endpoints
+
+| Método | Ruta | Auth |
+|---|---|---|
+| GET | `/configuracion/precio-membresia` | Admin |
+| PUT | `/configuracion/precio-membresia` | Admin |
+
+#### Funcionamiento
+
+- Almacenado en la tabla `CONFIGURACION` con clave `precio_membresia`
+- Valor por defecto en seed: `80000` COP
+- El Admin puede editarlo inline desde el Dashboard
+- Al cambiar, el Dashboard recalcula automáticamente: `ingreso_proyectado = precio × afiliados_activos`
+
+---
+
+### 1.4.4 Catálogos con CRUD Completo
+
+#### Ejercicios
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| GET | `/catalogo/ejercicios` | Listar todos los ejercicios |
+| POST | `/catalogo/ejercicios` | Crear ejercicio (nombre, grupo muscular, nivel mínimo, descripción) |
+| PATCH | `/catalogo/ejercicios/:id` | Actualizar ejercicio |
+| DELETE | `/catalogo/ejercicios/:id` | Eliminar ejercicio. Retorna 409 si está referenciado en rutinas activas |
+
+#### Alimentos
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| GET | `/catalogo/alimentos` | Listar todos los alimentos con macros |
+| POST | `/catalogo/alimentos` | Crear alimento (nombre, proteinas, carbohidratos, grasas) |
+| PATCH | `/catalogo/alimentos/:id` | Actualizar alimento |
+| DELETE | `/catalogo/alimentos/:id` | Eliminar alimento. Retorna 409 si está referenciado en planes activos |
+
+#### Catálogos Filtrados por Restricciones
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| GET | `/afiliados/:id/ejercicios-disponibles` | Ejercicios permitidos para el afiliado (excluye los prohibidos por sus restricciones) |
+| GET | `/afiliados/:id/alimentos-disponibles` | Alimentos permitidos para el afiliado (excluye los prohibidos por sus restricciones) |
+
+---
 
 ### Variables de Entorno
 
@@ -289,6 +442,20 @@ CORS_ORIGINS=http://localhost:5173,http://localhost:3000
 API_BASE_URL=http://localhost:3001
 ```
 
+### Credenciales de Prueba (Seed Data)
+
+| Nombre | Email | Contraseña | Rol | Estado |
+|---|---|---|---|---|
+| Carlos Ramirez | carlos@metafit.com | Admin123! | Administrador | Activo |
+| Laura Gomez | laura@metafit.com | Laura123! | Entrenador | Activo |
+| Andres Torres | andres@metafit.com | Andres123! | Entrenador | Activo |
+| Maria Lopez | maria@metafit.com | Maria123! | Recepcionista | Activo |
+| Pedro Suarez | pedro@metafit.com | Pedro123! | Recepcionista | Pendiente |
+| Juan Martinez | juan@gmail.com | MetaFit2025! | Afiliado | Activo |
+| Ana Rodriguez | ana@gmail.com | MetaFit2025! | Afiliado | Activo |
+| Luis Herrera | luis@gmail.com | MetaFit2025! | Afiliado | Activo |
+| Sofia Castro | sofia@gmail.com | MetaFit2025! | Afiliado | Activo |
+
 ---
 
 ## 1.5 Frontend Web
@@ -307,20 +474,21 @@ API_BASE_URL=http://localhost:3001
   │  - authAxios (instancia axios configurada)                 │
   └──────────────────────────┬──────────────────────────────────┘
                              │
-              ┌──────────────┼──────────────┐
-              ▼              ▼              ▼
-    ┌─────────────────┐ ┌──────────┐ ┌──────────┐
-    │  PublicLayout   │ │Protected │ │  AppLayout│
-    │  (Landing,Login)│ │ Route    │ │(Sidebar + │
-    └─────────────────┘ └────┬─────┘ │Header+Foot│
-                            │       └──────────┘
-              ┌──────────────┼──────────────┐
-              ▼              ▼              ▼
-    ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
-    │Login        │ │Dashboard    │ │AfiliadosView│
-    │LandingPage  │ │GestionPers. │ │RutinasView  │
-    └─────────────┘ │PagosView    │ │DietasView   │
-                    └─────────────┘ └─────────────┘
+               ┌──────────────┼──────────────┐
+               ▼              ▼              ▼
+     ┌─────────────────┐ ┌──────────┐ ┌──────────┐
+     │  PublicLayout   │ │Protected │ │  AppLayout│
+     │  (Landing,Login)│ │ Route    │ │(Sidebar + │
+     └─────────────────┘ └────┬─────┘ │Header+Foot│
+                             │       └──────────┘
+               ┌──────────────┼──────────────┐
+               ▼              ▼              ▼
+     ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
+     │Login        │ │Dashboard    │ │AfiliadosView│
+     │LandingPage  │ │GestionPers. │ │RutinasView  │
+     └─────────────┘ │PagosView    │ │DietasView   │
+                     │FinanzasView │ └─────────────┘
+                     └─────────────┘
 ```
 
 ### Vistas y Componentes
@@ -328,21 +496,23 @@ API_BASE_URL=http://localhost:3001
 | Vista | Ruta | Roles | Responsabilidad |
 |---|---|---|---|
 | `Login.jsx` | `/login` | Público | Formulario de inicio de sesión con selector de rol |
-| `LandingPage.jsx` | `/` | Público | Página de aterrizaje informativa |
-| `Dashboard.jsx` | `/dashboard` | Admin | KPIs, gráficos, métricas del gimnasio |
-| `AfiliadosView.jsx` | `/afiliados` | Todos | CRUD completo de afiliados por rol |
+| `LandingPage.jsx` | `/` | Público | Página de aterrizaje informativa con KPI counters |
+| `Dashboard.jsx` | `/dashboard` | Admin | KPIs, gráficos (Chart.js), métricas del gimnasio, precio membresía editable |
+| `AdminDashboard.jsx` | Usado internamente | Admin | Dashboard avanzado con 6 KPIs, 4 gráficos (barras, línea, doughnut, barras horizontales) |
+| `AfiliadosView.jsx` | `/afiliados` | Todos | CRUD completo de afiliados con modal multi-pestaña |
 | `GestionPersonal.jsx` | `/personal` | Admin | CRUD de empleados (staff) |
-| `RutinasView.jsx` | `/rutinas` | Admin, Entrenador | Asignación y visualización de rutinas |
-| `DietasView.jsx` | `/dietas` | Admin, Entrenador | Asignación y visualización de dietas |
-| `PagosView.jsx` | `/pagos` | Admin, Recepcionista | Registro y consulta de pagos |
+| `RutinasView.jsx` | `/rutinas` | Admin, Entrenador | Asignación de rutinas, CRUD ejercicios, visualización de planes |
+| `DietasView.jsx` | `/dietas` | Admin, Entrenador | Asignación de dietas, CRUD alimentos, visualización de planes |
+| `PagosView.jsx` | `/pagos` | Admin, Recepcionista | Registro de pagos, historial, semáforo de membresía |
+| `FinanzasView.jsx` | (sub-ruta admin) | Admin | Panel financiero con gráficos, KPIs, filtros y exportación PDF |
 
 | Componente | Responsabilidad |
 |---|---|
 | `AppLayout.jsx` | Layout interno con Sidebar + Header + Footer |
 | `PublicLayout.jsx` | Layout para páginas públicas (Landing, Login) |
-| `Sidebar.jsx` | Navegación lateral con enlaces por rol |
-| `Header.jsx` | Barra superior con información del usuario |
-| `Footer.jsx` | Pie de página con enlaces |
+| `Sidebar.jsx` | Navegación lateral con enlaces por rol (3 menús distintos) |
+| `Header.jsx` | Barra superior con breadcrumb, fecha, campana de notificaciones (polling 60s), avatar |
+| `Footer.jsx` | Pie de página con términos y condiciones, Instagram |
 | `ProtectedRoute.jsx` | Guard de ruta con verificación de token y rol |
 | `HomeRedirect.jsx` | Redirección al home según el rol |
 | `ErrorBoundary.jsx` | Captura de errores de renderizado |
@@ -373,6 +543,35 @@ Implementado con `ProtectedRoute` que verifica:
 - Tema oscuro personalizado con gradientes, sombras y animaciones
 - Paleta de colores por rol (Admin: morado, Entrenador: verde, Recepcionista: azul)
 
+### Sistema de Notificaciones en Frontend
+
+El componente `Header.jsx` implementa un sistema de notificaciones en tiempo real:
+
+1. **Polling**: cada 60 segundos mediante `setInterval` a `GET /notificaciones`
+2. **Auto-cancelación**: se limpia el intervalo al desmontar el componente o al recibir 401
+3. **Badge**: muestra el número total de notificaciones no leídas como badge rojo
+4. **Dropdown**: al hacer clic en la campana, muestra lista de notificaciones con:
+   - Mensaje descriptivo
+   - Enlace a la ruta correspondiente
+   - Al hacer clic, navega a la ruta y cierra el dropdown
+5. **Actualización en tiempo real**: al registrar un pago, se dispara evento `pago-registrado`
+
+### Panel de Finanzas (FinanzasView.jsx)
+
+El panel financiero exclusivo para Admin incluye:
+
+- **KPIs**: Total recaudado, recaudado este mes, mes anterior, promedio mensual, mejor recepcionista
+- **Filtros**: Rango de fechas (inicio/fin) y selector de recepcionista
+- **Gráfico de barras** (Chart.js + chartjs-plugin-datalabels): Ingresos por mes (últimos 6 meses)
+- **Gráfico doughnut**: Recaudación por recepcionista (agrupa valores pequeños en "Otros")
+- **Últimos pagos**: Grid de tarjetas con avatar, nombre, fecha, monto, estado, recepcionista
+- **Exportación PDF**: Genera reporte PDF con jsPDF + jspdf-autotable que incluye:
+  - Período del reporte
+  - Tabla de pagos con todas las columnas
+  - Totales por columna
+  - Fecha de generación y footer
+- **Actualización automática**: Se refresca al recibir evento `pago-registrado`
+
 ### Flujo de Autenticación
 
 ```
@@ -400,12 +599,22 @@ React Native 0.83.6 + Expo SDK ~55.0.0. Aplicación nativa para iOS y Android, c
 
 | Pantalla | Responsabilidad | API Calls |
 |---|---|---|
-| `LandingScreen.js` | Página de bienvenida informativa | Ninguna |
-| `LoginScreen.js` | Inicio de sesión del afiliado | `POST /login` |
-| `MiPerfilScreen.js` | Perfil personal + datos físicos + restricciones | `GET /afiliados/me` |
-| `MiRutinaScreen.js` | Plan de entrenamiento con ejercicios por día | `GET /afiliados/me/ciclos` → `GET /planes/entrenamiento/:id` |
-| `MiDietaScreen.js` | Plan nutricional con calorías y comidas | `GET /afiliados/me/ciclos` → `GET /planes/nutricional/:id` |
-| `MiProgresoScreen.js` | Historial de progreso físico | `GET /afiliados/me/progreso` |
+| `LandingScreen.js` | Página de bienvenida informativa. Hero, KPIs, features, cómo funciona, sede, CTA | Ninguna |
+| `LoginScreen.js` | Inicio de sesión del afiliado. Muestra error de conexión o credenciales inválidas | `POST /login` |
+| `MiPerfilScreen.js` | Perfil personal + datos físicos + restricciones + botón de cerrar sesión | `GET /afiliados/me` |
+| `MiRutinaScreen.js` | Plan de entrenamiento con ejercicios por día. Tarjetas expandibles | `GET /afiliados/me/ciclos` → `GET /planes/entrenamiento/:id` |
+| `MiDietaScreen.js` | Plan nutricional con calorías y comidas. Tarjetas expandibles con macros | `GET /afiliados/me/ciclos` → `GET /planes/nutricional/:id` |
+| `MiProgresoScreen.js` | Historial de progreso físico (peso, IMC, % grasa, medidas) | `GET /afiliados/me/progreso` |
+
+### Detalle de LandingScreen
+
+- **Hero**: Gradiente oscuro, badge "Sistema de Gestión Deportiva v1.0", logo MetaFit, tagline, descripción, CTA "Ingresar al Sistema"
+- **KPIs**: 4 indicadores (1,200+ afiliados, 500+ planes, 20+ entrenadores, 98% satisfacción)
+- **Features**: 4 tarjetas (Rutinas Personalizadas, Plan Nutricional, Progreso Físico, Datos Seguros) con gradientes por color de rol
+- **Cómo funciona**: 3 pasos numerados (Visitar gym → Crear perfil → Acceder desde app)
+- **Sede**: Información de Sport Gym Sede 80 con stats (3,500 m², horario, ubicación)
+- **CTA final**: "¿Ya sos miembro?" con botón de inicio de sesión
+- **Footer**: Copyright, contacto, Instagram
 
 ### Sistema de Navegación
 
@@ -450,6 +659,8 @@ COLORS = {
 }
 ```
 
+Además exporta: `GRADIENTS` (5 degradados), `FONTS` (tamaños), `SPACING` (espaciados), `SHADOWS` (sombras), `BORDER_RADIUS`.
+
 ### Flujo de Autenticación Móvil
 
 ```
@@ -465,6 +676,18 @@ COLORS = {
 8. Auto-logout en 401 (response interceptor excepto /login)
 ```
 
+### Configuración de API URL
+
+La URL del backend se determina por:
+
+1. Variable de entorno `EXPO_PUBLIC_API_URL` (definida en `.env` del proyecto móvil)
+2. Fallback a `http://localhost:3001`
+
+Para dispositivos físicos, se debe configurar la IP local del servidor en `movil/.env`:
+```
+EXPO_PUBLIC_API_URL=http://192.168.X.X:3001
+```
+
 ---
 
 ## 1.7 Base de Datos
@@ -476,58 +699,57 @@ COLORS = {
   │                          USUARIO                                    │
   │  id_usuario (PK) · nombres · apellidos · correo (UQ)               │
   │  contrasena (bcrypt) · rol (ENUM) · estado · fecha_registro        │
-  └────────┬───────────────┬──────────────┬─────────────────────────────┘
-           │               │              │
-           │ 1:1           │ 1:N          │ 1:N
-           ▼               ▼              ▼
-  ┌────────────────┐ ┌──────────┐ ┌──────────────────┐
-  │   AFILIADO     │ │   PAGO   │ │ CICLO            │
-  │ id_usuario(PK) │ │ id_pago  │ │ id_ciclo (PK)    │
-  │ · documento UQ │ │ · id_usr │ │ · id_usuario FK  │
-  │ · fecha_nac    │ │ · fecha  │ │ · activo         │
-  │ · sexo         │ │ · valor  │ └───────┬──────────┘
-  │ · estatura_cm  │ └──────────┘         │
-  └────┬───────────┘                      │ 1:1
-       │                                  ├──────────────────┐
-       │ N:M                              │                  │
-       ├──────────────────────┐           ▼                  ▼
-       │                      │ ┌────────────────┐ ┌────────────────┐
-       ▼                      ▼ │PLAN_ENTRENA.   │ │PLAN_NUTRICIONAL│
-  ┌────────────────────┐  ┌──────────┐ │ id_ciclo (PK) │ │ id_ciclo (PK)  │
-  │AFILIADO_RESTRICCION│  │RESTRICC. │ │ · observac.    │ │ · cal_objetivo │
-  │ id_usuario  (PK)   │  │id_rest(PK)└────────┬───────┘ │ · num_comidas  │
-  │ id_restricc (PK)   │◀─┤ nombre             │1:N      └────────┬───────┘
-  └────────────────────┘  │ tipo               │                  │
-                          │ efecto             ▼                  │
-                          └──────────┘ ┌────────────┐              │
-                                       │   RUTINA   │              │
-                          ┌──────────┐ │ id_rutina  │              │
-                          │EJERCICIO │ │ id_ciclo   │              │
-                          │id_ejer(PK)│ │ nombre     │              │
-                          │ nombre   │ │ dia_numero │              │
-                          │ grupo_mus│ └─────┬──────┘              │
-                          └────┬─────┘       │1:N                  │
-                               │             ▼                     │
-                    ┌──────────┴──┐ ┌────────────────┐  ┌──────────┴──────┐
-                    │EJERCICIO_   │ │RUTINA_EJERCICIO│  │DETALLE_NUTRI.   │
-                    │RESTRIC_EXCL │ │· id_rutina (PK)│  │· id_ciclo (PK)  │
-                    │· id_ejer(PK)│ │· orden     (PK)│  │· num_comida(PK) │
-                    │· id_rest(PK)│ │· id_ejercicio  │  │· id_alimento(PK)│
-                    └─────────────┘ │· series        │  │· cantidad_g     │
-                                    │· repeticiones  │  └─────────────────┘
-                        ┌──────────┴────────────────┐
-                        │ALIMENTO_RESTRIC_EXCL      │
-                        │· id_alimento (PK)         │
-                        │· id_restriccion (PK)      │
-                        └──────────────────────────┘
-  ┌──────────┐  ┌──────────────────┐  ┌──────────────────┐
-  │ALIMENTO  │  │PROGRESO_FISICO   │  │CONFIGURACION     │
-  │id_alimPK │  │· id_ciclo (PK)   │  │· clave (PK)      │
-  │ nombre   │  │· fecha_reg (PK)  │  │· valor           │
-  │ macros   │  │· peso_kg         │  └──────────────────┘
-  └──────────┘  │· %grasa         │
-                │· medidas        │
-                └─────────────────┘
+  └────────┬───────────────┬──────────────┬──────────────┬──────────────┘
+           │               │              │              │
+           │ 1:1           │ 1:N          │ 1:N          │ 1:N
+           ▼               ▼              ▼              ▼
+  ┌────────────────┐ ┌──────────┐ ┌──────────┐ ┌───────────────┐
+  │   AFILIADO     │ │   PAGO   │ │ CICLO    │ │ NOTIFICACION  │
+  │ id_usuario(PK) │ │ id_pago  │ │ id_ciclo │ │ (virtual,     │
+  │ · documento UQ │ │ · id_usr │ │ · id_usr │ │  calculada en │
+  │ · fecha_nac    │ │ · fecha  │ │ · activo │ │  backend)     │
+  │ · sexo         │ │ · valor  │ └────┬─────┘ └───────────────┘
+  │ · estatura_cm  │ └──────────┘      │
+  └────┬───────────┘                   │ 1:1
+       │                               ├──────────────┬──────────────┐
+       │ N:M                           ▼              ▼              ▼
+       ├──────────────────┐  ┌────────────────┐ ┌──────────────┐ ┌──────────────┐
+       ▼                  ▼  │PLAN_ENTRENA.   │ │PLAN_NUTRI.   │ │CONFIGURACION │
+  ┌──────────────┐  ┌────────┐ │ id_ciclo (PK)  │ │ id_ciclo (PK) │ │ clave (PK)    │
+  │AFILIADO_REST │  │RESTRICC│ │ · observac.    │ │ · cal_objetivo│ │ valor         │
+  │ id_usuario   │  │id_rest │ └────────┬───────┘ └────────┬───────┘ └──────────────┘
+  │ id_restricc  │◀─┤ nombre │          │1:N              │1:N
+  └──────────────┘  │ tipo   │          ▼                  ▼
+                    │ efecto │ ┌────────────┐  ┌──────────────────┐
+                    └────────┘ │   RUTINA   │  │DETALLE_NUTRI.    │
+          ┌──────────┐        │ id_rutina  │  │· id_ciclo (PK)   │
+          │EJERCICIO │        │ id_ciclo   │  │· num_comida (PK) │
+          │id_ejer   │        │ nombre     │  │· id_alimento (PK)│
+          │ nombre   │        │ dia_numero │  │· cantidad_g      │
+          │ grupo_mus│        └─────┬──────┘  └──────────────────┘
+          └────┬─────┘              │1:N
+               │          ┌─────────────────┐
+    ┌──────────┴──┐      │RUTINA_EJERCICIO  │
+    │EJERCICIO_   │      │· id_rutina (PK)  │
+    │RESTRIC_EXCL │      │· orden     (PK)  │
+    │· id_ejer(PK)│      │· id_ejercicio    │
+    │· id_rest(PK)│      │· series          │
+    └─────────────┘      │· repeticiones    │
+          ┌──────────┐   └──────────────────┘
+          │ALIMENTO  │
+          │id_alim   │   ┌──────────────────┐
+          │ nombre   │   │ALIMENTO_RESTRIC  │
+          │ macros   │   │· id_alimento(PK) │
+          └────┬─────┘   │· id_restricc(PK) │
+               │         └──────────────────┘
+               │  ┌──────────────────┐
+               └──┤PROGRESO_FISICO   │
+                  │· id_ciclo (PK)   │
+                  │· fecha_reg (PK)  │
+                  │· peso_kg         │
+                  │· %grasa          │
+                  │· medidas         │
+                  └──────────────────┘
 ```
 
 ### Tablas (17)
@@ -549,7 +771,7 @@ COLORS = {
 | **RUTINA_EJERCICIO** | id_rutina (PK), orden (PK), id_ejercicio, series, repeticiones | Pivot ordenada | RUTINA, EJERCICIO |
 | **DETALLE_NUTRICIONAL** | id_ciclo (PK), num_comida (PK), id_alimento (PK), cantidad_g | Triple PK natural | PLAN_NUTRICIONAL, ALIMENTO |
 | **PROGRESO_FISICO** | id_ciclo (PK), fecha_registro (PK), peso_kg, porcentaje_grasa, medida_cintura, medida_brazo, medida_pierna, observaciones, registrado_por | Alta frecuencia | CICLO, USUARIO |
-| **PAGO** | id_pago (PK), id_usuario, fecha_pago, valor_pagado, estado ENUM, fecha_vencimiento | Transaccional | AFILIADO |
+| **PAGO** | id_pago (PK), id_usuario, fecha_pago, valor_pagado, estado ENUM, fecha_vencimiento, id_recepcionista | Transaccional | AFILIADO, USUARIO |
 | **CONFIGURACION** | clave (PK), valor | Clave-valor | — |
 
 ### Vistas (5)
@@ -605,30 +827,33 @@ AFILIADO (sub-tipo)
 
 ### Autenticación JWT + bcrypt
 
-- **JWT**: Token firmado con `JWT_SECRET`, expira en 8 horas. Payload: `{ sub: id, email, role, nombres, apellidos }`.
+- **JWT**: Token firmado con `JWT_SECRET`, expira en 8 horas. Payload: `{ sub: id, email, role }`.
 - **bcrypt**: 12 rondas de salt. Validación de límite de 72 bytes. Contraseña generada automática: `MF_{documento}@2025`.
-- **Rate limiting**: 10 intentos por 15 minutos en `/login` (express-rate-limit).
+- **Rate limiting**: 10 intentos por 15 minutos en `/login` (express-rate-limit). Solo cuenta intentos fallidos.
 
 ### Protección de Rutas por Rol
 
-5 middlewares progresivos:
+6 middlewares progresivos:
 - `requireAuth` → cualquier token válido
 - `requireAdmin` → solo Administrador
 - `requireAdminOrEntrenador` → Admin o Entrenador
 - `requireAdminOrRecepcionista` → Admin o Recepcionista
+- `requireStaff` → Admin, Entrenador o Recepcionista (excluye Afiliado)
 - `requireOwnCiclo` → verifica propiedad del ciclo o rol staff
 
 ### Validación de Datos
 
-- **Backend**: Validación de campos requeridos en servicios, CHECK constraints en MySQL, Content-Type validation (415 si no es JSON).
-- **Frontend**: Validación de formularios con campos required, honeypot anti-autocomplete en login.
-- **Móvil**: Validación de campos requeridos antes de enviar.
+- **Backend**: Validación de campos requeridos en servicios, CHECK constraints en MySQL, Content-Type validation (415 si no es JSON), límite de 50kb en body.
+- **Frontend**: Validación de formularios con campos required, honeypot anti-autocomplete en login, toggle de visibilidad de contraseña.
+- **Móvil**: Validación de campos requeridos antes de enviar, manejo de errores de conexión vs credenciales.
 
 ### Seguridad Adicional
 
 - **Helmet**: Headers HTTP seguros (X-Content-Type-Options, X-Frame-Options, etc.)
-- **CORS**: Solo orígenes configurados en `CORS_ORIGINS` (por defecto localhost:5173 y 3000).
+- **CORS**: Solo orígenes configurados en `CORS_ORIGINS` (por defecto localhost:5173 y 3000). Abierto para Swagger y health.
 - **Endpoints /me**: Los afiliados solo acceden a sus propios datos via `/afiliados/me/*`. Nunca reciben ID de otro usuario.
+- **requireStaff**: Impide que afiliados accedan a listados de otros afiliados (BUG-002).
+- **requireAdmin en /usuarios**: Impide que afiliados vean el listado de personal (BUG-003).
 - **Sin secretos hardcodeados**: Todas las credenciales via variables de entorno.
 
 ---
@@ -639,7 +864,7 @@ AFILIADO (sub-tipo)
 
 | Tipo | Archivo | Framework | Cobertura |
 |---|---|---|---|
-| Integración API | `__tests__/api.test.js` | Jest + Supertest | Endpoints: login, usuarios, afiliados, pagos, notificaciones, dashboard, configuracion |
+| Integración API | `__tests__/api.test.js` | Jest + Supertest | Login, usuarios, afiliados, ejercicios disponibles, notificaciones, dashboard, configuracion |
 | Unitarias | `__tests__/afiliadoService.test.js` | Jest | `normalizarFecha()` utilidad |
 
 ### Resultados
@@ -650,16 +875,53 @@ Tests:       16 passed, 16 total
 ```
 
 Casos de prueba cubiertos:
-- Login exitoso con credenciales válidas
+- Login exitoso con credenciales de Admin, Entrenador, Recepcionista, Afiliado
 - Login fallido con credenciales inválidas → 401
+- Login sin credenciales → 400
+- Cuenta Pendiente rechazada → 403 (Pedro Suarez)
+- Rate limiter (10+ intentos fallidos) → 429
 - Acceso a rutas protegidas sin token → 401
 - Acceso a rutas de admin sin rol Admin → 403
-- CRUD de afiliados (listar, crear)
+- Afiliado restringido de ver lista de afiliados → 403 (BUG-002)
+- Afiliado restringido de ver lista de personal → 403 (BUG-003)
+- CRUD de afiliados (listar, crear, eliminar)
+- Ejercicios disponibles filtrados por restricciones
 - Pagos y notificaciones con diferentes roles
 - Dashboard KPIs solo para Admin
 - Configuración de precio membresía solo para Admin
 - Normalización de fechas (DD/MM/YYYY, YYYY-MM-DD, ISO 8601)
 - Casos borde de fechas (null, undefined, string vacío, formato inválido)
+
+### Auditoría QA (Reporte Completo en QA_REPORT.md)
+
+Se realizó una auditoría manual de **51 pruebas** distribuidas en 10 fases:
+
+| Fase | Tests | Resultado |
+|---|---|---|
+| 0 — Preparación del entorno | 4/4 | ✅ |
+| 1 — Autenticación | 6/6 | ✅ |
+| 2 — CRUD Afiliados | 10/10 | ✅ |
+| 3 — Gestión de Personal | 3/3 | ✅ |
+| 4 — Rutinas y Ejercicios | 4/4 | ✅ |
+| 5 — Dietas y Alimentos | 2/2 | ✅ |
+| 6 — Pagos | 3/3 | ✅ |
+| 7 — Dashboard Admin | 3/3 | ✅ |
+| 8 — Notificaciones | 2/2 | ✅ |
+| 9 — Frontend Web | 2/2 | ✅ |
+| 10 — Base de Datos | 12/12 | ✅ |
+| **Total** | **51/51** | **✅ 100%** |
+
+### Bugs Encontrados y Corregidos en Auditoría
+
+| Bug | Severidad | Archivo | Solución |
+|---|---|---|---|
+| BUG-001: Rate Limiter Global | Crítico | `server.js:108` | Separado en `app.use('/login', loginLimiter)` |
+| BUG-002: Afiliados listaban usuarios | Alto | `routes/afiliadoRoutes.js:46` | Nuevo middleware `requireStaff` |
+| BUG-003: Usuarios sin restricción | Alto | `routes/usuarioRoutes.js` | Agregado `requireAdmin` |
+| Banner ruta `/660/` | Medio | `backend/index.js` | Corregido a `/catalogo/` |
+| JSDoc ruta `/660/` | Medio | `routes/catalogoRoutes.js` | Corregido a `/catalogo/` |
+| Schema `DashboardKPIs` | Medio | `config/swagger.js` | Agregadas propiedades faltantes |
+| `apis[]` incompleto | Medio | `config/swagger.js` | Agregadas rutas faltantes |
 
 ---
 
@@ -669,9 +931,9 @@ Casos de prueba cubiertos:
 
 ```yaml
 Servicios:
-  mysql:      Imagen mysql:8.0, puerto 3306, volumen persistente
-  backend:    Imagen node:22, puerto 3001, depende de mysql
-  frontend:   Imagen nginx:alpine (build de Vite), puerto 5173
+  mysql:      Imagen mysql:8.0, puerto 3307:3306, volumen persistente
+  backend:    Imagen node:22, puerto 3001, depende de mysql (healthy)
+  frontend:   Imagen node:22 (Vite dev), puerto 5173, VITE_API_URL=http://localhost:3001
   phpmyadmin: Imagen phpmyadmin, puerto 8080, depende de mysql
 ```
 
@@ -683,7 +945,6 @@ git clone <repo-url>
 cd Equipo_Metafit
 
 # 2. Configurar variables de entorno (opcional, hay defaults)
-cp .env.example .env
 # Editar .env con tus valores
 
 # 3. Iniciar todos los servicios
@@ -696,7 +957,7 @@ docker compose ps
 #    Frontend:  http://localhost:5173
 #    Backend:   http://localhost:3001
 #    Swagger:   http://localhost:3001/api-docs
-#    phpMyAdmin: http://localhost:8080
+#    phpMyAdmin: http://localhost:8080 (root / MetaFit2025Dev!)
 
 # 6. Detener servicios
 docker compose down
@@ -777,8 +1038,8 @@ npx expo start         # Expo, escanear QR con Expo Go
 | **Mantenibilidad** | MVC + Services, responsabilidad única por archivo |
 | **Modularidad** | Frontend/backend desacoplados via API REST |
 | **Analizabilidad** | Swagger JSDoc, README, nombres autoexplicativos |
-| **Seguridad** | JWT + bcrypt + helmet + rate limit + CORS |
-| **Capacidad de prueba** | Jest + Supertest, servicios sin dependencias de red |
-| **Funcionalidad** | 48 endpoints REST documentados |
-| **Confiabilidad** | Try-catch + códigos HTTP semánticos + validación |
+| **Seguridad** | JWT + bcrypt + helmet + rate limit + CORS + RBAC |
+| **Capacidad de prueba** | Jest + Supertest + QA Audit (51 pruebas) |
+| **Funcionalidad** | 54 endpoints REST documentados |
+| **Confiabilidad** | Try-catch + códigos HTTP semánticos + validación + auditoría |
 | **Eficiencia** | Índices en FKs, vistas materializadas, paginación |

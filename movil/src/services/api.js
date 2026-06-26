@@ -1,9 +1,9 @@
 // ============================================================
 // src/services/api.js — MetaFit Mobile API Client
 //
-// IMPORTANTE: Cambiá API_URL a la IP local de tu computador
-// donde corre el backend (ej: "http://192.168.1.100:3001").
-// NO uses "localhost" en un dispositivo físico.
+// Configuración de la URL del backend:
+// 1. Variable de entorno EXPO_PUBLIC_API_URL (si existe)
+// 2. IP del servidor con puerto 3001
 // ============================================================
 
 import axios from 'axios';
@@ -13,7 +13,7 @@ const TOKEN_KEY = 'metafit_token';
 const USER_KEY  = 'metafit_user';
 const ROLE_KEY  = 'metafit_role';
 
-const API_URL = 'http://192.168.0.8:3001';
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://10.1.196.132:3001';
 
 const api = axios.create({
   baseURL: API_URL,
