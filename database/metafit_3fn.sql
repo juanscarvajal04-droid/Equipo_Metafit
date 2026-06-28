@@ -1,5 +1,5 @@
 -- =====================================================
--- MetaFit DB — Esquema Normalizado 3FN (FINAL v8)
+-- MetaFit DB — Esquema Normalizado 3FN (final v8)
 -- 15 tablas + 2 VIEWs
 -- Ronda 1: calorias_por_100g derivada, peso/grasa redundantes
 -- Ronda 2: numero_ciclo calculable, 3 UNIQUE faltantes,
