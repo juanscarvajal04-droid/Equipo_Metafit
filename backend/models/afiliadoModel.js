@@ -30,7 +30,7 @@ const AfiliadoModel = {
         u.nombres,
         u.apellidos,
         u.correo,
-        u.estado                AS estado_cuenta,
+        u.estado,
         u.fecha_registro        AS fecha_registro_sistema,
         a.documento,
         a.fecha_nacimiento,
@@ -85,8 +85,15 @@ const AfiliadoModel = {
           FROM CICLO c2
           WHERE c2.id_usuario   = c.id_usuario
             AND c2.fecha_inicio <= c.fecha_inicio
-        ) AS numero_ciclo
+        ) AS numero_ciclo,
+        pe.id_ciclo     AS plan_entrenamiento_id,
+        pe.observaciones AS plan_observaciones,
+        pn.calorias_objetivo,
+        pn.num_comidas,
+        pn.observaciones AS plan_nutricional_obs
       FROM CICLO c
+      LEFT JOIN PLAN_ENTRENAMIENTO pe ON c.id_ciclo = pe.id_ciclo
+      LEFT JOIN PLAN_NUTRICIONAL   pn ON c.id_ciclo = pn.id_ciclo
       WHERE c.id_usuario IN (?) AND c.activo = 1
     `, [ids]);
 
@@ -130,11 +137,37 @@ const AfiliadoModel = {
     for (const p of progreso) progresoMap.set(p.id_ciclo, p);
 
     return afiliados.map(af => {
-      const ciclo = cicloMap.has(af.id_usuario)
-        ? {
-            ...cicloMap.get(af.id_usuario),
-            ultimo_progreso: progresoMap.get(cicloMap.get(af.id_usuario).id_ciclo) || null,
-          }
+      const raw = cicloMap.get(af.id_usuario);
+      const ciclo = raw
+        ? (() => {
+            const planEntrenamiento = raw.plan_entrenamiento_id
+              ? { observaciones: raw.plan_observaciones }
+              : null;
+            let planNutricional = null;
+            if (raw.calorias_objetivo) {
+              planNutricional = {
+                calorias_estimadas: raw.calorias_objetivo,
+                num_comidas_diarias: raw.num_comidas,
+                observaciones: raw.plan_nutricional_obs || null,
+              };
+            }
+            return {
+              id_ciclo: raw.id_ciclo,
+              id_usuario: raw.id_usuario,
+              fecha_inicio: raw.fecha_inicio,
+              fecha_fin: raw.fecha_fin,
+              activo: raw.activo,
+              objetivo_fisico: raw.objetivo_fisico,
+              nivel_experiencia: raw.nivel_experiencia,
+              disponibilidad_dias: raw.disponibilidad_dias,
+              grupo_muscular_prioritario: raw.grupo_muscular_prioritario,
+              observaciones: raw.observaciones,
+              numero_ciclo: raw.numero_ciclo,
+              plan_entrenamiento: planEntrenamiento,
+              plan_nutricional: planNutricional,
+              ultimo_progreso: progresoMap.get(raw.id_ciclo) || null,
+            };
+          })()
         : null;
 
       return {
@@ -159,7 +192,7 @@ const AfiliadoModel = {
       SELECT
         a.id_usuario,
         u.nombres, u.apellidos, u.correo,
-        u.estado AS estado_cuenta,
+        u.estado,
         a.documento, a.fecha_nacimiento,
         TIMESTAMPDIFF(YEAR, a.fecha_nacimiento, CURDATE()) AS edad,
         a.sexo, a.telefono, a.direccion, a.estatura_cm,
@@ -213,14 +246,14 @@ const AfiliadoModel = {
         SELECT r.*,
           JSON_ARRAYAGG(
             JSON_OBJECT(
-              'id_rutina_ejercicio', re.id_rutina,
-              'orden', re.orden,
-              'id_ejercicio', e.id_ejercicio,
+              'id_rutina',        re.id_rutina,
+              'orden',            re.orden,
+              'id_ejercicio',     e.id_ejercicio,
               'nombre_ejercicio', e.nombre_ejercicio,
-              'grupo_muscular', e.grupo_muscular,
-              'series', re.series,
-              'repeticiones', re.repeticiones
-            ) ORDER BY re.orden
+              'grupo_muscular',   e.grupo_muscular,
+              'series',           re.series,
+              'repeticiones',     re.repeticiones
+            )
           ) AS ejercicios
         FROM RUTINA r
         LEFT JOIN RUTINA_EJERCICIO re ON r.id_rutina = re.id_rutina
@@ -229,12 +262,18 @@ const AfiliadoModel = {
         GROUP BY r.id_rutina
         ORDER BY r.dia_numero
       `, [ciclo.id_ciclo]);
-      // Parsear ejercicios (JSON_ARRAYAGG devuelve string en algunos drivers)
+      // Parsear ejercicios (JSON_ARRAYAGG devuelve string con typeCast)
       rutinas.forEach(r => {
-        if (typeof r.ejercicios === 'string') r.ejercicios = JSON.parse(r.ejercicios);
-        r.ejercicios = (r.ejercicios || []).filter(e => e.id_ejercicio !== null);
+        if (typeof r.ejercicios === 'string') {
+          r.ejercicios = JSON.parse(r.ejercicios);
+        }
+        r.ejercicios = (r.ejercicios || []).filter(e => e && e.id_ejercicio != null);
+        r.ejercicios.sort((a, b) => a.orden - b.orden);
       });
-      ciclo.plan_entrenamiento = { ...pe[0], rutinas };
+      ciclo.plan_entrenamiento = {
+        ...pe[0],
+        rutinas,
+      };
     }
 
     // Plan nutricional + detalle
@@ -251,7 +290,12 @@ const AfiliadoModel = {
         WHERE dn.id_ciclo = ?
         ORDER BY dn.num_comida
       `, [ciclo.id_ciclo]);
-      ciclo.plan_nutricional = { ...pn[0], detalle };
+      ciclo.plan_nutricional = {
+        ...pn[0],
+        calorias_estimadas: pn[0].calorias_objetivo,
+        num_comidas_diarias: pn[0].num_comidas,
+        detalle,
+      };
     }
 
     // Progreso físico
@@ -331,7 +375,7 @@ const AfiliadoModel = {
           sexo || 'Masculino',
           telefono || '',
           direccion || '',
-          parseFloat(estatura_cm) || null,
+          parseFloat(estatura_cm) > 0 ? parseFloat(estatura_cm) : null,
           estado_afiliacion,
           registrado_por,
         ]

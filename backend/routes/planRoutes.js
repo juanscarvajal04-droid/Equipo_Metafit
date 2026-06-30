@@ -4,7 +4,7 @@
 const express         = require('express');
 const router          = express.Router();
 const PlanController  = require('../controllers/planController');
-const { requireAuth, requireAdminOrEntrenador } = require('../middlewares/auth');
+const { requireAuth, requireAdminOrEntrenador, requireOwnCiclo } = require('../middlewares/auth');
 
 /**
  * @swagger
@@ -41,7 +41,9 @@ const { requireAuth, requireAdminOrEntrenador } = require('../middlewares/auth')
  *               type: object
  *               properties:
  *                 id_ciclo:     { type: integer }
- *                 observaciones:{ type: string, nullable: true }
+ *                 observaciones:
+ *                   type: string
+ *                   nullable: true
  *                 rutinas:
  *                   type: array
  *                   items:
@@ -63,7 +65,7 @@ const { requireAuth, requireAdminOrEntrenador } = require('../middlewares/auth')
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.get('/entrenamiento/:id_ciclo', requireAuth, PlanController.getEntrenamiento);
+router.get('/entrenamiento/:id_ciclo', requireAuth, requireOwnCiclo, PlanController.getEntrenamiento);
 
 /**
  * @swagger
@@ -82,7 +84,9 @@ router.get('/entrenamiento/:id_ciclo', requireAuth, PlanController.getEntrenamie
  *             required: [id_ciclo]
  *             properties:
  *               id_ciclo:     { type: integer, example: 1 }
- *               observaciones:{ type: string, nullable: true }
+ *               observaciones:
+ *                 type: string
+ *                 nullable: true
  *     responses:
  *       201:
  *         description: Plan de entrenamiento creado
@@ -106,7 +110,7 @@ router.get('/entrenamiento/:id_ciclo', requireAuth, PlanController.getEntrenamie
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.post('/entrenamiento', requireAdminOrEntrenador, PlanController.createEntrenamiento);
+router.post('/entrenamiento', requireAuth, requireAdminOrEntrenador, PlanController.createEntrenamiento);
 
 /**
  * @swagger
@@ -135,7 +139,7 @@ router.post('/entrenamiento', requireAdminOrEntrenador, PlanController.createEnt
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.patch('/entrenamiento/:id', requireAdminOrEntrenador, PlanController.updateEntrenamiento);
+router.patch('/entrenamiento/:id', requireAuth, requireAdminOrEntrenador, PlanController.updateEntrenamiento);
 
 // ─────────────────────────────────────────────────────────────
 // RUTINAS
@@ -177,7 +181,7 @@ router.patch('/entrenamiento/:id', requireAdminOrEntrenador, PlanController.upda
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.post('/rutinas', requireAdminOrEntrenador, PlanController.createRutina);
+router.post('/rutinas', requireAuth, requireAdminOrEntrenador, PlanController.createRutina);
 
 /**
  * @swagger
@@ -220,7 +224,7 @@ router.post('/rutinas', requireAdminOrEntrenador, PlanController.createRutina);
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.post('/rutinas/:id_rutina/ejercicios', requireAdminOrEntrenador, PlanController.addEjercicio);
+router.post('/rutinas/:id_rutina/ejercicios', requireAuth, requireAdminOrEntrenador, PlanController.addEjercicio);
 
 /**
  * @swagger
@@ -249,7 +253,32 @@ router.post('/rutinas/:id_rutina/ejercicios', requireAdminOrEntrenador, PlanCont
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.delete('/rutinas/:id_rutina/ejercicios/:id_ejercicio', requireAdminOrEntrenador, PlanController.removeEjercicio);
+router.delete('/rutinas/:id_rutina/ejercicios/:id_ejercicio', requireAuth, requireAdminOrEntrenador, PlanController.removeEjercicio);
+
+/**
+ * @swagger
+ * /planes/rutinas/{id_rutina}:
+ *   delete:
+ *     summary: Eliminar rutina y sus ejercicios asociados (Admin o Entrenador)
+ *     tags: [Planes]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id_rutina
+ *         in: path
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Rutina eliminada correctamente
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.delete('/rutinas/:id_rutina', requireAuth, requireAdminOrEntrenador, PlanController.deleteRutina);
 
 // ─────────────────────────────────────────────────────────────
 // PLANES NUTRICIONALES
@@ -291,7 +320,7 @@ router.delete('/rutinas/:id_rutina/ejercicios/:id_ejercicio', requireAdminOrEntr
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.get('/nutricional/:id_ciclo', requireAuth, PlanController.getNutricional);
+router.get('/nutricional/:id_ciclo', requireAuth, requireOwnCiclo, PlanController.getNutricional);
 
 /**
  * @swagger
@@ -312,7 +341,9 @@ router.get('/nutricional/:id_ciclo', requireAuth, PlanController.getNutricional)
  *               id_ciclo:          { type: integer, example: 1 }
  *               calorias_objetivo: { type: number,  example: 2200.0, description: 'Rango: 500–10000 kcal' }
  *               num_comidas:       { type: integer, example: 5, description: 'Rango: 1–10 comidas/día' }
- *               observaciones:     { type: string,  nullable: true }
+ *               observaciones:
+ *                 type: string
+ *                 nullable: true
  *     responses:
  *       201:
  *         description: Plan nutricional creado
@@ -329,7 +360,7 @@ router.get('/nutricional/:id_ciclo', requireAuth, PlanController.getNutricional)
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.post('/nutricional', requireAdminOrEntrenador, PlanController.createNutricional);
+router.post('/nutricional', requireAuth, requireAdminOrEntrenador, PlanController.createNutricional);
 
 /**
  * @swagger
@@ -372,6 +403,8 @@ router.post('/nutricional', requireAdminOrEntrenador, PlanController.createNutri
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.post('/nutricional/:id_plan/detalle', requireAdminOrEntrenador, PlanController.addAlimento);
+router.patch('/nutricional/:id', requireAuth, requireAdminOrEntrenador, PlanController.updateNutricional);
+
+router.post('/nutricional/:id_plan/detalle', requireAuth, requireAdminOrEntrenador, PlanController.addAlimento);
 
 module.exports = router;

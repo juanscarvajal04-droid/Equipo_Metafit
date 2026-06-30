@@ -4,7 +4,7 @@
 const express             = require('express');
 const router              = express.Router();
 const CatalogoController  = require('../controllers/catalogoController');
-const { requireAuth, requireAdmin } = require('../middlewares/auth');
+const { requireAuth, requireAdmin, requireAdminOrEntrenador } = require('../middlewares/auth');
 
 /**
  * @swagger
@@ -15,7 +15,7 @@ const { requireAuth, requireAdmin } = require('../middlewares/auth');
 
 /**
  * @swagger
- * /660/ejercicios:
+ * /catalogo/ejercicios:
  *   get:
  *     summary: Listar todos los ejercicios
  *     description: Devuelve el catálogo de ejercicios con sus restricciones médicas excluyentes.
@@ -36,7 +36,9 @@ const { requireAuth, requireAdmin } = require('../middlewares/auth');
  *                   nombre_ejercicio:        { type: string }
  *                   grupo_muscular:          { type: string, enum: [Piernas, Pecho, Espalda, Hombros, Biceps, Triceps, Core, Gluteos] }
  *                   nivel_minimo:            { type: string, enum: [Principiante, Intermedio, Avanzado] }
- *                   descripcion:             { type: string, nullable: true }
+ *                   descripcion:
+ *                     type: string
+ *                     nullable: true
  *                   restricciones_excluidas: { type: array, items: { $ref: '#/components/schemas/Restriccion' } }
  *       401:
  *         $ref: '#/components/responses/Unauthorized'
@@ -47,7 +49,7 @@ router.get('/ejercicios', requireAuth, CatalogoController.getAllEjercicios);
 
 /**
  * @swagger
- * /660/ejercicios:
+ * /catalogo/ejercicios:
  *   post:
  *     summary: Crear ejercicio en el catálogo (solo Administrador)
  *     tags: [Catálogos]
@@ -64,7 +66,9 @@ router.get('/ejercicios', requireAuth, CatalogoController.getAllEjercicios);
  *               nombre_ejercicio: { type: string,  example: Sentadilla Búlgara }
  *               grupo_muscular:   { type: string,  enum: [Piernas, Pecho, Espalda, Hombros, Biceps, Triceps, Core, Gluteos] }
  *               nivel_minimo:     { type: string,  enum: [Principiante, Intermedio, Avanzado] }
- *               descripcion:      { type: string,  nullable: true }
+ *               descripcion:
+ *                 type: string
+ *                 nullable: true
  *     responses:
  *       201:
  *         description: Ejercicio creado
@@ -81,11 +85,13 @@ router.get('/ejercicios', requireAuth, CatalogoController.getAllEjercicios);
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.post('/ejercicios', requireAdmin, CatalogoController.createEjercicio);
+router.post('/ejercicios', requireAuth, requireAdminOrEntrenador, CatalogoController.createEjercicio);
+router.put('/ejercicios/:id', requireAuth, requireAdminOrEntrenador, CatalogoController.updateEjercicio);
+router.delete('/ejercicios/:id', requireAuth, requireAdminOrEntrenador, CatalogoController.deleteEjercicio);
 
 /**
  * @swagger
- * /660/alimentos:
+ * /catalogo/alimentos:
  *   get:
  *     summary: Listar todos los alimentos
  *     description: >
@@ -109,7 +115,10 @@ router.post('/ejercicios', requireAdmin, CatalogoController.createEjercicio);
  *                   proteinas:        { type: number, example: 25.5 }
  *                   carbohidratos:    { type: number, example: 40.0 }
  *                   grasas:           { type: number, example: 5.0 }
- *                   calorias_por_100g:{ type: number, example: 307.0, description: Calculado con Atwater }
+ *                   calorias_por_100g:
+ *                     type: number
+ *                     example: 307.0
+ *                     description: 'Calculado con Atwater'
  *       401:
  *         $ref: '#/components/responses/Unauthorized'
  *       500:
@@ -119,7 +128,7 @@ router.get('/alimentos', requireAuth, CatalogoController.getAllAlimentos);
 
 /**
  * @swagger
- * /660/alimentos:
+ * /catalogo/alimentos:
  *   post:
  *     summary: Crear alimento en el catálogo (solo Administrador)
  *     tags: [Catálogos]
@@ -153,11 +162,13 @@ router.get('/alimentos', requireAuth, CatalogoController.getAllAlimentos);
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.post('/alimentos', requireAdmin, CatalogoController.createAlimento);
+router.post('/alimentos', requireAuth, requireAdminOrEntrenador, CatalogoController.createAlimento);
+router.put('/alimentos/:id', requireAuth, requireAdminOrEntrenador, CatalogoController.updateAlimento);
+router.delete('/alimentos/:id', requireAuth, requireAdminOrEntrenador, CatalogoController.deleteAlimento);
 
 /**
  * @swagger
- * /660/restricciones:
+ * /catalogo/restricciones:
  *   get:
  *     summary: Listar todas las restricciones médicas del catálogo
  *     tags: [Catálogos]

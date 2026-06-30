@@ -7,12 +7,14 @@
 
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger');
 const app = express();
 
 const IS_PROD = process.env.NODE_ENV === 'production';
+
 
 // ── CORS ──────────────────────────────────────────────────────
 const ALLOWED_ORIGINS = (process.env.CORS_ORIGINS || 'http://localhost:5173,http://localhost:3000')
@@ -48,9 +50,15 @@ app.use((req, res, next) => {
   })(req, res, next);
 });
 
+// ── ISO 25000 / 3.1: Helmet — cabeceras HTTP seguras ──────────
+// Desactivamos contentSecurityPolicy para que Swagger UI pueda
+// cargar sus scripts y estilos inline sin bloquearse.
+app.use(helmet({ contentSecurityPolicy: false }));
+
 // ── Límite de tamaño de body (evita DoS por payloads enormes) ─
 app.use(express.json({ limit: '50kb' }));
 app.use(express.urlencoded({ extended: true, limit: '50kb' }));
+
 
 // ── BUG-003: Validación de Content-Type ───────────────────────
 // Los endpoints POST, PUT y PATCH deben recibir JSON.
@@ -91,14 +99,23 @@ const afiliadoRoutes = require('./routes/afiliadoRoutes');
 const planRoutes = require('./routes/planRoutes');
 const catalogoRoutes = require('./routes/catalogoRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const pagoRoutes = require('./routes/pagoRoutes');        // FIX 5: rutas de pagos
+const pagoAdminRoutes = require('./routes/pagoAdminRoutes'); // FASE FINANZAS: admin
+const configuracionRoutes = require('./routes/configuracionRoutes');
+const notificacionRoutes = require('./routes/notificacionRoutes');
 
 // BUG-005: El rate limiter se aplica SOLO al endpoint de login
-app.use('/', loginLimiter, authRoutes);   // POST /login (con rate limit)
+app.use('/login', loginLimiter);          // rate limit solo en /login
+app.use('/', authRoutes);                // POST /login (con rate limit)
 app.use('/usuarios', usuarioRoutes);              // GET/POST/PATCH/DELETE /usuarios
 app.use('/afiliados', afiliadoRoutes);             // CRUD afiliados + ciclos + progreso
+app.use('/afiliados', pagoRoutes);                // FIX 5: GET|POST /afiliados/:id/pagos
+app.use('/pagos', pagoAdminRoutes);              // FASE FINANZAS: GET /pagos, GET /pagos/metricas
 app.use('/planes', planRoutes);                 // Planes entrenamiento y nutricional
 app.use('/catalogo', catalogoRoutes);             // GET /catalogo/ejercicios|alimentos|restricciones
 app.use('/dashboard', dashboardRoutes);            // GET /dashboard/kpis
+app.use('/configuracion', configuracionRoutes);     // GET|PUT /configuracion/precio-membresia
+app.use('/notificaciones', notificacionRoutes);    // GET /notificaciones
 
 // ── Swagger UI — /api-docs y /swagger (alias) ────────────────
 const swaggerSetup = swaggerUi.setup(swaggerSpec, {

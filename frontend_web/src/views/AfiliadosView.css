@@ -1,0 +1,164 @@
+/* ============================================================
+   AfiliadosView.css — MetaFit Afiliados View Styles
+
+   RESPONSABILIDAD ÚNICA (ISO 25000 - SoC):
+   Contiene TODOS los estilos visuales del módulo de afiliados.
+   El archivo .jsx no debe contener ningún atributo `style`.
+   ============================================================ */
+
+/* ── Variables del módulo ────────────────────────────────────── */
+:root {
+  --af-red:          #e94560;
+  --af-red-dark:     #c62a47;
+  --af-green:        #198754;
+  --af-green-dark:   #146c43;
+  --af-dark-header:  #1a1a2e;
+  --af-dark-header2: #16213e;
+  --af-modal-overlay: rgba(0, 0, 0, 0.55);
+}
+
+/* ── Toast de notificación ───────────────────────────────────── */
+.af-toast {
+  position:   fixed;
+  bottom:     1.5rem;
+  right:      1.5rem;
+  z-index:    9999;
+  min-width:  280px;
+}
+
+/* ── Encabezado de la vista ──────────────────────────────────── */
+.af-header {
+  display:         flex;
+  justify-content: space-between;
+  align-items:     center;
+  flex-wrap:       wrap;
+  gap:             0.5rem;
+  margin-bottom:   1.5rem;
+}
+
+/* Botón "Nuevo Afiliado" */
+.af-btn-crear {
+  background: linear-gradient(135deg, var(--af-red) 0%, var(--af-red-dark) 100%);
+  border:     none;
+  color:      #fff;
+  font-weight: 600;
+  padding:    0.25rem 1.25rem;
+  font-size:  0.875rem;
+  border-radius: 0.375rem;
+  cursor:     pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.af-btn-crear:hover {
+  opacity:   0.9;
+  transform: translateY(-1px);
+}
+
+/* ── Barra de búsqueda ───────────────────────────────────────── */
+.af-search {
+  max-width: 280px;
+}
+
+/* ── Wrapper de la tabla con scroll horizontal ───────────────── */
+.af-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Avatar circular con inicial ─────────────────────────────── */
+.af-avatar {
+  width:           36px;
+  height:          36px;
+  border-radius:   50%;
+  flex-shrink:     0;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  color:           #fff;
+  font-weight:     700;
+  font-size:       0.8rem;
+  /* background se aplica inline via JS con hsl() — es un valor calculado,
+     no un estilo de diseño, por lo que es aceptable según ISO 25000 SoC:
+     representa lógica de presentación dinámica, no estilo estático. */
+}
+
+/* Texto secundario del afiliado (documento) */
+.af-avatar-doc {
+  font-size: 0.72rem;
+}
+
+/* ── Select de cambio de estado (Recepcionista) ──────────────── */
+.af-estado-select {
+  width:      auto;
+  background: transparent;
+  border:     none !important;
+  cursor:     pointer;
+  padding:    0;
+  text-align: center;
+}
+
+/* ── Encabezados de modal ────────────────────────────────────── */
+.af-modal-header--ver {
+  background: linear-gradient(135deg, var(--af-dark-header) 0%, var(--af-dark-header2) 100%);
+}
+
+.af-modal-header--editar {
+  background: linear-gradient(135deg, var(--af-red) 0%, var(--af-red-dark) 100%);
+}
+
+.af-modal-header--crear {
+  background: linear-gradient(135deg, var(--af-green) 0%, var(--af-green-dark) 100%);
+}
+
+/* ── Modal de VER: etiquetas de campo ────────────────────────── */
+.af-field-label {
+  font-size:      0.68rem;
+  text-transform: uppercase;
+  font-weight:    600;
+}
+
+/* Etiqueta pequeña en tabla de progreso */
+.af-progreso-label {
+  font-size: 0.68rem;
+}
+
+/* ── Cuerpo del modal Crear (scroll interno) ─────────────────── */
+.af-modal-body--crear {
+  max-height:  75vh;
+  overflow-y:  auto;
+}
+
+/* ── Botones de acción de modales ────────────────────────────── */
+.af-btn-guardar-editar {
+  background: linear-gradient(135deg, var(--af-red) 0%, var(--af-red-dark) 100%);
+  border:     none;
+  color:      #fff;
+  font-weight: 600;
+  padding:    0.25rem 1.25rem;
+  font-size:  0.875rem;
+  border-radius: 0.375rem;
+  cursor:     pointer;
+  transition: opacity 0.2s ease;
+}
+
+.af-btn-guardar-editar:disabled {
+  opacity: 0.65;
+  cursor:  not-allowed;
+}
+
+.af-btn-guardar-crear {
+  background: linear-gradient(135deg, var(--af-green) 0%, var(--af-green-dark) 100%);
+  border:     none;
+  color:      #fff;
+  font-weight: 600;
+  padding:    0.25rem 1.25rem;
+  font-size:  0.875rem;
+  border-radius: 0.375rem;
+  cursor:     pointer;
+  transition: opacity 0.2s ease;
+}
+
+.af-btn-guardar-crear:disabled {
+  opacity: 0.65;
+  cursor:  not-allowed;
+}

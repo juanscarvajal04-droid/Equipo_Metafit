@@ -1,635 +1,320 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import AppLayout from "../components/AppLayout";
+import { useToast } from "../hooks/useToast";
+import styles from "./Dashboard.module.css";
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-const getId          = (doc) => doc.id_usuario ?? doc._id ?? doc.id;
-const nombreCompleto = (a)   => [a.nombres, a.apellidos].filter(Boolean).join(" ") || "Sin nombre";
-const inicial        = (a)   => (a.nombres || a.correo || "?")[0].toUpperCase();
-// FIX: el backend devuelve `ciclo_activo` (objeto), NO `ciclos` (array)
-const cicloActivo    = (a)   => a.ciclo_activo || null;
-const numRestr       = (a)   => a.restricciones?.length || 0;
-// FIX: MySQL devuelve '2000-01-30T00:00:00.000Z'. <input type="date"> necesita 'YYYY-MM-DD'.
-const toDateInput    = (v)   => { if (!v) return ""; if (typeof v === "string") return v.split("T")[0].split(" ")[0]; if (v instanceof Date) return v.toISOString().split("T")[0]; return ""; };
-
-const OBJETIVO_CONFIG = {
-  "Pérdida de grasa": { icono: "🔥", color: "#e94560", bg: "#e9456022" },
-  "Aumento de masa":  { icono: "💪", color: "#0d6efd", bg: "#0d6efd22" },
-  "Mantenimiento":    { icono: "⚖️", color: "#198754", bg: "#19875422" },
-};
-
-const OBJETIVOS  = Object.keys(OBJETIVO_CONFIG);
-const NIVELES    = ["Principiante", "Intermedio", "Avanzado"];
-const ESTADOS    = ["Activo", "Inactivo", "Pendiente"];
-
-const badgeEstado = (estado) => {
-  const map = { activo: "success", inactivo: "danger", pendiente: "warning" };
-  const c   = map[(estado || "").toLowerCase()] || "secondary";
-  return <span className={`badge bg-${c}`}>{estado || "—"}</span>;
-};
-const badgeNivel = (nivel) => {
-  const map = { principiante: "info", intermedio: "primary", avanzado: "dark" };
-  const c   = map[(nivel || "").toLowerCase()] || "secondary";
-  return <span className={`badge bg-${c} bg-opacity-75`}>{nivel || "—"}</span>;
-};
-
-// ─── Formulario inicial vacío ─────────────────────────────────────────────────
-const FORM_VACIO = {
-  nombres: "", apellidos: "", correo: "", telefono: "", direccion: "",
-  documento: "", fecha_nacimiento: "", sexo: "Masculino",
-  estatura_cm: "", objetivo_fisico: "Pérdida de grasa",
-  grupo_muscular_prioritario: "", nivel_experiencia: "Principiante",
-  disponibilidad_semanal_dias: "", estado: "Activo",
-};
-
-// ─── Componente ───────────────────────────────────────────────────────────────
 export default function Dashboard() {
-  const { user, logout, authAxios } = useAuth();
-  const navigate = useNavigate();
+  const { authAxios } = useAuth();
+  const { toast, showToast } = useToast();
 
-  const [afiliados,  setAfiliados]  = useState([]);
-  const [loading,    setLoading]    = useState(true);
-  const [error,      setError]      = useState("");
-  const [busqueda,   setBusqueda]   = useState("");
+  const [kpis, setKpis] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // ── Modales ────────────────────────────────────────────────────────────────
-  const [verModal,    setVerModal]    = useState(null);  // afiliado a ver
-  const [editModal,   setEditModal]   = useState(null);  // afiliado a editar
-  const [formEdit,    setFormEdit]    = useState(FORM_VACIO);
-  const [savingEdit,  setSavingEdit]  = useState(false);
-  const [editError,   setEditError]   = useState("");
-  const [deleteModal, setDeleteModal] = useState(null);  // afiliado a eliminar
-  const [deleting,    setDeleting]    = useState(false);
-  const [toast,       setToast]       = useState("");    // mensaje flotante
+  const cargarKPIs = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const { data } = await authAxios.get("/dashboard/kpis");
+      setKpis(data);
+    } catch (err) {
+      console.error("[Dashboard] Error al cargar KPIs:", err);
+      // ⚠️ No llamar logout() aquí: el interceptor global de api.js ya maneja
+      // los 401 de token expirado. Llamarlo localmente provoca un logout
+      // inmediato tras el login si el backend responde lento o con 403.
+      setError("No se pudieron cargar las estadísticas del sistema.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // ── Carga ──────────────────────────────────────────────────────────────────
   useEffect(() => {
-    // FIX: la ruta correcta es /afiliados, no /660/afiliados
-    authAxios.get("/afiliados")
-      .then(({ data }) => {
-        setAfiliados(data);
-      })
-      .catch((err) => {
-        console.error('[Dashboard] Error al cargar afiliados:', err.response?.status, err.response?.data || err.message);
-        if (err?.response?.status === 401 || err?.response?.status === 403) {
-          logout(); navigate("/login");
-        } else {
-          setError("No se pudieron cargar los afiliados.");
-        }
-      })
-      .finally(() => setLoading(false));
+    cargarKPIs();
   }, []);
 
-  const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(""), 3000); };
+  useEffect(() => {
+    const refresh = () => cargarKPIs();
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") cargarKPIs();
+    };
+    window.addEventListener("pago-registrado", refresh);
+    window.addEventListener("afiliado-modificado", refresh);
+    window.addEventListener("personal-modificado", refresh);
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      window.removeEventListener("pago-registrado", refresh);
+      window.removeEventListener("afiliado-modificado", refresh);
+      window.removeEventListener("personal-modificado", refresh);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, []);
 
-  // ── Abrir modal de edición ──────────────────────────────────────────────────
-  const abrirEditar = (afiliado) => {
-    setEditModal(afiliado);
-    setEditError("");
-    setFormEdit({
-      nombres:                     afiliado.nombres                     || "",
-      apellidos:                   afiliado.apellidos                   || "",
-      correo:                      afiliado.correo                      || "",
-      telefono:                    afiliado.telefono                     || "",
-      direccion:                   afiliado.direccion                   || "",
-      documento:                   afiliado.documento                   || "",
-      // FIX: convertir ISO a YYYY-MM-DD para que <input type="date"> lo muestre
-      fecha_nacimiento:            toDateInput(afiliado.fecha_nacimiento),
-      sexo:                        afiliado.sexo                        || "Masculino",
-      estatura_cm:                 afiliado.estatura_cm                 || "",
-      objetivo_fisico:             afiliado.objetivo_fisico             || "Pérdida de grasa",
-      grupo_muscular_prioritario:  afiliado.grupo_muscular_prioritario  || "",
-      nivel_experiencia:           afiliado.nivel_experiencia           || "Principiante",
-      disponibilidad_semanal_dias: afiliado.disponibilidad_semanal_dias || "",
-      // FIX: el campo en la DB/backend es estado_afiliacion, no estado
-      estado_afiliacion:           afiliado.estado_afiliacion           || "Activo",
-    });
-  };
-
-  // ── Guardar edición ────────────────────────────────────────────────────────
-  const guardarEdicion = async (e) => {
-    e.preventDefault();
-    setSavingEdit(true);
-    setEditError("");
-    try {
-      const id = getId(editModal);
-      await authAxios.patch(`/afiliados/${id}`, formEdit);
-      // FIX: el backend devuelve {message}, NO el afiliado actualizado.
-      // Mergeamos formEdit en el objeto existente para actualizar la tabla localmente.
-      const actualizado = {
-        ...editModal,
-        ...formEdit,
-        // Mantener campos de solo-lectura del backend
-        estado_cuenta:    formEdit.estado_afiliacion || editModal.estado_cuenta,
-      };
-      setAfiliados((prev) => prev.map((a) => (getId(a) === id ? actualizado : a)));
-      setEditModal(null);
-      showToast(`✅ ${nombreCompleto(actualizado)} actualizado correctamente`);
-    } catch (err) {
-      const msg = err?.response?.data?.error || err.message || "Error desconocido";
-      console.error('[Dashboard.guardarEdicion]', err);
-      setEditError(`Error al guardar: ${msg}`);
-    } finally {
-      setSavingEdit(false);
-    }
-  };
-
-  // ── Eliminar ───────────────────────────────────────────────────────────────
-  const confirmarEliminar = async () => {
-    setDeleting(true);
-    try {
-      const id = getId(deleteModal);
-      await authAxios.delete(`/afiliados/${id}`);
-      setAfiliados((prev) => prev.filter((a) => getId(a) !== id));
-      showToast(`🗑 ${nombreCompleto(deleteModal)} eliminado`);
-      setDeleteModal(null);
-    } catch {
-      showToast("❌ Error al eliminar. Verifica el servidor.");
-      setDeleteModal(null);
-    } finally {
-      setDeleting(false);
-    }
-  };
-
-  // ── Filtrado y KPIs ────────────────────────────────────────────────────────
-  const filtrados        = afiliados.filter((a) => {
-    const t = busqueda.toLowerCase();
-    return (
-      nombreCompleto(a).toLowerCase().includes(t) ||
-      (a.correo || "").toLowerCase().includes(t)  ||
-      (a.objetivo_fisico || "").toLowerCase().includes(t)
-    );
-  });
-  // FIX: el backend devuelve `estado_cuenta` (de USUARIO), no `estado`
-  const totalActivos     = afiliados.filter((a) => (a.estado_cuenta || a.estado_afiliacion || "").toLowerCase() === "activo").length;
-  const conCicloActivo   = afiliados.filter((a) => cicloActivo(a)).length;
-  const conRestricciones = afiliados.filter((a) => numRestr(a) > 0).length;
-  const conteoPorObj     = OBJETIVOS.map((obj) => ({
-    objetivo: obj, cantidad: afiliados.filter((a) => a.objetivo_fisico === obj).length,
-    ...OBJETIVO_CONFIG[obj],
-  }));
-
-  // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="min-vh-100" style={{ background: "#f4f6f9" }}>
-
+    <AppLayout>
       {/* Toast */}
-      {toast && (
+      {toast.msg && (
         <div
-          className="position-fixed bottom-0 end-0 m-4 alert alert-dark shadow-lg py-2 px-3"
-          style={{ zIndex: 9999, minWidth: 280 }}
+          className={`position-fixed bottom-0 end-0 m-4 alert alert-${toast.type === "danger" ? "danger" : "dark"} shadow-lg py-2 px-3 ${styles.toast}`}
         >
-          {toast}
+          {toast.msg}
         </div>
       )}
-
-      {/* Navbar */}
-      <nav className="navbar navbar-dark px-4 py-3 shadow-sm"
-        style={{ background: "linear-gradient(135deg,#1a1a2e,#16213e)" }}>
-        <span className="navbar-brand fw-bold fs-5">
-          💪 MetaFit&nbsp;
-          <span className="badge fs-6 text-white" style={{ background: "#e94560" }}>Dashboard</span>
-        </span>
-        <div className="d-flex align-items-center gap-3">
-          <span className="text-white-50 small d-none d-md-inline">👤 {user?.email}</span>
-          <button id="btn-logout" className="btn btn-outline-light btn-sm"
-            onClick={() => { logout(); navigate("/login"); }}>
-            Cerrar sesión
-          </button>
-        </div>
-      </nav>
 
       <div className="container-fluid py-4 px-3 px-md-4">
-
-        {/* KPIs */}
-        <div className="row g-3 mb-4">
-          {[
-            { label: "Total Afiliados",   valor: afiliados.length,   icono: "👥", color: "#0d6efd" },
-            { label: "Activos",           valor: totalActivos,        icono: "✅", color: "#198754" },
-            { label: "Ciclos en curso",   valor: conCicloActivo,      icono: "🔄", color: "#6f42c1" },
-            { label: "Con restricciones", valor: conRestricciones,    icono: "⚠️", color: "#fd7e14" },
-          ].map((kpi) => (
-            <div key={kpi.label} className="col-6 col-md-3">
-              <div className="card border-0 shadow-sm h-100">
-                <div className="card-body d-flex align-items-center gap-3">
-                  <div className="rounded-circle d-flex align-items-center justify-content-center fs-4"
-                    style={{ width: 52, height: 52, background: kpi.color + "22", flexShrink: 0 }}>
-                    {kpi.icono}
-                  </div>
-                  <div>
-                    <div className="fw-bold fs-3 lh-1" style={{ color: kpi.color }}>
-                      {loading ? <span className="spinner-border spinner-border-sm" /> : kpi.valor}
-                    </div>
-                    <small className="text-muted">{kpi.label}</small>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Cards por Objetivo */}
-        <h2 className="h5 fw-bold mb-3">🎯 Distribución por Objetivo Físico</h2>
-        <div className="row g-3 mb-4">
-          {conteoPorObj.map((obj) => (
-            <div key={obj.objetivo} className="col-12 col-md-4">
-              <div className="card border-0 shadow-sm h-100"
-                style={{ borderLeft: `5px solid ${obj.color}` }}>
-                <div className="card-body">
-                  <div className="d-flex align-items-center justify-content-between mb-2">
-                    <span className="fs-1">{obj.icono}</span>
-                    <div className="rounded-circle d-flex align-items-center justify-content-center fw-bold fs-3"
-                      style={{ width: 60, height: 60, background: obj.bg, color: obj.color }}>
-                      {loading ? <span className="spinner-border spinner-border-sm" /> : obj.cantidad}
-                    </div>
-                  </div>
-                  <h3 className="h6 fw-bold mb-1" style={{ color: obj.color }}>{obj.objetivo}</h3>
-                  <div className="progress mt-2" style={{ height: 6 }}>
-                    <div className="progress-bar"
-                      style={{ width: afiliados.length > 0 ? `${(obj.cantidad / afiliados.length) * 100}%` : "0%", background: obj.color }} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Tabla */}
-        <div className="card border-0 shadow-sm">
-          <div className="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2 border-0">
-            <h2 className="h5 fw-bold mb-0">👥 Gestión de Afiliados</h2>
-            <input type="text" id="busqueda-afiliados" className="form-control form-control-sm"
-              style={{ maxWidth: 280 }} placeholder="🔍 Nombre, correo, objetivo..."
-              value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
+        {/* Encabezado */}
+        <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+          <div>
+            <h1 className="h4 fw-bold mb-0 d-flex align-items-center gap-2">
+              <span className={`d-inline-flex align-items-center justify-content-center rounded-2 text-white ${styles.titleIcon}`}>
+                📊
+              </span>
+              Dashboard General
+            </h1>
+            <small className="text-muted">
+              Panel administrativo general · Métricas clave del negocio, personal e ingresos
+            </small>
           </div>
-          <div className="card-body p-0">
-            {error && <div className="alert alert-danger m-3 py-2"><small>⚠️ {error}</small></div>}
-            {loading && (
-              <div className="text-center py-5">
-                <div className="spinner-border text-primary" />
-                <p className="text-muted mt-2 small">Cargando afiliados...</p>
-              </div>
-            )}
-            {!loading && !error && (
-              <div className="table-responsive">
-                <table className="table table-hover align-middle mb-0">
-                  <thead className="table-light">
-                    <tr>
-                      <th className="ps-4">#</th>
-                      <th>Afiliado</th>
-                      <th>Contacto</th>
-                      <th>Objetivo</th>
-                      <th>Nivel</th>
-                      <th className="text-center">Días/sem</th>
-                      <th className="text-center">Restrict.</th>
-                      <th>Ciclo activo</th>
-                      <th>Estado</th>
-                      <th className="text-center pe-4">Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filtrados.length === 0 ? (
-                      <tr><td colSpan={10} className="text-center text-muted py-5">
-                        {busqueda ? `Sin resultados para "${busqueda}"` : "No hay afiliados."}
-                      </td></tr>
-                    ) : filtrados.map((a, idx) => {
-                      const ciclo = cicloActivo(a);
-                      return (
-                        <tr key={getId(a)}>
-                          <td className="ps-4 text-muted small">{idx + 1}</td>
-                          <td>
-                            <div className="d-flex align-items-center gap-2">
-                              <div className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
-                                style={{ width: 38, height: 38, flexShrink: 0, fontSize: "0.85rem",
-                                  background: `hsl(${(getId(a) * 47) % 360},65%,55%)` }}>
-                                {inicial(a)}
-                              </div>
-                              <div>
-                                <div className="fw-semibold small">{nombreCompleto(a)}</div>
-                                <div className="text-muted" style={{ fontSize: "0.72rem" }}>Doc: {a.documento || "—"}</div>
-                              </div>
-                            </div>
-                          </td>
-                          <td>
-                            <div className="small">{a.correo || "—"}</div>
-                            <div className="text-muted" style={{ fontSize: "0.72rem" }}>📞 {a.telefono || "—"}</div>
-                          </td>
-                          <td><span className="small">{OBJETIVO_CONFIG[a.objetivo_fisico]?.icono || "📌"} {a.objetivo_fisico || "—"}</span></td>
-                          <td>{badgeNivel(a.nivel_experiencia)}</td>
-                          <td className="text-center">
-                            <span className="badge bg-light text-dark border">{a.disponibilidad_semanal_dias || "—"}d</span>
-                          </td>
-                          <td className="text-center">
-                            {numRestr(a) > 0
-                              ? <span className="badge bg-warning text-dark" title={a.restricciones.map((r) => r.nombre).join(", ")}>⚠️ {numRestr(a)}</span>
-                              : <span className="badge bg-success bg-opacity-10 text-success">✓</span>}
-                          </td>
-                          <td>
-                            {ciclo ? (
-                              <div className="small">
-                                <span className="badge bg-primary bg-opacity-10 text-primary mb-1">Ciclo {ciclo.numero_ciclo}</span>
-                                <div className="text-muted" style={{ fontSize: "0.72rem" }}>
-                                  {ciclo.plan_nutricional?.calorias_estimadas || "—"} kcal · {ciclo.plan_entrenamiento?.rutinas?.length || 0} rutinas
-                                </div>
-                              </div>
-                            ) : <span className="text-muted small">Sin ciclo</span>}
-                          </td>
-                          <td>{badgeEstado(a.estado)}</td>
-                          <td className="text-center pe-4">
-                            <div className="d-flex gap-1 justify-content-center">
-                              <button className="btn btn-outline-primary btn-sm" id={`btn-ver-${getId(a)}`}
-                                title="Ver detalle" onClick={() => setVerModal(a)}>👁</button>
-                              <button className="btn btn-outline-warning btn-sm" id={`btn-editar-${getId(a)}`}
-                                title="Editar" onClick={() => abrirEditar(a)}>✏️</button>
-                              <button className="btn btn-outline-danger btn-sm" id={`btn-eliminar-${getId(a)}`}
-                                title="Eliminar" onClick={() => setDeleteModal(a)}>🗑</button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-            {!loading && !error && (
-              <div className="card-footer bg-white text-muted small py-2 px-4 border-0">
-                Mostrando <strong>{filtrados.length}</strong> de <strong>{afiliados.length}</strong> afiliados
-              </div>
-            )}
-          </div>
+
+          <button
+            id="btn-refresh-dashboard"
+            className={`btn btn-sm btn-outline-secondary d-flex align-items-center gap-1 px-3 ${styles.refreshBtn}`}
+            onClick={cargarKPIs}
+            disabled={loading}
+          >
+            {loading ? (
+              <span className={`spinner-border spinner-border-sm me-1 ${styles.spinnerSm}`} />
+            ) : ("🔄")}
+            Actualizar datos
+          </button>
         </div>
-      </div>
 
-      {/* ═══════════════════════════════════════════════════════════════════════
-          MODAL: EDITAR AFILIADO
-      ═══════════════════════════════════════════════════════════════════════ */}
-      {editModal && (
-        <div className="modal d-block" style={{ background: "rgba(0,0,0,0.55)" }}
-          onClick={() => !savingEdit && setEditModal(null)}>
-          <div className="modal-dialog modal-lg modal-dialog-scrollable"
-            onClick={(e) => e.stopPropagation()}>
-            <div className="modal-content border-0 shadow">
-
-              {/* Header */}
-              <div className="modal-header text-white border-0"
-                style={{ background: "linear-gradient(135deg,#e94560,#c62a47)" }}>
-                <h5 className="modal-title">✏️ Editar — {nombreCompleto(editModal)}</h5>
-                <button type="button" className="btn-close btn-close-white"
-                  onClick={() => !savingEdit && setEditModal(null)} />
-              </div>
-
-              {/* Body */}
-              <form onSubmit={guardarEdicion}>
-                <div className="modal-body">
-                  {editError && (
-                    <div className="alert alert-danger py-2"><small>⚠️ {editError}</small></div>
-                  )}
-
-                  {/* ── Datos personales ── */}
-                  <h6 className="fw-bold text-muted text-uppercase small mb-3">👤 Datos personales</h6>
-                  <div className="row g-3 mb-4">
-                    <div className="col-md-6">
-                      <label className="form-label small fw-semibold">Nombres</label>
-                      <input className="form-control" value={formEdit.nombres} required
-                        onChange={(e) => setFormEdit({ ...formEdit, nombres: e.target.value })} />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label small fw-semibold">Apellidos</label>
-                      <input className="form-control" value={formEdit.apellidos} required
-                        onChange={(e) => setFormEdit({ ...formEdit, apellidos: e.target.value })} />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label small fw-semibold">Correo</label>
-                      <input type="email" className="form-control" value={formEdit.correo}
-                        onChange={(e) => setFormEdit({ ...formEdit, correo: e.target.value })} />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label small fw-semibold">Teléfono</label>
-                      <input className="form-control" value={formEdit.telefono}
-                        onChange={(e) => setFormEdit({ ...formEdit, telefono: e.target.value })} />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label small fw-semibold">Documento</label>
-                      <input className="form-control" value={formEdit.documento}
-                        onChange={(e) => setFormEdit({ ...formEdit, documento: e.target.value })} />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label small fw-semibold">Fecha de nacimiento</label>
-                      <input type="date" className="form-control" value={formEdit.fecha_nacimiento}
-                        onChange={(e) => setFormEdit({ ...formEdit, fecha_nacimiento: e.target.value })} />
-                    </div>
-                    <div className="col-md-4">
-                      <label className="form-label small fw-semibold">Sexo</label>
-                      <select className="form-select" value={formEdit.sexo}
-                        onChange={(e) => setFormEdit({ ...formEdit, sexo: e.target.value })}>
-                        <option>Masculino</option>
-                        <option>Femenino</option>
-                        <option>Otro</option>
-                      </select>
-                    </div>
-                    <div className="col-md-4">
-                      <label className="form-label small fw-semibold">Estatura (cm)</label>
-                      <input type="number" step="0.1" className="form-control" value={formEdit.estatura_cm}
-                        onChange={(e) => setFormEdit({ ...formEdit, estatura_cm: parseFloat(e.target.value) || "" })} />
-                    </div>
-                    <div className="col-md-4">
-                      <label className="form-label small fw-semibold">Estado</label>
-                      <select className="form-select" value={formEdit.estado}
-                        onChange={(e) => setFormEdit({ ...formEdit, estado: e.target.value })}>
-                        {ESTADOS.map((s) => <option key={s}>{s}</option>)}
-                      </select>
-                    </div>
-                    <div className="col-12">
-                      <label className="form-label small fw-semibold">Dirección</label>
-                      <input className="form-control" value={formEdit.direccion}
-                        onChange={(e) => setFormEdit({ ...formEdit, direccion: e.target.value })} />
-                    </div>
-                  </div>
-
-                  {/* ── Datos deportivos ── */}
-                  <h6 className="fw-bold text-muted text-uppercase small mb-3">🏋️ Datos deportivos</h6>
-                  <div className="row g-3">
-                    <div className="col-md-4">
-                      <label className="form-label small fw-semibold">Objetivo físico</label>
-                      <select className="form-select" value={formEdit.objetivo_fisico}
-                        onChange={(e) => setFormEdit({ ...formEdit, objetivo_fisico: e.target.value })}>
-                        {OBJETIVOS.map((o) => <option key={o}>{o}</option>)}
-                      </select>
-                    </div>
-                    <div className="col-md-4">
-                      <label className="form-label small fw-semibold">Nivel de experiencia</label>
-                      <select className="form-select" value={formEdit.nivel_experiencia}
-                        onChange={(e) => setFormEdit({ ...formEdit, nivel_experiencia: e.target.value })}>
-                        {NIVELES.map((n) => <option key={n}>{n}</option>)}
-                      </select>
-                    </div>
-                    <div className="col-md-4">
-                      <label className="form-label small fw-semibold">Días disponibles/sem</label>
-                      <input type="number" min="1" max="7" className="form-control"
-                        value={formEdit.disponibilidad_semanal_dias}
-                        onChange={(e) => setFormEdit({ ...formEdit, disponibilidad_semanal_dias: parseInt(e.target.value) || "" })} />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label small fw-semibold">Músculo prioritario</label>
-                      <input className="form-control" value={formEdit.grupo_muscular_prioritario}
-                        placeholder="Ej: Pecho, Glúteos..."
-                        onChange={(e) => setFormEdit({ ...formEdit, grupo_muscular_prioritario: e.target.value })} />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Footer */}
-                <div className="modal-footer border-0">
-                  <button type="button" className="btn btn-outline-secondary btn-sm"
-                    onClick={() => !savingEdit && setEditModal(null)} disabled={savingEdit}>
-                    Cancelar
-                  </button>
-                  <button type="submit" id="btn-guardar-edicion"
-                    className="btn btn-sm text-white fw-semibold px-4"
-                    style={{ background: "linear-gradient(135deg,#e94560,#c62a47)", border: "none" }}
-                    disabled={savingEdit}>
-                    {savingEdit
-                      ? <><span className="spinner-border spinner-border-sm me-2" />Guardando...</>
-                      : "💾 Guardar cambios"}
-                  </button>
-                </div>
-              </form>
-            </div>
+        {error && (
+          <div className="alert alert-danger py-2 mb-4">
+            <small>⚠️ {error}</small>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* ═══════════════════════════════════════════════════════════════════════
-          MODAL: CONFIRMAR ELIMINACIÓN
-      ═══════════════════════════════════════════════════════════════════════ */}
-      {deleteModal && (
-        <div className="modal d-block" style={{ background: "rgba(0,0,0,0.55)" }}
-          onClick={() => !deleting && setDeleteModal(null)}>
-          <div className="modal-dialog modal-sm" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-content border-0 shadow">
-              <div className="modal-header border-0 bg-danger text-white">
-                <h5 className="modal-title">🗑 Eliminar afiliado</h5>
-                <button type="button" className="btn-close btn-close-white"
-                  onClick={() => !deleting && setDeleteModal(null)} />
-              </div>
-              <div className="modal-body text-center py-4">
-                <p className="mb-1">¿Seguro que deseas eliminar a</p>
-                <strong>{nombreCompleto(deleteModal)}</strong>
-                <p className="text-muted small mt-2 mb-0">Esta acción no se puede deshacer.</p>
-              </div>
-              <div className="modal-footer border-0 justify-content-center gap-2">
-                <button className="btn btn-outline-secondary btn-sm px-4"
-                  onClick={() => setDeleteModal(null)} disabled={deleting}>
-                  Cancelar
-                </button>
-                <button id="btn-confirmar-eliminar"
-                  className="btn btn-danger btn-sm px-4 fw-semibold"
-                  onClick={confirmarEliminar} disabled={deleting}>
-                  {deleting
-                    ? <><span className="spinner-border spinner-border-sm me-1" />Eliminando...</>
-                    : "Sí, eliminar"}
-                </button>
-              </div>
-            </div>
+        {loading && !kpis ? (
+          <div className="text-center py-5">
+            <div className={`spinner-border text-primary ${styles.spinnerLg}`} />
+            <p className="text-muted mt-2 small">Cargando métricas de rendimiento...</p>
           </div>
-        </div>
-      )}
-
-      {/* ═══════════════════════════════════════════════════════════════════════
-          MODAL: VER DETALLE
-      ═══════════════════════════════════════════════════════════════════════ */}
-      {verModal && (
-        <div className="modal d-block" style={{ background: "rgba(0,0,0,0.5)" }}
-          onClick={() => setVerModal(null)}>
-          <div className="modal-dialog modal-lg modal-dialog-scrollable"
-            onClick={(e) => e.stopPropagation()}>
-            <div className="modal-content border-0 shadow">
-              <div className="modal-header text-white border-0"
-                style={{ background: "linear-gradient(135deg,#1a1a2e,#16213e)" }}>
-                <h5 className="modal-title">👤 {nombreCompleto(verModal)}</h5>
-                <button type="button" className="btn-close btn-close-white" onClick={() => setVerModal(null)} />
-              </div>
-              <div className="modal-body">
-                <div className="row g-3 mb-4">
-                  {[
-                    { label: "Correo",     valor: verModal.correo },
-                    { label: "Teléfono",   valor: verModal.telefono },
-                    { label: "Documento",  valor: verModal.documento },
-                    { label: "Estatura",   valor: verModal.estatura_cm ? `${verModal.estatura_cm} cm` : "—" },
-                    { label: "Sexo",       valor: verModal.sexo },
-                    { label: "Nacimiento", valor: verModal.fecha_nacimiento },
-                    { label: "Objetivo",   valor: verModal.objetivo_fisico },
-                    { label: "Nivel",      valor: verModal.nivel_experiencia },
-                    { label: "Días/sem",   valor: verModal.disponibilidad_semanal_dias },
-                    { label: "Músculo",    valor: verModal.grupo_muscular_prioritario || "—" },
-                  ].map((f) => (
-                    <div key={f.label} className="col-6 col-md-4">
-                      <small className="text-muted d-block text-uppercase fw-semibold" style={{ fontSize: "0.7rem" }}>{f.label}</small>
-                      <span className="small fw-semibold">{f.valor || "—"}</span>
-                    </div>
-                  ))}
-                </div>
-
-                {verModal.restricciones?.length > 0 && (
-                  <>
-                    <h6 className="fw-bold mb-2">⚠️ Restricciones</h6>
-                    {verModal.restricciones.map((r) => (
-                      <div key={r.id_restriccion} className="alert alert-warning py-2 mb-2">
-                        <strong>{r.nombre}</strong>
-                        <span className="badge bg-warning text-dark ms-2">{r.tipo}</span>
-                        {r.efecto_relevante && <div className="small mt-1 text-muted">{r.efecto_relevante}</div>}
-                      </div>
-                    ))}
-                  </>
-                )}
-
-                <h6 className="fw-bold mb-2">📅 Ciclos</h6>
-                {(verModal.ciclos || []).map((ciclo) => (
-                  <div key={ciclo.numero_ciclo} className="border rounded p-3 mb-3"
-                    style={{ borderLeft: ciclo.activo ? "4px solid #0d6efd" : "4px solid #dee2e6" }}>
-                    <div className="d-flex justify-content-between align-items-center mb-2">
-                      <strong>Ciclo {ciclo.numero_ciclo}</strong>
-                      {ciclo.activo
-                        ? <span className="badge bg-primary">Activo</span>
-                        : <span className="badge bg-secondary">Finalizado</span>}
-                    </div>
-                    <div className="small text-muted mb-2">
-                      {ciclo.fecha_inicio} → {ciclo.fecha_fin}
-                    </div>
-                    {ciclo.plan_nutricional && (
-                      <div className="small mb-1">
-                        🥗 <strong>{ciclo.plan_nutricional.calorias_estimadas} kcal</strong> · {ciclo.plan_nutricional.num_comidas_diarias} comidas/día
-                      </div>
-                    )}
-                    {ciclo.plan_entrenamiento?.rutinas?.length > 0 && (
-                      <div className="small">
-                        🏋️ {ciclo.plan_entrenamiento.rutinas.map((r) => (
-                          <span key={r.dia_numero} className="badge bg-light text-dark border me-1">{r.nombre}</span>
-                        ))}
-                      </div>
-                    )}
-                    {ciclo.progreso_fisico?.length > 0 && (() => {
-                      const u = ciclo.progreso_fisico.at(-1);
-                      return (
-                        <div className="small mt-2 text-muted">
-                          📈 Último: {u.peso_kg} kg · {u.porcentaje_grasa}% grasa · cintura {u.medidas_cm?.cintura} cm ({u.fecha_registro})
+        ) : (
+          kpis && (
+            <>
+              {/* Sección 1: Métricas de Membresía e Ingresos */}
+              <h5 className={`fw-bold mb-3 text-muted small text-uppercase ${styles.sectionLabel}`}>
+                💰 Rendimiento y Finanzas
+              </h5>
+              <div className="row g-3 mb-4">
+                {[
+                  {
+                    label: "Ingresos Totales",
+                    valor: `$${Number(kpis.ingresos).toLocaleString("es-CO")}`,
+                    icono: "💵",
+                    color: "#059669",
+                    bg: "#05966915",
+                    subtext: "Recaudo en efectivo",
+                  },
+                  {
+                    label: "Pagos Registrados",
+                    valor: kpis.pagos_registrados,
+                    icono: "🧾",
+                    color: "#2563eb",
+                    bg: "#2563eb15",
+                    subtext: "Transacciones realizadas",
+                  },
+                  {
+                    label: "Próximos Vencimientos",
+                    valor: kpis.proximos_vencimientos,
+                    icono: "📅",
+                    color: "#dc2626",
+                    bg: "#dc262615",
+                    subtext: "Membresías por expirar",
+                  },
+                ].map((kpi) => (
+                  <div key={kpi.label} className="col-12 col-md-4">
+                    <div className="card border-0 shadow-sm h-100">
+                      <div className="card-body d-flex align-items-center gap-3">
+                        {/* DINÁMICO: background y color vienen de kpi.bg / kpi.color (datos) */}
+                        <div className={styles.kpiIconWrap} style={{ background: kpi.bg, color: kpi.color }}>
+                          {kpi.icono}
                         </div>
-                      );
-                    })()}
+                        <div>
+                          {/* DINÁMICO: color del valor viene de kpi.color */}
+                          <div className="fw-bold fs-4 lh-1" style={{ color: kpi.color }}>
+                            {kpi.valor}
+                          </div>
+                          <div className={`fw-semibold text-dark small mt-1 ${styles.kpiLabel}`}>
+                            {kpi.label}
+                          </div>
+                          <small className={`text-muted ${styles.kpiSub}`}>
+                            {kpi.subtext}
+                          </small>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
-              <div className="modal-footer border-0">
-                <button className="btn btn-outline-warning btn-sm" onClick={() => { setVerModal(null); abrirEditar(verModal); }}>
-                  ✏️ Editar este afiliado
-                </button>
-                <button className="btn btn-secondary btn-sm" onClick={() => setVerModal(null)}>Cerrar</button>
+
+              {/* Sección 2: Afiliados y Personal */}
+              <h5 className={`fw-bold mb-3 text-muted small text-uppercase ${styles.sectionLabel}`}>
+                👥 Control de Afiliados y Staff
+              </h5>
+              <div className="row g-3 mb-4">
+                {[
+                  {
+                    label: "Total Afiliados",
+                    valor: kpis.total_afiliados,
+                    icono: "👥",
+                    color: "#4b9ecb",
+                    bg: "#4b9ecb15",
+                    sub: `${kpis.afiliados_activos} activos / ${kpis.afiliados_inactivos} inactivos`,
+                  },
+                  {
+                    label: "Entrenadores",
+                    valor: kpis.entrenadores,
+                    icono: "🏆",
+                    color: "#0891b2",
+                    bg: "#0891b215",
+                    sub: "Gestión de rutinas/dietas",
+                  },
+                  {
+                    label: "Recepcionistas",
+                    valor: kpis.recepcionistas,
+                    icono: "🗂️",
+                    color: "#4f46e5",
+                    bg: "#4f46e515",
+                    sub: "Gestión de caja y acceso",
+                  },
+                  {
+                    label: "Ciclos Activos",
+                    valor: kpis.ciclos_en_curso,
+                    icono: "🔄",
+                    color: "#ea580c",
+                    bg: "#ea580c15",
+                    sub: "Rutinas/dietas asignadas",
+                  },
+                  {
+                    label: "Con Restricciones",
+                    valor: kpis.con_restricciones,
+                    icono: "⚠️",
+                    color: "#ca8a04",
+                    bg: "#ca8a0415",
+                    sub: "Afiliados con cuidado especial",
+                  },
+                ].map((kpi) => (
+                  <div key={kpi.label} className="col-6 col-md">
+                    <div className="card border-0 shadow-sm h-100 text-center py-3">
+                      <div className="card-body p-2 d-flex flex-column align-items-center">
+                        {/* DINÁMICO: background y color vienen de kpi.bg / kpi.color (datos) */}
+                        <div className={styles.kpiSmIcon} style={{ background: kpi.bg, color: kpi.color }}>
+                          {kpi.icono}
+                        </div>
+                        <div className="fw-bold fs-4 text-dark">{kpi.valor}</div>
+                        <div className={`fw-semibold text-muted mt-1 ${styles.kpiSmLabel}`}>{kpi.label}</div>
+                        <small className={`text-muted mt-1 ${styles.kpiSmSub}`}>{kpi.sub}</small>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+
+              {/* Sección 3: Distribución y Estado Operativo */}
+              <div className="row g-3">
+                {/* Distribución por objetivo */}
+                <div className="col-md-6">
+                  <div className="card border-0 shadow-sm h-100">
+                    <div className="card-header bg-white border-0 py-3">
+                      <h6 className={`fw-bold mb-0 text-muted small text-uppercase ${styles.cardSectionLabel}`}>
+                        🎯 Distribución por Objetivo Físico (Ciclos Activos)
+                      </h6>
+                    </div>
+                    <div className="card-body pt-0">
+                      {kpis.por_objetivo?.length === 0 ? (
+                        <p className="text-muted small text-center py-4">No hay ciclos de entrenamiento activos.</p>
+                      ) : (
+                        <div className="d-flex flex-column gap-3 mt-2">
+                          {kpis.por_objetivo?.map((obj) => {
+                            const total = kpis.ciclos_en_curso || 1;
+                            const pct = Math.round((obj.cantidad * 100) / total);
+                            const colors = {
+                              "Perdida de grasa": "#e94560",
+                              "Aumento de masa": "#2563eb",
+                              "Mantenimiento": "#059669",
+                              "Rehabilitación": "#ea580c",
+                            };
+                            const col = colors[obj.objetivo] || "#4b9ecb";
+                            return (
+                              <div key={obj.objetivo}>
+                                <div className="d-flex justify-content-between small fw-semibold text-muted mb-1">
+                                  <span>{obj.objetivo}</span>
+                                  <span>
+                                    {obj.cantidad} ({pct}%)
+                                  </span>
+                                </div>
+                                {/* DINÁMICO: width viene de pct calculado; background viene de col (dato) */}
+                                <div className={`progress ${styles.progressBar}`}>
+                                  <div className="progress-bar rounded-pill"
+                                    style={{ width: `${pct}%`, background: col }} />
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Resumen del Staff */}
+                <div className="col-md-6">
+                  <div className="card border-0 shadow-sm h-100">
+                    <div className="card-header bg-white border-0 py-3">
+                      <h6 className={`fw-bold mb-0 text-muted small text-uppercase ${styles.cardSectionLabel}`}>
+                        ⚡ Estado Operativo del Staff
+                      </h6>
+                    </div>
+                    <div className="card-body pt-0">
+                      <div className="list-group list-group-flush">
+                        <div className="list-group-item border-0 px-0 d-flex justify-content-between align-items-center">
+                          <div>
+                            <div className="fw-semibold small">Membresía General Única</div>
+                            <small className="text-muted">Valor mensual estandarizado</small>
+                          </div>
+                          <span className="badge bg-success bg-opacity-10 text-success fw-bold fs-6">
+                            $80.000 COP
+                          </span>
+                        </div>
+                        <div className="list-group-item border-0 px-0 d-flex justify-content-between align-items-center">
+                          <div>
+                            <div className="fw-semibold small">Tipo de Pagos</div>
+                            <small className="text-muted">Medio de recaudo autorizado</small>
+                          </div>
+                          <span className="badge bg-primary bg-opacity-10 text-primary fw-bold">
+                            Efectivo únicamente
+                          </span>
+                        </div>
+                        <div className="list-group-item border-0 px-0 d-flex justify-content-between align-items-center">
+                          <div>
+                            <div className="fw-semibold small">Capacidad Operativa</div>
+                            <small className="text-muted">Total de empleados registrados</small>
+                          </div>
+                          <span className="badge bg-dark bg-opacity-10 text-dark fw-bold">
+                            {Number(kpis.entrenadores) + Number(kpis.recepcionistas)} personas
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          )
+        )}
+      </div>
+    </AppLayout>
   );
 }

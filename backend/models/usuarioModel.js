@@ -3,7 +3,7 @@
 'use strict';
 
 const pool                   = require('../config/db');
-const { hashPassword }       = require('../middlewares/auth');
+const { hashPassword }       = require('../services/authService');
 
 const UsuarioModel = {
 
@@ -24,6 +24,7 @@ const UsuarioModel = {
       `SELECT id_usuario, nombres, apellidos, correo,
               rol, estado, fecha_registro
        FROM USUARIO
+       WHERE rol != 'Afiliado'
        ORDER BY rol, nombres`
     );
     return rows;

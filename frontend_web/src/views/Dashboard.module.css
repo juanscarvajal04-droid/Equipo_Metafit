@@ -1,0 +1,97 @@
+/* frontend_web/src/views/Dashboard.module.css */
+
+
+
+/* ── Encabezado ── */
+.titleIcon {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #4b9ecb, #2d7db5);
+  border-radius: 6px;
+  font-size: 1.1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.refreshBtn {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.spinnerSm {
+  width: 12px;
+  height: 12px;
+}
+
+/* ── Spinners de carga ── */
+.spinnerLg {
+  width: 3rem;
+  height: 3rem;
+}
+
+/* ── Sección headers ── */
+.sectionLabel {
+  letter-spacing: 0.06em;
+}
+
+/* ── Cards de KPI ── */
+/* Los colores de los KPI son dinámicos (vienen de datos) → inline en el JSX */
+.kpiIconWrap {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  /* background y color son DINÁMICOS → inline */
+}
+
+.kpiLabel {
+  font-size: 0.8rem;
+}
+
+.kpiSub {
+  font-size: 0.68rem;
+}
+
+/* ── Cards secundarias (Afiliados/Staff) ── */
+.kpiSmIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+  font-size: 1.1rem;
+  /* background y color DINÁMICOS → inline */
+}
+
+.kpiSmLabel {
+  font-size: 0.75rem;
+}
+
+.kpiSmSub {
+  font-size: 0.62rem;
+}
+
+/* ── Barra de progreso ── */
+.progressBar {
+  height: 6px;
+}
+
+/* ── Card section headers ── */
+.cardSectionLabel {
+  letter-spacing: 0.06em;
+}
+
+/* ── Toast de notificación ── */
+.toast {
+  z-index: 9999;
+  min-width: 300px;
+}

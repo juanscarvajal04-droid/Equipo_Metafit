@@ -1,6 +1,7 @@
 import Sidebar from "./Sidebar";
 import Header  from "./Header";
 import Footer  from "./Footer";
+import styles from "./AppLayout.module.css";
 
 /**
  * AppLayout — wrapper global con Sidebar + columna derecha (Header + content + Footer)
@@ -16,18 +17,18 @@ import Footer  from "./Footer";
  */
 export default function AppLayout({ children }) {
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "#f4f6f9" }}>
+    <div className={styles.root}>
       {/* Sidebar fijo a la izquierda */}
       <Sidebar />
 
       {/* Columna derecha: Header sticky + contenido + Footer */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, overflowX: "hidden" }}>
+      <div className={styles.rightCol}>
 
         {/* Header sticky — dentro de la columna, NO sobre el sidebar */}
         <Header />
 
         {/* Contenido de la página — hace scroll independiente */}
-        <main style={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
+        <main className={styles.main}>
           {children}
         </main>
 

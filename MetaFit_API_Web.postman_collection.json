@@ -1,0 +1,1003 @@
+{
+  "info": {
+    "name": "MetaFit API - Web",
+    "description": "Colección para el panel web de MetaFit (Staff: Admin, Recepcionista, Entrenador). Autenticación heredada vía Bearer token.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "MetaFit"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "🔐 Auth",
+      "item": [
+        {
+          "name": "Login Admin",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"carlos@metafit.com\",\n  \"password\": \"{{password_admin}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": ["{{base_url}}"],
+              "path": ["login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var json = pm.response.json();",
+                  "    pm.environment.set(\"token\", json.accessToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login Recepcionista",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"maria@metafit.com\",\n  \"password\": \"{{password_recepcionista}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": ["{{base_url}}"],
+              "path": ["login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var json = pm.response.json();",
+                  "    pm.environment.set(\"token\", json.accessToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login Entrenador",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"laura@metafit.com\",\n  \"password\": \"{{password_entrenador}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": ["{{base_url}}"],
+              "path": ["login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var json = pm.response.json();",
+                  "    pm.environment.set(\"token\", json.accessToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "👥 Usuarios / Personal",
+      "item": [
+        {
+          "name": "Listar Usuarios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usuarios",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios"]
+            }
+          }
+        },
+        {
+          "name": "Listar Recepcionistas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usuarios/recepcionistas",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios", "recepcionistas"]
+            }
+          }
+        },
+        {
+          "name": "Obtener Usuario por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usuarios/1",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios", "1"]
+            }
+          }
+        },
+        {
+          "name": "Crear Usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Nuevo\",\n  \"apellidos\": \"Empleado\",\n  \"correo\": \"nuevo@metafit.com\",\n  \"contrasena\": \"Temp1234\",\n  \"rol\": \"Recepcionista\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/usuarios",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar Usuario",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Nombre Actualizado\",\n  \"estado\": \"Activo\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/usuarios/1",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios", "1"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar Usuario",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usuarios/10",
+              "host": ["{{base_url}}"],
+              "path": ["usuarios", "10"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🧑‍🤝‍🧑 Afiliados",
+      "item": [
+        {
+          "name": "Listar Afiliados",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/afiliados",
+              "host": ["{{base_url}}"],
+              "path": ["afiliados"]
+            }
+          }
+        },
+        {
+          "name": "Obtener Afiliado por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/afiliados/{{id_afiliado_test}}",
+              "host": ["{{base_url}}"],
+              "path": ["afiliados", "{{id_afiliado_test}}"]
+            }
+          }
+        },
+        {
+          "name": "Crear Afiliado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Nuevo\",\n  \"apellidos\": \"Afiliado\",\n  \"correo\": \"nuevo.afiliado@email.com\",\n  \"contrasena\": \"MetaFit2025!\",\n  \"documento\": 1009999999,\n  \"fecha_nacimiento\": \"1995-05-15\",\n  \"sexo\": \"Masculino\",\n  \"telefono\": \"3009999999\",\n  \"direccion\": \"Calle Principal\",\n  \"estatura_cm\": 170.0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/afiliados",
+              "host": ["{{base_url}}"],
+              "path": ["afiliados"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar Afiliado",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"telefono\": \"3008888888\",\n  \"direccion\": \"Nueva dirección\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/afiliados/{{id_afiliado_test}}",
+              "host": ["{{base_url}}"],
+              "path": ["afiliados", "{{id_afiliado_test}}"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar Afiliado",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/afiliados/99",
+              "host": ["{{base_url}}"],
+              "path": ["afiliados", "99"]
+            }
+          }
+        },
+        {
+          "name": "🔄 Ciclos",
+          "item": [
+            {
+              "name": "Listar Ciclos de Afiliado",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/afiliados/{{id_afiliado_test}}/ciclos",
+                  "host": ["{{base_url}}"],
+                  "path": ["afiliados", "{{id_afiliado_test}}", "ciclos"]
+                }
+              }
+            },
+            {
+              "name": "Crear Ciclo",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id_usuario\": {{id_afiliado_test}},\n  \"fecha_inicio\": \"2026-07-01\",\n  \"fecha_fin\": \"2026-09-30\",\n  \"objetivo_fisico\": \"Aumento de masa\",\n  \"nivel_experiencia\": \"Intermedio\",\n  \"disponibilidad_dias\": 4\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/afiliados/ciclos",
+                  "host": ["{{base_url}}"],
+                  "path": ["afiliados", "ciclos"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "⚠️ Restricciones",
+          "item": [
+            {
+              "name": "Listar Restricciones de Afiliado",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/afiliados/{{id_afiliado_test}}/restricciones",
+                  "host": ["{{base_url}}"],
+                  "path": ["afiliados", "{{id_afiliado_test}}", "restricciones"]
+                }
+              }
+            },
+            {
+              "name": "Asignar Restriccion",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id_restriccion\": 3\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/afiliados/{{id_afiliado_test}}/restricciones",
+                  "host": ["{{base_url}}"],
+                  "path": ["afiliados", "{{id_afiliado_test}}", "restricciones"]
+                }
+              }
+            },
+            {
+              "name": "Remover Restriccion",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/afiliados/{{id_afiliado_test}}/restricciones/3",
+                  "host": ["{{base_url}}"],
+                  "path": ["afiliados", "{{id_afiliado_test}}", "restricciones", "3"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "📈 Progreso",
+          "item": [
+            {
+              "name": "Listar Progreso de Afiliado",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/afiliados/{{id_afiliado_test}}/progreso",
+                  "host": ["{{base_url}}"],
+                  "path": ["afiliados", "{{id_afiliado_test}}", "progreso"]
+                }
+              }
+            },
+            {
+              "name": "Registrar Progreso",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id_ciclo\": {{id_ciclo_test}},\n  \"fecha_registro\": \"2026-06-23\",\n  \"peso_kg\": 78.5,\n  \"porcentaje_grasa\": 20.0,\n  \"medida_cintura\": 85.0,\n  \"medida_brazo\": 34.0,\n  \"medida_pierna\": 56.0\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/afiliados/progreso",
+                  "host": ["{{base_url}}"],
+                  "path": ["afiliados", "progreso"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "🏋️‍♂️ Catalogos Filtrados",
+          "item": [
+            {
+              "name": "Ejercicios Disponibles para Afiliado",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/afiliados/{{id_afiliado_test}}/ejercicios-disponibles",
+                  "host": ["{{base_url}}"],
+                  "path": ["afiliados", "{{id_afiliado_test}}", "ejercicios-disponibles"]
+                }
+              }
+            },
+            {
+              "name": "Alimentos Disponibles para Afiliado",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/afiliados/{{id_afiliado_test}}/alimentos-disponibles",
+                  "host": ["{{base_url}}"],
+                  "path": ["afiliados", "{{id_afiliado_test}}", "alimentos-disponibles"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "💳 Pagos",
+          "item": [
+            {
+              "name": "Historial de Pagos de Afiliado",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/afiliados/{{id_afiliado_test}}/pagos",
+                  "host": ["{{base_url}}"],
+                  "path": ["afiliados", "{{id_afiliado_test}}", "pagos"]
+                }
+              }
+            },
+            {
+              "name": "Registrar Pago",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fecha_pago\": \"2026-06-23\",\n  \"valor_pagado\": 80000,\n  \"estado\": \"Pagado\",\n  \"fecha_vencimiento\": \"2026-07-23\",\n  \"observaciones\": \"Pago mensual junio\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/afiliados/{{id_afiliado_test}}/pagos",
+                  "host": ["{{base_url}}"],
+                  "path": ["afiliados", "{{id_afiliado_test}}", "pagos"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "📋 Catalogos",
+      "item": [
+        {
+          "name": "Listar Ejercicios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/catalogo/ejercicios",
+              "host": ["{{base_url}}"],
+              "path": ["catalogo", "ejercicios"]
+            }
+          }
+        },
+        {
+          "name": "Crear Ejercicio",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre_ejercicio\": \"Nuevo Ejercicio\",\n  \"grupo_muscular\": \"Piernas\",\n  \"nivel_minimo\": \"Intermedio\",\n  \"descripcion\": null\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/catalogo/ejercicios",
+              "host": ["{{base_url}}"],
+              "path": ["catalogo", "ejercicios"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar Ejercicio",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre_ejercicio\": \"Ejercicio Actualizado\",\n  \"grupo_muscular\": \"Pecho\",\n  \"nivel_minimo\": \"Avanzado\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/catalogo/ejercicios/1",
+              "host": ["{{base_url}}"],
+              "path": ["catalogo", "ejercicios", "1"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar Ejercicio",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/catalogo/ejercicios/99",
+              "host": ["{{base_url}}"],
+              "path": ["catalogo", "ejercicios", "99"]
+            }
+          }
+        },
+        {
+          "name": "Listar Alimentos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/catalogo/alimentos",
+              "host": ["{{base_url}}"],
+              "path": ["catalogo", "alimentos"]
+            }
+          }
+        },
+        {
+          "name": "Crear Alimento",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre_alimento\": \"Nuevo Alimento\",\n  \"proteinas\": 20.0,\n  \"carbohidratos\": 30.0,\n  \"grasas\": 5.0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/catalogo/alimentos",
+              "host": ["{{base_url}}"],
+              "path": ["catalogo", "alimentos"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar Alimento",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre_alimento\": \"Alimento Actualizado\",\n  \"proteinas\": 25.0,\n  \"carbohidratos\": 10.0,\n  \"grasas\": 8.0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/catalogo/alimentos/1",
+              "host": ["{{base_url}}"],
+              "path": ["catalogo", "alimentos", "1"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar Alimento",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/catalogo/alimentos/99",
+              "host": ["{{base_url}}"],
+              "path": ["catalogo", "alimentos", "99"]
+            }
+          }
+        },
+        {
+          "name": "Listar Restricciones",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/catalogo/restricciones",
+              "host": ["{{base_url}}"],
+              "path": ["catalogo", "restricciones"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏋️ Planes",
+      "item": [
+        {
+          "name": "Obtener Plan de Entrenamiento",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/planes/entrenamiento/{{id_ciclo_test}}",
+              "host": ["{{base_url}}"],
+              "path": ["planes", "entrenamiento", "{{id_ciclo_test}}"]
+            }
+          }
+        },
+        {
+          "name": "Crear Plan de Entrenamiento",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_ciclo\": {{id_ciclo_test}},\n  \"observaciones\": null\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/planes/entrenamiento",
+              "host": ["{{base_url}}"],
+              "path": ["planes", "entrenamiento"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar Plan de Entrenamiento",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"observaciones\": \"Plan actualizado\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/planes/entrenamiento/2",
+              "host": ["{{base_url}}"],
+              "path": ["planes", "entrenamiento", "2"]
+            }
+          }
+        },
+        {
+          "name": "Crear Rutina",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_ciclo\": {{id_ciclo_test}},\n  \"nombre_rutina\": \"Nueva Rutina\",\n  \"enfoque_muscular\": \"Piernas\",\n  \"dia_numero\": 5\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/planes/rutinas",
+              "host": ["{{base_url}}"],
+              "path": ["planes", "rutinas"]
+            }
+          }
+        },
+        {
+          "name": "Agregar Ejercicio a Rutina",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_ejercicio\": 1,\n  \"series\": 4,\n  \"repeticiones\": 12,\n  \"orden\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/planes/rutinas/1/ejercicios",
+              "host": ["{{base_url}}"],
+              "path": ["planes", "rutinas", "1", "ejercicios"]
+            }
+          }
+        },
+        {
+          "name": "Quitar Ejercicio de Rutina",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/planes/rutinas/1/ejercicios/99",
+              "host": ["{{base_url}}"],
+              "path": ["planes", "rutinas", "1", "ejercicios", "99"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar Rutina",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/planes/rutinas/99",
+              "host": ["{{base_url}}"],
+              "path": ["planes", "rutinas", "99"]
+            }
+          }
+        },
+        {
+          "name": "Obtener Plan Nutricional",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/planes/nutricional/{{id_ciclo_test}}",
+              "host": ["{{base_url}}"],
+              "path": ["planes", "nutricional", "{{id_ciclo_test}}"]
+            }
+          }
+        },
+        {
+          "name": "Crear Plan Nutricional",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_ciclo\": {{id_ciclo_test}},\n  \"calorias_objetivo\": 2200.0,\n  \"num_comidas\": 5\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/planes/nutricional",
+              "host": ["{{base_url}}"],
+              "path": ["planes", "nutricional"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar Plan Nutricional",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"calorias_objetivo\": 2400.0,\n  \"num_comidas\": 4\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/planes/nutricional/2",
+              "host": ["{{base_url}}"],
+              "path": ["planes", "nutricional", "2"]
+            }
+          }
+        },
+        {
+          "name": "Agregar Alimento a Plan Nutricional",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_alimento\": 1,\n  \"num_comida\": 2,\n  \"cantidad_g\": 200.0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/planes/nutricional/{{id_ciclo_test}}/detalle",
+              "host": ["{{base_url}}"],
+              "path": ["planes", "nutricional", "{{id_ciclo_test}}", "detalle"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📊 Dashboard",
+      "item": [
+        {
+          "name": "Obtener KPIs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/dashboard/kpis",
+              "host": ["{{base_url}}"],
+              "path": ["dashboard", "kpis"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "💳 Pagos Admin",
+      "item": [
+        {
+          "name": "Listar Todos los Pagos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/pagos",
+              "host": ["{{base_url}}"],
+              "path": ["pagos"]
+            }
+          }
+        },
+        {
+          "name": "Metricas de Pagos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/pagos/metricas",
+              "host": ["{{base_url}}"],
+              "path": ["pagos", "metricas"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "⚙️ Configuracion",
+      "item": [
+        {
+          "name": "Obtener Precio Membresia",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/configuracion/precio-membresia",
+              "host": ["{{base_url}}"],
+              "path": ["configuracion", "precio-membresia"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar Precio Membresia",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"precio\": 90000\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/configuracion/precio-membresia",
+              "host": ["{{base_url}}"],
+              "path": ["configuracion", "precio-membresia"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔔 Notificaciones",
+      "item": [
+        {
+          "name": "Listar Notificaciones",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/notificaciones",
+              "host": ["{{base_url}}"],
+              "path": ["notificaciones"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🟢 Health Check",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

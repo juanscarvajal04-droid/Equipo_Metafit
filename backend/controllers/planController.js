@@ -90,6 +90,16 @@ const PlanController = {
     }
   },
 
+  deleteRutina: async (req, res) => {
+    try {
+      await PlanModel.deleteRutina(req.params.id_rutina);
+      res.json({ message: 'Rutina eliminada correctamente' });
+    } catch (err) {
+      console.error('[planController.deleteRutina]', err);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
   // ── PLAN NUTRICIONAL ──────────────────────────────────────
   getNutricional: async (req, res) => {
     try {
@@ -120,6 +130,24 @@ const PlanController = {
       if (err.code === 'ER_DUP_ENTRY')
         return res.status(400).json({ error: 'Este ciclo ya tiene un plan nutricional' });
       console.error('[planController.createNutricional]', err);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
+  updateNutricional: async (req, res) => {
+    const calorias_objetivo = req.body.calorias_objetivo || req.body.calorias_estimadas;
+    const num_comidas       = req.body.num_comidas || req.body.num_comidas_diarias;
+    const observaciones     = req.body.observaciones;
+    if (!calorias_objetivo || !num_comidas)
+      return res.status(400).json({ error: 'calorias_objetivo y num_comidas son requeridos' });
+    try {
+      await PlanModel.updateNutricional(
+        req.params.id, { calorias_objetivo, num_comidas, observaciones }, req.user.sub
+      );
+      await PlanModel.clearDetalleNutricional(req.params.id);
+      res.json({ message: 'Plan nutricional actualizado' });
+    } catch (err) {
+      console.error('[planController.updateNutricional]', err);
       res.status(500).json({ error: 'Error interno del servidor' });
     }
   },

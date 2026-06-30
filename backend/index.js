@@ -24,6 +24,8 @@ app.listen(PORT, () => {
   console.log('║  GET     /afiliados/:id/ciclos                       ║');
   console.log('║  POST    /afiliados/ciclos                           ║');
   console.log('║  GET     /afiliados/:id/restricciones                ║');
+  console.log('║  GET     /afiliados/:id/ejercicios-disponibles       ║');
+  console.log('║  GET     /afiliados/:id/alimentos-disponibles        ║');
   console.log('║  GET     /afiliados/:id/progreso                     ║');
   console.log('║  POST    /afiliados/progreso                         ║');
   console.log('║  GET     /planes/entrenamiento/:id_ciclo             ║');
@@ -31,10 +33,14 @@ app.listen(PORT, () => {
   console.log('║  POST    /planes/rutinas                             ║');
   console.log('║  GET     /planes/nutricional/:id_ciclo               ║');
   console.log('║  POST    /planes/nutricional                         ║');
-  console.log('║  GET     /660/ejercicios                             ║');
-  console.log('║  GET     /660/alimentos                              ║');
-  console.log('║  GET     /660/restricciones                          ║');
-  console.log('║  GET     /dashboard/kpis        (Admin)              ║');
+  console.log('║  GET     /catalogo/ejercicios                        ║');
+  console.log('║  GET     /catalogo/alimentos                         ║');
+  console.log('║  GET     /catalogo/restricciones                     ║');
+  console.log('║  GET|PUT /configuracion/precio-membresia (Admin)    ║');
+  console.log('║  GET     /notificaciones                             ║');
+    console.log('║  GET     /dashboard/kpis        (Admin)              ║');
+  console.log('║  GET     /pagos                 (Admin)              ║');
+  console.log('║  GET     /pagos/metricas        (Admin)              ║');
   console.log('║  GET     /health                                     ║');
   console.log('╚══════════════════════════════════════════════════════╝');
   console.log('');

@@ -4,7 +4,7 @@
 const express              = require('express');
 const router               = express.Router();
 const AfiliadoController   = require('../controllers/afiliadoController');
-const { requireAuth, requireAdmin, requireAdminOrEntrenador } = require('../middlewares/auth');
+const { requireAuth, requireAdmin, requireAdminOrEntrenador, requireStaff } = require('../middlewares/auth');
 
 /**
  * @swagger
@@ -43,7 +43,92 @@ const { requireAuth, requireAdmin, requireAdminOrEntrenador } = require('../midd
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.get('/', requireAuth, AfiliadoController.getAll);
+router.get('/', requireAuth, requireStaff, AfiliadoController.getAll);
+
+/**
+ * @swagger
+ * /afiliados/me:
+ *   get:
+ *     summary: Obtener mi perfil (afiliado autenticado)
+ *     description: Usa automáticamente el id del token JWT. No requiere parámetro :id.
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Perfil completo del afiliado autenticado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Afiliado'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.get('/me', requireAuth, AfiliadoController.getMe);
+
+/**
+ * @swagger
+ * /afiliados/me/ciclos:
+ *   get:
+ *     summary: Obtener mis ciclos (afiliado autenticado)
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de ciclos del afiliado autenticado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Ciclo'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.get('/me/ciclos', requireAuth, AfiliadoController.getMisCiclos);
+
+/**
+ * @swagger
+ * /afiliados/me/progreso:
+ *   get:
+ *     summary: Obtener mi progreso físico (afiliado autenticado)
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de registros de progreso del afiliado autenticado
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.get('/me/progreso', requireAuth, AfiliadoController.getMiProgreso);
+
+/**
+ * @swagger
+ * /afiliados/me/restricciones:
+ *   get:
+ *     summary: Obtener mis restricciones médicas (afiliado autenticado)
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de restricciones activas del afiliado autenticado
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.get('/me/restricciones', requireAuth, AfiliadoController.getMisRestricciones);
 
 /**
  * @swagger
@@ -70,7 +155,7 @@ router.get('/', requireAuth, AfiliadoController.getAll);
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.get('/:id', requireAuth, AfiliadoController.getById);
+router.get('/:id', requireAuth, requireStaff, AfiliadoController.getById);
 
 /**
  * @swagger
@@ -173,7 +258,7 @@ router.patch('/:id', requireAuth, AfiliadoController.update);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  *             example:
- *               error: No se puede eliminar: el afiliado tiene datos asociados
+ *               error: 'No se puede eliminar: el afiliado tiene datos asociados'
  *       401:
  *         $ref: '#/components/responses/Unauthorized'
  *       403:
@@ -183,7 +268,7 @@ router.patch('/:id', requireAuth, AfiliadoController.update);
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.delete('/:id', requireAdmin, AfiliadoController.delete);
+router.delete('/:id', requireAuth, requireAdmin, AfiliadoController.delete);
 
 // ─────────────────────────────────────────────────────────────
 // CICLOS
@@ -242,8 +327,12 @@ router.get('/:id/ciclos', requireAuth, AfiliadoController.getCiclos);
  *               objetivo_fisico:             { type: string, enum: [Perdida de grasa, Aumento de masa, Mantenimiento, Rehabilitacion] }
  *               nivel_experiencia:           { type: string, enum: [Principiante, Intermedio, Avanzado] }
  *               disponibilidad_dias:         { type: integer, minimum: 1, maximum: 7 }
- *               grupo_muscular_prioritario:  { type: string, nullable: true }
- *               observaciones:               { type: string, nullable: true }
+ *               grupo_muscular_prioritario:
+ *                 type: string
+ *                 nullable: true
+ *               observaciones:
+ *                 type: string
+ *                 nullable: true
  *     responses:
  *       201:
  *         description: Ciclo creado correctamente
@@ -269,7 +358,7 @@ router.get('/:id/ciclos', requireAuth, AfiliadoController.getCiclos);
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.post('/ciclos', requireAdminOrEntrenador, AfiliadoController.createCiclo);
+router.post('/ciclos', requireAuth, requireAdminOrEntrenador, AfiliadoController.createCiclo);
 
 // ─────────────────────────────────────────────────────────────
 // RESTRICCIONES MÉDICAS
@@ -330,7 +419,7 @@ router.get('/:id/restricciones', requireAuth, AfiliadoController.getRestriccione
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.post('/:id/restricciones', requireAdminOrEntrenador, AfiliadoController.addRestriccion);
+router.post('/:id/restricciones', requireAuth, requireAdminOrEntrenador, AfiliadoController.addRestriccion);
 
 /**
  * @swagger
@@ -357,7 +446,51 @@ router.post('/:id/restricciones', requireAdminOrEntrenador, AfiliadoController.a
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.delete('/:id/restricciones/:id_restriccion', requireAdminOrEntrenador, AfiliadoController.removeRestriccion);
+router.delete('/:id/restricciones/:id_restriccion', requireAuth, requireAdminOrEntrenador, AfiliadoController.removeRestriccion);
+
+// ─────────────────────────────────────────────────────────────
+// CATÁLOGOS FILTRADOS POR RESTRICCIONES DEL AFILIADO
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * @swagger
+ * /afiliados/{id}/ejercicios-disponibles:
+ *   get:
+ *     summary: Ejercicios disponibles para el afiliado (excluye los prohibidos por sus restricciones)
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/idParam'
+ *     responses:
+ *       200:
+ *         description: Lista de ejercicios permitidos para el afiliado
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.get('/:id/ejercicios-disponibles', requireAuth, AfiliadoController.getEjerciciosDisponibles);
+
+/**
+ * @swagger
+ * /afiliados/{id}/alimentos-disponibles:
+ *   get:
+ *     summary: Alimentos disponibles para el afiliado (excluye los prohibidos por sus restricciones)
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/idParam'
+ *     responses:
+ *       200:
+ *         description: Lista de alimentos permitidos para el afiliado
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.get('/:id/alimentos-disponibles', requireAuth, AfiliadoController.getAlimentosDisponibles);
 
 // ─────────────────────────────────────────────────────────────
 // PROGRESO FÍSICO
@@ -388,10 +521,18 @@ router.delete('/:id/restricciones/:id_restriccion', requireAdminOrEntrenador, Af
  *                   fecha_registro:   { type: string, format: date }
  *                   peso_kg:          { type: number, example: 75.5 }
  *                   imc:              { type: number, example: 24.8, description: 'Calculado: peso_kg / (estatura_cm/100)²' }
- *                   porcentaje_grasa: { type: number, nullable: true }
- *                   medida_cintura:   { type: number, nullable: true }
- *                   medida_brazo:     { type: number, nullable: true }
- *                   medida_pierna:    { type: number, nullable: true }
+ *                   porcentaje_grasa:
+ *                     type: number
+ *                     nullable: true
+ *                   medida_cintura:
+ *                     type: number
+ *                     nullable: true
+ *                   medida_brazo:
+ *                     type: number
+ *                     nullable: true
+ *                   medida_pierna:
+ *                     type: number
+ *                     nullable: true
  *       401:
  *         $ref: '#/components/responses/Unauthorized'
  *       500:
@@ -418,11 +559,25 @@ router.get('/:id/progreso', requireAuth, AfiliadoController.getProgreso);
  *               id_ciclo:         { type: integer,  example: 1 }
  *               fecha_registro:   { type: string,   format: date, example: '2025-02-15' }
  *               peso_kg:          { type: number,   example: 75.5 }
- *               porcentaje_grasa: { type: number,   nullable: true, example: 18.5 }
- *               medida_cintura:   { type: number,   nullable: true, example: 82.0 }
- *               medida_brazo:     { type: number,   nullable: true, example: 35.0 }
- *               medida_pierna:    { type: number,   nullable: true, example: 55.0 }
- *               observaciones:    { type: string,   nullable: true }
+ *               porcentaje_grasa:
+ *                 type: number
+ *                 nullable: true
+ *                 example: 18.5
+ *               medida_cintura:
+ *                 type: number
+ *                 nullable: true
+ *                 example: 82.0
+ *               medida_brazo:
+ *                 type: number
+ *                 nullable: true
+ *                 example: 35.0
+ *               medida_pierna:
+ *                 type: number
+ *                 nullable: true
+ *                 example: 55.0
+ *               observaciones:
+ *                 type: string
+ *                 nullable: true
  *     responses:
  *       201:
  *         description: Progreso registrado correctamente
@@ -441,6 +596,6 @@ router.get('/:id/progreso', requireAuth, AfiliadoController.getProgreso);
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.post('/progreso', requireAdminOrEntrenador, AfiliadoController.createProgreso);
+router.post('/progreso', requireAuth, requireAdminOrEntrenador, AfiliadoController.createProgreso);
 
 module.exports = router;

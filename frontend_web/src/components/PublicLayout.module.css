@@ -1,0 +1,296 @@
+/* frontend_web/src/components/PublicLayout.module.css */
+
+/* ── Contenedor raíz ── */
+.root {
+  background: #0a0a0f;
+  color: #fff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  width: 100vw;
+  margin-left: calc(-1 * ((100vw - 100%) / 2));
+  box-sizing: border-box;
+}
+
+/* ── Navbar ── */
+/* background y borderBottom son DINÁMICOS (dependen del estado `scrolled`) → inline */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 500;
+  height: 60px;
+  backdrop-filter: blur(14px);
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.navInner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 32px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Logo link */
+.logoLink {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.logoIcon {
+  font-size: 1.6rem;
+  /* filter usa RED_GLOW → inline */
+}
+
+.logoName {
+  font-weight: 900;
+  font-size: 1.1rem;
+  letter-spacing: 0.05em;
+  /* background gradient con RED → inline (WebkitBackgroundClip) */
+}
+
+.logoTagline {
+  font-size: 0.55rem;
+  color: rgba(255, 255, 255, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  line-height: 1;
+}
+
+/* Botón "Volver al inicio" */
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 7px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  transition: all 0.2s;
+}
+
+.backBtn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ── Contenido principal ── */
+.main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+}
+
+/* ── Footer ── */
+.footer {
+  background: #0a0a0f;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 14px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.footerCopy {
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.28);
+  white-space: nowrap;
+}
+
+.footerCopyBrand {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.footerLinks {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+}
+
+.footerSep {
+  color: rgba(255, 255, 255, 0.1);
+}
+
+.footerLink {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.7rem;
+  text-decoration: none;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: color 0.18s;
+}
+
+.footerLink:hover {
+  color: #e31c25; /* RED de marca */
+}
+
+.footerLinkIg {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.7rem;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.18s;
+}
+
+.footerLinkIg:hover {
+  color: #e1306c; /* Magenta Instagram */
+}
+
+/* ── Modal Términos (versión oscura, integrado en PublicLayout) ── */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modalBox {
+  background: #1a1a2e;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 580px;
+  max-height: 78vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
+}
+
+.modalHeader {
+  background: linear-gradient(135deg, #1a1a2e, #12121e);
+  border-radius: 14px 14px 0 0;
+  padding: 18px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  position: sticky;
+  top: 0;
+}
+
+.modalTitle {
+  margin: 0;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.modalSub {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.66rem;
+}
+
+.modalCloseBtn {
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  color: #fff;
+  border-radius: 8px;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.modalCloseBtn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.modalBody {
+  padding: 22px;
+}
+
+.seccion {
+  margin-bottom: 22px;
+}
+
+.seccionHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+/* DINÁMICO: background, border, color del badge de sección dependen de s.c (dato) */
+.seccionBadge {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-weight: 800;
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.seccionTitle {
+  margin: 0;
+  font-weight: 700;
+  color: #fff;
+  font-size: 0.85rem;
+}
+
+.seccionText {
+  margin: 0 0 0 34px;
+  font-size: 0.76rem;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.7;
+}
+
+.modalNote {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.modalNoteStrong {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.modalFooter {
+  padding: 10px 22px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Dinámico: background usa RED/RED_DARK → inline */
+.modalOkBtn {
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 22px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}

@@ -1,0 +1,305 @@
+/* frontend_web/src/components/Header.module.css */
+/* ISO 25000 — Separación de concerns: estilos estáticos extraídos del JSX.
+   Los estilos dinámicos (color por rol) permanecen como inline props en el JSX. */
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: linear-gradient(180deg, #1a1a2e 0%, #0a0a0f 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  height: 54px;
+  min-height: 54px;
+  flex-shrink: 0;
+}
+
+/* ── Breadcrumb ── */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.breadcrumbSystem {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.breadcrumbParent {
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+.breadcrumbSeparator {
+  color: #4a5568;
+  font-size: 0.8rem;
+}
+
+.breadcrumbCurrent {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #e0e0e0;
+  border-radius: 20px;
+  padding: 2px 10px 2px 7px;
+}
+
+.breadcrumbIcon {
+  font-size: 0.85rem;
+}
+
+/* ── Lado derecho ── */
+.rightSection {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.dateBlock {
+  text-align: right;
+}
+
+.dateDay {
+  font-size: 0.73rem;
+  font-weight: 700;
+  color: #e0e0e0;
+  line-height: 1.2;
+}
+
+.dateRest {
+  font-size: 0.68rem;
+  color: #94a3b8;
+  line-height: 1.2;
+}
+
+.divider {
+  width: 1px;
+  height: 28px;
+  background: #252545;
+}
+
+/* ── Campana de notificaciones ── */
+.bellButton {
+  position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  transition: background 0.15s;
+}
+
+.bellButton:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.bellDot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e94560;
+  border: 2px solid #0a0a0f;
+  animation: mfPulse 2s infinite;
+}
+
+@keyframes mfPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.6; transform: scale(1.3); }
+}
+
+/* ── Badge numérico sobre la campana ── */
+.bellBadge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  background: #e94560;
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border: 2px solid #0a0a0f;
+  line-height: 1;
+}
+
+/* ── Wrapper para posicionar el dropdown ── */
+.bellWrapper {
+  position: relative;
+}
+
+/* ── Dropdown ── */
+.dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 340px;
+  background: #1a1a2e;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  border: 1px solid #252545;
+  z-index: 200;
+  overflow: hidden;
+}
+
+.dropdownHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #e0e0e0;
+  border-bottom: 1px solid #252545;
+}
+
+.dropdownCount {
+  background: #252545;
+  color: #94a3b8;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.dropdownList {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.dropdownEmpty {
+  padding: 24px 16px;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.82rem;
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid #1a1a2e;
+  transition: background 0.1s;
+}
+
+.dropdownItem:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.dropdownItemClickable {
+  cursor: pointer;
+}
+
+.dropdownItemClickable:hover {
+  background: rgba(75, 158, 203, 0.1);
+}
+
+.dropdownItemClickable:active {
+  background: rgba(75, 158, 203, 0.2);
+}
+
+.dropdownItem:last-child {
+  border-bottom: none;
+}
+
+.dropdownIcon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.dropdownContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.dropdownMsg {
+  font-size: 0.73rem;
+  font-weight: 600;
+  color: #e0e0e0;
+  line-height: 1.3;
+}
+
+.dropdownMeta {
+  font-size: 0.62rem;
+  color: #94a3b8;
+  margin-top: 1px;
+}
+
+.dropdownCantidad {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+  background: #252545;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dropdownCantidadActiva {
+  background: #e94560;
+  color: #fff;
+}
+
+/* ── Avatar ── */
+.avatarSection {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.avatarName {
+  font-size: 0.73rem;
+  font-weight: 700;
+  color: #e0e0e0;
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.3;
+}
+
+.avatarRole {
+  font-size: 0.62rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  line-height: 1.3;
+}

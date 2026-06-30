@@ -1,4 +1,5 @@
 import { useState } from "react";
+import styles from "./Footer.module.css";
 
 // ── Icono de Instagram (SVG inline, sin dependencias) ─────────────────────────
 function InstagramIcon() {
@@ -12,80 +13,25 @@ function InstagramIcon() {
 // ── Modal de Términos y Condiciones ───────────────────────────────────────────
 function ModalTerminos({ onClose }) {
   return (
-    <div
-      onClick={onClose}
-      style={{
-        position:   "fixed",
-        inset:      0,
-        background: "rgba(0,0,0,0.55)",
-        zIndex:     2000,
-        display:    "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding:    "20px",
-      }}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          background:   "#fff",
-          borderRadius: 14,
-          width:        "100%",
-          maxWidth:     620,
-          maxHeight:    "80vh",
-          overflowY:    "auto",
-          boxShadow:    "0 20px 60px rgba(0,0,0,0.25)",
-        }}
-      >
+    <div className={styles.modalOverlay} onClick={onClose}>
+      <div className={styles.modalBox} onClick={(e) => e.stopPropagation()}>
+
         {/* Header del modal */}
-        <div
-          style={{
-            background:    "linear-gradient(135deg,#1a1a2e,#16213e)",
-            borderRadius:  "14px 14px 0 0",
-            padding:       "20px 24px",
-            display:       "flex",
-            justifyContent:"space-between",
-            alignItems:    "center",
-            position:      "sticky",
-            top:           0,
-            zIndex:        1,
-          }}
-        >
+        <div className={styles.modalHeader}>
           <div>
-            <h5 style={{ margin: 0, color: "#fff", fontWeight: 700, fontSize: "1rem" }}>
-              📋 Términos y Condiciones
-            </h5>
-            <small style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.7rem" }}>
+            <h5 className={styles.modalHeaderTitle}>📋 Términos y Condiciones</h5>
+            <small className={styles.modalHeaderSub}>
               MetaFit — Sport Gym Sede 80 · Versión 1.0 · Abril 2026
             </small>
           </div>
-          <button
-            onClick={onClose}
-            style={{
-              background:   "rgba(255,255,255,0.1)",
-              border:       "none",
-              color:        "#fff",
-              borderRadius: 8,
-              width:        32,
-              height:       32,
-              cursor:       "pointer",
-              fontSize:     "1.1rem",
-              display:      "flex",
-              alignItems:   "center",
-              justifyContent: "center",
-            }}
-          >
-            ✕
-          </button>
+          <button className={styles.modalCloseBtn} onClick={onClose}>✕</button>
         </div>
 
         {/* Cuerpo */}
-        <div style={{ padding: "24px" }}>
+        <div className={styles.modalBody}>
           {[
             {
-              num: "1",
-              titulo: "🔒 Privacidad de Datos",
-              color: "#7c3aed",
+              num: "1", titulo: "🔒 Privacidad de Datos", color: "#7c3aed",
               parrafos: [
                 "MetaFit recopila únicamente los datos necesarios para la gestión de membresías, historial de entrenamiento y planes nutricionales de cada afiliado. Esta información es tratada conforme a la Ley 1581 de 2012 (Habeas Data) y el Decreto 1377 de 2013 de Colombia.",
                 "Los datos personales (nombre, documento, correo, teléfono) son usados exclusivamente para la operación interna del gimnasio y no serán compartidos con terceros sin autorización expresa del titular.",
@@ -93,9 +39,7 @@ function ModalTerminos({ onClose }) {
               ],
             },
             {
-              num: "2",
-              titulo: "🏋️ Uso de Instalaciones",
-              color: "#2563eb",
+              num: "2", titulo: "🏋️ Uso de Instalaciones", color: "#2563eb",
               parrafos: [
                 "El acceso a las instalaciones de Sport Gym Sede 80 está restringido exclusivamente a afiliados con membresía activa y al día en sus pagos. El sistema MetaFit valida automáticamente el estado de membresía al momento del ingreso.",
                 "El uso de los equipos debe realizarse de manera responsable. Cualquier daño intencional o uso inadecuado resultará en la suspensión temporal o definitiva de la membresía, a criterio de la administración.",
@@ -103,99 +47,45 @@ function ModalTerminos({ onClose }) {
               ],
             },
             {
-              num: "3",
-              titulo: "⚕️ Responsabilidad en Salud",
-              color: "#059669",
+              num: "3", titulo: "⚕️ Responsabilidad en Salud", color: "#059669",
               parrafos: [
                 "Sport Gym Sede 80 no asume responsabilidad por lesiones derivadas del uso inadecuado de los equipos, el incumplimiento de las indicaciones de los entrenadores o la omisión de información médica relevante al momento de la inscripción.",
                 "Se recomienda a todos los afiliados realizarse un chequeo médico previo al inicio de cualquier programa de entrenamiento, especialmente si padecen condiciones como hipertensión, diabetes, problemas cardiovasculares o lesiones musculoesqueléticas.",
-                "Las rutinas y planes nutricionales asignados a través del sistema MetaFit son orientativos y no reemplazan el diagnóstico o tratamiento médico profesional. En caso de molestias durante el entrenamiento, se debe interrumpir la actividad e informar al entrenador de turno.",
+                "Las rutinas y planes nutricionales asignados a través del sistema MetaFit son orientativos y no reemplazan el diagnóstico o tratamiento médico profesional.",
               ],
             },
           ].map((seccion) => (
-            <section key={seccion.num} style={{ marginBottom: 28 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+            <section key={seccion.num} className={styles.seccion}>
+              <div className={styles.seccionHeader}>
+                {/* DINÁMICO: background, border y color dependen de seccion.color (dato) */}
                 <span
+                  className={styles.seccionNum}
                   style={{
-                    width:        28,
-                    height:       28,
-                    borderRadius: "50%",
-                    background:   `${seccion.color}15`,
-                    border:       `2px solid ${seccion.color}40`,
-                    color:        seccion.color,
-                    fontWeight:   800,
-                    fontSize:     "0.75rem",
-                    display:      "flex",
-                    alignItems:   "center",
-                    justifyContent: "center",
-                    flexShrink:   0,
+                    background: `${seccion.color}15`,
+                    border:     `2px solid ${seccion.color}40`,
+                    color:       seccion.color,
                   }}
                 >
                   {seccion.num}
                 </span>
-                <h6 style={{ margin: 0, fontWeight: 700, color: "#1e293b", fontSize: "0.92rem" }}>
-                  {seccion.titulo}
-                </h6>
+                <h6 className={styles.seccionTitulo}>{seccion.titulo}</h6>
               </div>
               {seccion.parrafos.map((p, i) => (
-                <p
-                  key={i}
-                  style={{
-                    margin:     "0 0 8px 38px",
-                    fontSize:   "0.8rem",
-                    color:      "#475569",
-                    lineHeight: 1.65,
-                  }}
-                >
-                  {p}
-                </p>
+                <p key={i} className={styles.seccionParrafo}>{p}</p>
               ))}
-              {seccion.num !== "3" && (
-                <hr style={{ border: "none", borderTop: "1px solid #f1f5f9", margin: "20px 0 0" }} />
-              )}
+              {seccion.num !== "3" && <hr className={styles.seccionDivider} />}
             </section>
           ))}
 
-          {/* Footer del modal */}
-          <div
-            style={{
-              background:   "#f8fafc",
-              borderRadius: 8,
-              padding:      "12px 16px",
-              fontSize:     "0.72rem",
-              color:        "#94a3b8",
-              border:       "1px solid #e2e8f0",
-              textAlign:    "center",
-            }}
-          >
+          {/* Nota legal */}
+          <div className={styles.modalNote}>
             Al hacer uso de las instalaciones y del sistema MetaFit, el afiliado acepta estos términos
             y condiciones en su totalidad. Para consultas: <strong>admin@metafit.com</strong>
           </div>
         </div>
 
-        <div
-          style={{
-            padding:       "12px 24px",
-            borderTop:     "1px solid #f1f5f9",
-            display:       "flex",
-            justifyContent:"flex-end",
-          }}
-        >
-          <button
-            onClick={onClose}
-            style={{
-              background:   "linear-gradient(135deg,#1a1a2e,#16213e)",
-              color:        "#fff",
-              border:       "none",
-              borderRadius: 8,
-              padding:      "8px 24px",
-              fontSize:     "0.82rem",
-              fontWeight:   600,
-              cursor:       "pointer",
-            }}
-          >
-            Entendido ✓
-          </button>
+        <div className={styles.modalFooter}>
+          <button className={styles.modalOkBtn} onClick={onClose}>Entendido ✓</button>
         </div>
       </div>
     </div>
@@ -207,77 +97,35 @@ export default function Footer() {
   const [showTerminos, setShowTerminos] = useState(false);
   const year = new Date().getFullYear();
 
-  // Estilo base para los links del footer
-  const linkBase = {
-    color:          "rgba(255,255,255,0.45)",
-    textDecoration: "none",
-    fontSize:       "0.7rem",
-    fontWeight:     500,
-    transition:     "color 0.18s",
-    cursor:         "pointer",
-    background:     "none",
-    border:         "none",
-    padding:        0,
-  };
-
   return (
     <>
-      {/* Modal de Términos (inline, sin portal) */}
       {showTerminos && <ModalTerminos onClose={() => setShowTerminos(false)} />}
 
-      <footer
-        style={{
-          width:           "100%",
-          padding:         "10px 24px",
-          borderTop:       "1px solid rgba(255,255,255,0.06)",
-          background:      "linear-gradient(90deg,#0f0f1a,#14142b)",
-          display:         "flex",
-          alignItems:      "center",
-          justifyContent:  "space-between",
-          flexShrink:      0,
-          gap:             8,
-          flexWrap:        "wrap",
-        }}
-      >
-        {/* ── Izquierda: Copyright ── */}
-        <span style={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.35)", whiteSpace: "nowrap" }}>
+      <footer className={styles.footer}>
+        {/* Izquierda: Copyright */}
+        <span className={styles.copyright}>
           © {year}{" "}
-          <strong style={{ color: "rgba(255,255,255,0.6)" }}>MetaFit</strong>
+          <strong className={styles.copyrightBrand}>MetaFit</strong>
           {" · "}
-          <span style={{ color: "rgba(255,255,255,0.4)" }}>Sport Gym Sede 80</span>
+          <span className={styles.copyrightSub}>Sport Gym Sede 80</span>
         </span>
 
-        {/* ── Centro: Términos y Condiciones ── */}
+        {/* Centro: Términos y Condiciones */}
         <button
           id="btn-terminos-condiciones"
           onClick={() => setShowTerminos(true)}
-          style={linkBase}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.color          = "#fff";
-            e.currentTarget.style.textDecoration = "underline";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.color          = "rgba(255,255,255,0.45)";
-            e.currentTarget.style.textDecoration = "none";
-          }}
+          className={styles.link}
         >
           📋 Términos y Condiciones
         </button>
 
-        {/* ── Derecha: Instagram ── */}
+        {/* Derecha: Instagram */}
         <a
           id="link-instagram-sportgym"
           href="https://www.instagram.com/sportgymsede80/"
           target="_blank"
           rel="noopener noreferrer"
-          style={{ ...linkBase, display: "flex", alignItems: "center", gap: 5 }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.color          = "#e1306c";  /* magenta de IG */
-            e.currentTarget.style.textDecoration = "none";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.color          = "rgba(255,255,255,0.45)";
-          }}
+          className={styles.linkIg}
         >
           <InstagramIcon />
           @sportgymsede80

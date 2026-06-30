@@ -1,0 +1,721 @@
+.page {
+  padding: 1.5rem 1.75rem;
+  min-height: 100%;
+}
+
+.headerTitle {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #e0e0e0;
+  margin: 0;
+}
+
+.headerSub {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  margin: 4px 0 0 0;
+}
+
+/* KPI */
+.kpiRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.kpiCol {
+  display: flex;
+  flex-direction: column;
+}
+
+.kpiCard {
+  background: #1a1a2e;
+  border: 1px solid #252545;
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.kpiLabel {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  margin-top: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.kpiValue {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #e0e0e0;
+  line-height: 1.2;
+}
+
+/* Table card */
+.tableCard {
+  background: #1a1a2e;
+  border: 1px solid #252545;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.tableCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #252545;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.table th {
+  text-align: left;
+  padding: 0.75rem 0.6rem;
+  font-weight: 600;
+  color: #94a3b8;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #252545;
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 0.6rem;
+  color: #e0e0e0;
+  vertical-align: middle;
+}
+
+.table tbody tr:nth-child(odd) {
+  background: #1a1a2e;
+}
+
+.table tbody tr:nth-child(even) {
+  background: #16213e;
+}
+
+.table tbody tr:hover {
+  background: rgba(124, 58, 237, 0.08);
+}
+
+/* Avatar */
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.avatarSm {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.avatarModal {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.emailText {
+  color: #94a3b8;
+  font-size: 0.75rem;
+}
+
+/* Search */
+.searchInput {
+  background: #0a0a0f;
+  border: 1px solid #252545;
+  color: #e0e0e0;
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.searchInput:focus {
+  border-color: #7c3aed;
+}
+
+/* Label */
+.labelText {
+  color: #94a3b8;
+  font-size: 0.78rem;
+  font-weight: 500;
+  margin-bottom: 4px;
+  display: block;
+}
+
+/* Form controls */
+.inputDark {
+  background: #0a0a0f;
+  border: 1px solid #252545;
+  color: #e0e0e0;
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.inputDark:focus {
+  border-color: #7c3aed;
+}
+
+.selectDark {
+  background: #0a0a0f;
+  border: 1px solid #252545;
+  color: #e0e0e0;
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color 0.2s;
+  cursor: pointer;
+}
+
+.selectDark:focus {
+  border-color: #7c3aed;
+}
+
+.checkboxDark {
+  accent-color: #7c3aed;
+  cursor: pointer;
+}
+
+.textareaDark {
+  background: #0a0a0f;
+  border: 1px solid #252545;
+  color: #e0e0e0;
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color 0.2s;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.textareaDark:focus {
+  border-color: #7c3aed;
+}
+
+/* Buttons */
+.btnPrimary {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.btnPrimary:hover {
+  opacity: 0.9;
+}
+
+.btnPrimary:active {
+  transform: scale(0.97);
+}
+
+.btnPrimary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btnOutline {
+  background: transparent;
+  border: 1px solid #7c3aed;
+  color: #a78bfa;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btnOutline:hover {
+  background: rgba(124, 58, 237, 0.1);
+  color: #c4b5fd;
+}
+
+.btnOutline:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btnOutlineDanger {
+  background: transparent;
+  border: 1px solid #ef4444;
+  color: #ef4444;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btnOutlineDanger:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.btnOutlineDanger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btnOutlineInfo {
+  background: transparent;
+  border: 1px solid #4b9ecb;
+  color: #4b9ecb;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btnOutlineInfo:hover {
+  background: rgba(75, 158, 203, 0.1);
+}
+
+.btnAsignar {
+  background: linear-gradient(135deg, #059669, #047857);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.btnAsignar:hover {
+  opacity: 0.9;
+}
+
+.btnAsignar:active {
+  transform: scale(0.97);
+}
+
+.btnAsignar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btnDanger {
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.btnDanger:hover {
+  opacity: 0.9;
+}
+
+.btnDanger:active {
+  transform: scale(0.97);
+}
+
+.btnDanger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btnConfirmar {
+  background: #22c55e;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.btnConfirmar:hover {
+  opacity: 0.9;
+}
+
+.btnConfirmar:active {
+  transform: scale(0.97);
+}
+
+.btnConfirmar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btnRefresh {
+  background: transparent;
+  border: 1px solid #252545;
+  color: #94a3b8;
+  border-radius: 6px;
+  padding: 0.4rem 0.65rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btnRefresh:hover {
+  background: rgba(124, 58, 237, 0.08);
+  color: #a78bfa;
+  border-color: #7c3aed;
+}
+
+.btnRefresh:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btnIcon {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+.badgeDark {
+  display: inline-flex;
+  align-items: center;
+  background: #252545;
+  color: #94a3b8;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+.badgeSuccess {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(5, 150, 105, 0.1);
+  color: #059669;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+.badgeDanger {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+/* Empty state */
+.emptyState {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+/* Alerts */
+.alertInfo {
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.alertDanger {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.alertWarning {
+  background: rgba(234, 179, 8, 0.08);
+  border: 1px solid rgba(234, 179, 8, 0.2);
+  color: #eab308;
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-size: 0.85rem;
+}
+
+/* Modal */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1050;
+}
+
+.modalContent {
+  background: #1a1a2e;
+  border-radius: 12px;
+  border: 1px solid #252545;
+  max-width: 750px;
+  width: 95%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #252545;
+}
+
+.modalTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #e0e0e0;
+  margin: 0;
+}
+
+.modalBody {
+  padding: 1.25rem;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid #252545;
+}
+
+/* Afiliado section */
+.afiliadoSection {
+  margin-bottom: 16px;
+}
+
+.afiliadoInfoBox {
+  background: #0a0a0f;
+  border: 1px solid #252545;
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+
+/* Info card */
+.infoCard {
+  background: #0a0a0f;
+  border: 1px solid #252545;
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+
+/* Spinners */
+.spinnerBrand {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid #7c3aed;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  display: inline-block;
+}
+
+.spinnerTeal {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid #059669;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Alimento items */
+.alimentoItem {
+  padding: 0.5rem;
+  border: 1px solid #252545;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.alimentoChecked {
+  background: rgba(124, 58, 237, 0.08);
+  border-color: rgba(124, 58, 237, 0.3);
+}
+
+.alimentoRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.alimentoName {
+  font-weight: 600;
+  font-size: 0.85rem;
+  flex: 1;
+  color: #e0e0e0;
+}
+
+.alimentoNutrition {
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+/* Inline form row */
+.formRow {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  margin-left: 28px;
+  flex-wrap: wrap;
+}
+
+.formGroup {
+  flex: 1;
+  min-width: 80px;
+}
+
+.inlineLabel {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.inlineInput {
+  background: #0a0a0f;
+  border: 1px solid #252545;
+  color: #e0e0e0;
+  border-radius: 4px;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.78rem;
+  width: 100%;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.inlineInput:focus {
+  border-color: #7c3aed;
+}
+
+.inlineSelect {
+  background: #0a0a0f;
+  border: 1px solid #252545;
+  color: #e0e0e0;
+  border-radius: 4px;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.78rem;
+  width: 100%;
+  outline: none;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.inlineSelect:focus {
+  border-color: #7c3aed;
+}
+
+/* Action buttons */
+.actionBtns {
+  display: flex;
+  gap: 4px;
+}
+
+/* Objetivo & Restriccion badges */
+.objetivoBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+.restriccionBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.5rem;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+/* Scrollbar for modal content */
+.modalContent::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modalContent::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modalContent::-webkit-scrollbar-thumb {
+  background: #252545;
+  border-radius: 3px;
+}
+
+.modalContent::-webkit-scrollbar-thumb:hover {
+  background: #353560;
+}

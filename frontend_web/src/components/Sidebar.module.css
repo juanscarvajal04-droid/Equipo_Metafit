@@ -1,0 +1,232 @@
+.sidebar {
+  width: 248px;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #0f0f1a 0%, #14142b 55%, #0d1b3e 100%);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.35);
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: #252545;
+  border-radius: 10px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: #3a3a5c;
+}
+
+/* ── Logo ── */
+.logoSection {
+  text-align: center;
+  padding: 1.5rem 0.75rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.logoIcon {
+  font-size: 2.1rem;
+  filter: drop-shadow(0 0 12px rgba(124, 58, 237, 0.7));
+}
+
+.logoTitle {
+  color: #fff;
+  font-weight: 700;
+  margin-top: 0.25rem;
+  font-size: 1.15rem;
+  letter-spacing: 0.05em;
+}
+
+.logoSubtitle {
+  color: #94a3b8;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ── Perfil ── */
+.profileSection {
+  padding: 0.85rem 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.profileRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  flex-shrink: 0;
+  font-size: 1rem;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.12);
+}
+
+.profileInfo {
+  min-width: 0;
+}
+
+.profileEmail {
+  color: #e0e0e0;
+  font-weight: 600;
+  font-size: 0.78rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profileBadge {
+  font-size: 0.6rem;
+  letter-spacing: 0.04em;
+  margin-top: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+}
+
+.adminBanner {
+  margin-top: 0.5rem;
+  text-align: center;
+  border-radius: 8px;
+  padding: 0.3rem 0;
+  background: linear-gradient(90deg, rgba(124, 58, 237, 0.2), rgba(79, 70, 229, 0.2));
+  border: 1px solid rgba(124, 58, 237, 0.4);
+  font-size: 0.62rem;
+  color: #a78bfa;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ── Navegación ── */
+.nav {
+  padding: 0.5rem 0;
+  flex: 1;
+}
+
+.navSectionLabel {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 10px 20px 6px;
+}
+
+.navSectionLabelAdmin {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #a78bfa;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 14px 20px 6px;
+}
+
+.navIcon {
+  font-size: 1rem;
+  width: 20px;
+  text-align: center;
+}
+
+/* ── Nav link (base) ── */
+.navLink {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #94a3b8;
+  border-left: 3px solid transparent;
+  transition: all 0.3s ease;
+  margin-right: 8px;
+  border-radius: 0 8px 8px 0;
+}
+
+.navLink:hover {
+  background: rgba(124, 58, 237, 0.08);
+  color: #e0e0e0;
+}
+
+.navLinkActive {
+  background: rgba(124, 58, 237, 0.15);
+  color: #fff;
+  border-left: 3px solid #7c3aed;
+}
+
+/* ── Admin nav link ── */
+.navLinkAdmin {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #94a3b8;
+  border-left: 3px solid rgba(124, 58, 237, 0.3);
+  transition: all 0.3s ease;
+  margin-right: 8px;
+  border-radius: 0 8px 8px 0;
+  background: rgba(124, 58, 237, 0.06);
+}
+
+.navLinkAdmin:hover {
+  background: rgba(124, 58, 237, 0.15);
+  color: #e0e0e0;
+}
+
+.navLinkAdminActive {
+  background: rgba(124, 58, 237, 0.22);
+  color: #fff;
+  border-left: 3px solid #a78bfa;
+}
+
+/* ── Logout ── */
+.logoutSection {
+  padding: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.logoutButton {
+  width: 100%;
+  background: transparent;
+  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.logoutButton:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border-color: #ef4444;
+}
