@@ -1,10 +1,10 @@
--- ============================================================================================================================
+-- =============================================================================================================================
 -- TITULO DE INVESTIGACION:
 -- "Disenar, Normalizar e Implementar un Esquema de Base de Datos Relacional en Tercera Forma Normal
 --  para Gestionar Afiliados, Ciclos de Entrenamiento y Planes Nutricionales del Sistema MetaFit
 --  Aplicando Patrones de Herencia de Entidades, Indices de Rendimiento e Integridad Referencial
 --  como Soporte Tecnologico al Gimnasio Sport Gym Sede 80, Bogota, 2025."
--- ============================================================================================================================
+-- =============================================================================================================================
 -- Proyecto      : MetaFit - Sistema de Gestion Deportiva
 -- Cliente       : Sport Gym Sede 80, Bogota, Colombia
 -- Equipo        : Sofia Astudillo - Kevin S. Robayo - Carlos Rodrigues - Juan S. Carvajal
@@ -14,7 +14,7 @@
 -- Patron        : Herencia Super-tipo / Sub-tipo (USUARIO -> AFILIADO)
 -- Docker        : Compatible con /docker-entrypoint-initdb.d/ (ejecutado automaticamente)
 -- Fecha         : 2026
--- ============================================================================================================================
+-- =============================================================================================================================
 --
 -- DECISIONES ARQUITECTURALES:
 --
