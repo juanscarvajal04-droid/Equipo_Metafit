@@ -33,7 +33,7 @@ export default function LoginScreen() {
       await login(correo.trim(), contrasena);
     } catch (err) {
       if (!err.response) {
-        setError('Error de conexión. Verificá que el servidor esté activo.');
+        setError('Error de conexión. Verificá que el servidor esté activo en 192.168.0.4:3001.');
       } else {
         const msg = err.response?.data?.error || 'Correo o contraseña incorrectos';
         setError(msg);

@@ -220,6 +220,67 @@ const AfiliadoController = {
       return res.status(500).json({ error: 'Error interno del servidor' });
     }
   },
+
+  saveProgresoEjercicio: async (req, res) => {
+    try {
+      const result = await AfiliadoService.saveProgresoEjercicio(req.user.sub, req.body);
+      return res.status(201).json(result);
+    } catch (err) {
+      if (err.message.includes('requeridos')) {
+        return res.status(400).json({ error: err.message });
+      }
+      console.error('[afiliadoController.saveProgresoEjercicio]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
+  getProgresoEjercicio: async (req, res) => {
+    try {
+      const { idCiclo, fecha } = req.params;
+      const result = await AfiliadoService.getProgresoEjercicio(req.user.sub, idCiclo, fecha);
+      return res.json({ ejercicios: result });
+    } catch (err) {
+      console.error('[afiliadoController.getProgresoEjercicio]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
+  saveAgua: async (req, res) => {
+    try {
+      const result = await AfiliadoService.saveAgua(req.user.sub, req.body);
+      return res.status(201).json(result);
+    } catch (err) {
+      if (err.message.includes('requeridos')) {
+        return res.status(400).json({ error: err.message });
+      }
+      console.error('[afiliadoController.saveAgua]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
+  getAgua: async (req, res) => {
+    try {
+      const { fecha } = req.params;
+      const result = await AfiliadoService.getAgua(req.user.sub, fecha);
+      return res.json(result);
+    } catch (err) {
+      console.error('[afiliadoController.getAgua]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
+  saveConsumoAlimento: async (req, res) => {
+    try {
+      const result = await AfiliadoService.saveConsumoAlimento(req.user.sub, req.body);
+      return res.status(201).json(result);
+    } catch (err) {
+      if (err.message.includes('requeridos')) {
+        return res.status(400).json({ error: err.message });
+      }
+      console.error('[afiliadoController.saveConsumoAlimento]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
 };
 
 module.exports = AfiliadoController;

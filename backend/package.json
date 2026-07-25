@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "test": "jest --runInBand --forceExit"
+    "test": "jest --runInBand --forceExit",
+    "tunnel": "bash start-tunnel.sh"
   },
   "jest": {
     "testEnvironment": "node",
@@ -28,6 +29,7 @@
   },
   "devDependencies": {
     "jest": "^30.4.2",
+    "localtunnel": "^2.0.2",
     "nodemon": "^3.1.0",
     "supertest": "^7.2.2"
   }

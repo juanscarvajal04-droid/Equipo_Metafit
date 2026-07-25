@@ -1,0 +1,44 @@
+# render.yaml — MetaFit Backend
+# Despliegue automático en Render (Web Service con Docker)
+# Documentación: https://render.com/docs/yaml-spec
+#
+# ⚠️ Antes del primer despliegue:
+#   1. Conectá tu repositorio de GitHub/GitLab a Render
+#   2. Creá un Web Service apuntando a este archivo
+#   3. Configurá las variables de entorno en el dashboard de Render
+
+services:
+  - type: web
+    name: metafit-backend
+    env: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /health
+    port: 3001
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+      # ── Base de datos MySQL (Railway) ──────────────────────────
+      # Reemplazá con la URL de conexión de tu base de datos en Railway
+      # Formato: mysql://usuario:password@host:puerto/nombre_db
+      - key: DATABASE_URL
+        value: mysql://root:password@host.railway.internal:3306/metafit
+        # ↑ REEMPLAZAR con los datos reales de Railway
+
+      # ── JWT ────────────────────────────────────────────────────
+      # Generá un secreto seguro con: node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+      - key: JWT_SECRET
+        value: reemplazar_con_secreto_seguro_de_64_chars_minimo
+      - key: JWT_EXPIRES_IN
+        value: 8h
+
+      # ── CORS ──────────────────────────────────────────────────
+      # Incluí la URL de Render + URL de la web frontend si existe
+      - key: CORS_ORIGINS
+        value: https://metafit-backend.onrender.com,http://localhost:5173
+
+      # ── Puerto ────────────────────────────────────────────────
+      - key: PORT
+        value: "3001"

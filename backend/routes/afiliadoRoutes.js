@@ -598,4 +598,170 @@ router.get('/:id/progreso', requireAuth, AfiliadoController.getProgreso);
  */
 router.post('/progreso', requireAuth, requireAdminOrEntrenador, AfiliadoController.createProgreso);
 
+// ─────────────────────────────────────────────────────────────
+// SEGUIMIENTO DIARIO (app móvil)
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * @swagger
+ * /afiliados/me/progreso-ejercicio:
+ *   post:
+ *     summary: Guardar progreso diario de ejercicios (app móvil)
+ *     description: Marca ejercicios como completados/no completados para un ciclo y fecha específicos.
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [id_ciclo, fecha, ejercicios]
+ *             properties:
+ *               id_ciclo:   { type: integer }
+ *               fecha:      { type: string, format: date }
+ *               ejercicios:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     id_ejercicio: { type: integer }
+ *                     completado:  { type: boolean }
+ *     responses:
+ *       201:
+ *         description: Progreso guardado correctamente
+ *       400:
+ *         description: Datos faltantes
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.post('/me/progreso-ejercicio', requireAuth, AfiliadoController.saveProgresoEjercicio);
+
+/**
+ * @swagger
+ * /afiliados/me/progreso-ejercicio/{idCiclo}/{fecha}:
+ *   get:
+ *     summary: Obtener progreso de ejercicios de un día específico (app móvil)
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: idCiclo
+ *         in: path
+ *         required: true
+ *         schema: { type: integer }
+ *       - name: fecha
+ *         in: path
+ *         required: true
+ *         schema: { type: string, format: date }
+ *     responses:
+ *       200:
+ *         description: Lista de ejercicios con estado de completado
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.get('/me/progreso-ejercicio/:idCiclo/:fecha', requireAuth, AfiliadoController.getProgresoEjercicio);
+
+/**
+ * @swagger
+ * /afiliados/me/agua:
+ *   post:
+ *     summary: Registrar consumo de agua (app móvil)
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [fecha, vasos]
+ *             properties:
+ *               fecha:  { type: string, format: date }
+ *               vasos:  { type: integer, minimum: 0, maximum: 20 }
+ *     responses:
+ *       201:
+ *         description: Agua registrada correctamente
+ *       400:
+ *         description: Datos faltantes
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.post('/me/agua', requireAuth, AfiliadoController.saveAgua);
+
+/**
+ * @swagger
+ * /afiliados/me/agua/{fecha}:
+ *   get:
+ *     summary: Obtener consumo de agua de una fecha (app móvil)
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: fecha
+ *         in: path
+ *         required: true
+ *         schema: { type: string, format: date }
+ *     responses:
+ *       200:
+ *         description: Vasos de agua registrados para esa fecha
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 vasos: { type: integer }
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.get('/me/agua/:fecha', requireAuth, AfiliadoController.getAgua);
+
+/**
+ * @swagger
+ * /afiliados/me/consumo-alimento:
+ *   post:
+ *     summary: Guardar consumo diario de alimentos (app móvil)
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [id_ciclo, fecha, alimentos]
+ *             properties:
+ *               id_ciclo:   { type: integer }
+ *               fecha:      { type: string, format: date }
+ *               alimentos:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     id_alimento: { type: integer }
+ *                     num_comida:  { type: integer }
+ *                     consumido:   { type: boolean }
+ *     responses:
+ *       201:
+ *         description: Consumo guardado correctamente
+ *       400:
+ *         description: Datos faltantes
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.post('/me/consumo-alimento', requireAuth, AfiliadoController.saveConsumoAlimento);
+
 module.exports = router;

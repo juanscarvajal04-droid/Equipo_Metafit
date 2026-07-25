@@ -1,8 +1,9 @@
 import React from 'react';
-import { ActivityIndicator, View, Text, StyleSheet } from 'react-native';
+import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Ionicons } from '@expo/vector-icons';
 
 import { useAuth } from '../context/AuthContext';
 import LandingScreen from '../screens/LandingScreen';
@@ -19,79 +20,48 @@ const Tab = createBottomTabNavigator();
 function LoadingScreen() {
   return (
     <View style={styles.loading}>
-      <ActivityIndicator size="large" color={COLORS.red} />
+      <ActivityIndicator size="large" color={COLORS.purple} />
     </View>
   );
 }
 
+const TAB_ICONS = {
+  Perfil: { focused: 'person', unfocused: 'person-outline' },
+  Rutina: { focused: 'barbell', unfocused: 'barbell-outline' },
+  Dieta: { focused: 'restaurant', unfocused: 'restaurant-outline' },
+  Progreso: { focused: 'stats-chart', unfocused: 'stats-chart-outline' },
+};
+
 function MainTabs() {
   return (
     <Tab.Navigator
-      screenOptions={{
-        tabBarActiveTintColor: COLORS.red,
+      screenOptions={({ route }) => ({
+        tabBarActiveTintColor: COLORS.purpleLight,
         tabBarInactiveTintColor: COLORS.textMuted,
+        headerShown: false,
         tabBarStyle: {
           backgroundColor: COLORS.bgSecondary,
           borderTopColor: COLORS.border,
           borderTopWidth: 1,
-          paddingBottom: 5,
+          paddingBottom: 6,
+          paddingTop: 6,
           height: 60,
         },
-        headerStyle: {
-          backgroundColor: COLORS.bg,
+        tabBarLabelStyle: {
+          fontSize: FONTS.xsmall,
+          fontWeight: '600',
         },
-        headerTintColor: COLORS.text,
-        headerTitleStyle: {
-          fontWeight: '700',
-          fontSize: FONTS.body,
+        tabBarIcon: ({ focused, color, size }) => {
+          const icons = TAB_ICONS[route.name];
+          const iconName = focused ? icons.focused : icons.unfocused;
+          return <Ionicons name={iconName} size={22} color={color} />;
         },
-        headerShadowVisible: false,
-      }}
+      })}
     >
-      <Tab.Screen
-        name="Perfil"
-        component={MiPerfilScreen}
-        options={{
-          tabBarLabel: 'Perfil',
-          headerTitle: 'Mi Perfil',
-          tabBarIcon: ({ focused, color }) => (
-            <Text style={styles.tabIcon}>👤</Text>
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Rutina"
-        component={MiRutinaScreen}
-        options={{
-          tabBarLabel: 'Rutina',
-          headerTitle: 'Mi Rutina',
-          tabBarIcon: ({ focused, color }) => (
-            <Text style={styles.tabIcon}>💪</Text>
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Dieta"
-        component={MiDietaScreen}
-        options={{
-          tabBarLabel: 'Dieta',
-          headerTitle: 'Mi Dieta',
-          tabBarIcon: ({ focused, color }) => (
-            <Text style={styles.tabIcon}>🥗</Text>
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Progreso"
-        component={MiProgresoScreen}
-        options={{
-          tabBarLabel: 'Progreso',
-          headerTitle: 'Mi Progreso',
-          tabBarIcon: ({ focused, color }) => (
-            <Text style={styles.tabIcon}>📊</Text>
-          ),
-        }}
-      />
+      <Tab.Screen name="Perfil" component={MiPerfilScreen} />
+      <Tab.Screen name="Rutina" component={MiRutinaScreen} />
+      <Tab.Screen name="Dieta" component={MiDietaScreen} />
+      <Tab.Screen name="Progreso" component={MiProgresoScreen} />
     </Tab.Navigator>
   );
 }
@@ -123,8 +93,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: COLORS.bg,
-  },
-  tabIcon: {
-    fontSize: 22,
   },
 });

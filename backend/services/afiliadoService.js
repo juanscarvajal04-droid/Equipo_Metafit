@@ -1,9 +1,10 @@
 // backend/services/afiliadoService.js
 'use strict';
 
-const AfiliadoModel = require('../models/afiliadoModel');
-const CicloModel    = require('../models/cicloModel');
-const CatalogoModel = require('../models/catalogoModel');
+const AfiliadoModel          = require('../models/afiliadoModel');
+const CicloModel             = require('../models/cicloModel');
+const CatalogoModel          = require('../models/catalogoModel');
+const SeguimientoDiarioModel = require('../models/seguimientoDiarioModel');
 
 // FIX 1.3 / ISO 25000: normalizarFecha extraída a utils/fechaUtils.js
 // para que sea testeable sin dependencia de BD.
@@ -113,6 +114,38 @@ const AfiliadoService = {
     }
     await CatalogoModel.createProgreso(datos, creatorId);
     return { message: 'Progreso registrado correctamente' };
+  },
+
+  saveProgresoEjercicio: async (idUsuario, data) => {
+    const { id_ciclo, fecha, ejercicios } = data;
+    if (!id_ciclo || !fecha || !ejercicios) {
+      throw new Error('id_ciclo, fecha y ejercicios son requeridos');
+    }
+    return SeguimientoDiarioModel.saveProgresoEjercicio(idUsuario, id_ciclo, fecha, ejercicios);
+  },
+
+  getProgresoEjercicio: async (idUsuario, idCiclo, fecha) => {
+    return SeguimientoDiarioModel.getProgresoEjercicio(idUsuario, idCiclo, fecha);
+  },
+
+  saveAgua: async (idUsuario, data) => {
+    const { fecha, vasos } = data;
+    if (!fecha || vasos == null) {
+      throw new Error('fecha y vasos son requeridos');
+    }
+    return SeguimientoDiarioModel.saveAgua(idUsuario, fecha, vasos);
+  },
+
+  getAgua: async (idUsuario, fecha) => {
+    return SeguimientoDiarioModel.getAgua(idUsuario, fecha);
+  },
+
+  saveConsumoAlimento: async (idUsuario, data) => {
+    const { id_ciclo, fecha, alimentos } = data;
+    if (!id_ciclo || !fecha || !alimentos) {
+      throw new Error('id_ciclo, fecha y alimentos son requeridos');
+    }
+    return SeguimientoDiarioModel.saveConsumoAlimento(idUsuario, id_ciclo, fecha, alimentos);
   }
 };
 

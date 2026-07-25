@@ -1,281 +1,272 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
-  StyleSheet,
-  SafeAreaView,
+  Alert,
+  Animated,
+  RefreshControl,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useAuth } from '../context/AuthContext';
-import { getMiPerfil } from '../services/api';
-import { COLORS, GRADIENTS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../theme';
+import * as ImagePicker from 'expo-image-picker';
+import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { COLORS, GRADIENTS, FONTS, SPACING, SHADOWS, BORDER_RADIUS } from '../theme';
+import { getMiPerfil, getMisCiclos, getMisRestricciones } from '../services/api';
 
-export default function MiPerfilScreen() {
-  const { logout } = useAuth();
-  const [perfil, setPerfil] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await getMiPerfil();
-        setPerfil(res.data);
-      } catch {
-        setError('Error al cargar perfil');
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, []);
-
-  if (loading) {
-    return (
-      <SafeAreaView style={styles.center}>
-        <ActivityIndicator size="large" color={COLORS.red} />
-      </SafeAreaView>
-    );
-  }
-
-  if (error) {
-    return (
-      <SafeAreaView style={styles.center}>
-        <Text style={styles.errorText}>{error}</Text>
-      </SafeAreaView>
-    );
-  }
-
-  if (!perfil) return null;
-
-  const inicial = (perfil.nombres?.charAt(0) || 'U').toUpperCase();
-  const restricciones = perfil.restricciones || [];
-  const activo = perfil.estado === 'Activo';
+function Avatar({ nombre, size = 80 }) {
+  const initials = (nombre || 'U')
+    .split(' ')
+    .map((w) => w[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container}>
-        <LinearGradient colors={GRADIENTS.oscuro} style={styles.headerGradient}>
-          <View style={styles.avatarRow}>
-            <View style={[styles.avatar, activo ? styles.avatarActive : styles.avatarInactive]}>
-              <Text style={styles.avatarText}>{inicial}</Text>
-            </View>
-            <View style={styles.headerInfo}>
-              <Text style={styles.headerName}>
-                {perfil.nombres} {perfil.apellidos}
-              </Text>
-              <View style={[styles.badge, activo ? styles.badgeActive : styles.badgeInactive]}>
-                <Text style={[styles.badgeText, { color: activo ? COLORS.success : COLORS.textSecondary }]}>
-                  {activo ? 'Activo' : 'Inactivo'}
-                </Text>
-              </View>
-            </View>
-          </View>
-        </LinearGradient>
-
-        <View style={styles.cardsSection}>
-          <SectionCard title="📋 Datos Personales">
-            <Row label="Correo" value={perfil.correo} />
-            <Row label="Documento" value={perfil.documento} />
-            <Row label="Fecha de nacimiento" value={perfil.fecha_nacimiento ? new Date(perfil.fecha_nacimiento).toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'} />
-            <Row label="Sexo" value={perfil.sexo} />
-            <Row label="Teléfono" value={perfil.telefono} />
-          </SectionCard>
-
-          <SectionCard title="📐 Información Física">
-            <Row label="Estatura" value={perfil.estatura_cm ? `${perfil.estatura_cm} cm` : '-'} />
-            <Row label="Objetivo físico" value={perfil.ciclo_activo?.objetivo_fisico || '—'} />
-            <Row label="Nivel de experiencia" value={perfil.ciclo_activo?.nivel_experiencia || '—'} />
-          </SectionCard>
-
-          {restricciones.length > 0 && (
-            <SectionCard title="⚠️ Restricciones Médicas">
-              {restricciones.map((r, i) => (
-                <View key={i} style={styles.restriccionRow}>
-                  <Text style={styles.restriccionDot}>•</Text>
-                  <Text style={styles.restriccionText}>
-                    {r.nombre_restriccion}
-                    {r.tipo ? ` (${r.tipo})` : ''}
-                    {r.efecto_relevante ? ` — ${r.efecto_relevante}` : ''}
-                  </Text>
-                </View>
-              ))}
-            </SectionCard>
-          )}
-        </View>
-
-        <TouchableOpacity style={styles.logoutButton} onPress={logout} activeOpacity={0.8}>
-          <LinearGradient colors={['rgba(227,28,37,0.2)', 'rgba(227,28,37,0.05)']} style={styles.logoutGradient}>
-            <Text style={styles.logoutText}>🚪 Cerrar sesión</Text>
-          </LinearGradient>
-        </TouchableOpacity>
-      </ScrollView>
-    </SafeAreaView>
+    <LinearGradient
+      colors={GRADIENTS.purple}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={{
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        justifyContent: 'center',
+        alignItems: 'center',
+        ...SHADOWS.purple,
+      }}
+    >
+      <Text style={{ color: '#fff', fontSize: size * 0.38, fontWeight: '700' }}>
+        {initials}
+      </Text>
+    </LinearGradient>
   );
 }
 
-function SectionCard({ title, children }) {
+function Badge({ role }) {
+  const cfg = {
+    ADMINISTRADOR: { label: 'Admin', colors: GRADIENTS.admin },
+    ENTRENADOR: { label: 'Entrenador', colors: GRADIENTS.entrenador },
+    NUTRICIONISTA: { label: 'Nutricionista', colors: GRADIENTS.admin },
+    RECEPCIONISTA: { label: 'Recepción', colors: GRADIENTS.recepcionista },
+    AFILIADO: { label: 'Afiliado', colors: GRADIENTS.purpleDark },
+  };
+  const c = cfg[role] || cfg.AFILIADO;
   return (
-    <View style={styles.card}>
-      <Text style={styles.cardTitle}>{title}</Text>
+    <LinearGradient colors={c.colors} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
+      style={{ paddingHorizontal: 14, paddingVertical: 4, borderRadius: 20 }}>
+      <Text style={{ color: '#fff', fontSize: FONTS.xsmall, fontWeight: '700' }}>{c.label}</Text>
+    </LinearGradient>
+  );
+}
+
+function InfoRow({ icon, label, value }) {
+  return (
+    <View style={{
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: COLORS.bgCard,
+      borderRadius: BORDER_RADIUS.md,
+      padding: SPACING.md,
+      marginBottom: SPACING.sm,
+      ...SHADOWS.subtle,
+    }}>
+      <View style={{
+        width: 38,
+        height: 38,
+        borderRadius: 19,
+        backgroundColor: COLORS.purpleGlow,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: SPACING.md,
+      }}>
+        <Ionicons name={icon} size={18} color={COLORS.purpleLight} />
+      </View>
+      <View style={{ flex: 1 }}>
+        <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.small }}>{label}</Text>
+        <Text style={{ color: COLORS.text, fontSize: FONTS.body, fontWeight: '600', marginTop: 2 }}>{value}</Text>
+      </View>
+    </View>
+  );
+}
+
+function SectionCard({ title, icon, children }) {
+  return (
+    <View style={{
+      backgroundColor: COLORS.bgCard,
+      borderRadius: BORDER_RADIUS.lg,
+      padding: SPACING.md,
+      marginBottom: SPACING.md,
+      ...SHADOWS.card,
+    }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: SPACING.md }}>
+        <Ionicons name={icon} size={20} color={COLORS.purpleLight} style={{ marginRight: SPACING.sm }} />
+        <Text style={{ color: COLORS.text, fontSize: FONTS.subtitle, fontWeight: '700' }}>{title}</Text>
+      </View>
       {children}
     </View>
   );
 }
 
-function Row({ label, value }) {
+export default function MiPerfilScreen({ navigation }) {
+  const [perfil, setPerfil] = useState(null);
+  const [ciclo, setCiclo] = useState(null);
+  const [restricciones, setRestricciones] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const scrollY = useState(() => new Animated.Value(0))[0];
+
+  const fetchData = useCallback(async () => {
+    try {
+      const [perfilRes, ciclosRes, restricRes] = await Promise.all([
+        getMiPerfil(),
+        getMisCiclos(),
+        getMisRestricciones(),
+      ]);
+      setPerfil(perfilRes.data);
+      setCiclo(ciclosRes.data?.cicloActual || ciclosRes.data?.[0] || null);
+      setRestricciones(restricRes.data || []);
+    } catch (err) {
+      Alert.alert('Error', 'No se pudo cargar el perfil.');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  const onRefresh = () => { setRefreshing(true); fetchData(); };
+
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.multiRemove(['metafit_token', 'metafit_user', 'metafit_role']);
+      navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+    } catch (_) {}
+  };
+
+  const handlePhoto = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permiso requerido', 'Necesitamos acceso a tu galería.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({ quality: 0.7 });
+    if (!result.canceled) {
+      Alert.alert('Foto', 'Foto seleccionada (subida pendiente)');
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, backgroundColor: COLORS.bg, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color={COLORS.purple} />
+      </View>
+    );
+  }
+
+  const u = perfil?.usuario || perfil || {};
+  const rol = u.nombre_rol || perfil?.rol || 'AFILIADO';
+  const nombreCompleto = `${u.nombre || ''} ${u.apellido || ''}`.trim() || 'Usuario';
+  const edad = u.edad || '-';
+  const peso = u.peso ?? perfil?.peso ?? '-';
+  const altura = u.altura ?? perfil?.altura ?? '-';
+
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, 120],
+    outputRange: [260, 160],
+    extrapolate: 'clamp',
+  });
+
   return (
-    <View style={styles.row}>
-      <Text style={styles.label}>{label}</Text>
-      <Text style={styles.value}>{value || '-'}</Text>
+    <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
+      <Animated.View style={{ height: headerHeight, overflow: 'hidden' }}>
+        <LinearGradient colors={GRADIENTS.purple} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1.2 }}
+          style={{ flex: 1, justifyContent: 'flex-end', paddingHorizontal: SPACING.lg, paddingBottom: SPACING.lg }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <TouchableOpacity onPress={handlePhoto} activeOpacity={0.8}>
+              <Avatar nombre={nombreCompleto} size={72} />
+            </TouchableOpacity>
+            <View style={{ marginLeft: SPACING.md, flex: 1 }}>
+              <Text style={{ color: '#fff', fontSize: FONTS.title, fontWeight: '800' }} numberOfLines={1}>
+                {nombreCompleto}
+              </Text>
+              <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: FONTS.body, marginTop: 2 }}>
+                {u.correo || ''}
+              </Text>
+              <View style={{ flexDirection: 'row', marginTop: SPACING.sm }}>
+                <Badge role={rol} />
+              </View>
+            </View>
+          </View>
+        </LinearGradient>
+      </Animated.View>
+
+      <Animated.ScrollView
+        contentContainerStyle={{ padding: SPACING.md, paddingBottom: SPACING.xl + 20 }}
+        onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: false })}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}
+          tintColor={COLORS.purple} colors={[COLORS.purple]} />}
+      >
+        <SectionCard title="Información Personal" icon="person-outline">
+          <InfoRow icon="calendar-outline" label="Edad" value={`${edad} años`} />
+          <InfoRow icon="scale-outline" label="Peso" value={`${peso} kg`} />
+          <InfoRow icon="resize-outline" label="Altura" value={`${altura} cm`} />
+          <InfoRow icon="mail-outline" label="Correo" value={u.correo || '-'} />
+          <InfoRow icon="call-outline" label="Teléfono" value={u.telefono || '-'} />
+        </SectionCard>
+
+        {ciclo && (
+          <SectionCard title="Estado Físico" icon="fitness-outline">
+            <InfoRow icon="barbell-outline" label="Ciclo Actual" value={ciclo.nombre || `#${ciclo.id_ciclo}`} />
+            {ciclo.dias_entreno != null && (
+              <InfoRow icon="calendar-outline" label="Días de Entreno" value={`${ciclo.dias_entreno}/semana`} />
+            )}
+            {ciclo.objetivo && (
+              <InfoRow icon="flag-outline" label="Objetivo" value={ciclo.objetivo} />
+            )}
+            {ciclo.estado && (
+              <InfoRow icon="pulse-outline" label="Estado" value={ciclo.estado} />
+            )}
+          </SectionCard>
+        )}
+
+        {restricciones.length > 0 && (
+          <SectionCard title="Restricciones" icon="warning-outline">
+            {restricciones.map((r, i) => (
+              <View key={i} style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                backgroundColor: 'rgba(227,28,37,0.1)',
+                borderRadius: BORDER_RADIUS.sm,
+                padding: SPACING.sm,
+                marginBottom: SPACING.xs,
+              }}>
+                <Ionicons name="alert-circle" size={16} color={COLORS.error} style={{ marginRight: SPACING.sm }} />
+                <Text style={{ color: COLORS.text, fontSize: FONTS.small, flex: 1 }}>
+                  {r.descripcion || r.nombre || `Restricción`}
+                </Text>
+              </View>
+            ))}
+          </SectionCard>
+        )}
+
+        <TouchableOpacity onPress={handleLogout} activeOpacity={0.7}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'rgba(227,28,37,0.15)',
+            borderRadius: BORDER_RADIUS.md,
+            padding: SPACING.md,
+            marginTop: SPACING.sm,
+          }}>
+          <Ionicons name="log-out-outline" size={20} color={COLORS.error} style={{ marginRight: SPACING.sm }} />
+          <Text style={{ color: COLORS.error, fontSize: FONTS.body, fontWeight: '600' }}>Cerrar Sesión</Text>
+        </TouchableOpacity>
+      </Animated.ScrollView>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: COLORS.bg,
-  },
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: COLORS.bg,
-  },
-  container: {
-    paddingBottom: SPACING.xl,
-  },
-  headerGradient: {
-    paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.lg,
-    paddingBottom: SPACING.lg,
-  },
-  avatarRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: SPACING.md,
-  },
-  avatarActive: {
-    backgroundColor: COLORS.success,
-  },
-  avatarInactive: {
-    backgroundColor: COLORS.textMuted,
-  },
-  avatarText: {
-    fontSize: 26,
-    fontWeight: '700',
-    color: COLORS.text,
-  },
-  headerInfo: {
-    flex: 1,
-  },
-  headerName: {
-    fontSize: FONTS.subtitle,
-    fontWeight: '700',
-    color: COLORS.text,
-    marginBottom: SPACING.xs,
-  },
-  badge: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: SPACING.sm + 4,
-    paddingVertical: 2,
-    borderRadius: BORDER_RADIUS.sm,
-    borderWidth: 1,
-  },
-  badgeActive: {
-    backgroundColor: 'rgba(5,150,105,0.15)',
-    borderColor: 'rgba(5,150,105,0.4)',
-  },
-  badgeInactive: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderColor: 'rgba(255,255,255,0.15)',
-  },
-  badgeText: {
-    fontSize: FONTS.xsmall,
-    fontWeight: '600',
-  },
-  cardsSection: {
-    paddingHorizontal: SPACING.md,
-    paddingTop: SPACING.md,
-  },
-  card: {
-    backgroundColor: COLORS.bgCard,
-    borderRadius: BORDER_RADIUS.lg,
-    padding: SPACING.md,
-    marginBottom: SPACING.md,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    ...SHADOWS.card,
-  },
-  cardTitle: {
-    fontSize: FONTS.body,
-    fontWeight: '700',
-    color: COLORS.text,
-    marginBottom: SPACING.sm + 4,
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: SPACING.xs + 2,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.05)',
-  },
-  label: {
-    fontSize: FONTS.small,
-    color: COLORS.textSecondary,
-    flex: 1,
-  },
-  value: {
-    fontSize: FONTS.small,
-    color: COLORS.text,
-    fontWeight: '500',
-    flex: 1.5,
-    textAlign: 'right',
-  },
-  restriccionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: SPACING.xs,
-  },
-  restriccionDot: {
-    color: COLORS.red,
-    fontSize: FONTS.body,
-    marginRight: SPACING.sm,
-  },
-  restriccionText: {
-    fontSize: FONTS.small,
-    color: COLORS.red,
-  },
-  logoutButton: {
-    marginHorizontal: SPACING.md,
-    marginTop: SPACING.sm,
-    borderRadius: BORDER_RADIUS.md,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(227,28,37,0.3)',
-  },
-  logoutGradient: {
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  logoutText: {
-    fontSize: FONTS.body,
-    fontWeight: '600',
-    color: COLORS.red,
-  },
-  errorText: {
-    color: COLORS.red,
-    fontSize: FONTS.body,
-  },
-});

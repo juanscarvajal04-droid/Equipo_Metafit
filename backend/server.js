@@ -17,7 +17,7 @@ const IS_PROD = process.env.NODE_ENV === 'production';
 
 
 // ── CORS ──────────────────────────────────────────────────────
-const ALLOWED_ORIGINS = (process.env.CORS_ORIGINS || 'http://localhost:5173,http://localhost:3000')
+const ALLOWED_ORIGINS = (process.env.CORS_ORIGINS || 'http://localhost:5173,http://localhost:3000,http://localhost:8081,http://192.168.0.4:8081,exp://192.168.0.4:8081')
   .split(',')
   .map(o => o.trim());
 
@@ -40,8 +40,15 @@ app.use((req, res, next) => {
   cors({
     origin: (origin, callback) => {
       // Permitir requests sin origin: Postman, curl, herramientas server-to-server
-      // Solo bloquear si el origin existe pero NO está en la lista permitida
-      if (!origin || ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+      // También permitir orígenes de desarrollo local (Expo, emuladores, LAN)
+      const isLocalDev = origin && (
+        origin.startsWith('http://localhost:') ||
+        origin.startsWith('http://192.168.') ||
+        origin.startsWith('http://10.') ||
+        origin.startsWith('http://172.') ||
+        origin.startsWith('exp://')
+      );
+      if (!origin || ALLOWED_ORIGINS.includes(origin) || isLocalDev) return callback(null, true);
       callback(new Error(`CORS bloqueado para origen: ${origin}`));
     },
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

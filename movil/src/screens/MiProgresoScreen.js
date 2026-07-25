@@ -1,206 +1,279 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
-  FlatList,
+  ScrollView,
+  TouchableOpacity,
   ActivityIndicator,
-  StyleSheet,
-  SafeAreaView,
+  RefreshControl,
+  Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
+import { COLORS, GRADIENTS, FONTS, SPACING, SHADOWS, BORDER_RADIUS } from '../theme';
 import { getMiProgreso } from '../services/api';
-import { COLORS, GRADIENTS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../theme';
 
-function formatFecha(fecha) {
-  if (!fecha) return '-';
-  const d = new Date(fecha);
-  const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-  return `${d.getDate()} ${meses[d.getMonth()]} ${d.getFullYear()}`;
-}
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-export default function MiProgresoScreen() {
-  const [registros, setRegistros] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await getMiProgreso();
-        const data = Array.isArray(res.data) ? res.data : [];
-        setRegistros(data);
-      } catch {
-        setError('Error al cargar progreso');
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, []);
-
-  if (loading) {
-    return (
-      <SafeAreaView style={styles.center}>
-        <ActivityIndicator size="large" color={COLORS.red} />
-      </SafeAreaView>
-    );
-  }
-
-  if (error) {
-    return (
-      <SafeAreaView style={styles.center}>
-        <Text style={styles.errorText}>{error}</Text>
-      </SafeAreaView>
-    );
-  }
-
-  if (registros.length === 0) {
-    return (
-      <SafeAreaView style={styles.center}>
-        <View style={styles.emptyCard}>
-          <Text style={styles.emptyIcon}>📊</Text>
-          <Text style={styles.emptyTitle}>Sin registros</Text>
-          <Text style={styles.emptyText}>
-            Aún no tienes registros de progreso.
-          </Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
-  const ultimo = registros[registros.length - 1];
-
-  const renderItem = ({ item }) => (
-    <View style={styles.card}>
-      <Text style={styles.fecha}>{formatFecha(item.fecha_registro)}</Text>
-      <View style={styles.medidasGrid}>
-        <MedidaItem label="Peso" value={item.peso_kg != null ? `${item.peso_kg} kg` : '-'} />
-        <MedidaItem label="IMC" value={item.imc != null ? item.imc.toFixed(1) : '-'} />
-        <MedidaItem label="Grasa" value={item.porcentaje_grasa != null ? `${item.porcentaje_grasa}%` : '-'} />
-        <MedidaItem label="Cintura" value={item.medida_cintura != null ? `${item.medida_cintura} cm` : '-'} />
-        <MedidaItem label="Brazo" value={item.medida_brazo != null ? `${item.medida_brazo} cm` : '-'} />
-        <MedidaItem label="Pierna" value={item.medida_pierna != null ? `${item.medida_pierna} cm` : '-'} />
+function ProgressStatCard({ icon, label, value, color }) {
+  return (
+    <View style={{
+      backgroundColor: COLORS.bgCard,
+      borderRadius: BORDER_RADIUS.md,
+      padding: SPACING.md,
+      alignItems: 'center',
+      flex: 1,
+      marginHorizontal: SPACING.xs,
+      ...SHADOWS.subtle,
+    }}>
+      <View style={{
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: `${color}20`,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: SPACING.sm,
+      }}>
+        <Ionicons name={icon} size={20} color={color} />
       </View>
-    </View>
-  );
-
-  return (
-    <SafeAreaView style={styles.safeArea}>
-      <FlatList
-        data={registros}
-        keyExtractor={(_, i) => String(i)}
-        contentContainerStyle={styles.list}
-        ListHeaderComponent={
-          <LinearGradient colors={GRADIENTS.oscuro} style={styles.headerGradient}>
-            <Text style={styles.headerTitle}>Progreso Físico</Text>
-          </LinearGradient>
-        }
-        ListHeaderComponentStyle={styles.headerComponent}
-        renderItem={renderItem}
-      />
-    </SafeAreaView>
-  );
-}
-
-function MedidaItem({ label, value, destacado }) {
-  return (
-    <View style={[styles.medidaItem, destacado && styles.medidaDestacado]}>
-      <Text style={styles.medidaLabel}>{label}</Text>
-      <Text style={[styles.medidaValue, destacado && styles.medidaValueDestacado]}>
-        {value}
+      <Text style={{ color: COLORS.text, fontSize: FONTS.subtitle, fontWeight: '800' }}>{value}</Text>
+      <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.xsmall, marginTop: 2, textAlign: 'center' }}>
+        {label}
       </Text>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: COLORS.bg,
-  },
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: COLORS.bg,
-    padding: SPACING.lg,
-  },
-  list: {
-    paddingBottom: SPACING.xl,
-  },
-  headerComponent: {
-    marginBottom: 0,
-  },
-  headerGradient: {
-    paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.lg,
-    paddingBottom: SPACING.md,
-  },
-  headerTitle: {
-    fontSize: FONTS.title,
-    fontWeight: '700',
-    color: COLORS.text,
-  },
-  card: {
-    marginHorizontal: SPACING.md,
-    marginTop: SPACING.md,
-    backgroundColor: COLORS.bgCard,
-    borderRadius: BORDER_RADIUS.lg,
-    padding: SPACING.md,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    ...SHADOWS.card,
-  },
-  fecha: {
-    fontSize: FONTS.small,
-    fontWeight: '700',
-    color: COLORS.text,
-    marginBottom: SPACING.sm + 4,
-  },
-  medidasGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  medidaItem: {
-    width: '33%',
-    marginBottom: SPACING.sm,
-  },
-  medidaLabel: {
-    fontSize: FONTS.xsmall,
-    color: COLORS.textSecondary,
-  },
-  medidaValue: {
-    fontSize: FONTS.small,
-    color: COLORS.text,
-    fontWeight: '600',
-  },
-  emptyCard: {
-    alignItems: 'center',
-    padding: SPACING.xl,
-    backgroundColor: COLORS.bgCard,
-    borderRadius: BORDER_RADIUS.lg,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    ...SHADOWS.card,
-  },
-  emptyIcon: {
-    fontSize: 48,
-    marginBottom: SPACING.md,
-  },
-  emptyTitle: {
-    fontSize: FONTS.subtitle,
-    fontWeight: '700',
-    color: COLORS.text,
-    marginBottom: SPACING.sm,
-  },
-  emptyText: {
-    fontSize: FONTS.body,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-    lineHeight: 22,
-  },
-  errorText: {
-    color: COLORS.red,
-    fontSize: FONTS.body,
-  },
-});
+function ProgresoItem({ item, isLatest }) {
+  const fecha = item.fecha || item.created_at || '-';
+  const peso = item.peso ?? '-';
+  const imc = item.imc ?? item.IMC ?? '-';
+  const grasa = item.grasa_corporal ?? item.grasa ?? item.porcentaje_grasa ?? '-';
+  const musculo = item.masa_muscular ?? item.musculo ?? '-';
+  const cintura = item.cintura ?? '-';
+
+  return (
+    <LinearGradient
+      colors={isLatest ? [COLORS.purple, COLORS.purpleDark] : [COLORS.bgCard, COLORS.bgCard]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={{
+        borderRadius: BORDER_RADIUS.lg,
+        padding: SPACING.md,
+        marginBottom: SPACING.md,
+        ...(isLatest ? SHADOWS.purple : SHADOWS.subtle),
+      }}
+    >
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: SPACING.sm }}>
+        <Text style={{
+          color: isLatest ? '#fff' : COLORS.text,
+          fontSize: FONTS.body,
+          fontWeight: '700',
+        }}>
+          {fecha}
+        </Text>
+        {isLatest && (
+          <View style={{
+            backgroundColor: 'rgba(255,255,255,0.2)',
+            borderRadius: 12,
+            paddingHorizontal: 10,
+            paddingVertical: 3,
+          }}>
+            <Text style={{ color: '#fff', fontSize: FONTS.xsmall, fontWeight: '700' }}>ÚLTIMO</Text>
+          </View>
+        )}
+      </View>
+
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+        {peso !== '-' && (
+          <View style={{ width: '50%', paddingVertical: SPACING.xs }}>
+            <Text style={{ color: isLatest ? 'rgba(255,255,255,0.6)' : COLORS.textSecondary, fontSize: FONTS.xsmall }}>
+              Peso
+            </Text>
+            <Text style={{ color: isLatest ? '#fff' : COLORS.text, fontSize: FONTS.body, fontWeight: '600' }}>
+              {peso} kg
+            </Text>
+          </View>
+        )}
+        {imc !== '-' && (
+          <View style={{ width: '50%', paddingVertical: SPACING.xs }}>
+            <Text style={{ color: isLatest ? 'rgba(255,255,255,0.6)' : COLORS.textSecondary, fontSize: FONTS.xsmall }}>
+              IMC
+            </Text>
+            <Text style={{ color: isLatest ? '#fff' : COLORS.text, fontSize: FONTS.body, fontWeight: '600' }}>
+              {imc}
+            </Text>
+          </View>
+        )}
+        {grasa !== '-' && (
+          <View style={{ width: '50%', paddingVertical: SPACING.xs }}>
+            <Text style={{ color: isLatest ? 'rgba(255,255,255,0.6)' : COLORS.textSecondary, fontSize: FONTS.xsmall }}>
+              Grasa Corporal
+            </Text>
+            <Text style={{ color: isLatest ? '#fff' : COLORS.text, fontSize: FONTS.body, fontWeight: '600' }}>
+              {grasa}%
+            </Text>
+          </View>
+        )}
+        {musculo !== '-' && (
+          <View style={{ width: '50%', paddingVertical: SPACING.xs }}>
+            <Text style={{ color: isLatest ? 'rgba(255,255,255,0.6)' : COLORS.textSecondary, fontSize: FONTS.xsmall }}>
+              Masa Muscular
+            </Text>
+            <Text style={{ color: isLatest ? '#fff' : COLORS.text, fontSize: FONTS.body, fontWeight: '600' }}>
+              {musculo} kg
+            </Text>
+          </View>
+        )}
+        {cintura !== '-' && (
+          <View style={{ width: '50%', paddingVertical: SPACING.xs }}>
+            <Text style={{ color: isLatest ? 'rgba(255,255,255,0.6)' : COLORS.textSecondary, fontSize: FONTS.xsmall }}>
+              Cintura
+            </Text>
+            <Text style={{ color: isLatest ? '#fff' : COLORS.text, fontSize: FONTS.body, fontWeight: '600' }}>
+              {cintura} cm
+            </Text>
+          </View>
+        )}
+      </View>
+    </LinearGradient>
+  );
+}
+
+export default function MiProgresoScreen() {
+  const [progreso, setProgreso] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [showAll, setShowAll] = useState(false);
+  const [error, setError] = useState(null);
+
+  const fetchData = useCallback(async () => {
+    try {
+      setError(null);
+      const res = await getMiProgreso();
+      const data = res.data?.progreso || res.data || [];
+      setProgreso(Array.isArray(data) ? data : []);
+    } catch (_) {
+      setError('Error al cargar el progreso.');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  const onRefresh = () => { setRefreshing(true); fetchData(); };
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, backgroundColor: COLORS.bg, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color={COLORS.purple} />
+      </View>
+    );
+  }
+
+  const latest = progreso[0] || null;
+  const history = showAll ? progreso.slice(1) : progreso.slice(1, 5);
+  const hasMore = progreso.length > 5;
+
+  const pesoActual = latest?.peso ?? '-';
+  const pesoAnterior = progreso[1]?.peso ?? null;
+  const diffPeso = (pesoActual !== '-' && pesoAnterior != null)
+    ? (Number(pesoActual) - Number(pesoAnterior)).toFixed(1)
+    : null;
+
+  return (
+    <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
+      <LinearGradient colors={GRADIENTS.purple} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+        style={{ paddingHorizontal: SPACING.lg, paddingTop: SPACING.xl, paddingBottom: SPACING.lg }}>
+        <Text style={{ color: '#fff', fontSize: FONTS.title, fontWeight: '800' }}>Mi Progreso</Text>
+        <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: FONTS.body, marginTop: 4 }}>
+          Evolución física
+        </Text>
+      </LinearGradient>
+
+      {error ? (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: SPACING.lg }}>
+          <Ionicons name="alert-circle-outline" size={48} color={COLORS.textSecondary} />
+          <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.body, marginTop: SPACING.md, textAlign: 'center' }}>
+            {error}
+          </Text>
+        </View>
+      ) : progreso.length === 0 ? (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: SPACING.lg }}>
+          <Ionicons name="bar-chart-outline" size={48} color={COLORS.textSecondary} />
+          <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.body, marginTop: SPACING.md, textAlign: 'center' }}>
+            Aún no hay registros de progreso.
+          </Text>
+        </View>
+      ) : (
+        <ScrollView
+          contentContainerStyle={{ padding: SPACING.md, paddingBottom: SPACING.xl }}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.purple} colors={[COLORS.purple]} />
+          }
+        >
+          <View style={{ flexDirection: 'row', marginBottom: SPACING.lg }}>
+            <ProgressStatCard icon="scale-outline" label="Peso Actual" value={`${pesoActual} kg`} color={COLORS.purpleLight} />
+            <ProgressStatCard
+              icon="trending-down-outline"
+              label="Cambio"
+              value={diffPeso != null ? `${diffPeso} kg` : '-'}
+              color={diffPeso != null && Number(diffPeso) < 0 ? COLORS.check : COLORS.warning}
+            />
+            <ProgressStatCard icon="calendar-outline" label="Registros" value={`${progreso.length}`} color={COLORS.water} />
+          </View>
+
+          {latest && (
+            <View style={{ marginBottom: SPACING.md }}>
+              <Text style={{ color: COLORS.text, fontSize: FONTS.body, fontWeight: '700', marginBottom: SPACING.sm }}>
+                Último Registro
+              </Text>
+              <ProgresoItem item={latest} isLatest />
+            </View>
+          )}
+
+          {history.length > 0 && (
+            <View>
+              <Text style={{ color: COLORS.text, fontSize: FONTS.body, fontWeight: '700', marginBottom: SPACING.sm }}>
+                Historial
+              </Text>
+              {history.map((item, i) => (
+                <ProgresoItem key={item.id_progreso || i} item={item} isLatest={false} />
+              ))}
+            </View>
+          )}
+
+          {hasMore && (
+            <TouchableOpacity
+              onPress={() => setShowAll(!showAll)}
+              activeOpacity={0.7}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: COLORS.bgCard,
+                borderRadius: BORDER_RADIUS.md,
+                padding: SPACING.md,
+                marginTop: SPACING.sm,
+                ...SHADOWS.subtle,
+              }}
+            >
+              <Ionicons
+                name={showAll ? 'chevron-up-outline' : 'chevron-down-outline'}
+                size={20}
+                color={COLORS.purpleLight}
+                style={{ marginRight: SPACING.sm }}
+              />
+              <Text style={{ color: COLORS.purpleLight, fontSize: FONTS.body, fontWeight: '600' }}>
+                {showAll ? 'Mostrar menos' : 'Ver historial completo'}
+              </Text>
+            </TouchableOpacity>
+          )}
+        </ScrollView>
+      )}
+    </View>
+  );
+}

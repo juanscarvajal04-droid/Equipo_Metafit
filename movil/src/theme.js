@@ -17,6 +17,14 @@ export const COLORS = {
   border: 'rgba(255,255,255,0.1)',
   borderActive: 'rgba(255,255,255,0.2)',
   inputBg: '#1a1a2e',
+  purple: '#8b5cf6',
+  purpleLight: '#a78bfa',
+  purpleDark: '#6d28d9',
+  purpleGlow: 'rgba(139,92,246,0.3)',
+  water: '#3b82f6',
+  waterLight: 'rgba(59,130,246,0.2)',
+  check: '#10b981',
+  checkBg: 'rgba(16,185,129,0.15)',
 };
 
 export const GRADIENTS = {
@@ -25,6 +33,9 @@ export const GRADIENTS = {
   admin: ['#7c3aed', '#4f46e5'],
   entrenador: ['#059669', '#0d9488'],
   recepcionista: ['#2563eb', '#0891b2'],
+  purple: ['#8b5cf6', '#6d28d9'],
+  purpleDark: ['#6d28d9', '#4c1d95'],
+  water: ['#3b82f6', '#1d4ed8'],
 };
 
 export const FONTS = {
@@ -57,6 +68,13 @@ export const SHADOWS = {
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 3,
+  },
+  purple: {
+    shadowColor: '#8b5cf6',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 4,
   },
 };
 
