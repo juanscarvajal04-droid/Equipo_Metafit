@@ -13,7 +13,7 @@ const ROLE_KEY  = 'metafit_role';
 //   3. RENDER_URL           (producción en Render)
 //   4. localhost            (fallback local)
 // ────────────────────────────────────────────────────────────────
-const RENDER_URL = 'https://metafit-backend.onrender.com'; // ← CAMBIAR por la URL real de Render
+const RENDER_URL = 'https://metafit-backend-rr18.onrender.com'; // ← CAMBIAR si el slug de Render cambia
 const API_URL = process.env.EXPO_PUBLIC_API_URL || tunnelUrl || RENDER_URL || 'http://localhost:3001';
 
 const api = axios.create({
