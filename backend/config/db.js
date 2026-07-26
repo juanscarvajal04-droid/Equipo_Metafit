@@ -63,8 +63,8 @@ const poolConfig = {
 };
 
 if (DB_SSL === 'true' || DB_SSL === '1') {
-  poolConfig.ssl = {};
-  console.log('[db.js] SSL habilitado para la conexión MySQL');
+  poolConfig.ssl = { rejectUnauthorized: false };
+  console.log('[db.js] SSL habilitado para la conexión MySQL (rejectUnauthorized: false)');
 }
 
 const pool = mysql.createPool(poolConfig);
