@@ -1,7 +1,8 @@
 node_modules
-npm-debug.log
 .git
-.env
+.cache
 *.md
+movil
+frontend_web
 __tests__
-coverage
+.env
