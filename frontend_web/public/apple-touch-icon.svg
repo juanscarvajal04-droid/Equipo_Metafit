@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#12121e"/>
+      <stop offset="100%" stop-color="#0a0a0f"/>
+    </linearGradient>
+    <linearGradient id="purpleGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#a78bfa"/>
+      <stop offset="30%" stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+    <linearGradient id="purpleDark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6d28d9"/>
+      <stop offset="100%" stop-color="#4c1d95"/>
+    </linearGradient>
+    <linearGradient id="redGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e31c25"/>
+      <stop offset="100%" stop-color="#b71c1c"/>
+    </linearGradient>
+    <linearGradient id="barGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#c084fc"/>
+      <stop offset="40%" stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#e31c25"/>
+    </linearGradient>
+    <linearGradient id="glowGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#e31c25" stop-opacity="0.04"/>
+    </linearGradient>
+    <filter id="outerGlow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="innerShadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <!-- Background rounded rect (Apple-style) -->
+  <rect x="4" y="4" width="172" height="172" rx="36" fill="url(#bgGrad)" stroke="url(#purpleGrad)" stroke-width="3" filter="url(#outerGlow)"/>
+
+  <!-- Inner glow -->
+  <rect x="4" y="4" width="172" height="172" rx="36" fill="url(#glowGrad)" stroke="none"/>
+
+  <!-- Decorative inner rect -->
+  <rect x="16" y="16" width="148" height="148" rx="28" fill="none" stroke="url(#purpleGrad)" stroke-width="1" opacity="0.2"/>
+
+  <!-- Corner accent dots -->
+  <circle cx="28" cy="28" r="3" fill="#8b5cf6" opacity="0.5"/>
+  <circle cx="152" cy="28" r="3" fill="#8b5cf6" opacity="0.5"/>
+  <circle cx="28" cy="152" r="3" fill="#8b5cf6" opacity="0.5"/>
+  <circle cx="152" cy="152" r="3" fill="#8b5cf6" opacity="0.5"/>
+
+  <!-- Central dumbbell -->
+  <!-- Main bar -->
+  <rect x="48" y="80" width="84" height="20" rx="8" fill="url(#barGrad)" filter="url(#innerShadow)"/>
+
+  <!-- Bar highlight -->
+  <rect x="54" y="84" width="72" height="4" rx="2" fill="#ffffff" opacity="0.12"/>
+
+  <!-- Left weight plate -->
+  <rect x="35" y="60" width="30" height="60" rx="10" fill="url(#purpleGrad)" filter="url(#innerShadow)"/>
+  <rect x="40" y="65" width="20" height="50" rx="6" fill="url(#purpleDark)" opacity="0.35"/>
+
+  <!-- M cutout on left weight -->
+  <line x1="44" y1="70" x2="44" y2="110" stroke="#0a0a0f" stroke-width="2.5" stroke-linecap="round" opacity="0.4"/>
+  <line x1="44" y1="88" x2="50" y2="95" stroke="#0a0a0f" stroke-width="2.5" stroke-linecap="round" opacity="0.4"/>
+  <line x1="50" y1="95" x2="56" y2="88" stroke="#0a0a0f" stroke-width="2.5" stroke-linecap="round" opacity="0.4"/>
+  <line x1="56" y1="70" x2="56" y2="110" stroke="#0a0a0f" stroke-width="2.5" stroke-linecap="round" opacity="0.4"/>
+
+  <!-- Right weight plate -->
+  <rect x="115" y="60" width="30" height="60" rx="10" fill="url(#redGrad)" filter="url(#innerShadow)"/>
+  <rect x="120" y="65" width="20" height="50" rx="6" fill="#8b0000" opacity="0.25"/>
+
+  <!-- F cutout on right weight -->
+  <line x1="124" y1="70" x2="124" y2="110" stroke="#0a0a0f" stroke-width="2.5" stroke-linecap="round" opacity="0.4"/>
+  <line x1="124" y1="73" x2="140" y2="73" stroke="#0a0a0f" stroke-width="2.5" stroke-linecap="round" opacity="0.4"/>
+  <line x1="124" y1="88" x2="136" y2="88" stroke="#0a0a0f" stroke-width="2.5" stroke-linecap="round" opacity="0.4"/>
+
+  <!-- Side grooves -->
+  <line x1="37" y1="68" x2="37" y2="112" stroke="#000" stroke-width="1.5" opacity="0.15"/>
+  <line x1="63" y1="68" x2="63" y2="112" stroke="#000" stroke-width="1.5" opacity="0.15"/>
+  <line x1="117" y1="68" x2="117" y2="112" stroke="#000" stroke-width="1.5" opacity="0.15"/>
+  <line x1="143" y1="68" x2="143" y2="112" stroke="#000" stroke-width="1.5" opacity="0.15"/>
+
+  <!-- MF monogram -->
+  <text x="90" y="90" text-anchor="middle" dominant-baseline="central"
+        font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
+        font-weight="900" font-size="22" fill="#ffffff"
+        letter-spacing="0.5">MF</text>
+
+  <!-- Motion arcs -->
+  <path d="M18 52 Q10 90 18 128" fill="none" stroke="#a78bfa" stroke-width="3" opacity="0.35" stroke-linecap="round"/>
+  <path d="M162 52 Q170 90 162 128" fill="none" stroke="#e31c25" stroke-width="3" opacity="0.35" stroke-linecap="round"/>
+
+  <!-- Energy particles -->
+  <circle cx="14" cy="42" r="3" fill="#c084fc" opacity="0.5"/>
+  <circle cx="166" cy="42" r="3" fill="#f87171" opacity="0.5"/>
+  <circle cx="14" cy="138" r="2" fill="#c084fc" opacity="0.3"/>
+  <circle cx="166" cy="138" r="2" fill="#f87171" opacity="0.3"/>
+
+  <!-- MetaFit name -->
+  <text x="90" y="138" text-anchor="middle" dominant-baseline="central"
+        font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
+        font-weight="700" font-size="10" fill="#a78bfa" opacity="0.7"
+        letter-spacing="4">METAFIT</text>
+</svg>
