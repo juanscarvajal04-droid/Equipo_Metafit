@@ -8,15 +8,19 @@ MYSQLD=/usr/bin/mariadbd
 mkdir -p /run/mysqld
 chown mysql:mysql /run/mysqld
 
-echo ">>> Iniciando MariaDB (modo setup)..."
+if [ ! -d "$MYSQL_DATA/mysql" ]; then
+  echo ">>> Inicializando base de datos MariaDB..."
+  mariadb-install-db --user=mysql --datadir="$MYSQL_DATA" --skip-test-db
+fi
+
 $MYSQLD --datadir="$MYSQL_DATA" --socket="$MYSQL_SOCK" --pid-file=/tmp/mysql.pid \
-  --skip-grant-tables --skip-networking --skip-name-resolve --innodb-buffer-pool-size=256M --user=mysql &
+  --skip-name-resolve --innodb-buffer-pool-size=128M --user=mysql &
 MYSQL_PID=$!
 
-echo ">>> Esperando a que MariaDB inicie..."
+echo ">>> Esperando MariaDB..."
 for i in $(seq 1 20); do
   if mysqladmin ping --socket="$MYSQL_SOCK" 2>/dev/null; then
-    echo ">>> MariaDB listo!"
+    echo ">>> MariaDB listo"
     break
   fi
   sleep 1
@@ -27,31 +31,25 @@ if ! mysqladmin ping --socket="$MYSQL_SOCK" 2>/dev/null; then
   exit 1
 fi
 
-echo ">>> Configurando autenticación root para TCP..."
-mysql --socket="$MYSQL_SOCK" -e "FLUSH PRIVILEGES;"
-mysql --socket="$MYSQL_SOCK" -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Admin123!';"
-mysql --socket="$MYSQL_SOCK" -e "CREATE USER IF NOT EXISTS 'root'@'127.0.0.1' IDENTIFIED BY 'Admin123!'; ALTER USER 'root'@'127.0.0.1' IDENTIFIED BY 'Admin123!'; GRANT ALL ON *.* TO 'root'@'127.0.0.1' WITH GRANT OPTION;"
-mysql --socket="$MYSQL_SOCK" -e "CREATE USER IF NOT EXISTS 'root'@'%' IDENTIFIED BY 'Admin123!'; ALTER USER 'root'@'%' IDENTIFIED BY 'Admin123!'; GRANT ALL ON *.* TO 'root'@'%' WITH GRANT OPTION;"
-mysql --socket="$MYSQL_SOCK" -e "FLUSH PRIVILEGES;"
-echo ">>> Root configurado para TCP"
+DB_EXISTS=$(mysql --socket="$MYSQL_SOCK" -e "SELECT 1 FROM information_schema.SCHEMATA WHERE SCHEMA_NAME='metafit'" 2>/dev/null | grep 1 || echo "")
 
-echo ">>> Deteniendo MariaDB (modo setup)..."
-mysqladmin -u root shutdown --socket="$MYSQL_SOCK" 2>/dev/null || true
-wait $MYSQL_PID 2>/dev/null || true
+if [ -z "$DB_EXISTS" ]; then
+  echo ">>> Creando base de datos metafit..."
+  mysql --socket="$MYSQL_SOCK" -e "CREATE DATABASE IF NOT EXISTS metafit CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+  echo ">>> Ejecutando schema..."
+  mysql --socket="$MYSQL_SOCK" metafit < /app/database/01_schema.sql
+  echo ">>> Ejecutando seed..."
+  mysql --socket="$MYSQL_SOCK" metafit < /app/database/02_seed.sql
+  echo ">>> Ejecutando migración..."
+  mysql --socket="$MYSQL_SOCK" metafit < /app/database/04_migracion_app_movil.sql
+  echo ">>> Base de datos inicializada!"
+else
+  echo ">>> Base de datos metafit ya existe"
+fi
 
-echo ">>> Iniciando MariaDB (modo normal)..."
-$MYSQLD --datadir="$MYSQL_DATA" --socket="$MYSQL_SOCK" --pid-file=/tmp/mysql.pid \
-  --skip-name-resolve --innodb-buffer-pool-size=256M --user=mysql &
-MYSQL_PID=$!
-
-echo ">>> Esperando a que MariaDB inicie..."
-for i in $(seq 1 15); do
-  if mysqladmin ping --socket="$MYSQL_SOCK" 2>/dev/null; then
-    echo ">>> MariaDB listo!"
-    break
-  fi
-  sleep 1
-done
-
-echo ">>> Iniciando aplicación Node.js..."
+echo ">>> Iniciando Node.js..."
+export DB_SOCKET="$MYSQL_SOCK"
+export DB_USER="root"
+export DB_PASSWORD="ignored"
+export DB_NAME="metafit"
 exec node /app/index.js

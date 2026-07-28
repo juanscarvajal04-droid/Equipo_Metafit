@@ -40,13 +40,18 @@ for (const [key, val] of Object.entries(configMap)) {
   }
 }
 
-// ── Creación del pool ──────────────────────────────────────────
-const poolConfig = {
-  host              : DB_HOST,
-  port              : parseInt(DB_PORT, 10),
-  user              : DB_USER,
-  password          : DB_PASSWORD,
-  database          : DB_NAME,
+// ── Creación del pool (soporta socket Unix) ────────────────────
+const poolConfig = {};
+if (process.env.DB_SOCKET) {
+  poolConfig.socketPath = process.env.DB_SOCKET;
+  console.log(`[db.js] Usando socket Unix: ${process.env.DB_SOCKET}`);
+} else {
+  poolConfig.host = DB_HOST;
+  poolConfig.port = parseInt(DB_PORT, 10);
+}
+poolConfig.user = DB_USER;
+poolConfig.password = DB_PASSWORD;
+poolConfig.database = DB_NAME;
   waitForConnections: true,
   connectionLimit   : 10,
   queueLimit        : 0,
