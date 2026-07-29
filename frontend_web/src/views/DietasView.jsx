@@ -3,920 +3,794 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
 import { getId, nombreCompleto, inicial, cicloActivo } from "../utils/afiliadoHelpers";
+import { useToast } from "../hooks/useToast";
+import s from "./DietasView.module.css";
 
 const OBJETIVO_CONFIG = {
-  "Pérdida de grasa": { icono: "🔥", color: "#e94560", bg: "#e9456018" },
-  "Aumento de masa":  { icono: "💪", color: "#2563eb", bg: "#2563eb18" },
-  "Mantenimiento":    { icono: "⚖️", color: "#059669", bg: "#05966918" },
+  "Perdida de grasa": { icono:"🔥", color:"#e94560", bg:"#e9456018" },
+  "Aumento de masa":  { icono:"💪", color:"#2563eb", bg:"#2563eb18" },
+  "Mantenimiento":    { icono:"⚖️", color:"#059669", bg:"#05966918" },
 };
-
-// Restricciones tipo alerta
 const RESTRICCION_COLOR = {
-  "Enfermedad": { bg: "#ef444418", text: "#dc2626" },
-  "Alergia":    { bg: "#f9731618", text: "#ea580c" },
-  "Lesión":     { bg: "#eab30818", text: "#ca8a04" },
+  "Enfermedad": { bg:"#ef444418", text:"#dc2626" },
+  "Alergia":    { bg:"#f9731618", text:"#ea580c" },
+  "Lesion":     { bg:"#eab30818", text:"#ca8a04" },
 };
 
-// ── Catálogo de planes nutricionales ─────────────────────────────────────────
-const PLANES_NUTRICIONALES = [
-  {
-    id: 1,
-    nombre: "Plan Hipercalórico",
-    objetivo: "Aumento de masa",
-    calorias: 3200,
-    comidas: 6,
-    icono: "💪",
-    color: "#2563eb",
-    descripcion: "Superávit calórico con alto contenido proteico. Ideal para ganar masa muscular.",
-    macros: { proteinas: "35%", carbos: "45%", grasas: "20%" },
-    compatible: ["Aumento de masa"],
-    alimentos: ["Pollo", "Arroz", "Avena", "Huevo", "Almendras"],
-  },
-  {
-    id: 2,
-    nombre: "Dieta Mediterránea",
-    objetivo: "Mantenimiento",
-    calorias: 2000,
-    comidas: 4,
-    icono: "🫒",
-    color: "#059669",
-    descripcion: "Rica en grasas saludables, vegetales y proteínas magras. Equilibrada y sostenible.",
-    macros: { proteinas: "25%", carbos: "40%", grasas: "35%" },
-    compatible: ["Mantenimiento", "Pérdida de grasa"],
-    alimentos: ["Pescado", "Aceite de oliva", "Quinoa", "Brócoli", "Tomate"],
-  },
-  {
-    id: 3,
-    nombre: "Plan de Definición",
-    objetivo: "Pérdida de grasa",
-    calorias: 1600,
-    comidas: 5,
-    icono: "🔥",
-    color: "#e94560",
-    descripcion: "Déficit calórico controlado. Alto en proteínas para preservar músculo.",
-    macros: { proteinas: "40%", carbos: "30%", grasas: "30%" },
-    compatible: ["Pérdida de grasa"],
-    alimentos: ["Atún", "Pechuga", "Brócoli", "Batata", "Claras"],
-  },
-  {
-    id: 4,
-    nombre: "Plan Low-Carb",
-    objetivo: "Pérdida de grasa",
-    calorias: 1800,
-    comidas: 4,
-    icono: "🥩",
-    color: "#7c3aed",
-    descripcion: "Reducción de carbohidratos para acelerar la quema de grasa sin perder músculo.",
-    macros: { proteinas: "35%", carbos: "15%", grasas: "50%" },
-    compatible: ["Pérdida de grasa", "Mantenimiento"],
-    alimentos: ["Carne magra", "Huevo", "Aguacate", "Espinaca", "Almendras"],
-  },
-  {
-    id: 5,
-    nombre: "Plan Plant-Based",
-    objetivo: "Mantenimiento",
-    calorias: 1900,
-    comidas: 5,
-    icono: "🌱",
-    color: "#0d9488",
-    descripcion: "100% basado en plantas. Alto en fibra y micronutrientes esenciales.",
-    macros: { proteinas: "20%", carbos: "55%", grasas: "25%" },
-    compatible: ["Mantenimiento", "Pérdida de grasa"],
-    alimentos: ["Lentejas", "Garbanzos", "Quinoa", "Tofu", "Batata"],
-  },
-];
-
-// ── Componente principal ──────────────────────────────────────────────────────
-import { useToast } from "../hooks/useToast";
+const avatarColor = (nombre) => {
+  let hash = 0;
+  for (let i = 0; i < nombre.length; i++) hash = nombre.charCodeAt(i) + ((hash << 5) - hash);
+  return `hsl(${Math.abs(hash) % 360}, 65%, 55%)`;
+};
 
 export default function DietasView() {
-  const { user, authAxios, logout } = useAuth();
+  const { user, authAxios } = useAuth();
+  const { toast, showToast } = useToast();
   const navigate = useNavigate();
-  const role     = user?.role || "Entrenador";
-  const isAdmin  = role === "Administrador";
+  const role = user?.role || "Recepcionista";
 
-  const [afiliados,  setAfiliados]  = useState([]);
-  const [loading,    setLoading]    = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error,      setError]      = useState("");
-  const [busqueda,   setBusqueda]   = useState("");
-  const { toast, showToast }        = useToast();
+  // ── State ──────────────────────────────────────────────────
+  const [afiliados, setAfiliados] = useState([]);
+  const [catalogoAlimentos, setCatalogoAlimentos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState("");
 
-  // Modal asignar plan
-  const [asignarModal, setAsignarModal] = useState(null);
-  const [planSelec,    setPlanSelec]    = useState(null);
-  const [calorias,     setCalorias]     = useState("");
-  const [numComidas,   setNumComidas]   = useState(4);
-  const [obs,          setObs]          = useState("");
-  const [saving,       setSaving]       = useState(false);
-  const [asigError,    setAsigError]    = useState("");
+  // Modal state
+  const [modal, setModal] = useState(null);
+  const [modalAfiliado, setModalAfiliado] = useState(null);
+  const [modalAlimento, setModalAlimento] = useState(null);
 
-  // Modal ver plan activo
-  const [verModal, setVerModal] = useState(null);
+  // Asignar state
+  const [asignarAfiliadoId, setAsignarAfiliadoId] = useState("");
+  const [asignarAfiliadoData, setAsignarAfiliadoData] = useState(null);
+  const [alimentosDisponibles, setAlimentosDisponibles] = useState([]);
+  const [selectedAlimentos, setSelectedAlimentos] = useState({});
+  const [formPlan, setFormPlan] = useState({ calorias_objetivo:"", num_comidas:"3", observaciones:"" });
 
-  // ── Carga (reutilizable para el botón Actualizar) ──────────────────────────
-  const cargarAfiliados = useCallback(async (esRefresh = false) => {
-    esRefresh ? setRefreshing(true) : setLoading(true);
-    setError("");
+  // Nuevo/Editar alimento form
+  const [formAlimento, setFormAlimento] = useState({ nombre_alimento:"", proteinas:"", carbohidratos:"", grasas:"", calorias_por_100g:"" });
+
+  // Delete
+  const [deleteAlimentoId, setDeleteAlimentoId] = useState("");
+
+  // ── Data fetching ───────────────────────────────────────────
+  const fetchAfiliados = useCallback(async () => {
+    setLoading(true);
     try {
-      // FIX: ruta correcta /afiliados (no /660/afiliados)
       const { data } = await authAxios.get("/afiliados");
-      setAfiliados(data);
-      if (esRefresh) showToast(`✅ Lista actualizada — ${data.length} afiliados`);
+      setAfiliados(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error('[DietasView] Error al cargar:', err.response?.status, err.response?.data || err.message);
-      if (err?.response?.status === 401) { logout(); navigate("/login"); }
-      else setError("No se pudieron cargar los afiliados.");
+      console.error("[DietasView]", err);
+      showToast("Error al cargar afiliados", "danger");
     } finally {
-      esRefresh ? setRefreshing(false) : setLoading(false);
+      setLoading(false);
     }
-  }, [authAxios, logout, navigate, showToast]);
+  }, [authAxios, showToast]);
 
-  useEffect(() => { cargarAfiliados(); }, []);
+  const fetchAlimentos = useCallback(async () => {
+    try {
+      const { data } = await authAxios.get("/catalogo/alimentos");
+      setCatalogoAlimentos(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("[DietasView] catálogo:", err);
+      showToast("Error al cargar catálogo de alimentos", "danger");
+    }
+  }, [authAxios, showToast]);
 
-  // ── Helpers ────────────────────────────────────────────────────────────────
-  const tienePlanNutricional = (a) => !!cicloActivo(a)?.plan_nutricional;
-  const tieneAlergia         = (a) => (a.restricciones || []).some((r) => r.tipo === "Alergia");
-  const tieneEnfermedad      = (a) => (a.restricciones || []).some((r) => r.tipo === "Enfermedad");
+  useEffect(() => { fetchAfiliados(); fetchAlimentos(); }, [fetchAfiliados, fetchAlimentos]);
 
-  const filtrados = afiliados
-    .filter((a) => {
-      const t = busqueda.toLowerCase();
-      return (
-        nombreCompleto(a).toLowerCase().includes(t) ||
-        (a.objetivo_fisico || "").toLowerCase().includes(t) ||
-        (a.restricciones || []).some((r) => r.nombre.toLowerCase().includes(t))
-      );
-    })
-    // ⬇️ Sin plan nutricional primero (prioridad para el entrenador)
-    .sort((a, b) => {
-      const aConPlan = tienePlanNutricional(a);
-      const bConPlan = tienePlanNutricional(b);
-      if (!aConPlan && bConPlan) return -1;
-      if (aConPlan && !bConPlan) return 1;
-      return 0;
+  // ── Derived data ────────────────────────────────────────────
+  const filtered = afiliados.filter((a) => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return nombreCompleto(a).toLowerCase().includes(q) || (a.correo||a.email||"").toLowerCase().includes(q);
+  });
+  const totalAfiliados = afiliados.length;
+  const conPlan = afiliados.filter((a) => !!cicloActivo(a)?.plan_nutricional).length;
+  const sinPlan = totalAfiliados - conPlan;
+  const totalAlimentos = catalogoAlimentos.length;
+
+  // ── Modal handlers ──────────────────────────────────────────
+  const closeModal = () => {
+    if (saving) return;
+    setModal(null);
+    setModalAfiliado(null);
+    setModalAlimento(null);
+    setAsignarAfiliadoId("");
+    setAsignarAfiliadoData(null);
+    setAlimentosDisponibles([]);
+    setSelectedAlimentos({});
+    setFormPlan({ calorias_objetivo:"", num_comidas:"3", observaciones:"" });
+    setFormAlimento({ nombre_alimento:"", proteinas:"", carbohidratos:"", grasas:"", calorias_por_100g:"" });
+    setDeleteAlimentoId("");
+  };
+
+  const handleAfiliadoSelect = async (e) => {
+    const id = e.target.value;
+    setAsignarAfiliadoId(id);
+    if (!id) { setAsignarAfiliadoData(null); setAlimentosDisponibles([]); return; }
+    const a = afiliados.find((x) => String(getId(x)) === id);
+    setAsignarAfiliadoData(a || null);
+    try {
+      const { data } = await authAxios.get(`/afiliados/${id}/alimentos-disponibles`);
+      setAlimentosDisponibles(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("[DietasView] disponibles:", err);
+      showToast("Error al cargar alimentos disponibles", "danger");
+      setAlimentosDisponibles([]);
+    }
+  };
+
+  const toggleAlimento = (id) => {
+    setSelectedAlimentos((prev) => {
+      if (prev[id]) { const c={...prev}; delete c[id]; return c; }
+      return { ...prev, [id]: { cantidad_g:100, num_comida:1 } };
     });
+  };
 
-  // KPIs
-  const totalConPlan     = afiliados.filter((a) => tienePlanNutricional(a)).length;
-  const alertasAlergia   = afiliados.filter((a) => tieneAlergia(a) || tieneEnfermedad(a)).length;
-
-  // ── Asignar plan nutricional ───────────────────────────────────────────────
-  const abrirAsignar = (afiliado) => {
-    setAsignarModal(afiliado);
-    const compatible = PLANES_NUTRICIONALES.find(
-      (p) => p.compatible.includes(afiliado.objetivo_fisico)
-    ) || PLANES_NUTRICIONALES[0];
-    setPlanSelec(compatible);
-    setCalorias(String(compatible.calorias));
-    setNumComidas(compatible.comidas);
-    setObs("");
-    setAsigError("");
+  const updateAlimentoSel = (id, field, value) => {
+    setSelectedAlimentos((prev) => ({ ...prev, [id]: { ...prev[id], [field]: value } }));
   };
 
   const handleAsignar = async (e) => {
     e.preventDefault();
-    if (!planSelec) { setAsigError("Selecciona un plan nutricional."); return; }
-    if (!calorias || isNaN(Number(calorias))) { setAsigError("Ingresa las calorías estimadas."); return; }
-
-    setSaving(true); setAsigError("");
+    const alimentosIds = Object.keys(selectedAlimentos);
+    if (alimentosIds.length === 0) {
+      showToast("Selecciona al menos un alimento", "danger");
+      return;
+    }
+    const a = asignarAfiliadoData;
+    if (!a) { showToast("Selecciona un afiliado", "danger"); return; }
+    setSaving(true);
     try {
-      const id        = getId(asignarModal);
-      const tienePlan = !!cicloActivo(asignarModal);
-      // FIX: el backend MySQL maneja planes en tabla PLAN_NUTRICIONAL + CICLO.
-      // Usamos el endpoint /afiliados/ciclos en lugar de PATCH con array JSON.
-      await authAxios.post(`/afiliados/ciclos`, {
-        id_afiliado:          id,
-        fecha_inicio:         new Date().toISOString().split("T")[0],
-        fecha_fin:            (() => { const d = new Date(); d.setDate(d.getDate() + 84); return d.toISOString().split("T")[0]; })(),
-        asignado_por_id:      getId(user),
-        plan_base_id:         planSelec.id,
-        nombre_plan:          planSelec.nombre,
-        objetivo_dieta:       planSelec.objetivo,
-        calorias_estimadas:   Number(calorias),
-        num_comidas_diarias:  numComidas,
-        observaciones:        obs || null,
-      });
-      // FIX: el backend devuelve {message}, NO el afiliado actualizado.
-      // Mergeamos localmente el nuevo plan activo para reflejar el cambio en UI.
-      const nuevoCicloLocal = {
-        plan_nutricional: {
-          nombre_plan:          planSelec.nombre,
-          calorias_estimadas:   Number(calorias),
-          num_comidas_diarias:  numComidas,
-          objetivo_dieta:       planSelec.objetivo,
-        },
-      };
-      setAfiliados((prev) => prev.map((a) =>
-        getId(a) === id ? { ...a, ciclo_activo: { ...a.ciclo_activo, ...nuevoCicloLocal } } : a
-      ));
-      setAsignarModal(null);
-      const accion = tienePlan ? "actualizado" : "asignado";
-      showToast(`✅ Plan "${planSelec.nombre}" ${accion} a ${nombreCompleto(asignarModal)}`);
+      const idAfiliado = getId(a);
+      let idCiclo;
+      const cicloExistente = cicloActivo(a);
+      if (cicloExistente && (cicloExistente.id_ciclo || cicloExistente.id)) {
+        idCiclo = cicloExistente.id_ciclo || cicloExistente.id;
+      } else {
+        const fechaInicio = new Date().toISOString().split("T")[0];
+        const fechaFin = new Date(Date.now()+30*86400000).toISOString().split("T")[0];
+        const { data: cicloRes } = await authAxios.post("/afiliados/ciclos", {
+          id_usuario: idAfiliado,
+          fecha_inicio: fechaInicio,
+          fecha_fin: fechaFin,
+          objetivo_fisico: a.objetivo || a.objetivo_fisico || "Mantenimiento",
+          nivel_experiencia: a.nivel_experiencia || "Principiante",
+          disponibilidad_dias: Number(a.disponibilidad_semanal_dias) || 5,
+        });
+        idCiclo = cicloRes.id_ciclo ?? cicloRes.id;
+      }
+
+      // Crear o actualizar plan nutricional
+      let planExists = false;
+      try {
+        await authAxios.get(`/planes/nutricional/${idCiclo}`);
+        planExists = true;
+      } catch (getErr) {
+        if (getErr.response?.status !== 404) throw getErr;
+      }
+      if (planExists) {
+        await authAxios.patch(`/planes/nutricional/${idCiclo}`, {
+          calorias_objetivo: Number(formPlan.calorias_objetivo) || 2000,
+          num_comidas: Number(formPlan.num_comidas) || 3,
+          observaciones: formPlan.observaciones,
+        });
+      } else {
+        await authAxios.post("/planes/nutricional", {
+          id_ciclo: idCiclo,
+          calorias_objetivo: Number(formPlan.calorias_objetivo) || 2000,
+          num_comidas: Number(formPlan.num_comidas) || 3,
+          observaciones: formPlan.observaciones,
+        });
+      }
+
+      // Agregar alimentos al detalle
+      for (const idAlimento of alimentosIds) {
+        const sel = selectedAlimentos[idAlimento];
+        await authAxios.post(`/planes/nutricional/${idCiclo}/detalle`, {
+          id_alimento: Number(idAlimento),
+          cantidad_g: Number(sel.cantidad_g) || 100,
+          num_comida: Number(sel.num_comida) || 1,
+        });
+      }
+
+      showToast("Plan nutricional creado exitosamente", "success");
+      closeModal();
+      fetchAfiliados();
     } catch (err) {
-      const msg = err?.response?.data?.error || err.message || "Error desconocido";
-      console.error('[DietasView.handleAsignar]', err);
-      setAsigError(`Error al guardar: ${msg}`);
+      console.error("[DietasView] asignar:", err);
+      showToast(err.response?.data?.error || err.message || "Error al asignar dieta", "danger");
     } finally {
       setSaving(false);
     }
   };
 
-  // ── Render ─────────────────────────────────────────────────────────────────
+  const handleGuardarAlimento = async (e) => {
+    e.preventDefault();
+    if (!formAlimento.nombre_alimento.trim()) { showToast("El nombre es obligatorio", "danger"); return; }
+    setSaving(true);
+    try {
+      if (modal === "editar" && modalAlimento) {
+        const id = modalAlimento.id_alimento ?? modalAlimento.id;
+        await authAxios.put(`/catalogo/alimentos/${id}`, {
+          nombre_alimento: formAlimento.nombre_alimento,
+          proteinas: Number(formAlimento.proteinas) || 0,
+          carbohidratos: Number(formAlimento.carbohidratos) || 0,
+          grasas: Number(formAlimento.grasas) || 0,
+          calorias_por_100g: Number(formAlimento.calorias_por_100g) || 0,
+        });
+        showToast("Alimento actualizado", "success");
+      } else {
+        await authAxios.post("/catalogo/alimentos", formAlimento);
+        showToast("Alimento creado", "success");
+      }
+      closeModal();
+      fetchAlimentos();
+    } catch (err) {
+      showToast(err.response?.data?.error || err.message || "Error al guardar alimento", "danger");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleEliminarAlimento = async (e) => {
+    e.preventDefault();
+    if (!deleteAlimentoId) { showToast("Selecciona un alimento", "danger"); return; }
+    setSaving(true);
+    try {
+      await authAxios.delete(`/catalogo/alimentos/${deleteAlimentoId}`);
+      showToast("Alimento eliminado", "success");
+      closeModal();
+      fetchAlimentos();
+    } catch (err) {
+      const msg = err.response?.status === 409
+        ? "No se puede eliminar: el alimento está siendo usado en planes activos"
+        : (err.response?.data?.error || err.message || "Error al eliminar");
+      showToast(msg, "danger");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // ── Render helpers ──────────────────────────────────────────
+  const formatRestricciones = (rest) => {
+    if (!rest) return [];
+    if (Array.isArray(rest)) {
+      return rest.map((r) => {
+        if (typeof r === "string") return r;
+        if (r && typeof r === "object") return r.nombre_restriccion || r.tipo || "";
+        return "";
+      }).filter(Boolean);
+    }
+    if (typeof rest === "object") {
+      const arr = [];
+      for (const key of Object.keys(rest)) {
+        const val = rest[key];
+        if (val === true || val === "true") arr.push(key);
+        else if (val && typeof val === "object") arr.push(val.nombre_restriccion || val.tipo || key);
+      }
+      return arr;
+    }
+    return [];
+  };
+
+  const restriccionesBadges = (restricciones) => {
+    const items = formatRestricciones(restricciones);
+    if (items.length === 0) return <span className={s.badgeDark}>Ninguna</span>;
+    return items.map((r, i) => {
+      const cfg = RESTRICCION_COLOR[r] || { bg:"#6b728018", text:"#6b7280" };
+      return <span key={i} className={s.badgeDark} style={{ background:cfg.bg, color:cfg.text, marginRight:4, marginBottom:2 }}>{r}</span>;
+    });
+  };
+
+  // ════════════════════════════════════════════════════════════
+  // RENDER
+  // ════════════════════════════════════════════════════════════
   return (
     <AppLayout>
-      {/* Toast */}
       {toast.msg && (
-        <div
-          className={`position-fixed bottom-0 end-0 m-4 alert alert-${toast.type === "danger" ? "danger" : "dark"} shadow-lg py-2 px-3`}
-          style={{ zIndex: 9999, minWidth: 300 }}
-        >
+        <div style={{ position:"fixed", top:16, right:16, zIndex:9999, padding:"0.5rem 1rem", borderRadius:8,
+          background: toast.type==="danger" ? "rgba(239,68,68,0.1)" : "rgba(34,197,94,0.1)",
+          border: toast.type==="danger" ? "1px solid rgba(239,68,68,0.3)" : "1px solid rgba(34,197,94,0.3)",
+          color: toast.type==="danger" ? "#ef4444" : "#22c55e" }}>
           {toast.msg}
         </div>
       )}
 
-      <div className="container-fluid py-4 px-3 px-md-4">
-
-        {/* ── Encabezado ── */}
-        <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+      <div className={s.page}>
+        {/* HEADER */}
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:24, flexWrap:"wrap", gap:12 }}>
           <div>
-            <h1 className="h4 fw-bold mb-0 d-flex align-items-center gap-2">
-              <span
-                className="d-inline-flex align-items-center justify-content-center rounded-2 text-white"
-                style={{ width: 36, height: 36, background: "linear-gradient(135deg,#0891b2,#0d9488)", fontSize: "1.1rem" }}
-              >
-                🥗
-              </span>
-              Planes de Dieta
-            </h1>
-            <small className="text-muted">
-              {isAdmin
-                ? "Vista de administrador — supervisión de planes nutricionales activos"
-                : "Asigna y gestiona planes nutricionales personalizados para cada afiliado"}
-            </small>
+            <h1 className={s.headerTitle}>🥗 Planes Nutricionales</h1>
+            <p className={s.headerSub}>Gestión de planes nutricionales para afiliados</p>
           </div>
-
-          {/* KPIs */}
-          <div className="d-flex gap-2 flex-wrap">
-            {[
-              { label: "Total afiliados",    valor: afiliados.length,   color: "#0891b2" },
-              { label: "Con plan activo",    valor: totalConPlan,        color: "#059669" },
-              { label: "Alertas nutrición",  valor: alertasAlergia,      color: "#e94560" },
-            ].map((k) => (
-              <div
-                key={k.label}
-                className="card border-0 shadow-sm text-center px-3 py-2"
-                style={{ minWidth: 115 }}
-              >
-                <div className="fw-bold fs-5" style={{ color: k.color }}>
-                  {loading ? "—" : k.valor}
-                </div>
-                <div className="text-muted" style={{ fontSize: "0.68rem" }}>{k.label}</div>
-              </div>
-            ))}
+          <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+            <button type="button" className={s.btnPrimary} onClick={() => setModal("asignar")}>➕ Asignar Dieta</button>
+            <button type="button" className={s.btnOutline} onClick={() => { fetchAlimentos(); setModal("catalogo"); }}>📋 Ver Catálogo</button>
+            <button type="button" className={s.btnAsignar} onClick={() => setModal("nuevo")}>➕ Agregar Alimento</button>
+            <button type="button" className={s.btnOutlineDanger} onClick={() => { fetchAlimentos(); setModal("eliminar"); }}>🗑️ Eliminar Alimento</button>
           </div>
         </div>
 
-        {/* ── Tabla de afiliados ── */}
-        <div className="card border-0 shadow-sm mb-4">
-          <div className="card-header bg-white py-3 d-flex justify-content-between align-items-center border-0 flex-wrap gap-2">
-            <span className="fw-semibold text-muted small">{filtrados.length} afiliados</span>
-            <div className="d-flex gap-2 align-items-center">
-              <input
-                id="busqueda-dietas"
-                type="text"
-                className="form-control form-control-sm"
-                style={{ maxWidth: 240 }}
-                placeholder="🔍 Nombre, objetivo, restricción..."
-                value={busqueda}
-                onChange={(e) => setBusqueda(e.target.value)}
-              />
-              <button
-                id="btn-refresh-dietas"
-                className="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1"
-                style={{ whiteSpace: "nowrap", fontSize: "0.78rem" }}
-                onClick={() => cargarAfiliados(true)}
-                disabled={refreshing}
-                title="Recargar lista de afiliados"
-              >
-                {refreshing
-                  ? <span className="spinner-border spinner-border-sm" style={{ width: 12, height: 12, borderWidth: 2 }} />
-                  : "🔄"}
-                Actualizar
-              </button>
-            </div>
+        {/* KPIs */}
+        <div className={s.kpiRow}>
+          <div className={s.kpiCard}>
+            <div className={s.kpiValue}>{totalAfiliados}</div>
+            <div className={s.kpiLabel}>Total Afiliados</div>
           </div>
-
-          <div className="card-body p-0">
-            {error   && <div className="alert alert-danger m-3 py-2"><small>⚠️ {error}</small></div>}
-            {loading && <div className="text-center py-5"><div className="spinner-border" style={{ color: "#0891b2" }} /></div>}
-
-            {!loading && !error && (
-              <div className="table-responsive">
-                <table className="table table-hover align-middle mb-0">
-                  <thead className="table-light">
-                    <tr>
-                      <th className="ps-4">#</th>
-                      <th>Afiliado</th>
-                      <th>Objetivo</th>
-                      <th>Restricciones</th>
-                      <th>Plan activo</th>
-                      <th className="text-center">Calorías</th>
-                      <th className="text-center">Comidas/día</th>
-                      <th className="text-center pe-4">Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filtrados.length === 0 ? (
-                      <tr>
-                        <td colSpan={8} className="text-center text-muted py-5">
-                          {busqueda ? `Sin resultados para "${busqueda}"` : "No hay afiliados."}
-                        </td>
-                      </tr>
-                    ) : filtrados.map((a, idx) => {
-                      const ciclo    = cicloActivo(a);
-                      const plan     = ciclo?.plan_nutricional;
-                      const objCfg   = OBJETIVO_CONFIG[a.objetivo_fisico] || OBJETIVO_CONFIG["Mantenimiento"];
-                      const restr    = a.restricciones || [];
-                      const hayAlerta = tieneAlergia(a) || tieneEnfermedad(a);
-
-                      return (
-                        <tr
-                          key={getId(a)}
-                          style={{
-                            background: !plan ? "#fff8f0" : hayAlerta ? "#fff8f8" : "transparent",
-                            borderLeft: !plan ? "3px solid #f97316" : hayAlerta ? "3px solid #ef4444" : "none",
-                          }}
-                        >
-                          <td className="ps-4 text-muted small">{idx + 1}</td>
-
-                          {/* Afiliado */}
-                          <td>
-                            <div className="d-flex align-items-center gap-2">
-                              <div
-                                className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0"
-                                style={{
-                                  width: 36, height: 36, fontSize: "0.85rem",
-                                  background: `hsl(${(getId(a) * 47) % 360},65%,55%)`,
-                                }}
-                              >
-                                {inicial(a)}
-                              </div>
-                              <div>
-                                <div className="fw-semibold small">{nombreCompleto(a)}</div>
-                                <div className="text-muted" style={{ fontSize: "0.7rem" }}>{a.correo || "—"}</div>
-                              </div>
-                            </div>
-                          </td>
-
-                          {/* Objetivo */}
-                          <td>
-                            <span
-                              className="badge px-2 py-1"
-                              style={{ background: objCfg.bg, color: objCfg.color, fontSize: "0.7rem" }}
-                            >
-                              {objCfg.icono} {a.objetivo_fisico || "—"}
-                            </span>
-                          </td>
-
-                          {/* Restricciones */}
-                          <td>
-                            {restr.length === 0 ? (
-                              <span className="badge bg-success bg-opacity-10 text-success" style={{ fontSize: "0.7rem" }}>
-                                ✓ Sin restricciones
-                              </span>
-                            ) : (
-                              <div className="d-flex flex-wrap gap-1">
-                                {restr.slice(0, 2).map((r) => {
-                                  const cfg = RESTRICCION_COLOR[r.tipo] || { bg: "#e2e8f0", text: "#64748b" };
-                                  return (
-                                    <span
-                                      key={r.id_restriccion}
-                                      className="badge px-2 py-1"
-                                      title={r.efecto_relevante || r.nombre}
-                                      style={{ background: cfg.bg, color: cfg.text, fontSize: "0.65rem" }}
-                                    >
-                                      ⚠️ {r.nombre}
-                                    </span>
-                                  );
-                                })}
-                                {restr.length > 2 && (
-                                  <span className="badge bg-secondary bg-opacity-10 text-secondary" style={{ fontSize: "0.65rem" }}>
-                                    +{restr.length - 2}
-                                  </span>
-                                )}
-                              </div>
-                            )}
-                          </td>
-
-                          {/* Plan activo */}
-                          <td>
-                            {plan?.nombre_plan ? (
-                              <span
-                                className="badge px-2 py-1"
-                                style={{ background: "#0891b218", color: "#0891b2", fontSize: "0.7rem" }}
-                              >
-                                ✅ {plan.nombre_plan}
-                              </span>
-                            ) : plan ? (
-                              <span className="badge bg-warning bg-opacity-15 text-warning" style={{ fontSize: "0.7rem" }}>
-                                ⚙️ Plan personalizado
-                              </span>
-                            ) : (
-                              <span className="badge bg-danger bg-opacity-10 text-danger" style={{ fontSize: "0.7rem" }}>
-                                ❌ Sin plan
-                              </span>
-                            )}
-                          </td>
-
-                          {/* Calorías */}
-                          <td className="text-center">
-                            {plan?.calorias_estimadas ? (
-                              <span className="badge bg-light text-dark border">
-                                {plan.calorias_estimadas} kcal
-                              </span>
-                            ) : (
-                              <small className="text-muted">—</small>
-                            )}
-                          </td>
-
-                          {/* Comidas/día */}
-                          <td className="text-center">
-                            {plan?.num_comidas_diarias ? (
-                              <span className="badge bg-light text-dark border">
-                                {plan.num_comidas_diarias}×/día
-                              </span>
-                            ) : (
-                              <small className="text-muted">—</small>
-                            )}
-                          </td>
-
-                          {/* Acciones */}
-                          <td className="text-center pe-4">
-                            <div className="d-flex gap-1 justify-content-center">
-                              {plan && (
-                                <button
-                                  className="btn btn-outline-primary btn-sm"
-                                  id={`btn-ver-dieta-${getId(a)}`}
-                                  title="Ver plan activo"
-                                  onClick={() => setVerModal(a)}
-                                >
-                                  👁️
-                                </button>
-                              )}
-                              <button
-                                className="btn btn-sm fw-semibold text-white"
-                                id={`btn-asignar-dieta-${getId(a)}`}
-                                title={plan ? "Cambiar plan" : "Asignar plan"}
-                                style={{ background: "linear-gradient(135deg,#0891b2,#0d9488)", border: "none", fontSize: "0.78rem" }}
-                                onClick={() => abrirAsignar(a)}
-                              >
-                                {plan ? "🔄 Cambiar" : "➕ Asignar"}
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
+          <div className={s.kpiCard}>
+            <div className={s.kpiValue} style={{ color:"#22c55e" }}>{conPlan}</div>
+            <div className={s.kpiLabel}>Con Plan Nutricional</div>
+          </div>
+          <div className={s.kpiCard}>
+            <div className={s.kpiValue} style={{ color:"#ef4444" }}>{sinPlan}</div>
+            <div className={s.kpiLabel}>Sin Plan Asignado</div>
+          </div>
+          <div className={s.kpiCard}>
+            <div className={s.kpiValue} style={{ color:"#7c3aed" }}>{totalAlimentos}</div>
+            <div className={s.kpiLabel}>Alimentos en Catálogo</div>
           </div>
         </div>
 
-        {/* ── Catálogo de planes nutricionales ── */}
-        <div>
-          <h2 className="h6 fw-bold text-muted text-uppercase mb-3" style={{ letterSpacing: "0.06em" }}>
-            🍽️ Catálogo de Planes Nutricionales
-          </h2>
-          <div className="row g-3">
-            {PLANES_NUTRICIONALES.map((p) => (
-              <div key={p.id} className="col-md-6 col-xl-4">
-                <div
-                  className="card border-0 shadow-sm h-100"
-                  style={{ borderLeft: `4px solid ${p.color}` }}
-                >
-                  <div className="card-body p-3">
-                    {/* Header tarjeta */}
-                    <div className="d-flex justify-content-between align-items-start mb-2">
-                      <div>
-                        <div className="fw-bold" style={{ color: p.color }}>
-                          {p.icono} {p.nombre}
+        {/* SEARCH + TABLE */}
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:16, flexWrap:"wrap", gap:12,
+          background:"#1a1a2e", border:"1px solid #252545", borderRadius:14, padding:"0.75rem 1rem" }}>
+          <span className="fw-bold" style={{ fontSize:"0.85rem", color:"#e0e0e0" }}>🥗 Afiliados</span>
+          <div style={{ display:"flex", gap:8, alignItems:"center" }}>
+            <input type="text" className={s.searchInput} placeholder="Buscar afiliado..." value={search} onChange={(e)=>setSearch(e.target.value)} style={{ maxWidth:260, padding:"0.4rem 0.7rem", fontSize:"0.85rem" }} />
+            <button type="button" className={s.btnRefresh} onClick={fetchAfiliados} disabled={loading} title="Refrescar">{loading ? <span className="spinner-border spinner-border-sm" /> : "🔄"}</button>
+          </div>
+        </div>
+
+        {/* TABLE */}
+        <div className={s.tableCard}>
+          <div style={{ overflowX:"auto" }}>
+            <table className={s.table}>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Afiliado</th>
+                  <th>Objetivo</th>
+                  <th>Restricciones</th>
+                  <th>Plan activo</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading && afiliados.length === 0 ? (
+                  <tr><td colSpan={6} className="text-center py-4"><span className="spinner-border spinner-border-sm" /></td></tr>
+                ) : filtered.length === 0 ? (
+                  <tr><td colSpan={6} className={s.emptyState}>{search ? "No se encontraron afiliados" : "No hay afiliados registrados"}</td></tr>
+                ) : filtered.map((a, idx) => {
+                  const ciclo = cicloActivo(a);
+                  const tienePlan = ciclo && !!ciclo.plan_nutricional;
+                  const objConf = OBJETIVO_CONFIG[a.objetivo] || { icono:"🎯", color:"#94a3b8", bg:"#94a3b818" };
+                  const nombre = nombreCompleto(a);
+                  const email = a.correo || a.email || "";
+                  return (
+                    <tr key={getId(a)}>
+                      <td style={{ color:"#94a3b8", fontSize:"0.78rem" }}>{idx + 1}</td>
+                      <td>
+                        <div style={{ display:"flex", alignItems:"center", gap:"0.5rem" }}>
+                          <div className={s.avatar} style={{ background:avatarColor(nombre) }}>{inicial(a)}</div>
+                          <div>
+                            <div style={{ fontSize:"0.85rem", fontWeight:600 }}>{nombre}</div>
+                            <div className={s.emailText}>{email}</div>
+                          </div>
                         </div>
-                        <small className="text-muted">{p.descripcion}</small>
-                      </div>
-                    </div>
-
-                    {/* Macros */}
-                    <div className="d-flex gap-2 my-2 flex-wrap">
-                      {Object.entries(p.macros).map(([key, val]) => (
-                        <span
-                          key={key}
-                          className="badge px-2 py-1"
-                          style={{ background: `${p.color}18`, color: p.color, fontSize: "0.65rem" }}
-                        >
-                          {key === "proteinas" ? "🥩" : key === "carbos" ? "🌾" : "🥑"} {val}
+                      </td>
+                      <td>
+                        <span className={s.badgeDark} style={{ background:objConf.bg, color:objConf.color }}>
+                          {objConf.icono} {a.objetivo || "Sin objetivo"}
                         </span>
-                      ))}
-                    </div>
-
-                    {/* Calorías y comidas */}
-                    <div className="d-flex gap-3 text-muted small mb-2">
-                      <span>🔥 {p.calorias} kcal/día</span>
-                      <span>🍽️ {p.comidas} comidas/día</span>
-                    </div>
-
-                    {/* Alimentos típicos */}
-                    <div className="d-flex flex-wrap gap-1 mt-2">
-                      {p.alimentos.map((al) => (
-                        <span
-                          key={al}
-                          className="badge bg-light text-secondary border"
-                          style={{ fontSize: "0.62rem" }}
-                        >
-                          {al}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
+                      </td>
+                      <td>
+                        <div style={{ display:"flex", flexWrap:"wrap", gap:2 }}>
+                          {restriccionesBadges(a.restricciones)}
+                        </div>
+                      </td>
+                      <td>
+                        {tienePlan ? (
+                          <span className={s.badgeSuccess}>✅ Activo</span>
+                        ) : (
+                          <span className={s.badgeDanger}>❌ Sin plan</span>
+                        )}
+                      </td>
+                      <td>
+                        <div className={s.actionBtns}>
+                          {tienePlan && (
+                            <button type="button" className={s.btnOutline} style={{ padding:"0.25rem 0.5rem", fontSize:"0.75rem" }}
+                              onClick={() => { setModalAfiliado(a); setModal("verPerfil"); }} title="Ver">👁️</button>
+                          )}
+                          <button type="button" className={s.btnAsignar} style={{ padding:"0.25rem 0.6rem", fontSize:"0.75rem" }}
+                            onClick={() => {
+                              setAsignarAfiliadoId(String(getId(a)));
+                              setAsignarAfiliadoData(a);
+                              handleAfiliadoSelect({ target: { value: String(getId(a)) } });
+                              setModal("asignar");
+                            }}>
+                            {tienePlan ? "🔄 Nueva" : "➕ Asignar"}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════════════════
-          MODAL: ASIGNAR PLAN NUTRICIONAL
-      ═══════════════════════════════════════════════════════════════════════ */}
-      {asignarModal && (
-        <div
-          className="modal d-block"
-          style={{ background: "rgba(0,0,0,0.6)", zIndex: 1055 }}
-          onClick={() => !saving && setAsignarModal(null)}
-        >
-          <div
-            className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="modal-content border-0 shadow-lg">
-              <div
-                className="modal-header text-white border-0"
-                style={{ background: "linear-gradient(135deg,#0891b2,#0d9488)" }}
-              >
-                <h5 className="modal-title">
-                  🥗 Asignar Plan Nutricional — {nombreCompleto(asignarModal)}
-                </h5>
-                <button
-                  className="btn-close btn-close-white"
-                  onClick={() => !saving && setAsignarModal(null)}
-                  disabled={saving}
-                />
-              </div>
+      {/* ════════════════════════════════════════════ */}
+      {/* MODAL: ASIGNAR DIETA                          */}
+      {/* ════════════════════════════════════════════ */}
+      {modal === "asignar" && (
+        <div className={s.modalOverlay} onClick={closeModal}>
+          <div className={s.modalContent} onClick={(e)=>e.stopPropagation()} style={{ maxWidth:800 }}>
+            <div className={s.modalHeader}>
+              <h5 className={s.modalTitle}>{asignarAfiliadoData && cicloActivo(asignarAfiliadoData) ? "🔄 Nueva Dieta" : "➕ Asignar Dieta"}</h5>
+              <button type="button" className={s.btnOutline} onClick={closeModal} disabled={saving}>✕</button>
+            </div>
+            <form onSubmit={handleAsignar}>
+              <div className={s.modalBody}>
+                {/* Selector de afiliado */}
+                <div style={{ marginBottom:16 }}>
+                  <label className={s.labelText}>Afiliado</label>
+                  <select className={s.selectDark} value={asignarAfiliadoId} onChange={handleAfiliadoSelect} required style={{ width:"100%" }}>
+                    <option value="">-- Selecciona un afiliado --</option>
+                    {afiliados.map((a) => (
+                      <option key={getId(a)} value={getId(a)}>{nombreCompleto(a)} — {a.correo||a.email||""}</option>
+                    ))}
+                  </select>
+                </div>
 
-              <form onSubmit={handleAsignar}>
-                <div className="modal-body" style={{ maxHeight: "75vh", overflowY: "auto" }}>
-                  {asigError && (
-                    <div className="alert alert-danger py-2 mb-3">
-                      <small>⚠️ {asigError}</small>
-                    </div>
-                  )}
-
-                  {/* Info del afiliado */}
-                  <div
-                    className="rounded-3 p-3 mb-4 d-flex align-items-start gap-3 flex-wrap"
-                    style={{ background: "#f0fdfa", border: "1px solid #99f6e4" }}
-                  >
-                    <div
-                      className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0"
-                      style={{
-                        width: 44, height: 44, fontSize: "1rem",
-                        background: `hsl(${(getId(asignarModal) * 47) % 360},65%,55%)`,
-                      }}
-                    >
-                      {inicial(asignarModal)}
-                    </div>
-                    <div className="flex-grow-1">
-                      <div className="fw-semibold">{nombreCompleto(asignarModal)}</div>
-                      <div className="text-muted small">
-                        {OBJETIVO_CONFIG[asignarModal.objetivo_fisico]?.icono} {asignarModal.objetivo_fisico}
-                        &nbsp;·&nbsp; {asignarModal.nivel_experiencia}
-                        &nbsp;·&nbsp; {asignarModal.disponibilidad_semanal_dias}d/sem
-                      </div>
-                      {/* Restricciones del afiliado */}
-                      {(asignarModal.restricciones || []).length > 0 && (
-                        <div className="mt-2 d-flex flex-wrap gap-1">
-                          {asignarModal.restricciones.map((r) => {
-                            const cfg = RESTRICCION_COLOR[r.tipo] || { bg: "#e2e8f0", text: "#64748b" };
-                            return (
-                              <span
-                                key={r.id_restriccion}
-                                className="badge px-2 py-1"
-                                style={{ background: cfg.bg, color: cfg.text, fontSize: "0.65rem" }}
-                                title={r.efecto_relevante || ""}
-                              >
-                                ⚠️ {r.nombre}
-                              </span>
-                            );
-                          })}
+                {asignarAfiliadoData && (
+                  <div className={s.afiliadoInfoBox}>
+                    <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+                      <div className={s.avatarModal} style={{ background:avatarColor(nombreCompleto(asignarAfiliadoData)) }}>{inicial(asignarAfiliadoData)}</div>
+                      <div>
+                        <div style={{ fontWeight:600 }}>{nombreCompleto(asignarAfiliadoData)}</div>
+                        <small style={{ color:"#94a3b8" }}>{asignarAfiliadoData.correo||asignarAfiliadoData.email||""}{asignarAfiliadoData.objetivo ? ` · ${asignarAfiliadoData.objetivo}` : ""}</small>
+                        <div style={{ display:"flex", gap:4, marginTop:4, flexWrap:"wrap" }}>
+                          {restriccionesBadges(asignarAfiliadoData.restricciones)}
                         </div>
-                      )}
+                      </div>
+                    </div>
+                    {cicloActivo(asignarAfiliadoData) && (
+                      <div style={{ marginTop:8, color:"#22c55e", fontSize:"0.78rem" }}>
+                        ✅ Ciclo activo detectado (ID: {cicloActivo(asignarAfiliadoData).id_ciclo}) — se reutilizará
+                      </div>
+                    )}
+                    {/* Fechas y parámetros del plan */}
+                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:12, marginTop:12 }}>
+                      <div>
+                        <label className={s.labelText}>Calorías objetivo</label>
+                        <input type="number" className={s.inputDark} value={formPlan.calorias_objetivo} onChange={(e)=>setFormPlan((f)=>({...f, calorias_objetivo:e.target.value}))} placeholder="Ej: 2000" style={{ width:"100%" }} />
+                      </div>
+                      <div>
+                        <label className={s.labelText}>Nº de comidas</label>
+                        <select className={s.selectDark} value={formPlan.num_comidas} onChange={(e)=>setFormPlan((f)=>({...f, num_comidas:e.target.value}))} style={{ width:"100%" }}>
+                          {[1,2,3,4,5,6].map((n) => <option key={n} value={n}>{n}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label className={s.labelText}>Observaciones</label>
+                        <input type="text" className={s.inputDark} value={formPlan.observaciones} onChange={(e)=>setFormPlan((f)=>({...f, observaciones:e.target.value}))} placeholder="Opcional" style={{ width:"100%" }} />
+                      </div>
                     </div>
                   </div>
+                )}
 
-                  {/* Selector de plan */}
-                  <h6 className="fw-bold text-muted text-uppercase small mb-3">
-                    Selecciona un plan nutricional
-                  </h6>
-                  <div className="row g-2 mb-4">
-                    {PLANES_NUTRICIONALES.map((p) => {
-                      const selec = planSelec?.id === p.id;
-                      const compatible = p.compatible.includes(asignarModal.objetivo_fisico);
-                      return (
-                        <div key={p.id} className="col-md-6 col-xl-4">
-                          <div
-                            className="card border-0 h-100"
-                            style={{
-                              cursor: "pointer",
-                              background: selec ? `${p.color}12` : "#f8fafc",
-                              border:     selec ? `2px solid ${p.color}` : "2px solid #e2e8f0",
-                              transition: "all 0.15s ease",
-                              opacity:    1,
-                            }}
-                            onClick={() => {
-                              setPlanSelec(p);
-                              setCalorias(String(p.calorias));
-                              setNumComidas(p.comidas);
-                            }}
-                          >
-                            <div className="card-body p-3">
-                              <div className="d-flex justify-content-between align-items-start">
-                                <div className="fw-semibold small" style={{ color: p.color }}>
-                                  {p.icono} {p.nombre}
-                                </div>
-                                {selec && <span style={{ color: p.color }}>✓</span>}
-                              </div>
-                              <div className="text-muted mt-1" style={{ fontSize: "0.68rem" }}>
-                                🔥 {p.calorias} kcal · 🍽️ {p.comidas} comidas/día
-                              </div>
-                              {compatible && (
-                                <span
-                                  className="badge mt-2 px-2"
-                                  style={{ background: `${p.color}18`, color: p.color, fontSize: "0.6rem" }}
-                                >
-                                  ⭐ Recomendado para este objetivo
+                {/* Alimentos disponibles */}
+                {asignarAfiliadoData && (
+                  <>
+                    <label className={s.labelText}>Alimentos disponibles ({alimentosDisponibles.length})</label>
+                    {alimentosDisponibles.length === 0 ? (
+                      <div className={s.emptyState}>No hay alimentos disponibles para este afiliado</div>
+                    ) : (
+                      <div style={{ maxHeight:350, overflowY:"auto", border:"1px solid #252545", borderRadius:8, padding:"0.5rem", marginBottom:12 }}>
+                        {alimentosDisponibles.map((al) => {
+                          const id = al.id_alimento;
+                          const checked = !!selectedAlimentos[id];
+                          return (
+                            <div key={id} className={`${s.alimentoItem} ${checked ? s.alimentoChecked : ""}`}>
+                              <div className={s.alimentoRow}>
+                                <input type="checkbox" className={s.checkboxDark} checked={checked} onChange={() => toggleAlimento(id)} />
+                                <span className={s.alimentoName}>{al.nombre_alimento}</span>
+                                <span className={s.alimentoNutrition}>
+                                  P:{al.proteinas}g · C:{al.carbohidratos}g · G:{al.grasas}g · {al.calorias_por_100g} kcal/100g
                                 </span>
+                              </div>
+                              {checked && (
+                                <div className={s.formRow}>
+                                  <div className={s.formGroup}>
+                                    <label className={s.inlineLabel}>Gramos/comida</label>
+                                    <input type="number" className={s.inlineInput} value={selectedAlimentos[id]?.cantidad_g??100} min={1}
+                                      onChange={(e) => updateAlimentoSel(id, "cantidad_g", e.target.value)} />
+                                  </div>
+                                  <div className={s.formGroup}>
+                                    <label className={s.inlineLabel}>N° Comida</label>
+                                    <input type="number" className={s.inlineInput} value={selectedAlimentos[id]?.num_comida??1} min={1} max={10}
+                                      onChange={(e) => updateAlimentoSel(id, "num_comida", e.target.value)} />
+                                  </div>
+                                </div>
                               )}
                             </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* Personalización */}
-                  <h6 className="fw-bold text-muted text-uppercase small mb-3">
-                    Ajustar parámetros
-                  </h6>
-                  <div className="row g-3">
-                    <div className="col-md-4">
-                      <label className="form-label small fw-semibold">Calorías estimadas/día *</label>
-                      <div className="input-group">
-                        <input
-                          type="number"
-                          className="form-control"
-                          min={800} max={6000} step={50}
-                          value={calorias}
-                          onChange={(e) => setCalorias(e.target.value)}
-                          required
-                        />
-                        <span className="input-group-text text-muted small">kcal</span>
+                          );
+                        })}
                       </div>
-                    </div>
-                    <div className="col-md-4">
-                      <label className="form-label small fw-semibold">Comidas por día</label>
-                      <select
-                        className="form-select"
-                        value={numComidas}
-                        onChange={(e) => setNumComidas(Number(e.target.value))}
-                      >
-                        {[3, 4, 5, 6].map((n) => (
-                          <option key={n} value={n}>{n} comidas/día</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="col-md-4">
-                      <label className="form-label small fw-semibold">Observaciones</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Ej: evitar lácteos..."
-                        value={obs}
-                        onChange={(e) => setObs(e.target.value)}
-                      />
+                    )}
+                  </>
+                )}
+              </div>
+              <div className={s.modalFooter}>
+                <button type="button" className={s.btnOutline} onClick={closeModal} disabled={saving}>Cancelar</button>
+                <button type="submit" className={s.btnConfirmar} disabled={saving || !asignarAfiliadoData || Object.keys(selectedAlimentos).length === 0}>
+                  {saving ? <span className="spinner-border spinner-border-sm" /> : "✅ Crear Plan Nutricional"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ════════════════════════════════════════════ */}
+      {/* MODAL: VER PERFIL                            */}
+      {/* ════════════════════════════════════════════ */}
+      {modal === "verPerfil" && modalAfiliado && (
+        <div className={s.modalOverlay} onClick={closeModal}>
+          <div className={s.modalContent} onClick={(e)=>e.stopPropagation()} style={{ maxWidth:700 }}>
+            <div className={s.modalHeader}>
+              <h5 className={s.modalTitle}>👁️ Plan Nutricional: {nombreCompleto(modalAfiliado)}</h5>
+              <button type="button" className={s.btnOutline} onClick={closeModal}>✕</button>
+            </div>
+            <div className={s.modalBody}>
+              <div className={s.afiliadoInfoBox}>
+                <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+                  <div className={s.avatarModal} style={{ background:avatarColor(nombreCompleto(modalAfiliado)) }}>{inicial(modalAfiliado)}</div>
+                  <div>
+                    <div style={{ fontWeight:600 }}>{nombreCompleto(modalAfiliado)}</div>
+                    <small style={{ color:"#94a3b8" }}>{modalAfiliado.correo||modalAfiliado.email||""}</small>
+                    <div style={{ display:"flex", gap:4, marginTop:4, flexWrap:"wrap" }}>
+                      {restriccionesBadges(modalAfiliado.restricciones)}
                     </div>
                   </div>
-
-                  {/* Advertencia si ya tiene plan */}
-                  {tienePlanNutricional(asignarModal) && (
-                    <div className="alert alert-warning mt-3 py-2">
-                      <small>
-                        ⚠️ Este afiliado ya tiene un plan activo. Asignar uno nuevo reemplazará el ciclo anterior.
-                      </small>
-                    </div>
-                  )}
                 </div>
-
-                <div className="modal-footer border-0">
-                  <button
-                    type="button"
-                    className="btn btn-outline-secondary btn-sm px-4"
-                    onClick={() => setAsignarModal(null)}
-                    disabled={saving}
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    id="btn-confirmar-asignar-dieta"
-                    type="submit"
-                    className="btn btn-sm text-white fw-semibold px-4"
-                    style={{ background: "linear-gradient(135deg,#0891b2,#0d9488)", border: "none" }}
-                    disabled={saving || !planSelec}
-                  >
-                    {saving
-                      ? <><span className="spinner-border spinner-border-sm me-2" />Guardando...</>
-                      : tienePlanNutricional(asignarModal)
-                        ? "💾 Actualizar Plan"
-                        : "✅ Crear Plan"}
-                  </button>
-                </div>
-              </form>
+              </div>
+              <DietaDisplay afiliado={modalAfiliado} authAxios={authAxios} />
+            </div>
+            <div className={s.modalFooter}>
+              <button type="button" className={s.btnOutline} onClick={closeModal}>Cerrar</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ═══════════════════════════════════════════════════════════════════════
-          MODAL: VER PLAN NUTRICIONAL ACTIVO
-      ═══════════════════════════════════════════════════════════════════════ */}
-      {verModal && (() => {
-        const ciclo = cicloActivo(verModal);
-        const plan  = ciclo?.plan_nutricional;
-        const objCfg = OBJETIVO_CONFIG[verModal.objetivo_fisico] || OBJETIVO_CONFIG["Mantenimiento"];
-
-        return (
-          <div
-            className="modal d-block"
-            style={{ background: "rgba(0,0,0,0.6)", zIndex: 1055 }}
-            onClick={() => setVerModal(null)}
-          >
-            <div
-              className="modal-dialog modal-lg modal-dialog-scrollable"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="modal-content border-0 shadow-lg">
-                <div
-                  className="modal-header text-white border-0"
-                  style={{ background: "linear-gradient(135deg,#1a1a2e,#16213e)" }}
-                >
-                  <h5 className="modal-title">
-                    🥗 Plan activo — {nombreCompleto(verModal)}
-                  </h5>
-                  <button className="btn-close btn-close-white" onClick={() => setVerModal(null)} />
-                </div>
-
-                <div className="modal-body">
-                  {/* Resumen del plan */}
-                  <div className="row g-3 mb-4">
-                    {[
-                      { label: "Plan",          v: plan?.nombre_plan           || "Personalizado" },
-                      { label: "Objetivo",       v: plan?.objetivo_dieta        || verModal.objetivo_fisico },
-                      { label: "Calorías",       v: plan?.calorias_estimadas ? `${plan.calorias_estimadas} kcal` : "—" },
-                      { label: "Comidas/día",    v: plan?.num_comidas_diarias   || "—" },
-                      { label: "Inicio ciclo",   v: ciclo?.fecha_inicio         || "—" },
-                      { label: "Fin ciclo",      v: ciclo?.fecha_fin            || "—" },
-                    ].map((f) => (
-                      <div key={f.label} className="col-6 col-md-4">
-                        <small className="text-muted d-block text-uppercase fw-semibold" style={{ fontSize: "0.65rem" }}>
-                          {f.label}
-                        </small>
-                        <span className="small fw-semibold">{f.v || "—"}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Macros */}
-                  {plan?.macros && (
-                    <>
-                      <h6 className="fw-bold mb-3">📊 Distribución de macronutrientes</h6>
-                      <div className="row g-2 mb-4">
-                        {Object.entries(plan.macros).map(([key, val]) => (
-                          <div key={key} className="col-4">
-                            <div
-                              className="card border-0 text-center p-3"
-                              style={{ background: "#0891b218" }}
-                            >
-                              <div className="fw-bold fs-5" style={{ color: "#0891b2" }}>{val}</div>
-                              <small className="text-muted text-capitalize">{key}</small>
+      {/* ════════════════════════════════════════════ */}
+      {/* MODAL: CATÁLOGO DE ALIMENTOS                 */}
+      {/* ════════════════════════════════════════════ */}
+      {modal === "catalogo" && (
+        <div className={s.modalOverlay} onClick={closeModal}>
+          <div className={s.modalContent} onClick={(e)=>e.stopPropagation()} style={{ maxWidth:800 }}>
+            <div className={s.modalHeader}>
+              <h5 className={s.modalTitle}>📋 Catálogo de Alimentos</h5>
+              <button type="button" className={s.btnOutline} onClick={closeModal}>✕</button>
+            </div>
+            <div className={s.modalBody}>
+              {catalogoAlimentos.length === 0 ? (
+                <div className={s.emptyState}>No hay alimentos en el catálogo</div>
+              ) : (
+                <div style={{ overflowX:"auto" }}>
+                  <table className={s.table}>
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Nombre</th>
+                        <th>Proteínas</th>
+                        <th>Carbos</th>
+                        <th>Grasas</th>
+                        <th>Kcal/100g</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {catalogoAlimentos.map((al, idx) => (
+                        <tr key={al.id_alimento}>
+                          <td style={{ color:"#94a3b8", fontSize:"0.78rem" }}>{idx + 1}</td>
+                          <td style={{ fontWeight:600 }}>{al.nombre_alimento}</td>
+                          <td>{al.proteinas}g</td>
+                          <td>{al.carbohidratos}g</td>
+                          <td>{al.grasas}g</td>
+                          <td>{al.calorias_por_100g}</td>
+                          <td>
+                            <div className={s.actionBtns}>
+                              <button type="button" className={s.btnOutline} style={{ padding:"0.2rem 0.5rem", fontSize:"0.72rem" }}
+                                onClick={() => { setModalAlimento(al); setFormAlimento({ nombre_alimento:al.nombre_alimento, proteinas:String(al.proteinas), carbohidratos:String(al.carbohidratos), grasas:String(al.grasas), calorias_por_100g:String(al.calorias_por_100g) }); setModal("editar"); }}>✏️</button>
+                              <button type="button" className={s.btnOutlineDanger} style={{ padding:"0.2rem 0.5rem", fontSize:"0.72rem" }}
+                                onClick={() => { setDeleteAlimentoId(al.id_alimento); setModal("eliminar"); }}>🗑️</button>
                             </div>
-                          </div>
-                        ))}
-                      </div>
-                    </>
-                  )}
-
-                  {/* Alimentos base */}
-                  {plan?.alimentos_base?.length > 0 && (
-                    <>
-                      <h6 className="fw-bold mb-3">🍱 Alimentos base del plan</h6>
-                      <div className="d-flex flex-wrap gap-2 mb-4">
-                        {plan.alimentos_base.map((al) => (
-                          <span key={al} className="badge bg-light text-dark border px-3 py-2">
-                            {al}
-                          </span>
-                        ))}
-                      </div>
-                    </>
-                  )}
-
-                  {/* Detalle de comidas (si existe) */}
-                  {plan?.detalle?.length > 0 && (
-                    <>
-                      <h6 className="fw-bold mb-3">📋 Distribución de comidas</h6>
-                      {Array.from(new Set(plan.detalle.map((d) => d.numero_comida))).map((nc) => (
-                        <div key={nc} className="border rounded-3 p-3 mb-2">
-                          <div className="fw-semibold small mb-2">Comida {nc}</div>
-                          {plan.detalle.filter((d) => d.numero_comida === nc).map((d, i) => (
-                            <div key={i} className="d-flex justify-content-between small text-muted border-bottom py-1">
-                              <span>🍽️ {d.nombre_alimento}</span>
-                              <span className="fw-semibold">{d.cantidad_g} g</span>
-                            </div>
-                          ))}
-                        </div>
+                          </td>
+                        </tr>
                       ))}
-                    </>
-                  )}
-
-                  {/* Restricciones del afiliado */}
-                  {(verModal.restricciones || []).length > 0 && (
-                    <>
-                      <h6 className="fw-bold mt-4 mb-3">⚠️ Restricciones del afiliado</h6>
-                      {verModal.restricciones.map((r) => {
-                        const cfg = RESTRICCION_COLOR[r.tipo] || { bg: "#e2e8f0", text: "#64748b" };
-                        return (
-                          <div
-                            key={r.id_restriccion}
-                            className="rounded-3 p-2 mb-2 d-flex align-items-center gap-2"
-                            style={{ background: cfg.bg }}
-                          >
-                            <span style={{ color: cfg.text, fontWeight: 700 }}>⚠️</span>
-                            <div>
-                              <div className="small fw-semibold" style={{ color: cfg.text }}>{r.nombre}</div>
-                              {r.efecto_relevante && (
-                                <div className="text-muted" style={{ fontSize: "0.7rem" }}>{r.efecto_relevante}</div>
-                              )}
-                            </div>
-                            <span
-                              className="badge ms-auto"
-                              style={{ background: cfg.bg, color: cfg.text, fontSize: "0.6rem", border: `1px solid ${cfg.text}44` }}
-                            >
-                              {r.tipo}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </>
-                  )}
-
-                  {/* Observaciones */}
-                  {plan?.observaciones && (
-                    <div className="alert alert-info py-2 mt-3">
-                      <small>📝 {plan.observaciones}</small>
-                    </div>
-                  )}
+                    </tbody>
+                  </table>
                 </div>
-
-                <div className="modal-footer border-0">
-                  <button
-                    className="btn btn-sm px-3 fw-semibold"
-                    style={{ background: "linear-gradient(135deg,#0891b2,#0d9488)", color: "#fff", border: "none" }}
-                    onClick={() => { setVerModal(null); abrirAsignar(verModal); }}
-                  >
-                    🔄 Cambiar plan
-                  </button>
-                  <button
-                    className="btn btn-secondary btn-sm px-3"
-                    onClick={() => setVerModal(null)}
-                  >
-                    Cerrar
-                  </button>
-                </div>
-              </div>
+              )}
+            </div>
+            <div className={s.modalFooter}>
+              <button type="button" className={s.btnPrimary} onClick={() => setModal("nuevo")}>➕ Nuevo Alimento</button>
+              <button type="button" className={s.btnOutline} onClick={closeModal}>Cerrar</button>
             </div>
           </div>
-        );
-      })()}
+        </div>
+      )}
+
+      {/* ════════════════════════════════════════════ */}
+      {/* MODAL: NUEVO / EDITAR ALIMENTO               */}
+      {/* ════════════════════════════════════════════ */}
+      {(modal === "nuevo" || modal === "editar") && (
+        <div className={s.modalOverlay} onClick={closeModal}>
+          <div className={s.modalContent} onClick={(e)=>e.stopPropagation()} style={{ maxWidth:500 }}>
+            <div className={s.modalHeader}>
+              <h5 className={s.modalTitle}>{modal === "nuevo" ? "🥗 Nuevo Alimento" : "✏️ Editar Alimento"}</h5>
+              <button type="button" className={s.btnOutline} onClick={closeModal} disabled={saving}>✕</button>
+            </div>
+            <form onSubmit={handleGuardarAlimento}>
+              <div className={s.modalBody}>
+                <div style={{ marginBottom:12 }}>
+                  <label className={s.labelText}>Nombre del alimento *</label>
+                  <input className={s.inputDark} value={formAlimento.nombre_alimento} onChange={(e)=>setFormAlimento((f)=>({...f, nombre_alimento:e.target.value}))} placeholder="Ej: Pechuga de pollo" required style={{ width:"100%" }} />
+                </div>
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:12 }}>
+                  <div>
+                    <label className={s.labelText}>Proteínas (g)</label>
+                    <input type="number" className={s.inputDark} value={formAlimento.proteinas} onChange={(e)=>setFormAlimento((f)=>({...f, proteinas:e.target.value}))} step="0.1" style={{ width:"100%" }} />
+                  </div>
+                  <div>
+                    <label className={s.labelText}>Carbohidratos (g)</label>
+                    <input type="number" className={s.inputDark} value={formAlimento.carbohidratos} onChange={(e)=>setFormAlimento((f)=>({...f, carbohidratos:e.target.value}))} step="0.1" style={{ width:"100%" }} />
+                  </div>
+                </div>
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:12 }}>
+                  <div>
+                    <label className={s.labelText}>Grasas (g)</label>
+                    <input type="number" className={s.inputDark} value={formAlimento.grasas} onChange={(e)=>setFormAlimento((f)=>({...f, grasas:e.target.value}))} step="0.1" style={{ width:"100%" }} />
+                  </div>
+                  <div>
+                    <label className={s.labelText}>Calorías por 100g</label>
+                    <input type="number" className={s.inputDark} value={formAlimento.calorias_por_100g} onChange={(e)=>setFormAlimento((f)=>({...f, calorias_por_100g:e.target.value}))} step="0.1" style={{ width:"100%" }} />
+                  </div>
+                </div>
+              </div>
+              <div className={s.modalFooter}>
+                <button type="button" className={s.btnOutline} onClick={closeModal} disabled={saving}>Cancelar</button>
+                <button type="submit" className={s.btnConfirmar} disabled={saving}>
+                  {saving ? <span className="spinner-border spinner-border-sm" /> : (modal === "nuevo" ? "💾 Guardar" : "💾 Guardar Cambios")}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ════════════════════════════════════════════ */}
+      {/* MODAL: ELIMINAR ALIMENTO                     */}
+      {/* ════════════════════════════════════════════ */}
+      {modal === "eliminar" && (
+        <div className={s.modalOverlay} onClick={closeModal}>
+          <div className={s.modalContent} onClick={(e)=>e.stopPropagation()} style={{ maxWidth:450 }}>
+            <div className={s.modalHeader}>
+              <h5 className={s.modalTitle}>🗑️ Eliminar Alimento</h5>
+              <button type="button" className={s.btnOutline} onClick={closeModal} disabled={saving}>✕</button>
+            </div>
+            <form onSubmit={handleEliminarAlimento}>
+              <div className={s.modalBody}>
+                <div className={s.alertDanger} style={{ marginBottom:"0.75rem", padding:"0.5rem 0.75rem", fontSize:"0.82rem" }}>⚠️ Esta acción no se puede deshacer.</div>
+                {catalogoAlimentos.length === 0 ? (
+                  <div className={s.emptyState}>No hay alimentos en el catálogo</div>
+                ) : (
+                  <>
+                    <label className={s.labelText}>Seleccionar alimento</label>
+                    <select className={s.selectDark} value={deleteAlimentoId} onChange={(e)=>setDeleteAlimentoId(e.target.value)} style={{ width:"100%" }}>
+                      <option value="">-- Selecciona --</option>
+                      {catalogoAlimentos.map((al) => (
+                        <option key={al.id_alimento} value={al.id_alimento}>{al.nombre_alimento}</option>
+                      ))}
+                    </select>
+                  </>
+                )}
+              </div>
+              <div className={s.modalFooter}>
+                <button type="button" className={s.btnOutline} onClick={closeModal} disabled={saving}>Cancelar</button>
+                <button type="submit" className={s.btnDanger} disabled={saving || !deleteAlimentoId}>
+                  {saving ? <span className="spinner-border spinner-border-sm" /> : "🗑️ Eliminar"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </AppLayout>
   );
+}
+
+// ── Sub-component: DietaDisplay ──────────────────────────────
+function DietaDisplay({ afiliado, authAxios }) {
+  const [plan, setPlan] = useState(null);
+  const [error, setError] = useState(null);
+  useEffect(() => {
+    (async () => {
+      try {
+        const ciclo = cicloActivo(afiliado);
+        if (!ciclo) { setError("Sin ciclo activo"); return; }
+        const idCiclo = ciclo.id_ciclo ?? ciclo.id;
+        const { data } = await authAxios.get(`/planes/nutricional/${idCiclo}`);
+        setPlan(data);
+      } catch (err) {
+        console.error("[DietasView] ver plan:", err);
+        setError(err.response?.status === 404 ? "No tiene plan nutricional" : "Error al cargar plan");
+      }
+    })();
+  }, [afiliado, authAxios]);
+
+  if (error) return <div className={s.emptyState}>{error}</div>;
+  if (!plan) return <div className={s.emptyState}>Cargando plan...</div>;
+
+  return (
+    <>
+      <div className={s.infoCard} style={{ marginBottom:"1rem" }}>
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
+          <div>
+            <small style={{ color:"#94a3b8", fontSize:"0.72rem" }}>Calorías objetivo</small>
+            <div style={{ fontWeight:600 }}>{plan.calorias_objetivo || "—"} kcal</div>
+          </div>
+          <div>
+            <small style={{ color:"#94a3b8", fontSize:"0.72rem" }}>Comidas / día</small>
+            <div style={{ fontWeight:600 }}>{plan.num_comidas || "—"}</div>
+          </div>
+          {plan.observaciones && (
+            <div style={{ gridColumn:"1/-1" }}>
+              <small style={{ color:"#94a3b8", fontSize:"0.72rem" }}>Observaciones</small>
+              <div style={{ fontSize:"0.85rem" }}>{plan.observaciones}</div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {Array.isArray(plan.detalle) && plan.detalle.length > 0 ? (
+        <PlanDetalle detalle={plan.detalle} numComidas={plan.num_comidas} />
+      ) : (
+        <div className={s.emptyState}>Este plan no tiene alimentos asignados</div>
+      )}
+    </>
+  );
+}
+
+function PlanDetalle({ detalle, numComidas }) {
+  const grouped = {};
+  for (const d of detalle) {
+    const key = d.num_comida || 1;
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(d);
+  }
+  const keys = Object.keys(grouped).sort((a, b) => Number(a) - Number(b));
+
+  return keys.map((key) => (
+    <div key={key} className={s.infoCard} style={{ marginBottom:"0.5rem" }}>
+      <div style={{ fontWeight:600, fontSize:"0.85rem", marginBottom:"0.25rem", color:"#7c3aed" }}>
+        🍽️ Comida #{key}
+      </div>
+      <div style={{ display:"flex", flexDirection:"column", gap:"0.25rem" }}>
+        {grouped[key].map((d, i) => (
+          <div key={i} style={{ display:"flex", justifyContent:"space-between", fontSize:"0.82rem" }}>
+            <span>{d.nombre_alimento || "Alimento"}</span>
+            <span style={{ color:"#94a3b8" }}>{d.cantidad_g || 0}g</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  ));
 }

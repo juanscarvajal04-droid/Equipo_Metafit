@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
 import { useToast } from "../hooks/useToast";
+import styles from "./Dashboard.module.css";
 
 export default function Dashboard() {
-  const { authAxios, logout } = useAuth();
-  const navigate = useNavigate();
+  const { authAxios } = useAuth();
   const { toast, showToast } = useToast();
 
   const [kpis, setKpis] = useState(null);
@@ -21,12 +20,10 @@ export default function Dashboard() {
       setKpis(data);
     } catch (err) {
       console.error("[Dashboard] Error al cargar KPIs:", err);
-      if (err?.response?.status === 401 || err?.response?.status === 403) {
-        logout();
-        navigate("/login");
-      } else {
-        setError("No se pudieron cargar las estadísticas del sistema.");
-      }
+      // ⚠️ No llamar logout() aquí: el interceptor global de api.js ya maneja
+      // los 401 de token expirado. Llamarlo localmente provoca un logout
+      // inmediato tras el login si el backend responde lento o con 403.
+      setError("No se pudieron cargar las estadísticas del sistema.");
     } finally {
       setLoading(false);
     }
@@ -36,13 +33,29 @@ export default function Dashboard() {
     cargarKPIs();
   }, []);
 
+  useEffect(() => {
+    const refresh = () => cargarKPIs();
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") cargarKPIs();
+    };
+    window.addEventListener("pago-registrado", refresh);
+    window.addEventListener("afiliado-modificado", refresh);
+    window.addEventListener("personal-modificado", refresh);
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      window.removeEventListener("pago-registrado", refresh);
+      window.removeEventListener("afiliado-modificado", refresh);
+      window.removeEventListener("personal-modificado", refresh);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, []);
+
   return (
     <AppLayout>
       {/* Toast */}
       {toast.msg && (
         <div
-          className={`position-fixed bottom-0 end-0 m-4 alert alert-${toast.type === "danger" ? "danger" : "dark"} shadow-lg py-2 px-3`}
-          style={{ zIndex: 9999, minWidth: 300 }}
+          className={`position-fixed bottom-0 end-0 m-4 alert alert-${toast.type === "danger" ? "danger" : "dark"} shadow-lg py-2 px-3 ${styles.toast}`}
         >
           {toast.msg}
         </div>
@@ -53,15 +66,7 @@ export default function Dashboard() {
         <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
           <div>
             <h1 className="h4 fw-bold mb-0 d-flex align-items-center gap-2">
-              <span
-                className="d-inline-flex align-items-center justify-content-center rounded-2 text-white"
-                style={{
-                  width: 36,
-                  height: 36,
-                  background: "linear-gradient(135deg,#7c3aed,#4f46e5)",
-                  fontSize: "1.1rem",
-                }}
-              >
+              <span className={`d-inline-flex align-items-center justify-content-center rounded-2 text-white ${styles.titleIcon}`}>
                 📊
               </span>
               Dashboard General
@@ -73,16 +78,13 @@ export default function Dashboard() {
 
           <button
             id="btn-refresh-dashboard"
-            className="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1 px-3"
-            style={{ fontSize: "0.8rem", fontWeight: 600 }}
+            className={`btn btn-sm btn-outline-secondary d-flex align-items-center gap-1 px-3 ${styles.refreshBtn}`}
             onClick={cargarKPIs}
             disabled={loading}
           >
             {loading ? (
-              <span className="spinner-border spinner-border-sm me-1" style={{ width: 12, height: 12 }} />
-            ) : (
-              "🔄"
-            )}
+              <span className={`spinner-border spinner-border-sm me-1 ${styles.spinnerSm}`} />
+            ) : ("🔄")}
             Actualizar datos
           </button>
         </div>
@@ -95,14 +97,14 @@ export default function Dashboard() {
 
         {loading && !kpis ? (
           <div className="text-center py-5">
-            <div className="spinner-border text-primary" style={{ width: "3rem", height: "3rem" }} />
+            <div className={`spinner-border text-primary ${styles.spinnerLg}`} />
             <p className="text-muted mt-2 small">Cargando métricas de rendimiento...</p>
           </div>
         ) : (
           kpis && (
             <>
               {/* Sección 1: Métricas de Membresía e Ingresos */}
-              <h5 className="fw-bold mb-3 text-muted small text-uppercase" style={{ letterSpacing: "0.06em" }}>
+              <h5 className={`fw-bold mb-3 text-muted small text-uppercase ${styles.sectionLabel}`}>
                 💰 Rendimiento y Finanzas
               </h5>
               <div className="row g-3 mb-4">
@@ -135,20 +137,19 @@ export default function Dashboard() {
                   <div key={kpi.label} className="col-12 col-md-4">
                     <div className="card border-0 shadow-sm h-100">
                       <div className="card-body d-flex align-items-center gap-3">
-                        <div
-                          className="rounded-circle d-flex align-items-center justify-content-center fs-4"
-                          style={{ width: 56, height: 56, background: kpi.bg, flexShrink: 0, color: kpi.color }}
-                        >
+                        {/* DINÁMICO: background y color vienen de kpi.bg / kpi.color (datos) */}
+                        <div className={styles.kpiIconWrap} style={{ background: kpi.bg, color: kpi.color }}>
                           {kpi.icono}
                         </div>
                         <div>
+                          {/* DINÁMICO: color del valor viene de kpi.color */}
                           <div className="fw-bold fs-4 lh-1" style={{ color: kpi.color }}>
                             {kpi.valor}
                           </div>
-                          <div className="fw-semibold text-dark small mt-1" style={{ fontSize: "0.8rem" }}>
+                          <div className={`fw-semibold text-dark small mt-1 ${styles.kpiLabel}`}>
                             {kpi.label}
                           </div>
-                          <small className="text-muted" style={{ fontSize: "0.68rem" }}>
+                          <small className={`text-muted ${styles.kpiSub}`}>
                             {kpi.subtext}
                           </small>
                         </div>
@@ -159,7 +160,7 @@ export default function Dashboard() {
               </div>
 
               {/* Sección 2: Afiliados y Personal */}
-              <h5 className="fw-bold mb-3 text-muted small text-uppercase" style={{ letterSpacing: "0.06em" }}>
+              <h5 className={`fw-bold mb-3 text-muted small text-uppercase ${styles.sectionLabel}`}>
                 👥 Control de Afiliados y Staff
               </h5>
               <div className="row g-3 mb-4">
@@ -168,8 +169,8 @@ export default function Dashboard() {
                     label: "Total Afiliados",
                     valor: kpis.total_afiliados,
                     icono: "👥",
-                    color: "#7c3aed",
-                    bg: "#7c3aed15",
+                    color: "#4b9ecb",
+                    bg: "#4b9ecb15",
                     sub: `${kpis.afiliados_activos} activos / ${kpis.afiliados_inactivos} inactivos`,
                   },
                   {
@@ -208,19 +209,13 @@ export default function Dashboard() {
                   <div key={kpi.label} className="col-6 col-md">
                     <div className="card border-0 shadow-sm h-100 text-center py-3">
                       <div className="card-body p-2 d-flex flex-column align-items-center">
-                        <div
-                          className="rounded-circle d-flex align-items-center justify-content-center mb-2 fs-5"
-                          style={{ width: 44, height: 44, background: kpi.bg, color: kpi.color }}
-                        >
+                        {/* DINÁMICO: background y color vienen de kpi.bg / kpi.color (datos) */}
+                        <div className={styles.kpiSmIcon} style={{ background: kpi.bg, color: kpi.color }}>
                           {kpi.icono}
                         </div>
                         <div className="fw-bold fs-4 text-dark">{kpi.valor}</div>
-                        <div className="fw-semibold text-muted mt-1" style={{ fontSize: "0.75rem" }}>
-                          {kpi.label}
-                        </div>
-                        <small className="text-muted mt-1" style={{ fontSize: "0.62rem" }}>
-                          {kpi.sub}
-                        </small>
+                        <div className={`fw-semibold text-muted mt-1 ${styles.kpiSmLabel}`}>{kpi.label}</div>
+                        <small className={`text-muted mt-1 ${styles.kpiSmSub}`}>{kpi.sub}</small>
                       </div>
                     </div>
                   </div>
@@ -233,7 +228,7 @@ export default function Dashboard() {
                 <div className="col-md-6">
                   <div className="card border-0 shadow-sm h-100">
                     <div className="card-header bg-white border-0 py-3">
-                      <h6 className="fw-bold mb-0 text-muted small text-uppercase" style={{ letterSpacing: "0.06em" }}>
+                      <h6 className={`fw-bold mb-0 text-muted small text-uppercase ${styles.cardSectionLabel}`}>
                         🎯 Distribución por Objetivo Físico (Ciclos Activos)
                       </h6>
                     </div>
@@ -246,12 +241,12 @@ export default function Dashboard() {
                             const total = kpis.ciclos_en_curso || 1;
                             const pct = Math.round((obj.cantidad * 100) / total);
                             const colors = {
-                              "Pérdida de grasa": "#e94560",
+                              "Perdida de grasa": "#e94560",
                               "Aumento de masa": "#2563eb",
                               "Mantenimiento": "#059669",
                               "Rehabilitación": "#ea580c",
                             };
-                            const col = colors[obj.objetivo] || "#7c3aed";
+                            const col = colors[obj.objetivo] || "#4b9ecb";
                             return (
                               <div key={obj.objetivo}>
                                 <div className="d-flex justify-content-between small fw-semibold text-muted mb-1">
@@ -260,11 +255,10 @@ export default function Dashboard() {
                                     {obj.cantidad} ({pct}%)
                                   </span>
                                 </div>
-                                <div className="progress" style={{ height: 6 }}>
-                                  <div
-                                    className="progress-bar rounded-pill"
-                                    style={{ width: `${pct}%`, background: col }}
-                                  />
+                                {/* DINÁMICO: width viene de pct calculado; background viene de col (dato) */}
+                                <div className={`progress ${styles.progressBar}`}>
+                                  <div className="progress-bar rounded-pill"
+                                    style={{ width: `${pct}%`, background: col }} />
                                 </div>
                               </div>
                             );
@@ -279,7 +273,7 @@ export default function Dashboard() {
                 <div className="col-md-6">
                   <div className="card border-0 shadow-sm h-100">
                     <div className="card-header bg-white border-0 py-3">
-                      <h6 className="fw-bold mb-0 text-muted small text-uppercase" style={{ letterSpacing: "0.06em" }}>
+                      <h6 className={`fw-bold mb-0 text-muted small text-uppercase ${styles.cardSectionLabel}`}>
                         ⚡ Estado Operativo del Staff
                       </h6>
                     </div>

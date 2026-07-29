@@ -1,0 +1,166 @@
+{
+  "info": {
+    "name": "MetaFit API - Movil",
+    "description": "Coleccion para la app movil de MetaFit (rol Afiliado). Autenticacion heredada via Bearer token.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "MetaFit"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "🔐 Auth",
+      "item": [
+        {
+          "name": "Login Afiliado",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"juan@gmail.com\",\n  \"password\": \"{{password_afiliado}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": ["{{base_url}}"],
+              "path": ["login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var json = pm.response.json();",
+                  "    pm.environment.set(\"token\", json.accessToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "👤 Mi Perfil",
+      "item": [
+        {
+          "name": "Obtener Mi Perfil",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/afiliados/me",
+              "host": ["{{base_url}}"],
+              "path": ["afiliados", "me"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔄 Mis Ciclos",
+      "item": [
+        {
+          "name": "Obtener Mis Ciclos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/afiliados/me/ciclos",
+              "host": ["{{base_url}}"],
+              "path": ["afiliados", "me", "ciclos"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📈 Mi Progreso",
+      "item": [
+        {
+          "name": "Obtener Mi Progreso",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/afiliados/me/progreso",
+              "host": ["{{base_url}}"],
+              "path": ["afiliados", "me", "progreso"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "⚠️ Mis Restricciones",
+      "item": [
+        {
+          "name": "Obtener Mis Restricciones",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/afiliados/me/restricciones",
+              "host": ["{{base_url}}"],
+              "path": ["afiliados", "me", "restricciones"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏋️ Plan de Entrenamiento",
+      "item": [
+        {
+          "name": "Obtener Plan de Entrenamiento",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/planes/entrenamiento/{{id_ciclo_test}}",
+              "host": ["{{base_url}}"],
+              "path": ["planes", "entrenamiento", "{{id_ciclo_test}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🥗 Plan Nutricional",
+      "item": [
+        {
+          "name": "Obtener Plan Nutricional",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/planes/nutricional/{{id_ciclo_test}}",
+              "host": ["{{base_url}}"],
+              "path": ["planes", "nutricional", "{{id_ciclo_test}}"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

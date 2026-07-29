@@ -6,12 +6,13 @@ import HomeRedirect from "./components/HomeRedirect";
 // ── Vistas ────────────────────────────────────────────────────────────────────
 import Login from "./views/Login";
 import LandingPage from "./views/LandingPage";
-import Dashboard from "./views/Dashboard";
+import AdminDashboard from "./views/AdminDashboard";
 import AfiliadosView from "./views/AfiliadosView";
 import GestionPersonal from "./views/GestionPersonal";
 import RutinasView from "./views/RutinasView";
 import DietasView from "./views/DietasView";
 import PagosView from "./views/PagosView";
+import FinanzasView from "./views/FinanzasView";
 
 /**
  * App.jsx — Raíz de la aplicación
@@ -28,8 +29,7 @@ import PagosView from "./views/PagosView";
  *  Regla: intentar acceder a una ruta no permitida redirige al home del rol.
  *  *      → /login (ruta desconocida sin sesión)
  *
- *  NOTA: Dashboard (antiguo) no tiene AppLayout/Sidebar. Solo se usa en /dashboard.
- *        Las rutas placeholder usan PlaceholderView que sí incluye el Sidebar.
+ *  NOTA: AdminDashboard reemplazó al Dashboard anterior. Incluye editor de precio de membresía.
  */
 
 // Grupos de roles
@@ -57,9 +57,11 @@ export default function App() {
               ADMINISTRADOR — acceso total
           ══════════════════════════════════════════════════════════════ */}
           <Route element={<ProtectedRoute allowedRoles={ADMIN} />}>
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/dashboard" element={<AdminDashboard />} />
             {/* 🛡️ RUTA EXCLUSIVA: Gestión de Personal — Solo Administrador */}
             <Route path="/personal" element={<GestionPersonal />} />
+            {/* 💰 Panel de Finanzas — Solo Administrador */}
+            <Route path="/finanzas" element={<FinanzasView />} />
           </Route>
 
           {/* ══════════════════════════════════════════════════════════════

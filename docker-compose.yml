@@ -25,7 +25,7 @@ services:
       # Forzar utf8mb4 desde arranque para evitar problemas de encoding
       MYSQL_INITDB_SKIP_TZINFO: "true"
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       # FIX: se monta la CARPETA completa (no un archivo individual).
       # Docker ejecuta TODOS los .sql en orden lexicográfico:
@@ -64,7 +64,7 @@ services:
       DB_NAME: ${DB_NAME}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-8h}
-      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://localhost:8081,http://192.168.0.4:8081,exp://192.168.0.4:8081}
     ports:
       - "${PORT}:${PORT}"
     depends_on:
@@ -107,14 +107,14 @@ services:
     container_name: metafit_phpmyadmin
     restart: unless-stopped
     environment:
-      PMA_HOST: db          # <- nombre exacto del servicio MySQL en esta red
+      PMA_HOST: db # <- nombre exacto del servicio MySQL en esta red
       PMA_PORT: 3306
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "8080:80"           # phpMyAdmin escucha en el 80 interno; lo exponemos en el 8080 local
+      - "8080:80" # phpMyAdmin escucha en el 80 interno; lo exponemos en el 8080 local
     depends_on:
       db:
-        condition: service_healthy  # arranca solo cuando MySQL ya responde el healthcheck
+        condition: service_healthy # arranca solo cuando MySQL ya responde el healthcheck
     networks:
       - metafit_net
 

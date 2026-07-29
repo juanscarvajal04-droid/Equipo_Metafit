@@ -82,10 +82,10 @@ const AfiliadoController = {
 
   createCiclo: async (req, res) => {
     try {
-      const result = await AfiliadoService.createCiclo(req.body);
+      const result = await AfiliadoService.createCiclo(req.body, req.user.sub);
       return res.status(201).json(result);
     } catch (err) {
-      if (err.message === 'id_afiliado, fecha_inicio y fecha_fin son requeridos') {
+      if (err.message === 'id_usuario, fecha_inicio y fecha_fin son requeridos') {
         return res.status(400).json({ error: err.message });
       }
       if (err.code === 'ER_DUP_ENTRY') {
@@ -132,6 +132,26 @@ const AfiliadoController = {
     }
   },
 
+  getEjerciciosDisponibles: async (req, res) => {
+    try {
+      const data = await AfiliadoService.getEjerciciosDisponibles(req.params.id);
+      return res.json(data);
+    } catch (err) {
+      console.error('[afiliadoController.getEjerciciosDisponibles]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
+  getAlimentosDisponibles: async (req, res) => {
+    try {
+      const data = await AfiliadoService.getAlimentosDisponibles(req.params.id);
+      return res.json(data);
+    } catch (err) {
+      console.error('[afiliadoController.getAlimentosDisponibles]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
   getProgreso: async (req, res) => {
     try {
       const progreso = await AfiliadoService.getProgreso(req.params.id);
@@ -154,6 +174,110 @@ const AfiliadoController = {
         return res.status(400).json({ error: 'Ya existe un registro de progreso para ese ciclo en esa fecha' });
       }
       console.error('[afiliadoController.createProgreso]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
+  // ── ENDPOINTS /me (auto‑usan req.user.sub) ────────────────
+
+  getMe: async (req, res) => {
+    try {
+      const af = await AfiliadoService.getById(req.user.sub);
+      if (!af) return res.status(404).json({ error: 'Afiliado no encontrado' });
+      return res.json(af);
+    } catch (err) {
+      console.error('[afiliadoController.getMe]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
+  getMisCiclos: async (req, res) => {
+    try {
+      const ciclos = await AfiliadoService.getCiclos(req.user.sub);
+      return res.json(ciclos);
+    } catch (err) {
+      console.error('[afiliadoController.getMisCiclos]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
+  getMiProgreso: async (req, res) => {
+    try {
+      const progreso = await AfiliadoService.getProgreso(req.user.sub);
+      return res.json(progreso);
+    } catch (err) {
+      console.error('[afiliadoController.getMiProgreso]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
+  getMisRestricciones: async (req, res) => {
+    try {
+      const restr = await AfiliadoService.getRestricciones(req.user.sub);
+      return res.json(restr);
+    } catch (err) {
+      console.error('[afiliadoController.getMisRestricciones]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
+  saveProgresoEjercicio: async (req, res) => {
+    try {
+      const result = await AfiliadoService.saveProgresoEjercicio(req.user.sub, req.body);
+      return res.status(201).json(result);
+    } catch (err) {
+      if (err.message.includes('requeridos')) {
+        return res.status(400).json({ error: err.message });
+      }
+      console.error('[afiliadoController.saveProgresoEjercicio]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
+  getProgresoEjercicio: async (req, res) => {
+    try {
+      const { idCiclo, fecha } = req.params;
+      const result = await AfiliadoService.getProgresoEjercicio(req.user.sub, idCiclo, fecha);
+      return res.json({ ejercicios: result });
+    } catch (err) {
+      console.error('[afiliadoController.getProgresoEjercicio]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
+  saveAgua: async (req, res) => {
+    try {
+      const result = await AfiliadoService.saveAgua(req.user.sub, req.body);
+      return res.status(201).json(result);
+    } catch (err) {
+      if (err.message.includes('requeridos')) {
+        return res.status(400).json({ error: err.message });
+      }
+      console.error('[afiliadoController.saveAgua]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
+  getAgua: async (req, res) => {
+    try {
+      const { fecha } = req.params;
+      const result = await AfiliadoService.getAgua(req.user.sub, fecha);
+      return res.json(result);
+    } catch (err) {
+      console.error('[afiliadoController.getAgua]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
+  saveConsumoAlimento: async (req, res) => {
+    try {
+      const result = await AfiliadoService.saveConsumoAlimento(req.user.sub, req.body);
+      return res.status(201).json(result);
+    } catch (err) {
+      if (err.message.includes('requeridos')) {
+        return res.status(400).json({ error: err.message });
+      }
+      console.error('[afiliadoController.saveConsumoAlimento]', err);
       return res.status(500).json({ error: 'Error interno del servidor' });
     }
   },

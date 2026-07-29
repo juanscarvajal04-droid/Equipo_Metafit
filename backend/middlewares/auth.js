@@ -3,6 +3,7 @@
 // Refactorizado: BUG-004 (límite 72 bytes bcrypt), BUG-009 (JWT_SECRET sin fallback inseguro)
 'use strict';
 
+const jwt = require('jsonwebtoken'); // FIX 1: jwt era undefined → todos los requireAuth fallaban con 401
 const AuthService = require('../services/authService');
 const SECRET = AuthService.SECRET;
 
@@ -64,6 +65,73 @@ const requireAdminOrEntrenador = (req, res, next) => {
   next();
 };
 
+// ─────────────────────────────────────────────────────────────
+// MIDDLEWARE: requireAdminOrRecepcionista
+// Pasa si role es 'Administrador' o 'Recepcionista'.
+// FIX 5: Necesario para el endpoint POST /afiliados/:id/pagos.
+// ─────────────────────────────────────────────────────────────
+const requireAdminOrRecepcionista = (req, res, next) => {
+  if (!req.user) return res.status(401).json({ error: 'No autenticado' });
+  const allowed = ['Administrador', 'Recepcionista'];
+  if (!allowed.includes(req.user.role)) {
+    return res.status(403).json({
+      error: 'Acceso denegado: se requiere rol Administrador o Recepcionista',
+    });
+  }
+  next();
+};
+
+// ─────────────────────────────────────────────────────────────
+// MIDDLEWARE: requireAdminOrTrainerOrRecepcionista (staff)
+// Pasa si role es 'Administrador', 'Entrenador' o 'Recepcionista'.
+// ─────────────────────────────────────────────────────────────
+const requireStaff = (req, res, next) => {
+  if (!req.user) return res.status(401).json({ error: 'No autenticado' });
+  const allowed = ['Administrador', 'Entrenador', 'Recepcionista'];
+  if (!allowed.includes(req.user.role)) {
+    return res.status(403).json({
+      error: 'Acceso denegado: se requiere rol de staff',
+    });
+  }
+  next();
+};
+
+// ─────────────────────────────────────────────────────────────
+// MIDDLEWARE: requireOwnCiclo
+// Si el usuario es 'Afiliado', verifica que el id_ciclo del
+// parámetro de ruta le pertenezca (CICLO.id_usuario === req.user.sub).
+// Para Admin/Entrenador pasa automáticamente.
+// ─────────────────────────────────────────────────────────────
+const CicloModel = require('../models/cicloModel');
+
+const requireOwnCiclo = async (req, res, next) => {
+  if (!req.user) return res.status(401).json({ error: 'No autenticado' });
+
+  const allowed = ['Administrador', 'Entrenador'];
+  if (allowed.includes(req.user.role)) {
+    return next();
+  }
+
+  const idCiclo = req.params.id_ciclo;
+  if (!idCiclo) {
+    return res.status(400).json({ error: 'id_ciclo es requerido' });
+  }
+
+  try {
+    const ciclo = await CicloModel.findById(idCiclo);
+    if (!ciclo) {
+      return res.status(404).json({ error: 'Ciclo no encontrado' });
+    }
+    if (ciclo.id_usuario !== req.user.sub) {
+      return res.status(403).json({ error: 'Este ciclo no te pertenece' });
+    }
+    next();
+  } catch (err) {
+    console.error('[requireOwnCiclo]', err);
+    return res.status(500).json({ error: 'Error interno del servidor' });
+  }
+};
+
 module.exports = {
   signJWT,
   hashPassword,
@@ -71,4 +139,7 @@ module.exports = {
   requireAuth,
   requireAdmin,
   requireAdminOrEntrenador,
+  requireAdminOrRecepcionista,
+  requireStaff,
+  requireOwnCiclo,
 };

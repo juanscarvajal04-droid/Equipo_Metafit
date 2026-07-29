@@ -66,19 +66,19 @@ VALUES
 
   -- ── Afiliados (rol=Afiliado, contrasena inicial individual) ──
   (6,  'Juan',  'Martínez', 'juan@gmail.com',
-   '$2a$12$9Z9XY1M1wFf/mcPlNJOK2OfZp3WNuVMvdmDsLh.oKZl/VZvW0ordO',
+   '$2a$12$VyQI5vdVoepQqwPySKKGXO9I4X89GceDV/Q9RBx2Xds1waAlvgGxy',
    'Afiliado', 'Activo', '2024-01-08 08:00:00'),
 
   (7,  'Ana',   'Rodríguez','ana@gmail.com',
-   '$2a$12$/OvH1.U9Z8nEIBclUeSYQeknyJvCMG6BpGHeE5dXAFryLXCfwhaQO',
+   '$2a$12$VyQI5vdVoepQqwPySKKGXO9I4X89GceDV/Q9RBx2Xds1waAlvgGxy',
    'Afiliado', 'Activo', '2024-02-01 08:00:00'),
 
   (8,  'Luis',  'Herrera',  'luis@gmail.com',
-   '$2a$12$mc.uLJ5DLfAX8.wy42P9deJVqXbu8bbJWu2OUoncBxCBZcrpy5t.C',
+   '$2a$12$VyQI5vdVoepQqwPySKKGXO9I4X89GceDV/Q9RBx2Xds1waAlvgGxy',
    'Afiliado', 'Activo', '2024-01-15 08:00:00'),
 
   (9,  'Sofía', 'Castro',   'sofia@gmail.com',
-   '$2a$12$x6tpLYgFMA5e0Vu/3SbqceVv/ZFUjGVdowdVcf9Osr11Vt7FIqhqO',
+   '$2a$12$VyQI5vdVoepQqwPySKKGXO9I4X89GceDV/Q9RBx2Xds1waAlvgGxy',
    'Afiliado', 'Activo', '2024-04-01 08:00:00');
 
 
@@ -106,15 +106,25 @@ VALUES
 INSERT INTO `EJERCICIO`
   (id_ejercicio, nombre_ejercicio, grupo_muscular, descripcion, nivel_minimo)
 VALUES
-  (1, 'Sentadilla',            'Piernas',  NULL, 'Principiante'),
-  (2, 'Press de banca',        'Pecho',    NULL, 'Principiante'),
-  (3, 'Peso muerto',           'Espalda',  NULL, 'Intermedio'),
-  (4, 'Press militar',         'Hombros',  NULL, 'Intermedio'),
-  (5, 'Curl de biceps',        'Biceps',   NULL, 'Principiante'),
-  (6, 'Extension de triceps',  'Triceps',  NULL, 'Principiante'),
-  (7, 'Hip thrust',            'Gluteos',  NULL, 'Intermedio'),
-  (8, 'Dominadas',             'Espalda',  NULL, 'Avanzado'),
-  (9, 'Zancadas',              'Piernas',  NULL, 'Intermedio');
+   (1, 'Sentadilla',            'Piernas',  NULL, 'Principiante'),
+   (2, 'Press de banca',        'Pecho',    NULL, 'Principiante'),
+   (3, 'Peso muerto',           'Espalda',  NULL, 'Intermedio'),
+   (4, 'Press militar',         'Hombros',  NULL, 'Intermedio'),
+   (5, 'Curl de biceps',        'Biceps',   NULL, 'Principiante'),
+   (6, 'Extension de triceps',  'Triceps',  NULL, 'Principiante'),
+   (7, 'Hip thrust',            'Gluteos',  NULL, 'Intermedio'),
+   (8, 'Dominadas',             'Espalda',  NULL, 'Avanzado'),
+   (9, 'Zancadas',              'Piernas',  NULL, 'Intermedio'),
+  (10, 'Plancha',               'Core',     NULL, 'Principiante'),
+  (11, 'Remo con barra',        'Espalda',  NULL, 'Intermedio'),
+  (12, 'Press inclinado',       'Pecho',    NULL, 'Intermedio'),
+  (13, 'Sentadilla bulgara',    'Piernas',  NULL, 'Avanzado'),
+  (14, 'Elevaciones laterales', 'Hombros',  NULL, 'Principiante'),
+  (15, 'Curl martillo',         'Biceps',   NULL, 'Intermedio'),
+  (16, 'Fondos en paralelas',   'Triceps',  NULL, 'Avanzado'),
+  (17, 'Peso muerto rumano',    'Gluteos',  NULL, 'Intermedio'),
+  (18, 'Abdominales',           'Core',     NULL, 'Principiante'),
+  (19, 'Jalon al pecho',        'Espalda',  NULL, 'Principiante');
 
 
 -- ============================================================================================================================
@@ -125,16 +135,26 @@ VALUES
 INSERT INTO `ALIMENTO`
   (id_alimento, nombre_alimento, proteinas, carbohidratos, grasas)
 VALUES
-  (1,  'Pechuga de pollo',    31.00,  0.00, 3.60),
-  (2,  'Arroz blanco',         2.70, 28.00, 0.30),
-  (3,  'Huevo entero',        13.00,  1.10,11.00),
-  (4,  'Avena',               17.00, 66.00, 7.00),
-  (5,  'Brocoli',              2.80,  7.00, 0.40),
-  (6,  'Atun en agua',        29.00,  0.00, 0.50),
-  (7,  'Batata',               1.60, 20.00, 0.10),
-  (8,  'Almendras',           21.00, 22.00,50.00),
-  (9,  'Leche deslactosada',   3.40,  4.80, 3.60),
-  (10, 'Quinoa',              14.00, 64.00, 6.00);
+   (1,  'Pechuga de pollo',    31.00,  0.00, 3.60),
+   (2,  'Arroz blanco',         2.70, 28.00, 0.30),
+   (3,  'Huevo entero',        13.00,  1.10,11.00),
+   (4,  'Avena',               17.00, 66.00, 7.00),
+   (5,  'Brocoli',              2.80,  7.00, 0.40),
+   (6,  'Atun en agua',        29.00,  0.00, 0.50),
+   (7,  'Batata',               1.60, 20.00, 0.10),
+   (8,  'Almendras',           21.00, 22.00,50.00),
+   (9,  'Leche deslactosada',   3.40,  4.80, 3.60),
+   (10, 'Quinoa',              14.00, 64.00, 6.00),
+   (11, 'Salmon',              20.00,  0.00,13.00),
+   (12, 'Yogur griego',        10.00,  3.60, 5.00),
+   (13, 'Espinacas',            2.90,  3.60, 0.40),
+   (14, 'Papa',                 2.00, 17.00, 0.10),
+   (15, 'Aguacate',             2.00,  9.00,15.00),
+   (16, 'Lentejas',             9.00, 20.00, 0.40),
+   (17, 'Pechuga de pavo',     22.00,  0.00, 1.00),
+   (18, 'Queso cottage',       11.00,  3.40, 4.30),
+   (19, 'Platano',              1.10, 23.00, 0.30),
+   (20, 'Arroz integral',       2.60, 23.00, 0.90);
 
 
 -- ============================================================================================================================
@@ -629,17 +649,82 @@ VALUES
 
 
 -- ============================================================================================================================
+-- BLOQUE 16 — CONFIGURACION DEL SISTEMA
+-- ============================================================================================================================
+
+INSERT INTO `CONFIGURACION` (`clave`, `valor`)
+VALUES ('precio_membresia', '80000');
+
+-- ============================================================================================================================
 -- Reactivar FK checks y resetear AUTO_INCREMENT para futuros inserts
 -- ============================================================================================================================
 
 SET FOREIGN_KEY_CHECKS = 1;
 
 ALTER TABLE `USUARIO`   AUTO_INCREMENT = 10;
-ALTER TABLE `EJERCICIO` AUTO_INCREMENT = 10;
-ALTER TABLE `ALIMENTO`  AUTO_INCREMENT = 11;
+ALTER TABLE `EJERCICIO` AUTO_INCREMENT = 20;
+ALTER TABLE `ALIMENTO`  AUTO_INCREMENT = 21;
 ALTER TABLE `RESTRICCION` AUTO_INCREMENT = 7;
 ALTER TABLE `CICLO`     AUTO_INCREMENT = 9;
 ALTER TABLE `RUTINA`    AUTO_INCREMENT = 25;
+
+-- ============================================================================================================================
+-- BLOQUE 11 - PAGOS (Ejemplos para el panel de Finanzas)
+-- Varios meses de pagos para que los gráficos tengan contenido.
+-- registrado_por: María (id=4, Recepcionista), Carlos (id=1, Admin)
+-- ============================================================================================================================
+
+INSERT INTO `PAGO` (id_usuario, fecha_pago, valor_pagado, estado, fecha_vencimiento, observaciones, registrado_por)
+VALUES
+  -- Juan Martínez (id=6) — pagos regulares
+  (6, '2025-06-10', 80000.00, 'Pagado', '2025-07-10', 'Pago mensual junio',       4),
+  (6, '2025-07-10', 80000.00, 'Pagado', '2025-08-10', 'Pago mensual julio',       4),
+  (6, '2025-08-10', 80000.00, 'Pagado', '2025-09-10', 'Pago mensual agosto',      4),
+  (6, '2025-09-10', 80000.00, 'Pagado', '2025-10-10', 'Pago mensual septiembre',  1),
+  (6, '2025-10-10', 80000.00, 'Pagado', '2025-11-10', 'Pago mensual octubre',     4),
+  (6, '2025-11-10', 80000.00, 'Pagado', '2025-12-10', 'Pago mensual noviembre',   4),
+  (6, '2025-12-10', 80000.00, 'Pagado', '2026-01-10', 'Pago mensual diciembre',   4),
+  (6, '2026-01-10', 80000.00, 'Pagado', '2026-02-10', 'Pago mensual enero',       4),
+  (6, '2026-02-10', 80000.00, 'Pagado', '2026-03-10', 'Pago mensual febrero',     4),
+  (6, '2026-03-10', 80000.00, 'Pagado', '2026-04-10', 'Pago mensual marzo',       4),
+  (6, '2026-04-10', 80000.00, 'Pagado', '2026-05-10', 'Pago mensual abril',       4),
+  (6, '2026-05-10', 80000.00, 'Pagado', '2026-06-10', 'Pago mensual mayo',        4),
+
+  -- Ana Rodríguez (id=7) — pagos regulares
+  (7, '2025-07-05', 80000.00, 'Pagado', '2025-08-05', 'Pago mensual julio',       4),
+  (7, '2025-08-05', 80000.00, 'Pagado', '2025-09-05', 'Pago mensual agosto',      4),
+  (7, '2025-09-05', 80000.00, 'Pagado', '2025-10-05', 'Pago mensual septiembre',  4),
+  (7, '2025-10-05', 80000.00, 'Pagado', '2025-11-05', 'Pago mensual octubre',     1),
+  (7, '2025-11-05', 80000.00, 'Pagado', '2025-12-05', 'Pago mensual noviembre',   4),
+  (7, '2025-12-05', 80000.00, 'Pagado', '2026-01-05', 'Pago mensual diciembre',   4),
+  (7, '2026-01-05', 80000.00, 'Pagado', '2026-02-05', 'Pago mensual enero',       4),
+  (7, '2026-02-05', 80000.00, 'Pagado', '2026-03-05', 'Pago mensual febrero',     4),
+  (7, '2026-03-05', 80000.00, 'Pagado', '2026-04-05', 'Pago mensual marzo',       4),
+  (7, '2026-04-05', 80000.00, 'Pagado', '2026-05-05', 'Pago mensual abril',       4),
+  (7, '2026-05-05', 80000.00, 'Pagado', '2026-06-05', 'Pago mensual mayo',        4),
+
+  -- Luis Herrera (id=8) — pagos con algunos vencidos y pendientes
+  (8, '2025-08-15', 80000.00, 'Pagado',  '2025-09-15', 'Pago mensual agosto',      4),
+  (8, '2025-09-15', 80000.00, 'Pagado',  '2025-10-15', 'Pago mensual septiembre',  4),
+  (8, '2025-10-15', 80000.00, 'Pagado',  '2025-11-15', 'Pago mensual octubre',     4),
+  (8, '2025-11-15', 80000.00, 'Pagado',  '2025-12-15', 'Pago mensual noviembre',   4),
+  (8, '2025-12-15', 80000.00, 'Vencido', '2026-01-15', 'Se venció, no pagó diciembre a tiempo', 4),
+  (8, '2026-01-20', 80000.00, 'Pagado',  '2026-02-20', 'Pago atrasado de enero',   1),
+  (8, '2026-02-15', 80000.00, 'Pagado',  '2026-03-15', 'Pago mensual febrero',     4),
+  (8, '2026-03-15', 80000.00, 'Pagado',  '2026-04-15', 'Pago mensual marzo',       4),
+  (8, '2026-04-15', 80000.00, 'Pagado',  '2026-05-15', 'Pago mensual abril',       4),
+  (8, '2026-05-15', 80000.00, 'Pagado',  '2026-06-15', 'Pago mensual mayo',        4),
+
+  -- Sofía Castro (id=9) — pagos esporádicos
+  (9, '2025-09-01', 80000.00, 'Pagado',  '2025-10-01', 'Pago mensual septiembre',  4),
+  (9, '2025-10-01', 80000.00, 'Pagado',  '2025-11-01', 'Pago mensual octubre',     4),
+  (9, '2025-11-01', 80000.00, 'Pagado',  '2025-12-01', 'Pago mensual noviembre',   4),
+  (9, '2025-12-01', 80000.00, 'Pagado',  '2026-01-01', 'Pago mensual diciembre',   4),
+  (9, '2026-01-01', 80000.00, 'Pagado',  '2026-02-01', 'Pago mensual enero',       4),
+  (9, '2026-02-01', 80000.00, 'Pagado',  '2026-03-01', 'Pago mensual febrero',     4),
+  (9, '2026-03-01', 80000.00, 'Pagado',  '2026-04-01', 'Pago mensual marzo',       4),
+  (9, '2026-04-01', 80000.00, 'Pagado',  '2026-05-01', 'Pago mensual abril',       4),
+  (9, '2026-05-01', 80000.00, 'Pagado',  '2026-06-01', 'Pago mensual mayo',        4);
 
 -- ============================================================================================================================
 -- VERIFICACION RAPIDA (ejecutar manualmente para validar la carga)

@@ -1,0 +1,21 @@
+/* frontend_web/src/components/AppLayout.module.css */
+/* Layout raíz de la aplicación autenticada: Sidebar + columna derecha */
+
+.root {
+  display: flex;
+  min-height: 100vh;
+  background: #0a0a0f;
+}
+
+.rightCol {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.main {
+  flex: 1;
+  overflow-y: auto;
+  background: #0a0a0f;
+}

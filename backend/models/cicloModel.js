@@ -1,31 +1,70 @@
 // models/cicloModel.js
+// FIX 2: Corregidos nombres de columna para coincidir con el schema real de la tabla CICLO.
+//  - id_afiliado        → id_usuario        (FK a AFILIADO.id_usuario)
+//  - fecha_inicio_ciclo → fecha_inicio       (nombre real en el schema)
+//  - fecha_fin_ciclo    → fecha_fin          (nombre real en el schema)
+//  - Agregados campos NOT NULL: objetivo_fisico, nivel_experiencia, disponibilidad_dias, registrado_por
+'use strict';
+
 const pool = require('../config/db');
 
 const CicloModel = {
 
-  findByAfiliado: async (id_afiliado) => {
+  findByAfiliado: async (id_usuario) => {
     const [rows] = await pool.query(`
-      SELECT c.*, ccn.numero_ciclo
+      SELECT c.*,
+        (
+          SELECT COUNT(*)
+          FROM CICLO c2
+          WHERE c2.id_usuario   = c.id_usuario
+            AND c2.fecha_inicio <= c.fecha_inicio
+        ) AS numero_ciclo
       FROM CICLO c
-      JOIN ciclo_con_numero ccn ON c.id_ciclo = ccn.id_ciclo
-      WHERE c.id_afiliado = ?
-      ORDER BY c.fecha_inicio_ciclo DESC
-    `, [id_afiliado]);
+      WHERE c.id_usuario = ?
+      ORDER BY c.fecha_inicio DESC
+    `, [id_usuario]);
     return rows;
   },
 
-  create: async (id_afiliado, fecha_inicio_ciclo, fecha_fin_ciclo) => {
+  // FIX 2: create ahora recibe un objeto con todos los campos requeridos por la tabla CICLO.
+  create: async (datos) => {
+    const {
+      id_usuario,
+      fecha_inicio,
+      fecha_fin,
+      objetivo_fisico,
+      nivel_experiencia,
+      disponibilidad_dias,
+      grupo_muscular_prioritario = null,
+      observaciones              = null,
+      registrado_por,
+    } = datos;
+
     const conn = await pool.getConnection();
     try {
       await conn.beginTransaction();
-      // Cierra ciclos anteriores activos
+      // Cierra ciclos anteriores activos del mismo afiliado
       await conn.query(
-        'UPDATE CICLO SET activo = 0 WHERE id_afiliado = ? AND activo = 1',
-        [id_afiliado]
+        'UPDATE CICLO SET activo = 0 WHERE id_usuario = ? AND activo = 1',
+        [id_usuario]
       );
       const [result] = await conn.query(
-        'INSERT INTO CICLO (id_afiliado, fecha_inicio_ciclo, fecha_fin_ciclo, activo) VALUES (?,?,?,1)',
-        [id_afiliado, fecha_inicio_ciclo, fecha_fin_ciclo]
+        `INSERT INTO CICLO
+           (id_usuario, fecha_inicio, fecha_fin, activo,
+            objetivo_fisico, nivel_experiencia, disponibilidad_dias,
+            grupo_muscular_prioritario, observaciones, registrado_por)
+         VALUES (?,?,?,1,?,?,?,?,?,?)`,
+        [
+          id_usuario,
+          fecha_inicio,
+          fecha_fin,
+          objetivo_fisico,
+          nivel_experiencia,
+          disponibilidad_dias,
+          grupo_muscular_prioritario,
+          observaciones,
+          registrado_por,
+        ]
       );
       await conn.commit();
       return result.insertId;
@@ -37,11 +76,16 @@ const CicloModel = {
     }
   },
 
+  findById: async (id_ciclo) => {
+    const [rows] = await pool.query('SELECT * FROM CICLO WHERE id_ciclo = ?', [id_ciclo]);
+    return rows[0] || null;
+  },
+
   update: async (id, campos) => {
     const sets = [];
     const vals = [];
-    if (campos.activo !== undefined)       { sets.push('activo=?');          vals.push(campos.activo); }
-    if (campos.fecha_fin_ciclo)            { sets.push('fecha_fin_ciclo=?'); vals.push(campos.fecha_fin_ciclo); }
+    if (campos.activo    !== undefined) { sets.push('activo=?');    vals.push(campos.activo); }
+    if (campos.fecha_fin !== undefined) { sets.push('fecha_fin=?'); vals.push(campos.fecha_fin); }
     if (!sets.length) return 0;
     vals.push(id);
     const [r] = await pool.query(`UPDATE CICLO SET ${sets.join(',')} WHERE id_ciclo=?`, vals);

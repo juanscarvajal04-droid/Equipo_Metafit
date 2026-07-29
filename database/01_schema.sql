@@ -1,10 +1,10 @@
--- =============================================================================================================================
+-- ============================================================================================================================
 -- TITULO DE INVESTIGACION:
 -- "Disenar, Normalizar e Implementar un Esquema de Base de Datos Relacional en Tercera Forma Normal
 --  para Gestionar Afiliados, Ciclos de Entrenamiento y Planes Nutricionales del Sistema MetaFit
 --  Aplicando Patrones de Herencia de Entidades, Indices de Rendimiento e Integridad Referencial
 --  como Soporte Tecnologico al Gimnasio Sport Gym Sede 80, Bogota, 2025."
--- =============================================================================================================================
+-- ============================================================================================================================
 -- Proyecto      : MetaFit - Sistema de Gestion Deportiva
 -- Cliente       : Sport Gym Sede 80, Bogota, Colombia
 -- Equipo        : Sofia Astudillo - Kevin S. Robayo - Carlos Rodrigues - Juan S. Carvajal
@@ -14,7 +14,7 @@
 -- Patron        : Herencia Super-tipo / Sub-tipo (USUARIO -> AFILIADO)
 -- Docker        : Compatible con /docker-entrypoint-initdb.d/ (ejecutado automaticamente)
 -- Fecha         : 2026
--- =============================================================================================================================
+-- ============================================================================================================================
 --
 -- DECISIONES ARQUITECTURALES:
 --
@@ -152,12 +152,12 @@ CREATE TABLE IF NOT EXISTS `ALIMENTO` (
 
 CREATE TABLE IF NOT EXISTS `AFILIADO` (
   `id_usuario`                INT          NOT NULL,
-  `documento`                 BIGINT       NOT NULL,
-  `fecha_nacimiento`          DATE         NOT NULL CHECK (`fecha_nacimiento` >= '1900-01-01'),
+  `documento`                 VARCHAR(20)  NULL,
+  `fecha_nacimiento`          DATE         NULL,
   `sexo`                      ENUM('Masculino','Femenino','Otro') NOT NULL,
-  `telefono`                  VARCHAR(20)  NOT NULL,
-  `direccion`                 VARCHAR(100) NOT NULL,
-  `estatura_cm`               DECIMAL(5,2) NOT NULL CHECK (`estatura_cm` BETWEEN 100.00 AND 250.00),
+  `telefono`                  VARCHAR(20)  NULL DEFAULT '',
+  `direccion`                 VARCHAR(100) NULL DEFAULT '',
+  `estatura_cm`               DECIMAL(5,2) NULL,
   `estado_afiliacion`         ENUM('Activo','Inactivo','Suspendido') NOT NULL DEFAULT 'Activo',
   `fecha_registro`            DATE         NOT NULL DEFAULT (CURRENT_DATE),
   `fecha_ultima_modificacion` DATETIME     NULL,
@@ -495,7 +495,7 @@ CREATE OR REPLACE VIEW `v_perfil_afiliado` AS
     u.`nombres`,
     u.`apellidos`,
     u.`correo`,
-    u.`estado`               AS `estado_cuenta`,
+    u.`estado`,
     u.`fecha_registro`       AS `fecha_registro_sistema`,
     a.`documento`,
     a.`fecha_nacimiento`,
@@ -597,11 +597,13 @@ CREATE TABLE IF NOT EXISTS `PAGO` (
   `estado`            ENUM('Pagado','Vencido','Pendiente') NOT NULL DEFAULT 'Pagado',
   `fecha_vencimiento` DATE         NOT NULL,
   `observaciones`     VARCHAR(200) NULL,
+  `registrado_por`    INT          NULL COMMENT 'id_usuario de quien registró el pago (Admin/Recepcionista)',
   `fecha_creacion`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
   PRIMARY KEY (`id_pago`),
   INDEX `idx_pago_afiliado` (`id_usuario`),
   INDEX `idx_pago_fecha` (`fecha_pago`),
+  INDEX `idx_pago_registrado_por` (`registrado_por`),
 
   CONSTRAINT `fk_pago_afiliado`
     FOREIGN KEY (`id_usuario`)
@@ -611,17 +613,42 @@ CREATE TABLE IF NOT EXISTS `PAGO` (
   COMMENT = 'Registro de pagos de membresia en efectivo. Valor mensual unico.';
 
 
+-- ============================================================================================================================
+-- BLOQUE 10 — CONFIGURACION DEL SISTEMA (clave-valor)
+-- Parametros editables por el Administrador desde el Dashboard.
+-- ============================================================================================================================
+
+CREATE TABLE IF NOT EXISTS `CONFIGURACION` (
+  `clave` VARCHAR(50)  NOT NULL,
+  `valor` VARCHAR(255) NOT NULL,
+
+  PRIMARY KEY (`clave`)
+
+) ENGINE = InnoDB
+  COMMENT = 'Parametros configurables del sistema (ej: precio_membresia).';
+
+-- ============================================================================================================================
+-- BLOQUE 11 — TRIGGERS
+-- ============================================================================================================================
+
+-- NOTA: Los triggers sobre CICLO fueron eliminados porque:
+--   - trg_ciclo_un_activo_insert: causaba MySQL error 1442 (UPDATE sobre CICLO dentro de BEFORE INSERT)
+--   - trg_ciclo_no_solapamiento_insert: causaba MySQL error 1442 (SELECT sobre CICLO dentro de BEFORE
+--     INSERT después de que la transacción ya modificó CICLO via UPDATE en cicloModel.create)
+--   La desactivación del ciclo anterior se maneja en cicloModel.create (capa de aplicación),
+--   y la validación de fechas está garantizada por CHECK constraints y lógica de negocio en el service.
+
 -- Reactivar checks de FK
 SET FOREIGN_KEY_CHECKS = 1;
 
 
 -- ============================================================================================================================
--- RESUMEN DEL ESQUEMA v4.0
+-- RESUMEN DEL ESQUEMA v4.1
 -- ============================================================================================================================
--- TABLAS (12): USUARIO, RESTRICCION, EJERCICIO, ALIMENTO, AFILIADO,
+-- TABLAS (17): USUARIO, RESTRICCION, EJERCICIO, ALIMENTO, AFILIADO,
 --              AFILIADO_RESTRICCION, EJERCICIO_RESTRICCION_EXCLUIDA, ALIMENTO_RESTRICCION_EXCLUIDA,
 --              CICLO, PLAN_ENTRENAMIENTO, PLAN_NUTRICIONAL, RUTINA, RUTINA_EJERCICIO,
---              DETALLE_NUTRICIONAL, PROGRESO_FISICO
+--              DETALLE_NUTRICIONAL, PROGRESO_FISICO, PAGO, CONFIGURACION
 --
 -- VISTAS (5):  v_alimento_calorias, v_perfil_afiliado, v_ciclo_activo_afiliado,
 --              v_ultimo_progreso, v_catalogo_ejercicios_disponibles

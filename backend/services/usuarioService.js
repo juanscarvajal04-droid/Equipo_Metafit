@@ -16,13 +16,12 @@ const UsuarioService = {
   },
 
   create: async (datos) => {
-    // Normalizar entrada
-    const nombres    = datos.nombres    || datos.nombres_usuario;
-    const apellidos  = datos.apellidos  || datos.apellidos_usuario;
-    const correo     = datos.correo     || datos.correo_usuario || datos.email;
-    const contrasena = datos.contrasena || datos.contrasena_usuario || datos.password;
-    const rol        = datos.rol        || datos.rol_usuario || datos.role;
-    const estado     = datos.estado     || datos.estado_cuenta_usuario || datos.estado_cuenta;
+    const nombres    = datos.nombres;
+    const apellidos  = datos.apellidos;
+    const correo     = datos.correo || datos.email;
+    const contrasena = datos.contrasena || datos.password;
+    const rol        = datos.rol;
+    const estado     = datos.estado;
 
     if (!nombres || !apellidos || !correo || !contrasena || !rol) {
       throw new Error('Todos los campos son requeridos');
@@ -34,8 +33,8 @@ const UsuarioService = {
   },
 
   update: async (id, datos, selfId, userRole) => {
-    const estadoNuevo = datos.estado || datos.estado_cuenta_usuario || datos.estado_cuenta;
-    const rolNuevo    = datos.rol    || datos.rol_usuario || datos.role;
+    const estadoNuevo = datos.estado;
+    const rolNuevo    = datos.rol;
 
     // Protecciones de auto-modificación
     if (parseInt(id, 10) === selfId && estadoNuevo && estadoNuevo !== 'Activo') {
@@ -47,10 +46,10 @@ const UsuarioService = {
     }
 
     const payload = {
-      nombres   : datos.nombres    || datos.nombres_usuario,
-      apellidos : datos.apellidos  || datos.apellidos_usuario,
-      correo    : datos.correo     || datos.correo_usuario || datos.email,
-      contrasena: datos.contrasena || datos.contrasena_usuario || datos.password,
+      nombres   : datos.nombres,
+      apellidos : datos.apellidos,
+      correo    : datos.correo || datos.email,
+      contrasena: datos.contrasena || datos.password,
       rol       : rolNuevo,
       estado    : estadoNuevo,
     };
@@ -89,7 +88,6 @@ const UsuarioService = {
       nombres: u.nombres,
       apellidos: u.apellidos,
       estado: u.estado,
-      estado_cuenta: u.estado,
       fecha_registro: u.fecha_registro
     };
   }

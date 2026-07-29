@@ -4,710 +4,761 @@ import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
 import { getId, nombreCompleto, inicial, cicloActivo } from "../utils/afiliadoHelpers";
 import { useToast } from "../hooks/useToast";
+import s from "./RutinasView.module.css";
 
+const DAY_LABELS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+const DIA_SEMANA_MAP = { Lunes:1, Martes:2, "Miércoles":3, Jueves:4, Viernes:5, Sábado:6, Domingo:7 };
+const GRUPOS_MUSCULARES = ["Piernas","Pecho","Espalda","Hombros","Bíceps","Tríceps","Core","Glúteos"];
+const NIVELES = ["Principiante","Intermedio","Avanzado"];
 const NIVEL_COLOR = {
-  Principiante: { bg: "#0ea5e922", text: "#0284c7", label: "Principiante" },
-  Intermedio:   { bg: "#8b5cf622", text: "#7c3aed", label: "Intermedio"   },
-  Avanzado:     { bg: "#ef444422", text: "#dc2626", label: "Avanzado"     },
+  Principiante:{bg:"#0ea5e922",text:"#0284c7"},
+  Intermedio:{bg:"#4b9ecb22",text:"#4b9ecb"},
+  Avanzado:{bg:"#ef444422",text:"#dc2626"},
+};
+const OBJETIVO_ICON = {"Perdida de grasa":"🔥","Aumento de masa":"💪","Mantenimiento":"⚖️"};
+
+const avatarColor = (nombre) => {
+  let hash = 0;
+  for (let i = 0; i < nombre.length; i++) hash = nombre.charCodeAt(i) + ((hash << 5) - hash);
+  return `hsl(${Math.abs(hash) % 360}, 65%, 55%)`;
 };
 
-const OBJETIVO_ICON = {
-  "Pérdida de grasa": "🔥",
-  "Aumento de masa":  "💪",
-  "Mantenimiento":    "⚖️",
-};
-
-// Rutinas predefinidas que el Entrenador puede asignar
-const RUTINAS_PREDEFINIDAS = [
-  { id: 1, nombre: "Full Body — Principiante",  dias: 3, enfoque: "Cuerpo completo",  nivel: "Principiante" },
-  { id: 2, nombre: "Upper/Lower — Intermedio",  dias: 4, enfoque: "Fuerza",           nivel: "Intermedio"   },
-  { id: 3, nombre: "Push/Pull/Legs — Avanzado", dias: 6, enfoque: "Hipertrofia",      nivel: "Avanzado"     },
-  { id: 4, nombre: "Cardio + Fuerza",           dias: 4, enfoque: "Pérdida de grasa", nivel: "Principiante" },
-  { id: 5, nombre: "Glúteos & Core",            dias: 3, enfoque: "Glúteos",          nivel: "Intermedio"   },
-  { id: 6, nombre: "Powerlifting Base",         dias: 4, enfoque: "Fuerza máxima",    nivel: "Avanzado"     },
-];
-
-// ── Componente principal ──────────────────────────────────────────────────────
 export default function RutinasView() {
-  const { user, authAxios, logout } = useAuth();
+  const { user, authAxios } = useAuth();
+  const { toast, showToast } = useToast();
   const navigate = useNavigate();
-  const role     = user?.role || "Entrenador";
-  const isAdmin  = role === "Administrador";
+  const role = user?.role || "Recepcionista";
 
-  const [afiliados,   setAfiliados]  = useState([]);
-  const [loading,     setLoading]    = useState(true);
-  const [refreshing,  setRefreshing] = useState(false);
-  const [error,       setError]      = useState("");
-  const [busqueda,    setBusqueda]   = useState("");
-  const { toast, showToast }         = useToast();
+  // ── State ──────────────────────────────────────────────────
+  const [afiliados, setAfiliados] = useState([]);
+  const [catalogoEj, setCatalogoEj] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState("");
 
-  // Modal asignar rutina
-  const [asignarModal, setAsignarModal] = useState(null);
-  const [rutinaSelec,  setRutinaSelec]  = useState(null);
-  const [fechaInicio,  setFechaInicio]  = useState(new Date().toISOString().split("T")[0]);
-  const [fechaFin,     setFechaFin]     = useState("");
-  const [saving,       setSaving]       = useState(false);
-  const [asigError,    setAsigError]    = useState("");
+  // Modal state
+  const [modal, setModal] = useState(null); // null | "asignar" | "catalogo" | "nuevo" | "editar" | "eliminar" | "verPerfil"
+  const [modalAfiliado, setModalAfiliado] = useState(null);
+  const [modalEjercicio, setModalEjercicio] = useState(null);
 
-  // Modal ver rutina activa
-  const [verModal, setVerModal] = useState(null);
+  // Asignar state
+  const [asignarAfiliadoId, setAsignarAfiliadoId] = useState("");
+  const [asignarAfiliadoData, setAsignarAfiliadoData] = useState(null);
+  const [ejerciciosDisponibles, setEjerciciosDisponibles] = useState([]);
+  const [selectedEjercicios, setSelectedEjercicios] = useState({}); // { [id_ejercicio]: { series, repeticiones, dia_numero } }
+  const [selectedRutinas, setSelectedRutinas] = useState({}); // { [dia_numero]: [ { id_ejercicio, series, repeticiones } ] }
 
-  // ── Carga (reutilizable para el botón Actualizar) ──────────────────────────
-  const cargarAfiliados = useCallback(async (esRefresh = false) => {
-    esRefresh ? setRefreshing(true) : setLoading(true);
-    setError("");
+  // Nuevo/Editar ejercicio form
+  const [formEj, setFormEj] = useState({ nombre_ejercicio:"", grupo_muscular:"Pecho", nivel_minimo:"Principiante", descripcion:"" });
+
+  // Delete
+  const [deleteEjId, setDeleteEjId] = useState("");
+
+  // ── Data fetching ───────────────────────────────────────────
+  const fetchAfiliados = useCallback(async () => {
+    setLoading(true);
     try {
-      // FIX: ruta correcta /afiliados (no /660/afiliados)
       const { data } = await authAxios.get("/afiliados");
-      setAfiliados(data);
-      if (esRefresh) showToast(`✅ Lista actualizada — ${data.length} afiliados`);
+      setAfiliados(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error('[RutinasView] Error al cargar:', err.response?.status, err.response?.data || err.message);
-      if (err?.response?.status === 401) { logout(); navigate("/login"); }
-      else setError("No se pudieron cargar los afiliados.");
+      console.error("[RutinasView]", err);
+      showToast("Error al cargar afiliados", "danger");
     } finally {
-      esRefresh ? setRefreshing(false) : setLoading(false);
+      setLoading(false);
     }
-  }, [authAxios, logout, navigate, showToast]);
+  }, [authAxios, showToast]);
 
-  useEffect(() => { cargarAfiliados(); }, []);
+  const fetchEjercicios = useCallback(async () => {
+    try {
+      const { data } = await authAxios.get("/catalogo/ejercicios");
+      setCatalogoEj(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("[RutinasView] catálogo:", err);
+      showToast("Error al cargar catálogo de ejercicios", "danger");
+    }
+  }, [authAxios, showToast]);
 
+  useEffect(() => { fetchAfiliados(); fetchEjercicios(); }, [fetchAfiliados, fetchEjercicios]);
 
-  const filtrados = afiliados
-    .filter((a) => {
-      const t = busqueda.toLowerCase();
-      return (
-        nombreCompleto(a).toLowerCase().includes(t) ||
-        (a.objetivo_fisico || "").toLowerCase().includes(t) ||
-        (a.nivel_experiencia || "").toLowerCase().includes(t)
-      );
-    })
-    // ⬇️ Sin rutina primero (prioridad para el entrenador)
-    .sort((a, b) => {
-      const aConRutina = !!cicloActivo(a);
-      const bConRutina = !!cicloActivo(b);
-      if (!aConRutina && bConRutina) return -1;
-      if (aConRutina && !bConRutina) return 1;
-      return 0;
-    });
+  // ── Derived data ────────────────────────────────────────────
+  const filtered = afiliados.filter((a) => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return nombreCompleto(a).toLowerCase().includes(q) || (a.correo||a.email||"").toLowerCase().includes(q) || (a.documento||"").includes(q);
+  });
+  const totalAfiliados = afiliados.length;
+  const conPlan = afiliados.filter((a) => !!cicloActivo(a)?.plan_entrenamiento).length;
+  const sinPlan = totalAfiliados - conPlan;
+  const totalEjercicios = catalogoEj.length;
 
-  // ── Asignar rutina (crea/actualiza ciclo activo) ───────────────────────────
-  const abrirAsignar = (afiliado) => {
-    setAsignarModal(afiliado);
-    const ciclo = cicloActivo(afiliado);
-    // Pre-seleccionar rutina compatible con el nivel
-    const compatible = RUTINAS_PREDEFINIDAS.find(
-      (r) => r.nivel === afiliado.nivel_experiencia
-    ) || RUTINAS_PREDEFINIDAS[0];
-    setRutinaSelec(compatible);
-    setFechaInicio(new Date().toISOString().split("T")[0]);
-    // Fecha fin = 8 semanas por defecto
-    const fin = new Date();
-    fin.setDate(fin.getDate() + 56);
-    setFechaFin(fin.toISOString().split("T")[0]);
-    setAsigError("");
+  // ── Modal handlers ──────────────────────────────────────────
+  const closeModal = () => {
+    if (saving) return;
+    setModal(null);
+    setModalAfiliado(null);
+    setModalEjercicio(null);
+    setAsignarAfiliadoId("");
+    setAsignarAfiliadoData(null);
+    setEjerciciosDisponibles([]);
+    setSelectedEjercicios({});
+    setSelectedRutinas({});
+    setFormEj({ nombre_ejercicio:"", grupo_muscular:"Pecho", nivel_minimo:"Principiante", descripcion:"" });
+    setDeleteEjId("");
+  };
+
+  const openAsignar = async () => {
+    setAsignarAfiliadoId("");
+    setAsignarAfiliadoData(null);
+    setEjerciciosDisponibles([]);
+    setSelectedEjercicios({});
+    setSelectedRutinas({});
+    setModal("asignar");
+  };
+
+  const handleAfiliadoSelect = async (e) => {
+    const id = e.target.value;
+    setAsignarAfiliadoId(id);
+    if (!id) { setAsignarAfiliadoData(null); setEjerciciosDisponibles([]); return; }
+    const a = afiliados.find((x) => String(getId(x)) === id);
+    setAsignarAfiliadoData(a || null);
+    try {
+      const { data } = await authAxios.get(`/afiliados/${id}/ejercicios-disponibles`);
+      setEjerciciosDisponibles(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("[RutinasView] disponibles:", err);
+      showToast("Error al cargar ejercicios disponibles", "danger");
+      setEjerciciosDisponibles([]);
+    }
+  };
+
+  const addEjercicioToRutina = (ej) => {
+    const id = ej.id_ejercicio ?? ej.id;
+    if (selectedEjercicios[id]) return;
+    setSelectedEjercicios((prev) => ({ ...prev, [id]: { series:3, repeticiones:12, dia_numero:1 } }));
+  };
+
+  const updateEjercicioSel = (id, field, value) => {
+    setSelectedEjercicios((prev) => ({ ...prev, [id]: { ...prev[id], [field]: value } }));
+  };
+
+  const removeEjercicioSel = (id) => {
+    setSelectedEjercicios((prev) => { const c={...prev}; delete c[id]; return c; });
   };
 
   const handleAsignar = async (e) => {
     e.preventDefault();
-    if (!rutinaSelec) { setAsigError("Selecciona una rutina."); return; }
-    if (!fechaInicio || !fechaFin) { setAsigError("Las fechas son obligatorias."); return; }
-    if (fechaFin <= fechaInicio) { setAsigError("La fecha de fin debe ser posterior al inicio."); return; }
-
-    setSaving(true); setAsigError("");
+    const idsEjer = Object.keys(selectedEjercicios);
+    if (idsEjer.length === 0) {
+      showToast("Selecciona al menos un ejercicio", "danger");
+      return;
+    }
+    const a = asignarAfiliadoData;
+    if (!a) { showToast("Selecciona un afiliado", "danger"); return; }
+    setSaving(true);
     try {
-      const id = getId(asignarModal);
-      // FIX: el backend MySQL maneja ciclos en la tabla CICLO, no como array en JSON.
-      // Enviamos solo los datos del nuevo ciclo al endpoint correcto.
-      const payload = {
-        fecha_inicio:       fechaInicio,
-        fecha_fin:          fechaFin,
-        asignado_por_id:    getId(user),
-        nombre_rutina:      rutinaSelec.nombre,
-        enfoque:            rutinaSelec.enfoque,
-        dias_semana:        rutinaSelec.dias,
-      };
-      await authAxios.post(`/afiliados/ciclos`, {
-        id_afiliado: id,
-        ...payload,
+      const idAfiliado = getId(a);
+      let idCiclo;
+      const cicloExistente = cicloActivo(a);
+      if (cicloExistente && (cicloExistente.id_ciclo || cicloExistente.id)) {
+        idCiclo = cicloExistente.id_ciclo || cicloExistente.id;
+      } else {
+        const fechaInicio = new Date().toISOString().split("T")[0];
+        const fechaFin = new Date(Date.now()+90*86400000).toISOString().split("T")[0];
+        const { data: ciclo } = await authAxios.post("/afiliados/ciclos", {
+          id_usuario: idAfiliado,
+          fecha_inicio: fechaInicio,
+          fecha_fin: fechaFin,
+          objetivo_fisico: a.objetivo_fisico || "Mantenimiento",
+          nivel_experiencia: a.nivel_experiencia || "Principiante",
+          disponibilidad_dias: Number(a.disponibilidad_semanal_dias) || 3,
+        });
+        idCiclo = ciclo.id_ciclo ?? ciclo.id;
+      }
+
+      // Crear o actualizar plan de entrenamiento
+      let planData = null;
+      try {
+        const resp = await authAxios.get(`/planes/entrenamiento/${idCiclo}`);
+        planData = resp.data;
+      } catch (getErr) {
+        if (getErr.response?.status !== 404) throw getErr;
+      }
+      if (planData) {
+        await authAxios.patch(`/planes/entrenamiento/${idCiclo}`, { observaciones:"" });
+      } else {
+        await authAxios.post("/planes/entrenamiento", { id_ciclo: idCiclo });
+      }
+
+      // Mapa de rutinas existentes: dia_numero → id_rutina
+      const rutinasExistentes = {};
+      if (planData && Array.isArray(planData.rutinas)) {
+        for (const r of planData.rutinas) {
+          rutinasExistentes[r.dia_numero] = r.id_rutina;
+        }
+      }
+
+      // Agrupar ejercicios por día
+      const porDia = {};
+      idsEjer.forEach((idEj) => {
+        const ej = selectedEjercicios[idEj];
+        const dia = Number(ej.dia_numero) || 1;
+        if (!porDia[dia]) porDia[dia] = [];
+        porDia[dia].push({ id_ejercicio: Number(idEj), series: Number(ej.series)||3, repeticiones: Number(ej.repeticiones)||12 });
       });
-      // FIX: el backend devuelve {message}, NO el afiliado actualizado.
-      // Actualizamos el estado local mergeando el nuevo ciclo activo.
-      const nuevoCicloLocal = {
-        numero_ciclo:       (asignarModal.ciclo_activo?.numero_ciclo || 0) + 1,
-        fecha_inicio:       fechaInicio,
-        fecha_fin:          fechaFin,
-        plan_entrenamiento: { nombre_rutina: rutinaSelec.nombre, enfoque: rutinaSelec.enfoque, dias_semana: rutinaSelec.dias },
-        progreso_fisico:    [],
-      };
-      setAfiliados((prev) => prev.map((a) =>
-        getId(a) === id ? { ...a, ciclo_activo: nuevoCicloLocal } : a
-      ));
-      setAsignarModal(null);
-      const accion = cicloActivo(asignarModal) ? "actualizada" : "asignada";
-      showToast(`✅ Rutina "${rutinaSelec.nombre}" ${accion} a ${nombreCompleto(asignarModal)}`);
+
+      // Crear rutinas y asignar ejercicios
+      for (const diaStr of Object.keys(porDia)) {
+        const diaNum = Number(diaStr);
+        if (rutinasExistentes[diaNum]) {
+          try {
+            await authAxios.delete(`/planes/rutinas/${rutinasExistentes[diaNum]}`);
+          } catch (delErr) {
+            console.warn("[RutinasView] error al eliminar rutina existente:", delErr);
+          }
+        }
+        const ejercDelDia = porDia[diaNum];
+        const { data: rutina } = await authAxios.post("/planes/rutinas", {
+          id_ciclo: idCiclo,
+          nombre_rutina: "Rutina " + (DAY_LABELS[diaNum-1] || "Día "+diaNum),
+          dia_numero: diaNum,
+          enfoque_muscular: "Full Body",
+        });
+        const idRutina = rutina.id ?? rutina.id_rutina;
+        for (let i = 0; i < ejercDelDia.length; i++) {
+          await authAxios.post(`/planes/rutinas/${idRutina}/ejercicios`, {
+            id_ejercicio: ejercDelDia[i].id_ejercicio,
+            series: ejercDelDia[i].series,
+            repeticiones: ejercDelDia[i].repeticiones,
+            orden: i + 1,
+          });
+        }
+      }
+
+      showToast("Plan de entrenamiento creado correctamente", "success");
+      closeModal();
+      fetchAfiliados();
     } catch (err) {
-      const msg = err?.response?.data?.error || err.message || "Error desconocido";
-      console.error('[RutinasView.handleAsignar]', err);
-      setAsigError(`Error al guardar: ${msg}`);
+      console.error("[RutinasView] asignar:", err);
+      showToast(err.response?.data?.error || err.message || "Error al asignar rutina", "danger");
     } finally {
       setSaving(false);
     }
   };
 
-  // ── Render ─────────────────────────────────────────────────────────────────
+  const handleGuardarEjercicio = async (e) => {
+    e.preventDefault();
+    if (!formEj.nombre_ejercicio.trim()) { showToast("El nombre es obligatorio", "danger"); return; }
+    setSaving(true);
+    try {
+      if (modal === "editar" && modalEjercicio) {
+        const id = modalEjercicio.id_ejercicio ?? modalEjercicio.id;
+        await authAxios.put(`/catalogo/ejercicios/${id}`, formEj);
+        showToast("Ejercicio actualizado", "success");
+      } else {
+        await authAxios.post("/catalogo/ejercicios", formEj);
+        showToast("Ejercicio creado", "success");
+      }
+      closeModal();
+      fetchEjercicios();
+    } catch (err) {
+      showToast(err.response?.data?.error || err.message || "Error al guardar ejercicio", "danger");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleEliminarEjercicio = async (e) => {
+    e.preventDefault();
+    if (!deleteEjId) { showToast("Selecciona un ejercicio", "danger"); return; }
+    setSaving(true);
+    try {
+      await authAxios.delete(`/catalogo/ejercicios/${deleteEjId}`);
+      showToast("Ejercicio eliminado", "success");
+      closeModal();
+      fetchEjercicios();
+    } catch (err) {
+      const msg = err.response?.status === 409
+        ? "No se puede eliminar: el ejercicio está siendo usado en planes activos"
+        : (err.response?.data?.error || err.message || "Error al eliminar");
+      showToast(msg, "danger");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // ── Render helpers ──────────────────────────────────────────
+  const badgeNivel = (nivel) => {
+    if (!nivel) return null;
+    const cfg = NIVEL_COLOR[nivel] || { bg:"#6b728018", text:"#6b7280" };
+    return <span className={s.badgeNivel} style={{ background:cfg.bg, color:cfg.text }}>{nivel}</span>;
+  };
+
+  // ════════════════════════════════════════════════════════════
+  // RENDER
+  // ════════════════════════════════════════════════════════════
   return (
     <AppLayout>
-      {/* Toast */}
       {toast.msg && (
-        <div
-          className={`position-fixed bottom-0 end-0 m-4 alert alert-${toast.type === "danger" ? "danger" : "dark"} shadow-lg py-2 px-3`}
-          style={{ zIndex: 9999, minWidth: 300 }}
-        >
+        <div style={{ position:"fixed", top:16, right:16, zIndex:9999, padding:"0.5rem 1rem", borderRadius:8,
+          background: toast.type==="danger" ? "rgba(239,68,68,0.1)" : "rgba(34,197,94,0.1)",
+          border: toast.type==="danger" ? "1px solid rgba(239,68,68,0.3)" : "1px solid rgba(34,197,94,0.3)",
+          color: toast.type==="danger" ? "#ef4444" : "#22c55e" }}>
           {toast.msg}
         </div>
       )}
 
-      <div className="container-fluid py-4 px-3 px-md-4">
-
-        {/* ── Encabezado ── */}
-        <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+      <div className={s.page}>
+        {/* HEADER */}
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:24, flexWrap:"wrap", gap:12 }}>
           <div>
-            <h1 className="h4 fw-bold mb-0 d-flex align-items-center gap-2">
-              <span
-                className="d-inline-flex align-items-center justify-content-center rounded-2 text-white"
-                style={{ width: 36, height: 36, background: "linear-gradient(135deg,#059669,#0d9488)", fontSize: "1.1rem" }}
-              >
-                🏋️
-              </span>
-              Planes de Entrenamiento
-            </h1>
-            <small className="text-muted">
-              {isAdmin
-                ? "Vista de administrador — supervisión de rutinas asignadas"
-                : "Asigna y gestiona rutinas personalizadas para cada afiliado"}
-            </small>
+            <h1 className={s.headerTitle}>🏋️ Planes de Entrenamiento</h1>
+            <p className={s.headerSub}>Gestión de rutinas y planes de entrenamiento para afiliados</p>
           </div>
-
-          {/* KPIs rápidos */}
-          <div className="d-flex gap-2 flex-wrap">
-            {[
-              { label: "Total afiliados", valor: afiliados.length,                          color: "#059669" },
-              { label: "Con rutina activa", valor: afiliados.filter((a) => cicloActivo(a)).length, color: "#7c3aed" },
-              { label: "Sin rutina",       valor: afiliados.filter((a) => !cicloActivo(a)).length, color: "#e94560" },
-            ].map((k) => (
-              <div
-                key={k.label}
-                className="card border-0 shadow-sm text-center px-3 py-2"
-                style={{ minWidth: 110 }}
-              >
-                <div className="fw-bold fs-5" style={{ color: k.color }}>
-                  {loading ? "—" : k.valor}
-                </div>
-                <div className="text-muted" style={{ fontSize: "0.68rem" }}>{k.label}</div>
-              </div>
-            ))}
+          <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+            <button type="button" className={s.btnPrimary} onClick={openAsignar}>➕ Asignar Rutina</button>
+            <button type="button" className={s.btnOutline} onClick={() => { fetchEjercicios(); setModal("catalogo"); }}>📋 Ver Catálogo</button>
+            <button type="button" className={s.btnAsignar} onClick={() => setModal("nuevo")}>➕ Agregar Ejercicio</button>
+            <button type="button" className={s.btnOutlineDanger} onClick={() => { fetchEjercicios(); setModal("eliminar"); }}>🗑️ Eliminar Ejercicio</button>
           </div>
         </div>
 
-        {/* ── Tabla de afiliados ── */}
-        <div className="card border-0 shadow-sm">
-          <div className="card-header bg-white py-3 d-flex justify-content-between align-items-center border-0 flex-wrap gap-2">
-            <span className="fw-semibold text-muted small">{filtrados.length} afiliados</span>
-            <div className="d-flex gap-2 align-items-center">
-              <input
-                id="busqueda-rutinas"
-                type="text"
-                className="form-control form-control-sm"
-                style={{ maxWidth: 240 }}
-                placeholder="🔍 Nombre, objetivo, nivel..."
-                value={busqueda}
-                onChange={(e) => setBusqueda(e.target.value)}
-              />
-              <button
-                id="btn-refresh-rutinas"
-                className="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1"
-                style={{ whiteSpace: "nowrap", fontSize: "0.78rem" }}
-                onClick={() => cargarAfiliados(true)}
-                disabled={refreshing}
-                title="Recargar lista de afiliados"
-              >
-                {refreshing
-                  ? <span className="spinner-border spinner-border-sm" style={{ width: 12, height: 12, borderWidth: 2 }} />
-                  : "🔄"}
-                Actualizar
-              </button>
-            </div>
+        {/* KPIs */}
+        <div className={s.kpiRow}>
+          <div className={s.kpiCard}>
+            <div className={s.kpiValue}>{totalAfiliados}</div>
+            <div className={s.kpiLabel}>Total Afiliados</div>
           </div>
+          <div className={s.kpiCard}>
+            <div className={s.kpiValue} style={{ color:"#22c55e" }}>{conPlan}</div>
+            <div className={s.kpiLabel}>Con Plan de Entrenamiento</div>
+          </div>
+          <div className={s.kpiCard}>
+            <div className={s.kpiValue} style={{ color:"#ef4444" }}>{sinPlan}</div>
+            <div className={s.kpiLabel}>Sin Plan Asignado</div>
+          </div>
+          <div className={s.kpiCard}>
+            <div className={s.kpiValue} style={{ color:"#7c3aed" }}>{totalEjercicios}</div>
+            <div className={s.kpiLabel}>Ejercicios en Catálogo</div>
+          </div>
+        </div>
 
-          <div className="card-body p-0">
-            {error   && <div className="alert alert-danger m-3 py-2"><small>⚠️ {error}</small></div>}
-            {loading && <div className="text-center py-5"><div className="spinner-border" style={{ color: "#059669" }} /></div>}
+        {/* SEARCH + TABLE CARD */}
+        <div className={s.tableCardHeader} style={{ marginBottom:16, borderRadius:14, border:"1px solid #252545", display:"flex", gap:12, flexWrap:"wrap", alignItems:"center", justifyContent:"space-between", padding:"0.75rem 1rem" }}>
+          <span className="fw-bold" style={{ fontSize:"0.85rem", color:"#e0e0e0" }}>🏋️ Afiliados</span>
+          <div style={{ display:"flex", gap:8, alignItems:"center" }}>
+            <input type="text" className={s.searchInput} placeholder="Buscar afiliado..." value={search} onChange={(e)=>setSearch(e.target.value)} style={{ maxWidth:260, padding:"0.4rem 0.7rem", fontSize:"0.85rem" }} />
+            <button type="button" className={s.btnRefresh} onClick={fetchAfiliados} disabled={loading} title="Refrescar">{loading ? <span className="spinner-border spinner-border-sm" /> : "🔄"}</button>
+          </div>
+        </div>
 
-            {!loading && !error && (
-              <div className="table-responsive">
-                <table className="table table-hover align-middle mb-0">
-                  <thead className="table-light">
-                    <tr>
-                      <th className="ps-4">#</th>
-                      <th>Afiliado</th>
-                      <th>Objetivo</th>
-                      <th>Nivel</th>
-                      <th className="text-center">Días/sem</th>
-                      <th>Rutina activa</th>
-                      <th>Período</th>
-                      <th className="text-center pe-4">Acciones</th>
+        {/* TABLE */}
+        <div className={s.tableCard}>
+          <div style={{ overflowX:"auto" }}>
+            <table className={s.table}>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Afiliado</th>
+                  <th>Objetivo</th>
+                  <th>Nivel</th>
+                  <th>Días/sem</th>
+                  <th>Plan activo</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading && afiliados.length === 0 ? (
+                  <tr><td colSpan={7} className="text-center py-4"><span className="spinner-border spinner-border-sm" /></td></tr>
+                ) : filtered.length === 0 ? (
+                  <tr><td colSpan={7} className={s.emptyState}>{search ? "No se encontraron afiliados" : "No hay afiliados registrados"}</td></tr>
+                ) : filtered.map((a, idx) => {
+                  const ciclo = cicloActivo(a);
+                  const tienePlan = ciclo && !!ciclo.plan_entrenamiento;
+                  const nombre = nombreCompleto(a);
+                  const email = a.correo || a.email || "";
+                  return (
+                    <tr key={getId(a)}>
+                      <td style={{ color:"#94a3b8", fontSize:"0.78rem" }}>{idx + 1}</td>
+                      <td>
+                        <div style={{ display:"flex", alignItems:"center", gap:"0.5rem" }}>
+                          <div className={s.avatar} style={{ background:avatarColor(nombre) }}>{inicial(a)}</div>
+                          <div>
+                            <div style={{ fontSize:"0.85rem", fontWeight:600 }}>{nombre}</div>
+                            <div className={s.emailText}>{email}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>{a.objetivo_fisico ? <span>{OBJETIVO_ICON[a.objetivo_fisico]||""} {a.objetivo_fisico}</span> : "—"}</td>
+                      <td>{badgeNivel(a.nivel_experiencia)}</td>
+                      <td style={{ color:"#e0e0e0" }}>{a.disponibilidad_semanal_dias || "—"}</td>
+                      <td>{tienePlan ? <span className={s.badgeCiclo}>✅ Activo</span> : <span className={s.badgeSinRutina}>Sin plan</span>}</td>
+                      <td>
+                        <div className={s.actionBtns}>
+                          {tienePlan && (
+                            <button type="button" className={s.btnOutline} style={{ padding:"0.25rem 0.5rem", fontSize:"0.75rem" }} onClick={() => { setModalAfiliado(a); setModal("verPerfil"); }} title="Ver">👁️</button>
+                          )}
+                          <button type="button" className={s.btnAsignar} style={{ padding:"0.25rem 0.6rem", fontSize:"0.75rem" }} onClick={() => { setAsignarAfiliadoId(String(getId(a))); setAsignarAfiliadoData(a); handleAfiliadoSelect({ target: { value: String(getId(a)) } }); setModal("asignar"); }}>
+                            {tienePlan ? "🔄 Nueva" : "➕ Asignar"}
+                          </button>
+                        </div>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {filtrados.length === 0 ? (
-                      <tr>
-                        <td colSpan={8} className="text-center text-muted py-5">
-                          {busqueda ? `Sin resultados para "${busqueda}"` : "No hay afiliados."}
-                        </td>
-                      </tr>
-                    ) : filtrados.map((a, idx) => {
-                      const sinRutina = !cicloActivo(a);
-                      const ciclo   = cicloActivo(a);
-                      const nivelCfg = NIVEL_COLOR[a.nivel_experiencia] || NIVEL_COLOR.Principiante;
-
-                      return (
-                        <tr
-                          key={getId(a)}
-                          style={sinRutina ? { background: "#fff8f0", borderLeft: "3px solid #f97316" } : {}}
-                        >
-                          <td className="ps-4 text-muted small">{idx + 1}</td>
-
-                          {/* Afiliado */}
-                          <td>
-                            <div className="d-flex align-items-center gap-2">
-                              <div
-                                className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0"
-                                style={{
-                                  width: 36, height: 36, fontSize: "0.85rem",
-                                  background: `hsl(${(getId(a) * 47) % 360},65%,55%)`,
-                                }}
-                              >
-                                {inicial(a)}
-                              </div>
-                              <div>
-                                <div className="fw-semibold small">{nombreCompleto(a)}</div>
-                                <div className="text-muted" style={{ fontSize: "0.7rem" }}>{a.correo || "—"}</div>
-                              </div>
-                            </div>
-                          </td>
-
-                          {/* Objetivo */}
-                          <td>
-                            <small>{OBJETIVO_ICON[a.objetivo_fisico]} {a.objetivo_fisico || "—"}</small>
-                          </td>
-
-                          {/* Nivel */}
-                          <td>
-                            <span
-                              className="badge px-2 py-1"
-                              style={{ background: nivelCfg.bg, color: nivelCfg.text, fontSize: "0.7rem" }}
-                            >
-                              {nivelCfg.label}
-                            </span>
-                          </td>
-
-                          {/* Días */}
-                          <td className="text-center">
-                            <span className="badge bg-light text-dark border">
-                              {a.disponibilidad_semanal_dias || "—"}d
-                            </span>
-                          </td>
-
-                          {/* Rutina activa */}
-                          <td>
-                            {ciclo?.plan_entrenamiento?.nombre_rutina ? (
-                              <span className="badge px-2 py-1" style={{ background: "#05966918", color: "#059669", fontSize: "0.7rem" }}>
-                                ✅ {ciclo.plan_entrenamiento.nombre_rutina}
-                              </span>
-                            ) : ciclo ? (
-                              <span className="badge bg-warning bg-opacity-15 text-warning" style={{ fontSize: "0.7rem" }}>
-                                ⚙️ Plan personalizado
-                              </span>
-                            ) : (
-                              <span className="badge bg-danger bg-opacity-10 text-danger" style={{ fontSize: "0.7rem" }}>
-                                ❌ Sin rutina
-                              </span>
-                            )}
-                          </td>
-
-                          {/* Período */}
-                          <td>
-                            {ciclo ? (
-                              <small className="text-muted">
-                                {ciclo.fecha_inicio} → {ciclo.fecha_fin}
-                              </small>
-                            ) : (
-                              <small className="text-muted">—</small>
-                            )}
-                          </td>
-
-                          {/* Acciones */}
-                          <td className="text-center pe-4">
-                            <div className="d-flex gap-1 justify-content-center">
-                              {/* Ver detalle del ciclo */}
-                              {ciclo && (
-                                <button
-                                  className="btn btn-outline-primary btn-sm"
-                                  id={`btn-ver-rutina-${getId(a)}`}
-                                  title="Ver rutina activa"
-                                  onClick={() => setVerModal(a)}
-                                >
-                                  👁️
-                                </button>
-                              )}
-                              {/* Asignar / Cambiar rutina */}
-                              <button
-                                className="btn btn-sm fw-semibold text-white"
-                                id={`btn-asignar-rutina-${getId(a)}`}
-                                title={ciclo ? "Cambiar rutina" : "Asignar rutina"}
-                                style={{ background: "linear-gradient(135deg,#059669,#0d9488)", border: "none", fontSize: "0.78rem" }}
-                                onClick={() => abrirAsignar(a)}
-                              >
-                                {ciclo ? "🔄 Cambiar" : "➕ Asignar"}
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* ── Catálogo de rutinas disponibles ── */}
-        <div className="mt-4">
-          <h2 className="h6 fw-bold text-muted text-uppercase mb-3" style={{ letterSpacing: "0.06em" }}>
-            📋 Catálogo de Rutinas Disponibles
-          </h2>
-          <div className="row g-2">
-            {RUTINAS_PREDEFINIDAS.map((r) => {
-              const nivelCfg = NIVEL_COLOR[r.nivel] || NIVEL_COLOR.Principiante;
-              return (
-                <div key={r.id} className="col-md-4 col-lg-2">
-                  <div
-                    className="card border-0 shadow-sm h-100"
-                    style={{ borderLeft: `3px solid ${nivelCfg.text}` }}
-                  >
-                    <div className="card-body p-3">
-                      <div className="fw-semibold small mb-1">{r.nombre}</div>
-                      <div className="text-muted" style={{ fontSize: "0.68rem" }}>
-                        🎯 {r.enfoque} · {r.dias}d/sem
-                      </div>
-                      <span
-                        className="badge mt-2 px-2 py-1"
-                        style={{ background: nivelCfg.bg, color: nivelCfg.text, fontSize: "0.6rem" }}
-                      >
-                        {r.nivel}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════════════════
-          MODAL: ASIGNAR / CAMBIAR RUTINA
-      ═══════════════════════════════════════════════════════════════════════ */}
-      {asignarModal && (
-        <div
-          className="modal d-block"
-          style={{ background: "rgba(0,0,0,0.6)", zIndex: 1055 }}
-          onClick={() => !saving && setAsignarModal(null)}
-        >
-          <div
-            className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="modal-content border-0 shadow-lg">
-              <div
-                className="modal-header text-white border-0"
-                style={{ background: "linear-gradient(135deg,#059669,#0d9488)" }}
-              >
-                <h5 className="modal-title">
-                  🏋️ Asignar Rutina — {nombreCompleto(asignarModal)}
-                </h5>
-                <button
-                  className="btn-close btn-close-white"
-                  onClick={() => !saving && setAsignarModal(null)}
-                  disabled={saving}
-                />
-              </div>
+      {/* ════════════════════════════════════════════ */}
+      {/* MODAL: ASIGNAR RUTINA                         */}
+      {/* ════════════════════════════════════════════ */}
+      {modal === "asignar" && (
+        <div className={s.modalOverlay} onClick={closeModal}>
+          <div className={s.modalContent} onClick={(e)=>e.stopPropagation()} style={{ maxWidth:800 }}>
+            <div className={s.modalHeader}>
+              <h5 className={s.modalTitle}>{asignarAfiliadoData && cicloActivo(asignarAfiliadoData) ? "🔄 Nueva Rutina" : "➕ Asignar Rutina"}</h5>
+              <button type="button" className={s.btnOutline} onClick={closeModal} disabled={saving}>✕</button>
+            </div>
+            <form onSubmit={handleAsignar}>
+              <div className={s.modalBody}>
+                {/* Selector de afiliado */}
+                <div style={{ marginBottom:16 }}>
+                  <label className={s.labelText}>Afiliado</label>
+                  <select className={s.selectDark} value={asignarAfiliadoId} onChange={handleAfiliadoSelect} required style={{ width:"100%" }}>
+                    <option value="">-- Selecciona un afiliado --</option>
+                    {afiliados.map((a) => (
+                      <option key={getId(a)} value={getId(a)}>{nombreCompleto(a)} — {a.correo||a.email||""}</option>
+                    ))}
+                  </select>
+                </div>
 
-              <form onSubmit={handleAsignar}>
-                <div className="modal-body" style={{ maxHeight: "75vh", overflowY: "auto" }}>
-                  {asigError && (
-                    <div className="alert alert-danger py-2 mb-3">
-                      <small>⚠️ {asigError}</small>
-                    </div>
-                  )}
-
-                  {/* Info del afiliado */}
-                  <div
-                    className="rounded-3 p-3 mb-4 d-flex align-items-center gap-3"
-                    style={{ background: "#f8fafc", border: "1px solid #e2e8f0" }}
-                  >
-                    <div
-                      className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0"
-                      style={{
-                        width: 44, height: 44, fontSize: "1rem",
-                        background: `hsl(${(getId(asignarModal) * 47) % 360},65%,55%)`,
-                      }}
-                    >
-                      {inicial(asignarModal)}
-                    </div>
-                    <div>
-                      <div className="fw-semibold">{nombreCompleto(asignarModal)}</div>
-                      <div className="text-muted small">
-                        {OBJETIVO_ICON[asignarModal.objetivo_fisico]} {asignarModal.objetivo_fisico}
-                        &nbsp;·&nbsp;{asignarModal.nivel_experiencia}
-                        &nbsp;·&nbsp;{asignarModal.disponibilidad_semanal_dias}d/sem
+                {asignarAfiliadoData && (
+                  <div className={s.afiliadoSection} style={{ marginBottom:16 }}>
+                    <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+                      <div className={s.avatarModal} style={{ background:avatarColor(nombreCompleto(asignarAfiliadoData)) }}>{inicial(asignarAfiliadoData)}</div>
+                      <div>
+                        <div style={{ fontWeight:600, fontSize:"0.9rem" }}>{nombreCompleto(asignarAfiliadoData)}</div>
+                        <div className={s.emailText}>{asignarAfiliadoData.correo || asignarAfiliadoData.email || ""}</div>
+                        <div style={{ display:"flex", gap:6, marginTop:4, flexWrap:"wrap" }}>
+                          {badgeNivel(asignarAfiliadoData.nivel_experiencia)}
+                          <span className={s.badgeDark}>{OBJETIVO_ICON[asignarAfiliadoData.objetivo_fisico]||""} {asignarAfiliadoData.objetivo_fisico||"Sin objetivo"}</span>
+                          <span className={s.badgeDark}>📅 {asignarAfiliadoData.disponibilidad_semanal_dias||"?"} días/sem</span>
+                        </div>
+                        {asignarAfiliadoData.restricciones_medicas && (
+                          <div className={s.alertDanger} style={{ marginTop:8, padding:"0.3rem 0.6rem", fontSize:"0.78rem" }}>⚠️ {asignarAfiliadoData.restricciones_medicas}</div>
+                        )}
                       </div>
                     </div>
+                    {cicloActivo(asignarAfiliadoData) && (
+                      <div style={{ marginTop:8, color:"#22c55e", fontSize:"0.78rem" }}>
+                        ✅ Ciclo activo detectado (ID: {cicloActivo(asignarAfiliadoData).id_ciclo}) — se reutilizará
+                      </div>
+                    )}
                   </div>
+                )}
 
-                  {/* Selector de rutina */}
-                  <h6 className="fw-bold text-muted text-uppercase small mb-3">
-                    Selecciona una rutina
-                  </h6>
-                  <div className="row g-2 mb-4">
-                    {RUTINAS_PREDEFINIDAS.map((r) => {
-                      const nivelCfg   = NIVEL_COLOR[r.nivel] || NIVEL_COLOR.Principiante;
-                      const seleccionada = rutinaSelec?.id === r.id;
-                      return (
-                        <div key={r.id} className="col-md-6">
-                          <div
-                            className="card border-0 h-100"
-                            style={{
-                              cursor: "pointer",
-                              background: seleccionada ? `${nivelCfg.text}12` : "#f8fafc",
-                              border:     seleccionada ? `2px solid ${nivelCfg.text}` : "2px solid #e2e8f0",
-                              transition: "all 0.15s ease",
-                            }}
-                            onClick={() => setRutinaSelec(r)}
-                          >
-                            <div className="card-body p-3">
-                              <div className="d-flex justify-content-between align-items-start">
-                                <div className="fw-semibold small">{r.nombre}</div>
-                                {seleccionada && (
-                                  <span style={{ color: nivelCfg.text, fontSize: "1rem" }}>✓</span>
-                                )}
-                              </div>
-                              <div className="text-muted mt-1" style={{ fontSize: "0.7rem" }}>
-                                🎯 {r.enfoque} &nbsp;·&nbsp; 📅 {r.dias} días/sem
-                              </div>
-                              <span
-                                className="badge mt-2 px-2"
-                                style={{ background: nivelCfg.bg, color: nivelCfg.text, fontSize: "0.62rem" }}
-                              >
-                                {r.nivel}
-                              </span>
+                {/* Ejercicios disponibles */}
+                {asignarAfiliadoData && (
+                  <>
+                    <label className={s.labelText}>Ejercicios disponibles ({ejerciciosDisponibles.length})</label>
+                    {ejerciciosDisponibles.length === 0 ? (
+                      <div className={s.emptyState}>No hay ejercicios disponibles para este afiliado</div>
+                    ) : (
+                      <div className={s.gruposMusculares} style={{ display:"flex", gap:4, marginBottom:8 }}>
+                        {[...new Set(ejerciciosDisponibles.map(e=>e.grupo_muscular))].filter(Boolean).map((g) => (
+                          <button key={g} type="button" className={s.badgeDark} style={{ cursor:"pointer" }}
+                            onClick={() => {
+                              const first = ejerciciosDisponibles.find((e) => e.grupo_muscular === g && !selectedEjercicios[e.id_ejercicio??e.id]);
+                              if (first) addEjercicioToRutina(first);
+                            }}>➕ {g}</button>
+                        ))}
+                      </div>
+                    )}
+                    <div style={{ maxHeight:300, overflowY:"auto", border:"1px solid #252545", borderRadius:8, padding:"0.5rem", marginBottom:12 }}>
+                      {ejerciciosDisponibles.map((ej) => {
+                        const id = ej.id_ejercicio ?? ej.id;
+                        const checked = !!selectedEjercicios[id];
+                        const data = selectedEjercicios[id] || {};
+                        return (
+                          <div key={id} className={`${s.ejercicioItem} ${checked ? s.ejercicioItemChecked : ""}`}>
+                            <div className={s.ejercicioRow}>
+                              <input type="checkbox" className={s.checkboxDark} checked={checked} onChange={() => checked ? removeEjercicioSel(id) : addEjercicioToRutina(ej)} />
+                              <span className={s.ejercicioName}>{ej.nombre_ejercicio || ej.nombre}</span>
+                              <span className={s.ejercicioMeta}>{ej.grupo_muscular || ""}</span>
                             </div>
+                            {checked && (
+                              <div className={s.formRow}>
+                                <div className={s.formGroup}>
+                                  <label className={s.inlineLabel}>Series</label>
+                                  <input type="number" className={s.inlineInput} min={1} max={20} value={data.series??3} onChange={(e)=>updateEjercicioSel(id,"series",e.target.value)} />
+                                </div>
+                                <div className={s.formGroup}>
+                                  <label className={s.inlineLabel}>Reps</label>
+                                  <input type="number" className={s.inlineInput} min={1} max={100} value={data.repeticiones??12} onChange={(e)=>updateEjercicioSel(id,"repeticiones",e.target.value)} />
+                                </div>
+                                <div className={s.formGroup} style={{ minWidth:100 }}>
+                                  <label className={s.inlineLabel}>Día</label>
+                                  <select className={s.inlineSelect} value={data.dia_numero??1} onChange={(e)=>updateEjercicioSel(id,"dia_numero",e.target.value)}>
+                                    {DAY_LABELS.map((d, i) => <option key={i+1} value={i+1}>{d}</option>)}
+                                  </select>
+                                </div>
+                              </div>
+                            )}
                           </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+              </div>
+              <div className={s.modalFooter}>
+                <button type="button" className={s.btnOutline} onClick={closeModal} disabled={saving}>Cancelar</button>
+                <button type="submit" className={s.btnConfirmar} disabled={saving || !asignarAfiliadoData || Object.keys(selectedEjercicios).length === 0}>
+                  {saving ? <span className="spinner-border spinner-border-sm" /> : "✅ Crear Plan de Entrenamiento"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
-                  {/* Fechas */}
-                  <h6 className="fw-bold text-muted text-uppercase small mb-3">
-                    Período del ciclo
-                  </h6>
-                  <div className="row g-3">
-                    <div className="col-md-6">
-                      <label className="form-label small fw-semibold">Fecha de inicio *</label>
-                      <input
-                        type="date"
-                        className="form-control"
-                        value={fechaInicio}
-                        min={new Date().toISOString().split("T")[0]}
-                        onChange={(e) => setFechaInicio(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label small fw-semibold">Fecha de fin *</label>
-                      <input
-                        type="date"
-                        className="form-control"
-                        value={fechaFin}
-                        min={fechaInicio}
-                        onChange={(e) => setFechaFin(e.target.value)}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  {/* Advertencia si ya tiene ciclo */}
-                  {cicloActivo(asignarModal) && (
-                    <div className="alert alert-warning mt-3 py-2">
-                      <small>
-                        ⚠️ Este afiliado ya tiene un ciclo activo. Asignar una nueva rutina
-                        finalizará el ciclo anterior.
-                      </small>
-                    </div>
-                  )}
+      {/* ════════════════════════════════════════════ */}
+      {/* MODAL: CATÁLOGO DE EJERCICIOS                 */}
+      {/* ════════════════════════════════════════════ */}
+      {modal === "catalogo" && (
+        <div className={s.modalOverlay} onClick={closeModal}>
+          <div className={s.modalContent} onClick={(e)=>e.stopPropagation()} style={{ maxWidth:800 }}>
+            <div className={s.modalHeader}>
+              <h5 className={s.modalTitle}>📋 Catálogo de Ejercicios</h5>
+              <button type="button" className={s.btnOutline} onClick={closeModal}>✕</button>
+            </div>
+            <div className={s.modalBody}>
+              {catalogoEj.length === 0 ? (
+                <div className={s.emptyState}>No hay ejercicios en el catálogo</div>
+              ) : (
+                <div style={{ overflowX:"auto" }}>
+                  <table className={s.table}>
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Nombre</th>
+                        <th>Grupo Muscular</th>
+                        <th>Nivel Mínimo</th>
+                        <th>Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {catalogoEj.map((ej, idx) => (
+                        <tr key={ej.id_ejercicio ?? ej.id}>
+                          <td style={{ color:"#94a3b8", fontSize:"0.78rem" }}>{idx + 1}</td>
+                          <td style={{ fontWeight:600 }}>{ej.nombre_ejercicio || ej.nombre}</td>
+                          <td>{ej.grupo_muscular ? <span className={s.badgeDark}>{ej.grupo_muscular}</span> : "—"}</td>
+                          <td>{badgeNivel(ej.nivel_minimo)}</td>
+                          <td>
+                            <div className={s.actionBtns}>
+                              <button type="button" className={s.btnOutline} style={{ padding:"0.2rem 0.5rem", fontSize:"0.72rem" }}
+                                onClick={() => { setModalEjercicio(ej); setFormEj({ nombre_ejercicio:ej.nombre_ejercicio||ej.nombre||"", grupo_muscular:ej.grupo_muscular||"Pecho", nivel_minimo:ej.nivel_minimo||"Principiante", descripcion:ej.descripcion||"" }); setModal("editar"); }}>✏️</button>
+                              <button type="button" className={s.btnOutlineDanger} style={{ padding:"0.2rem 0.5rem", fontSize:"0.72rem" }}
+                                onClick={() => { setDeleteEjId(ej.id_ejercicio ?? ej.id); setModal("eliminar"); }}>🗑️</button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-
-                <div className="modal-footer border-0">
-                  <button
-                    type="button"
-                    className="btn btn-outline-secondary btn-sm px-4"
-                    onClick={() => setAsignarModal(null)}
-                    disabled={saving}
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    id="btn-confirmar-asignar-rutina"
-                    type="submit"
-                    className="btn btn-sm text-white fw-semibold px-4"
-                    style={{ background: "linear-gradient(135deg,#059669,#0d9488)", border: "none" }}
-                    disabled={saving || !rutinaSelec}
-                  >
-                    {saving
-                      ? <><span className="spinner-border spinner-border-sm me-2" />Guardando...</>
-                      : cicloActivo(asignarModal)
-                        ? "💾 Actualizar Plan"
-                        : "✅ Crear Plan"}
-                  </button>
-                </div>
-              </form>
+              )}
+            </div>
+            <div className={s.modalFooter}>
+              <button type="button" className={s.btnPrimary} onClick={() => setModal("nuevo")}>➕ Nuevo Ejercicio</button>
+              <button type="button" className={s.btnOutline} onClick={closeModal}>Cerrar</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ═══════════════════════════════════════════════════════════════════════
-          MODAL: VER RUTINA ACTIVA
-      ═══════════════════════════════════════════════════════════════════════ */}
-      {verModal && (() => {
-        const ciclo = cicloActivo(verModal);
-        const plan  = ciclo?.plan_entrenamiento;
-        return (
-          <div
-            className="modal d-block"
-            style={{ background: "rgba(0,0,0,0.6)", zIndex: 1055 }}
-            onClick={() => setVerModal(null)}
-          >
-            <div
-              className="modal-dialog modal-lg modal-dialog-scrollable"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="modal-content border-0 shadow-lg">
-                <div
-                  className="modal-header text-white border-0"
-                  style={{ background: "linear-gradient(135deg,#1a1a2e,#16213e)" }}
-                >
-                  <h5 className="modal-title">
-                    🏋️ Rutina activa — {nombreCompleto(verModal)}
-                  </h5>
-                  <button className="btn-close btn-close-white" onClick={() => setVerModal(null)} />
+      {/* ════════════════════════════════════════════ */}
+      {/* MODAL: NUEVO / EDITAR EJERCICIO               */}
+      {/* ════════════════════════════════════════════ */}
+      {(modal === "nuevo" || modal === "editar") && (
+        <div className={s.modalOverlay} onClick={closeModal}>
+          <div className={s.modalContent} onClick={(e)=>e.stopPropagation()} style={{ maxWidth:500 }}>
+            <div className={s.modalHeader}>
+              <h5 className={s.modalTitle}>{modal === "nuevo" ? "🏋️ Nuevo Ejercicio" : "✏️ Editar Ejercicio"}</h5>
+              <button type="button" className={s.btnOutline} onClick={closeModal} disabled={saving}>✕</button>
+            </div>
+            <form onSubmit={handleGuardarEjercicio}>
+              <div className={s.modalBody}>
+                <div style={{ marginBottom:12 }}>
+                  <label className={s.labelText}>Nombre del ejercicio *</label>
+                  <input className={s.inputDark} value={formEj.nombre_ejercicio} onChange={(e)=>setFormEj((f)=>({...f, nombre_ejercicio:e.target.value}))} placeholder="Ej: Press de banca" required style={{ width:"100%" }} />
                 </div>
-                <div className="modal-body">
-                  {/* Info del ciclo */}
-                  <div className="row g-3 mb-4">
-                    {[
-                      { label: "Ciclo Nº",      v: ciclo?.numero_ciclo },
-                      { label: "Inicio",         v: ciclo?.fecha_inicio },
-                      { label: "Fin",            v: ciclo?.fecha_fin    },
-                      { label: "Rutina base",    v: plan?.nombre_rutina || "Personalizada" },
-                      { label: "Enfoque",        v: plan?.enfoque       || "—" },
-                      { label: "Días/sem",       v: plan?.dias_semana   ? `${plan.dias_semana} días` : "—" },
-                    ].map((f) => (
-                      <div key={f.label} className="col-6 col-md-4">
-                        <small className="text-muted d-block text-uppercase fw-semibold" style={{ fontSize: "0.65rem" }}>
-                          {f.label}
-                        </small>
-                        <span className="small fw-semibold">{f.v || "—"}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Rutinas del ciclo */}
-                  {plan?.rutinas?.length > 0 ? (
-                    <>
-                      <h6 className="fw-bold mb-3">📋 Días de entrenamiento</h6>
-                      {plan.rutinas.map((r) => (
-                        <div key={r.dia_numero} className="border rounded-3 p-3 mb-2">
-                          <div className="fw-semibold small mb-2">{r.nombre}</div>
-                          {r.ejercicios?.map((ej, i) => (
-                            <div key={i} className="d-flex justify-content-between small text-muted border-bottom py-1">
-                              <span>🏃 {ej.nombre}</span>
-                              <span className="fw-semibold">{ej.series}×{ej.repeticiones}</span>
-                            </div>
-                          ))}
-                        </div>
-                      ))}
-                    </>
-                  ) : (
-                    <div className="text-center text-muted py-3">
-                      <div className="fs-3 mb-2">📋</div>
-                      <p className="small">Los ejercicios detallados se configuran al personalizar el plan.</p>
-                    </div>
-                  )}
-
-                  {/* Progreso físico */}
-                  {ciclo?.progreso_fisico?.length > 0 && (
-                    <>
-                      <h6 className="fw-bold mt-4 mb-3">📈 Progreso físico</h6>
-                      {ciclo.progreso_fisico.map((p, i) => (
-                        <div key={i} className="border rounded-3 p-3 mb-2">
-                          <div className="d-flex justify-content-between mb-1">
-                            <strong className="small">{p.fecha_registro}</strong>
-                            <span className="badge bg-primary bg-opacity-10 text-primary">{p.peso_kg} kg</span>
-                          </div>
-                          <div className="row g-2 text-center">
-                            {[
-                              { l: "% Grasa",  v: `${p.porcentaje_grasa}%`       },
-                              { l: "Cintura",  v: `${p.medidas_cm?.cintura} cm`  },
-                              { l: "Brazo",    v: `${p.medidas_cm?.brazo} cm`    },
-                              { l: "Pierna",   v: `${p.medidas_cm?.pierna} cm`   },
-                            ].map((f) => (
-                              <div key={f.l} className="col-3">
-                                <small className="text-muted d-block" style={{ fontSize: "0.65rem" }}>{f.l}</small>
-                                <strong className="small">{f.v || "—"}</strong>
-                              </div>
-                            ))}
-                          </div>
-                          {p.observaciones && (
-                            <small className="text-muted mt-1 d-block">📝 {p.observaciones}</small>
-                          )}
-                        </div>
-                      ))}
-                    </>
-                  )}
+                <div style={{ marginBottom:12 }}>
+                  <label className={s.labelText}>Grupo muscular</label>
+                  <select className={s.selectDark} value={formEj.grupo_muscular} onChange={(e)=>setFormEj((f)=>({...f, grupo_muscular:e.target.value}))} style={{ width:"100%" }}>
+                    {GRUPOS_MUSCULARES.map((g) => <option key={g} value={g}>{g}</option>)}
+                  </select>
                 </div>
-                <div className="modal-footer border-0">
-                  <button
-                    className="btn btn-outline-success btn-sm"
-                    onClick={() => { setVerModal(null); abrirAsignar(verModal); }}
-                  >
-                    🔄 Cambiar rutina
-                  </button>
-                  <button
-                    className="btn btn-secondary btn-sm"
-                    onClick={() => setVerModal(null)}
-                  >
-                    Cerrar
-                  </button>
+                <div style={{ marginBottom:12 }}>
+                  <label className={s.labelText}>Nivel mínimo</label>
+                  <select className={s.selectDark} value={formEj.nivel_minimo} onChange={(e)=>setFormEj((f)=>({...f, nivel_minimo:e.target.value}))} style={{ width:"100%" }}>
+                    {NIVELES.map((n) => <option key={n} value={n}>{n}</option>)}
+                  </select>
+                </div>
+                <div style={{ marginBottom:12 }}>
+                  <label className={s.labelText}>Descripción (opcional)</label>
+                  <textarea className={s.textareaDark} rows={3} value={formEj.descripcion} onChange={(e)=>setFormEj((f)=>({...f, descripcion:e.target.value}))} placeholder="Instrucciones o notas..." style={{ width:"100%" }} />
                 </div>
               </div>
+              <div className={s.modalFooter}>
+                <button type="button" className={s.btnOutline} onClick={closeModal} disabled={saving}>Cancelar</button>
+                <button type="submit" className={s.btnConfirmar} disabled={saving}>
+                  {saving ? <span className="spinner-border spinner-border-sm" /> : (modal === "nuevo" ? "💾 Guardar" : "💾 Guardar Cambios")}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ════════════════════════════════════════════ */}
+      {/* MODAL: ELIMINAR EJERCICIO                     */}
+      {/* ════════════════════════════════════════════ */}
+      {modal === "eliminar" && (
+        <div className={s.modalOverlay} onClick={closeModal}>
+          <div className={s.modalContent} onClick={(e)=>e.stopPropagation()} style={{ maxWidth:450 }}>
+            <div className={s.modalHeader}>
+              <h5 className={s.modalTitle}>🗑️ Eliminar Ejercicio</h5>
+              <button type="button" className={s.btnOutline} onClick={closeModal} disabled={saving}>✕</button>
+            </div>
+            <form onSubmit={handleEliminarEjercicio}>
+              <div className={s.modalBody}>
+                <div className={s.alertDanger} style={{ marginBottom:"0.75rem", padding:"0.5rem 0.75rem", fontSize:"0.82rem" }}>⚠️ Esta acción no se puede deshacer.</div>
+                {catalogoEj.length === 0 ? (
+                  <div className={s.emptyState}>No hay ejercicios en el catálogo</div>
+                ) : (
+                  <>
+                    <label className={s.labelText}>Seleccionar ejercicio</label>
+                    <select className={s.selectDark} value={deleteEjId} onChange={(e)=>setDeleteEjId(e.target.value)} style={{ width:"100%" }}>
+                      <option value="">-- Selecciona --</option>
+                      {catalogoEj.map((ej) => (
+                        <option key={ej.id_ejercicio??ej.id} value={ej.id_ejercicio??ej.id}>
+                          {ej.nombre_ejercicio||ej.nombre} ({ej.grupo_muscular||"Sin grupo"})
+                        </option>
+                      ))}
+                    </select>
+                  </>
+                )}
+              </div>
+              <div className={s.modalFooter}>
+                <button type="button" className={s.btnOutline} onClick={closeModal} disabled={saving}>Cancelar</button>
+                <button type="submit" className={s.btnDanger} disabled={saving || !deleteEjId}>
+                  {saving ? <span className="spinner-border spinner-border-sm" /> : "🗑️ Eliminar"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ════════════════════════════════════════════ */}
+      {/* MODAL: VER PERFIL DEL AFILIADO                */}
+      {/* ════════════════════════════════════════════ */}
+      {modal === "verPerfil" && modalAfiliado && (
+        <div className={s.modalOverlay} onClick={closeModal}>
+          <div className={s.modalContent} onClick={(e)=>e.stopPropagation()} style={{ maxWidth:700 }}>
+            <div className={s.modalHeader}>
+              <h5 className={s.modalTitle}>👁️ Rutina: {nombreCompleto(modalAfiliado)}</h5>
+              <button type="button" className={s.btnOutline} onClick={closeModal}>✕</button>
+            </div>
+            <div className={s.modalBody}>
+              <div className={s.afiliadoSection} style={{ marginBottom:16 }}>
+                <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+                  <div className={s.avatarModal} style={{ background:avatarColor(nombreCompleto(modalAfiliado)) }}>{inicial(modalAfiliado)}</div>
+                  <div>
+                    <div style={{ fontWeight:600, fontSize:"0.9rem" }}>{nombreCompleto(modalAfiliado)}</div>
+                    <div className={s.emailText}>{modalAfiliado.correo||modalAfiliado.email||""}</div>
+                    <div style={{ display:"flex", gap:6, marginTop:4, flexWrap:"wrap" }}>
+                      {badgeNivel(modalAfiliado.nivel_experiencia)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {(() => {
+                const ciclo = cicloActivo(modalAfiliado);
+                if (!ciclo || !ciclo.plan_entrenamiento) {
+                  return <div className={s.emptyState}>Este afiliado no tiene un plan de entrenamiento activo</div>;
+                }
+                return <PlanDisplay afiliado={modalAfiliado} authAxios={authAxios} />;
+              })()}
+            </div>
+            <div className={s.modalFooter}>
+              <button type="button" className={s.btnOutline} onClick={closeModal}>Cerrar</button>
             </div>
           </div>
-        );
-      })()}
+        </div>
+      )}
     </AppLayout>
   );
+}
+
+// ── Sub-component: PlanDisplay ──────────────────────────────
+function PlanDisplay({ afiliado, authAxios }) {
+  const [plan, setPlan] = useState(null);
+  const [error, setError] = useState(null);
+  useEffect(() => {
+    (async () => {
+      try {
+        const ciclo = cicloActivo(afiliado);
+        if (!ciclo) { setError("Sin ciclo activo"); return; }
+        const idCiclo = ciclo.id_ciclo ?? ciclo.id;
+        const { data } = await authAxios.get(`/planes/entrenamiento/${idCiclo}`);
+        setPlan(data);
+      } catch (err) {
+        console.error("[RutinasView] ver plan:", err);
+        setError("Error al cargar plan de entrenamiento");
+      }
+    })();
+  }, [afiliado, authAxios]);
+
+  if (error) return <div className={s.emptyState}>{error}</div>;
+  if (!plan) return <div className={s.emptyState}>Cargando plan...</div>;
+
+  const rutinas = plan.rutinas || [];
+  if (rutinas.length === 0) return <div className={s.emptyState}>No hay rutinas asignadas en este plan</div>;
+
+  return rutinas.map((rutina, ri) => (
+    <div key={rutina.id_rutina ?? ri} style={{ marginBottom:16 }}>
+      <h5 style={{ color:"#7c3aed", fontSize:"0.9rem", margin:"0 0 8px 0", display:"flex", alignItems:"center", gap:6 }}>
+        📅 {DAY_LABELS[(rutina.dia_numero ?? 1) - 1] || `Día ${rutina.dia_numero}`}
+        {rutina.enfoque_muscular ? <span className="badge" style={{ background:"rgba(124,58,237,0.15)", color:"#a78bfa", fontSize:"0.65rem", padding:"0.1rem 0.4rem" }}>{rutina.enfoque_muscular}</span> : null}
+      </h5>
+      {Array.isArray(rutina.ejercicios) && rutina.ejercicios.length > 0 ? (
+        <table className={s.table} style={{ fontSize:"0.8rem" }}>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Ejercicio</th>
+              <th>Series</th>
+              <th>Reps</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rutina.ejercicios.filter(e=>e).map((ej, ei) => (
+              <tr key={ei}>
+                <td style={{ color:"#94a3b8" }}>{ej.orden ?? ei + 1}</td>
+                <td>{ej.nombre_ejercicio || ej.nombre || "—"}</td>
+                <td>{ej.series ?? "—"}</td>
+                <td>{ej.repeticiones ?? "—"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <div className={s.emptyState} style={{ margin:0, padding:"0.5rem" }}>Sin ejercicios asignados</div>
+      )}
+    </div>
+  ));
 }

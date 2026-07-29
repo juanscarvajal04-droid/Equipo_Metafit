@@ -165,10 +165,16 @@ Todos los endpoints protegidos requieren un **Bearer Token JWT**.
         DashboardKPIs: {
           type: 'object',
           properties: {
-            total_afiliados:   { type: 'integer', example: 120 },
-            afiliados_activos: { type: 'integer', example: 98 },
-            ciclos_en_curso:   { type: 'integer', example: 45 },
-            con_restricciones: { type: 'integer', example: 23 },
+            total_afiliados:      { type: 'integer', example: 1247 },
+            afiliados_activos:    { type: 'integer', example: 1189 },
+            afiliados_inactivos:  { type: 'integer', example: 58 },
+            entrenadores:         { type: 'integer', example: 20 },
+            recepcionistas:       { type: 'integer', example: 5 },
+            ciclos_en_curso:      { type: 'integer', example: 834 },
+            con_restricciones:    { type: 'integer', example: 312 },
+            pagos_registrados:    { type: 'integer', example: 3891 },
+            ingresos:             { type: 'integer', example: 58750000 },
+            proximos_vencimientos:{ type: 'integer', example: 47 },
             por_objetivo: {
               type: 'array',
               items: {
@@ -221,6 +227,9 @@ Todos los endpoints protegidos requieren un **Bearer Token JWT**.
     './routes/planRoutes.js',
     './routes/catalogoRoutes.js',
     './routes/dashboardRoutes.js',
+    './routes/pagoRoutes.js',
+    './routes/configuracionRoutes.js',
+    './routes/notificacionRoutes.js',
   ],
 };
 

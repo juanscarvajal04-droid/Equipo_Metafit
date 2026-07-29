@@ -35,7 +35,9 @@ const { requireAuth, requireAdmin } = require('../middlewares/auth');
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.get('/', requireAuth, UsuarioController.getAll);
+router.get('/', requireAuth, requireAdmin, UsuarioController.getAll);
+
+router.get('/recepcionistas', requireAuth, requireAdmin, UsuarioController.getRecepcionistas);
 
 /**
  * @swagger
@@ -61,7 +63,7 @@ router.get('/', requireAuth, UsuarioController.getAll);
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.get('/:id', requireAuth, UsuarioController.getById);
+router.get('/:id', requireAuth, requireAdmin, UsuarioController.getById);
 
 /**
  * @swagger
@@ -101,7 +103,7 @@ router.get('/:id', requireAuth, UsuarioController.getById);
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.post('/', requireAdmin, UsuarioController.create);
+router.post('/', requireAuth, requireAdmin, UsuarioController.create);
 
 /**
  * @swagger
@@ -139,7 +141,7 @@ router.post('/', requireAdmin, UsuarioController.create);
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.patch('/:id', requireAdmin, UsuarioController.update);
+router.patch('/:id', requireAuth, requireAdmin, UsuarioController.update);
 
 /**
  * @swagger
@@ -170,6 +172,6 @@ router.patch('/:id', requireAdmin, UsuarioController.update);
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.delete('/:id', requireAdmin, UsuarioController.delete);
+router.delete('/:id', requireAuth, requireAdmin, UsuarioController.delete);
 
 module.exports = router;

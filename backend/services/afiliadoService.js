@@ -1,9 +1,15 @@
 // backend/services/afiliadoService.js
 'use strict';
 
-const AfiliadoModel = require('../models/afiliadoModel');
-const CicloModel    = require('../models/cicloModel');
-const CatalogoModel = require('../models/catalogoModel');
+const AfiliadoModel          = require('../models/afiliadoModel');
+const CicloModel             = require('../models/cicloModel');
+const CatalogoModel          = require('../models/catalogoModel');
+const SeguimientoDiarioModel = require('../models/seguimientoDiarioModel');
+
+// FIX 1.3 / ISO 25000: normalizarFecha extraída a utils/fechaUtils.js
+// para que sea testeable sin dependencia de BD.
+const { normalizarFecha } = require('../utils/fechaUtils');
+
 
 const AfiliadoService = {
 
@@ -19,7 +25,14 @@ const AfiliadoService = {
     if (!datos.nombres || !datos.documento) {
       throw new Error('Nombre y documento son requeridos');
     }
-    const id = await AfiliadoModel.create(datos, creatorId);
+
+    // FIX 1.3: normalizar fecha_nacimiento antes de insertar
+    const datosNormalizados = {
+      ...datos,
+      fecha_nacimiento: normalizarFecha(datos.fecha_nacimiento),
+    };
+
+    const id = await AfiliadoModel.create(datosNormalizados, creatorId);
     return { id, message: 'Afiliado creado correctamente' };
   },
 
@@ -37,18 +50,34 @@ const AfiliadoService = {
     return CicloModel.findByAfiliado(id);
   },
 
-  createCiclo: async (datos) => {
-    const id_afiliado = datos.id_afiliado;
-    const fecha_inicio_ciclo = datos.fecha_inicio_ciclo || datos.fecha_inicio;
-    const fecha_fin_ciclo = datos.fecha_fin_ciclo || datos.fecha_fin;
+  createCiclo: async (datos, registradoPor) => {
+    // FIX 2: la tabla CICLO usa id_usuario (no id_afiliado) y requiere
+    //         objetivo_fisico, nivel_experiencia, disponibilidad_dias, registrado_por (NOT NULL).
+    const id_usuario = datos.id_usuario;
+    const fecha_inicio = datos.fecha_inicio;
+    const fecha_fin    = datos.fecha_fin;
 
-    if (!id_afiliado || !fecha_inicio_ciclo || !fecha_fin_ciclo) {
-      throw new Error('id_afiliado, fecha_inicio y fecha_fin son requeridos');
+    if (!id_usuario || !fecha_inicio || !fecha_fin) {
+      throw new Error('id_usuario, fecha_inicio y fecha_fin son requeridos');
+    }
+    if (!datos.objetivo_fisico || !datos.nivel_experiencia || !datos.disponibilidad_dias) {
+      throw new Error('objetivo_fisico, nivel_experiencia y disponibilidad_dias son requeridos');
     }
 
-    const id = await CicloModel.create(id_afiliado, fecha_inicio_ciclo, fecha_fin_ciclo);
+    const id = await CicloModel.create({
+      id_usuario,
+      fecha_inicio,
+      fecha_fin,
+      objetivo_fisico:            datos.objetivo_fisico,
+      nivel_experiencia:          datos.nivel_experiencia,
+      disponibilidad_dias:        Number(datos.disponibilidad_dias),
+      grupo_muscular_prioritario: datos.grupo_muscular_prioritario || null,
+      observaciones:              datos.observaciones || null,
+      registrado_por:             registradoPor,
+    });
     return { id_ciclo: id, message: 'Ciclo creado correctamente' };
   },
+
 
   getRestricciones: async (id) => {
     return CatalogoModel.getRestriccionesByAfiliado(id);
@@ -67,6 +96,14 @@ const AfiliadoService = {
     return affected > 0;
   },
 
+  getEjerciciosDisponibles: async (id) => {
+    return CatalogoModel.getEjerciciosDisponibles(id);
+  },
+
+  getAlimentosDisponibles: async (id) => {
+    return CatalogoModel.getAlimentosDisponibles(id);
+  },
+
   getProgreso: async (id) => {
     return CatalogoModel.getProgresoByAfiliado(id);
   },
@@ -77,6 +114,38 @@ const AfiliadoService = {
     }
     await CatalogoModel.createProgreso(datos, creatorId);
     return { message: 'Progreso registrado correctamente' };
+  },
+
+  saveProgresoEjercicio: async (idUsuario, data) => {
+    const { id_ciclo, fecha, ejercicios } = data;
+    if (!id_ciclo || !fecha || !ejercicios) {
+      throw new Error('id_ciclo, fecha y ejercicios son requeridos');
+    }
+    return SeguimientoDiarioModel.saveProgresoEjercicio(idUsuario, id_ciclo, fecha, ejercicios);
+  },
+
+  getProgresoEjercicio: async (idUsuario, idCiclo, fecha) => {
+    return SeguimientoDiarioModel.getProgresoEjercicio(idUsuario, idCiclo, fecha);
+  },
+
+  saveAgua: async (idUsuario, data) => {
+    const { fecha, vasos } = data;
+    if (!fecha || vasos == null) {
+      throw new Error('fecha y vasos son requeridos');
+    }
+    return SeguimientoDiarioModel.saveAgua(idUsuario, fecha, vasos);
+  },
+
+  getAgua: async (idUsuario, fecha) => {
+    return SeguimientoDiarioModel.getAgua(idUsuario, fecha);
+  },
+
+  saveConsumoAlimento: async (idUsuario, data) => {
+    const { id_ciclo, fecha, alimentos } = data;
+    if (!id_ciclo || !fecha || !alimentos) {
+      throw new Error('id_ciclo, fecha y alimentos son requeridos');
+    }
+    return SeguimientoDiarioModel.saveConsumoAlimento(idUsuario, id_ciclo, fecha, alimentos);
   }
 };
 

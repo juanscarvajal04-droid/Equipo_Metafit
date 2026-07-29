@@ -1,47 +1,24 @@
-import { useLocation } from "react-router-dom";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import styles from "./Header.module.css";
 
-// ── Mapa de rutas → breadcrumb ────────────────────────────────────────────────
 const ROUTE_META = {
-  "/dashboard": { label: "Panel de Control", icon: "📊", parent: null },
-  "/afiliados": { label: "Gestión de Afiliados", icon: "👥", parent: null },
-  "/pagos": { label: "Gestión de Pagos", icon: "💳", parent: "Administración" },
-  "/rutinas": { label: "Planes de Entrenamiento", icon: "🏋️", parent: "Entrenamiento" },
-  "/dietas": { label: "Planes de Dieta", icon: "🥗", parent: "Nutrición" },
-  "/personal": { label: "Gestión de Personal", icon: "🛡️", parent: "Administración" },
+  "/dashboard": { label: "Panel de Control",        icon: "📊", parent: null },
+  "/finanzas":  { label: "Panel de Finanzas",       icon: "💰", parent: "Administración" },
+  "/afiliados": { label: "Gestión de Afiliados",     icon: "👥", parent: null },
+  "/pagos":     { label: "Gestión de Pagos",          icon: "💳", parent: "Administración" },
+  "/rutinas":   { label: "Planes de Entrenamiento",   icon: "🏋️", parent: "Entrenamiento" },
+  "/dietas":    { label: "Planes de Dieta",           icon: "🥗", parent: "Nutrición" },
+  "/personal":  { label: "Gestión de Personal",       icon: "🛡️", parent: "Administración" },
 };
 
 const ROLE_COLOR = {
   Administrador: "#7c3aed",
   Recepcionista: "#2563eb",
-  Entrenador: "#059669",
+  Entrenador:    "#059669",
 };
 
-/**
- * Obtiene el nombre para mostrar del usuario.
- * Prioridad: nombres+apellidos > name > parte del correo antes del @
- */
-const getUserDisplayName = (user) => {
-  if (!user) return "Usuario";
-  if (user.nombres) {
-    const full = [user.nombres, user.apellidos].filter(Boolean).join(" ");
-    return full || user.nombres;
-  }
-  if (user.name) return user.name;
-  return user.email?.split("@")[0] || "Usuario";
-};
-
-/**
- * Obtiene la inicial del usuario para el avatar (primera letra del nombre).
- */
-const getUserInitial = (user) => {
-  if (!user) return "U";
-  if (user.nombres) return user.nombres[0].toUpperCase();
-  if (user.name) return user.name[0].toUpperCase();
-  return (user.email || "U")[0].toUpperCase();
-};
-
-/** Formatea la fecha en español: "Miércoles, 8 de Abril de 2026" */
 const fechaElegante = () =>
   new Date().toLocaleDateString("es-CO", {
     weekday: "long",
@@ -50,7 +27,6 @@ const fechaElegante = () =>
     year: "numeric",
   });
 
-// ── Componente de campana ─────────────────────────────────────────────────────
 function BellIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -61,179 +37,175 @@ function BellIcon() {
   );
 }
 
-// ── Header ────────────────────────────────────────────────────────────────────
 export default function Header() {
   const { pathname } = useLocation();
-  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { user, authAxios } = useAuth();
 
-  const meta = ROUTE_META[pathname] || { label: "MetaFit", icon: "💪", parent: null };
+  const meta  = ROUTE_META[pathname] || { label: "MetaFit", icon: "💪", parent: null };
   const color = ROLE_COLOR[user?.role] || "#6c757d";
   const fecha = fechaElegante();
-
-  // Capitalizar la primera letra de la fecha
   const fechaCap = fecha.charAt(0).toUpperCase() + fecha.slice(1);
 
-  return (
-    <header
-      style={{
-        position: "sticky",
-        top: 0,
-        zIndex: 100,
-        background: "#ffffff",
-        borderBottom: "1px solid #e9ecef",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "0 24px",
-        height: 54,
-        minHeight: 54,
-        flexShrink: 0,
-      }}
-    >
-      {/* ── Izquierda: Breadcrumb ── */}
-      <nav aria-label="breadcrumb" style={{ display: "flex", alignItems: "center", gap: 6 }}>
-        {/* Sistema */}
-        <span style={{ fontSize: "0.72rem", color: "#94a3b8", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-          MetaFit
-        </span>
+  const [notificaciones, setNotificaciones] = useState([]);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const pollingRef = useRef(null);
 
-        {/* Separador > padre (si existe) */}
+  const totalNotificaciones = notificaciones.reduce((sum, n) => sum + n.cantidad, 0);
+  const hayNotificaciones = totalNotificaciones > 0;
+
+  const cargarNotificaciones = useCallback(async () => {
+    try {
+      const { data } = await authAxios.get("/notificaciones");
+      setNotificaciones(Array.isArray(data) ? data : []);
+    } catch (err) {
+      if (err?.response?.status === 401 && pollingRef.current) {
+        clearInterval(pollingRef.current);
+        pollingRef.current = null;
+      }
+    }
+  }, [authAxios]);
+
+  useEffect(() => {
+    cargarNotificaciones();
+    pollingRef.current = setInterval(cargarNotificaciones, 60000);
+    return () => {
+      if (pollingRef.current) clearInterval(pollingRef.current);
+    };
+  }, [cargarNotificaciones]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleNotificacionClick = (ruta) => {
+    setDropdownOpen(false);
+    if (ruta) navigate(ruta);
+  };
+
+  return (
+    <header className={styles.header}>
+
+      <nav aria-label="breadcrumb" className={styles.breadcrumb}>
+        <span className={styles.breadcrumbSystem}>MetaFit</span>
+
         {meta.parent && (
           <>
-            <span style={{ color: "#cbd5e1", fontSize: "0.8rem" }}>›</span>
-            <span style={{ fontSize: "0.72rem", color: "#94a3b8" }}>{meta.parent}</span>
+            <span className={styles.breadcrumbSeparator}>›</span>
+            <span className={styles.breadcrumbParent}>{meta.parent}</span>
           </>
         )}
 
-        {/* Separador > página actual */}
-        <span style={{ color: "#cbd5e1", fontSize: "0.8rem" }}>›</span>
+        <span className={styles.breadcrumbSeparator}>›</span>
         <span
+          className={styles.breadcrumbCurrent}
           style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 5,
-            fontSize: "0.82rem",
-            fontWeight: 700,
-            color: "#1e293b",
             background: `${color}10`,
             border: `1px solid ${color}30`,
-            borderRadius: 20,
-            padding: "2px 10px 2px 7px",
           }}
         >
-          <span style={{ fontSize: "0.85rem" }}>{meta.icon}</span>
+          <span className={styles.breadcrumbIcon}>{meta.icon}</span>
           {meta.label}
         </span>
       </nav>
 
-      {/* ── Derecha: fecha + notificaciones ── */}
-      <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-        {/* Fecha */}
-        <div style={{ textAlign: "right" }}>
-          <div style={{ fontSize: "0.73rem", fontWeight: 700, color: "#1e293b", lineHeight: 1.2 }}>
-            {fechaCap.split(",")[0]}
-          </div>
-          <div style={{ fontSize: "0.68rem", color: "#94a3b8", lineHeight: 1.2 }}>
-            {fechaCap.split(",")[1]?.trim()}
-          </div>
+      <div className={styles.rightSection}>
+
+        <div className={styles.dateBlock}>
+          <div className={styles.dateDay}>{fechaCap.split(",")[0]}</div>
+          <div className={styles.dateRest}>{fechaCap.split(",")[1]?.trim()}</div>
         </div>
 
-        {/* Divisor */}
-        <div style={{ width: 1, height: 28, background: "#e2e8f0" }} />
+        <div className={styles.divider} />
 
-        {/* Campana de notificaciones */}
-        <button
-          id="btn-notificaciones"
-          title="Notificaciones"
-          style={{
-            position: "relative",
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            padding: "6px",
-            borderRadius: 8,
-            color: "#64748b",
-            display: "flex",
-            alignItems: "center",
-            transition: "background 0.15s",
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.background = "#f1f5f9"}
-          onMouseLeave={(e) => e.currentTarget.style.background = "none"}
-        >
-          <BellIcon />
-          {/* Punto rojo de notificación */}
-          <span
+        <div className={styles.bellWrapper} ref={dropdownRef}>
+          <button
+            id="btn-notificaciones"
+            title="Notificaciones"
+            className={styles.bellButton}
+            onClick={() => setDropdownOpen((prev) => !prev)}
+          >
+            <BellIcon />
+            {hayNotificaciones && (
+              <span className={styles.bellBadge}>{totalNotificaciones}</span>
+            )}
+            {!hayNotificaciones && <span className={styles.bellDot} />}
+          </button>
+
+          {dropdownOpen && (
+            <div className={styles.dropdown}>
+              <div className={styles.dropdownHeader}>
+                Notificaciones
+                {hayNotificaciones && (
+                  <span className={styles.dropdownCount}>{totalNotificaciones}</span>
+                )}
+              </div>
+              <div className={styles.dropdownList}>
+                {notificaciones.length === 0 ? (
+                  <div className={styles.dropdownEmpty}>Todo al día ✅</div>
+                ) : (
+                  notificaciones.map((n) => {
+                    const clickable = !!n.ruta;
+                    return (
+                      <div
+                        key={n.tipo}
+                        className={`${styles.dropdownItem} ${clickable ? styles.dropdownItemClickable : ""}`}
+                        onClick={() => handleNotificacionClick(n.ruta)}
+                        role={clickable ? "button" : undefined}
+                        tabIndex={clickable ? 0 : undefined}
+                        onKeyDown={clickable ? (e) => { if (e.key === "Enter") handleNotificacionClick(n.ruta); } : undefined}
+                      >
+                        <span className={styles.dropdownIcon}>{n.icono}</span>
+                        <div className={styles.dropdownContent}>
+                          <div className={styles.dropdownMsg}>{n.mensaje}</div>
+                          <div className={styles.dropdownMeta}>
+                            {n.cantidad > 0 ? `${n.cantidad} pendiente(s)` : "Sin novedades"}
+                          </div>
+                        </div>
+                        <span className={`${styles.dropdownCantidad} ${n.cantidad > 0 ? styles.dropdownCantidadActiva : ""}`}>
+                          {n.cantidad}
+                        </span>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className={styles.divider} />
+
+        <div className={styles.avatarSection}>
+          <div
+            className={styles.avatar}
             style={{
-              position: "absolute",
-              top: 4,
-              right: 4,
-              width: 8,
-              height: 8,
-              borderRadius: "50%",
-              background: "#e94560",
-              border: "2px solid #fff",
-              animation: "mf-pulse 2s infinite",
+              background: `linear-gradient(135deg, ${color}, ${color}aa)`,
+              boxShadow: `0 0 0 2px ${color}30`,
             }}
-          />
-        </button>
-
-        {/* Divisor */}
-        <div style={{ width: 1, height: 28, background: "#e2e8f0" }} />
-
-        {/* ── AVATAR: inicial dinámica — sin imágenes ── */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-
-          {/* Círculo con la primera letra del nombre real */}
-          <div style={{
-            width: 36,
-            height: 36,
-            borderRadius: "50%",
-            background: `linear-gradient(135deg, ${color}, ${color}aa)`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#fff",
-            fontWeight: 800,
-            fontSize: "0.9rem",
-            flexShrink: 0,
-            userSelect: "none",
-            boxShadow: `0 0 0 2px ${color}30`,
-          }}>
-            {/* Prioridad: nombres → email. Nunca una imagen. */}
+          >
             {(user?.nombres?.charAt(0) || user?.email?.charAt(0) || "U").toUpperCase()}
           </div>
 
-          {/* Nombre y rol */}
-          <div style={{ lineHeight: 1.3 }}>
-            <div style={{
-              fontSize: "0.73rem",
-              fontWeight: 700,
-              color: "#1e293b",
-              maxWidth: 130,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}>
-              {/* Nombre completo o email sin dominio */}
+          <div>
+            <div className={styles.avatarName}>
               {user?.nombres
                 ? `${user.nombres} ${user.apellidos || ""}`.trim()
                 : user?.email?.split("@")[0] || "Usuario"}
             </div>
-            <div style={{ fontSize: "0.62rem", color, fontWeight: 600, textTransform: "capitalize" }}>
+            <div className={styles.avatarRole} style={{ color }}>
               {user?.role}
             </div>
           </div>
         </div>
       </div>
-
-      {/* Animación del punto de notificación */}
-      <style>{`
-        @keyframes mf-pulse {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50%       { opacity: 0.6; transform: scale(1.3); }
-        }
-      `}</style>
     </header>
   );
 }
