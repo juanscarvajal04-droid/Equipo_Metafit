@@ -637,6 +637,213 @@
 }
 .footerIg:hover { color: #e1306c; }
 
+/* ─ Sección App Móvil ─────────────────────────────────────────────────────────── */
+.sectionApp {
+  padding: 100px 5%;
+  background: linear-gradient(160deg, var(--lp-dark1) 0%, var(--lp-dark2) 50%, var(--lp-dark3) 100%);
+  border-top: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  position: relative;
+  overflow: hidden;
+}
+.appInner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+/* ─ Info ───────────────────────────────────────────────────────────────────── */
+.appTitle {
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 900;
+  margin: 0 0 14px;
+  letter-spacing: -0.02em;
+}
+.appTitleAccent {
+  background: linear-gradient(90deg, #8b5cf6, #7c3aed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.appSubtitle {
+  font-size: 1rem;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.7;
+  margin: 0 0 36px;
+  max-width: 480px;
+}
+
+/* ─ Feature bullets ──────────────────────────────────────────────────────────── */
+.appFeatures {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-bottom: 36px;
+}
+.appFeature {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.appFeatureIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 11px;
+  background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(124,58,237,0.05));
+  border: 1px solid rgba(139,92,246,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+.appFeatureTitle {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #fff;
+  margin-bottom: 4px;
+}
+.appFeatureDesc {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.5);
+  line-height: 1.6;
+}
+
+/* ─ Botón descarga ───────────────────────────────────────────────────────────── */
+.btnAppDownload {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 15px 32px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.25s;
+  text-decoration: none;
+  box-shadow: 0 4px 20px rgba(124,58,237,0.35);
+  letter-spacing: 0.02em;
+}
+.btnAppDownload:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 32px rgba(124,58,237,0.5);
+  color: #fff;
+  text-decoration: none;
+}
+.appVersion {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.3);
+  margin-top: 12px;
+}
+
+/* ─ Mockup celular ───────────────────────────────────────────────────────────── */
+.appMockupCol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.appPhone {
+  width: 220px;
+  height: 420px;
+  background: linear-gradient(145deg, #1a1a2e, #12121e);
+  border-radius: 28px;
+  border: 2px solid rgba(139,92,246,0.3);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.6),
+    0 0 40px rgba(139,92,246,0.1),
+    inset 0 0 1px rgba(139,92,246,0.1);
+  position: relative;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.4s;
+}
+.appPhone:hover {
+  transform: translateY(-8px);
+}
+.appPhoneNotch {
+  width: 70px;
+  height: 6px;
+  background: #0a0a0f;
+  border-radius: 4px;
+  margin-top: 4px;
+  margin-bottom: 16px;
+}
+.appPhoneScreen {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.appPhoneLogo {
+  font-size: 2.5rem;
+  filter: drop-shadow(0 0 12px rgba(139,92,246,0.4));
+  margin-bottom: 4px;
+}
+.appPhoneTitle {
+  font-weight: 900;
+  font-size: 1.15rem;
+  background: linear-gradient(90deg, #8b5cf6, #7c3aed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.appPhoneSub {
+  font-size: 0.55rem;
+  color: rgba(255,255,255,0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 12px;
+}
+.appPhoneDivider {
+  width: 40px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(139,92,246,0.5), transparent);
+  margin-bottom: 12px;
+}
+.appPhoneFeature {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.7);
+  padding: 5px 12px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 6px;
+  width: fit-content;
+}
+.appPhoneBadge {
+  font-size: 0.58rem;
+  color: rgba(139,92,246,0.6);
+  border: 1px solid rgba(139,92,246,0.2);
+  border-radius: 8px;
+  padding: 3px 10px;
+  margin-top: 8px;
+}
+.appPhoneHome {
+  width: 110px;
+  height: 4px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 3px;
+  margin-bottom: 6px;
+}
+.appBadgeAndroid {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.35);
+  background: rgba(139,92,246,0.08);
+  border: 1px solid rgba(139,92,246,0.15);
+  border-radius: 16px;
+  padding: 4px 14px;
+}
+
 /* ─ Modal Términos ────────────────────────────────────────────────────────────── */
 .modalOverlay {
   position: fixed;

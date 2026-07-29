@@ -1,126 +1,262 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
   <defs>
-    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+    <linearGradient id="gBg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#12121e"/>
+      <stop offset="50%" stop-color="#0e0e16"/>
       <stop offset="100%" stop-color="#0a0a0f"/>
     </linearGradient>
-    <linearGradient id="purpleGrad" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#a78bfa"/>
-      <stop offset="30%" stop-color="#8b5cf6"/>
+    <linearGradient id="gPurple" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#c084fc"/>
+      <stop offset="25%" stop-color="#a78bfa"/>
+      <stop offset="55%" stop-color="#8b5cf6"/>
       <stop offset="100%" stop-color="#7c3aed"/>
     </linearGradient>
-    <linearGradient id="purpleDark" x1="0" y1="0" x2="1" y2="1">
+    <linearGradient id="gPurpleDark" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#6d28d9"/>
       <stop offset="100%" stop-color="#4c1d95"/>
     </linearGradient>
-    <linearGradient id="redGrad" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#e31c25"/>
+    <linearGradient id="gPurpleLight" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ddd6fe"/>
+      <stop offset="100%" stop-color="#a78bfa"/>
+    </linearGradient>
+    <linearGradient id="gRed" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff4d4d"/>
+      <stop offset="30%" stop-color="#e31c25"/>
       <stop offset="100%" stop-color="#b71c1c"/>
     </linearGradient>
-    <linearGradient id="barGrad" x1="0" y1="0" x2="1" y2="0">
+    <linearGradient id="gRedDark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#b71c1c"/>
+      <stop offset="100%" stop-color="#8b0000"/>
+    </linearGradient>
+    <linearGradient id="gBar" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0%" stop-color="#c084fc"/>
-      <stop offset="40%" stop-color="#a78bfa"/>
+      <stop offset="35%" stop-color="#8b5cf6"/>
+      <stop offset="65%" stop-color="#a78bfa"/>
       <stop offset="100%" stop-color="#e31c25"/>
     </linearGradient>
-    <linearGradient id="glowGrad" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.15"/>
-      <stop offset="100%" stop-color="#e31c25" stop-opacity="0.05"/>
+    <linearGradient id="gMetal" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.12)"/>
+      <stop offset="50%" stop-color="rgba(255,255,255,0.04)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0.08)"/>
     </linearGradient>
-    <filter id="outerGlow">
-      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+    <linearGradient id="gAccent" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#e31c25" stop-opacity="0.1"/>
+    </linearGradient>
+    <radialGradient id="gGlow" cx="50%" cy="45%" r="50%">
+      <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.08"/>
+      <stop offset="60%" stop-color="#7c3aed" stop-opacity="0.03"/>
+      <stop offset="100%" stop-color="#0a0a0f" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="fGlow">
+      <feGaussianBlur stdDeviation="1.2" result="blur"/>
       <feMerge>
         <feMergeNode in="blur"/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
-    <filter id="innerShadow">
-      <feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="#000" flood-opacity="0.5"/>
+    <filter id="fShadow">
+      <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#000" flood-opacity="0.6"/>
     </filter>
+    <filter id="fInnerGlow">
+      <feGaussianBlur stdDeviation="0.8" result="blur"/>
+      <feComposite in="blur" in2="SourceAlpha" operator="in"/>
+      <feMerge>
+        <feMergeNode in="SourceGraphic"/>
+        <feMergeNode in="blur"/>
+      </feMerge>
+    </filter>
+    <clipPath id="cCircle">
+      <circle cx="32" cy="32" r="30"/>
+    </clipPath>
+    <pattern id="pGrid" width="4" height="4" patternUnits="userSpaceOnUse">
+      <path d="M4 0L4 4M0 4L4 4" stroke="rgba(139,92,246,0.04)" stroke-width="0.3"/>
+    </pattern>
   </defs>
 
-  <!-- Hexagonal outer shell -->
-  <path d="M32 2 L58 11 L62 32 L58 53 L32 62 L6 53 L2 32 L6 11 Z"
-        fill="url(#bgGrad)" stroke="url(#purpleGrad)" stroke-width="1.5"
-        stroke-linejoin="round" filter="url(#outerGlow)"/>
+  <!-- 1. Fondo oscuro circular con grid -->
+  <circle cx="32" cy="32" r="31" fill="url(#gBg)" stroke="rgba(139,92,246,0.12)" stroke-width="0.5"/>
+  <circle cx="32" cy="32" r="31" fill="url(#pGrid)"/>
+  <circle cx="32" cy="32" r="31" fill="url(#gGlow)"/>
 
-  <!-- Inner glow fill -->
-  <path d="M32 2 L58 11 L62 32 L58 53 L32 62 L6 53 L2 32 L6 11 Z"
-        fill="url(#glowGrad)" stroke="none"/>
+  <!-- 2. Dientes de engranaje (12 alrededor del perímetro) -->
+  <g opacity="0.35" fill="url(#gMetal)" stroke="rgba(139,92,246,0.2)" stroke-width="0.3">
+    <rect x="28" y="1" width="8" height="4" rx="0.8" transform="rotate(0 32 32)"/>
+    <rect x="28" y="1" width="8" height="4" rx="0.8" transform="rotate(30 32 32)"/>
+    <rect x="28" y="1" width="8" height="4" rx="0.8" transform="rotate(60 32 32)"/>
+    <rect x="28" y="1" width="8" height="4" rx="0.8" transform="rotate(90 32 32)"/>
+    <rect x="28" y="1" width="8" height="4" rx="0.8" transform="rotate(120 32 32)"/>
+    <rect x="28" y="1" width="8" height="4" rx="0.8" transform="rotate(150 32 32)"/>
+    <rect x="28" y="1" width="8" height="4" rx="0.8" transform="rotate(180 32 32)"/>
+    <rect x="28" y="1" width="8" height="4" rx="0.8" transform="rotate(210 32 32)"/>
+    <rect x="28" y="1" width="8" height="4" rx="0.8" transform="rotate(240 32 32)"/>
+    <rect x="28" y="1" width="8" height="4" rx="0.8" transform="rotate(270 32 32)"/>
+    <rect x="28" y="1" width="8" height="4" rx="0.8" transform="rotate(300 32 32)"/>
+    <rect x="28" y="1" width="8" height="4" rx="0.8" transform="rotate(330 32 32)"/>
+  </g>
 
-  <!-- Decorative inner hexagon ring -->
-  <path d="M32 6 L54 14 L58 32 L54 50 L32 58 L10 50 L6 32 L10 14 Z"
-        fill="none" stroke="url(#purpleGrad)" stroke-width="0.5" opacity="0.25"
+  <!-- 3. Aro exterior sólido -->
+  <circle cx="32" cy="32" r="28" fill="none" stroke="url(#gPurple)" stroke-width="1.2" opacity="0.5"/>
+  <circle cx="32" cy="32" r="26.5" fill="none" stroke="url(#gMetal)" stroke-width="0.3"/>
+
+  <!-- 4. Anillo punteado (tracker/ciclo de entrenamiento) -->
+  <circle cx="32" cy="32" r="25" fill="none" stroke="url(#gPurple)" stroke-width="0.5"
+          stroke-dasharray="2 3" opacity="0.4"/>
+
+  <!-- 5. Segundo anillo punteado (interior) -->
+  <circle cx="32" cy="32" r="23.5" fill="none" stroke="url(#gRed)" stroke-width="0.4"
+          stroke-dasharray="1.5 4" opacity="0.25"/>
+
+  <!-- 6. Anillo medio sólido -->
+  <circle cx="32" cy="32" r="22" fill="none" stroke="url(#gPurple)" stroke-width="0.6" opacity="0.2"/>
+
+  <!-- 7. Marco hexagonal exterior -->
+  <path d="M32 5 L55.5 16 L60 32 L55.5 48 L32 59 L8.5 48 L4 32 L8.5 16 Z"
+        fill="none" stroke="url(#gPurple)" stroke-width="0.8" opacity="0.35"
+        stroke-linejoin="round" filter="url(#fGlow)"/>
+
+  <!-- 8. Marco hexagonal interior -->
+  <path d="M32 9 L52 18.5 L56 32 L52 45.5 L32 55 L12 45.5 L8 32 L12 18.5 Z"
+        fill="none" stroke="url(#gPurpleLight)" stroke-width="0.4" opacity="0.2"
         stroke-linejoin="round"/>
 
-  <!-- Vertex accent dots (6 points of the hexagon → training cycle) -->
-  <circle cx="32" cy="2" r="1.5" fill="#8b5cf6" opacity="0.8"/>
-  <circle cx="58" cy="11" r="1.5" fill="#8b5cf6" opacity="0.8"/>
-  <circle cx="62" cy="32" r="1.5" fill="#8b5cf6" opacity="0.8"/>
-  <circle cx="58" cy="53" r="1.5" fill="#8b5cf6" opacity="0.8"/>
-  <circle cx="32" cy="62" r="1.5" fill="#8b5cf6" opacity="0.8"/>
-  <circle cx="6" cy="53" r="1.5" fill="#8b5cf6" opacity="0.8"/>
-  <circle cx="2" cy="32" r="1.5" fill="#8b5cf6" opacity="0.8"/>
-  <circle cx="6" cy="11" r="1.5" fill="#8b5cf6" opacity="0.8"/>
+  <!-- 9. Vértices del hexágono exterior (8 puntos) -->
+  <circle cx="32" cy="5" r="1.2" fill="#a78bfa" opacity="0.6"/>
+  <circle cx="55.5" cy="16" r="1.2" fill="#a78bfa" opacity="0.6"/>
+  <circle cx="60" cy="32" r="1.2" fill="#a78bfa" opacity="0.6"/>
+  <circle cx="55.5" cy="48" r="1.2" fill="#a78bfa" opacity="0.6"/>
+  <circle cx="32" cy="59" r="1.2" fill="#a78bfa" opacity="0.6"/>
+  <circle cx="8.5" cy="48" r="1.2" fill="#a78bfa" opacity="0.6"/>
+  <circle cx="4" cy="32" r="1.2" fill="#a78bfa" opacity="0.6"/>
+  <circle cx="8.5" cy="16" r="1.2" fill="#a78bfa" opacity="0.6"/>
 
-  <!-- Central dumbbell -->
-  <!-- Main bar -->
-  <rect x="17" y="28.5" width="30" height="7" rx="3" fill="url(#barGrad)" filter="url(#innerShadow)"/>
+  <!-- 10. Marcas de grado en los ejes cardinales -->
+  <g opacity="0.25" stroke="url(#gPurpleLight)" stroke-width="0.5" stroke-linecap="round">
+    <line x1="32" y1="3.5" x2="32" y2="6.5"/>
+    <line x1="60.5" y1="32" x2="57.5" y2="32"/>
+    <line x1="32" y1="60.5" x2="32" y2="57.5"/>
+    <line x1="3.5" y1="32" x2="6.5" y2="32"/>
+    <line x1="52" y1="10" x2="50" y2="12.5"/>
+    <line x1="52" y1="54" x2="50" y2="51.5"/>
+    <line x1="12" y1="10" x2="14" y2="12.5"/>
+    <line x1="12" y1="54" x2="14" y2="51.5"/>
+  </g>
 
-  <!-- Bar highlight line -->
-  <rect x="19" y="29.5" width="26" height="1.5" rx="0.75" fill="#ffffff" opacity="0.15"/>
+  <!-- 11. Diamantes decorativos en puntos intercardinales -->
+  <g fill="#8b5cf6" opacity="0.3">
+    <polygon points="32,15 34,17 32,19 30,17"/>
+    <polygon points="49,32 47,34 45,32 47,30"/>
+    <polygon points="32,49 34,47 32,45 30,47"/>
+    <polygon points="15,32 17,34 19,32 17,30"/>
+  </g>
 
-  <!-- Left weight plate (purple) – outer -->
-  <rect x="13" y="22" width="10" height="20" rx="3.5" fill="url(#purpleGrad)" filter="url(#innerShadow)"/>
-  <!-- Left weight inner highlight -->
-  <rect x="15" y="24" width="6" height="16" rx="2" fill="url(#purpleDark)" opacity="0.4"/>
+  <!-- 12. Barra de la pesa -->
+  <rect x="16" y="28.5" width="32" height="7" rx="3" fill="url(#gBar)" filter="url(#fShadow)"/>
 
-  <!-- "M" negative-space cutout on left weight -->
-  <!-- Left leg of M -->
-  <line x1="16.5" y1="25" x2="16.5" y2="39" stroke="#0a0a0f" stroke-width="1.2" stroke-linecap="round" opacity="0.5"/>
-  <!-- Center V of M -->
-  <line x1="16.5" y1="31" x2="18" y2="34" stroke="#0a0a0f" stroke-width="1.2" stroke-linecap="round" opacity="0.5"/>
-  <line x1="18" y1="34" x2="19.5" y2="31" stroke="#0a0a0f" stroke-width="1.2" stroke-linecap="round" opacity="0.5"/>
-  <!-- Right leg of M -->
-  <line x1="19.5" y1="25" x2="19.5" y2="39" stroke="#0a0a0f" stroke-width="1.2" stroke-linecap="round" opacity="0.5"/>
+  <!-- 13. Reflejo de la barra -->
+  <rect x="18" y="29.5" width="28" height="1.5" rx="0.75" fill="#fff" opacity="0.12"/>
 
-  <!-- Right weight plate (red) – outer -->
-  <rect x="41" y="22" width="10" height="20" rx="3.5" fill="url(#redGrad)" filter="url(#innerShadow)"/>
-  <!-- Right weight inner highlight -->
-  <rect x="43" y="24" width="6" height="16" rx="2" fill="#8b0000" opacity="0.3"/>
+  <!-- 14. Sombra inferior de la barra -->
+  <rect x="18" y="34" width="28" height="0.5" rx="0.25" fill="#000" opacity="0.15"/>
 
-  <!-- "F" negative-space cutout on right weight -->
-  <!-- Stem of F -->
-  <line x1="43.5" y1="25" x2="43.5" y2="39" stroke="#0a0a0f" stroke-width="1.2" stroke-linecap="round" opacity="0.5"/>
-  <!-- Top bar of F -->
-  <line x1="43.5" y1="26" x2="48.5" y2="26" stroke="#0a0a0f" stroke-width="1.2" stroke-linecap="round" opacity="0.5"/>
-  <!-- Middle bar of F -->
-  <line x1="43.5" y1="31" x2="47" y2="31" stroke="#0a0a0f" stroke-width="1.2" stroke-linecap="round" opacity="0.5"/>
+  <!-- 15. Peso izquierdo (púrpura) – placa exterior -->
+  <rect x="12" y="21.5" width="11" height="21" rx="3.5" fill="url(#gPurple)" filter="url(#fShadow)"/>
 
-  <!-- Weight plate side grooves -->
-  <line x1="13.5" y1="24" x2="13.5" y2="40" stroke="#000" stroke-width="0.8" opacity="0.2"/>
-  <line x1="22.5" y1="24" x2="22.5" y2="40" stroke="#000" stroke-width="0.8" opacity="0.2"/>
-  <line x1="41.5" y1="24" x2="41.5" y2="40" stroke="#000" stroke-width="0.8" opacity="0.2"/>
-  <line x1="50.5" y1="24" x2="50.5" y2="40" stroke="#000" stroke-width="0.8" opacity="0.2"/>
+  <!-- 16. Peso izquierdo – placa interior (dark) -->
+  <rect x="14" y="23.5" width="7" height="17" rx="2.5" fill="url(#gPurpleDark)" opacity="0.35"/>
 
-  <!-- Center "MF" monogram on the bar -->
-  <text x="32" y="32.8" text-anchor="middle" dominant-baseline="central"
-        font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
-        font-weight="900" font-size="7.5" fill="#ffffff"
-        letter-spacing="0.3">MF</text>
+  <!-- 17. Peso izquierdo – gradiente de brillo -->
+  <rect x="12" y="21.5" width="11" height="21" rx="3.5" fill="url(#gMetal)" opacity="0.3"/>
 
-  <!-- Motion/energy arcs -->
-  <!-- Left motion arc -->
-  <path d="M7 18 Q3 32 7 46" fill="none" stroke="#a78bfa" stroke-width="1.2"
-        opacity="0.4" stroke-linecap="round"/>
-  <!-- Right motion arc -->
-  <path d="M57 18 Q61 32 57 46" fill="none" stroke="#e31c25" stroke-width="1.2"
-        opacity="0.4" stroke-linecap="round"/>
+  <!-- 18. Peso izquierdo – borde brillante -->
+  <rect x="12" y="21.5" width="11" height="21" rx="3.5" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="0.5"/>
 
-  <!-- Small energy particles -->
-  <circle cx="5" cy="14" r="1" fill="#c084fc" opacity="0.6"/>
-  <circle cx="59" cy="14" r="1" fill="#f87171" opacity="0.6"/>
-  <circle cx="5" cy="50" r="0.8" fill="#c084fc" opacity="0.4"/>
-  <circle cx="59" cy="50" r="0.8" fill="#f87171" opacity="0.4"/>
-  <circle cx="32" cy="1" r="0.8" fill="#c084fc" opacity="0.3"/>
-  <circle cx="32" cy="63" r="0.8" fill="#c084fc" opacity="0.3"/>
+  <!-- 19–22. Corte "M" en peso izquierdo (4 líneas) -->
+  <line x1="15.5" y1="25" x2="15.5" y2="39" stroke="#0a0a0f" stroke-width="1.4" stroke-linecap="round" opacity="0.45"/>
+  <line x1="15.5" y1="30.5" x2="17" y2="34" stroke="#0a0a0f" stroke-width="1.4" stroke-linecap="round" opacity="0.45"/>
+  <line x1="17" y1="34" x2="18.5" y2="30.5" stroke="#0a0a0f" stroke-width="1.4" stroke-linecap="round" opacity="0.45"/>
+  <line x1="18.5" y1="25" x2="18.5" y2="39" stroke="#0a0a0f" stroke-width="1.4" stroke-linecap="round" opacity="0.45"/>
+
+  <!-- 23. Peso derecho (rojo) – placa exterior -->
+  <rect x="41" y="21.5" width="11" height="21" rx="3.5" fill="url(#gRed)" filter="url(#fShadow)"/>
+
+  <!-- 24. Peso derecho – placa interior (dark) -->
+  <rect x="43" y="23.5" width="7" height="17" rx="2.5" fill="url(#gRedDark)" opacity="0.3"/>
+
+  <!-- 25. Peso derecho – gradiente de brillo -->
+  <rect x="41" y="21.5" width="11" height="21" rx="3.5" fill="url(#gMetal)" opacity="0.3"/>
+
+  <!-- 26. Peso derecho – borde brillante -->
+  <rect x="41" y="21.5" width="11" height="21" rx="3.5" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="0.5"/>
+
+  <!-- 27–29. Corte "F" en peso derecho (3 líneas) -->
+  <line x1="43.5" y1="25" x2="43.5" y2="39" stroke="#0a0a0f" stroke-width="1.4" stroke-linecap="round" opacity="0.45"/>
+  <line x1="43.5" y1="26.5" x2="49" y2="26.5" stroke="#0a0a0f" stroke-width="1.4" stroke-linecap="round" opacity="0.45"/>
+  <line x1="43.5" y1="32.5" x2="48" y2="32.5" stroke="#0a0a0f" stroke-width="1.4" stroke-linecap="round" opacity="0.45"/>
+
+  <!-- 30–33. Ranuras laterales de los pesos (4 líneas) -->
+  <line x1="12.5" y1="24" x2="12.5" y2="40" stroke="#000" stroke-width="0.6" opacity="0.15"/>
+  <line x1="22.5" y1="24" x2="22.5" y2="40" stroke="#000" stroke-width="0.6" opacity="0.15"/>
+  <line x1="41.5" y1="24" x2="41.5" y2="40" stroke="#000" stroke-width="0.6" opacity="0.15"/>
+  <line x1="51.5" y1="24" x2="51.5" y2="40" stroke="#000" stroke-width="0.6" opacity="0.15"/>
+
+  <!-- 34. Monograma "MF" centrado en la barra -->
+  <text x="32" y="32.7" text-anchor="middle" dominant-baseline="central"
+        font-family="system-ui,-apple-system,'Segoe UI',Roboto,sans-serif"
+        font-weight="900" font-size="7.8" fill="#ffffff"
+        letter-spacing="0.4" filter="url(#fInnerGlow)">MF</text>
+
+  <!-- 35. Sombra del texto MF -->
+  <text x="32.3" y="33" text-anchor="middle" dominant-baseline="central"
+        font-family="system-ui,-apple-system,'Segoe UI',Roboto,sans-serif"
+        font-weight="900" font-size="7.8" fill="#000" opacity="0.15"
+        letter-spacing="0.4">MF</text>
+
+  <!-- 36. Arco de movimiento izquierdo (púrpura) -->
+  <path d="M6 18 Q3 32 6 46" fill="none" stroke="url(#gPurple)" stroke-width="1"
+        opacity="0.35" stroke-linecap="round" filter="url(#fGlow)"/>
+
+  <!-- 37. Arco de movimiento derecho (rojo) -->
+  <path d="M58 18 Q61 32 58 46" fill="none" stroke="url(#gRed)" stroke-width="1"
+        opacity="0.35" stroke-linecap="round" filter="url(#fGlow)"/>
+
+  <!-- 38. Segundo arco interior izquierdo -->
+  <path d="M10 22 Q8 32 10 42" fill="none" stroke="#8b5cf6" stroke-width="0.5"
+        stroke-dasharray="2 2" opacity="0.2" stroke-linecap="round"/>
+
+  <!-- 39. Segundo arco interior derecho -->
+  <path d="M54 22 Q56 32 54 42" fill="none" stroke="#e31c25" stroke-width="0.5"
+        stroke-dasharray="2 2" opacity="0.2" stroke-linecap="round"/>
+
+  <!-- 40–51. Partículas de energía (12 círculos) -->
+  <circle cx="4.5" cy="14" r="1" fill="#c084fc" opacity="0.7"/>
+  <circle cx="59.5" cy="14" r="1" fill="#f87171" opacity="0.7"/>
+  <circle cx="4.5" cy="50" r="0.8" fill="#c084fc" opacity="0.4"/>
+  <circle cx="59.5" cy="50" r="0.8" fill="#f87171" opacity="0.4"/>
+  <circle cx="8" cy="11" r="0.6" fill="#a78bfa" opacity="0.5"/>
+  <circle cx="56" cy="11" r="0.6" fill="#ff6b6b" opacity="0.5"/>
+  <circle cx="8" cy="53" r="0.6" fill="#a78bfa" opacity="0.3"/>
+  <circle cx="56" cy="53" r="0.6" fill="#ff6b6b" opacity="0.3"/>
+  <circle cx="32" cy="3" r="0.6" fill="#c084fc" opacity="0.4"/>
+  <circle cx="61" cy="32" r="0.6" fill="#f87171" opacity="0.4"/>
+  <circle cx="32" cy="61" r="0.6" fill="#c084fc" opacity="0.4"/>
+  <circle cx="3" cy="32" r="0.6" fill="#f87171" opacity="0.4"/>
+
+  <!-- 52. Destello superior izquierdo -->
+  <path d="M14 10 L16 12 L14 14 L12 12 Z" fill="#a78bfa" opacity="0.2"/>
+
+  <!-- 53. Destello superior derecho -->
+  <path d="M50 10 L52 12 L50 14 L48 12 Z" fill="#f87171" opacity="0.2"/>
+
+  <!-- 54. Anillo de resplandor exterior (efecto de profundidad) -->
+  <circle cx="32" cy="32" r="30.5" fill="none" stroke="url(#gAccent)" stroke-width="1" opacity="0.3"/>
+
+  <!-- 55–58. Micro-puntos en las esquinas de los pesos (detalle) -->
+  <circle cx="13" cy="23" r="0.4" fill="#fff" opacity="0.15"/>
+  <circle cx="22" cy="23" r="0.4" fill="#fff" opacity="0.15"/>
+  <circle cx="42" cy="23" r="0.4" fill="#fff" opacity="0.15"/>
+  <circle cx="51" cy="23" r="0.4" fill="#fff" opacity="0.15"/>
+
+  <!-- 59. Clip del círculo exterior para suavizar bordes -->
+  <circle cx="32" cy="32" r="31" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="0.5"/>
 </svg>

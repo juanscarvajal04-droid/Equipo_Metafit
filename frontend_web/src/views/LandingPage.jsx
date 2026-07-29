@@ -490,6 +490,76 @@ export default function LandingPage() {
       </section>
 
       {/* ════════════════════════════════════════════════════════════════════
+          APP MÓVIL
+      ════════════════════════════════════════════════════════════════════ */}
+      <section id="app-movil" className={s.sectionApp}>
+        <div className={s.appInner}>
+          {/* Columna izquierda — contenido */}
+          <div className={s.appInfo}>
+            <div className={s.sectionBadge}>📱 App Móvil</div>
+            <h2 className={s.appTitle}>
+              Lleva MetaFit en{" "}
+              <span className={s.appTitleAccent}>tu bolsillo</span>
+            </h2>
+            <p className={s.appSubtitle}>
+              Descarga nuestra app para Android y accede a tus rutinas, dietas y
+              progreso desde cualquier lugar. Sin conexión a internet, sin excusas.
+            </p>
+
+            {/* Feature bullets */}
+            <div className={s.appFeatures}>
+              {[
+                { icono: "🏋️", titulo: "Rutinas personalizadas", desc: "Planes de entrenamiento adaptados a tu nivel y objetivos, sincronizados en tiempo real con tu entrenador." },
+                { icono: "🥗", titulo: "Planes nutricionales",    desc: "Dietas calculadas con tus macros exactos. Compatible con alergias, intolerancias y preferencias." },
+                { icono: "📊", titulo: "Seguimiento de progreso", desc: "Gráficos de evolución, registro de pesos, medidas corporales e hitos alcanzados." },
+                { icono: "🔒", titulo: "Datos seguros",           desc: "Autenticación biométrica, cifrado de extremo a extremo y control parental de privacidad." },
+              ].map(f => (
+                <div key={f.titulo} className={s.appFeature}>
+                  <div className={s.appFeatureIcon}>{f.icono}</div>
+                  <div>
+                    <div className={s.appFeatureTitle}>{f.titulo}</div>
+                    <div className={s.appFeatureDesc}>{f.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Botón descarga */}
+            <a
+              href="/app/metafit.apk"
+              download
+              className={s.btnAppDownload}
+            >
+              📥 Descargar APK para Android
+            </a>
+            <div className={s.appVersion}>Versión 1.0 · Solo Android · Gratis</div>
+          </div>
+
+          {/* Columna derecha — mockup celular */}
+          <div className={s.appMockupCol}>
+            <div className={s.appPhone}>
+              {/* Notch */}
+              <div className={s.appPhoneNotch} />
+              {/* Pantalla */}
+              <div className={s.appPhoneScreen}>
+                <div className={s.appPhoneLogo}>💪</div>
+                <div className={s.appPhoneTitle}>MetaFit</div>
+                <div className={s.appPhoneSub}>Sport Gym Sede 80</div>
+                <div className={s.appPhoneDivider} />
+                <div className={s.appPhoneFeature}>🏋️ Rutinas</div>
+                <div className={s.appPhoneFeature}>🥗 Dietas</div>
+                <div className={s.appPhoneFeature}>📊 Progreso</div>
+                <div className={s.appPhoneBadge}>v1.0</div>
+              </div>
+              {/* Home indicator */}
+              <div className={s.appPhoneHome} />
+            </div>
+            <div className={s.appBadgeAndroid}>🤖 Android</div>
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════════════════════════════
           FOOTER
       ════════════════════════════════════════════════════════════════════ */}
       <footer className={s.landingFooter}>
