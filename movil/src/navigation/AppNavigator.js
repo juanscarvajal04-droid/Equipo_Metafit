@@ -76,9 +76,9 @@ export default function AppNavigator() {
   return (
     <NavigationContainer>
       {token ? (
-        <MainTabs />
+        <MainTabs key="main-tabs" />
       ) : (
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Navigator key="auth-stack" initialRouteName="Landing" screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Landing" component={LandingScreen} />
           <Stack.Screen name="Login" component={LoginScreen} />
         </Stack.Navigator>
