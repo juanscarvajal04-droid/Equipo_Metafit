@@ -12,9 +12,9 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLORS, GRADIENTS, FONTS, SPACING, SHADOWS, BORDER_RADIUS } from '../theme';
 import { getMiPerfil, getMisCiclos, getMisRestricciones } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 function Avatar({ nombre, size = 80 }) {
   const initials = (nombre || 'U')
@@ -111,6 +111,7 @@ function SectionCard({ title, icon, children }) {
 }
 
 export default function MiPerfilScreen({ navigation }) {
+  const { logout } = useAuth();
   const [perfil, setPerfil] = useState(null);
   const [ciclo, setCiclo] = useState(null);
   const [restricciones, setRestricciones] = useState([]);
@@ -142,8 +143,7 @@ export default function MiPerfilScreen({ navigation }) {
 
   const handleLogout = async () => {
     try {
-      await AsyncStorage.multiRemove(['metafit_token', 'metafit_user', 'metafit_role']);
-      navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+      await logout();
     } catch (_) {}
   };
 
