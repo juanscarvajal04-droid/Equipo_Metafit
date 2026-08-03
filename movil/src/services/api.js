@@ -1,20 +1,11 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import tunnelUrl from './tunnelUrl';
 
 const TOKEN_KEY = 'metafit_token';
 const USER_KEY  = 'metafit_user';
 const ROLE_KEY  = 'metafit_role';
 
-// ── URL del backend ─────────────────────────────────────────────
-// Prioridad:
-//   1. EXPO_PUBLIC_API_URL  (variable de entorno, para CI/CD)
-//   2. tunnelUrl            (escrito por start-tunnel.sh)
-//   3. RENDER_URL           (producción en Render)
-//   4. localhost            (fallback local)
-// ────────────────────────────────────────────────────────────────
-const RENDER_URL = 'https://metafit-backend-rr18.onrender.com'; // ← CAMBIAR si el slug de Render cambia
-const API_URL = process.env.EXPO_PUBLIC_API_URL || tunnelUrl || RENDER_URL || 'http://localhost:3001';
+const API_URL = 'https://metafit-backend-rr18.onrender.com';
 
 const api = axios.create({
   baseURL: API_URL,
