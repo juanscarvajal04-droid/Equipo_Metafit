@@ -17,45 +17,10 @@ const IS_PROD = process.env.NODE_ENV === 'production';
 
 
 // ── CORS ──────────────────────────────────────────────────────
-const ALLOWED_ORIGINS = (process.env.CORS_ORIGINS || 'http://localhost:5173,http://localhost:3000,http://localhost:8081,http://192.168.0.4:8081,exp://192.168.0.4:8081')
-  .split(',')
-  .map(o => o.trim());
-
-// Rutas que deben estar accesibles sin restricción de origen
-// (Swagger UI, health check, herramientas de desarrollo)
-const CORS_OPEN_PATHS = ['/api-docs', '/swagger', '/health', '/api-docs.json'];
-
-app.use((req, res, next) => {
-  // Si la ruta es de documentación o health, aplicar CORS abierto y continuar
-  const isOpenPath = CORS_OPEN_PATHS.some(p => req.path === p || req.path.startsWith(p + '/'));
-  if (isOpenPath) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    if (req.method === 'OPTIONS') return res.sendStatus(204);
-    return next();
-  }
-
-  // Para el resto de rutas, aplicar CORS estricto
-  cors({
-    origin: (origin, callback) => {
-      // Permitir requests sin origin: Postman, curl, herramientas server-to-server
-      // También permitir orígenes de desarrollo local (Expo, emuladores, LAN)
-      const isLocalDev = origin && (
-        origin.startsWith('http://localhost:') ||
-        origin.startsWith('http://192.168.') ||
-        origin.startsWith('http://10.') ||
-        origin.startsWith('http://172.') ||
-        origin.startsWith('exp://')
-      );
-      if (!origin || ALLOWED_ORIGINS.includes(origin) || isLocalDev) return callback(null, true);
-      callback(new Error(`CORS bloqueado para origen: ${origin}`));
-    },
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
-  })(req, res, next);
-});
+// Temporal: permitir todos los orígenes para que el frontend de
+// Render (https://metafit-frontend-78x6.onrender.com) pueda conectar.
+// Ajustar a una lista blanca en el futuro si es necesario.
+app.use(cors({ origin: '*' }));
 
 // ── ISO 25000 / 3.1: Helmet — cabeceras HTTP seguras ──────────
 // Desactivamos contentSecurityPolicy para que Swagger UI pueda
