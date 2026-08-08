@@ -111,4 +111,91 @@ describe('API Integration — Catálogos Filtrados', () => {
 
     expect(res.status).toBe(401);
   });
+
+  // ── ISO 25010 · Seguridad: CORS con lista blanca ──────────────
+  test('Origen ajeno a la lista blanca recibe 403 CORS', async () => {
+    const res = await request(app)
+      .get('/health')
+      .set('Origin', 'https://evil.example.com')
+      .expect('Content-Type', /json/);
+
+    expect(res.status).toBe(403);
+    expect(res.body.error).toMatch(/CORS/);
+  });
+
+  test('Origen de la lista blanca recibe headers CORS válidos', async () => {
+    process.env.CORS_ORIGINS = 'https://metafit-frontend-78x6.onrender.com';
+    const res = await request(app)
+      .get('/health')
+      .set('Origin', 'https://metafit-frontend-78x6.onrender.com');
+
+    expect(res.status).toBe(200);
+    expect(res.headers['access-control-allow-origin'])
+      .toBe('https://metafit-frontend-78x6.onrender.com');
+  });
+
+  // ── ISO 25010 · Seguridad: RBAC en mutaciones de afiliados ────
+  test('POST /afiliados con rol Afiliado devuelve 403', async () => {
+    const jwt = require('jsonwebtoken');
+    const token = jwt.sign(
+      { sub: 2, email: 'afi@metafit.com', role: 'Afiliado' },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    const res = await request(app)
+      .post('/afiliados')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ nombres: 'A', apellidos: 'B', correo: 'x@y.com', contrasena: '123456', documento: '1' })
+      .expect('Content-Type', /json/);
+
+    expect(res.status).toBe(403);
+  });
+
+  test('PATCH /afiliados/1 con rol de Entrenador devuelve 403', async () => {
+    const jwt = require('jsonwebtoken');
+    const token = jwt.sign(
+      { sub: 3, email: 'trainer@metafit.com', role: 'Entrenador' },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    const res = await request(app)
+      .patch('/afiliados/1')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ telefono: '3001234567' })
+      .expect('Content-Type', /json/);
+
+    expect(res.status).toBe(403);
+  });
+
+  test('PATCH /afiliados/1 con rol Recepcionista pasa el middleware RBAC', async () => {
+    const jwt = require('jsonwebtoken');
+    const token = jwt.sign(
+      { sub: 1, email: 'recepcion@metafit.com', role: 'Recepcionista' },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    pool.query.mockReset();
+    pool.query.mockResolvedValueOnce([{ affectedRows: 1 }]);
+
+    // El modelo usa transacción (getConnection + commit)
+    const conn = {
+      query: jest.fn().mockResolvedValue([{ affectedRows: 1 }]),
+      beginTransaction: jest.fn().mockResolvedValue(),
+      commit: jest.fn().mockResolvedValue(),
+      rollback: jest.fn().mockResolvedValue(),
+      release: jest.fn(),
+    };
+    pool.getConnection = jest.fn().mockResolvedValue(conn);
+
+    const res = await request(app)
+      .patch('/afiliados/1')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ telefono: '3001234567' })
+      .expect('Content-Type', /json/);
+
+    expect(res.status).not.toBe(403);  // 200 o 404 (depende del mock), NUNCA 403
+  });
 });

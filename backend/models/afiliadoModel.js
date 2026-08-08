@@ -461,11 +461,34 @@ const AfiliadoModel = {
   },
 
   delete: async (id) => {
-    // ON DELETE RESTRICT en FK → el afiliado con datos asociados no se puede eliminar
-    const [result] = await pool.query(
-      'DELETE FROM AFILIADO WHERE id_usuario=?', [id]
-    );
-    return result.affectedRows;
+    // ⚠️ Transacción: elimina AFILIADO y su USUARIO base.
+    // Si el afiliado tiene datos asociados (ciclos, planes, progreso), las FK
+    // RESTRICT lanzan ER_ROW_IS_REFERENCED_2 → rollback → el controller responde 400.
+    const conn = await pool.getConnection();
+    try {
+      await conn.beginTransaction();
+
+      const [afResult] = await conn.query(
+        'DELETE FROM AFILIADO WHERE id_usuario=?', [id]
+      );
+
+      let affectedRows = afResult.affectedRows;
+      if (affectedRows > 0) {
+        // Elimina la cuenta de login asociada (evita usuarios huérfanos activos)
+        const [uResult] = await conn.query(
+          'DELETE FROM USUARIO WHERE id_usuario=?', [id]
+        );
+        affectedRows = Math.min(affectedRows, uResult.affectedRows);
+      }
+
+      await conn.commit();
+      return affectedRows;
+    } catch (err) {
+      await conn.rollback();
+      throw err;
+    } finally {
+      conn.release();
+    }
   },
 };
 

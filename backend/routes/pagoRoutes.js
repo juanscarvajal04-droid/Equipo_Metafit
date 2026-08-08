@@ -5,13 +5,13 @@
 'use strict';
 
 const { Router } = require('express');
-const { requireAuth, requireAdminOrRecepcionista } = require('../middlewares/auth');
+const { requireAuth, requireAdminOrRecepcionista, requireStaff } = require('../middlewares/auth');
 const PagoController = require('../controllers/pagoController');
 
 const router = Router();
 
-// Obtener historial de pagos de un afiliado (cualquier usuario autenticado)
-router.get('/:id/pagos', requireAuth, PagoController.getByAfiliado);
+// Obtener historial de pagos de un afiliado (solo staff: Admin/Entrenador/Recepcionista)
+router.get('/:id/pagos', requireAuth, requireStaff, PagoController.getByAfiliado);
 
 // Registrar un nuevo pago (solo Admin o Recepcionista)
 router.post('/:id/pagos', requireAuth, requireAdminOrRecepcionista, PagoController.create);

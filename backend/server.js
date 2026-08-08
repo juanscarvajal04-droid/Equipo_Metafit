@@ -17,10 +17,30 @@ const IS_PROD = process.env.NODE_ENV === 'production';
 
 
 // ── CORS ──────────────────────────────────────────────────────
-// Temporal: permitir todos los orígenes para que el frontend de
-// Render (https://metafit-frontend-78x6.onrender.com) pueda conectar.
-// Ajustar a una lista blanca en el futuro si es necesario.
-app.use(cors({ origin: '*' }));
+// Lista blanca estricta desde CORS_ORIGINS (coma-separada, sin espacios).
+// En producción Render: "https://metafit-frontend-78x6.onrender.com"
+// Si CORS_ORIGINS está vacío, se usa el frontend oficial como default.
+// Requests SIN Origin (app móvil, curl, server-to-server) se permiten.
+// Cualquier otro origen → callback(error) → el error handler responde 403.
+const DEFAULT_CORS_ORIGIN = 'https://metafit-frontend-78x6.onrender.com';
+
+const corsOrigins = () =>
+  (process.env.CORS_ORIGINS || DEFAULT_CORS_ORIGIN)
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin) return callback(null, true);   // sin Origin: móvil/curl
+    const allowed = corsOrigins();
+    if (allowed.includes('*') || allowed.includes(origin)) {
+      return callback(null, true);              // lista blanca
+    }
+    return callback(new Error('CORS no permitido para este origen'));
+  },
+  credentials: false,
+}));
 
 // ── ISO 25000 / 3.1: Helmet — cabeceras HTTP seguras ──────────
 // Desactivamos contentSecurityPolicy para que Swagger UI pueda

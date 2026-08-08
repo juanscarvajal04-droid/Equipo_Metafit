@@ -4,7 +4,7 @@
 const express              = require('express');
 const router               = express.Router();
 const AfiliadoController   = require('../controllers/afiliadoController');
-const { requireAuth, requireAdmin, requireAdminOrEntrenador, requireStaff } = require('../middlewares/auth');
+const { requireAuth, requireAdmin, requireAdminOrEntrenador, requireAdminOrRecepcionista, requireStaff } = require('../middlewares/auth');
 
 /**
  * @swagger
@@ -198,7 +198,7 @@ router.get('/:id', requireAuth, requireStaff, AfiliadoController.getById);
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.post('/', requireAuth, AfiliadoController.create);
+router.post('/', requireAuth, requireAdminOrRecepcionista, AfiliadoController.create);
 
 /**
  * @swagger
@@ -233,7 +233,7 @@ router.post('/', requireAuth, AfiliadoController.create);
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.patch('/:id', requireAuth, AfiliadoController.update);
+router.patch('/:id', requireAuth, requireAdminOrRecepcionista, AfiliadoController.update);
 
 /**
  * @swagger
@@ -299,7 +299,7 @@ router.delete('/:id', requireAuth, requireAdmin, AfiliadoController.delete);
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.get('/:id/ciclos', requireAuth, AfiliadoController.getCiclos);
+router.get('/:id/ciclos', requireAuth, requireStaff, AfiliadoController.getCiclos);
 
 /**
  * @swagger
@@ -388,7 +388,7 @@ router.post('/ciclos', requireAuth, requireAdminOrEntrenador, AfiliadoController
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.get('/:id/restricciones', requireAuth, AfiliadoController.getRestricciones);
+router.get('/:id/restricciones', requireAuth, requireStaff, AfiliadoController.getRestricciones);
 
 /**
  * @swagger
@@ -470,7 +470,7 @@ router.delete('/:id/restricciones/:id_restriccion', requireAuth, requireAdminOrE
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.get('/:id/ejercicios-disponibles', requireAuth, AfiliadoController.getEjerciciosDisponibles);
+router.get('/:id/ejercicios-disponibles', requireAuth, requireStaff, AfiliadoController.getEjerciciosDisponibles);
 
 /**
  * @swagger
@@ -490,7 +490,7 @@ router.get('/:id/ejercicios-disponibles', requireAuth, AfiliadoController.getEje
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.get('/:id/alimentos-disponibles', requireAuth, AfiliadoController.getAlimentosDisponibles);
+router.get('/:id/alimentos-disponibles', requireAuth, requireStaff, AfiliadoController.getAlimentosDisponibles);
 
 // ─────────────────────────────────────────────────────────────
 // PROGRESO FÍSICO
@@ -538,7 +538,7 @@ router.get('/:id/alimentos-disponibles', requireAuth, AfiliadoController.getAlim
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.get('/:id/progreso', requireAuth, AfiliadoController.getProgreso);
+router.get('/:id/progreso', requireAuth, requireStaff, AfiliadoController.getProgreso);
 
 /**
  * @swagger
