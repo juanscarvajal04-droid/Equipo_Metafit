@@ -12,7 +12,7 @@ const CANDIDATES = [
 function probe(host, port) {
   return new Promise((resolve) => {
     const net = require('net');
-    const sock = net.connect({ host, port });
+    const sock = net.connect({ host, port, family: 4 });
     const t0 = Date.now();
     const done = (ok, extra) => {
       clearTimeout(guard);
