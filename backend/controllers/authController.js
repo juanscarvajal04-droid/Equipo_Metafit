@@ -125,7 +125,9 @@ const AuthController = {
             auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
           });
           await transporter.sendMail({
-            from: `"MetaFit" <${process.env.SMTP_USER}>`,
+            // SMTP_FROM permite un remitente "lindo" distinto del usuario SMTP
+            // (p. ej. metafit.sistema@gmail.com registrado como sender en Brevo).
+            from: `"MetaFit" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
             to: user.correo,
             subject: 'Recuperación de contraseña — MetaFit',
             text: `Usá este enlace para restablecer tu contraseña (válido por 15 minutos):\n\n${process.env.FRONTEND_URL}/reset-password/${token}`,
