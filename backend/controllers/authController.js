@@ -123,6 +123,9 @@ const AuthController = {
             port: Number(process.env.SMTP_PORT || 587),
             secure: process.env.SMTP_SECURE === 'true',
             auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+            connectionTimeout: 15000,
+            greetingTimeout: 15000,
+            socketTimeout: 20000,
           });
           await transporter.sendMail({
             // SMTP_FROM permite un remitente "lindo" distinto del usuario SMTP
