@@ -4,9 +4,14 @@ const router = express.Router();
 
 const CANDIDATES = [
   { host: 'smtp-relay.sendinblue.com', port: 587 },
-  { host: 'smtp-relay.sendinblue.com', port: 465 },
   { host: 'smtp-relay.brevo.com', port: 587 },
-  { host: 'smtp-relay.brevo.com', port: 465 },
+  { host: 'smtp.gmail.com', port: 587 },
+  { host: 'smtp.office365.com', port: 587 },
+  { host: 'in-v3.mailjet.com', port: 587 },
+  { host: 'smtp.mailgun.org', port: 587 },
+  { host: 'smtp.zoho.com', port: 465 },
+  { host: 'api.brevo.com', port: 443 },
+  { host: 'google.com', port: 443 },
 ];
 
 function probe(host, port) {
