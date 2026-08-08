@@ -864,17 +864,26 @@ AFILIADO (sub-tipo)
 
 | Tipo | Archivo | Framework | Cobertura |
 |---|---|---|---|
-| Integración API | `__tests__/api.test.js` | Jest + Supertest | Login, usuarios, afiliados, ejercicios disponibles, notificaciones, dashboard, configuracion |
-| Unitarias | `__tests__/afiliadoService.test.js` | Jest | `normalizarFecha()` utilidad |
+| Integración API | `backend/__tests__/api.test.js` | Jest + Supertest | Login, usuarios, afiliados, ejercicios disponibles, notificaciones, dashboard, configuración, CORS (lista blanca 403/allow-origin) y RBAC (403 para Afiliado/Entrenador en mutaciones) |
+| Unitarias | `backend/__tests__/afiliadoService.test.js` | Jest | `normalizarFecha()` utilidad |
+| Componente Web | `frontend_web/src/components/__tests__/ErrorBoundary.test.jsx` | Vitest + Testing Library | Fallback ante errores de renderizado |
+| Servicios Web | `frontend_web/src/services/__tests__/api.test.js` | Vitest | Interceptor JWT, manejo de 401 global, helpers del cliente API |
+| Contexto Web | `frontend_web/src/context/__tests__/AuthContext.test.jsx` | Vitest | login/logout, persistencia y restauración en localStorage |
+| Utilidades Web | `frontend_web/src/utils/__tests__/helpers.test.js` | Vitest | Funciones puras de afiliados (getId, nombreCompleto, inicial, cicloActivo, toDateInput) |
+| Pantalla Móvil | `movil/src/screens/__tests__/LoginScreen.test.js` | Jest + RNTL | Render de campos, validación de vacíos, flujo de login y errores |
+| Servicios Móvil | `movil/src/services/__tests__/api.test.js` | Jest + RNTL | Interceptor JWT desde AsyncStorage, 401 global, loginRequest, getMiPerfil |
+| Contexto Móvil | `movil/src/context/__tests__/AuthContext.test.jsx` | Jest + RNTL | login/logout y restauración de sesión desde AsyncStorage |
 
 ### Resultados
 
 ```
-Test Suites: 2 passed, 2 total
-Tests:       16 passed, 16 total
+Backend :  Test Suites: 2 passed ·  Tests:  21 passed  (21 total)
+Web     :  Test Files:  4 passed ·  Tests:  26 passed  (26 total)
+Móvil   :  Test Suites: 3 passed ·  Tests:  14 passed  (14 total)
+TOTAL   :  61 pruebas automatizadas, 61 pasan (100 %)
 ```
 
-Casos de prueba cubiertos:
+Casos de prueba cubiertos (backend):
 - Login exitoso con credenciales de Admin, Entrenador, Recepcionista, Afiliado
 - Login fallido con credenciales inválidas → 401
 - Login sin credenciales → 400
@@ -891,6 +900,22 @@ Casos de prueba cubiertos:
 - Configuración de precio membresía solo para Admin
 - Normalización de fechas (DD/MM/YYYY, YYYY-MM-DD, ISO 8601)
 - Casos borde de fechas (null, undefined, string vacío, formato inválido)
+- CORS: origen ajeno a la lista blanca → 403; origen permitido → `access-control-allow-origin`
+- RBAC: `POST /afiliados` con rol Afiliado → 403; `PATCH /afiliados/:id` con Entrenador → 403; con Recepcionista → permitido
+
+Casos de prueba cubiertos (frontend web):
+- ErrorBoundary muestra fallback ante error de render y expone detalles en desarrollo
+- Interceptor adjunta `Authorization: Bearer` cuando existe token; no lo envía si no hay
+- 401 global limpia localStorage y redirige a /login; 401 de /login NO limpia la sesión
+- Restauración de sesión desde localStorage al montar; login persiste token/usuario/rol
+- Logout limpia estado y localStorage; funciones puras de utilidades
+
+Casos de prueba cubiertos (app móvil):
+- LoginScreen renderiza campos, botón e enlace de recuperación
+- Validación de campos vacíos → mensaje "Ingresá correo y contraseña"
+- Login feliz llama `login()` con credenciales; error del backend se muestra al usuario
+- Interceptor adjunta JWT desde AsyncStorage; 401 global limpia claves (excepto /login)
+- AuthContext: restauración de sesión, login persistente, logout con limpieza de AsyncStorage
 
 ### Auditoría QA (Reporte Completo en QA_REPORT.md)
 

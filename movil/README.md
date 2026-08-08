@@ -2,6 +2,25 @@
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
+## Unit testing con Jest
+
+La app usa **Jest + jest-expo** (preset oficial de Expo para SDK 55) y **React Native Testing Library**.
+
+```bash
+npm test          # ejecuta una sola vez
+npm run test:watch # ejecución en modo watch
+```
+
+Qué cubren (14 tests):
+
+| Archivo | Cobertura |
+|---|---|
+| `src/screens/__tests__/LoginScreen.test.js` | Render de campos, validación de vacíos, flujo de login y errores |
+| `src/services/__tests__/api.test.js` | Interceptor JWT desde AsyncStorage, 401 global, loginRequest, getMiPerfil |
+| `src/context/__tests__/AuthContext.test.jsx` | login/logout y restauración de sesión desde AsyncStorage |
+
+Configuración: preset `jest-expo` + `transformIgnorePatterns` en `movil/package.json`. Los módulos nativos (AsyncStorage) se reemplazan con el mock oficial del paquete (`jest/async-storage-mock`).
+
 ## Get started
 
 1. Install dependencies
