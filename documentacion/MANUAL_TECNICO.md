@@ -451,15 +451,20 @@ SMTP_FROM=remitente@verificado.com
 FRONTEND_URL=http://localhost:5173
 ```
 
-### Correo de recuperación de contraseña (SMTP)
+### Correo de recuperación de contraseña (SMTP / API Brevo)
 
-El endpoint `POST /auth/recuperar-password` genera un JWT de reset (15 min) y, si hay SMTP configurado, envía el enlace por correo de verdad. Sin SMTP devuelve el token en `modoPrueba` (solo desarrollo).
+El endpoint `POST /auth/recuperar-password` genera un JWT de reset (15 min) y envía el enlace por correo de verdad. Sin SMTP/API configurado devuelve el token en `modoPrueba` (solo desarrollo).
 
 - **Servicio**: Brevo (plan free, 300 correos/día), relay `smtp-relay.sendinblue.com:587` con STARTTLS (`smtp-relay.brevo.com` falla por el certificado — el alias válido es `smtp-relay.sendinblue.com`).
-- **Auth**: login del panel Brevo + clave SMTP (`xsmtpsib-…`, se crea en **SMTP & API → SMTP → Generar clave**).
+- **Dos vías de envío** (por orden de prioridad en `authController.js`):
+  1. **API REST Brevo** (`BREVO_API_KEY` seteada): `POST https://api.brevo.com/v3/smtp/email` por HTTPS. Es la vía recomendada: el tráfico TCP saliente de Render hacia puertos SMTP (465/587) puede estar bloqueado según la instancia, mientras que 443 siempre funciona.
+  2. **SMTP clásico** (nodemailer) con `SMTP_HOST/PORT/USER/PASS` (usado cuando no hay clave API). Funciona solo en instancias con egress SMTP habilitado.
+- **Auth**: login del panel Brevo + clave SMTP (`xsmtpsib-…`, se crea en **SMTP & API → SMTP → Generar clave**) o clave API (`xkeysib-…`, en **SMTP & API → Claves API**).
 - **En Brevo**: las claves SMTP deben poder enviar desde cualquier IP — en **Seguridad → IP autorizadas → Claves SMTP** desactivar el bloqueo (si queda activo, el relay responde `525 5.7.1 Unauthorized IP address`).
 - **Sender**: `SMTP_FROM` debe estar verificado en Brevo (Transaccional → Senders). No es necesario que coincida con `SMTP_USER`.
-- **Variables en Render** (metafit-backend): `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`, `FRONTEND_URL` (para la URL del enlace). Timeouts 15/15/20 s en `createTransport` evitan que el endpoint cuelgue si el relay no responde.
+- **Variables en Render** (metafit-backend): `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`, `FRONTEND_URL` (para la URL del enlace) y opcionalmente `BREVO_API_KEY`. Timeouts 15/15/20 s en `createTransport` evitan que el endpoint cuelgue si el relay no responde.
+
+**✅ Prueba en producción (ago 2026):** se creó un usuario temporal (`Test Real`, correo `metafit.sistema@gmail.com`) vía `POST /usuarios`, se solicitó recuperación y el correo real se envió correctamente (respuesta 200 sin `modoPrueba`). El enlace usa `FRONTEND_URL` + `/#/reset-password/{token}` (HashRouter: el sitio estático no hace fallback SPA). El usuario temporal fue eliminado y la BD quedó limpia.
 
 ### Credenciales de Prueba (Seed Data)
 

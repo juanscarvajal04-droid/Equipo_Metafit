@@ -461,6 +461,8 @@ Podés recuperarla por correo electrónico (envío real vía SMTP):
 3. Revisá tu casilla (si no aparece, mirá en **Spam** o **Promociones**)
 4. Abrí el enlace que llegó y creá una contraseña nueva (válido por **15 minutos**)
 
+> ✅ Probado en producción: el correo de recuperación llega real desde **MetaFit** (vía Brevo) y el enlace lleva directo a la pantalla para restablecer la contraseña.
+
 Si el correo no llegó, el soporte/administrador puede restablecerla de forma presencial:
 1. **Afiliados**: Solicitar al recepcionista un restablecimiento
 2. **Personal (staff)**: Solicitar al administrador un cambio de contraseña
