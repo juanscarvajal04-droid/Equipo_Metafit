@@ -454,7 +454,14 @@ El sistema filtra automáticamente según las **restricciones médicas** del afi
 
 ### ¿Qué hago si olvidé mi contraseña?
 
-Actualmente, la recuperación de contraseña debe hacerse de forma presencial:
+Podés recuperarla por correo electrónico (envío real vía SMTP):
+
+1. En la pantalla de **Iniciar sesión** toca **"¿Olvidaste tu contraseña?"**
+2. Escribí el correo con el que te registraste y confirmá el envío
+3. Revisá tu casilla (si no aparece, mirá en **Spam** o **Promociones**)
+4. Abrí el enlace que llegó y creá una contraseña nueva (válido por **15 minutos**)
+
+Si el correo no llegó, el soporte/administrador puede restablecerla de forma presencial:
 1. **Afiliados**: Solicitar al recepcionista un restablecimiento
 2. **Personal (staff)**: Solicitar al administrador un cambio de contraseña
 3. El administrador puede cambiar la contraseña desde **Gestión de Personal** → Editar empleado

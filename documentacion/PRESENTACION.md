@@ -278,7 +278,7 @@
 **R:** Sí. Solo agregar un campo `id_sede` a las tablas principales (USUARIO, AFILIADO, PAGO) y filtrar por sede en los endpoints. La arquitectura está preparada.
 
 ### P: ¿Cómo se recupera una contraseña olvidada?
-**R:** Actualmente es presencial (el admin cambia la contraseña). Una mejora futura sería implementar flujo de recuperación por correo (JWT de reset + nodemailer).
+**R:** Ya implementado: "¿Olvidaste tu contraseña?" envía un correo con enlace de reset (JWT de 15 min) vía SMTP Brevo en producción; además el admin/recepción pueden resetear manualmente la contraseña.
 
 ---
 

@@ -440,7 +440,26 @@ CORS_ORIGINS=http://localhost:5173,http://localhost:3000
 
 # URL base para Swagger
 API_BASE_URL=http://localhost:3001
+
+# SMTP (envío real de correos de recuperación de contraseña)
+# En producción se usan SMTP_HOST/PORT/USER/PASS de Brevo (ver § Correo de recuperación)
+SMTP_HOST=smtp-relay.sendinblue.com
+SMTP_PORT=587
+SMTP_USER=tu_login_smtp
+SMTP_PASS=tu_clave_smtp
+SMTP_FROM=remitente@verificado.com
+FRONTEND_URL=http://localhost:5173
 ```
+
+### Correo de recuperación de contraseña (SMTP)
+
+El endpoint `POST /auth/recuperar-password` genera un JWT de reset (15 min) y, si hay SMTP configurado, envía el enlace por correo de verdad. Sin SMTP devuelve el token en `modoPrueba` (solo desarrollo).
+
+- **Servicio**: Brevo (plan free, 300 correos/día), relay `smtp-relay.sendinblue.com:587` con STARTTLS (`smtp-relay.brevo.com` falla por el certificado — el alias válido es `smtp-relay.sendinblue.com`).
+- **Auth**: login del panel Brevo + clave SMTP (`xsmtpsib-…`, se crea en **SMTP & API → SMTP → Generar clave**).
+- **En Brevo**: las claves SMTP deben poder enviar desde cualquier IP — en **Seguridad → IP autorizadas → Claves SMTP** desactivar el bloqueo (si queda activo, el relay responde `525 5.7.1 Unauthorized IP address`).
+- **Sender**: `SMTP_FROM` debe estar verificado en Brevo (Transaccional → Senders). No es necesario que coincida con `SMTP_USER`.
+- **Variables en Render** (metafit-backend): `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`, `FRONTEND_URL` (para la URL del enlace). Timeouts 15/15/20 s en `createTransport` evitan que el endpoint cuelgue si el relay no responde.
 
 ### Credenciales de Prueba (Seed Data)
 
