@@ -113,10 +113,35 @@ const AuthController = {
         expiracion,
       });
 
-      // ── Envío de correo (opcional, si hay SMTP configurado) ──
+      // ── Envío de correo (opcional, si hay SMTP/API Brevo configurado) ──
+      // Prioridad: 1) API REST Brevo (vía HTTPS, funciona desde Render),
+      //            2) SMTP clásico (nodemailer) si se usa otro host directo.
       let correoEnviado = false;
-      if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-        try {
+      const enlaceReset = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/#/reset-password/${token}`;
+      const subject = 'Recuperación de contraseña — MetaFit';
+      try {
+        if (process.env.BREVO_API_KEY) {
+          const resApi = await fetch('https://api.brevo.com/v3/smtp/email', {
+            method: 'POST',
+            headers: {
+              'api-key': process.env.BREVO_API_KEY,
+              'accept': 'application/json',
+              'content-type': 'application/json',
+            },
+            body: JSON.stringify({
+              sender: { email: process.env.SMTP_FROM || 'metafit.sistema@gmail.com', name: 'MetaFit' },
+              to: [{ email: user.correo }],
+              subject,
+              textContent: `Usá este enlace para restablecer tu contraseña (válido por 15 minutos):\n\n${enlaceReset}`,
+            }),
+          });
+          const bodyApi = await resApi.json().catch(() => ({}));
+          if (resApi.ok) {
+            correoEnviado = true;
+          } else {
+            console.error('[authController.recuperarPassword] Brevo API:', resApi.status, JSON.stringify(bodyApi));
+          }
+        } else if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
           const nodemailer = require('nodemailer');
           const transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST,
@@ -128,17 +153,15 @@ const AuthController = {
             socketTimeout: 20000,
           });
           await transporter.sendMail({
-            // SMTP_FROM permite un remitente "lindo" distinto del usuario SMTP
-            // (p. ej. metafit.sistema@gmail.com registrado como sender en Brevo).
             from: `"MetaFit" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
             to: user.correo,
-            subject: 'Recuperación de contraseña — MetaFit',
-            text: `Usá este enlace para restablecer tu contraseña (válido por 15 minutos):\n\n${process.env.FRONTEND_URL}/#/reset-password/${token}`,
+            subject,
+            text: `Usá este enlace para restablecer tu contraseña (válido por 15 minutos):\n\n${enlaceReset}`,
           });
           correoEnviado = true;
-        } catch (errMail) {
-          console.error('[authController.recuperarPassword] error SMTP:', errMail.message);
         }
+      } catch (errMail) {
+        console.error('[authController.recuperarPassword] error envío:', errMail.message);
       }
 
       return res.json({
