@@ -888,23 +888,24 @@ AFILIADO (sub-tipo)
 
 | Tipo | Archivo | Framework | Cobertura |
 |---|---|---|---|
-| Integración API | `backend/__tests__/api.test.js` | Jest + Supertest | Login, usuarios, afiliados, ejercicios disponibles, notificaciones, dashboard, configuración, CORS (lista blanca 403/allow-origin) y RBAC (403 para Afiliado/Entrenador en mutaciones) |
+| Integración API | `backend/__tests__/api.test.js` | Jest + Supertest | Login, usuarios, afiliados, ejercicios disponibles, notificaciones, dashboard, configuración, CORS (403/allow-origin), RBAC (403 para Afiliado/Entrenador) y recuperación de contraseña (200/anti-enumeración, reset 200/400) |
 | Unitarias | `backend/__tests__/afiliadoService.test.js` | Jest | `normalizarFecha()` utilidad |
 | Componente Web | `frontend_web/src/components/__tests__/ErrorBoundary.test.jsx` | Vitest + Testing Library | Fallback ante errores de renderizado |
 | Servicios Web | `frontend_web/src/services/__tests__/api.test.js` | Vitest | Interceptor JWT, manejo de 401 global, helpers del cliente API |
 | Contexto Web | `frontend_web/src/context/__tests__/AuthContext.test.jsx` | Vitest | login/logout, persistencia y restauración en localStorage |
 | Utilidades Web | `frontend_web/src/utils/__tests__/helpers.test.js` | Vitest | Funciones puras de afiliados (getId, nombreCompleto, inicial, cicloActivo, toDateInput) |
 | Pantalla Móvil | `movil/src/screens/__tests__/LoginScreen.test.js` | Jest + RNTL | Render de campos, validación de vacíos, flujo de login y errores |
+| Recuperación Móvil | `movil/src/screens/__tests__/RecuperarPasswordScreen.test.js` | Jest + RNTL | Render del formulario, envío de solicitud (éxito/error/modo prueba) y navegación desde LoginScreen |
 | Servicios Móvil | `movil/src/services/__tests__/api.test.js` | Jest + RNTL | Interceptor JWT desde AsyncStorage, 401 global, loginRequest, getMiPerfil |
 | Contexto Móvil | `movil/src/context/__tests__/AuthContext.test.jsx` | Jest + RNTL | login/logout y restauración de sesión desde AsyncStorage |
 
 ### Resultados
 
 ```
-Backend :  Test Suites: 2 passed ·  Tests:  21 passed  (21 total)
-Web     :  Test Files:  4 passed ·  Tests:  26 passed  (26 total)
-Móvil   :  Test Suites: 3 passed ·  Tests:  14 passed  (14 total)
-TOTAL   :  61 pruebas automatizadas, 61 pasan (100 %)
+Backend :  Test Suites: 2 passed ·  Tests:  25 passed  (25 total)
+Web     :  Test Files:  5 passed ·  Tests:  30 passed  (30 total)
+Móvil   :  Test Suites: 4 passed ·  Tests:  19 passed  (19 total)
+TOTAL   :  74 pruebas automatizadas, 74 pasan (100 %)
 ```
 
 Casos de prueba cubiertos (backend):
@@ -926,6 +927,8 @@ Casos de prueba cubiertos (backend):
 - Casos borde de fechas (null, undefined, string vacío, formato inválido)
 - CORS: origen ajeno a la lista blanca → 403; origen permitido → `access-control-allow-origin`
 - RBAC: `POST /afiliados` con rol Afiliado → 403; `PATCH /afiliados/:id` con Entrenador → 403; con Recepcionista → permitido
+- Recuperación: email válido → 200 con token JWT (sin SMTP en tests); email inexistente → 200 genérico (anti-enumeración)
+- Reset: token válido → 200 + commit transaccional; token ya utilizado → 400
 
 Casos de prueba cubiertos (frontend web):
 - ErrorBoundary muestra fallback ante error de render y expone detalles en desarrollo
@@ -933,6 +936,7 @@ Casos de prueba cubiertos (frontend web):
 - 401 global limpia localStorage y redirige a /login; 401 de /login NO limpia la sesión
 - Restauración de sesión desde localStorage al montar; login persiste token/usuario/rol
 - Logout limpia estado y localStorage; funciones puras de utilidades
+- RecuperarPassword: render del formulario, éxito real (sin token), modo prueba con token, error del backend
 
 Casos de prueba cubiertos (app móvil):
 - LoginScreen renderiza campos, botón e enlace de recuperación
@@ -940,6 +944,7 @@ Casos de prueba cubiertos (app móvil):
 - Login feliz llama `login()` con credenciales; error del backend se muestra al usuario
 - Interceptor adjunta JWT desde AsyncStorage; 401 global limpia claves (excepto /login)
 - AuthContext: restauración de sesión, login persistente, logout con limpieza de AsyncStorage
+- RecuperarPasswordScreen: render del formulario, envío de solicitud (éxito/error/modo prueba) y navegación desde LoginScreen
 
 ### Auditoría QA (Reporte Completo en QA_REPORT.md)
 

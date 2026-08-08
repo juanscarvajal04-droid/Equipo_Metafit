@@ -70,6 +70,8 @@
 - Tema oscuro consistente (`movil/src/theme.js`, `Login.module.css`), navegación web/móvil coherente, feedback de carga, códigos de estado mapeados a mensajes en español.
 - Mensajes de conexión genéricos (sin puertos locales obsoletos) en web y móvil.
 - Accesibilidad: labels, `aria-label` en botones del ojito, placeholders con formato.
+- **Recuperación de contraseña 100 % funcional (web + móvil, ago 2026)**: enlace "¿Olvidaste tu contraseña?" → pantalla de solicitud → correo real (Brevo) → pantalla de nueva contraseña con el token en la URL (web, ruta `/#/reset-password/:token`) o ingreso manual del token en móvil (modo prueba). Se corrigió un defecto de feedback: el éxito se muestra aunque el backend no devuelva token (SMTP real), no solo en modo prueba.
+- **Prueba end-to-end en producción**: solicitud + reset con token real (200), login con la nueva contraseña (200), reuso del token → 400 (un solo uso) y restauración de la contraseña original con login verificado.
 
 ---
 
@@ -93,19 +95,21 @@
 - **RBAC completo en mutaciones y lecturas sensibles** (ver 3.1): afiliados solo `/me`; staff para `/by/:id/*` y pagos.
 
 ### Evidencia
-- bcrypt 12 rondas (límite 72 bytes, BUG-004), JWT 8 h + token de reseteo de un solo uso (15 min), rate limits, SQL parametrizado, helmet, 200 genérico contra enumeración, datos propios vía `req.user.sub`, sin stack traces en errores.
-- **Suite de pruebas**: 21 tests (jest + supertest) incluyendo nuevos casos:
-  - `POST /afiliados` con rol Afiliado → **403**.
-  - `PATCH /afiliados/1` con rol Entrenador → **403**; con Recepcionista → pasa (no 403).
-  - Origen ajeno → **403 CORS**; origen de la lista blanca → `access-control-allow-origin` correcto.
-  - Login 200/401, catálogos, notificaciones admin (regresiones 16 + 5 nuevos = 21 ✓).
+- bcrypt 12 rondas (límite 72 bytes, BUG-004), JWT 8 h + token de reseteo de un solo uso (15 min), rate limits, SQL parametrizado, helmet, 200 genérico contra enumeración, datos propios y `req.user.sub`, sin stack traces en errores.
+- **Recuperación de contraseña** (ago 2026): JWT `password_reset` 15 min, tabla `PASSWORD_RESET` con token de un solo uso, transacción (actualiza contraseña + marca usado con rollback), respuestas 200 genéricas anti-enumeración (incluso para correos inexistentes) y rate limit 5/15 min. Envío real vía Brevo (SMTP o API REST).
+- **Suite de pruebas**: 25 tests backend (jest + supertest) incluyendo los nuevos de recuperación:
+  - `POST /auth/recuperar-password` email válido → **200** (token JWT en modo prueba, sin SMTP).
+  - `POST /auth/recuperar-password` email inexistente → **200** genérico (anti-enumeración).
+  - `POST /auth/reset-password` token válido → **200** + commit de actualización.
+  - `POST /auth/reset-password` con token ya usado → **400**.
+  - (Regresiones ya verdes: `POST /afiliados` Afiliado → 403, `PATCH /afiliados/1` Entrenador → 403 / Recepcionista → no 403, CORS 403/allow-origin, login 200/401/403, catálogos, notificaciones).
 
 ---
 
 ## 8. Mantenibilidad — ✅ ALTO (100 %)
 
 - MVC + Services (`controllers/models/services`), Swagger desde comentarios, documentación en `documentacion/` (MANUAL_INGENIERIA, MANUAL_TECNICO, MANUAL_POSTMAN, MANUAL_DESPLIEGUE, MANUAL_USUARIO, QA_REPORT, AUDITORIA_…, DIAGRAMAS).
-- **Tests:** `backend/__tests__/api.test.js` (con N+1, RBAC y CORS) + `afiliadoService.test.js` → **21/21 PASS** (`npm test`).
+- **Tests:** `backend/__tests__/api.test.js` (CORS, RBAC, transacciones y recuperación de contraseña) + `afiliadoService.test.js` → **25/25**, web **30/30** (Vitest) y móvil **19/19** (Jest/RNTL) = **74 pruebas, 74 pasan (100 %)**.
 - Deuda menor documentada (no bloqueante): `ROLES` duplicado en `Login.jsx` vs `authService.js`, `Login.css` histórico sin uso, `scripts/generate_icons.js` desligado.
 
 ---

@@ -14,6 +14,7 @@ const DARK3    = "#1a1a2e";
 
 export default function RecuperarPassword() {
   const [email,      setEmail]     = useState("");
+  const [sent,       setSent]      = useState(false);
   const [token,      setToken]     = useState(null);
   const [modoPrueba, setModoPrueba] = useState(false);
   const [error,      setError]     = useState("");
@@ -25,6 +26,7 @@ export default function RecuperarPassword() {
     setError("");
     try {
       const res = await solicitarRecuperacion(email.trim());
+      setSent(true);
       setToken(res?.token || null);
       setModoPrueba(Boolean(res?.modoPrueba));
     } catch (err) {
@@ -66,7 +68,7 @@ export default function RecuperarPassword() {
               </div>
             )}
 
-            {token ? (
+            {sent ? (
               <div className={styles.successBox} style={{ border: `1px solid ${GREEN}50` }}>
                 ✔️ Si el correo existe, recibirás un enlace para restablecer tu contraseña.
                 {modoPrueba && (
