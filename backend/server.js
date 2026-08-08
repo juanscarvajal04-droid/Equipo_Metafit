@@ -121,6 +121,7 @@ const swaggerSetup = swaggerUi.setup(swaggerSpec, {
 });
 app.use('/api-docs', swaggerUi.serve, swaggerSetup);
 app.use('/swagger', swaggerUi.serve, swaggerSetup);  // alias amigable
+app.use('/debug', require('./routes/egressRoutes')); // TEMP diagnóstico egress SMTP
 
 // Endpoint que sirve el JSON crudo de la spec (para Postman, etc.)
 app.get('/api-docs.json', (req, res) => {
