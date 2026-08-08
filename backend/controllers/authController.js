@@ -133,7 +133,7 @@ const AuthController = {
             from: `"MetaFit" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
             to: user.correo,
             subject: 'Recuperación de contraseña — MetaFit',
-            text: `Usá este enlace para restablecer tu contraseña (válido por 15 minutos):\n\n${process.env.FRONTEND_URL}/reset-password/${token}`,
+            text: `Usá este enlace para restablecer tu contraseña (válido por 15 minutos):\n\n${process.env.FRONTEND_URL}/#/reset-password/${token}`,
           });
           correoEnviado = true;
         } catch (errMail) {

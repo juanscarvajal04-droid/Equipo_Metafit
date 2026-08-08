@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import HomeRedirect from "./components/HomeRedirect";
@@ -75,7 +75,7 @@ function RouteLoader() {
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <HashRouter>
         <Suspense fallback={<RouteLoader />}>
           <Routes>
             {/* ── Raíz pública: Landing Page ── */}
@@ -134,7 +134,7 @@ export default function App() {
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </Suspense>
-      </BrowserRouter>
+      </HashRouter>
     </AuthProvider>
   );
 }
