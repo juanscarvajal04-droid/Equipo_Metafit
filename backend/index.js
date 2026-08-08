@@ -3,6 +3,13 @@
 require('dotenv').config();
 require('./config/db');      // Inicia la conexión a MySQL al arrancar
 
+// ── Migración automática idempotente: tabla PASSWORD_RESET ────
+// Crea la tabla si no existe en cualquier entorno (local, Docker, Render)
+// sin depender de ejecutar scripts SQL manualmente.
+require('./models/passwordResetModel').ensureTable()
+  .then(() => console.log('✅ Tabla PASSWORD_RESET verificada/creada'))
+  .catch(err => console.error('[PASSWORD_RESET] error creando tabla:', err.message));
+
 const app  = require('./server');
 const PORT = process.env.PORT || 3001;
 

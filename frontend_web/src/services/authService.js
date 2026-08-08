@@ -57,6 +57,31 @@ export const loginUser = async ({ correo, contrasena }) => {
   return response.data; // { accessToken, user: { id, email, role, ... } }
 };
 
+/**
+ * Solicita un enlace de recuperación de contraseña.
+ * El backend responde siempre 200 (genérico) para no revelar la existencia
+ * del correo. Sin SMTP configurado, devuelve además { modoPrueba, token }.
+ *
+ * @param {string} email
+ * @returns {Promise<{ mensaje: string, modoPrueba?: boolean, token?: string }>}
+ */
+export const solicitarRecuperacion = async (email) => {
+  const response = await api.post('/auth/recuperar-password', { email });
+  return response.data;
+};
+
+/**
+ * Aplica una nueva contraseña usando un token de un solo uso.
+ *
+ * @param {string} token  - JWT recibido por correo (o en modoPrueba).
+ * @param {string} nuevaPassword
+ * @returns {Promise<{ mensaje: string }>}
+ */
+export const resetPasswordRequest = async (token, nuevaPassword) => {
+  const response = await api.post('/auth/reset-password', { token, nuevaPassword });
+  return response.data;
+};
+
 // ── 3. PERSISTENCIA DE SESIÓN ────────────────────────────────
 
 /**

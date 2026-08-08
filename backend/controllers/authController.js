@@ -6,7 +6,9 @@
 //               BUG-010 (cero fugas de err.message al cliente)
 'use strict';
 
-const UsuarioModel               = require('../models/usuarioModel');
+const UsuarioModel          = require('../models/usuarioModel');
+const PasswordResetModel    = require('../models/passwordResetModel');
+const AuthService           = require('../services/authService');
 const { signJWT, comparePassword } = require('../middlewares/auth');
 
 // ─── BUG-001: Regex de validación de email (RFC 5322 básico) ──
@@ -72,6 +74,134 @@ const AuthController = {
       // ── BUG-010: Solo el servidor ve el error real ───────────
       console.error('[authController.login]', err);
       return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
+  // ─────────────────────────────────────────────────────────────
+  // POST /auth/recuperar-password — solicitar reseteo
+  // Genera un JWT de un solo uso (15 min) y lo guarda en PASSWORD_RESET.
+  // Si no hay servicio de correo configurado, devuelve el token en la
+  // respuesta (modo prueba) para que el administrador lo use manualmente.
+  // Siempre responde 200 para no revelar si el correo existe.
+  // ─────────────────────────────────────────────────────────────
+  recuperarPassword: async (req, res) => {
+    const { email } = req.body;
+
+    if (!email || typeof email !== 'string' || !EMAIL_REGEX.test(email.trim())) {
+      return res.status(400).json({ error: 'Correo inválido' });
+    }
+
+    try {
+      const user = await UsuarioModel.findByEmail(email.trim().toLowerCase());
+
+      // Respuesta genérica siempre (evita enumeración de usuarios)
+      if (!user) {
+        return res.json({
+          mensaje: 'Si el correo existe, recibirás un enlace para restablecer tu contraseña',
+        });
+      }
+
+      // Invalida tokens anteriores del usuario (un solo token vigente)
+      await PasswordResetModel.invalidarAnteriores(user.id_usuario);
+
+      const token = AuthService.signResetToken(user.id_usuario);
+      const expiracion = new Date(Date.now() + 15 * 60 * 1000);
+
+      await PasswordResetModel.create({
+        usuario_id: user.id_usuario,
+        token,
+        expiracion,
+      });
+
+      // ── Envío de correo (opcional, si hay SMTP configurado) ──
+      let correoEnviado = false;
+      if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+        try {
+          const nodemailer = require('nodemailer');
+          const transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST,
+            port: Number(process.env.SMTP_PORT || 587),
+            secure: process.env.SMTP_SECURE === 'true',
+            auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+          });
+          await transporter.sendMail({
+            from: `"MetaFit" <${process.env.SMTP_USER}>`,
+            to: user.correo,
+            subject: 'Recuperación de contraseña — MetaFit',
+            text: `Usá este enlace para restablecer tu contraseña (válido por 15 minutos):\n\n${process.env.FRONTEND_URL}/reset-password/${token}`,
+          });
+          correoEnviado = true;
+        } catch (errMail) {
+          console.error('[authController.recuperarPassword] error SMTP:', errMail.message);
+        }
+      }
+
+      return res.json({
+        mensaje: 'Si el correo existe, recibirás un enlace para restablecer tu contraseña',
+        ...(correoEnviado ? {} : { modoPrueba: true, token }), // ⚠️ solo sin SMTP (pruebas)
+      });
+    } catch (err) {
+      console.error('[authController.recuperarPassword]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
+  // ─────────────────────────────────────────────────────────────
+  // POST /auth/reset-password — aplicar nueva contraseña
+  // Verifica: JWT válido, no expirado, token no usado, no expirado en BD.
+  // Hashea la nueva contraseña (bcrypt 12) y marca el token como usado.
+  // Usa transacción: si falla el UPDATE de la contraseña, no se marca usado.
+  // ─────────────────────────────────────────────────────────────
+  resetPassword: async (req, res) => {
+    const { token, nuevaPassword } = req.body;
+
+    if (!token || typeof token !== 'string') {
+      return res.status(400).json({ error: 'Token requerido' });
+    }
+    if (!nuevaPassword || typeof nuevaPassword !== 'string') {
+      return res.status(400).json({ error: 'Nueva contraseña requerida' });
+    }
+    if (Buffer.byteLength(nuevaPassword, 'utf8') > MAX_PASSWORD_BYTES) {
+      return res.status(400).json({ error: `La contraseña no puede superar ${MAX_PASSWORD_BYTES} caracteres` });
+    }
+
+    let payload;
+    try {
+      payload = AuthService.verifyResetToken(token);
+      if (payload.tipo !== 'password_reset') {
+        return res.status(400).json({ error: 'Token inválido' });
+      }
+    } catch {
+      return res.status(400).json({ error: 'Token inválido o expirado' });
+    }
+
+    const pool = require('../config/db');
+    const conn = await pool.getConnection();
+    try {
+      await conn.beginTransaction();
+
+      // Token vigente en BD (no usado y no expirado)
+      const registro = await PasswordResetModel.findVigente(token);
+      if (!registro || registro.usuario_id !== payload.sub) {
+        await conn.rollback();
+        return res.status(400).json({ error: 'Token inválido o ya utilizado' });
+      }
+
+      // Hashea con bcrypt y actualiza la contraseña
+      const hash = await AuthService.hashPassword(nuevaPassword);
+      await conn.query('UPDATE USUARIO SET contrasena = ? WHERE id_usuario = ?', [hash, registro.usuario_id]);
+
+      // Marca el token como usado (un solo uso)
+      await PasswordResetModel.marcarUsado(registro.id);
+
+      await conn.commit();
+      return res.json({ mensaje: 'Contraseña actualizada correctamente' });
+    } catch (err) {
+      await conn.rollback();
+      console.error('[authController.resetPassword]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    } finally {
+      conn.release();
     }
   },
 };

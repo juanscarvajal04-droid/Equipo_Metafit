@@ -25,6 +25,23 @@ const AuthService = {
   },
 
   /**
+   * Firma un JWT de un solo uso para recuperación de contraseña.
+   * Expira en 15 minutos (ISO 25010 - requisitos de seguridad: ventana corta).
+   */
+  signResetToken: (usuarioId) => {
+    return jwt.sign(
+      { sub: usuarioId, tipo: 'password_reset' },
+      SECRET,
+      { expiresIn: '15m' }
+    );
+  },
+
+  /** Verifica un token de reseteo. Devuelve el payload o lanza error JWT. */
+  verifyResetToken: (token) => {
+    return jwt.verify(token, SECRET);
+  },
+
+  /**
    * Hashea una contraseña en texto plano con bcrypt.
    * Lanza error si supera el límite seguro de 72 bytes.
    */

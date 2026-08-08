@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import LandingScreen from '../screens/LandingScreen';
 import LoginScreen from '../screens/LoginScreen';
+import RecuperarPasswordScreen from '../screens/RecuperarPasswordScreen';
 import MiPerfilScreen from '../screens/MiPerfilScreen';
 import MiRutinaScreen from '../screens/MiRutinaScreen';
 import MiDietaScreen from '../screens/MiDietaScreen';
@@ -81,6 +82,7 @@ export default function AppNavigator() {
         <Stack.Navigator key="auth-stack" initialRouteName="Landing" screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Landing" component={LandingScreen} />
           <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="RecuperarPassword" component={RecuperarPasswordScreen} />
         </Stack.Navigator>
       )}
     </NavigationContainer>

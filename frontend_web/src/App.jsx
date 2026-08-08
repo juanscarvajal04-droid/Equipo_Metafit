@@ -6,6 +6,8 @@ import HomeRedirect from "./components/HomeRedirect";
 // ── Vistas ────────────────────────────────────────────────────────────────────
 import Login from "./views/Login";
 import LandingPage from "./views/LandingPage";
+import RecuperarPassword from "./views/RecuperarPassword";
+import ResetPassword from "./views/ResetPassword";
 import AdminDashboard from "./views/AdminDashboard";
 import AfiliadosView from "./views/AfiliadosView";
 import GestionPersonal from "./views/GestionPersonal";
@@ -49,6 +51,10 @@ export default function App() {
 
           {/* ── Ruta pública: Login ── */}
           <Route path="/login" element={<Login />} />
+
+          {/* ── Rutas públicas: Recuperación de contraseña ── */}
+          <Route path="/recuperar-password" element={<RecuperarPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
 
           {/* ── Alias de HomeRedirect para usuarios autenticados que llegan a /home ── */}
           <Route path="/home" element={<HomeRedirect />} />
