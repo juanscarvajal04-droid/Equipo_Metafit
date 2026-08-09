@@ -16,10 +16,24 @@ const UsuarioService = {
   },
 
   guardarPushToken: async (idUsuario, pushToken) => {
-    await pool.query(
-      `UPDATE USUARIO SET push_token = ? WHERE id_usuario = ?`,
-      [pushToken, idUsuario]
-    );
+    const probar = () =>
+      pool.query(
+        `UPDATE USUARIO SET push_token = ? WHERE id_usuario = ?`,
+        [pushToken, idUsuario]
+      );
+    try {
+      await probar();
+    } catch (err) {
+      // Auto-sanación: si la columna no existe (migración no corrió aún),
+      // la crea en caliente e intenta de nuevo (idempotente).
+      if (err.code === 'ER_BAD_FIELD_ERROR') {
+        const { asegurarColumnaPushToken } = require('../migrations/migracionPushToken');
+        await asegurarColumnaPushToken();
+        await probar();
+        return;
+      }
+      throw err;
+    }
   },
 
   create: async (datos) => {

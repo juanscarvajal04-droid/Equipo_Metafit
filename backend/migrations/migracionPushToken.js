@@ -21,8 +21,4 @@ async function asegurarColumnaPushToken() {
   }
 }
 
-async function runMigraciones() {
-  await asegurarColumnaPushToken();
-}
-
-module.exports = { runMigraciones };
+module.exports = { runMigraciones, asegurarColumnaPushToken };
