@@ -46,10 +46,37 @@ const PagoController = {
   },
 
   /** POST /afiliados/:id/pagos
-   *  Registra un nuevo pago para el afiliado. Responde 201 con { id_pago, fecha_vencimiento, message }. */
+   *  Registra un nuevo pago para el afiliado. Responde 201 con { id_pago, fecha_vencimiento, message }.
+   *  Después de registrar, dispara (en paralelo) el envío automático de la factura por correo:
+   *  si el correo falla, el pago queda registrado igualmente (la factura es un extra). */
   create: async (req, res) => {
     try {
       const { id_pago, fecha_vencimiento } = await PagoModel.create(req.params.id, req.body);
+
+      // ── Factura por correo (asíncrono, no bloquea la respuesta) ──
+      const datosPago = {
+        id_pago,
+        fecha_pago: req.body.fecha_pago || new Date().toISOString().split('T')[0],
+        valor_pagado: req.body.valor_pagado ?? 80000,
+        estado: req.body.estado || 'Pagado',
+        metodo_pago: req.body.metodo_pago || 'Efectivo',
+      };
+      (async () => {
+        try {
+          const AfiliadoModel = require('../models/afiliadoModel');
+          const { enviarFacturaPago } = require('../services/facturaService');
+          const afiliado = await AfiliadoModel.findById(req.params.id);
+          if (!afiliado) {
+            console.error('[pagoController.create] afiliado no encontrado para factura');
+            return;
+          }
+          const enviado = await enviarFacturaPago(datosPago, afiliado);
+          console.log(`[pagoController.create] factura FAC-${new Date().getFullYear()}-${id_pago} → ${enviado ? 'enviada' : 'NO enviada'} (${afiliado.correo})`);
+        } catch (errFactura) {
+          console.error('[pagoController.create] error factura (no afecta el pago):', errFactura.message);
+        }
+      })();
+
       return res.status(201).json({
         id:               id_pago,
         fecha_vencimiento,
