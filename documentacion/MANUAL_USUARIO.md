@@ -454,7 +454,7 @@ El sistema filtra automáticamente según las **restricciones médicas** del afi
 
 ### ¿Qué hago si olvidé mi contraseña?
 
-Podés recuperarla por correo electrónico (envío real vía SMTP):
+Podés recuperarla por correo electrónico (envío real vía Brevo):
 
 1. En la pantalla de **Iniciar sesión** toca **"¿Olvidaste tu contraseña?"**
 2. Escribí el correo con el que te registraste y confirmá el envío

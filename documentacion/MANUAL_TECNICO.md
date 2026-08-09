@@ -462,9 +462,9 @@ El endpoint `POST /auth/recuperar-password` genera un JWT de reset (15 min) y en
 - **Auth**: login del panel Brevo + clave SMTP (`xsmtpsib-…`, se crea en **SMTP & API → SMTP → Generar clave**) o clave API (`xkeysib-…`, en **SMTP & API → Claves API**).
 - **En Brevo**: las claves SMTP deben poder enviar desde cualquier IP — en **Seguridad → IP autorizadas → Claves SMTP** desactivar el bloqueo (si queda activo, el relay responde `525 5.7.1 Unauthorized IP address`).
 - **Sender**: `SMTP_FROM` debe estar verificado en Brevo (Transaccional → Senders). No es necesario que coincida con `SMTP_USER`.
-- **Variables en Render** (metafit-backend): `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`, `FRONTEND_URL` (para la URL del enlace) y **`BREVO_API_KEY` (ya configurada)**. Timeouts 15/15/20 s en `createTransport` evitan que el endpoint cuelgue si el relay no responde.
+- **Variables en Render** (metafit-backend): `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`, `FRONTEND_URL` (para la URL del enlace) y **`BREVO_API_KEY` (configurada y activa, ago 2026)**. Timeouts 15/15/20 s en `createTransport` evitan que el endpoint cuelgue si el relay no responde.
 
-**✅ Prueba en producción con `BREVO_API_KEY` (ago 2026):** se restauró el usuario temporal `Test Real` (correo `metafit.sistema@gmail.com`), se solicitó la recuperación y el endpoint respondió **200 sin `modoPrueba`** — el correo se despachó por la vía HTTPS de Brevo (o fallback SMTP). El enlace usa `FRONTEND_URL` + `/#/reset-password/{token}` (HashRouter: el sitio estático no hace fallback SPA). El usuario temporal quedó restaurado para esta validación.
+**✅ Prueba en producción (ago 2026):** con `BREVO_API_KEY` validada contra `api.brevo.com/v3/account` se creó el usuario temporal `Test Real` (`metafit.sistema@gmail.com`), se solicitó la recuperación y el endpoint respondió **200 sin `modoPrueba`** — el correo se despachó por la **API REST Brevo (HTTPS)** en ~1.3 s. SMTP queda como respaldo automático (solo en instancias con egress). El usuario temporal se eliminó después de la validación y la BD quedó limpia. El enlace usa `FRONTEND_URL` + `/#/reset-password/{token}` (HashRouter: el sitio estático no hace fallback SPA).
 
 ### Credenciales de Prueba (Seed Data)
 
