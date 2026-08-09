@@ -17,6 +17,7 @@ import { COLORS, GRADIENTS, FONTS, SPACING, SHADOWS, BORDER_RADIUS } from '../th
 import { getMiPerfil, getMisCiclos, getMisRestricciones } from '../services/api';
 import api, { API_URL } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 function Avatar({ nombre, foto, size = 80 }) {
   const initials = (nombre || 'U')
@@ -214,11 +215,32 @@ export default function MiPerfilScreen({ navigation }) {
     extrapolate: 'clamp',
   });
 
+  const { isDark, toggle } = useTheme();
+
   return (
     <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
       <Animated.View style={{ height: headerHeight, overflow: 'hidden' }}>
         <LinearGradient colors={GRADIENTS.purple} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1.2 }}
           style={{ flex: 1, justifyContent: 'flex-end', paddingHorizontal: SPACING.lg, paddingBottom: SPACING.lg }}>
+          <TouchableOpacity
+            onPress={toggle}
+            activeOpacity={0.8}
+            style={{
+              position: 'absolute',
+              top: 46,
+              right: SPACING.lg,
+              width: 38,
+              height: 38,
+              borderRadius: 19,
+              backgroundColor: 'rgba(255,255,255,0.18)',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderWidth: 1,
+              borderColor: 'rgba(255,255,255,0.25)',
+            }}
+          >
+            <Text style={{ fontSize: 17 }}>{isDark ? '☀️' : '🌙'}</Text>
+          </TouchableOpacity>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <TouchableOpacity onPress={handlePhoto} activeOpacity={0.8}>
               <Avatar nombre={nombreCompleto} foto={perfil?.foto || u.foto} size={72} />
