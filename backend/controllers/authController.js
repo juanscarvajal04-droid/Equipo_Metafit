@@ -116,9 +116,29 @@ const AuthController = {
       // ── Envío de correo (opcional, si hay SMTP/API Brevo configurado) ──
       // Prioridad: 1) API REST Brevo (vía HTTPS, funciona desde Render),
       //            2) SMTP clásico (nodemailer) si se usa otro host directo.
+      // Plantilla HTML profesional en backend/templates/recuperar-password.html
+      // (fallback a texto plano si no puede leerse/renderizarse).
       let correoEnviado = false;
       const enlaceReset = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/#/reset-password/${token}`;
       const subject = 'Recuperación de contraseña — MetaFit';
+      const textoPlano = `Hola ${user.nombres}, recibimos una solicitud para restablecer tu contraseña en MetaFit.\n\nUsá este enlace (válido por 15 minutos):\n${enlaceReset}\n\nSi no la pediste, ignorá este correo.\n\n— MetaFit · Sport Gym Sede 80 · Bogotá, Colombia`;
+
+      const renderPlantilla = () => {
+        try {
+          const fs = require('fs');
+          const path = require('path');
+          const ruta = path.join(__dirname, '..', 'templates', 'recuperar-password.html');
+          if (!fs.existsSync(ruta)) return null;
+          return fs.readFileSync(ruta, 'utf8')
+            .replace(/\{\{NOMBRE\}\}/g, user.nombres || 'usuario')
+            .replace(/\{\{ENLACE\}\}/g, enlaceReset)
+            .replace(/\{\{ANIO\}\}/g, String(new Date().getFullYear()));
+        } catch (errPlantilla) {
+          console.error('[authController.recuperarPassword] plantilla:', errPlantilla.message);
+          return null;
+        }
+      };
+      const html = renderPlantilla();
 
       const enviarConSmtp = async () => {
         if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) return false;
@@ -136,7 +156,8 @@ const AuthController = {
           from: `"MetaFit" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
           to: user.correo,
           subject,
-          text: `Usá este enlace para restablecer tu contraseña (válido por 15 minutos):\n\n${enlaceReset}`,
+          text: textoPlano,
+          ...(html ? { html } : {}),
         });
         return true;
       };
@@ -155,7 +176,7 @@ const AuthController = {
                 sender: { email: process.env.SMTP_FROM || 'metafit.sistema@gmail.com', name: 'MetaFit' },
                 to: [{ email: user.correo }],
                 subject,
-                textContent: `Usá este enlace para restablecer tu contraseña (válido por 15 minutos):\n\n${enlaceReset}`,
+                ...(html ? { htmlContent: html, textContent: textoPlano } : { textContent: textoPlano }),
               }),
             });
             const bodyApi = await resApi.json().catch(() => ({}));
