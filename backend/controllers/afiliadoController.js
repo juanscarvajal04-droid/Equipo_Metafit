@@ -35,6 +35,18 @@ const AfiliadoController = {
   create: async (req, res) => {
     try {
       const result = await AfiliadoService.create(req.body, req.user.sub);
+      // Correo de bienvenida (fire-and-forget: nunca bloquea la respuesta)
+      if (result?.id) {
+        AfiliadoService.getById(result.id)
+          .then((detalle) => {
+            if (detalle) {
+              return require('../services/bienvenidaService')
+                .enviarCorreoBienvenida(detalle, req.body.contrasena || req.body.password || null);
+            }
+            return null;
+          })
+          .catch((err) => console.error('[afiliadoController] bienvenida:', err.message));
+      }
       return res.status(201).json(result);
     } catch (err) {
       if (err.message === 'Nombre y documento son requeridos' || err.message.includes('contraseña')) {
