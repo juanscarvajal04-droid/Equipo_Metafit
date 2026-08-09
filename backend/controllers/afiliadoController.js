@@ -2,10 +2,8 @@
 // Refactorizado: delegar en afiliadoService para arquitectura limpia MVC
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
 const AfiliadoService = require('../services/afiliadoService');
-const { UPLOADS_DIR } = require('../middlewares/uploadFoto');
+const { eliminarFotoAnterior } = require('../middlewares/uploadFoto');
 
 const AfiliadoController = {
 
@@ -203,21 +201,21 @@ const AfiliadoController = {
 
       // /me/foto usa el id del token; /:id/foto lo toma del parámetro.
       const id = req.params.id || req.user.sub;
-      const foto = `/uploads/${req.file.filename}`;
+      // Cloudinary: req.file.path = URL https completa; disco: /uploads/archivo
+      const foto = req.file.path || `/uploads/${req.file.filename}`;
 
       const fotoAnterior = await AfiliadoService.getFoto(id);
       const ok = await AfiliadoService.setFoto(id, foto);
 
       if (!ok) {
-        // Afiliado inexistente: borrar el archivo recién subido
-        fs.unlink(path.join(UPLOADS_DIR, req.file.filename), () => {});
+        // Afiliado inexistente: borrar la foto recién subida
+        eliminarFotoAnterior(foto);
         return res.status(404).json({ error: 'Afiliado no encontrado' });
       }
 
       // Borrar la foto anterior (best effort, si no es la misma)
       if (fotoAnterior && fotoAnterior !== foto) {
-        const oldFile = path.join(UPLOADS_DIR, path.basename(fotoAnterior));
-        fs.unlink(oldFile, () => {});
+        eliminarFotoAnterior(fotoAnterior);
       }
 
       return res.json({
