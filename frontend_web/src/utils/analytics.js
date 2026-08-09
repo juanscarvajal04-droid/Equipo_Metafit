@@ -33,6 +33,20 @@
 //    App.jsx en un useEffect con useLocation.
 // ──────────────────────────────────────────────────────────────────
 
+// ── Eventos personalizados (GA4 vía GTM dataLayer) ──────────────────────────
+// Los tags GA4 de GTM deben crear triggers "Custom Event" con el nombre
+// del evento (ej. metaFit_afiliado_creado) y enviarlos a G-81SWBDG2P6.
+
+export function trackEvent(eventName, params = {}) {
+  try {
+    if (typeof window !== "undefined" && Array.isArray(window.dataLayer)) {
+      window.dataLayer.push({ event: eventName, ...params });
+    }
+  } catch {
+    /* analítica no debe romper la app */
+  }
+}
+
 // function pageview(path) {
 //   if (typeof window.gtag === 'function') {
 //     window.gtag('event', 'page_view', { page_path: path });

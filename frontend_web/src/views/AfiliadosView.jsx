@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
 import { getId, nombreCompleto } from "../utils/afiliadoHelpers";
 import { useToast } from "../hooks/useToast";
+import { trackEvent } from "../utils/analytics";
 import { API_BASE_URL } from "../services/api";
 import s from "./AfiliadosView.module.css";
 
@@ -201,6 +202,7 @@ export default function AfiliadosView() {
       const { data } = await authAxios.post("/afiliados", payload);
       if (fotoFile && data?.id) await subirFoto(data.id, fotoFile);
       showToast("Afiliado creado correctamente", "success");
+      trackEvent("metaFit_afiliado_creado", { rol_creador: role });
       setCreandoAbierto(false);
       setFormCrear(FORM_VACIO);
       setFotoFile(null);

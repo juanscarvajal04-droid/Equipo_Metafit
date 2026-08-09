@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { trackEvent } from "../utils/analytics";
 import s from "./LandingPage.module.css";
 
 /* ── Paleta (solo para cálculos dinámicos — los colores estáticos van al CSS) */
@@ -529,6 +530,7 @@ export default function LandingPage() {
               href="/app/metafit.apk"
               download
               className={s.btnAppDownload}
+              onClick={() => trackEvent("metaFit_apk_descargado")}
             >
               📥 Descargar APK para Android
             </a>

@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
 import { getId, nombreCompleto, inicial, cicloActivo } from "../utils/afiliadoHelpers";
 import { useToast } from "../hooks/useToast";
+import { trackEvent } from "../utils/analytics";
 import s from "./RutinasView.module.css";
 
 const DAY_LABELS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
@@ -235,6 +236,7 @@ export default function RutinasView() {
       }
 
       showToast("Plan de entrenamiento creado correctamente", "success");
+      trackEvent("metaFit_rutina_asignada", { afiliado_id: getId(a) });
       closeModal();
       fetchAfiliados();
     } catch (err) {

@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
 import { getId, nombreCompleto, inicial, cicloActivo } from "../utils/afiliadoHelpers";
 import { useToast } from "../hooks/useToast";
+import { trackEvent } from "../utils/analytics";
 import s from "./DietasView.module.css";
 
 const OBJETIVO_CONFIG = {
@@ -197,6 +198,7 @@ export default function DietasView() {
       }
 
       showToast("Plan nutricional creado exitosamente", "success");
+      trackEvent("metaFit_dieta_asignada", { afiliado_id: getId(a) });
       closeModal();
       fetchAfiliados();
     } catch (err) {
