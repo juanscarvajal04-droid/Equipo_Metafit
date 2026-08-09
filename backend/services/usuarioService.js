@@ -2,6 +2,7 @@
 'use strict';
 
 const UsuarioModel = require('../models/usuarioModel');
+const pool = require('../config/db');
 
 const UsuarioService = {
 
