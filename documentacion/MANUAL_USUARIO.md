@@ -211,6 +211,8 @@
    - Si ya tenía membresía vigente: se extiende desde el vencimiento actual
 8. Para ver el historial, hacer clic en **"Historial"** del afiliado
 
+> 💡 **Factura automática**: al registrar un pago, el afiliado recibirá automáticamente una **factura por correo electrónico** con el logo de MetaFit, los datos del afiliado, el valor pagado, la fecha y el número de factura (formato `FAC-año-número`). El remitente es **"MetaFit"** y el asunto **"Factura de pago - MetaFit - {nombre}"**; si no llega, revisá Spam/Promociones.
+
 ### Interpretar Notificaciones
 
 1. En el **Header** (barra superior), verá un icono de **campana 🔔**
