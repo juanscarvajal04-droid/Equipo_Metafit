@@ -491,3 +491,14 @@ El sistema permite subir una **foto de perfil** a cada afiliado, visible en la w
 - **Web** (`frontend_web/src/views/AfiliadosView.jsx`): input de archivo + preview en los modales de crear/editar; avatar circular con la foto (o iniciales de color si no hay) en la tabla y en el detalle. La URL absoluta se arma con `API_BASE_URL` (`services/api.js`).
 - **Móvil** (`movil/src/screens/MiPerfilScreen.js`): el avatar del header muestra la foto de `/afiliados/me` (componente `Avatar` con prop `foto`); al tocar el avatar se abre la galería (`expo-image-picker`) y se sube con FormData a `POST /afiliados/me/foto`, refrescando el perfil al terminar.
 - **Limitación de Render**: las fotos viven en el filesystem efímero de la instancia (`backend/uploads/`); no persisten entre redeploys. Para persistencia real habría que usar un bucket externo (S3/Cloudinary).
+
+### Analítica y SEO (Google Search Console + GA4 + GTM)
+
+El frontend web incluye los snippets de Google en `frontend_web/index.html`, todos asociados a `metafit.sistema@gmail.com`:
+
+- **Google Tag Manager (GTM)**: snippet principal en el `<head>` (lo más arriba posible) + iframe `noscript` al inicio del `<body>`. Se usa el **Container ID** `GTM-XXXXXXX`.
+- **Google Search Console**: meta tag `<meta name="google-site-verification" content="..." />` en el `<head>`. El `content` lo entrega Search Console al elegir el método **"Metaetiqueta HTML"** (propiedad de tipo Prefijo de URL: `https://metafit-frontend-78x6.onrender.com`).
+- **Google Analytics 4 (GA4)**: **NO** se incrusta gtag.js directo — se configura como **tag dentro de GTM** (consideración: el tag GA4 Configuration / Google Tag con el Measurement ID `G-XXXXXXXX`). Se evita el doble conteo de pageviews.
+- **SPA / HashRouter**: la app usa `HashRouter` (rutas `#/...`). GTM captura los cambios de ruta automáticamente con el trigger **"History Change"** (incluye cambios de hash), por lo que **no hay pageviews manuales** en el código (`frontend_web/src/utils/analytics.js` documenta esto y deja a mano una función `pageview()` comentada y lista por si algún día se migra a gtag.js directo; `App.jsx` no se modifica).
+- **Verificación**: en Search Console clic en "Verificar" tras publicar el meta tag; el estado del sitio se revisa en "Revisión de índice". En GTM, publicar el contenedor (botón **Enviar**) para que las etiquetas de GA4 queden activas. En GA4, el tráfico se ve en Tiempo real (En vivo) al entrar al sitio.
+- **Placeholders**: `GTM-XXXXXXX`, `G-XXXXXXXX` y `CODIGO_DE_VERIFICACION` están marcados con comentarios `⚠️ REEMPLAZAR` en `index.html` para sustituirlos por los IDs reales de las cuentas.
