@@ -23,6 +23,10 @@ runMigracionesPush()
   .then(() => console.log('✅ Migración de push_token verificada'))
   .catch(err => console.error('[MIGRACION-PUSH] error:', err.message));
 
+// ── Cron: recordatorio de pagos por vencer (cada hora) ──
+const { iniciarCron } = require('./cron/recordatorioPagos');
+iniciarCron();
+
 const app  = require('./server');
 const PORT = process.env.PORT || 3001;
 
