@@ -1,7 +1,7 @@
 .sidebar {
   width: 248px;
   min-height: 100vh;
-  background: linear-gradient(180deg, #0f0f1a 0%, #14142b 55%, #0d1b3e 100%);
+  background: var(--mf-sidebar);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
@@ -42,7 +42,7 @@
 }
 
 .logoTitle {
-  color: #fff;
+  color: var(--mf-text);
   font-weight: 700;
   margin-top: 0.25rem;
   font-size: 1.15rem;
@@ -50,7 +50,7 @@
 }
 
 .logoSubtitle {
-  color: #94a3b8;
+  color: var(--mf-muted);
   font-size: 0.65rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -75,7 +75,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  color: var(--mf-text);
   font-weight: 700;
   flex-shrink: 0;
   font-size: 1rem;
@@ -87,7 +87,7 @@
 }
 
 .profileEmail {
-  color: #e0e0e0;
+  color: var(--mf-text);
   font-weight: 600;
   font-size: 0.78rem;
   white-space: nowrap;
@@ -126,7 +126,7 @@
 .navSectionLabel {
   font-size: 0.6rem;
   font-weight: 700;
-  color: #94a3b8;
+  color: var(--mf-muted);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   padding: 10px 20px 6px;
@@ -156,7 +156,7 @@
   text-decoration: none;
   font-size: 0.82rem;
   font-weight: 600;
-  color: #94a3b8;
+  color: var(--mf-muted);
   border-left: 3px solid transparent;
   transition: all 0.3s ease;
   margin-right: 8px;
@@ -165,12 +165,12 @@
 
 .navLink:hover {
   background: rgba(124, 58, 237, 0.08);
-  color: #e0e0e0;
+  color: var(--mf-text);
 }
 
 .navLinkActive {
   background: rgba(124, 58, 237, 0.15);
-  color: #fff;
+  color: var(--mf-text);
   border-left: 3px solid #7c3aed;
 }
 
@@ -183,7 +183,7 @@
   text-decoration: none;
   font-size: 0.82rem;
   font-weight: 600;
-  color: #94a3b8;
+  color: var(--mf-muted);
   border-left: 3px solid rgba(124, 58, 237, 0.3);
   transition: all 0.3s ease;
   margin-right: 8px;
@@ -193,12 +193,12 @@
 
 .navLinkAdmin:hover {
   background: rgba(124, 58, 237, 0.15);
-  color: #e0e0e0;
+  color: var(--mf-text);
 }
 
 .navLinkAdminActive {
   background: rgba(124, 58, 237, 0.22);
-  color: #fff;
+  color: var(--mf-text);
   border-left: 3px solid #a78bfa;
 }
 
@@ -211,7 +211,7 @@
 .logoutButton {
   width: 100%;
   background: transparent;
-  color: #94a3b8;
+  color: var(--mf-muted);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   padding: 0.4rem 0.75rem;

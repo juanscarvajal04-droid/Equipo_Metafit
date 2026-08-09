@@ -190,3 +190,36 @@ code {
   text-align: center;
   white-space: nowrap;
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   MODO CLARO / OSCURO — variables globales del shell
+   Tema por defecto: OSCURO (valores base). [data-theme="light"] lo cambia.
+   ══════════════════════════════════════════════════════════════════ */
+:root {
+  --mf-bg:      #0a0a0f;
+  --mf-bg-grad: linear-gradient(180deg, #1a1a2e 0%, #0a0a0f 100%);
+  --mf-sidebar: linear-gradient(180deg, #0f0f1a 0%, #14142b 55%, #0d1b3e 100%);
+  --mf-surface: #16171d;
+  --mf-surface-2: #1f2230;
+  --mf-border:  rgba(255, 255, 255, 0.06);
+  --mf-text:    #e2e8f0;
+  --mf-muted:   #94a3b8;
+  --mf-accent:  #7c3aed;
+}
+
+:root[data-theme='light'] {
+  --mf-bg:      #eef1f6;
+  --mf-bg-grad: linear-gradient(180deg, #ffffff 0%, #e6eaf2 100%);
+  --mf-sidebar: linear-gradient(180deg, #ffffff 0%, #f2f4f9 55%, #e4eaf6 100%);
+  --mf-surface: #ffffff;
+  --mf-surface-2: #f0f2f7;
+  --mf-border:  rgba(15, 23, 42, 0.08);
+  --mf-text:    #0f172a;
+  --mf-muted:   #64748b;
+  --mf-accent:  #6d28d9;
+}
+
+/* Transición suave al cambiar de tema */
+body, .root, .main, .header, .sidebar, .footer {
+  transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}

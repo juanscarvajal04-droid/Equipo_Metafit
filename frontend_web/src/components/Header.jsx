@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { getTheme, toggleTheme } from "../utils/theme.js";
 import styles from "./Header.module.css";
 
 const ROUTE_META = {
@@ -49,6 +50,7 @@ export default function Header() {
 
   const [notificaciones, setNotificaciones] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [estadoTema, setEstadoTema] = useState(getTheme());
   const dropdownRef = useRef(null);
   const pollingRef = useRef(null);
 
@@ -122,6 +124,18 @@ export default function Header() {
           <div className={styles.dateDay}>{fechaCap.split(",")[0]}</div>
           <div className={styles.dateRest}>{fechaCap.split(",")[1]?.trim()}</div>
         </div>
+
+        <div className={styles.divider} />
+
+        <button
+          type="button"
+          id="btn-tema"
+          title="Cambiar tema (claro/oscuro)"
+          className={styles.themeBtn}
+          onClick={() => setEstadoTema(toggleTheme())}
+        >
+          {estadoTema === "light" ? "🌙" : "☀️"}
+        </button>
 
         <div className={styles.divider} />
 
