@@ -8,21 +8,39 @@ import {
   Alert,
   Animated,
   RefreshControl,
+  Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, GRADIENTS, FONTS, SPACING, SHADOWS, BORDER_RADIUS } from '../theme';
 import { getMiPerfil, getMisCiclos, getMisRestricciones } from '../services/api';
+import api, { API_URL } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
-function Avatar({ nombre, size = 80 }) {
+function Avatar({ nombre, foto, size = 80 }) {
   const initials = (nombre || 'U')
     .split(' ')
     .map((w) => w[0])
     .join('')
     .toUpperCase()
     .slice(0, 2);
+
+  const uri = foto ? (foto.startsWith('http') ? foto : `${API_URL}${foto}`) : null;
+
+  if (uri) {
+    return (
+      <Image
+        source={{ uri }}
+        style={{
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          ...SHADOWS.purple,
+        }}
+      />
+    );
+  }
 
   return (
     <LinearGradient
@@ -154,8 +172,24 @@ export default function MiPerfilScreen({ navigation }) {
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({ quality: 0.7 });
-    if (!result.canceled) {
-      Alert.alert('Foto', 'Foto seleccionada (subida pendiente)');
+    if (result.canceled || !result.assets?.length) return;
+
+    const asset = result.assets[0];
+    const fd = new FormData();
+    fd.append('foto', {
+      uri: asset.uri,
+      name: asset.fileName || 'foto.jpg',
+      type: asset.mimeType || 'image/jpeg',
+    });
+    try {
+      await api.post('/afiliados/me/foto', fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      Alert.alert('Foto actualizada', 'Tu foto de perfil fue subida correctamente.');
+      onRefresh();
+    } catch (err) {
+      console.error('[MiPerfil] subir foto:', err);
+      Alert.alert('Error', 'No se pudo subir la foto. Intenta nuevamente.');
     }
   };
 
@@ -187,7 +221,7 @@ export default function MiPerfilScreen({ navigation }) {
           style={{ flex: 1, justifyContent: 'flex-end', paddingHorizontal: SPACING.lg, paddingBottom: SPACING.lg }}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <TouchableOpacity onPress={handlePhoto} activeOpacity={0.8}>
-              <Avatar nombre={nombreCompleto} size={72} />
+              <Avatar nombre={nombreCompleto} foto={perfil?.foto || u.foto} size={72} />
             </TouchableOpacity>
             <View style={{ marginLeft: SPACING.md, flex: 1 }}>
               <Text style={{ color: '#fff', fontSize: FONTS.title, fontWeight: '800' }} numberOfLines={1}>

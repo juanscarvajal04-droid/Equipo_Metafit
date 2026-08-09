@@ -40,6 +40,7 @@ const AfiliadoModel = {
         a.direccion,
         a.estatura_cm,
         a.estado_afiliacion,
+        a.foto,
         a.fecha_registro        AS fecha_registro_afiliado,
         a.registrado_por,
         ur.nombres              AS registrado_por_nombre
@@ -196,7 +197,7 @@ const AfiliadoModel = {
         a.documento, a.fecha_nacimiento,
         TIMESTAMPDIFF(YEAR, a.fecha_nacimiento, CURDATE()) AS edad,
         a.sexo, a.telefono, a.direccion, a.estatura_cm,
-        a.estado_afiliacion, a.fecha_registro,
+        a.estado_afiliacion, a.foto, a.fecha_registro,
         a.fecha_ultima_modificacion, a.registrado_por
       FROM AFILIADO a
       JOIN USUARIO u ON a.id_usuario = u.id_usuario
@@ -458,6 +459,23 @@ const AfiliadoModel = {
     } finally {
       conn.release();
     }
+  },
+
+  // ─────────────────────────────────────────────────────────
+  // getFoto / setFoto — ruta de la foto de perfil (AFILIADO.foto)
+  // ─────────────────────────────────────────────────────────
+  getFoto: async (id) => {
+    const [rows] = await pool.query(
+      'SELECT foto FROM AFILIADO WHERE id_usuario = ?', [id]
+    );
+    return rows.length ? rows[0].foto : null;
+  },
+
+  setFoto: async (id, foto) => {
+    const [r] = await pool.query(
+      'UPDATE AFILIADO SET foto = ? WHERE id_usuario = ?', [foto, id]
+    );
+    return r.affectedRows > 0;
   },
 
   delete: async (id) => {

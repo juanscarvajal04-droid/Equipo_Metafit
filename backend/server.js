@@ -6,9 +6,11 @@
 'use strict';
 
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const multer = require('multer');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger');
 const app = express();
@@ -56,12 +58,13 @@ app.use(express.urlencoded({ extended: true, limit: '50kb' }));
 // Los endpoints POST, PUT y PATCH deben recibir JSON.
 // Sin esta validación, un body enviado como text/plain o form-data
 // resulta en req.body = undefined y errores silenciosos difíciles de depurar.
-// Excepción: rutas de Swagger UI realizan requests internos sin application/json.
+// Excepciones: rutas de Swagger UI (requests internos) y POST /afiliados/.../foto
+//              que llegan como multipart/form-data (multer).
 app.use((req, res, next) => {
   const isSwaggerPath = req.path.startsWith('/api-docs') || req.path.startsWith('/swagger');
   if (!isSwaggerPath && ['POST', 'PUT', 'PATCH'].includes(req.method)) {
     const ct = req.headers['content-type'] || '';
-    if (!ct.includes('application/json')) {
+    if (!(ct.includes('application/json') || ct.includes('multipart/form-data'))) {
       return res.status(415).json({
         error: 'Content-Type debe ser application/json',
       });
@@ -83,6 +86,10 @@ const loginLimiter = rateLimit({
   message: { error: 'Demasiados intentos de inicio de sesión. Intenta nuevamente en 15 minutos.' },
   skipSuccessfulRequests: true,         // los logins exitosos no cuentan contra el límite
 });
+
+// ── Archivos subidos (fotos de perfil) ────────────────────────
+// Sirve backend/uploads/ bajo la ruta pública /uploads.
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ── Rutas ──────────────────────────────────────────────────────
 const authRoutes = require('./routes/authRoutes');
@@ -164,6 +171,19 @@ app.use((err, req, res, next) => {
   // Error de Content-Type (express.json falla al parsear body inválido)
   if (err.type === 'entity.parse.failed') {
     return res.status(400).json({ error: 'JSON malformado en el body' });
+  }
+
+  // Error de contenido no permitido por multer (tipo de archivo)
+  if (err.message && err.message.startsWith('Solo se permiten')) {
+    return res.status(400).json({ error: err.message });
+  }
+
+  // Error de multer (tamaño, etc.)
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ error: 'La imagen supera el tamaño máximo de 5 MB' });
+    }
+    return res.status(400).json({ error: 'Error al procesar la imagen' });
   }
 
   // Nunca filtrar stack traces al cliente

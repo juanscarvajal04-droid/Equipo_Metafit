@@ -16,6 +16,9 @@ import axios from 'axios';
  */
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
+/** URL base pública del backend (para imágenes servidas bajo /uploads) */
+export const API_BASE_URL = BASE_URL;
+
 /**
  * Instancia principal de axios con baseURL apuntando al backend real.
  * Interceptor automático: inyecta el JWT en cada petición si existe.

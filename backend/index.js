@@ -10,6 +10,13 @@ require('./models/passwordResetModel').ensureTable()
   .then(() => console.log('✅ Tabla PASSWORD_RESET verificada/creada'))
   .catch(err => console.error('[PASSWORD_RESET] error creando tabla:', err.message));
 
+// ── Migración idempotente: columna AFILIADO.foto + limpieza de datos temporales ─
+// Corre dentro del VM de Render (MySQL solo socket local, sin acceso externo).
+const { runMigraciones } = require('./migrations/migracionFotos');
+runMigraciones()
+  .then(() => console.log('✅ Migración de fotos verificada'))
+  .catch(err => console.error('[MIGRACION-FOTOS] error:', err.message));
+
 const app  = require('./server');
 const PORT = process.env.PORT || 3001;
 

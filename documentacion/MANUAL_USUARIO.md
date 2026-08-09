@@ -164,11 +164,14 @@
 3. Completar el formulario:
    - **Datos personales**: Nombres, Apellidos, Correo, Documento de identidad
    - **Datos físicos**: Fecha de nacimiento, Sexo, Teléfono, Dirección, Estatura (cm)
+   - **Foto de perfil** (opcional): Seleccionar una imagen (JPG, PNG, WEBP o GIF, máx. 5 MB) — se verá en la tabla, en el detalle y en la app del afiliado
    - **Restricciones médicas** (opcional): Escribir condiciones separadas por coma
 4. Hacer clic en **"Guardar"**
 5. El sistema genera automáticamente:
    - Contraseña inicial: `MF_{documento}@2025`
    - Ciclo inactivo (el entrenador lo activará)
+
+> 💡 **Foto de perfil**: el recepcionista o administrador puede subir o cambiar la foto de un afiliado en cualquier momento desde el modal **"Editar"** (campo "Foto de perfil"). Si no hay foto, se muestra un avatar circular con la inicial del nombre.
 
 ### Editar Datos de Afiliado
 
@@ -397,11 +400,12 @@ La pantalla de bienvenida incluye las siguientes secciones (desplazar hacia abaj
 
 1. Pestaña **"Perfil"** (icono 👤)
 2. Verá:
-   - **Avatar** con inicial y badge de estado (Activo/Inactivo)
+   - **Avatar** con foto de perfil (si no tiene foto, se muestra la inicial) y badge de estado (Activo/Inactivo)
    - **Datos personales**: Correo, documento, fecha de nacimiento, sexo, teléfono
    - **Información física**: Estatura, objetivo físico actual, nivel de experiencia
    - **Restricciones médicas** (si tiene)
-3. Para cerrar sesión: hacer clic en **"Cerrar sesión"** al final de la página
+3. Para **cambiar la foto de perfil**: tocar el avatar → elegir una imagen de la galería → se sube automáticamente y el perfil se actualiza
+4. Para cerrar sesión: hacer clic en **"Cerrar sesión"** al final de la página
 
 ### Consultar Rutina Asignada
 

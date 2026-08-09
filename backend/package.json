@@ -23,6 +23,7 @@
     "express-rate-limit": "^7.5.1",
     "helmet": "^8.2.0",
     "jsonwebtoken": "^9.0.2",
+    "multer": "^2.2.0",
     "mysql2": "^3.9.7",
     "nodemailer": "^9.0.5",
     "swagger-jsdoc": "^6.2.8",

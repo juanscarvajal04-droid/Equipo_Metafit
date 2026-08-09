@@ -474,3 +474,20 @@ Cuando se registra un pago de membresía, el sistema genera automáticamente una
 - **Envío**: prioridad API REST Brevo (HTTPS) con fallback a SMTP (nodemailer), igual que la recuperación de contraseña.
 - **Aislamiento de fallos**: el correo es un extra — si la factura falla (servicio, red, plantilla), el pago queda registrado igualmente y solo se loguea el error (`[facturaService]`, `[pagoController.create]`).
 - **Verificado en producción (ago 2026)**: pago real id 43 → correo entregado (eventos Brevo `request`/`delivered`/`opened`) hacia `metafit.sistema@gmail.com`.
+
+### Fotos de perfil de afiliados
+
+El sistema permite subir una **foto de perfil** a cada afiliado, visible en la web (tabla y detalle) y en la app móvil (perfil propio).
+
+- **Esquema**: columna `AFILIADO.foto VARCHAR(255) NULL` (ruta relativa, p. ej. `/uploads/172...-ab12.png`).
+- **Migración automática**: `backend/migrations/migracionFotos.js` se ejecuta al arrancar (`index.js`) y es idempotente: crea la columna si no existe (necesario porque la BD de Render corre por socket local y no hay acceso SQL externo). También limpia los datos temporales de la prueba de factura (`PAGO 43`, `AFILIADO 10`, `USUARIO 10`) si siguen presentes.
+- **Subida**: `multer` (`backend/middlewares/uploadFoto.js`) con almacenamiento en `backend/uploads/`, nombre único (timestamp + hex aleatorio), filtro de tipos (`image/png|jpe?g|webp|gif`) y límite de **5 MB**. Errores de multer se mapean a 400 en el error handler global de `server.js`.
+- **Servido público**: `app.use('/uploads', express.static(...))` en `server.js` (la validación de Content-Type de BUG-003 permite `multipart/form-data`).
+- **Endpoints** (en `routes/afiliadoRoutes.js`):
+  - `POST /afiliados/me/foto` — el afiliado sube **su propia** foto (solo `requireAuth`).
+  - `POST /afiliados/:id/foto` — admin o recepcionista sube la foto de cualquier afiliado (`requireAdminOrRecepcionista`).
+  - Ambos devuelven `{ message, foto, url }`; el controller borra (best effort) el archivo de la foto anterior y el archivo recién subido si el afiliado no existe.
+- **Modelo**: `afiliadoModel.js` incluye `a.foto` en los `SELECT` de `findAll`/`findById` y agrega `getFoto(id)`/`setFoto(id, ruta)`.
+- **Web** (`frontend_web/src/views/AfiliadosView.jsx`): input de archivo + preview en los modales de crear/editar; avatar circular con la foto (o iniciales de color si no hay) en la tabla y en el detalle. La URL absoluta se arma con `API_BASE_URL` (`services/api.js`).
+- **Móvil** (`movil/src/screens/MiPerfilScreen.js`): el avatar del header muestra la foto de `/afiliados/me` (componente `Avatar` con prop `foto`); al tocar el avatar se abre la galería (`expo-image-picker`) y se sube con FormData a `POST /afiliados/me/foto`, refrescando el perfil al terminar.
+- **Limitación de Render**: las fotos viven en el filesystem efímero de la instancia (`backend/uploads/`); no persisten entre redeploys. Para persistencia real habría que usar un bucket externo (S3/Cloudinary).
