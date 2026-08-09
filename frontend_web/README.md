@@ -33,9 +33,9 @@ El sitio trae integrados los snippets de Google en `index.html` (GTM + verificac
 
 | Servicio | Dónde reemplazar | Valor |
 |---|---|---|
-| Google Tag Manager | `index.html` → 2 ocurrencias de `GTM-XXXXXXX` | Container ID (p. ej. `GTM-ABCDEFG`) |
-| Google Search Console | `index.html` → `CODIGO_DE_VERIFICACION` | content de la metaetiqueta HTML |
-| Google Analytics 4 | Dentro de GTM (tag GA4 Configuration) | Measurement ID `G-XXXXXXXX` |
+| Google Tag Manager | `index.html` (2 ocurrencias de `GTM-K6JZS4MG`) | ✅ ya configurado |
+| Google Search Console | `public/google784a94e7c83aeb9e.html` | ✅ verificación por archivo |
+| Google Analytics 4 | Dentro de GTM (tag GA4 Configuration) | Measurement ID `G-81SWBDG2P6` |
 
 > **Importante**: este proyecto usa GA4 **vía GTM** (no gtag.js directo) para evitar doble conteo; la app usa `HashRouter`, y GTM captura los cambios de ruta con el trigger "History Change". Ver `src/utils/analytics.js` para más contexto.
 

@@ -496,9 +496,9 @@ El sistema permite subir una **foto de perfil** a cada afiliado, visible en la w
 
 El frontend web incluye los snippets de Google en `frontend_web/index.html`, todos asociados a `metafit.sistema@gmail.com`:
 
-- **Google Tag Manager (GTM)**: snippet principal en el `<head>` (lo más arriba posible) + iframe `noscript` al inicio del `<body>`. Se usa el **Container ID** `GTM-XXXXXXX`.
-- **Google Search Console**: meta tag `<meta name="google-site-verification" content="..." />` en el `<head>`. El `content` lo entrega Search Console al elegir el método **"Metaetiqueta HTML"** (propiedad de tipo Prefijo de URL: `https://metafit-frontend-78x6.onrender.com`).
+- **Google Tag Manager (GTM)**: snippet principal en el `<head>` (lo más arriba posible) + iframe `noscript` al inicio del `<body>`. Container ID real: **`GTM-K6JZS4MG`**.
+- **Google Search Console**: verificación por **archivo HTML** `frontend_web/public/google784a94e7c83aeb9e.html` (servido en `https://metafit-frontend-78x6.onrender.com/google784a94e7c83aeb9e.html`, método elegido al agregar la propiedad de tipo Prefijo de URL).
 - **Google Analytics 4 (GA4)**: **NO** se incrusta gtag.js directo — se configura como **tag dentro de GTM** (consideración: el tag GA4 Configuration / Google Tag con el Measurement ID `G-XXXXXXXX`). Se evita el doble conteo de pageviews.
 - **SPA / HashRouter**: la app usa `HashRouter` (rutas `#/...`). GTM captura los cambios de ruta automáticamente con el trigger **"History Change"** (incluye cambios de hash), por lo que **no hay pageviews manuales** en el código (`frontend_web/src/utils/analytics.js` documenta esto y deja a mano una función `pageview()` comentada y lista por si algún día se migra a gtag.js directo; `App.jsx` no se modifica).
 - **Verificación**: en Search Console clic en "Verificar" tras publicar el meta tag; el estado del sitio se revisa en "Revisión de índice". En GTM, publicar el contenedor (botón **Enviar**) para que las etiquetas de GA4 queden activas. En GA4, el tráfico se ve en Tiempo real (En vivo) al entrar al sitio.
-- **Placeholders**: `GTM-XXXXXXX`, `G-XXXXXXXX` y `CODIGO_DE_VERIFICACION` están marcados con comentarios `⚠️ REEMPLAZAR` en `index.html` para sustituirlos por los IDs reales de las cuentas.
+- **Placeholders**: `G-81SWBDG2P6` (GA4) se configura **dentro de GTM** (no está en el código).
