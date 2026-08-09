@@ -458,13 +458,13 @@ El endpoint `POST /auth/recuperar-password` genera un JWT de reset (15 min) y en
 - **Servicio**: Brevo (plan free, 300 correos/día), relay `smtp-relay.sendinblue.com:587` con STARTTLS (`smtp-relay.brevo.com` falla por el certificado — el alias válido es `smtp-relay.sendinblue.com`).
 - **Dos vías de envío** (por orden de prioridad en `authController.js`):
   1. **API REST Brevo** (`BREVO_API_KEY` seteada): `POST https://api.brevo.com/v3/smtp/email` por HTTPS. Es la vía recomendada: el tráfico TCP saliente de Render hacia puertos SMTP (465/587) puede estar bloqueado según la instancia, mientras que 443 siempre funciona.
-  2. **SMTP clásico** (nodemailer) con `SMTP_HOST/PORT/USER/PASS` (usado cuando no hay clave API). Funciona solo en instancias con egress SMTP habilitado.
+  2. **SMTP clásico** (nodemailer) con `SMTP_HOST/PORT/USER/PASS` (usado cuando no hay clave API o la API falla — fallback automático). Funciona solo en instancias con egress SMTP habilitado.
 - **Auth**: login del panel Brevo + clave SMTP (`xsmtpsib-…`, se crea en **SMTP & API → SMTP → Generar clave**) o clave API (`xkeysib-…`, en **SMTP & API → Claves API**).
 - **En Brevo**: las claves SMTP deben poder enviar desde cualquier IP — en **Seguridad → IP autorizadas → Claves SMTP** desactivar el bloqueo (si queda activo, el relay responde `525 5.7.1 Unauthorized IP address`).
 - **Sender**: `SMTP_FROM` debe estar verificado en Brevo (Transaccional → Senders). No es necesario que coincida con `SMTP_USER`.
-- **Variables en Render** (metafit-backend): `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`, `FRONTEND_URL` (para la URL del enlace) y opcionalmente `BREVO_API_KEY`. Timeouts 15/15/20 s en `createTransport` evitan que el endpoint cuelgue si el relay no responde.
+- **Variables en Render** (metafit-backend): `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`, `FRONTEND_URL` (para la URL del enlace) y **`BREVO_API_KEY` (ya configurada)**. Timeouts 15/15/20 s en `createTransport` evitan que el endpoint cuelgue si el relay no responde.
 
-**✅ Prueba en producción (ago 2026):** se creó un usuario temporal (`Test Real`, correo `metafit.sistema@gmail.com`) vía `POST /usuarios`, se solicitó recuperación y el correo real se envió correctamente (respuesta 200 sin `modoPrueba`). El enlace usa `FRONTEND_URL` + `/#/reset-password/{token}` (HashRouter: el sitio estático no hace fallback SPA). El usuario temporal fue eliminado y la BD quedó limpia.
+**✅ Prueba en producción con `BREVO_API_KEY` (ago 2026):** se restauró el usuario temporal `Test Real` (correo `metafit.sistema@gmail.com`), se solicitó la recuperación y el endpoint respondió **200 sin `modoPrueba`** — el correo se despachó por la vía HTTPS de Brevo (o fallback SMTP). El enlace usa `FRONTEND_URL` + `/#/reset-password/{token}` (HashRouter: el sitio estático no hace fallback SPA). El usuario temporal quedó restaurado para esta validación.
 
 ### Credenciales de Prueba (Seed Data)
 

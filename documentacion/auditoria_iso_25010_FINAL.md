@@ -96,7 +96,7 @@
 
 ### Evidencia
 - bcrypt 12 rondas (límite 72 bytes, BUG-004), JWT 8 h + token de reseteo de un solo uso (15 min), rate limits, SQL parametrizado, helmet, 200 genérico contra enumeración, datos propios y `req.user.sub`, sin stack traces en errores.
-- **Recuperación de contraseña** (ago 2026): JWT `password_reset` 15 min, tabla `PASSWORD_RESET` con token de un solo uso, transacción (actualiza contraseña + marca usado con rollback), respuestas 200 genéricas anti-enumeración (incluso para correos inexistentes) y rate limit 5/15 min. Envío real vía Brevo (SMTP o API REST).
+- **Recuperación de contraseña** (ago 2026): JWT `password_reset` 15 min, tabla `PASSWORD_RESET` con token de un solo uso, transacción (actualiza contraseña + marca usado con rollback), respuestas 200 genéricas anti-enumeración (incluso para correos inexistentes) y rate limit 5/15 min. **Envío real vía Brevo API REST (HTTPS, `BREVO_API_KEY` configurada en Render)** — la vía más fiable que SMTP (443 siempre sale desde Render) — con **fallback SMTP automático** si la API falla. Verificado en producción (ago 2026): endpoint **200 sin `modoPrueba`**.
 - **Suite de pruebas**: 25 tests backend (jest + supertest) incluyendo los nuevos de recuperación:
   - `POST /auth/recuperar-password` email válido → **200** (token JWT en modo prueba, sin SMTP).
   - `POST /auth/recuperar-password` email inexistente → **200** genérico (anti-enumeración).
