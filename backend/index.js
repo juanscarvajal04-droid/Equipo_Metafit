@@ -17,6 +17,12 @@ runMigraciones()
   .then(() => console.log('✅ Migración de fotos verificada'))
   .catch(err => console.error('[MIGRACION-FOTOS] error:', err.message));
 
+// ── Migración idempotente: columna USUARIO.push_token (push notifications) ──
+const { runMigraciones: runMigracionesPush } = require('./migrations/migracionPushToken');
+runMigracionesPush()
+  .then(() => console.log('✅ Migración de push_token verificada'))
+  .catch(err => console.error('[MIGRACION-PUSH] error:', err.message));
+
 const app  = require('./server');
 const PORT = process.env.PORT || 3001;
 

@@ -2,6 +2,7 @@
 // Hardened: BUG-010 — todos los catch ahora usan log interno + mensaje genérico al cliente.
 'use strict';
 const PlanModel = require('../models/planModel');
+const { enviarPushAUsuarioDelCiclo } = require('../services/pushService');
 
 const PlanController = {
 
@@ -24,6 +25,11 @@ const PlanController = {
       const id = await PlanModel.createEntrenamiento(
         id_ciclo, req.user.sub, observaciones
       );
+      enviarPushAUsuarioDelCiclo(id_ciclo, {
+        title: '🏋️ Nueva rutina asignada',
+        body: 'Tu entrenador te asignó un plan de entrenamiento. ¡A darle!',
+        data: { screen: 'Rutina' },
+      });
       res.status(201).json({ id_ciclo: id, message: 'Plan de entrenamiento creado' });
     } catch (err) {
       if (err.code === 'ER_DUP_ENTRY')
@@ -125,6 +131,11 @@ const PlanController = {
       const id = await PlanModel.createNutricional(
         id_ciclo, calorias_objetivo, num_comidas, req.user.sub, observaciones
       );
+      enviarPushAUsuarioDelCiclo(id_ciclo, {
+        title: '🥗 Nueva dieta asignada',
+        body: 'Tu nutricionista te asignó un plan de alimentación. ¡A comer rico y sano!',
+        data: { screen: 'Dieta' },
+      });
       res.status(201).json({ id_ciclo: id, message: 'Plan nutricional creado' });
     } catch (err) {
       if (err.code === 'ER_DUP_ENTRY')

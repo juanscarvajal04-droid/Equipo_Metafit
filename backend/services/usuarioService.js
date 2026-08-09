@@ -15,6 +15,13 @@ const UsuarioService = {
     return UsuarioService.normalizarUsuario(user);
   },
 
+  guardarPushToken: async (idUsuario, pushToken) => {
+    await pool.query(
+      `UPDATE USUARIO SET push_token = ? WHERE id_usuario = ?`,
+      [pushToken, idUsuario]
+    );
+  },
+
   create: async (datos) => {
     const nombres    = datos.nombres;
     const apellidos  = datos.apellidos;

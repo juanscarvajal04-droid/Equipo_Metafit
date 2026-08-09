@@ -36,6 +36,7 @@ const { requireAuth, requireAdmin } = require('../middlewares/auth');
  *         $ref: '#/components/responses/InternalError'
  */
 router.get('/', requireAuth, requireAdmin, UsuarioController.getAll);
+router.put('/me/push-token', requireAuth, UsuarioController.guardarPushToken);
 
 router.get('/recepcionistas', requireAuth, requireAdmin, UsuarioController.getRecepcionistas);
 

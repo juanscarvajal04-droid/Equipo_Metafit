@@ -18,6 +18,7 @@ import { getMiPerfil, getMisCiclos, getMisRestricciones } from '../services/api'
 import api, { API_URL } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { activarPushNotifications } from '../services/notifications';
 
 function Avatar({ nombre, foto, size = 80 }) {
   const initials = (nombre || 'U')
@@ -157,6 +158,9 @@ export default function MiPerfilScreen({ navigation }) {
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  // Registro idempotente del push token (si el login no lo hizo aún)
+  useEffect(() => { activarPushNotifications(); }, []);
 
   const onRefresh = () => { setRefreshing(true); fetchData(); };
 

@@ -6,7 +6,12 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "metafit",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "automatic",
+    "extra": {
+      "eas": {
+        "projectId": "e3c9b7f2-6d4a-4b8e-9f1c-2a5d7e8b0c31"
+      }
+    },
     "ios": {
       "icon": "./assets/images/icon.png"
     },
