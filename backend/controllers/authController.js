@@ -119,46 +119,60 @@ const AuthController = {
       let correoEnviado = false;
       const enlaceReset = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/#/reset-password/${token}`;
       const subject = 'Recuperación de contraseña — MetaFit';
+
+      const enviarConSmtp = async () => {
+        if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) return false;
+        const nodemailer = require('nodemailer');
+        const transporter = nodemailer.createTransport({
+          host: process.env.SMTP_HOST,
+          port: Number(process.env.SMTP_PORT || 587),
+          secure: process.env.SMTP_SECURE === 'true',
+          auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+          connectionTimeout: 15000,
+          greetingTimeout: 15000,
+          socketTimeout: 20000,
+        });
+        await transporter.sendMail({
+          from: `"MetaFit" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
+          to: user.correo,
+          subject,
+          text: `Usá este enlace para restablecer tu contraseña (válido por 15 minutos):\n\n${enlaceReset}`,
+        });
+        return true;
+      };
+
       try {
         if (process.env.BREVO_API_KEY) {
-          const resApi = await fetch('https://api.brevo.com/v3/smtp/email', {
-            method: 'POST',
-            headers: {
-              'api-key': process.env.BREVO_API_KEY,
-              'accept': 'application/json',
-              'content-type': 'application/json',
-            },
-            body: JSON.stringify({
-              sender: { email: process.env.SMTP_FROM || 'metafit.sistema@gmail.com', name: 'MetaFit' },
-              to: [{ email: user.correo }],
-              subject,
-              textContent: `Usá este enlace para restablecer tu contraseña (válido por 15 minutos):\n\n${enlaceReset}`,
-            }),
-          });
-          const bodyApi = await resApi.json().catch(() => ({}));
-          if (resApi.ok) {
-            correoEnviado = true;
-          } else {
-            console.error('[authController.recuperarPassword] Brevo API:', resApi.status, JSON.stringify(bodyApi));
+          try {
+            const resApi = await fetch('https://api.brevo.com/v3/smtp/email', {
+              method: 'POST',
+              headers: {
+                'api-key': process.env.BREVO_API_KEY,
+                'accept': 'application/json',
+                'content-type': 'application/json',
+              },
+              body: JSON.stringify({
+                sender: { email: process.env.SMTP_FROM || 'metafit.sistema@gmail.com', name: 'MetaFit' },
+                to: [{ email: user.correo }],
+                subject,
+                textContent: `Usá este enlace para restablecer tu contraseña (válido por 15 minutos):\n\n${enlaceReset}`,
+              }),
+            });
+            const bodyApi = await resApi.json().catch(() => ({}));
+            if (resApi.ok) {
+              correoEnviado = true;
+            } else {
+              console.error('[authController.recuperarPassword] Brevo API:', resApi.status, JSON.stringify(bodyApi));
+            }
+          } catch (errApi) {
+            console.error('[authController.recuperarPassword] error Brevo API:', errApi.message);
+          }
+          if (!correoEnviado) {
+            console.error('[authController.recuperarPassword] intentando fallback SMTP…');
+            correoEnviado = await enviarConSmtp();
           }
         } else if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-          const nodemailer = require('nodemailer');
-          const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port: Number(process.env.SMTP_PORT || 587),
-            secure: process.env.SMTP_SECURE === 'true',
-            auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-            connectionTimeout: 15000,
-            greetingTimeout: 15000,
-            socketTimeout: 20000,
-          });
-          await transporter.sendMail({
-            from: `"MetaFit" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
-            to: user.correo,
-            subject,
-            text: `Usá este enlace para restablecer tu contraseña (válido por 15 minutos):\n\n${enlaceReset}`,
-          });
-          correoEnviado = true;
+          correoEnviado = await enviarConSmtp();
         }
       } catch (errMail) {
         console.error('[authController.recuperarPassword] error envío:', errMail.message);
