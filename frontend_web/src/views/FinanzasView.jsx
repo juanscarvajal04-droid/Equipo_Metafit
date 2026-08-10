@@ -110,7 +110,7 @@ export default function FinanzasView() {
     setPdfLoading(true);
     try {
       const { default: jsPDF } = await import("jspdf");
-      await import("jspdf-autotable");
+      const { default: autoTable } = await import("jspdf-autotable");
       const doc = new jsPDF();
       const { ultimos_pagos, total_recaudado } = data;
       const periodo = filtros.fecha_inicio || filtros.fecha_fin
@@ -132,12 +132,12 @@ export default function FinanzasView() {
         p.nombres_recepcionista ? `${p.nombres_recepcionista} ${p.apellidos_recepcionista}` : "—",
       ]);
 
-      doc.autoTable({
+      autoTable(doc, {
         head: [["Afiliado", "Fecha", "Valor", "Estado", "Recepcionista"]],
         body: rows,
         startY: 40,
         styles: { fontSize: 8 },
-        headStyles: { fillColor: [124, 58, 237] },
+        headStyles: { fillColor: [227, 28, 37] },
       });
 
       const y = doc.lastAutoTable.finalY + 12;
