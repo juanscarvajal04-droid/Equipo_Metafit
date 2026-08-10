@@ -201,10 +201,7 @@ export default function GestionPersonal() {
 
       <div className={s.page}>
         {/* ── Header ─────────────────────────────────── */}
-        <div style={{
-          marginBottom: "1.5rem", display: "flex",
-          justifyContent: "space-between", alignItems: "flex-start",
-        }}>
+        <div className={s.pageHeader}>
           <div>
             <h1 className={s.headerTitle}>👥 Gestión de Personal</h1>
             <small className={s.headerSub}>Administración de empleados</small>
@@ -221,7 +218,6 @@ export default function GestionPersonal() {
           placeholder="🔍 Buscar por nombre, correo o rol..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          style={{ marginBottom: "1.25rem" }}
         />
 
         {/* ── Table ──────────────────────────────────── */}

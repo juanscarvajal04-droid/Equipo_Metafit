@@ -260,6 +260,13 @@ code {
   --mf-radius-sm: 6px;
   --mf-radius-md: 10px;
   --mf-radius-lg: 14px;
+
+  /* Espaciado */
+  --mf-spacing-xs: 4px;
+  --mf-spacing-sm: 8px;
+  --mf-spacing-md: 16px;
+  --mf-spacing-lg: 24px;
+  --mf-spacing-xl: 32px;
 }
 
 /* ── MODO CLARO PROFESIONAL ──
@@ -307,6 +314,13 @@ code {
   --mf-radius-sm: 6px;
   --mf-radius-md: 10px;
   --mf-radius-lg: 14px;
+
+  /* Espaciado */
+  --mf-spacing-xs: 4px;
+  --mf-spacing-sm: 8px;
+  --mf-spacing-md: 16px;
+  --mf-spacing-lg: 24px;
+  --mf-spacing-xl: 32px;
 }
 
 /* Transición suave al cambiar de tema */
