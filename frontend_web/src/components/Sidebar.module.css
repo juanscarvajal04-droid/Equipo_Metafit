@@ -107,20 +107,6 @@
   color: var(--mf-on-accent);
 }
 
-.adminBanner {
-  margin-top: 0.6rem;
-  text-align: center;
-  border-radius: 8px;
-  padding: 0.3rem 0;
-  background: var(--mf-accent-soft);
-  border: 1px solid var(--mf-accent-strong);
-  font-size: 0.62rem;
-  color: var(--mf-accent);
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
 /* ── Navegación ── */
 .nav {
   padding: 0.35rem 0;

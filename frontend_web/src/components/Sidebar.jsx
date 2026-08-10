@@ -6,7 +6,7 @@ import styles from "./Sidebar.module.css";
 // Cada rol tiene exactamente los links que le corresponden según el RBAC.
 // 'Administrador' es el único con acceso a /personal (Gestión de Personal).
 const NAV_OPERATIVO = {
-  // ADMINISTRADOR — acceso total + módulo exclusivo de personal
+  // ADMINISTRADOR — módulos completos + personal exclusivo
   Administrador: [
     { to: "/dashboard", icon: "📊", label: "Dashboard" },
     { to: "/finanzas",  icon: "💰", label: "Finanzas"  },
@@ -28,7 +28,7 @@ const NAV_OPERATIVO = {
   ],
 };
 
-// Link exclusivo del Super Usuario
+// Link exclusivo del Administrador
 const NAV_ADMIN_EXCLUSIVO = [
   { to: "/personal", icon: "🛡️", label: "Gestión de Personal" },
 ];
@@ -47,7 +47,7 @@ const ROLE_ICON = {
 };
 
 const ROLE_LABEL = {
-  Administrador: "Super Usuario",
+  Administrador: "Administrador",
   Recepcionista: "Recepcionista",
   Entrenador:    "Entrenador",
 };
@@ -94,13 +94,6 @@ export default function Sidebar() {
             </span>
           </div>
         </div>
-
-        {/* Banner exclusivo Admin */}
-        {isAdmin && (
-          <div className={styles.adminBanner}>
-            ✦ Acceso Total al Sistema ✦
-          </div>
-        )}
       </div>
 
       {/* ── Sección: Navegación Principal ── */}

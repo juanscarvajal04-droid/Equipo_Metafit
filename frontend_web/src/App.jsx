@@ -21,7 +21,7 @@ const FinanzasView     = lazy(() => import("./views/FinanzasView"));
 /**
  * App.jsx — Raíz de la aplicación
  *
- * Árbol de rutas (RBAC — Super Usuario):
+ * Árbol de rutas (RBAC — Administrador):
  *
  *  /              → HomeRedirect (redirige al home del rol activo)
  *  /login         → pública
@@ -92,7 +92,7 @@ export default function App() {
             <Route path="/home" element={<HomeRedirect />} />
 
             {/* ══════════════════════════════════════════════════════════════
-                ADMINISTRADOR — acceso total
+                ADMINISTRADOR — módulos completos + personal
             ══════════════════════════════════════════════════════════════ */}
             <Route element={<ProtectedRoute allowedRoles={ADMIN} />}>
               <Route path="/dashboard" element={<AdminDashboard />} />
