@@ -331,7 +331,7 @@ export default function DietasView() {
             <div className={s.kpiLabel}>Sin Plan Asignado</div>
           </div>
           <div className={s.kpiCard}>
-            <div className={s.kpiValue} style={{ color:"#7c3aed" }}>{totalAlimentos}</div>
+            <div className={s.kpiValue} style={{ color:"#e31c25" }}>{totalAlimentos}</div>
             <div className={s.kpiLabel}>Alimentos en Catálogo</div>
           </div>
         </div>
@@ -782,7 +782,7 @@ function PlanDetalle({ detalle, numComidas }) {
 
   return keys.map((key) => (
     <div key={key} className={s.infoCard} style={{ marginBottom:"0.5rem" }}>
-      <div style={{ fontWeight:600, fontSize:"0.85rem", marginBottom:"0.25rem", color:"#7c3aed" }}>
+      <div style={{ fontWeight:600, fontSize:"0.85rem", marginBottom:"0.25rem", color:"#e31c25" }}>
         🍽️ Comida #{key}
       </div>
       <div style={{ display:"flex", flexDirection:"column", gap:"0.25rem" }}>

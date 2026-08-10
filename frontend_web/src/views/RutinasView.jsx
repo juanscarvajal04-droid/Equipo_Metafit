@@ -339,7 +339,7 @@ export default function RutinasView() {
             <div className={s.kpiLabel}>Sin Plan Asignado</div>
           </div>
           <div className={s.kpiCard}>
-            <div className={s.kpiValue} style={{ color:"#7c3aed" }}>{totalEjercicios}</div>
+            <div className={s.kpiValue} style={{ color:"#e31c25" }}>{totalEjercicios}</div>
             <div className={s.kpiLabel}>Ejercicios en Catálogo</div>
           </div>
         </div>
@@ -733,9 +733,9 @@ function PlanDisplay({ afiliado, authAxios }) {
 
   return rutinas.map((rutina, ri) => (
     <div key={rutina.id_rutina ?? ri} style={{ marginBottom:16 }}>
-      <h5 style={{ color:"#7c3aed", fontSize:"0.9rem", margin:"0 0 8px 0", display:"flex", alignItems:"center", gap:6 }}>
+      <h5 style={{ color:"#e31c25", fontSize:"0.9rem", margin:"0 0 8px 0", display:"flex", alignItems:"center", gap:6 }}>
         📅 {DAY_LABELS[(rutina.dia_numero ?? 1) - 1] || `Día ${rutina.dia_numero}`}
-        {rutina.enfoque_muscular ? <span className="badge" style={{ background:"rgba(124,58,237,0.15)", color:"var(--mf-accent)", fontSize:"0.65rem", padding:"0.1rem 0.4rem" }}>{rutina.enfoque_muscular}</span> : null}
+        {rutina.enfoque_muscular ? <span className="badge" style={{ background:"rgba(227, 28, 37, 0.15)", color:"var(--mf-accent)", fontSize:"0.65rem", padding:"0.1rem 0.4rem" }}>{rutina.enfoque_muscular}</span> : null}
       </h5>
       {Array.isArray(rutina.ejercicios) && rutina.ejercicios.length > 0 ? (
         <table className={s.table} style={{ fontSize:"0.8rem" }}>

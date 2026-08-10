@@ -185,8 +185,8 @@ export default function Dashboard() {
                     label: "Recepcionistas",
                     valor: kpis.recepcionistas,
                     icono: "🗂️",
-                    color: "#4f46e5",
-                    bg: "#4f46e515",
+                    color: "#b71c1c",
+                    bg: "#b71c1c15",
                     sub: "Gestión de caja y acceso",
                   },
                   {

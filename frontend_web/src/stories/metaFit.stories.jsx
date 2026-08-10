@@ -15,7 +15,7 @@ function Badge({ label = 'Activo', color = '#059669' }) {
 
 function Button({ label = 'Guardar', variant = 'primary', disabled = false }) {
   const colors = {
-    primary: 'linear-gradient(135deg, #7c3aed, #6d28d9)',
+    primary: 'linear-gradient(135deg, #e31c25, #b71c1c)',
     secondary: '#252545',
     danger: 'linear-gradient(135deg, #e31c25, #b71c1c)',
   };
@@ -51,7 +51,7 @@ function Modal({ title = 'Nuevo afiliado', children = '¿Deseas registrar este a
   );
 }
 
-function Avatar({ iniciales = 'JL', size = 56, color = '#7c3aed' }) {
+function Avatar({ iniciales = 'JL', size = 56, color = '#e31c25' }) {
   return (
     <div
       className="mfAvatar"
@@ -79,7 +79,7 @@ export const Badges = () => (
       <div className="mfDemoRow">
         <Badge label="Activo" color="#059669" />
         <Badge label="Suspendido" color="#e31c25" />
-        <Badge label="Administrador" color="#7c3aed" />
+        <Badge label="Administrador" color="#e31c25" />
         <Badge label="Practicante" color="#2563eb" />
       </div>
     </div>
@@ -123,7 +123,7 @@ export const Avatares = () => (
     <div>
       <p className="mfDemoTitle">Avatar de usuario</p>
       <div className="mfDemoRow">
-        <Avatar iniciales="JL" size={56} color="#7c3aed" />
+        <Avatar iniciales="JL" size={56} color="#e31c25" />
         <Avatar iniciales="MC" size={56} color="#2563eb" />
         <Avatar iniciales="DP" size={56} color="#059669" />
         <Avatar iniciales="SR" size={72} color="#e31c25" />

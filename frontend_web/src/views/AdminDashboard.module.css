@@ -258,7 +258,7 @@
 }
 
 .btnPrimary {
-  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  background: linear-gradient(135deg, #e31c25, #b71c1c);
   border: none;
   color: #fff;
   font-weight: 600;
@@ -271,7 +271,7 @@
 
 .btnPrimary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.3);
+  box-shadow: 0 4px 16px rgba(227, 28, 37, 0.3);
 }
 
 .btnOutline {

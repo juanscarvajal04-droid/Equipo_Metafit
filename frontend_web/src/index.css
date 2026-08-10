@@ -4,7 +4,7 @@
   --bg: #fff;
   --border: #e5e4e7;
   --code-bg: #f4f3ec;
-  --accent: #aa3bff;
+  --accent: #e31c25;
   --accent-bg: rgba(170, 59, 255, 0.1);
   --accent-border: rgba(170, 59, 255, 0.5);
   --social-bg: rgba(244, 243, 236, 0.5);
@@ -37,7 +37,7 @@
     --bg: #16171d;
     --border: #2e303a;
     --code-bg: #1f2028;
-    --accent: #c084fc;
+    --accent: #e31c25;
     --accent-bg: rgba(192, 132, 252, 0.15);
     --accent-border: rgba(192, 132, 252, 0.5);
     --social-bg: rgba(47, 48, 58, 0.5);
@@ -231,10 +231,10 @@ code {
   --mf-faint:      #64748b;
 
   /* Marca y estados */
-  --mf-accent:        #8b5cf6;
-  --mf-accent-hover:  #a78bfa;
-  --mf-accent-soft:   rgba(139, 92, 246, 0.14);  /* hover bg */
-  --mf-accent-strong: rgba(139, 92, 246, 0.28);  /* pill activa */
+  --mf-accent:        #c1121f;
+  --mf-accent-hover:  #e31c25;
+  --mf-accent-soft:   rgba(193, 18, 31, 0.14);  /* hover bg */
+  --mf-accent-strong: rgba(193, 18, 31, 0.28);  /* pill activa */
   --mf-on-accent:     #ffffff;
   --mf-accent-2:      #4b9ecb;
   --mf-success:       #22c55e;
@@ -254,7 +254,7 @@ code {
   --mf-shadow-popover: 0 12px 24px rgba(9, 30, 66, 0.4);
   --mf-shadow-modal:   0 24px 48px rgba(9, 30, 66, 0.5);
   --mf-sidebar-shadow: 4px 0 20px rgba(0, 0, 0, 0.35);
-  --mf-focus-ring:     0 0 0 3px rgba(139, 92, 246, 0.5);
+  --mf-focus-ring:     0 0 0 3px rgba(193, 18, 31, 0.5);
 
   /* Forma y ritmo */
   --mf-radius-sm: 6px;
@@ -280,10 +280,10 @@ code {
   --mf-muted:      #6b7280;
   --mf-faint:      #9ca3af;
 
-  --mf-accent:        #7c3aed;
-  --mf-accent-hover:  #6d28d9;
-  --mf-accent-soft:   rgba(124, 58, 237, 0.08);  /* hover translúcido */
-  --mf-accent-strong: rgba(124, 58, 237, 0.16);  /* pill activa */
+  --mf-accent:        #e31c25;
+  --mf-accent-hover:  #b71c1c;
+  --mf-accent-soft:   rgba(227, 28, 37, 0.08);  /* hover translúcido */
+  --mf-accent-strong: rgba(227, 28, 37, 0.16);  /* pill activa */
   --mf-on-accent:     #ffffff;
   --mf-accent-2:      #4b9ecb;
   --mf-success:       #22c55e;
@@ -302,7 +302,7 @@ code {
   --mf-shadow-popover: 0 8px 16px rgba(16, 24, 40, 0.06), 0 16px 32px rgba(16, 24, 40, 0.12);
   --mf-shadow-modal:   0 24px 48px rgba(16, 24, 40, 0.18);
   --mf-sidebar-shadow: 1px 0 0 var(--mf-border), 4px 0 16px rgba(16, 24, 40, 0.06);
-  --mf-focus-ring:     0 0 0 3px rgba(124, 58, 237, 0.35);
+  --mf-focus-ring:     0 0 0 3px rgba(227, 28, 37, 0.35);
 
   --mf-radius-sm: 6px;
   --mf-radius-md: 10px;

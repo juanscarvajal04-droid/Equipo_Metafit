@@ -74,7 +74,7 @@ export default function RecuperarPassword() {
                 {modoPrueba && (
                   <div style={{ marginTop: "8px", fontSize: "0.78rem", color: "rgba(255,255,255,0.45)" }}>
                     <strong>Modo prueba (sin SMTP):</strong> token generado:{" "}
-                    <span style={{ wordBreak: "break-all", color: "#8b5cf6" }}>{token}</span>
+                    <span style={{ wordBreak: "break-all", color: "#c1121f" }}>{token}</span>
                   </div>
                 )}
               </div>

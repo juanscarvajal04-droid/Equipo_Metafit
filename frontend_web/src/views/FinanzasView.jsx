@@ -203,8 +203,8 @@ export default function FinanzasView() {
   const etiquetasBar = ultimos6.map((r) => `${MONTHS[r.mes - 1]} ${r.anio}`);
   const valoresBar = ultimos6.map((r) => Number(r.total));
   const maxVal = Math.max(...valoresBar, 0);
-  const bgColorsBar = valoresBar.map((v) => (v === maxVal && maxVal > 0 ? "#e94560" : "rgba(124, 58, 237, 0.65)"));
-  const borderColorsBar = valoresBar.map((v) => (v === maxVal && maxVal > 0 ? "#e94560" : "#4b9ecb"));
+  const bgColorsBar = valoresBar.map((v) => (v === maxVal && maxVal > 0 ? "#e31c25" : "rgba(227, 28, 37, 0.65)"));
+  const borderColorsBar = valoresBar.map((v) => (v === maxVal && maxVal > 0 ? "#e31c25" : "rgba(227, 28, 37, 0.35)"));
 
   const barData = {
     labels: etiquetasBar,
@@ -258,7 +258,7 @@ export default function FinanzasView() {
   };
 
   // ── Doughnut chart: por recepcionista ──
-  const coloresDoughnut = ["#4b9ecb", "#2563eb", "#059669", "#e94560", "#f59e0b", "#6366f1", "#ec4899", "#14b8a6"];
+  const coloresDoughnut = ["#e31c25", "#c1121f", "#b71c1c", "#a4161a", "#e31c25", "#c1121f", "#b71c1c", "#a4161a"];
   let doughnutLabels = pagos_por_recepcionista.map((r) => `${r.nombres} ${r.apellidos}`);
   let doughnutValues = pagos_por_recepcionista.map((r) => Number(r.total_recaudado));
   let doughnutBg = coloresDoughnut.slice(0, doughnutValues.length);
@@ -406,7 +406,7 @@ export default function FinanzasView() {
             { icono: "📈", valor: formatter(recaudadoEsteMes), label: "Recaudado este mes", color: "#3b82f6" },
             { icono: "📅", valor: formatter(recaudadoMesAnterior), label: "Mes anterior", color: "#a855f7" },
             { icono: "📊", valor: formatter(Math.round(promedioMensual)), label: "Promedio mensual", color: "#f59e0b" },
-            { icono: "🏆", valor: mejorRecepcionista ? `${mejorRecepcionista.nombres} ${mejorRecepcionista.apellidos}` : "—", label: "Mejor recepcionista", color: "#ec4899" },
+            { icono: "🏆", valor: mejorRecepcionista ? `${mejorRecepcionista.nombres} ${mejorRecepcionista.apellidos}` : "—", label: "Mejor recepcionista", color: "#a4161a" },
           ].map((kpi) => (
             <div key={kpi.label} className={styles.kpiCard}>
               <div className={styles.kpiIconWrap} style={{ background: `${kpi.color}18` }}>

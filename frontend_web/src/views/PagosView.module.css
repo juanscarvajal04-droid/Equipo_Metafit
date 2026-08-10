@@ -17,12 +17,12 @@
 .badgeVencido { background: rgba(239,68,68,0.15); color: #ef4444; padding: 0.25rem 0.6rem; border-radius: 6px; font-size: 0.72rem; }
 
 /* Buttons */
-.btnPrimary { background: linear-gradient(135deg, #7c3aed, #4f46e5); border: none; color: #fff; font-weight: 600; padding: 0.4rem 1.2rem; border-radius: 8px; font-size: 0.85rem; cursor: pointer; }
+.btnPrimary { background: linear-gradient(135deg, #e31c25, #b71c1c); border: none; color: #fff; font-weight: 600; padding: 0.4rem 1.2rem; border-radius: 8px; font-size: 0.85rem; cursor: pointer; }
 .btnPrimary:hover { opacity: 0.9; }
 .btnPrimary:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .btnOutline { background: transparent; border: 1px solid var(--mf-border); color: var(--mf-text); padding: 0.3rem 0.8rem; border-radius: 8px; font-size: 0.78rem; cursor: pointer; }
-.btnOutline:hover { border-color: #7c3aed; color: #7c3aed; }
+.btnOutline:hover { border-color: #e31c25; color: #e31c25; }
 
 .btnConfirmar { background: linear-gradient(135deg, #22c55e, #16a34a); border: none; color: #fff; font-weight: 600; padding: 0.45rem 1.5rem; border-radius: 8px; font-size: 0.9rem; cursor: pointer; }
 .btnConfirmar:hover { opacity: 0.9; }
@@ -39,9 +39,9 @@
 /* Form */
 .labelText { color: var(--mf-muted); font-size: 0.78rem; font-weight: 600; margin-bottom: 0.25rem; display: block; }
 .inputDark { background: var(--mf-bg); border: 1px solid var(--mf-border); color: var(--mf-text); border-radius: 8px; padding: 0.45rem 0.7rem; font-size: 0.85rem; width: 100%; box-sizing: border-box; }
-.inputDark:focus { border-color: #7c3aed; box-shadow: var(--mf-focus-ring); outline: none; }
+.inputDark:focus { border-color: #e31c25; box-shadow: var(--mf-focus-ring); outline: none; }
 .selectDark { background: var(--mf-bg); border: 1px solid var(--mf-border); color: var(--mf-text); border-radius: 8px; padding: 0.45rem 0.7rem; font-size: 0.85rem; width: 100%; box-sizing: border-box; }
-.selectDark:focus { border-color: #7c3aed; outline: none; }
+.selectDark:focus { border-color: #e31c25; outline: none; }
 .alertDanger { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; color: #ef4444; font-size: 0.85rem; padding: 0.4rem 0.75rem; }
 .alertSuccess { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); border-radius: 8px; color: #22c55e; font-size: 0.85rem; padding: 0.4rem 0.75rem; }
 .afiliadoBox { background: var(--mf-bg); border: 1px solid var(--mf-border); border-radius: 10px; padding: 0.75rem; }

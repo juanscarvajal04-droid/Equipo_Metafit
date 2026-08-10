@@ -107,7 +107,7 @@ function ModalTerminos({ onClose }) {
         </div>
         <div className={s.modalBody}>
           {[
-            { num: "1", titulo: "🔒 Privacidad de Datos", color: "#7c3aed", texto: "MetaFit recopila únicamente los datos necesarios para la gestión de membresías, historial de entrenamiento y planes nutricionales. Esta información es tratada conforme a la Ley 1581 de 2012 (Habeas Data). Los datos personales no serán compartidos con terceros sin autorización expresa del titular." },
+            { num: "1", titulo: "🔒 Privacidad de Datos", color: "#e31c25", texto: "MetaFit recopila únicamente los datos necesarios para la gestión de membresías, historial de entrenamiento y planes nutricionales. Esta información es tratada conforme a la Ley 1581 de 2012 (Habeas Data). Los datos personales no serán compartidos con terceros sin autorización expresa del titular." },
             { num: "2", titulo: "🏋️ Uso de Instalaciones", color: "#2563eb", texto: "El acceso a las instalaciones está restringido a afiliados con membresía activa. El uso de equipos debe realizarse de manera responsable. Cualquier daño intencional resultará en la suspensión temporal o definitiva de la membresía." },
             { num: "3", titulo: "⚕️ Responsabilidad en Salud", color: RED, texto: "Sport Gym Sede 80 no asume responsabilidad por lesiones derivadas del uso inadecuado de equipos o la omisión de información médica. Se recomienda chequeo médico previo al inicio de cualquier programa. Las rutinas y planes nutricionales son orientativos y no reemplazan el diagnóstico médico profesional." },
           ].map(sec => (
@@ -456,7 +456,7 @@ export default function LandingPage() {
             {[
               { icono: "⚡", titulo: "Eficiencia",    desc: "Automatizamos los procesos operativos para que el foco esté en el entrenamiento.", color: "#f59e0b" },
               { icono: "🎯", titulo: "Precisión",     desc: "Cada plan nutricional y rutina es calibrado a las métricas reales del afiliado.",   color: RED        },
-              { icono: "🔒", titulo: "Confiabilidad", desc: "Datos seguros, acceso controlado por roles y trazabilidad total de operaciones.",   color: "#7c3aed"  },
+              { icono: "🔒", titulo: "Confiabilidad", desc: "Datos seguros, acceso controlado por roles y trazabilidad total de operaciones.",   color: "#e31c25"  },
               { icono: "📈", titulo: "Crecimiento",   desc: "Métricas de negocio en tiempo real para decisiones estratégicas más rápidas.",      color: "#059669"  },
             ].map(v => (
               <div key={v.titulo} className={s.valorCard}>

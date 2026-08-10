@@ -31,7 +31,7 @@ function ModalTerminos({ onClose }) {
         <div className={styles.modalBody}>
           {[
             {
-              num: "1", titulo: "🔒 Privacidad de Datos", color: "#7c3aed",
+              num: "1", titulo: "🔒 Privacidad de Datos", color: "#e31c25",
               parrafos: [
                 "MetaFit recopila únicamente los datos necesarios para la gestión de membresías, historial de entrenamiento y planes nutricionales de cada afiliado. Esta información es tratada conforme a la Ley 1581 de 2012 (Habeas Data) y el Decreto 1377 de 2013 de Colombia.",
                 "Los datos personales (nombre, documento, correo, teléfono) son usados exclusivamente para la operación interna del gimnasio y no serán compartidos con terceros sin autorización expresa del titular.",

@@ -44,7 +44,7 @@ const badgeEstado = (e) => {
   return <span className={`${styles.badgeEstado}`} style={{background:c.bg,color:c.color,padding:"0.25rem 0.6rem",borderRadius:"6px"}}>{e || "—"}</span>;
 };
 const badgeNivel = (n) => {
-  const map = { principiante: {bg:"rgba(124,58,237,0.15)",color:cssVar("--mf-accent")}, intermedio: {bg:"rgba(59,130,246,0.15)",color:"#60a5fa"}, avanzado: {bg:"rgba(239,68,68,0.15)",color:"#f87171"} };
+  const map = { principiante: {bg:"rgba(227, 28, 37, 0.15)",color:cssVar("--mf-accent")}, intermedio: {bg:"rgba(59,130,246,0.15)",color:"#60a5fa"}, avanzado: {bg:"rgba(239,68,68,0.15)",color:"#f87171"} };
   const c   = map[(n || "").toLowerCase()] || {bg:"rgba(148,163,184,0.15)",color:cssVar("--mf-muted")};
   return <span className={`${styles.badgeEstado}`} style={{background:c.bg,color:c.color,padding:"0.25rem 0.6rem",borderRadius:"6px"}}>{n || "—"}</span>;
 };
@@ -240,7 +240,7 @@ export default function AdminDashboard() {
   };
 
   const niveles = ["Principiante", "Intermedio", "Avanzado"];
-  const nivelColors = { Principiante: "#22c55e", Intermedio: "#4b9ecb", Avanzado: "#7c3aed" };
+  const nivelColors = { Principiante: "#22c55e", Intermedio: "#4b9ecb", Avanzado: "#e31c25" };
   const ciclosPorNivel = useMemo(() => {
     const counts = { Principiante: 0, Intermedio: 0, Avanzado: 0 };
     afiliados.forEach((a) => {

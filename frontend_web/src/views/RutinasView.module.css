@@ -173,7 +173,7 @@
 }
 
 .searchInput:focus {
-  border-color: #7c3aed;
+  border-color: #e31c25;
 }
 
 .searchInput::placeholder {
@@ -202,7 +202,7 @@
 }
 
 .inputDark:focus {
-  border-color: #7c3aed;
+  border-color: #e31c25;
 }
 
 .inputDark::placeholder {
@@ -222,11 +222,11 @@
 }
 
 .selectDark:focus {
-  border-color: #7c3aed;
+  border-color: #e31c25;
 }
 
 .checkboxDark {
-  accent-color: #7c3aed;
+  accent-color: #e31c25;
   width: 16px;
   height: 16px;
   cursor: pointer;
@@ -247,7 +247,7 @@
 }
 
 .textareaDark:focus {
-  border-color: #7c3aed;
+  border-color: #e31c25;
 }
 
 .textareaDark::placeholder {
@@ -256,7 +256,7 @@
 
 /* ── Buttons ──────────────────────────────────────── */
 .btnPrimary {
-  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  background: linear-gradient(135deg, #e31c25, #b71c1c);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -278,7 +278,7 @@
 
 .btnOutline {
   background: transparent;
-  border: 1px solid #7c3aed;
+  border: 1px solid #e31c25;
   color: var(--mf-accent);
   border-radius: 8px;
   padding: 0.45rem 1rem;
@@ -402,7 +402,7 @@
 .btnRefresh:hover {
   background: var(--mf-accent-soft);
   color: var(--mf-text);
-  border-color: #7c3aed;
+  border-color: #e31c25;
 }
 
 .btnIcon {
@@ -578,7 +578,7 @@
   display: inline-block;
   width: 1rem;
   height: 1rem;
-  border: 2px solid #7c3aed;
+  border: 2px solid #e31c25;
   border-right-color: transparent;
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
@@ -616,7 +616,7 @@
 
 .ejercicioItemChecked {
   background: var(--mf-accent-soft);
-  border-color: rgba(124, 58, 237, 0.3);
+  border-color: rgba(227, 28, 37, 0.3);
 }
 
 .ejercicioRow {
@@ -671,7 +671,7 @@
 }
 
 .inlineInput:focus {
-  border-color: #7c3aed;
+  border-color: #e31c25;
 }
 
 .inlineSelect {
@@ -688,7 +688,7 @@
 }
 
 .inlineSelect:focus {
-  border-color: #7c3aed;
+  border-color: #e31c25;
 }
 
 /* ── Selected List ────────────────────────────────── */

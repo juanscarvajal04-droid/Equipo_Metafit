@@ -122,7 +122,7 @@ export default function PagosView() {
       <AppLayout>
         <div className={s.page}>
           <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "70vh" }}>
-            <div style={{ width: 32, height: 32, border: "3px solid var(--mf-border)", borderTopColor: "#7c3aed", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+            <div style={{ width: 32, height: 32, border: "3px solid var(--mf-border)", borderTopColor: "#e31c25", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
           </div>
         </div>
       </AppLayout>

@@ -17,7 +17,7 @@ function IgIcon() {
 
 function ModalTerminos({ onClose }) {
   const secciones = [
-    { n: "1", t: "🔒 Privacidad de Datos",       c: "#7c3aed", p: "MetaFit recopila únicamente los datos necesarios para la gestión de membresías e historial de entrenamiento, conforme a la Ley 1581 de 2012 (Habeas Data). Los datos no serán compartidos con terceros sin autorización." },
+    { n: "1", t: "🔒 Privacidad de Datos",       c: "#e31c25", p: "MetaFit recopila únicamente los datos necesarios para la gestión de membresías e historial de entrenamiento, conforme a la Ley 1581 de 2012 (Habeas Data). Los datos no serán compartidos con terceros sin autorización." },
     { n: "2", t: "🏋️ Uso de Instalaciones",      c: "#2563eb", p: "El acceso está restringido a afiliados con membresía activa. El uso inadecuado de equipos puede resultar en suspensión de membresía. Los horarios y normas pueden actualizarse sin previo aviso." },
     { n: "3", t: "⚕️ Responsabilidad en Salud",  c: RED,       p: "Sport Gym Sede 80 no asume responsabilidad por lesiones derivadas del uso inadecuado de equipos. Se recomienda chequeo médico previo. Las rutinas y dietas son orientativas y no reemplazan el diagnóstico médico." },
   ];

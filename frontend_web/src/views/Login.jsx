@@ -20,7 +20,7 @@ const ROLES = [
 ];
 
 const ROLE_COLOR = {
-  Administrador: "#7c3aed",
+  Administrador: "#e31c25",
   Entrenador:    "#059669",
   Recepcionista: "#2563eb",
 };

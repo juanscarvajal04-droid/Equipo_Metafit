@@ -35,7 +35,7 @@ const NAV_ADMIN_EXCLUSIVO = [
 
 /** Paleta de colores por rol — permanecen inline por ser dinámicos */
 const ROLE_GRADIENT = {
-  Administrador: "linear-gradient(135deg,#7c3aed,#4f46e5)",
+  Administrador: "linear-gradient(135deg,#e31c25,#b71c1c)",
   Recepcionista: "linear-gradient(135deg,#2563eb,#0891b2)",
   Entrenador:    "linear-gradient(135deg,#059669,#0d9488)",
 };
@@ -58,7 +58,7 @@ export default function Sidebar() {
 
   const role     = user?.role || "Recepcionista";
   const links    = NAV_OPERATIVO[role] || [];
-  const gradient = ROLE_GRADIENT[role] || "#7c3aed";
+  const gradient = ROLE_GRADIENT[role] || "#e31c25";
   const isAdmin  = role === "Administrador";
 
   const handleLogout = () => { logout(); navigate("/"); };

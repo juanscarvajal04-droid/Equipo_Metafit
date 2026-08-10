@@ -15,7 +15,7 @@ const ROUTE_META = {
 };
 
 const ROLE_COLOR = {
-  Administrador: "#7c3aed",
+  Administrador: "#e31c25",
   Recepcionista: "#2563eb",
   Entrenador:    "#059669",
 };
