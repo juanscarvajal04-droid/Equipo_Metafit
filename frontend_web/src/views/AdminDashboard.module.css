@@ -1,6 +1,6 @@
 .page {
   min-height: 100vh;
-  background: #0a0a0f;
+  background: var(--mf-bg);
 }
 
 .headerIcon {
@@ -16,7 +16,7 @@
 }
 
 .headerSub {
-  color: #94a3b8;
+  color: var(--mf-muted);
 }
 
 .kpiIconWrap {
@@ -31,8 +31,8 @@
 }
 
 .kpiCard {
-  background: #1a1a2e;
-  border: 1px solid #252545;
+  background: var(--mf-surface);
+  border: 1px solid var(--mf-border);
   border-radius: 14px;
   padding: 0;
   transition: all 0.3s ease;
@@ -40,7 +40,7 @@
 
 .kpiCard:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 32px rgba(124, 58, 237, 0.2);
+  box-shadow: 0 8px 32px var(--mf-accent-strong);
 }
 
 .kpiCardBody {
@@ -54,25 +54,25 @@
 }
 
 .kpiLabel {
-  color: #94a3b8;
+  color: var(--mf-muted);
   font-size: 0.78rem;
 }
 
 .sectionTitle {
   font-weight: 700;
   margin-bottom: 0;
-  color: #e0e0e0;
+  color: var(--mf-text);
 }
 
 .cardDark {
-  background: #1a1a2e;
-  border: 1px solid #252545;
+  background: var(--mf-surface);
+  border: 1px solid var(--mf-border);
   border-radius: 14px;
   transition: all 0.3s ease;
 }
 
 .cardDark:hover {
-  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.15);
+  box-shadow: 0 4px 20px var(--mf-accent-strong);
 }
 
 .cardDarkBody {
@@ -80,31 +80,31 @@
 }
 
 .cardDarkHeader {
-  background: #0f0f1a;
-  border-bottom: 1px solid #252545;
+  background: var(--mf-surface-2);
+  border-bottom: 1px solid var(--mf-border);
   padding: 0.75rem 1.25rem;
   border-radius: 14px 14px 0 0;
 }
 
 .cardDarkFooter {
-  background: #0f0f1a;
-  border-top: 1px solid #252545;
+  background: var(--mf-surface-2);
+  border-top: 1px solid var(--mf-border);
   padding: 0.5rem 1.25rem;
   border-radius: 0 0 14px 14px;
-  color: #94a3b8;
+  color: var(--mf-muted);
   font-size: 0.8rem;
 }
 
 .objCard {
-  background: #1a1a2e;
-  border: 1px solid #252545;
+  background: var(--mf-surface);
+  border: 1px solid var(--mf-border);
   border-radius: 14px;
   transition: all 0.3s ease;
 }
 
 .objCard:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 32px rgba(124, 58, 237, 0.2);
+  box-shadow: 0 8px 32px var(--mf-accent-strong);
 }
 
 .objCardBody {
@@ -130,7 +130,7 @@
 
 .progressTrack {
   height: 6px;
-  background: #252545;
+  background: var(--mf-surface-3);
   border-radius: 3px;
   overflow: hidden;
 }
@@ -149,14 +149,14 @@
 
 .tableCard {
   width: 100%;
-  background: #1a1a2e;
-  border: 1px solid #252545;
+  background: var(--mf-surface);
+  border: 1px solid var(--mf-border);
   border-radius: 14px;
 }
 
 .tableCardHeader {
-  background: #0f0f1a;
-  border-bottom: 1px solid #252545;
+  background: var(--mf-surface-2);
+  border-bottom: 1px solid var(--mf-border);
   padding: 0.75rem 1.25rem;
   display: flex;
   justify-content: space-between;
@@ -167,11 +167,11 @@
 }
 
 .tableCardFooter {
-  background: #0f0f1a;
-  border-top: 1px solid #252545;
+  background: var(--mf-surface-2);
+  border-top: 1px solid var(--mf-border);
   padding: 0.5rem 1.25rem;
   border-radius: 0 0 14px 14px;
-  color: #94a3b8;
+  color: var(--mf-muted);
   font-size: 0.8rem;
 }
 
@@ -181,21 +181,21 @@
 }
 
 .table th {
-  color: #94a3b8;
+  color: var(--mf-muted);
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-weight: 600;
-  background: #0f0f1a;
-  border-bottom: 1px solid #252545;
+  background: var(--mf-surface-2);
+  border-bottom: 1px solid var(--mf-border);
   padding: 0.7rem 0.75rem;
   white-space: nowrap;
 }
 
 .table td {
   background: transparent;
-  color: #e0e0e0;
-  border-bottom: 1px solid #252545;
+  color: var(--mf-text);
+  border-bottom: 1px solid var(--mf-border);
   padding: 0.6rem 0.75rem;
   vertical-align: middle;
 }
@@ -205,15 +205,15 @@
 }
 
 .table tbody tr:hover {
-  background: rgba(124, 58, 237, 0.08);
+  background: var(--mf-accent-soft);
 }
 
 .table tbody tr:nth-child(even) {
-  background: #16213e;
+  background: var(--mf-surface);
 }
 
 .table tbody tr:nth-child(even):hover {
-  background: rgba(124, 58, 237, 0.08);
+  background: var(--mf-accent-soft);
 }
 
 .avatarTd {
@@ -231,30 +231,30 @@
 
 .emailSm {
   font-size: 0.72rem;
-  color: #94a3b8;
+  color: var(--mf-muted);
 }
 
 .searchInput {
   max-width: none;
   flex: 1;
   min-width: 140px;
-  background: #1a1a2e;
-  border: 1px solid #252545;
-  color: #e0e0e0;
+  background: var(--mf-surface);
+  border: 1px solid var(--mf-border);
+  color: var(--mf-text);
   border-radius: 8px;
   font-size: 0.85rem;
 }
 
 .searchInput::placeholder {
-  color: #94a3b8;
+  color: var(--mf-muted);
   opacity: 1;
 }
 
 .searchInput:focus {
   border-color: #4b9ecb;
   box-shadow: 0 0 0 3px rgba(75, 158, 203, 0.2);
-  background: #1a1a2e;
-  color: #e0e0e0;
+  background: var(--mf-surface);
+  color: var(--mf-text);
 }
 
 .btnPrimary {
@@ -276,8 +276,8 @@
 
 .btnOutline {
   background: transparent;
-  border: 1px solid #252545;
-  color: #94a3b8;
+  border: 1px solid var(--mf-border);
+  color: var(--mf-muted);
   font-size: 0.78rem;
   border-radius: 8px;
   padding: 0.25rem 0.75rem;
@@ -311,22 +311,22 @@
 }
 
 .inputGroupText {
-  background: #16213e;
-  border: 1px solid #252545;
-  color: #94a3b8;
+  background: var(--mf-surface);
+  border: 1px solid var(--mf-border);
+  color: var(--mf-muted);
 }
 
 .inputDark {
-  background: #1a1a2e;
-  border: 1px solid #252545;
-  color: #e0e0e0;
+  background: var(--mf-surface);
+  border: 1px solid var(--mf-border);
+  color: var(--mf-text);
 }
 
 .inputDark:focus {
   border-color: #4b9ecb;
   box-shadow: 0 0 0 3px rgba(75, 158, 203, 0.2);
-  background: #1a1a2e;
-  color: #e0e0e0;
+  background: var(--mf-surface);
+  color: var(--mf-text);
 }
 
 .precioValor {
@@ -336,20 +336,20 @@
 }
 
 .precioInfo {
-  color: #94a3b8;
+  color: var(--mf-muted);
   font-size: 0.8rem;
 }
 
 .chartCard {
-  background: #1a1a2e;
-  border: 1px solid #252545;
+  background: var(--mf-surface);
+  border: 1px solid var(--mf-border);
   border-radius: 14px;
   padding: 1.25rem;
   transition: all 0.3s ease;
 }
 
 .chartCard:hover {
-  box-shadow: 0 8px 32px rgba(124, 58, 237, 0.15);
+  box-shadow: 0 8px 32px var(--mf-accent-strong);
 }
 
 .chartCard canvas {
@@ -359,7 +359,7 @@
 .chartTitle {
   font-weight: 700;
   font-size: 0.85rem;
-  color: #e0e0e0;
+  color: var(--mf-text);
   margin-bottom: 1rem;
 }
 
@@ -371,5 +371,5 @@
 }
 
 .emptyState {
-  color: #94a3b8;
+  color: var(--mf-muted);
 }

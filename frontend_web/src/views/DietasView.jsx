@@ -338,8 +338,8 @@ export default function DietasView() {
 
         {/* SEARCH + TABLE */}
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:16, flexWrap:"wrap", gap:12,
-          background:"#1a1a2e", border:"1px solid #252545", borderRadius:14, padding:"0.75rem 1rem" }}>
-          <span className="fw-bold" style={{ fontSize:"0.85rem", color:"#e0e0e0" }}>🥗 Afiliados</span>
+          background:"var(--mf-surface)", border:"1px solid var(--mf-border)", borderRadius:14, padding:"0.75rem 1rem" }}>
+          <span className="fw-bold" style={{ fontSize:"0.85rem", color:"var(--mf-text)" }}>🥗 Afiliados</span>
           <div style={{ display:"flex", gap:8, alignItems:"center" }}>
             <input type="text" className={s.searchInput} placeholder="Buscar afiliado..." value={search} onChange={(e)=>setSearch(e.target.value)} style={{ maxWidth:260, padding:"0.4rem 0.7rem", fontSize:"0.85rem" }} />
             <button type="button" className={s.btnRefresh} onClick={fetchAfiliados} disabled={loading} title="Refrescar">{loading ? <span className="spinner-border spinner-border-sm" /> : "🔄"}</button>
@@ -368,12 +368,12 @@ export default function DietasView() {
                 ) : filtered.map((a, idx) => {
                   const ciclo = cicloActivo(a);
                   const tienePlan = ciclo && !!ciclo.plan_nutricional;
-                  const objConf = OBJETIVO_CONFIG[a.objetivo] || { icono:"🎯", color:"#94a3b8", bg:"#94a3b818" };
+                  const objConf = OBJETIVO_CONFIG[a.objetivo] || { icono:"🎯", color:"var(--mf-muted)", bg:"#94a3b818" };
                   const nombre = nombreCompleto(a);
                   const email = a.correo || a.email || "";
                   return (
                     <tr key={getId(a)}>
-                      <td style={{ color:"#94a3b8", fontSize:"0.78rem" }}>{idx + 1}</td>
+                      <td style={{ color:"var(--mf-muted)", fontSize:"0.78rem" }}>{idx + 1}</td>
                       <td>
                         <div style={{ display:"flex", alignItems:"center", gap:"0.5rem" }}>
                           <div className={s.avatar} style={{ background:avatarColor(nombre) }}>{inicial(a)}</div>
@@ -455,7 +455,7 @@ export default function DietasView() {
                       <div className={s.avatarModal} style={{ background:avatarColor(nombreCompleto(asignarAfiliadoData)) }}>{inicial(asignarAfiliadoData)}</div>
                       <div>
                         <div style={{ fontWeight:600 }}>{nombreCompleto(asignarAfiliadoData)}</div>
-                        <small style={{ color:"#94a3b8" }}>{asignarAfiliadoData.correo||asignarAfiliadoData.email||""}{asignarAfiliadoData.objetivo ? ` · ${asignarAfiliadoData.objetivo}` : ""}</small>
+                        <small style={{ color:"var(--mf-muted)" }}>{asignarAfiliadoData.correo||asignarAfiliadoData.email||""}{asignarAfiliadoData.objetivo ? ` · ${asignarAfiliadoData.objetivo}` : ""}</small>
                         <div style={{ display:"flex", gap:4, marginTop:4, flexWrap:"wrap" }}>
                           {restriccionesBadges(asignarAfiliadoData.restricciones)}
                         </div>
@@ -493,7 +493,7 @@ export default function DietasView() {
                     {alimentosDisponibles.length === 0 ? (
                       <div className={s.emptyState}>No hay alimentos disponibles para este afiliado</div>
                     ) : (
-                      <div style={{ maxHeight:350, overflowY:"auto", border:"1px solid #252545", borderRadius:8, padding:"0.5rem", marginBottom:12 }}>
+                      <div style={{ maxHeight:350, overflowY:"auto", border:"1px solid var(--mf-border)", borderRadius:8, padding:"0.5rem", marginBottom:12 }}>
                         {alimentosDisponibles.map((al) => {
                           const id = al.id_alimento;
                           const checked = !!selectedAlimentos[id];
@@ -555,7 +555,7 @@ export default function DietasView() {
                   <div className={s.avatarModal} style={{ background:avatarColor(nombreCompleto(modalAfiliado)) }}>{inicial(modalAfiliado)}</div>
                   <div>
                     <div style={{ fontWeight:600 }}>{nombreCompleto(modalAfiliado)}</div>
-                    <small style={{ color:"#94a3b8" }}>{modalAfiliado.correo||modalAfiliado.email||""}</small>
+                    <small style={{ color:"var(--mf-muted)" }}>{modalAfiliado.correo||modalAfiliado.email||""}</small>
                     <div style={{ display:"flex", gap:4, marginTop:4, flexWrap:"wrap" }}>
                       {restriccionesBadges(modalAfiliado.restricciones)}
                     </div>
@@ -601,7 +601,7 @@ export default function DietasView() {
                     <tbody>
                       {catalogoAlimentos.map((al, idx) => (
                         <tr key={al.id_alimento}>
-                          <td style={{ color:"#94a3b8", fontSize:"0.78rem" }}>{idx + 1}</td>
+                          <td style={{ color:"var(--mf-muted)", fontSize:"0.78rem" }}>{idx + 1}</td>
                           <td style={{ fontWeight:600 }}>{al.nombre_alimento}</td>
                           <td>{al.proteinas}g</td>
                           <td>{al.carbohidratos}g</td>
@@ -746,16 +746,16 @@ function DietaDisplay({ afiliado, authAxios }) {
       <div className={s.infoCard} style={{ marginBottom:"1rem" }}>
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
           <div>
-            <small style={{ color:"#94a3b8", fontSize:"0.72rem" }}>Calorías objetivo</small>
+            <small style={{ color:"var(--mf-muted)", fontSize:"0.72rem" }}>Calorías objetivo</small>
             <div style={{ fontWeight:600 }}>{plan.calorias_objetivo || "—"} kcal</div>
           </div>
           <div>
-            <small style={{ color:"#94a3b8", fontSize:"0.72rem" }}>Comidas / día</small>
+            <small style={{ color:"var(--mf-muted)", fontSize:"0.72rem" }}>Comidas / día</small>
             <div style={{ fontWeight:600 }}>{plan.num_comidas || "—"}</div>
           </div>
           {plan.observaciones && (
             <div style={{ gridColumn:"1/-1" }}>
-              <small style={{ color:"#94a3b8", fontSize:"0.72rem" }}>Observaciones</small>
+              <small style={{ color:"var(--mf-muted)", fontSize:"0.72rem" }}>Observaciones</small>
               <div style={{ fontSize:"0.85rem" }}>{plan.observaciones}</div>
             </div>
           )}
@@ -789,7 +789,7 @@ function PlanDetalle({ detalle, numComidas }) {
         {grouped[key].map((d, i) => (
           <div key={i} style={{ display:"flex", justifyContent:"space-between", fontSize:"0.82rem" }}>
             <span>{d.nombre_alimento || "Alimento"}</span>
-            <span style={{ color:"#94a3b8" }}>{d.cantidad_g || 0}g</span>
+            <span style={{ color:"var(--mf-muted)" }}>{d.cantidad_g || 0}g</span>
           </div>
         ))}
       </div>

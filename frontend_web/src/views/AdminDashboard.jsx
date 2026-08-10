@@ -20,8 +20,10 @@ import { Bar, Line, Doughnut } from "react-chartjs-2";
 import styles from "./AdminDashboard.module.css";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, ArcElement, Tooltip, Legend, Filler);
-ChartJS.defaults.color = "#94a3b8";
-ChartJS.defaults.borderColor = "rgba(255,255,255,0.04)";
+
+const cssVar = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+ChartJS.defaults.color = cssVar("--mf-muted");
+ChartJS.defaults.borderColor = cssVar("--mf-border");
 
 const getId          = (doc) => doc.id_usuario ?? doc._id ?? doc.id;
 const nombreCompleto = (a)   => [a.nombres, a.apellidos].filter(Boolean).join(" ") || "Sin nombre";
@@ -38,12 +40,12 @@ const OBJETIVOS = Object.keys(OBJETIVO_CONFIG);
 
 const badgeEstado = (e) => {
   const map = { activo: {bg:"rgba(34,197,94,0.15)",color:"#22c55e"}, inactivo: {bg:"rgba(239,68,68,0.15)",color:"#ef4444"}, pendiente: {bg:"rgba(234,179,8,0.15)",color:"#eab308"} };
-  const c   = map[(e || "").toLowerCase()] || {bg:"rgba(148,163,184,0.15)",color:"#94a3b8"};
+  const c   = map[(e || "").toLowerCase()] || {bg:"rgba(148,163,184,0.15)",color:cssVar("--mf-muted")};
   return <span className={`${styles.badgeEstado}`} style={{background:c.bg,color:c.color,padding:"0.25rem 0.6rem",borderRadius:"6px"}}>{e || "—"}</span>;
 };
 const badgeNivel = (n) => {
-  const map = { principiante: {bg:"rgba(124,58,237,0.15)",color:"#a78bfa"}, intermedio: {bg:"rgba(59,130,246,0.15)",color:"#60a5fa"}, avanzado: {bg:"rgba(239,68,68,0.15)",color:"#f87171"} };
-  const c   = map[(n || "").toLowerCase()] || {bg:"rgba(148,163,184,0.15)",color:"#94a3b8"};
+  const map = { principiante: {bg:"rgba(124,58,237,0.15)",color:cssVar("--mf-accent")}, intermedio: {bg:"rgba(59,130,246,0.15)",color:"#60a5fa"}, avanzado: {bg:"rgba(239,68,68,0.15)",color:"#f87171"} };
+  const c   = map[(n || "").toLowerCase()] || {bg:"rgba(148,163,184,0.15)",color:cssVar("--mf-muted")};
   return <span className={`${styles.badgeEstado}`} style={{background:c.bg,color:c.color,padding:"0.25rem 0.6rem",borderRadius:"6px"}}>{n || "—"}</span>;
 };
 
@@ -100,10 +102,10 @@ export default function AdminDashboard() {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: "#1a1a2e",
-        titleColor: "#e0e0e0",
-        bodyColor: "#94a3b8",
-        borderColor: "#252545",
+        backgroundColor: cssVar("--mf-surface"),
+        titleColor: cssVar("--mf-text"),
+        bodyColor: cssVar("--mf-muted"),
+        borderColor: cssVar("--mf-border"),
         borderWidth: 1,
         padding: 10,
         cornerRadius: 8,
@@ -111,12 +113,12 @@ export default function AdminDashboard() {
     },
     scales: {
       x: {
-        grid: { color: "rgba(255,255,255,0.04)" },
-        ticks: { color: "#94a3b8", font: { size: 11 } },
+        grid: { color: cssVar("--mf-border") },
+        ticks: { color: cssVar("--mf-muted"), font: { size: 11 } },
       },
       y: {
-        grid: { color: "rgba(255,255,255,0.04)" },
-        ticks: { color: "#94a3b8", font: { size: 11 }, stepSize: 1 },
+        grid: { color: cssVar("--mf-border") },
+        ticks: { color: cssVar("--mf-muted"), font: { size: 11 }, stepSize: 1 },
       },
     },
   };
@@ -152,7 +154,7 @@ export default function AdminDashboard() {
       fill: true,
       tension: 0.4,
       pointBackgroundColor: "#4b9ecb",
-      pointBorderColor: "#0a0a0f",
+      pointBorderColor: cssVar("--mf-bg"),
       pointBorderWidth: 2,
       pointRadius: 4,
       pointHoverRadius: 7,
@@ -165,10 +167,10 @@ export default function AdminDashboard() {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: "#1a1a2e",
-        titleColor: "#e0e0e0",
-        bodyColor: "#94a3b8",
-        borderColor: "#252545",
+        backgroundColor: cssVar("--mf-surface"),
+        titleColor: cssVar("--mf-text"),
+        bodyColor: cssVar("--mf-muted"),
+        borderColor: cssVar("--mf-border"),
         borderWidth: 1,
         padding: 10,
         cornerRadius: 8,
@@ -177,11 +179,11 @@ export default function AdminDashboard() {
     scales: {
       x: {
         grid: { display: false },
-        ticks: { color: "#94a3b8", font: { size: 11 } },
+        ticks: { color: cssVar("--mf-muted"), font: { size: 11 } },
       },
       y: {
-        grid: { color: "rgba(255,255,255,0.04)" },
-        ticks: { color: "#94a3b8", font: { size: 11 }, stepSize: 1 },
+        grid: { color: cssVar("--mf-border") },
+        ticks: { color: cssVar("--mf-muted"), font: { size: 11 }, stepSize: 1 },
         beginAtZero: true,
       },
     },
@@ -205,13 +207,13 @@ export default function AdminDashboard() {
     plugins: {
       legend: {
         position: "bottom",
-        labels: { color: "#94a3b8", padding: 16, usePointStyle: true, font: { size: 11 } },
+        labels: { color: cssVar("--mf-muted"), padding: 16, usePointStyle: true, font: { size: 11 } },
       },
       tooltip: {
-        backgroundColor: "#1a1a2e",
-        titleColor: "#e0e0e0",
-        bodyColor: "#94a3b8",
-        borderColor: "#252545",
+        backgroundColor: cssVar("--mf-surface"),
+        titleColor: cssVar("--mf-text"),
+        bodyColor: cssVar("--mf-muted"),
+        borderColor: cssVar("--mf-border"),
         borderWidth: 1,
         padding: 10,
         cornerRadius: 8,
@@ -228,10 +230,10 @@ export default function AdminDashboard() {
       ctx.font = 'bold 26px "Segoe UI", sans-serif';
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillStyle = "#e0e0e0";
+      ctx.fillStyle = cssVar("--mf-text");
       ctx.fillText(total, width / 2, height / 2 - 8);
       ctx.font = '11px "Segoe UI", sans-serif';
-      ctx.fillStyle = "#94a3b8";
+      ctx.fillStyle = cssVar("--mf-muted");
       ctx.fillText("Total", width / 2, height / 2 + 16);
       ctx.restore();
     },
@@ -268,10 +270,10 @@ export default function AdminDashboard() {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: "#1a1a2e",
-        titleColor: "#e0e0e0",
-        bodyColor: "#94a3b8",
-        borderColor: "#252545",
+        backgroundColor: cssVar("--mf-surface"),
+        titleColor: cssVar("--mf-text"),
+        bodyColor: cssVar("--mf-muted"),
+        borderColor: cssVar("--mf-border"),
         borderWidth: 1,
         padding: 10,
         cornerRadius: 8,
@@ -279,13 +281,13 @@ export default function AdminDashboard() {
     },
     scales: {
       x: {
-        grid: { color: "rgba(255,255,255,0.04)" },
-        ticks: { color: "#94a3b8", font: { size: 11 }, stepSize: 1 },
+        grid: { color: cssVar("--mf-border") },
+        ticks: { color: cssVar("--mf-muted"), font: { size: 11 }, stepSize: 1 },
         beginAtZero: true,
       },
       y: {
         grid: { display: false },
-        ticks: { color: "#e0e0e0", font: { size: 12, weight: "600" } },
+        ticks: { color: cssVar("--mf-text"), font: { size: 12, weight: "600" } },
       },
     },
   };
@@ -372,7 +374,7 @@ export default function AdminDashboard() {
     <AppLayout>
       {toast.msg && (
         <div className={`position-fixed bottom-0 end-0 m-4 alert shadow-lg py-2 px-3 ${styles.toast}`}
-          style={{ borderLeft: toast.type === "danger" ? "4px solid #ef4444" : "4px solid #4b9ecb", background: "#1a1a2e", color: "#e0e0e0", borderColor: "#252545" }}>
+          style={{ borderLeft: toast.type === "danger" ? "4px solid #ef4444" : "4px solid #4b9ecb", background: cssVar("--mf-surface"), color: cssVar("--mf-text"), borderColor: cssVar("--mf-border") }}>
           {toast.msg}
         </div>
       )}
@@ -452,7 +454,7 @@ export default function AdminDashboard() {
                     </span>
                     <small className={styles.precioInfo}> COP / mes</small>
                     <div className={styles.precioInfo} style={{marginTop:"0.25rem"}}>
-                      {totalActivos} afiliados activos × {precioFormateado} = <strong style={{color:"#a78bfa"}}>${(totalActivos * precio).toLocaleString("es-CO")} COP</strong> / mes
+                      {totalActivos} afiliados activos × {precioFormateado} = <strong style={{color:cssVar("--mf-accent")}}>${(totalActivos * precio).toLocaleString("es-CO")} COP</strong> / mes
                     </div>
                   </div>
                 )}
@@ -570,12 +572,12 @@ export default function AdminDashboard() {
                                 {inicial(a)}
                               </div>
                               <div>
-                                <div className="fw-semibold small" style={{color:"#e0e0e0"}}>{nombreCompleto(a)}</div>
+                                <div className="fw-semibold small" style={{color:cssVar("--mf-text")}}>{nombreCompleto(a)}</div>
                                 <div className={styles.emailSm}>{a.correo}</div>
                               </div>
                             </div>
                           </td>
-                          <td><small style={{color:"#94a3b8"}}>{OBJETIVO_CONFIG[a.objetivo_fisico]?.icono} {a.objetivo_fisico || "—"}</small></td>
+                          <td><small style={{color:cssVar("--mf-muted")}}>{OBJETIVO_CONFIG[a.objetivo_fisico]?.icono} {a.objetivo_fisico || "—"}</small></td>
                           <td>{badgeNivel(a.nivel_experiencia)}</td>
                           <td className="text-center">
                             {ciclo

@@ -274,7 +274,7 @@ export default function AfiliadosView() {
 
         <div className={s.tableCard}>
           {loading ? (
-            <div style={{ padding: "3rem 0", textAlign: "center", color: "#94a3b8" }}>Cargando afiliados...</div>
+            <div style={{ padding: "3rem 0", textAlign: "center", color: "var(--mf-muted)" }}>Cargando afiliados...</div>
           ) : afiliadosFiltrados.length === 0 ? (
             <div style={{ padding: "3rem 0", textAlign: "center" }}>
               <p className={s.emptyState}>No se encontraron afiliados.</p>
@@ -299,7 +299,7 @@ export default function AfiliadosView() {
                     const email = a.correo || a.email || "";
                     return (
                       <tr key={getId(a)}>
-                        <td style={{ color: "#94a3b8", fontSize: "0.78rem" }}>{idx + 1}</td>
+                        <td style={{ color: "var(--mf-muted)", fontSize: "0.78rem" }}>{idx + 1}</td>
                         <td>
                           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                             <AvatarFoto nombre={nombre} foto={a.foto} />
@@ -405,7 +405,7 @@ export default function AfiliadosView() {
                 </div>
               )}
 
-              <div style={{ display: "flex", gap: 4, marginTop: 20, borderBottom: "1px solid #252545" }}>
+              <div style={{ display: "flex", gap: 4, marginTop: 20, borderBottom: "1px solid var(--mf-border)" }}>
                 {tabsDisponibles.map((tab, i) => (
                   <button
                     key={tab}
@@ -427,7 +427,7 @@ export default function AfiliadosView() {
                         <div className={s.kpiValue} style={{ fontSize: "1rem" }}>
                           ${Number(detalleAfiliado.ultimo_pago.valor_pagado || 0).toLocaleString("es-CO")}
                         </div>
-                        <div style={{ fontSize: "0.75rem", color: "#94a3b8", marginTop: 4 }}>
+                        <div style={{ fontSize: "0.75rem", color: "var(--mf-muted)", marginTop: 4 }}>
                           {new Date(detalleAfiliado.ultimo_pago.fecha_pago).toLocaleDateString("es-CO")}
                         </div>
                       </div>
@@ -510,7 +510,7 @@ export default function AfiliadosView() {
                       }}
                       style={{ padding: "0.35rem 0.5rem" }}
                     />
-                    <small style={{ color: "#94a3b8" }}>JPG, PNG, WEBP o GIF · máx 5 MB</small>
+                    <small style={{ color: "var(--mf-muted)" }}>JPG, PNG, WEBP o GIF · máx 5 MB</small>
                   </div>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
@@ -623,7 +623,7 @@ export default function AfiliadosView() {
                       }}
                       style={{ padding: "0.35rem 0.5rem" }}
                     />
-                    <small style={{ color: "#94a3b8" }}>JPG, PNG, WEBP o GIF · máx 5 MB</small>
+                    <small style={{ color: "var(--mf-muted)" }}>JPG, PNG, WEBP o GIF · máx 5 MB</small>
                   </div>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>

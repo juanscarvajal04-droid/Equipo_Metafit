@@ -21,7 +21,7 @@ const sumarDias = (fechaStr, dias) => {
 const hoyISO = () => new Date().toISOString().split("T")[0];
 
 const estadoMembresia = (dias) => {
-  if (dias === null) return { label: "Sin registro", color: "#94a3b8", bg: "#94a3b818" };
+  if (dias === null) return { label: "Sin registro", color: "var(--mf-muted)", bg: "#94a3b818" };
   if (dias < 0) return { label: "Vencido", color: "#e94560", bg: "#e9456018" };
   if (dias <= 10) return { label: "Por vencer", color: "#f59e0b", bg: "#f59e0b18" };
   return { label: "Al d\u00eda", color: "#059669", bg: "#05966918" };
@@ -122,7 +122,7 @@ export default function PagosView() {
       <AppLayout>
         <div className={s.page}>
           <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "70vh" }}>
-            <div style={{ width: 32, height: 32, border: "3px solid #252545", borderTopColor: "#7c3aed", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+            <div style={{ width: 32, height: 32, border: "3px solid var(--mf-border)", borderTopColor: "#7c3aed", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
           </div>
         </div>
       </AppLayout>
@@ -148,32 +148,32 @@ export default function PagosView() {
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: "0.75rem", marginBottom: "1.5rem" }}>
-            <div style={{ background: "#1a1a2e", border: "1px solid #252545", borderRadius: 12, padding: "0.75rem" }}>
-              <div style={{ fontSize: "0.65rem", color: "#94a3b8", letterSpacing: "0.05em", textTransform: "uppercase" }}>Total</div>
-              <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "#e0e0e0" }}>{kpiCounts.total}</div>
-              <div style={{ fontSize: "0.72rem", color: "#94a3b8" }}>Afiliados</div>
+            <div style={{ background: "var(--mf-surface)", border: "1px solid var(--mf-border)", borderRadius: 12, padding: "0.75rem" }}>
+              <div style={{ fontSize: "0.65rem", color: "var(--mf-muted)", letterSpacing: "0.05em", textTransform: "uppercase" }}>Total</div>
+              <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "var(--mf-text)" }}>{kpiCounts.total}</div>
+              <div style={{ fontSize: "0.72rem", color: "var(--mf-muted)" }}>Afiliados</div>
             </div>
-            <div style={{ background: "#1a1a2e", border: "1px solid #252545", borderRadius: 12, padding: "0.75rem" }}>
-              <div style={{ fontSize: "0.65rem", color: "#94a3b8", letterSpacing: "0.05em", textTransform: "uppercase" }}>Al d\u00eda</div>
+            <div style={{ background: "var(--mf-surface)", border: "1px solid var(--mf-border)", borderRadius: 12, padding: "0.75rem" }}>
+              <div style={{ fontSize: "0.65rem", color: "var(--mf-muted)", letterSpacing: "0.05em", textTransform: "uppercase" }}>Al d\u00eda</div>
               <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "#22c55e" }}>{kpiCounts.alDia}</div>
-              <div style={{ fontSize: "0.72rem", color: "#94a3b8" }}>Membres\u00eda activa</div>
+              <div style={{ fontSize: "0.72rem", color: "var(--mf-muted)" }}>Membres\u00eda activa</div>
             </div>
-            <div style={{ background: "#1a1a2e", border: "1px solid #252545", borderRadius: 12, padding: "0.75rem" }}>
-              <div style={{ fontSize: "0.65rem", color: "#94a3b8", letterSpacing: "0.05em", textTransform: "uppercase" }}>Por vencer</div>
+            <div style={{ background: "var(--mf-surface)", border: "1px solid var(--mf-border)", borderRadius: 12, padding: "0.75rem" }}>
+              <div style={{ fontSize: "0.65rem", color: "var(--mf-muted)", letterSpacing: "0.05em", textTransform: "uppercase" }}>Por vencer</div>
               <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "#f59e0b" }}>{kpiCounts.porVencer}</div>
-              <div style={{ fontSize: "0.72rem", color: "#94a3b8" }}>{'\u2264'} 10 d\u00edas</div>
+              <div style={{ fontSize: "0.72rem", color: "var(--mf-muted)" }}>{'\u2264'} 10 d\u00edas</div>
             </div>
-            <div style={{ background: "#1a1a2e", border: "1px solid #252545", borderRadius: 12, padding: "0.75rem" }}>
-              <div style={{ fontSize: "0.65rem", color: "#94a3b8", letterSpacing: "0.05em", textTransform: "uppercase" }}>Vencidos</div>
+            <div style={{ background: "var(--mf-surface)", border: "1px solid var(--mf-border)", borderRadius: 12, padding: "0.75rem" }}>
+              <div style={{ fontSize: "0.65rem", color: "var(--mf-muted)", letterSpacing: "0.05em", textTransform: "uppercase" }}>Vencidos</div>
               <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "#ef4444" }}>{kpiCounts.vencido}</div>
-              <div style={{ fontSize: "0.72rem", color: "#94a3b8" }}>Sin membres\u00eda</div>
+              <div style={{ fontSize: "0.72rem", color: "var(--mf-muted)" }}>Sin membres\u00eda</div>
             </div>
           </div>
 
           <div className={s.tableCard}>
             <div className={s.tableCardHeader}>
-              <span style={{ fontWeight: 600, color: "#e0e0e0", fontSize: "0.9rem" }}>{'\uD83E\uDDFE'} Afiliados</span>
-              <span style={{ color: "#94a3b8", fontSize: "0.78rem" }}>{filtered.length} registro(s)</span>
+              <span style={{ fontWeight: 600, color: "var(--mf-text)", fontSize: "0.9rem" }}>{'\uD83E\uDDFE'} Afiliados</span>
+              <span style={{ color: "var(--mf-muted)", fontSize: "0.78rem" }}>{filtered.length} registro(s)</span>
             </div>
             <div style={{ overflowX: "auto" }}>
               <table className={s.table}>
@@ -202,13 +202,13 @@ export default function PagosView() {
                       const ac = avatarColor(nombre);
                       return (
                         <tr key={getId(a)}>
-                          <td style={{ color: "#94a3b8", fontWeight: 500 }}>{i + 1}</td>
+                          <td style={{ color: "var(--mf-muted)", fontWeight: 500 }}>{i + 1}</td>
                           <td>
                             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                               <div style={{ width: 32, height: 32, borderRadius: "50%", background: ac, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.78rem", fontWeight: 700, color: "#fff", flexShrink: 0 }}>{inicial(a)}</div>
                               <div>
                                 <div style={{ fontWeight: 600, fontSize: "0.85rem" }}>{nombre}</div>
-                                <div style={{ fontSize: "0.72rem", color: "#94a3b8" }}>{a.email || a.correo || ""}</div>
+                                <div style={{ fontSize: "0.72rem", color: "var(--mf-muted)" }}>{a.email || a.correo || ""}</div>
                               </div>
                             </div>
                           </td>
@@ -217,10 +217,10 @@ export default function PagosView() {
                             {ultimoPago ? (
                               <div>
                                 <div style={{ fontSize: "0.78rem" }}>{new Date(ultimoPago.fecha_pago).toLocaleDateString("es-CO")}</div>
-                                <div style={{ fontSize: "0.72rem", color: "#94a3b8" }}>${Number(ultimoPago.valor_pagado || 0).toLocaleString("es-CO")}</div>
+                                <div style={{ fontSize: "0.72rem", color: "var(--mf-muted)" }}>${Number(ultimoPago.valor_pagado || 0).toLocaleString("es-CO")}</div>
                               </div>
                             ) : (
-                              <span style={{ color: "#94a3b8", fontSize: "0.78rem" }}>{'\u2014'}</span>
+                              <span style={{ color: "var(--mf-muted)", fontSize: "0.78rem" }}>{'\u2014'}</span>
                             )}
                           </td>
                           <td>
@@ -269,9 +269,9 @@ export default function PagosView() {
                 <div className={s.confirmBox}>
                   <div style={{ fontSize: "0.85rem", marginBottom: "0.5rem" }}>{'\u00BF'}Registrar pago por valor de</div>
                   <div style={{ fontSize: "1.3rem", fontWeight: 700, color: "#22c55e" }}>$80,000 COP</div>
-                  <div style={{ fontSize: "0.78rem", color: "#94a3b8", marginTop: "0.5rem" }}>
+                  <div style={{ fontSize: "0.78rem", color: "var(--mf-muted)", marginTop: "0.5rem" }}>
                     Nueva fecha de vencimiento:{' '}
-                    <strong style={{ color: "#e0e0e0" }}>
+                    <strong style={{ color: "var(--mf-text)" }}>
                       {new Date(sumarDias(fechaVenc(pagoModal), 30)).toLocaleDateString("es-CO")}
                     </strong>
                   </div>
@@ -303,7 +303,7 @@ export default function PagosView() {
                   </div>
                 </div>
                 {historialPagos.length === 0 ? (
-                  <div style={{ textAlign: "center", padding: "2rem", color: "#94a3b8" }}>
+                  <div style={{ textAlign: "center", padding: "2rem", color: "var(--mf-muted)" }}>
                     Este afiliado no tiene pagos registrados.
                   </div>
                 ) : (
@@ -331,7 +331,7 @@ export default function PagosView() {
                               )}
                             </td>
                             <td style={{ fontWeight: 600 }}>${Number(p.valor_pagado || 0).toLocaleString("es-CO")}</td>
-                            <td style={{ color: "#94a3b8", fontSize: "0.78rem" }}>
+                            <td style={{ color: "var(--mf-muted)", fontSize: "0.78rem" }}>
                               {p.nombres_recepcionista ? `${p.nombres_recepcionista} ${p.apellidos_recepcionista || ""}` : "\u2014"}
                             </td>
                           </tr>

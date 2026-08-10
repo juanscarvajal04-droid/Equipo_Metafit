@@ -9,7 +9,8 @@
   top: 0;
   height: 100vh;
   overflow-y: auto;
-  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.35);
+  border-right: 1px solid var(--mf-border);
+  box-shadow: var(--mf-sidebar-shadow);
 }
 
 .sidebar::-webkit-scrollbar {
@@ -21,24 +22,24 @@
 }
 
 .sidebar::-webkit-scrollbar-thumb {
-  background: #252545;
+  background: var(--mf-surface-3);
   border-radius: 10px;
 }
 
 .sidebar::-webkit-scrollbar-thumb:hover {
-  background: #3a3a5c;
+  background: var(--mf-border-strong);
 }
 
 /* ── Logo ── */
 .logoSection {
   text-align: center;
   padding: 1.5rem 0.75rem 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid var(--mf-border);
 }
 
 .logoIcon {
   font-size: 2.1rem;
-  filter: drop-shadow(0 0 12px rgba(124, 58, 237, 0.7));
+  filter: drop-shadow(0 0 10px var(--mf-accent-strong));
 }
 
 .logoTitle {
@@ -59,7 +60,7 @@
 /* ── Perfil ── */
 .profileSection {
   padding: 0.85rem 0.75rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid var(--mf-border);
 }
 
 .profileRow {
@@ -79,7 +80,7 @@
   font-weight: 700;
   flex-shrink: 0;
   font-size: 1rem;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 0 2px var(--mf-border-strong);
 }
 
 .profileInfo {
@@ -108,10 +109,10 @@
   text-align: center;
   border-radius: 8px;
   padding: 0.3rem 0;
-  background: linear-gradient(90deg, rgba(124, 58, 237, 0.2), rgba(79, 70, 229, 0.2));
-  border: 1px solid rgba(124, 58, 237, 0.4);
+  background: var(--mf-accent-soft);
+  border: 1px solid var(--mf-accent-strong);
   font-size: 0.62rem;
-  color: #a78bfa;
+  color: var(--mf-accent);
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -135,7 +136,7 @@
 .navSectionLabelAdmin {
   font-size: 0.6rem;
   font-weight: 700;
-  color: #a78bfa;
+  color: var(--mf-accent);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   padding: 14px 20px 6px;
@@ -164,14 +165,21 @@
 }
 
 .navLink:hover {
-  background: rgba(124, 58, 237, 0.08);
+  background: var(--mf-accent-soft);
   color: var(--mf-text);
 }
 
+.navLink:focus-visible,
+.navLinkAdmin:focus-visible,
+.logoutButton:focus-visible {
+  outline: none;
+  box-shadow: var(--mf-focus-ring);
+}
+
 .navLinkActive {
-  background: rgba(124, 58, 237, 0.15);
+  background: var(--mf-accent-strong);
   color: var(--mf-text);
-  border-left: 3px solid #7c3aed;
+  border-left: 3px solid var(--mf-accent);
 }
 
 /* ── Admin nav link ── */
@@ -184,35 +192,35 @@
   font-size: 0.82rem;
   font-weight: 600;
   color: var(--mf-muted);
-  border-left: 3px solid rgba(124, 58, 237, 0.3);
+  border-left: 3px solid var(--mf-accent-strong);
   transition: all 0.3s ease;
   margin-right: 8px;
   border-radius: 0 8px 8px 0;
-  background: rgba(124, 58, 237, 0.06);
+  background: var(--mf-accent-soft);
 }
 
 .navLinkAdmin:hover {
-  background: rgba(124, 58, 237, 0.15);
+  background: var(--mf-accent-strong);
   color: var(--mf-text);
 }
 
 .navLinkAdminActive {
-  background: rgba(124, 58, 237, 0.22);
+  background: var(--mf-accent-strong);
   color: var(--mf-text);
-  border-left: 3px solid #a78bfa;
+  border-left: 3px solid var(--mf-accent);
 }
 
 /* ── Logout ── */
 .logoutSection {
   padding: 0.75rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid var(--mf-border);
 }
 
 .logoutButton {
   width: 100%;
   background: transparent;
   color: var(--mf-muted);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--mf-border-strong);
   border-radius: 8px;
   padding: 0.4rem 0.75rem;
   font-size: 0.8rem;
@@ -226,7 +234,7 @@
 }
 
 .logoutButton:hover {
-  background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
-  border-color: #ef4444;
+  background: var(--mf-error);
+  color: #ffffff;
+  border-color: var(--mf-error);
 }

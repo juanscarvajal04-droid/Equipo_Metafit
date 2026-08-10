@@ -17,6 +17,8 @@ import styles from "./FinanzasView.module.css";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend, ChartDataLabels);
 
+const cssVar = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
 const MONTHS = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
 const MAX_RECEP = 5;
 
@@ -224,8 +226,8 @@ export default function FinanzasView() {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: "#1a1a2e",
-        titleColor: "#ccc",
+        backgroundColor: cssVar("--mf-surface"),
+        titleColor: cssVar("--mf-muted"),
         bodyColor: "#fff",
         callbacks: {
           title: (items) => `Mes: ${items[0].label}`,
@@ -235,22 +237,22 @@ export default function FinanzasView() {
       datalabels: {
         anchor: "end",
         align: "end",
-        color: "#ccc",
+        color: cssVar("--mf-muted"),
         font: { size: 9, weight: "bold" },
         formatter: (v) => (v > 0 ? formatter(v) : ""),
       },
     },
     scales: {
       x: {
-        ticks: { color: "#94a3b8" },
-        grid: { color: "#252545" },
+        ticks: { color: cssVar("--mf-muted") },
+        grid: { color: cssVar("--mf-border") },
       },
       y: {
         ticks: {
-          color: "#94a3b8",
+          color: cssVar("--mf-muted"),
           callback: (v) => formatter(v),
         },
-        grid: { color: "#252545" },
+        grid: { color: cssVar("--mf-border") },
       },
     },
   };
@@ -280,7 +282,7 @@ export default function FinanzasView() {
         data: doughnutValues,
         backgroundColor: doughnutBg,
         borderWidth: 2,
-        borderColor: "#1a1a2e",
+        borderColor: cssVar("--mf-surface"),
       },
     ],
   };
@@ -291,11 +293,11 @@ export default function FinanzasView() {
     plugins: {
       legend: {
         position: "bottom",
-        labels: { color: "#94a3b8", padding: 16, font: { size: 10 } },
+        labels: { color: cssVar("--mf-muted"), padding: 16, font: { size: 10 } },
       },
       tooltip: {
-        backgroundColor: "#1a1a2e",
-        titleColor: "#ccc",
+        backgroundColor: cssVar("--mf-surface"),
+        titleColor: cssVar("--mf-muted"),
         bodyColor: "#fff",
         callbacks: {
           title: (items) => `Recepcionista: ${items[0].label}`,

@@ -345,8 +345,8 @@ export default function RutinasView() {
         </div>
 
         {/* SEARCH + TABLE CARD */}
-        <div className={s.tableCardHeader} style={{ marginBottom:16, borderRadius:14, border:"1px solid #252545", display:"flex", gap:12, flexWrap:"wrap", alignItems:"center", justifyContent:"space-between", padding:"0.75rem 1rem" }}>
-          <span className="fw-bold" style={{ fontSize:"0.85rem", color:"#e0e0e0" }}>🏋️ Afiliados</span>
+        <div className={s.tableCardHeader} style={{ marginBottom:16, borderRadius:14, border:"1px solid var(--mf-border)", display:"flex", gap:12, flexWrap:"wrap", alignItems:"center", justifyContent:"space-between", padding:"0.75rem 1rem" }}>
+          <span className="fw-bold" style={{ fontSize:"0.85rem", color:"var(--mf-text)" }}>🏋️ Afiliados</span>
           <div style={{ display:"flex", gap:8, alignItems:"center" }}>
             <input type="text" className={s.searchInput} placeholder="Buscar afiliado..." value={search} onChange={(e)=>setSearch(e.target.value)} style={{ maxWidth:260, padding:"0.4rem 0.7rem", fontSize:"0.85rem" }} />
             <button type="button" className={s.btnRefresh} onClick={fetchAfiliados} disabled={loading} title="Refrescar">{loading ? <span className="spinner-border spinner-border-sm" /> : "🔄"}</button>
@@ -380,7 +380,7 @@ export default function RutinasView() {
                   const email = a.correo || a.email || "";
                   return (
                     <tr key={getId(a)}>
-                      <td style={{ color:"#94a3b8", fontSize:"0.78rem" }}>{idx + 1}</td>
+                      <td style={{ color:"var(--mf-muted)", fontSize:"0.78rem" }}>{idx + 1}</td>
                       <td>
                         <div style={{ display:"flex", alignItems:"center", gap:"0.5rem" }}>
                           <div className={s.avatar} style={{ background:avatarColor(nombre) }}>{inicial(a)}</div>
@@ -392,7 +392,7 @@ export default function RutinasView() {
                       </td>
                       <td>{a.objetivo_fisico ? <span>{OBJETIVO_ICON[a.objetivo_fisico]||""} {a.objetivo_fisico}</span> : "—"}</td>
                       <td>{badgeNivel(a.nivel_experiencia)}</td>
-                      <td style={{ color:"#e0e0e0" }}>{a.disponibilidad_semanal_dias || "—"}</td>
+                      <td style={{ color:"var(--mf-text)" }}>{a.disponibilidad_semanal_dias || "—"}</td>
                       <td>{tienePlan ? <span className={s.badgeCiclo}>✅ Activo</span> : <span className={s.badgeSinRutina}>Sin plan</span>}</td>
                       <td>
                         <div className={s.actionBtns}>
@@ -478,7 +478,7 @@ export default function RutinasView() {
                         ))}
                       </div>
                     )}
-                    <div style={{ maxHeight:300, overflowY:"auto", border:"1px solid #252545", borderRadius:8, padding:"0.5rem", marginBottom:12 }}>
+                    <div style={{ maxHeight:300, overflowY:"auto", border:"1px solid var(--mf-border)", borderRadius:8, padding:"0.5rem", marginBottom:12 }}>
                       {ejerciciosDisponibles.map((ej) => {
                         const id = ej.id_ejercicio ?? ej.id;
                         const checked = !!selectedEjercicios[id];
@@ -554,7 +554,7 @@ export default function RutinasView() {
                     <tbody>
                       {catalogoEj.map((ej, idx) => (
                         <tr key={ej.id_ejercicio ?? ej.id}>
-                          <td style={{ color:"#94a3b8", fontSize:"0.78rem" }}>{idx + 1}</td>
+                          <td style={{ color:"var(--mf-muted)", fontSize:"0.78rem" }}>{idx + 1}</td>
                           <td style={{ fontWeight:600 }}>{ej.nombre_ejercicio || ej.nombre}</td>
                           <td>{ej.grupo_muscular ? <span className={s.badgeDark}>{ej.grupo_muscular}</span> : "—"}</td>
                           <td>{badgeNivel(ej.nivel_minimo)}</td>
@@ -735,7 +735,7 @@ function PlanDisplay({ afiliado, authAxios }) {
     <div key={rutina.id_rutina ?? ri} style={{ marginBottom:16 }}>
       <h5 style={{ color:"#7c3aed", fontSize:"0.9rem", margin:"0 0 8px 0", display:"flex", alignItems:"center", gap:6 }}>
         📅 {DAY_LABELS[(rutina.dia_numero ?? 1) - 1] || `Día ${rutina.dia_numero}`}
-        {rutina.enfoque_muscular ? <span className="badge" style={{ background:"rgba(124,58,237,0.15)", color:"#a78bfa", fontSize:"0.65rem", padding:"0.1rem 0.4rem" }}>{rutina.enfoque_muscular}</span> : null}
+        {rutina.enfoque_muscular ? <span className="badge" style={{ background:"rgba(124,58,237,0.15)", color:"var(--mf-accent)", fontSize:"0.65rem", padding:"0.1rem 0.4rem" }}>{rutina.enfoque_muscular}</span> : null}
       </h5>
       {Array.isArray(rutina.ejercicios) && rutina.ejercicios.length > 0 ? (
         <table className={s.table} style={{ fontSize:"0.8rem" }}>
@@ -750,7 +750,7 @@ function PlanDisplay({ afiliado, authAxios }) {
           <tbody>
             {rutina.ejercicios.filter(e=>e).map((ej, ei) => (
               <tr key={ei}>
-                <td style={{ color:"#94a3b8" }}>{ej.orden ?? ei + 1}</td>
+                <td style={{ color:"var(--mf-muted)" }}>{ej.orden ?? ei + 1}</td>
                 <td>{ej.nombre_ejercicio || ej.nombre || "—"}</td>
                 <td>{ej.series ?? "—"}</td>
                 <td>{ej.repeticiones ?? "—"}</td>

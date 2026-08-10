@@ -7,14 +7,14 @@
 .headerTitle {
   font-size: 1.35rem;
   font-weight: 800;
-  color: #e0e0e0;
+  color: var(--mf-text);
   margin: 0 0 4px;
   letter-spacing: -0.02em;
 }
 
 .headerSub {
   font-size: 0.82rem;
-  color: #94a3b8;
+  color: var(--mf-muted);
   margin: 0;
 }
 
@@ -33,8 +33,8 @@
 }
 
 .kpiCard {
-  background: #1a1a2e;
-  border: 1px solid #252545;
+  background: var(--mf-surface);
+  border: 1px solid var(--mf-border);
   border-radius: 12px;
   padding: 1rem 1.25rem;
   display: flex;
@@ -44,7 +44,7 @@
 
 .kpiLabel {
   font-size: 0.72rem;
-  color: #94a3b8;
+  color: var(--mf-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   font-weight: 500;
@@ -53,22 +53,22 @@
 .kpiValue {
   font-size: 1.65rem;
   font-weight: 800;
-  color: #e0e0e0;
+  color: var(--mf-text);
   line-height: 1.2;
 }
 
 /* ── Table Card ───────────────────────────────────── */
 .tableCard {
-  background: #1a1a2e;
-  border: 1px solid #252545;
+  background: var(--mf-surface);
+  border: 1px solid var(--mf-border);
   border-radius: 14px;
   overflow: hidden;
 }
 
 .tableCardHeader {
-  background: #1a1a2e;
+  background: var(--mf-surface);
   border-radius: 14px;
-  border: 1px solid #252545;
+  border: 1px solid var(--mf-border);
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
@@ -82,7 +82,7 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 0.82rem;
-  color: #e0e0e0;
+  color: var(--mf-text);
 }
 
 .table th {
@@ -90,30 +90,30 @@
   padding: 0.65rem 0.75rem;
   font-size: 0.72rem;
   font-weight: 600;
-  color: #94a3b8;
+  color: var(--mf-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  border-bottom: 2px solid #252545;
-  background: #16213e;
+  border-bottom: 2px solid var(--mf-border);
+  background: var(--mf-surface);
   white-space: nowrap;
 }
 
 .table td {
   padding: 0.6rem 0.75rem;
-  border-bottom: 1px solid #252545;
+  border-bottom: 1px solid var(--mf-border);
   vertical-align: middle;
 }
 
 .table tr:nth-child(even) {
-  background: #1a1a2e;
+  background: var(--mf-surface);
 }
 
 .table tr:nth-child(odd) {
-  background: #16213e;
+  background: var(--mf-surface);
 }
 
 .table tr:hover {
-  background: rgba(124, 58, 237, 0.08);
+  background: var(--mf-accent-soft);
 }
 
 /* ── Avatars ──────────────────────────────────────── */
@@ -157,16 +157,16 @@
 }
 
 .emailText {
-  color: #94a3b8;
+  color: var(--mf-muted);
   font-size: 0.75rem;
   line-height: 1.3;
 }
 
 /* ── Search Input ─────────────────────────────────── */
 .searchInput {
-  background: #0a0a0f;
-  border: 1px solid #252545;
-  color: #e0e0e0;
+  background: var(--mf-bg);
+  border: 1px solid var(--mf-border);
+  color: var(--mf-text);
   border-radius: 6px;
   outline: none;
   transition: border-color 0.15s;
@@ -177,12 +177,12 @@
 }
 
 .searchInput::placeholder {
-  color: #4a4a6a;
+  color: var(--mf-muted);
 }
 
 /* ── Labels ───────────────────────────────────────── */
 .labelText {
-  color: #94a3b8;
+  color: var(--mf-muted);
   font-size: 0.78rem;
   font-weight: 500;
   margin-bottom: 4px;
@@ -191,9 +191,9 @@
 
 /* ── Dark Form Inputs ─────────────────────────────── */
 .inputDark {
-  background: #0a0a0f;
-  border: 1px solid #252545;
-  color: #e0e0e0;
+  background: var(--mf-bg);
+  border: 1px solid var(--mf-border);
+  color: var(--mf-text);
   border-radius: 6px;
   padding: 0.45rem 0.7rem;
   font-size: 0.85rem;
@@ -206,13 +206,13 @@
 }
 
 .inputDark::placeholder {
-  color: #4a4a6a;
+  color: var(--mf-muted);
 }
 
 .selectDark {
-  background: #0a0a0f;
-  border: 1px solid #252545;
-  color: #e0e0e0;
+  background: var(--mf-bg);
+  border: 1px solid var(--mf-border);
+  color: var(--mf-text);
   border-radius: 6px;
   padding: 0.45rem 0.7rem;
   font-size: 0.85rem;
@@ -234,9 +234,9 @@
 }
 
 .textareaDark {
-  background: #0a0a0f;
-  border: 1px solid #252545;
-  color: #e0e0e0;
+  background: var(--mf-bg);
+  border: 1px solid var(--mf-border);
+  color: var(--mf-text);
   border-radius: 6px;
   padding: 0.45rem 0.7rem;
   font-size: 0.85rem;
@@ -251,7 +251,7 @@
 }
 
 .textareaDark::placeholder {
-  color: #4a4a6a;
+  color: var(--mf-muted);
 }
 
 /* ── Buttons ──────────────────────────────────────── */
@@ -279,7 +279,7 @@
 .btnOutline {
   background: transparent;
   border: 1px solid #7c3aed;
-  color: #a78bfa;
+  color: var(--mf-accent);
   border-radius: 8px;
   padding: 0.45rem 1rem;
   font-size: 0.82rem;
@@ -289,8 +289,8 @@
 }
 
 .btnOutline:hover {
-  background: rgba(124, 58, 237, 0.1);
-  color: #c4b5fd;
+  background: var(--mf-accent-soft);
+  color: var(--mf-accent);
 }
 
 .btnOutlineDanger {
@@ -390,8 +390,8 @@
 
 .btnRefresh {
   background: transparent;
-  border: 1px solid #252545;
-  color: #94a3b8;
+  border: 1px solid var(--mf-border);
+  color: var(--mf-muted);
   border-radius: 6px;
   padding: 0.35rem 0.65rem;
   font-size: 0.8rem;
@@ -400,8 +400,8 @@
 }
 
 .btnRefresh:hover {
-  background: rgba(124, 58, 237, 0.08);
-  color: #e0e0e0;
+  background: var(--mf-accent-soft);
+  color: var(--mf-text);
   border-color: #7c3aed;
 }
 
@@ -422,8 +422,8 @@
 }
 
 .badgeDark {
-  background: #252545;
-  color: #94a3b8;
+  background: var(--mf-surface-3);
+  color: var(--mf-muted);
   padding: 0.2rem 0.6rem;
   border-radius: 12px;
   font-size: 0.72rem;
@@ -467,7 +467,7 @@
 
 /* ── Empty State ──────────────────────────────────── */
 .emptyState {
-  color: #94a3b8;
+  color: var(--mf-muted);
   text-align: center;
   padding: 2rem;
   font-size: 0.85rem;
@@ -514,14 +514,14 @@
 }
 
 .modalContent {
-  background: #1a1a2e;
+  background: var(--mf-surface);
   border-radius: 12px;
-  border: 1px solid #252545;
+  border: 1px solid var(--mf-border);
   max-width: 750px;
   width: 95%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--mf-shadow-modal);
 }
 
 .modalHeader {
@@ -529,13 +529,13 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem 1.25rem;
-  border-bottom: 1px solid #252545;
+  border-bottom: 1px solid var(--mf-border);
 }
 
 .modalTitle {
   font-size: 1rem;
   font-weight: 700;
-  color: #e0e0e0;
+  color: var(--mf-text);
   margin: 0;
 }
 
@@ -548,27 +548,27 @@
   justify-content: flex-end;
   gap: 0.5rem;
   padding: 1rem 1.25rem;
-  border-top: 1px solid #252545;
+  border-top: 1px solid var(--mf-border);
 }
 
 /* ── Afiliado Section ─────────────────────────────── */
 .afiliadoSection {
-  background: #0a0a0f;
-  border: 1px solid #252545;
+  background: var(--mf-bg);
+  border: 1px solid var(--mf-border);
   border-radius: 10px;
   padding: 0.85rem;
 }
 
 .afiliadoInfoBox {
-  background: #0a0a0f;
-  border: 1px solid #252545;
+  background: var(--mf-bg);
+  border: 1px solid var(--mf-border);
   border-radius: 8px;
   padding: 0.75rem;
 }
 
 .infoCard {
-  background: #0a0a0f;
-  border: 1px solid #252545;
+  background: var(--mf-bg);
+  border: 1px solid var(--mf-border);
   border-radius: 8px;
   padding: 0.75rem;
 }
@@ -608,14 +608,14 @@
 /* ── Ejercicio Items ──────────────────────────────── */
 .ejercicioItem {
   padding: 0.5rem;
-  border: 1px solid #252545;
+  border: 1px solid var(--mf-border);
   border-radius: 8px;
   margin-bottom: 4px;
   transition: background 0.15s, border-color 0.15s;
 }
 
 .ejercicioItemChecked {
-  background: rgba(124, 58, 237, 0.08);
+  background: var(--mf-accent-soft);
   border-color: rgba(124, 58, 237, 0.3);
 }
 
@@ -629,12 +629,12 @@
   font-weight: 600;
   font-size: 0.85rem;
   flex: 1;
-  color: #e0e0e0;
+  color: var(--mf-text);
 }
 
 .ejercicioMeta {
   font-size: 0.72rem;
-  color: #94a3b8;
+  color: var(--mf-muted);
 }
 
 /* ── Form Row (inline form inside ejercicio item) ─── */
@@ -653,15 +653,15 @@
 
 .inlineLabel {
   font-size: 0.7rem;
-  color: #94a3b8;
+  color: var(--mf-muted);
   display: block;
   margin-bottom: 2px;
 }
 
 .inlineInput {
-  background: #0a0a0f;
-  border: 1px solid #252545;
-  color: #e0e0e0;
+  background: var(--mf-bg);
+  border: 1px solid var(--mf-border);
+  color: var(--mf-text);
   border-radius: 4px;
   padding: 0.3rem 0.5rem;
   font-size: 0.78rem;
@@ -675,9 +675,9 @@
 }
 
 .inlineSelect {
-  background: #0a0a0f;
-  border: 1px solid #252545;
-  color: #e0e0e0;
+  background: var(--mf-bg);
+  border: 1px solid var(--mf-border);
+  color: var(--mf-text);
   border-radius: 4px;
   padding: 0.3rem 0.5rem;
   font-size: 0.78rem;
@@ -703,8 +703,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(124, 58, 237, 0.06);
-  border: 1px solid rgba(124, 58, 237, 0.2);
+  background: var(--mf-accent-soft);
+  border: 1px solid var(--mf-accent-strong);
   border-radius: 6px;
   padding: 0.4rem 0.75rem;
 }

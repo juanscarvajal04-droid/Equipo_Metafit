@@ -192,7 +192,7 @@ export default function GestionPersonal() {
         <div style={{
           position: "fixed", bottom: 0, right: 0, margin: "1rem", zIndex: 9999,
           borderLeft: toast.type === "danger" ? "4px solid #ef4444" : "4px solid #22c55e",
-          background: "#1a1a2e", color: "#e0e0e0", border: "1px solid #252545",
+          background: "var(--mf-surface)", color: "var(--mf-text)", border: "1px solid #252545",
           padding: "0.5rem 1rem", borderRadius: "0.5rem",
         }}>
           {toast.msg}
@@ -227,7 +227,7 @@ export default function GestionPersonal() {
         {/* ── Table ──────────────────────────────────── */}
         <div className={s.tableCard}>
           <div className={s.tableCardHeader}>
-            <h5 style={{ fontWeight: 700, margin: 0, color: "#e0e0e0" }}>
+            <h5 style={{ fontWeight: 700, margin: 0, color: "var(--mf-text)" }}>
               👥 Personal ({filtrados.length})
             </h5>
           </div>
@@ -271,7 +271,7 @@ export default function GestionPersonal() {
                           >
                             {(emp.nombres || emp.correo || "?")[0].toUpperCase()}
                           </div>
-                          <span style={{ color: "#e0e0e0", fontWeight: 600 }}>
+                          <span style={{ color: "var(--mf-text)", fontWeight: 600 }}>
                             {nombreCompleto(emp)}
                           </span>
                         </div>
@@ -337,13 +337,13 @@ export default function GestionPersonal() {
               </button>
             </div>
             <div className={s.modalBody}>
-              <p style={{ color: "#94a3b8", margin: 0 }}>
+              <p style={{ color: "var(--mf-muted)", margin: 0 }}>
                 ¿Estás seguro de eliminar a{" "}
-                <strong style={{ color: "#e0e0e0" }}>
+                <strong style={{ color: "var(--mf-text)" }}>
                   {nombreCompleto(deleteTarget)}
                 </strong>?
               </p>
-              <p style={{ color: "#94a3b8", fontSize: "0.85rem", marginTop: "0.5rem" }}>
+              <p style={{ color: "var(--mf-muted)", fontSize: "0.85rem", marginTop: "0.5rem" }}>
                 Esta acción no se puede deshacer.
               </p>
             </div>
