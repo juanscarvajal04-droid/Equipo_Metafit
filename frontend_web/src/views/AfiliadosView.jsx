@@ -399,13 +399,13 @@ export default function AfiliadosView() {
               </div>
 
               {detalleAfiliado.restricciones_medicas && (
-                <div style={{ marginTop: 12 }}>
+                <div className={s.detailRestricciones}>
                   <div className={s.detailLabel}>Restricciones médicas</div>
                   <div className={s.detailValue}>{detalleAfiliado.restricciones_medicas}</div>
                 </div>
               )}
 
-              <div style={{ display: "flex", gap: 4, marginTop: 20, borderBottom: "1px solid var(--mf-border)" }}>
+              <div className={s.detailTabsBar}>
                 {tabsDisponibles.map((tab, i) => (
                   <button
                     key={tab}
@@ -418,7 +418,7 @@ export default function AfiliadosView() {
                 ))}
               </div>
 
-              <div style={{ marginTop: 16, minHeight: 80 }}>
+              <div className={s.detailTabsContent}>
                 {tabsDisponibles[tabActivo] === "Estado de Cuenta" && (
                   <div>
                     {detalleAfiliado.ultimo_pago ? (
