@@ -218,7 +218,7 @@ code {
   /* Superficies */
   --mf-bg:         #0a0a0f;
   --mf-bg-grad:    linear-gradient(180deg, #1a1a2e 0%, #0a0a0f 100%);
-  --mf-sidebar:    linear-gradient(180deg, #0f0f1a 0%, #14142b 55%, #0d1b3e 100%);
+  --mf-sidebar:    var(--mf-surface);   /* sólida, plana — como el Header */
   --mf-surface:    #16171d;   /* card / modal base */
   --mf-surface-2:  #1f2230;   /* hover / raised */
   --mf-surface-3:  #2a2e3f;   /* shadow-raised / pill activa */
@@ -241,6 +241,13 @@ code {
   --mf-error:         #f87171;
   --mf-warning:       #fbbf24;
 
+  /* Tokens semánticos (roles de texto y hover, misma fuente) */
+  --mf-text-primary:   var(--mf-text);
+  --mf-text-secondary: var(--mf-muted);
+  --mf-text-tertiary:  var(--mf-faint);
+  --mf-hover:          var(--mf-accent-soft);
+  --mf-error-soft:     rgba(239, 68, 68, 0.18);
+
   /* Elevación (Atlassian: sombras teñidas, nunca negro puro) */
   --mf-shadow-card:    0 1px 2px rgba(9, 30, 66, 0.25);
   --mf-shadow-raised:  0 8px 16px rgba(9, 30, 66, 0.32);
@@ -262,7 +269,7 @@ code {
 :root[data-theme='light'] {
   --mf-bg:         #fafafa;
   --mf-bg-grad:    linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
-  --mf-sidebar:    #ffffff;
+  --mf-sidebar:    var(--mf-surface);
   --mf-surface:    #ffffff;
   --mf-surface-2:  #f3f4f6;   /* hover / raised */
   --mf-surface-3:  #e9eaee;   /* pill activa / bien definida */
@@ -282,6 +289,13 @@ code {
   --mf-success:       #22c55e;
   --mf-error:         #ef4444;
   --mf-warning:       #eab308;
+
+  /* Tokens semánticos (roles de texto y hover, misma fuente) */
+  --mf-text-primary:   var(--mf-text);
+  --mf-text-secondary: var(--mf-muted);
+  --mf-text-tertiary:  var(--mf-faint);
+  --mf-hover:          var(--mf-accent-soft);
+  --mf-error-soft:     rgba(239, 68, 68, 0.12);
 
   --mf-shadow-card:    0 1px 2px rgba(16, 24, 40, 0.05), 0 1px 3px rgba(16, 24, 40, 0.1);
   --mf-shadow-raised:  0 4px 8px rgba(16, 24, 40, 0.04), 0 8px 16px rgba(16, 24, 40, 0.08);

@@ -88,14 +88,8 @@ export default function Sidebar() {
             <div className={styles.profileEmail}>
               {user?.email || "—"}
             </div>
-            {/* Badge — background y boxShadow son dinámicos */}
-            <span
-              className={`badge mt-1 ${styles.profileBadge}`}
-              style={{
-                background: gradient,
-                boxShadow: isAdmin ? "0 2px 8px rgba(124,58,237,0.45)" : "none",
-              }}
-            >
+            {/* Badge — fondo/acento definidos por token CSS (-mf-accent) */}
+            <span className={`badge mt-1 ${styles.profileBadge}`}>
               {ROLE_ICON[role]} {ROLE_LABEL[role]}
             </span>
           </div>

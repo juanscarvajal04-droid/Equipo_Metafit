@@ -22,7 +22,7 @@
 }
 
 .sidebar::-webkit-scrollbar-thumb {
-  background: var(--mf-surface-3);
+  background: var(--mf-border);
   border-radius: 10px;
 }
 
@@ -33,7 +33,7 @@
 /* ── Logo ── */
 .logoSection {
   text-align: center;
-  padding: 1.5rem 0.75rem 1rem;
+  padding: 1.5rem 0.75rem 1.1rem;
   border-bottom: 1px solid var(--mf-border);
 }
 
@@ -43,7 +43,7 @@
 }
 
 .logoTitle {
-  color: var(--mf-text);
+  color: var(--mf-text-primary);
   font-weight: 700;
   margin-top: 0.25rem;
   font-size: 1.15rem;
@@ -51,7 +51,7 @@
 }
 
 .logoSubtitle {
-  color: var(--mf-muted);
+  color: var(--mf-text-secondary);
   font-size: 0.65rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -59,14 +59,14 @@
 
 /* ── Perfil ── */
 .profileSection {
-  padding: 0.85rem 0.75rem;
+  padding: 0.9rem 0.9rem;
   border-bottom: 1px solid var(--mf-border);
 }
 
 .profileRow {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.6rem;
 }
 
 .avatar {
@@ -76,7 +76,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--mf-text);
+  color: var(--mf-on-accent);
   font-weight: 700;
   flex-shrink: 0;
   font-size: 1rem;
@@ -88,7 +88,7 @@
 }
 
 .profileEmail {
-  color: var(--mf-text);
+  color: var(--mf-text-primary);
   font-weight: 600;
   font-size: 0.78rem;
   white-space: nowrap;
@@ -98,14 +98,17 @@
 
 .profileBadge {
   font-size: 0.6rem;
+  font-weight: 700;
   letter-spacing: 0.04em;
-  margin-top: 0.25rem;
+  margin-top: 0.35rem;
   padding: 0.25rem 0.5rem;
   border-radius: 6px;
+  background: var(--mf-accent);
+  color: var(--mf-on-accent);
 }
 
 .adminBanner {
-  margin-top: 0.5rem;
+  margin-top: 0.6rem;
   text-align: center;
   border-radius: 8px;
   padding: 0.3rem 0;
@@ -120,26 +123,22 @@
 
 /* ── Navegación ── */
 .nav {
-  padding: 0.5rem 0;
+  padding: 0.35rem 0;
   flex: 1;
 }
 
-.navSectionLabel {
-  font-size: 0.6rem;
+.navSectionLabel,
+.navSectionLabelAdmin {
+  font-size: 0.68rem;
   font-weight: 700;
-  color: var(--mf-muted);
-  letter-spacing: 0.1em;
+  color: var(--mf-text-tertiary);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding: 10px 20px 6px;
+  padding: 18px 20px 6px;
 }
 
 .navSectionLabelAdmin {
-  font-size: 0.6rem;
-  font-weight: 700;
-  color: var(--mf-accent);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  padding: 14px 20px 6px;
+  padding-top: 20px;
 }
 
 .navIcon {
@@ -149,7 +148,8 @@
 }
 
 /* ── Nav link (base) ── */
-.navLink {
+.navLink,
+.navLinkAdmin {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -157,16 +157,17 @@
   text-decoration: none;
   font-size: 0.82rem;
   font-weight: 600;
-  color: var(--mf-muted);
+  color: var(--mf-text-secondary);
   border-left: 3px solid transparent;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   margin-right: 8px;
   border-radius: 0 8px 8px 0;
 }
 
-.navLink:hover {
-  background: var(--mf-accent-soft);
-  color: var(--mf-text);
+.navLink:hover,
+.navLinkAdmin:hover {
+  background: var(--mf-hover);
+  color: var(--mf-text-primary);
 }
 
 .navLink:focus-visible,
@@ -178,55 +179,38 @@
 
 .navLinkActive {
   background: var(--mf-accent-strong);
-  color: var(--mf-text);
+  color: var(--mf-text-primary);
   border-left: 3px solid var(--mf-accent);
 }
 
-/* ── Admin nav link ── */
+/* ── Admin nav link (tinte de sección exclusiva) ── */
 .navLinkAdmin {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 20px;
-  text-decoration: none;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--mf-muted);
   border-left: 3px solid var(--mf-accent-strong);
-  transition: all 0.3s ease;
-  margin-right: 8px;
-  border-radius: 0 8px 8px 0;
-  background: var(--mf-accent-soft);
-}
-
-.navLinkAdmin:hover {
-  background: var(--mf-accent-strong);
-  color: var(--mf-text);
 }
 
 .navLinkAdminActive {
   background: var(--mf-accent-strong);
-  color: var(--mf-text);
+  color: var(--mf-text-primary);
   border-left: 3px solid var(--mf-accent);
 }
 
-/* ── Logout ── */
+/* ── Logout (botón outline, consistente con la app) ── */
 .logoutSection {
-  padding: 0.75rem;
+  padding: 0.8rem;
   border-top: 1px solid var(--mf-border);
 }
 
 .logoutButton {
   width: 100%;
   background: transparent;
-  color: var(--mf-muted);
-  border: 1px solid var(--mf-border-strong);
+  color: var(--mf-text-secondary);
+  border: 1px solid var(--mf-border);
   border-radius: 8px;
-  padding: 0.4rem 0.75rem;
+  padding: 0.45rem 0.75rem;
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -234,7 +218,7 @@
 }
 
 .logoutButton:hover {
-  background: var(--mf-error);
-  color: #ffffff;
+  background: var(--mf-error-soft);
+  color: var(--mf-error);
   border-color: var(--mf-error);
 }
