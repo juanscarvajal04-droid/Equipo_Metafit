@@ -122,4 +122,29 @@ Todos los documentos se encuentran en la carpeta [`documentacion/`](./documentac
 | Storybook | ✅ 5 historias (Badge, Button, Card, Modal, Avatar) tema oscuro |
 
 ---
+
+## ⚠️ CORS abierto temporalmente (pruebas en la red del SENA)
+
+**Estado actual: `app.use(cors({ origin: '*' }))`** en `backend/server.js` + `CORS_ORIGINS="*"`
+en Render. Esto permite cualquier origen para que la demo funcione desde la red del SENA.
+
+**Después de la presentación hay que RESTRINGIRLO de nuevo** a la lista blanca:
+
+```js
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin) return callback(null, true);   // sin Origin: móvil/curl
+    const allowed = (process.env.CORS_ORIGINS || DEFAULT_CORS_ORIGIN)
+      .split(',').map((s) => s.trim()).filter(Boolean);
+    if (allowed.includes('*') || allowed.includes(origin)) return callback(null, true);
+    return callback(new Error('CORS no permitido para este origen'));
+  },
+  credentials: false,
+}));
+```
+
+El código original completo está comentado en `backend/server.js` (sección CORS).
+Render: `CORS_ORIGINS = https://metafit-frontend-78x6.onrender.com,http://localhost:5173,http://127.0.0.1:5173`
+
+---
 *MetaFit Inc. · Sport Gym Sede 80 · Bogotá, Colombia* 
