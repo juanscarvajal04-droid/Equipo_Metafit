@@ -21,10 +21,15 @@ const IS_PROD = process.env.NODE_ENV === 'production';
 // ── CORS ──────────────────────────────────────────────────────
 // Lista blanca estricta desde CORS_ORIGINS (coma-separada, sin espacios).
 // En producción Render: "https://metafit-frontend-78x6.onrender.com"
-// Si CORS_ORIGINS está vacío, se usa el frontend oficial como default.
+// Si CORS_ORIGINS está vacío, se usa el frontend oficial como default
+// (+ orígenes de desarrollo localhost:5173 para depuración en la red del SENA).
 // Requests SIN Origin (app móvil, curl, server-to-server) se permiten.
 // Cualquier otro origen → callback(error) → el error handler responde 403.
-const DEFAULT_CORS_ORIGIN = 'https://metafit-frontend-78x6.onrender.com';
+const DEFAULT_CORS_ORIGIN = [
+  'https://metafit-frontend-78x6.onrender.com',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+].join(',');
 
 const corsOrigins = () =>
   (process.env.CORS_ORIGINS || DEFAULT_CORS_ORIGIN)
