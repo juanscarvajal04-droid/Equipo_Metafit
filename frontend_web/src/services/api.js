@@ -10,11 +10,12 @@ import axios from 'axios';
 
 /**
  * Base URL del backend.
- * En Docker Compose se inyecta: VITE_API_URL=http://localhost:3001
- * En desarrollo local sin Docker, crea un .env en /frontend_web:
+ * En producción Render se inyecta: VITE_API_URL=https://metafit-backend-rr18.onrender.com
+ * En desarrollo local, crea un .env en /frontend_web:
  *   VITE_API_URL=http://localhost:3001
+ * El fallback apunta SIEMPRE al backend de producción (nunca a localhost).
  */
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const BASE_URL = import.meta.env.VITE_API_URL || 'https://metafit-backend-rr18.onrender.com';
 
 /** URL base pública del backend (para imágenes servidas bajo /uploads) */
 export const API_BASE_URL = BASE_URL;
