@@ -19,35 +19,34 @@ const IS_PROD = process.env.NODE_ENV === 'production';
 
 
 // ── CORS ──────────────────────────────────────────────────────
-// Lista blanca estricta desde CORS_ORIGINS (coma-separada, sin espacios).
-// En producción Render: "https://metafit-frontend-78x6.onrender.com"
-// Si CORS_ORIGINS está vacío, se usa el frontend oficial como default
-// (+ orígenes de desarrollo localhost:5173 para depuración en la red del SENA).
-// Requests SIN Origin (app móvil, curl, server-to-server) se permiten.
-// Cualquier otro origen → callback(error) → el error handler responde 403.
-const DEFAULT_CORS_ORIGIN = [
-  'https://metafit-frontend-78x6.onrender.com',
-  'http://localhost:5173',
-  'http://127.0.0.1:5173',
-].join(',');
-
-const corsOrigins = () =>
-  (process.env.CORS_ORIGINS || DEFAULT_CORS_ORIGIN)
-    .split(',')
-    .map((s) => s.trim())
-    .filter(Boolean);
-
-app.use(cors({
-  origin(origin, callback) {
-    if (!origin) return callback(null, true);   // sin Origin: móvil/curl
-    const allowed = corsOrigins();
-    if (allowed.includes('*') || allowed.includes(origin)) {
-      return callback(null, true);              // lista blanca
-    }
-    return callback(new Error('CORS no permitido para este origen'));
-  },
-  credentials: false,
-}));
+// ⚠️ TEMPORAL (pruebas en la red del SENA): CORS abierto a cualquier
+// origen (origin: '*'). Después de la presentación, volver a la lista
+// blanca estricta usando la variable CORS_ORIGINS:
+//
+//   const DEFAULT_CORS_ORIGIN = [
+//     'https://metafit-frontend-78x6.onrender.com',
+//     'http://localhost:5173',
+//     'http://127.0.0.1:5173',
+//   ].join(',');
+//
+//   const corsOrigins = () =>
+//     (process.env.CORS_ORIGINS || DEFAULT_CORS_ORIGIN)
+//       .split(',')
+//       .map((s) => s.trim())
+//       .filter(Boolean);
+//
+//   app.use(cors({
+//     origin(origin, callback) {
+//       if (!origin) return callback(null, true);   // sin Origin: móvil/curl
+//       const allowed = corsOrigins();
+//       if (allowed.includes('*') || allowed.includes(origin)) {
+//         return callback(null, true);              // lista blanca
+//       }
+//       return callback(new Error('CORS no permitido para este origen'));
+//     },
+//     credentials: false,
+//   }));
+app.use(cors({ origin: '*' }));
 
 // ── ISO 25000 / 3.1: Helmet — cabeceras HTTP seguras ──────────
 // Desactivamos contentSecurityPolicy para que Swagger UI pueda
