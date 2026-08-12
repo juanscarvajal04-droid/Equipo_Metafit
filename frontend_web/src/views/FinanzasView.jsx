@@ -17,6 +17,8 @@ import styles from "./FinanzasView.module.css";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend, ChartDataLabels);
 
+const cssVar = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
 const MONTHS = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
 const MAX_RECEP = 5;
 
@@ -108,7 +110,7 @@ export default function FinanzasView() {
     setPdfLoading(true);
     try {
       const { default: jsPDF } = await import("jspdf");
-      await import("jspdf-autotable");
+      const { default: autoTable } = await import("jspdf-autotable");
       const doc = new jsPDF();
       const { ultimos_pagos, total_recaudado } = data;
       const periodo = filtros.fecha_inicio || filtros.fecha_fin
@@ -130,12 +132,12 @@ export default function FinanzasView() {
         p.nombres_recepcionista ? `${p.nombres_recepcionista} ${p.apellidos_recepcionista}` : "—",
       ]);
 
-      doc.autoTable({
+      autoTable(doc, {
         head: [["Afiliado", "Fecha", "Valor", "Estado", "Recepcionista"]],
         body: rows,
         startY: 40,
         styles: { fontSize: 8 },
-        headStyles: { fillColor: [124, 58, 237] },
+        headStyles: { fillColor: [227, 28, 37] },
       });
 
       const y = doc.lastAutoTable.finalY + 12;
@@ -201,8 +203,8 @@ export default function FinanzasView() {
   const etiquetasBar = ultimos6.map((r) => `${MONTHS[r.mes - 1]} ${r.anio}`);
   const valoresBar = ultimos6.map((r) => Number(r.total));
   const maxVal = Math.max(...valoresBar, 0);
-  const bgColorsBar = valoresBar.map((v) => (v === maxVal && maxVal > 0 ? "#e94560" : "rgba(124, 58, 237, 0.65)"));
-  const borderColorsBar = valoresBar.map((v) => (v === maxVal && maxVal > 0 ? "#e94560" : "#4b9ecb"));
+  const bgColorsBar = valoresBar.map((v) => (v === maxVal && maxVal > 0 ? "#e31c25" : "rgba(227, 28, 37, 0.65)"));
+  const borderColorsBar = valoresBar.map((v) => (v === maxVal && maxVal > 0 ? "#e31c25" : "rgba(227, 28, 37, 0.35)"));
 
   const barData = {
     labels: etiquetasBar,
@@ -224,8 +226,8 @@ export default function FinanzasView() {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: "#1a1a2e",
-        titleColor: "#ccc",
+        backgroundColor: cssVar("--mf-surface"),
+        titleColor: cssVar("--mf-muted"),
         bodyColor: "#fff",
         callbacks: {
           title: (items) => `Mes: ${items[0].label}`,
@@ -235,28 +237,28 @@ export default function FinanzasView() {
       datalabels: {
         anchor: "end",
         align: "end",
-        color: "#ccc",
+        color: cssVar("--mf-muted"),
         font: { size: 9, weight: "bold" },
         formatter: (v) => (v > 0 ? formatter(v) : ""),
       },
     },
     scales: {
       x: {
-        ticks: { color: "#94a3b8" },
-        grid: { color: "#252545" },
+        ticks: { color: cssVar("--mf-muted") },
+        grid: { color: cssVar("--mf-border") },
       },
       y: {
         ticks: {
-          color: "#94a3b8",
+          color: cssVar("--mf-muted"),
           callback: (v) => formatter(v),
         },
-        grid: { color: "#252545" },
+        grid: { color: cssVar("--mf-border") },
       },
     },
   };
 
   // ── Doughnut chart: por recepcionista ──
-  const coloresDoughnut = ["#4b9ecb", "#2563eb", "#059669", "#e94560", "#f59e0b", "#6366f1", "#ec4899", "#14b8a6"];
+  const coloresDoughnut = ["#e31c25", "#c1121f", "#b71c1c", "#a4161a", "#e31c25", "#c1121f", "#b71c1c", "#a4161a"];
   let doughnutLabels = pagos_por_recepcionista.map((r) => `${r.nombres} ${r.apellidos}`);
   let doughnutValues = pagos_por_recepcionista.map((r) => Number(r.total_recaudado));
   let doughnutBg = coloresDoughnut.slice(0, doughnutValues.length);
@@ -280,7 +282,7 @@ export default function FinanzasView() {
         data: doughnutValues,
         backgroundColor: doughnutBg,
         borderWidth: 2,
-        borderColor: "#1a1a2e",
+        borderColor: cssVar("--mf-surface"),
       },
     ],
   };
@@ -291,11 +293,11 @@ export default function FinanzasView() {
     plugins: {
       legend: {
         position: "bottom",
-        labels: { color: "#94a3b8", padding: 16, font: { size: 10 } },
+        labels: { color: cssVar("--mf-muted"), padding: 16, font: { size: 10 } },
       },
       tooltip: {
-        backgroundColor: "#1a1a2e",
-        titleColor: "#ccc",
+        backgroundColor: cssVar("--mf-surface"),
+        titleColor: cssVar("--mf-muted"),
         bodyColor: "#fff",
         callbacks: {
           title: (items) => `Recepcionista: ${items[0].label}`,
@@ -404,7 +406,7 @@ export default function FinanzasView() {
             { icono: "📈", valor: formatter(recaudadoEsteMes), label: "Recaudado este mes", color: "#3b82f6" },
             { icono: "📅", valor: formatter(recaudadoMesAnterior), label: "Mes anterior", color: "#a855f7" },
             { icono: "📊", valor: formatter(Math.round(promedioMensual)), label: "Promedio mensual", color: "#f59e0b" },
-            { icono: "🏆", valor: mejorRecepcionista ? `${mejorRecepcionista.nombres} ${mejorRecepcionista.apellidos}` : "—", label: "Mejor recepcionista", color: "#ec4899" },
+            { icono: "🏆", valor: mejorRecepcionista ? `${mejorRecepcionista.nombres} ${mejorRecepcionista.apellidos}` : "—", label: "Mejor recepcionista", color: "#a4161a" },
           ].map((kpi) => (
             <div key={kpi.label} className={styles.kpiCard}>
               <div className={styles.kpiIconWrap} style={{ background: `${kpi.color}18` }}>

@@ -6,8 +6,10 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import LandingScreen from '../screens/LandingScreen';
 import LoginScreen from '../screens/LoginScreen';
+import RecuperarPasswordScreen from '../screens/RecuperarPasswordScreen';
 import MiPerfilScreen from '../screens/MiPerfilScreen';
 import MiRutinaScreen from '../screens/MiRutinaScreen';
 import MiDietaScreen from '../screens/MiDietaScreen';
@@ -68,19 +70,23 @@ function MainTabs() {
 
 export default function AppNavigator() {
   const { token, loading } = useAuth();
+  const { isDark } = useTheme();
 
   if (loading) {
     return <LoadingScreen />;
   }
 
+  // key={isDark ? 'd' : 'l'} fuerza un remontaje al cambiar de tema:
+  // todas las pantallas se re-renderizan y leen la paleta ya aplicada.
   return (
-    <NavigationContainer>
+    <NavigationContainer key={isDark ? 'd' : 'l'}>
       {token ? (
         <MainTabs key="main-tabs" />
       ) : (
         <Stack.Navigator key="auth-stack" initialRouteName="Landing" screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Landing" component={LandingScreen} />
           <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="RecuperarPassword" component={RecuperarPasswordScreen} />
         </Stack.Navigator>
       )}
     </NavigationContainer>

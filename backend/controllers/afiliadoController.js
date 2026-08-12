@@ -3,6 +3,7 @@
 'use strict';
 
 const AfiliadoService = require('../services/afiliadoService');
+const { eliminarFotoAnterior } = require('../middlewares/uploadFoto');
 
 const AfiliadoController = {
 
@@ -32,6 +33,18 @@ const AfiliadoController = {
   create: async (req, res) => {
     try {
       const result = await AfiliadoService.create(req.body, req.user.sub);
+      // Correo de bienvenida (fire-and-forget: nunca bloquea la respuesta)
+      if (result?.id) {
+        AfiliadoService.getById(result.id)
+          .then((detalle) => {
+            if (detalle) {
+              return require('../services/bienvenidaService')
+                .enviarCorreoBienvenida(detalle, req.body.contrasena || req.body.password || null);
+            }
+            return null;
+          })
+          .catch((err) => console.error('[afiliadoController] bienvenida:', err.message));
+      }
       return res.status(201).json(result);
     } catch (err) {
       if (err.message === 'Nombre y documento son requeridos' || err.message.includes('contraseña')) {
@@ -179,6 +192,42 @@ const AfiliadoController = {
   },
 
   // ── ENDPOINTS /me (auto‑usan req.user.sub) ────────────────
+
+  subirFoto: async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'Debe enviar una imagen en el campo "foto"' });
+      }
+
+      // /me/foto usa el id del token; /:id/foto lo toma del parámetro.
+      const id = req.params.id || req.user.sub;
+      // Cloudinary: req.file.path = URL https completa; disco: /uploads/archivo
+      const foto = req.file.path || `/uploads/${req.file.filename}`;
+
+      const fotoAnterior = await AfiliadoService.getFoto(id);
+      const ok = await AfiliadoService.setFoto(id, foto);
+
+      if (!ok) {
+        // Afiliado inexistente: borrar la foto recién subida
+        eliminarFotoAnterior(foto);
+        return res.status(404).json({ error: 'Afiliado no encontrado' });
+      }
+
+      // Borrar la foto anterior (best effort, si no es la misma)
+      if (fotoAnterior && fotoAnterior !== foto) {
+        eliminarFotoAnterior(fotoAnterior);
+      }
+
+      return res.json({
+        message: 'Foto de perfil actualizada',
+        foto,
+        url: `${req.protocol}://${req.get('host')}${foto}`,
+      });
+    } catch (err) {
+      console.error('[afiliadoController.subirFoto]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
 
   getMe: async (req, res) => {
     try {

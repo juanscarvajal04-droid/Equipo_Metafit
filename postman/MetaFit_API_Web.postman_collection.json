@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "MetaFit API - Web",
-    "description": "Colección para el panel web de MetaFit (Staff: Admin, Recepcionista, Entrenador). Autenticación heredada vía Bearer token.",
+    "description": "Colección reescrita a partir del código real del backend (08/2026). Módulos: Dashboard, Afiliados, Personal, Pagos, Planes, Catálogos, Notificaciones y Configuración. Login guarda el JWT en {{token}} automáticamente. Base: https://metafit-backend-rr18.onrender.com",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "MetaFit"
   },
@@ -17,14 +17,11 @@
   },
   "item": [
     {
-      "name": "🔐 Auth",
+      "name": "Auth",
       "item": [
         {
-          "name": "Login Admin",
+          "name": "POST /login — Admin",
           "request": {
-            "auth": {
-              "type": "noauth"
-            },
             "method": "POST",
             "header": [
               {
@@ -33,15 +30,23 @@
                 "type": "text"
               }
             ],
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"carlos@metafit.com\",\n  \"password\": \"{{password_admin}}\"\n}"
             },
-            "url": {
-              "raw": "{{base_url}}/login",
-              "host": ["{{base_url}}"],
-              "path": ["login"]
-            }
+            "description": "Inicia sesión con rol Administrador. Guarda accessToken en {{token}}."
           },
           "event": [
             {
@@ -49,21 +54,86 @@
               "script": {
                 "exec": [
                   "if (pm.response.code === 200) {",
-                  "    var json = pm.response.json();",
+                  "    const json = pm.response.json();",
                   "    pm.environment.set(\"token\", json.accessToken);",
                   "}"
                 ],
                 "type": "text/javascript"
               }
             }
+          ],
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"user\": {\n    \"id\": 1,\n    \"email\": \"carlos@metafit.com\",\n    \"role\": \"Administrador\",\n    \"nombres\": \"Carlos\",\n    \"apellidos\": \"Meléndez\"\n  }\n}"
+            },
+            {
+              "name": "401 Unauthorized - Credenciales inválidas",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"Correo o contraseña incorrectos\"\n}"
+            },
+            {
+              "name": "403 Forbidden - Cuenta inactiva",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"Cuenta no activa. Contacta al administrador.\"\n}"
+            }
           ]
         },
         {
-          "name": "Login Recepcionista",
+          "name": "POST /login — Recepcionista",
           "request": {
-            "auth": {
-              "type": "noauth"
-            },
             "method": "POST",
             "header": [
               {
@@ -72,15 +142,23 @@
                 "type": "text"
               }
             ],
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"maria@metafit.com\",\n  \"password\": \"{{password_recepcionista}}\"\n}"
             },
-            "url": {
-              "raw": "{{base_url}}/login",
-              "host": ["{{base_url}}"],
-              "path": ["login"]
-            }
+            "description": "Inicia sesión con rol Recepcionista. Guarda accessToken en {{token}}."
           },
           "event": [
             {
@@ -88,21 +166,42 @@
               "script": {
                 "exec": [
                   "if (pm.response.code === 200) {",
-                  "    var json = pm.response.json();",
+                  "    const json = pm.response.json();",
                   "    pm.environment.set(\"token\", json.accessToken);",
                   "}"
                 ],
                 "type": "text/javascript"
               }
             }
+          ],
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"user\": {\n    \"id\": 2,\n    \"email\": \"maria@metafit.com\",\n    \"role\": \"Recepcionista\",\n    \"nombres\": \"María\",\n    \"apellidos\": \"Gómez\"\n  }\n}"
+            }
           ]
         },
         {
-          "name": "Login Entrenador",
+          "name": "POST /login — Entrenador",
           "request": {
-            "auth": {
-              "type": "noauth"
-            },
             "method": "POST",
             "header": [
               {
@@ -111,15 +210,23 @@
                 "type": "text"
               }
             ],
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"laura@metafit.com\",\n  \"password\": \"{{password_entrenador}}\"\n}"
             },
-            "url": {
-              "raw": "{{base_url}}/login",
-              "host": ["{{base_url}}"],
-              "path": ["login"]
-            }
+            "description": "Inicia sesión con rol Entrenador. Guarda accessToken en {{token}}."
           },
           "event": [
             {
@@ -127,413 +234,41 @@
               "script": {
                 "exec": [
                   "if (pm.response.code === 200) {",
-                  "    var json = pm.response.json();",
+                  "    const json = pm.response.json();",
                   "    pm.environment.set(\"token\", json.accessToken);",
                   "}"
                 ],
                 "type": "text/javascript"
               }
             }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "👥 Usuarios / Personal",
-      "item": [
-        {
-          "name": "Listar Usuarios",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/usuarios",
-              "host": ["{{base_url}}"],
-              "path": ["usuarios"]
-            }
-          }
-        },
-        {
-          "name": "Listar Recepcionistas",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/usuarios/recepcionistas",
-              "host": ["{{base_url}}"],
-              "path": ["usuarios", "recepcionistas"]
-            }
-          }
-        },
-        {
-          "name": "Obtener Usuario por ID",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/usuarios/1",
-              "host": ["{{base_url}}"],
-              "path": ["usuarios", "1"]
-            }
-          }
-        },
-        {
-          "name": "Crear Usuario",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nombres\": \"Nuevo\",\n  \"apellidos\": \"Empleado\",\n  \"correo\": \"nuevo@metafit.com\",\n  \"contrasena\": \"Temp1234\",\n  \"rol\": \"Recepcionista\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/usuarios",
-              "host": ["{{base_url}}"],
-              "path": ["usuarios"]
-            }
-          }
-        },
-        {
-          "name": "Actualizar Usuario",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nombres\": \"Nombre Actualizado\",\n  \"estado\": \"Activo\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/usuarios/1",
-              "host": ["{{base_url}}"],
-              "path": ["usuarios", "1"]
-            }
-          }
-        },
-        {
-          "name": "Eliminar Usuario",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/usuarios/10",
-              "host": ["{{base_url}}"],
-              "path": ["usuarios", "10"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "🧑‍🤝‍🧑 Afiliados",
-      "item": [
-        {
-          "name": "Listar Afiliados",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/afiliados",
-              "host": ["{{base_url}}"],
-              "path": ["afiliados"]
-            }
-          }
-        },
-        {
-          "name": "Obtener Afiliado por ID",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/afiliados/{{id_afiliado_test}}",
-              "host": ["{{base_url}}"],
-              "path": ["afiliados", "{{id_afiliado_test}}"]
-            }
-          }
-        },
-        {
-          "name": "Crear Afiliado",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nombres\": \"Nuevo\",\n  \"apellidos\": \"Afiliado\",\n  \"correo\": \"nuevo.afiliado@email.com\",\n  \"contrasena\": \"MetaFit2025!\",\n  \"documento\": 1009999999,\n  \"fecha_nacimiento\": \"1995-05-15\",\n  \"sexo\": \"Masculino\",\n  \"telefono\": \"3009999999\",\n  \"direccion\": \"Calle Principal\",\n  \"estatura_cm\": 170.0\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/afiliados",
-              "host": ["{{base_url}}"],
-              "path": ["afiliados"]
-            }
-          }
-        },
-        {
-          "name": "Actualizar Afiliado",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"telefono\": \"3008888888\",\n  \"direccion\": \"Nueva dirección\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/afiliados/{{id_afiliado_test}}",
-              "host": ["{{base_url}}"],
-              "path": ["afiliados", "{{id_afiliado_test}}"]
-            }
-          }
-        },
-        {
-          "name": "Eliminar Afiliado",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/afiliados/99",
-              "host": ["{{base_url}}"],
-              "path": ["afiliados", "99"]
-            }
-          }
-        },
-        {
-          "name": "🔄 Ciclos",
-          "item": [
+          ],
+          "response": [
             {
-              "name": "Listar Ciclos de Afiliado",
-              "request": {
+              "name": "200 OK - Success",
+              "originalRequest": {
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{base_url}}/afiliados/{{id_afiliado_test}}/ciclos",
-                  "host": ["{{base_url}}"],
-                  "path": ["afiliados", "{{id_afiliado_test}}", "ciclos"]
+                  "raw": "{{base_url}}"
                 }
-              }
-            },
-            {
-              "name": "Crear Ciclo",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json",
-                    "type": "text"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"id_usuario\": {{id_afiliado_test}},\n  \"fecha_inicio\": \"2026-07-01\",\n  \"fecha_fin\": \"2026-09-30\",\n  \"objetivo_fisico\": \"Aumento de masa\",\n  \"nivel_experiencia\": \"Intermedio\",\n  \"disponibilidad_dias\": 4\n}"
-                },
-                "url": {
-                  "raw": "{{base_url}}/afiliados/ciclos",
-                  "host": ["{{base_url}}"],
-                  "path": ["afiliados", "ciclos"]
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
                 }
-              }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"user\": {\n    \"id\": 3,\n    \"email\": \"laura@metafit.com\",\n    \"role\": \"Entrenador\",\n    \"nombres\": \"Laura\",\n    \"apellidos\": \"Pérez\"\n  }\n}"
             }
           ]
         },
         {
-          "name": "⚠️ Restricciones",
-          "item": [
-            {
-              "name": "Listar Restricciones de Afiliado",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{base_url}}/afiliados/{{id_afiliado_test}}/restricciones",
-                  "host": ["{{base_url}}"],
-                  "path": ["afiliados", "{{id_afiliado_test}}", "restricciones"]
-                }
-              }
-            },
-            {
-              "name": "Asignar Restriccion",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json",
-                    "type": "text"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"id_restriccion\": 3\n}"
-                },
-                "url": {
-                  "raw": "{{base_url}}/afiliados/{{id_afiliado_test}}/restricciones",
-                  "host": ["{{base_url}}"],
-                  "path": ["afiliados", "{{id_afiliado_test}}", "restricciones"]
-                }
-              }
-            },
-            {
-              "name": "Remover Restriccion",
-              "request": {
-                "method": "DELETE",
-                "header": [],
-                "url": {
-                  "raw": "{{base_url}}/afiliados/{{id_afiliado_test}}/restricciones/3",
-                  "host": ["{{base_url}}"],
-                  "path": ["afiliados", "{{id_afiliado_test}}", "restricciones", "3"]
-                }
-              }
-            }
-          ]
-        },
-        {
-          "name": "📈 Progreso",
-          "item": [
-            {
-              "name": "Listar Progreso de Afiliado",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{base_url}}/afiliados/{{id_afiliado_test}}/progreso",
-                  "host": ["{{base_url}}"],
-                  "path": ["afiliados", "{{id_afiliado_test}}", "progreso"]
-                }
-              }
-            },
-            {
-              "name": "Registrar Progreso",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json",
-                    "type": "text"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"id_ciclo\": {{id_ciclo_test}},\n  \"fecha_registro\": \"2026-06-23\",\n  \"peso_kg\": 78.5,\n  \"porcentaje_grasa\": 20.0,\n  \"medida_cintura\": 85.0,\n  \"medida_brazo\": 34.0,\n  \"medida_pierna\": 56.0\n}"
-                },
-                "url": {
-                  "raw": "{{base_url}}/afiliados/progreso",
-                  "host": ["{{base_url}}"],
-                  "path": ["afiliados", "progreso"]
-                }
-              }
-            }
-          ]
-        },
-        {
-          "name": "🏋️‍♂️ Catalogos Filtrados",
-          "item": [
-            {
-              "name": "Ejercicios Disponibles para Afiliado",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{base_url}}/afiliados/{{id_afiliado_test}}/ejercicios-disponibles",
-                  "host": ["{{base_url}}"],
-                  "path": ["afiliados", "{{id_afiliado_test}}", "ejercicios-disponibles"]
-                }
-              }
-            },
-            {
-              "name": "Alimentos Disponibles para Afiliado",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{base_url}}/afiliados/{{id_afiliado_test}}/alimentos-disponibles",
-                  "host": ["{{base_url}}"],
-                  "path": ["afiliados", "{{id_afiliado_test}}", "alimentos-disponibles"]
-                }
-              }
-            }
-          ]
-        },
-        {
-          "name": "💳 Pagos",
-          "item": [
-            {
-              "name": "Historial de Pagos de Afiliado",
-              "request": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{base_url}}/afiliados/{{id_afiliado_test}}/pagos",
-                  "host": ["{{base_url}}"],
-                  "path": ["afiliados", "{{id_afiliado_test}}", "pagos"]
-                }
-              }
-            },
-            {
-              "name": "Registrar Pago",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json",
-                    "type": "text"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"fecha_pago\": \"2026-06-23\",\n  \"valor_pagado\": 80000,\n  \"estado\": \"Pagado\",\n  \"fecha_vencimiento\": \"2026-07-23\",\n  \"observaciones\": \"Pago mensual junio\"\n}"
-                },
-                "url": {
-                  "raw": "{{base_url}}/afiliados/{{id_afiliado_test}}/pagos",
-                  "host": ["{{base_url}}"],
-                  "path": ["afiliados", "{{id_afiliado_test}}", "pagos"]
-                }
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "📋 Catalogos",
-      "item": [
-        {
-          "name": "Listar Ejercicios",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/catalogo/ejercicios",
-              "host": ["{{base_url}}"],
-              "path": ["catalogo", "ejercicios"]
-            }
-          }
-        },
-        {
-          "name": "Crear Ejercicio",
+          "name": "POST /auth/recuperar-password",
           "request": {
             "method": "POST",
             "header": [
@@ -543,459 +278,3694 @@
                 "type": "text"
               }
             ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nombre_ejercicio\": \"Nuevo Ejercicio\",\n  \"grupo_muscular\": \"Piernas\",\n  \"nivel_minimo\": \"Intermedio\",\n  \"descripcion\": null\n}"
+            "url": {
+              "raw": "{{base_url}}/auth/recuperar-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "recuperar-password"
+              ]
             },
-            "url": {
-              "raw": "{{base_url}}/catalogo/ejercicios",
-              "host": ["{{base_url}}"],
-              "path": ["catalogo", "ejercicios"]
-            }
-          }
-        },
-        {
-          "name": "Actualizar Ejercicio",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nombre_ejercicio\": \"Ejercicio Actualizado\",\n  \"grupo_muscular\": \"Pecho\",\n  \"nivel_minimo\": \"Avanzado\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/catalogo/ejercicios/1",
-              "host": ["{{base_url}}"],
-              "path": ["catalogo", "ejercicios", "1"]
-            }
-          }
-        },
-        {
-          "name": "Eliminar Ejercicio",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/catalogo/ejercicios/99",
-              "host": ["{{base_url}}"],
-              "path": ["catalogo", "ejercicios", "99"]
-            }
-          }
-        },
-        {
-          "name": "Listar Alimentos",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/catalogo/alimentos",
-              "host": ["{{base_url}}"],
-              "path": ["catalogo", "alimentos"]
-            }
-          }
-        },
-        {
-          "name": "Crear Alimento",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nombre_alimento\": \"Nuevo Alimento\",\n  \"proteinas\": 20.0,\n  \"carbohidratos\": 30.0,\n  \"grasas\": 5.0\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/catalogo/alimentos",
-              "host": ["{{base_url}}"],
-              "path": ["catalogo", "alimentos"]
-            }
-          }
-        },
-        {
-          "name": "Actualizar Alimento",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nombre_alimento\": \"Alimento Actualizado\",\n  \"proteinas\": 25.0,\n  \"carbohidratos\": 10.0,\n  \"grasas\": 8.0\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/catalogo/alimentos/1",
-              "host": ["{{base_url}}"],
-              "path": ["catalogo", "alimentos", "1"]
-            }
-          }
-        },
-        {
-          "name": "Eliminar Alimento",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/catalogo/alimentos/99",
-              "host": ["{{base_url}}"],
-              "path": ["catalogo", "alimentos", "99"]
-            }
-          }
-        },
-        {
-          "name": "Listar Restricciones",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/catalogo/restricciones",
-              "host": ["{{base_url}}"],
-              "path": ["catalogo", "restricciones"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "🏋️ Planes",
-      "item": [
-        {
-          "name": "Obtener Plan de Entrenamiento",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/planes/entrenamiento/{{id_ciclo_test}}",
-              "host": ["{{base_url}}"],
-              "path": ["planes", "entrenamiento", "{{id_ciclo_test}}"]
-            }
-          }
-        },
-        {
-          "name": "Crear Plan de Entrenamiento",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"id_ciclo\": {{id_ciclo_test}},\n  \"observaciones\": null\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/planes/entrenamiento",
-              "host": ["{{base_url}}"],
-              "path": ["planes", "entrenamiento"]
-            }
-          }
-        },
-        {
-          "name": "Actualizar Plan de Entrenamiento",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"observaciones\": \"Plan actualizado\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/planes/entrenamiento/2",
-              "host": ["{{base_url}}"],
-              "path": ["planes", "entrenamiento", "2"]
-            }
-          }
-        },
-        {
-          "name": "Crear Rutina",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"id_ciclo\": {{id_ciclo_test}},\n  \"nombre_rutina\": \"Nueva Rutina\",\n  \"enfoque_muscular\": \"Piernas\",\n  \"dia_numero\": 5\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/planes/rutinas",
-              "host": ["{{base_url}}"],
-              "path": ["planes", "rutinas"]
-            }
-          }
-        },
-        {
-          "name": "Agregar Ejercicio a Rutina",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"id_ejercicio\": 1,\n  \"series\": 4,\n  \"repeticiones\": 12,\n  \"orden\": 1\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/planes/rutinas/1/ejercicios",
-              "host": ["{{base_url}}"],
-              "path": ["planes", "rutinas", "1", "ejercicios"]
-            }
-          }
-        },
-        {
-          "name": "Quitar Ejercicio de Rutina",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/planes/rutinas/1/ejercicios/99",
-              "host": ["{{base_url}}"],
-              "path": ["planes", "rutinas", "1", "ejercicios", "99"]
-            }
-          }
-        },
-        {
-          "name": "Eliminar Rutina",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/planes/rutinas/99",
-              "host": ["{{base_url}}"],
-              "path": ["planes", "rutinas", "99"]
-            }
-          }
-        },
-        {
-          "name": "Obtener Plan Nutricional",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/planes/nutricional/{{id_ciclo_test}}",
-              "host": ["{{base_url}}"],
-              "path": ["planes", "nutricional", "{{id_ciclo_test}}"]
-            }
-          }
-        },
-        {
-          "name": "Crear Plan Nutricional",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"id_ciclo\": {{id_ciclo_test}},\n  \"calorias_objetivo\": 2200.0,\n  \"num_comidas\": 5\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/planes/nutricional",
-              "host": ["{{base_url}}"],
-              "path": ["planes", "nutricional"]
-            }
-          }
-        },
-        {
-          "name": "Actualizar Plan Nutricional",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"calorias_objetivo\": 2400.0,\n  \"num_comidas\": 4\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/planes/nutricional/2",
-              "host": ["{{base_url}}"],
-              "path": ["planes", "nutricional", "2"]
-            }
-          }
-        },
-        {
-          "name": "Agregar Alimento a Plan Nutricional",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"id_alimento\": 1,\n  \"num_comida\": 2,\n  \"cantidad_g\": 200.0\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/planes/nutricional/{{id_ciclo_test}}/detalle",
-              "host": ["{{base_url}}"],
-              "path": ["planes", "nutricional", "{{id_ciclo_test}}", "detalle"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "📊 Dashboard",
-      "item": [
-        {
-          "name": "Obtener KPIs",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/dashboard/kpis",
-              "host": ["{{base_url}}"],
-              "path": ["dashboard", "kpis"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "💳 Pagos Admin",
-      "item": [
-        {
-          "name": "Listar Todos los Pagos",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/pagos",
-              "host": ["{{base_url}}"],
-              "path": ["pagos"]
-            }
-          }
-        },
-        {
-          "name": "Metricas de Pagos",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/pagos/metricas",
-              "host": ["{{base_url}}"],
-              "path": ["pagos", "metricas"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "⚙️ Configuracion",
-      "item": [
-        {
-          "name": "Obtener Precio Membresia",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/configuracion/precio-membresia",
-              "host": ["{{base_url}}"],
-              "path": ["configuracion", "precio-membresia"]
-            }
-          }
-        },
-        {
-          "name": "Actualizar Precio Membresia",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"precio\": 90000\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/configuracion/precio-membresia",
-              "host": ["{{base_url}}"],
-              "path": ["configuracion", "precio-membresia"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "🔔 Notificaciones",
-      "item": [
-        {
-          "name": "Listar Notificaciones",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/notificaciones",
-              "host": ["{{base_url}}"],
-              "path": ["notificaciones"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "🟢 Health Check",
-      "item": [
-        {
-          "name": "Health Check",
-          "request": {
             "auth": {
               "type": "noauth"
             },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/health",
-              "host": ["{{base_url}}"],
-              "path": ["health"]
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"carlos@metafit.com\"\n}"
+            },
+            "description": "Solicita recuperación de contraseña (5 intentos/15 min). Siempre responde 200 con el mismo mensaje si el correo existe o no. En modoPrueba (correo no enviado) incluye token de 15 min."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"mensaje\": \"Si el correo existe, recibirás un enlace para restablecer tu contraseña\"\n}"
+            },
+            {
+              "name": "200 OK - Correo no enviado (modo prueba)",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"mensaje\": \"Si el correo existe, recibirás un enlace para restablecer tu contraseña\",\n  \"modoPrueba\": true,\n  \"token\": \"eyJ...tokenReset15min\"\n}"
+            },
+            {
+              "name": "429 Too Many Requests - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"Demasiadas solicitudes de recuperación. Intenta en 15 minutos.\"\n}"
             }
-          }
+          ]
+        },
+        {
+          "name": "POST /auth/reset-password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/reset-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "reset-password"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"eyJ...tokenDelCorreoODeModoPrueba\",\n  \"nuevaPassword\": \"NuevaClave123!\"\n}"
+            },
+            "description": "Cambia la contraseña con el token de recuperación (JWT 15 min)."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"mensaje\": \"Contraseña actualizada correctamente\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Token malo/expirado",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"Token inválido o expirado\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Afiliados",
+      "item": [
+        {
+          "name": "GET /afiliados",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados?page=1&limit=50",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados?page=1&limit=50"
+              ]
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Lista paginada de afiliados (array directo, con restricciones y ciclo activo)."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "[\n  {\n    \"name\": \"200 OK - Success\",\n    \"originalRequest\": {\n      \"method\": \"GET\",\n      \"header\": [],\n      \"url\": {\n        \"raw\": \"{{base_url}}\"\n      }\n    },\n    \"status\": \"OK\",\n    \"code\": 200,\n    \"header\": [\n      {\n        \"key\": \"Content-Type\",\n        \"value\": \"application/json\",\n        \"type\": \"text\"\n      }\n    ],\n    \"cookie\": [],\n    \"_postman_previewlanguage\": \"json\",\n    \"body\": \"{\\n  \\\"id_usuario\\\": 6,\\n  \\\"nombres\\\": \\\"Juan\\\",\\n  \\\"apellidos\\\": \\\"Pineda\\\",\\n  \\\"correo\\\": \\\"juan@gmail.com\\\",\\n  \\\"estado\\\": \\\"Activo\\\",\\n  \\\"documento\\\": \\\"1023456789\\\",\\n  \\\"fecha_nacimiento\\\": \\\"1996-04-12\\\",\\n  \\\"edad\\\": 30,\\n  \\\"sexo\\\": \\\"Masculino\\\",\\n  \\\"telefono\\\": \\\"3001234567\\\",\\n  \\\"direccion\\\": \\\"Cra 15 #45-20\\\",\\n  \\\"estatura_cm\\\": 178.0,\\n  \\\"estado_afiliacion\\\": \\\"Activo\\\",\\n  \\\"foto\\\": null,\\n  \\\"fecha_registro_afiliado\\\": \\\"2025-01-10T09:00:00.000Z\\\",\\n  \\\"registrado_por_nombre\\\": \\\"Carlos Meléndez\\\",\\n  \\\"restricciones\\\": [\\n    {\\n      \\\"id_restriccion\\\": 1,\\n      \\\"nombre_restriccion\\\": \\\"Hipertensión\\\",\\n      \\\"tipo\\\": \\\"Enfermedad\\\",\\n      \\\"efecto_relevante\\\": \\\"Evitar esfuerzos máximos\\\"\\n    }\\n  ],\\n  \\\"ciclo_activo\\\": {\\n    \\\"id_ciclo\\\": 2,\\n    \\\"id_usuario\\\": 6,\\n    \\\"fecha_inicio\\\": \\\"2026-07-01\\\",\\n    \\\"fecha_fin\\\": \\\"2026-09-30\\\",\\n    \\\"activo\\\": 1,\\n    \\\"objetivo_fisico\\\": \\\"Perdida de grasa\\\",\\n    \\\"nivel_experiencia\\\": \\\"Intermedio\\\",\\n    \\\"disponibilidad_dias\\\": 3,\\n    \\\"grupo_muscular_prioritario\\\": \\\"Core\\\",\\n    \\\"observaciones\\\": null,\\n    \\\"numero_ciclo\\\": 2,\\n    \\\"plan_entrenamiento\\\": null,\\n    \\\"plan_nutricional\\\": null,\\n    \\\"ultimo_progreso\\\": null\\n  },\\n  \\\"objetivo_fisico\\\": \\\"Perdida de grasa\\\",\\n  \\\"nivel_experiencia\\\": \\\"Intermedio\\\",\\n  \\\"disponibilidad_semanal_dias\\\": 3,\\n  \\\"grupo_muscular_prioritario\\\": \\\"Core\\\"\\n}\"\n  }\n]"
+            },
+            {
+              "name": "401 Unauthorized - Sin token",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"Token requerido\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /afiliados/:id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/{{id_afiliado}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "{{id_afiliado}}"
+              ]
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Detalle completo con ciclo activo, planes y progreso."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"name\": \"200 OK - Success\",\n  \"originalRequest\": {\n    \"method\": \"GET\",\n    \"header\": [],\n    \"url\": {\n      \"raw\": \"{{base_url}}\"\n    }\n  },\n  \"status\": \"OK\",\n  \"code\": 200,\n  \"header\": [\n    {\n      \"key\": \"Content-Type\",\n      \"value\": \"application/json\",\n      \"type\": \"text\"\n    }\n  ],\n  \"cookie\": [],\n  \"_postman_previewlanguage\": \"json\",\n  \"body\": \"{\\n  \\\"id_usuario\\\": 6,\\n  \\\"nombres\\\": \\\"Juan\\\",\\n  \\\"apellidos\\\": \\\"Pineda\\\",\\n  \\\"correo\\\": \\\"juan@gmail.com\\\",\\n  \\\"estado\\\": \\\"Activo\\\",\\n  \\\"documento\\\": \\\"1023456789\\\",\\n  \\\"fecha_nacimiento\\\": \\\"1996-04-12\\\",\\n  \\\"edad\\\": 30,\\n  \\\"sexo\\\": \\\"Masculino\\\",\\n  \\\"telefono\\\": \\\"3001234567\\\",\\n  \\\"direccion\\\": \\\"Cra 15 #45-20\\\",\\n  \\\"estatura_cm\\\": 178.0,\\n  \\\"estado_afiliacion\\\": \\\"Activo\\\",\\n  \\\"foto\\\": null,\\n  \\\"fecha_registro_afiliado\\\": \\\"2025-01-10T09:00:00.000Z\\\",\\n  \\\"registrado_por_nombre\\\": \\\"Carlos Meléndez\\\",\\n  \\\"restricciones\\\": [\\n    {\\n      \\\"id_restriccion\\\": 1,\\n      \\\"nombre_restriccion\\\": \\\"Hipertensión\\\",\\n      \\\"tipo\\\": \\\"Enfermedad\\\",\\n      \\\"efecto_relevante\\\": \\\"Evitar esfuerzos máximos\\\"\\n    }\\n  ],\\n  \\\"ciclo_activo\\\": {\\n    \\\"id_ciclo\\\": 2,\\n    \\\"id_usuario\\\": 6,\\n    \\\"fecha_inicio\\\": \\\"2026-07-01\\\",\\n    \\\"fecha_fin\\\": \\\"2026-09-30\\\",\\n    \\\"activo\\\": 1,\\n    \\\"objetivo_fisico\\\": \\\"Perdida de grasa\\\",\\n    \\\"nivel_experiencia\\\": \\\"Intermedio\\\",\\n    \\\"disponibilidad_dias\\\": 3,\\n    \\\"grupo_muscular_prioritario\\\": \\\"Core\\\",\\n    \\\"observaciones\\\": null,\\n    \\\"numero_ciclo\\\": 2,\\n    \\\"plan_entrenamiento\\\": null,\\n    \\\"plan_nutricional\\\": null,\\n    \\\"ultimo_progreso\\\": null\\n  },\\n  \\\"objetivo_fisico\\\": \\\"Perdida de grasa\\\",\\n  \\\"nivel_experiencia\\\": \\\"Intermedio\\\",\\n  \\\"disponibilidad_semanal_dias\\\": 3,\\n  \\\"grupo_muscular_prioritario\\\": \\\"Core\\\"\\n}\",\n  \"fecha_registro\": \"2025-01-10\",\n  \"fecha_ultima_modificacion\": \"2026-07-01\",\n  \"ciclo_activo\": {\n    \"id_ciclo\": 2,\n    \"id_usuario\": 6,\n    \"fecha_inicio\": \"2026-07-01\",\n    \"fecha_fin\": \"2026-09-30\",\n    \"activo\": 1,\n    \"objetivo_fisico\": \"Perdida de grasa\",\n    \"grupo_muscular_prioritario\": \"Core\",\n    \"nivel_experiencia\": \"Intermedio\",\n    \"disponibilidad_dias\": 3,\n    \"observaciones\": \"Enfocado en déficit calórico\",\n    \"fecha_creacion\": \"2026-07-01\",\n    \"registrado_por\": 1,\n    \"numero_ciclo\": 2,\n    \"dias_restantes\": 45,\n    \"plan_entrenamiento\": {\n      \"id_ciclo\": 2,\n      \"modificado_por\": 3,\n      \"observaciones\": \"Push 3 días\",\n      \"rutinas\": [\n        {\n          \"id_rutina\": 1,\n          \"id_ciclo\": 2,\n          \"nombre_rutina\": \"Push A\",\n          \"enfoque_muscular\": \"Empuje\",\n          \"dia_numero\": 1,\n          \"ejercicios\": [\n            {\n              \"id_rutina\": 1,\n              \"orden\": 1,\n              \"id_ejercicio\": 5,\n              \"nombre_ejercicio\": \"Press Banca\",\n              \"grupo_muscular\": \"Pecho\",\n              \"series\": 4,\n              \"repeticiones\": 12\n            }\n          ]\n        }\n      ]\n    },\n    \"plan_nutricional\": {\n      \"id_ciclo\": 2,\n      \"calorias_objetivo\": 2200.0,\n      \"num_comidas\": 4,\n      \"modificado_por\": 3,\n      \"observaciones\": \"Alta proteína\",\n      \"calorias_estimadas\": 2200.0,\n      \"num_comidas_diarias\": 4,\n      \"detalle\": [\n        {\n          \"num_comida\": 1,\n          \"id_alimento\": 1,\n          \"cantidad_g\": 120.0,\n          \"nombre_alimento\": \"Pechuga de pollo\",\n          \"proteinas\": 25.0,\n          \"carbohidratos\": 0.0,\n          \"grasas\": 3.0,\n          \"calorias_por_100g\": 130.0\n        }\n      ]\n    },\n    \"progreso_fisico\": [\n      {\n        \"id_ciclo\": 2,\n        \"fecha_registro\": \"2026-07-15\",\n        \"peso_kg\": 82.5,\n        \"porcentaje_grasa\": 22.0,\n        \"medida_cintura\": 90.0,\n        \"medida_brazo\": 36.0,\n        \"medida_pierna\": 55.0,\n        \"observaciones\": \"Semana 2\",\n        \"imc\": 26.1,\n        \"registrado_por_nombre\": \"Laura Pérez\"\n      }\n    ]\n  }\n}"
+            },
+            {
+              "name": "404 Not Found - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"Afiliado no encontrado\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST /afiliados",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Camila\",\n  \"apellidos\": \"Rojas\",\n  \"documento\": \"1023987654\",\n  \"correo\": \"camila.rojas@gmail.com\",\n  \"contrasena\": \"MF_1023987654@2025\",\n  \"fecha_nacimiento\": \"1998-02-20\",\n  \"sexo\": \"Femenino\",\n  \"telefono\": \"3109876543\",\n  \"direccion\": \"Cll 8 #12-30\",\n  \"estatura_cm\": 165.0,\n  \"estado_afiliacion\": \"Activo\"\n}"
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Crea un afiliado (+ usuario de acceso). Sin contrasena se autogenera MF_<documento>@2025. Alias aceptados: password, estado."
+          },
+          "response": [
+            {
+              "name": "201 Created - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"id\": 8,\n  \"message\": \"Afiliado creado correctamente\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"Nombre y documento son requeridos\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Duplicado",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"Ya existe un afiliado con ese documento o correo\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "PATCH /afiliados/:id",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/{{id_afiliado}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "{{id_afiliado}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"telefono\": \"3009876543\",\n  \"direccion\": \"Cll 20 #5-10\",\n  \"estado_afiliacion\": \"Activo\"\n}"
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Actualización parcial (allowlist: documento, fecha_nacimiento, sexo, telefono, direccion, estatura_cm, estado_afiliacion, nombres, apellidos, correo, estado)."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Afiliado actualizado correctamente\"\n}"
+            },
+            {
+              "name": "404 Not Found - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"Afiliado no encontrado\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "DELETE /afiliados/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/{{id_afiliado}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "{{id_afiliado}}"
+              ]
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Solo Administrador."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Afiliado eliminado correctamente\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Con datos asociados",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"No se puede eliminar: el afiliado tiene datos asociados\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST /afiliados/:id/foto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/{{id_afiliado}}/foto",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "{{id_afiliado}}",
+                "foto"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "foto",
+                  "type": "file",
+                  "src": "/ruta/a/foto.jpg"
+                }
+              ]
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Multipart form-data, campo 'foto'. PNG/JPG/WEBP/GIF máx 5 MB."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Foto de perfil actualizada\",\n  \"foto\": \"/uploads/6-1722.jpg\",\n  \"url\": \"https://metafit-backend-rr18.onrender.com/uploads/6-1722.jpg\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"La imagen supera el tamaño máximo de 5 MB\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /afiliados/:id/ciclos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/{{id_afiliado}}/ciclos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "{{id_afiliado}}",
+                "ciclos"
+              ]
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Historial de ciclos (fecha_inicio DESC)."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "[\n  {\n    \"id_ciclo\": 2,\n    \"id_usuario\": 6,\n    \"fecha_inicio\": \"2026-07-01\",\n    \"fecha_fin\": \"2026-09-30\",\n    \"activo\": 1,\n    \"objetivo_fisico\": \"Perdida de grasa\",\n    \"grupo_muscular_prioritario\": \"Core\",\n    \"nivel_experiencia\": \"Intermedio\",\n    \"disponibilidad_dias\": 3,\n    \"observaciones\": null,\n    \"fecha_creacion\": \"2026-07-01\",\n    \"registrado_por\": 3,\n    \"numero_ciclo\": 2\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "POST /afiliados/ciclos",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/ciclos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "ciclos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_usuario\": 6,\n  \"fecha_inicio\": \"2026-10-01\",\n  \"fecha_fin\": \"2026-12-31\",\n  \"objetivo_fisico\": \"Aumento de masa\",\n  \"nivel_experiencia\": \"Avanzado\",\n  \"disponibilidad_dias\": 4,\n  \"grupo_muscular_prioritario\": \"Pecho\",\n  \"observaciones\": \"Hipertrofia 4 días\"\n}"
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Cierra automáticamente el ciclo activo anterior. Enums: objetivo_fisico [Perdida de grasa, Aumento de masa, Mantenimiento, Rehabilitacion], nivel_experiencia [Principiante, Intermedio, Avanzado]."
+          },
+          "response": [
+            {
+              "name": "201 Created - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"id_ciclo\": 5,\n  \"message\": \"Ciclo creado correctamente\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"objetivo_fisico, nivel_experiencia y disponibilidad_dias son requeridos\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Duplicado",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"Ya existe un ciclo con esa fecha de inicio para este afiliado\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /afiliados/:id/ejercicios-disponibles",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/{{id_afiliado}}/ejercicios-disponibles",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "{{id_afiliado}}",
+                "ejercicios-disponibles"
+              ]
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Ejercicios no prohibidos por restricciones y filtrados por nivel del último ciclo."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "[\n  {\n    \"id_ejercicio\": 3,\n    \"nombre_ejercicio\": \"Sentadilla\",\n    \"grupo_muscular\": \"Piernas\",\n    \"nivel_minimo\": \"Intermedio\",\n    \"descripcion\": \"Barra trasera\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "GET /afiliados/:id/alimentos-disponibles",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/{{id_afiliado}}/alimentos-disponibles",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "{{id_afiliado}}",
+                "alimentos-disponibles"
+              ]
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Alimentos permitidos según restricciones del afiliado."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "[\n  {\n    \"id_alimento\": 2,\n    \"nombre_alimento\": \"Arroz integral\",\n    \"proteinas\": 7.0,\n    \"carbohidratos\": 77.0,\n    \"grasas\": 2.2\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "GET /afiliados/:id/restricciones",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/{{id_afiliado}}/restricciones",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "{{id_afiliado}}",
+                "restricciones"
+              ]
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "[\n  {\n    \"id_restriccion\": 1,\n    \"nombre_restriccion\": \"Hipertensión\",\n    \"tipo\": \"Enfermedad\",\n    \"efecto_relevante\": \"Evitar esfuerzos máximos\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "POST /afiliados/:id/restricciones",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/{{id_afiliado}}/restricciones",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "{{id_afiliado}}",
+                "restricciones"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_restriccion\": 2\n}"
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Asigna una restricción del catálogo."
+          },
+          "response": [
+            {
+              "name": "201 Created - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Restricción asignada\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"id_restriccion requerido\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "DELETE /afiliados/:id/restricciones/:id_restriccion",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/{{id_afiliado}}/restricciones/{{id_restriccion}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "{{id_afiliado}}",
+                "restricciones",
+                "{{id_restriccion}}"
+              ]
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Quita una restricción del afiliado."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Restricción removida\"\n}"
+            },
+            {
+              "name": "404 Not Found - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"Restricción no encontrada para este afiliado\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /afiliados/:id/progreso",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/{{id_afiliado}}/progreso",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "{{id_afiliado}}",
+                "progreso"
+              ]
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Registros de progreso físico del afiliado."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "[\n  {\n    \"id_ciclo\": 2,\n    \"fecha_registro\": \"2026-07-15\",\n    \"peso_kg\": 82.5,\n    \"porcentaje_grasa\": 22.0,\n    \"medida_cintura\": 90.0,\n    \"medida_brazo\": 36.0,\n    \"medida_pierna\": 55.0,\n    \"observaciones\": \"Semana 2\",\n    \"imc\": 26.1,\n    \"fecha_inicio\": \"2026-07-01\",\n    \"fecha_fin\": \"2026-09-30\",\n    \"registrado_por_nombre\": \"Laura Pérez\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "POST /afiliados/progreso",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/progreso",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "progreso"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_ciclo\": 2,\n  \"fecha_registro\": \"2026-08-01\",\n  \"peso_kg\": 81.8,\n  \"porcentaje_grasa\": 21.5,\n  \"medida_cintura\": 89.0,\n  \"medida_brazo\": 36.0,\n  \"medida_pierna\": 55.5,\n  \"observaciones\": \"Semana 4\"\n}"
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. registrado_por se inyecta desde el JWT. Alias legacy: peso → peso_kg."
+          },
+          "response": [
+            {
+              "name": "201 Created - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Progreso registrado correctamente\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"id_ciclo, fecha_registro y peso son requeridos\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Duplicado",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"Ya existe un registro de progreso para ese ciclo en esa fecha\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Usuarios / Personal",
+      "item": [
+        {
+          "name": "GET /usuarios",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/usuarios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuarios"
+              ]
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Solo Administrador. Staff sin rol Afiliado (con claves duplicadas por compatibilidad)."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "[\n  {\n    \"name\": \"200 OK - Success\",\n    \"originalRequest\": {\n      \"method\": \"GET\",\n      \"header\": [],\n      \"url\": {\n        \"raw\": \"{{base_url}}\"\n      }\n    },\n    \"status\": \"OK\",\n    \"code\": 200,\n    \"header\": [\n      {\n        \"key\": \"Content-Type\",\n        \"value\": \"application/json\",\n        \"type\": \"text\"\n      }\n    ],\n    \"cookie\": [],\n    \"_postman_previewlanguage\": \"json\",\n    \"body\": \"{\\n  \\\"id\\\": 3,\\n  \\\"id_usuario\\\": 3,\\n  \\\"correo\\\": \\\"laura@metafit.com\\\",\\n  \\\"email\\\": \\\"laura@metafit.com\\\",\\n  \\\"rol\\\": \\\"Entrenador\\\",\\n  \\\"role\\\": \\\"Entrenador\\\",\\n  \\\"nombres\\\": \\\"Laura\\\",\\n  \\\"apellidos\\\": \\\"Pérez\\\",\\n  \\\"estado\\\": \\\"Activo\\\",\\n  \\\"fecha_registro\\\": \\\"2025-01-15\\\"\\n}\"\n  },\n  {\n    \"name\": \"200 OK - Success\",\n    \"originalRequest\": {\n      \"method\": \"GET\",\n      \"header\": [],\n      \"url\": {\n        \"raw\": \"{{base_url}}\"\n      }\n    },\n    \"status\": \"OK\",\n    \"code\": 200,\n    \"header\": [\n      {\n        \"key\": \"Content-Type\",\n        \"value\": \"application/json\",\n        \"type\": \"text\"\n      }\n    ],\n    \"cookie\": [],\n    \"_postman_previewlanguage\": \"json\",\n    \"body\": \"{\\n  \\\"id\\\": 3,\\n  \\\"id_usuario\\\": 3,\\n  \\\"correo\\\": \\\"laura@metafit.com\\\",\\n  \\\"email\\\": \\\"laura@metafit.com\\\",\\n  \\\"rol\\\": \\\"Entrenador\\\",\\n  \\\"role\\\": \\\"Entrenador\\\",\\n  \\\"nombres\\\": \\\"Laura\\\",\\n  \\\"apellidos\\\": \\\"Pérez\\\",\\n  \\\"estado\\\": \\\"Activo\\\",\\n  \\\"fecha_registro\\\": \\\"2025-01-15\\\"\\n}\",\n    \"id\": 2,\n    \"id_usuario\": 2,\n    \"correo\": \"maria@metafit.com\",\n    \"email\": \"maria@metafit.com\",\n    \"rol\": \"Recepcionista\",\n    \"role\": \"Recepcionista\",\n    \"nombres\": \"María\",\n    \"apellidos\": \"Gómez\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "GET /usuarios/recepcionistas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/usuarios/recepcionistas",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuarios",
+                "recepcionistas"
+              ]
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Solo Administrador. Filtrado por rol Recepcionista."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "[\n  {\n    \"name\": \"200 OK - Success\",\n    \"originalRequest\": {\n      \"method\": \"GET\",\n      \"header\": [],\n      \"url\": {\n        \"raw\": \"{{base_url}}\"\n      }\n    },\n    \"status\": \"OK\",\n    \"code\": 200,\n    \"header\": [\n      {\n        \"key\": \"Content-Type\",\n        \"value\": \"application/json\",\n        \"type\": \"text\"\n      }\n    ],\n    \"cookie\": [],\n    \"_postman_previewlanguage\": \"json\",\n    \"body\": \"{\\n  \\\"id\\\": 3,\\n  \\\"id_usuario\\\": 3,\\n  \\\"correo\\\": \\\"laura@metafit.com\\\",\\n  \\\"email\\\": \\\"laura@metafit.com\\\",\\n  \\\"rol\\\": \\\"Entrenador\\\",\\n  \\\"role\\\": \\\"Entrenador\\\",\\n  \\\"nombres\\\": \\\"Laura\\\",\\n  \\\"apellidos\\\": \\\"Pérez\\\",\\n  \\\"estado\\\": \\\"Activo\\\",\\n  \\\"fecha_registro\\\": \\\"2025-01-15\\\"\\n}\",\n    \"id\": 2,\n    \"id_usuario\": 2,\n    \"correo\": \"maria@metafit.com\",\n    \"email\": \"maria@metafit.com\",\n    \"rol\": \"Recepcionista\",\n    \"role\": \"Recepcionista\",\n    \"nombres\": \"María\",\n    \"apellidos\": \"Gómez\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "GET /usuarios/:id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/usuarios/{{id_usuario}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{id_usuario}}"
+              ]
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Solo Administrador."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"name\": \"200 OK - Success\",\n  \"originalRequest\": {\n    \"method\": \"GET\",\n    \"header\": [],\n    \"url\": {\n      \"raw\": \"{{base_url}}\"\n    }\n  },\n  \"status\": \"OK\",\n  \"code\": 200,\n  \"header\": [\n    {\n      \"key\": \"Content-Type\",\n      \"value\": \"application/json\",\n      \"type\": \"text\"\n    }\n  ],\n  \"cookie\": [],\n  \"_postman_previewlanguage\": \"json\",\n  \"body\": \"{\\n  \\\"id\\\": 3,\\n  \\\"id_usuario\\\": 3,\\n  \\\"correo\\\": \\\"laura@metafit.com\\\",\\n  \\\"email\\\": \\\"laura@metafit.com\\\",\\n  \\\"rol\\\": \\\"Entrenador\\\",\\n  \\\"role\\\": \\\"Entrenador\\\",\\n  \\\"nombres\\\": \\\"Laura\\\",\\n  \\\"apellidos\\\": \\\"Pérez\\\",\\n  \\\"estado\\\": \\\"Activo\\\",\\n  \\\"fecha_registro\\\": \\\"2025-01-15\\\"\\n}\"\n}"
+            },
+            {
+              "name": "404 Not Found - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"Usuario no encontrado\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST /usuarios",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/usuarios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuarios"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Pedro\",\n  \"apellidos\": \"Martínez\",\n  \"correo\": \"pedro.martinez@metafit.com\",\n  \"contrasena\": \"Pedro123!\",\n  \"rol\": \"Recepcionista\",\n  \"estado\": \"Activo\"\n}"
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Solo Administrador. Aliases: email → correo, password → contrasena. estado default 'Pendiente'. Roles válidos: Administrador, Recepcionista, Entrenador."
+          },
+          "response": [
+            {
+              "name": "201 Created - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"id\": 9,\n  \"id_usuario\": 9,\n  \"correo\": \"pedro.martinez@metafit.com\",\n  \"email\": \"pedro.martinez@metafit.com\",\n  \"rol\": \"Recepcionista\",\n  \"role\": \"Recepcionista\",\n  \"nombres\": \"Pedro\",\n  \"apellidos\": \"Martínez\",\n  \"estado\": \"Activo\",\n  \"fecha_registro\": \"2026-08-09\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"Todos los campos son requeridos\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Duplicado",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"Ya existe un empleado con ese correo\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "PATCH /usuarios/:id",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/usuarios/{{id_usuario}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{id_usuario}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"Inactivo\",\n  \"rol\": \"Entrenador\"\n}"
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Solo Administrador. No permite desactivar ni cambiar el rol de la propia cuenta."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"name\": \"200 OK - Success\",\n  \"originalRequest\": {\n    \"method\": \"GET\",\n    \"header\": [],\n    \"url\": {\n      \"raw\": \"{{base_url}}\"\n    }\n  },\n  \"status\": \"OK\",\n  \"code\": 200,\n  \"header\": [\n    {\n      \"key\": \"Content-Type\",\n      \"value\": \"application/json\",\n      \"type\": \"text\"\n    }\n  ],\n  \"cookie\": [],\n  \"_postman_previewlanguage\": \"json\",\n  \"body\": \"{\\n  \\\"id\\\": 3,\\n  \\\"id_usuario\\\": 3,\\n  \\\"correo\\\": \\\"laura@metafit.com\\\",\\n  \\\"email\\\": \\\"laura@metafit.com\\\",\\n  \\\"rol\\\": \\\"Entrenador\\\",\\n  \\\"role\\\": \\\"Entrenador\\\",\\n  \\\"nombres\\\": \\\"Laura\\\",\\n  \\\"apellidos\\\": \\\"Pérez\\\",\\n  \\\"estado\\\": \\\"Activo\\\",\\n  \\\"fecha_registro\\\": \\\"2025-01-15\\\"\\n}\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Autoservicio",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"No puedes desactivar tu propia cuenta\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Duplicado",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"Ese correo ya está en uso\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "DELETE /usuarios/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/usuarios/{{id_usuario}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{id_usuario}}"
+              ]
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Solo Administrador."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Usuario eliminado correctamente\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"No puedes eliminarte a ti mismo\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Con registros",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"No se puede eliminar: el usuario tiene registros asociados\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "PUT /usuarios/me/push-token",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/usuarios/me/push-token",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuarios",
+                "me",
+                "push-token"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"push_token\": \"ExponentPushToken[xxxxxxxxxxxxxx]\"\n}"
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Cualquier rol autenticado (incluye Afiliado). Registra el token de Expo Push (auto-migración de la columna si falta)."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Push token registrado\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"push_token es requerido\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Pagos",
+      "item": [
+        {
+          "name": "GET /afiliados/:id/pagos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/{{id_afiliado}}/pagos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "{{id_afiliado}}",
+                "pagos"
+              ]
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Historial de pagos del afiliado (staff)."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "[\n  {\n    \"id_pago\": 41,\n    \"id_usuario\": 6,\n    \"fecha_pago\": \"2026-08-01\",\n    \"valor_pagado\": 80000.0,\n    \"estado\": \"Pagado\",\n    \"fecha_vencimiento\": \"2026-09-01\",\n    \"observaciones\": null,\n    \"registrado_por\": 1,\n    \"fecha_creacion\": \"2026-08-01T10:00:00.000Z\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "POST /afiliados/:id/pagos",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/{{id_afiliado}}/pagos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "{{id_afiliado}}",
+                "pagos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fecha_pago\": \"2026-08-01\",\n  \"valor_pagado\": 80000,\n  \"estado\": \"Pagado\",\n  \"observaciones\": \"Mensualidad\"\n}"
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Defaults: fecha_pago hoy, valor_pagado 80000, estado 'Pagado', vencimiento +30 días. Dispara factura por correo en paralelo."
+          },
+          "response": [
+            {
+              "name": "201 Created - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"id\": 42,\n  \"fecha_vencimiento\": \"2026-09-01\",\n  \"message\": \"Pago registrado correctamente\"\n}"
+            },
+            {
+              "name": "500 Internal Server Error - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"Error interno del servidor\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /pagos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/pagos?fecha_inicio=2026-07-01&fecha_fin=2026-08-09",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pagos?fecha_inicio=2026-07-01&fecha_fin=2026-08-09"
+              ]
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Solo Administrador. Filtros opcionales: fecha_inicio, fecha_fin, id_recepcionista."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "[\n  {\n    \"id_pago\": 41,\n    \"id_usuario\": 6,\n    \"fecha_pago\": \"2026-08-01\",\n    \"valor_pagado\": 80000.0,\n    \"estado\": \"Pagado\",\n    \"fecha_vencimiento\": \"2026-09-01\",\n    \"observaciones\": null,\n    \"registrado_por\": 1,\n    \"fecha_creacion\": \"2026-08-01T10:00:00.000Z\",\n    \"nombres_afiliado\": \"Juan\",\n    \"apellidos_afiliado\": \"Pineda\",\n    \"nombres_recepcionista\": \"María\",\n    \"apellidos_recepcionista\": \"Gómez\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "GET /pagos/metricas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/pagos/metricas?fecha_inicio=2026-07-01&fecha_fin=2026-08-09",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pagos",
+                "metricas?fecha_inicio=2026-07-01&fecha_fin=2026-08-09"
+              ]
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Solo Administrador. Métricas para el módulo Finanzas."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"ingresos_por_mes\": [\n    {\n      \"mes\": 7,\n      \"anio\": 2026,\n      \"total\": 800000.0\n    }\n  ],\n  \"pagos_por_recepcionista\": [\n    {\n      \"id_usuario\": 2,\n      \"nombres\": \"María\",\n      \"apellidos\": \"Gómez\",\n      \"total_recaudado\": 800000.0,\n      \"cantidad_pagos\": 10\n    }\n  ],\n  \"total_recaudado\": 800000.0,\n  \"ultimos_pagos\": [\n    {\n      \"id_pago\": 41,\n      \"id_usuario\": 6,\n      \"fecha_pago\": \"2026-08-01\",\n      \"valor_pagado\": 80000.0,\n      \"estado\": \"Pagado\",\n      \"fecha_vencimiento\": \"2026-09-01\",\n      \"observaciones\": null,\n      \"registrado_por\": 1,\n      \"fecha_creacion\": \"2026-08-01T10:00:00.000Z\",\n      \"nombres_afiliado\": \"Juan\",\n      \"apellidos_afiliado\": \"Pineda\",\n      \"nombres_recepcionista\": \"María\",\n      \"apellidos_recepcionista\": \"Gómez\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "GET /dashboard/kpis",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dashboard/kpis",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "dashboard",
+                "kpis"
+              ]
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Solo Administrador. KPIs para el Dashboard."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"total_afiliados\": 87,\n  \"afiliados_activos\": 62,\n  \"afiliados_inactivos\": 25,\n  \"entrenadores\": 2,\n  \"recepcionistas\": 2,\n  \"ciclos_en_curso\": 58,\n  \"con_restricciones\": 14,\n  \"pagos_registrados\": 214,\n  \"ingresos\": 17120000.0,\n  \"proximos_vencimientos\": 12,\n  \"por_objetivo\": [\n    {\n      \"objetivo\": \"Perdida de grasa\",\n      \"cantidad\": 41\n    },\n    {\n      \"objetivo\": \"Aumento de masa\",\n      \"cantidad\": 22\n    },\n    {\n      \"objetivo\": \"Mantenimiento\",\n      \"cantidad\": 15\n    },\n    {\n      \"objetivo\": \"Rehabilitacion\",\n      \"cantidad\": 9\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Planes",
+      "item": [
+        {
+          "name": "GET /planes/entrenamiento/:id_ciclo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/planes/entrenamiento/{{id_ciclo}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "planes",
+                "entrenamiento",
+                "{{id_ciclo}}"
+              ]
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Staff o afiliado dueño del ciclo (requireOwnCiclo)."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"id_ciclo\": 2,\n  \"modificado_por\": 3,\n  \"observaciones\": \"Push 3 días\",\n  \"rutinas\": [\n    {\n      \"id_rutina\": 1,\n      \"nombre_rutina\": \"Push A\",\n      \"enfoque_muscular\": \"Empuje\",\n      \"dia_numero\": 1,\n      \"ejercicios\": [\n        {\n          \"orden\": 1,\n          \"id_ejercicio\": 5,\n          \"nombre_ejercicio\": \"Press Banca\",\n          \"grupo_muscular\": \"Pecho\",\n          \"series\": 4,\n          \"repeticiones\": 12\n        }\n      ]\n    }\n  ]\n}"
+            },
+            {
+              "name": "404 Not Found - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"Plan de entrenamiento no encontrado para este ciclo\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST /planes/entrenamiento",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/planes/entrenamiento",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "planes",
+                "entrenamiento"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_ciclo\": 5,\n  \"observaciones\": \"Empuje/Jale 4 días\"\n}"
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Crea el plan (1:1 con el ciclo) y dispara push al dueño. modificado_por desde el JWT."
+          },
+          "response": [
+            {
+              "name": "201 Created - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"id_ciclo\": 5,\n  \"message\": \"Plan de entrenamiento creado\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"id_ciclo es requerido\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Duplicado",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"Este ciclo ya tiene un plan de entrenamiento\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "PATCH /planes/entrenamiento/:id",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/planes/entrenamiento/{{id_ciclo}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "planes",
+                "entrenamiento",
+                "{{id_ciclo}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"observaciones\": \"Añadir día de piernas\"\n}"
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Actualiza observaciones del plan de entrenamiento."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Plan de entrenamiento actualizado\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST /planes/rutinas",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/planes/rutinas",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "planes",
+                "rutinas"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_ciclo\": 5,\n  \"nombre_rutina\": \"Leg Day\",\n  \"dia_numero\": 2,\n  \"enfoque_muscular\": \"Piernas\"\n}"
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. enfoque_muscular: Piernas|Pecho|Espalda|Hombros|Biceps|Triceps|Core|Gluteos|Full Body|Empuje|Jale. Unique (id_ciclo, dia_numero)."
+          },
+          "response": [
+            {
+              "name": "201 Created - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"id\": 12,\n  \"message\": \"Rutina creada correctamente\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"id_ciclo, nombre_rutina y dia_numero son requeridos\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Duplicado",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"Ya existe una rutina el día 2 en este ciclo\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST /planes/rutinas/:id_rutina/ejercicios",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/planes/rutinas/{{id_rutina}}/ejercicios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "planes",
+                "rutinas",
+                "{{id_rutina}}",
+                "ejercicios"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_ejercicio\": 5,\n  \"series\": 4,\n  \"repeticiones\": 12,\n  \"orden\": 1\n}"
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. PK (id_rutina, orden); ambos deben ser únicos."
+          },
+          "response": [
+            {
+              "name": "201 Created - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Ejercicio añadido a la rutina\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"id_ejercicio, series, repeticiones y orden son requeridos\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Duplicado",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"Ese ejercicio ya está en la rutina o ese orden ya existe\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "DELETE /planes/rutinas/:id_rutina/ejercicios/:id_ejercicio",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/planes/rutinas/{{id_rutina}}/ejercicios/{{id_ejercicio}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "planes",
+                "rutinas",
+                "{{id_rutina}}",
+                "ejercicios",
+                "{{id_ejercicio}}"
+              ]
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Quita un ejercicio de la rutina."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Ejercicio eliminado de la rutina\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "DELETE /planes/rutinas/:id_rutina",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/planes/rutinas/{{id_rutina}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "planes",
+                "rutinas",
+                "{{id_rutina}}"
+              ]
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Elimina la rutina y sus ejercicios (transacción)."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Rutina eliminada correctamente\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /planes/nutricional/:id_ciclo",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/planes/nutricional/{{id_ciclo}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "planes",
+                "nutricional",
+                "{{id_ciclo}}"
+              ]
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Staff o afiliado dueño del ciclo (requireOwnCiclo)."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"id_ciclo\": 2,\n  \"calorias_objetivo\": 2200.0,\n  \"num_comidas\": 4,\n  \"modificado_por\": 3,\n  \"observaciones\": \"Alta proteína\",\n  \"detalle\": [\n    {\n      \"num_comida\": 1,\n      \"id_alimento\": 1,\n      \"cantidad_g\": 120.0,\n      \"nombre_alimento\": \"Pechuga de pollo\",\n      \"proteinas\": 25.0,\n      \"carbohidratos\": 0.0,\n      \"grasas\": 3.0,\n      \"calorias_por_100g\": 130.0\n    }\n  ]\n}"
+            },
+            {
+              "name": "404 Not Found - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"Plan nutricional no encontrado para este ciclo\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST /planes/nutricional",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/planes/nutricional",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "planes",
+                "nutricional"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_ciclo\": 5,\n  \"calorias_objetivo\": 2400,\n  \"num_comidas\": 4,\n  \"observaciones\": \"Superávit moderado\"\n}"
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Aliases legacy: calorias_estimadas, num_comidas_diarias. Range: 500-10000 kcal, 1-10 comidas."
+          },
+          "response": [
+            {
+              "name": "201 Created - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"id_ciclo\": 5,\n  \"message\": \"Plan nutricional creado\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"id_ciclo, calorias_objetivo y num_comidas son requeridos\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Duplicado",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"Este ciclo ya tiene un plan nutricional\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "PATCH /planes/nutricional/:id",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/planes/nutricional/{{id_ciclo}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "planes",
+                "nutricional",
+                "{{id_ciclo}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"calorias_objetivo\": 2300,\n  \"num_comidas\": 5,\n  \"observaciones\": \"Ajuste por entrenamiento\"\n}"
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. IMPORTANTE: al actualizar se borra TODO el detalle nutricional del plan (hay que volver a agregar alimentos)."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Plan nutricional actualizado\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"calorias_objetivo y num_comidas son requeridos\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST /planes/nutricional/:id_plan/detalle",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/planes/nutricional/{{id_ciclo}}/detalle",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "planes",
+                "nutricional",
+                "{{id_ciclo}}",
+                "detalle"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_alimento\": 1,\n  \"num_comida\": 1,\n  \"cantidad_g\": 150\n}"
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Aliases legacy: numero_comida → num_comida, cantidad → cantidad_g. PK triple (id_ciclo, num_comida, id_alimento)."
+          },
+          "response": [
+            {
+              "name": "201 Created - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Alimento añadido al plan nutricional\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"id_alimento, num_comida y cantidad_g son requeridos\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Duplicado",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"Ese alimento ya está en esa comida del plan\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Catálogos",
+      "item": [
+        {
+          "name": "GET /catalogo/ejercicios",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/catalogo/ejercicios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "catalogo",
+                "ejercicios"
+              ]
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Cualquier rol autenticado."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "[\n  {\n    \"id_ejercicio\": 5,\n    \"nombre_ejercicio\": \"Press Banca\",\n    \"grupo_muscular\": \"Pecho\",\n    \"descripcion\": \"Banco plano con barra\",\n    \"nivel_minimo\": \"Principiante\",\n    \"restricciones_excluidas\": [\n      {\n        \"id_restriccion\": 3,\n        \"nombre_restriccion\": \"Hombro lesionado\",\n        \"tipo_restriccion\": \"Lesion\"\n      }\n    ]\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "POST /catalogo/ejercicios",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/catalogo/ejercicios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "catalogo",
+                "ejercicios"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre_ejercicio\": \"Peso muerto rumano\",\n  \"grupo_muscular\": \"Gluteos\",\n  \"nivel_minimo\": \"Intermedio\",\n  \"descripcion\": \"Foco en cadena posterior\"\n}"
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. grupo_muscular: Piernas|Pecho|Espalda|Hombros|Biceps|Triceps|Core|Gluteos. nivel_minimo: Principiante|Intermedio|Avanzado."
+          },
+          "response": [
+            {
+              "name": "201 Created - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"id\": 21,\n  \"message\": \"Ejercicio creado\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"nombre_ejercicio, grupo_muscular y nivel_minimo son requeridos\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Duplicado",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"Ya existe un ejercicio con ese nombre\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "PUT /catalogo/ejercicios/:id",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/catalogo/ejercicios/{{id_ejercicio}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "catalogo",
+                "ejercicios",
+                "{{id_ejercicio}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre_ejercicio\": \"Peso muerto rumano\",\n  \"grupo_muscular\": \"Gluteos\",\n  \"nivel_minimo\": \"Avanzado\",\n  \"descripcion\": \"Foco en cadena posterior\"\n}"
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Actualiza el ejercicio."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Ejercicio actualizado\"\n}"
+            },
+            {
+              "name": "404 Not Found - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"Ejercicio no encontrado\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "DELETE /catalogo/ejercicios/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/catalogo/ejercicios/{{id_ejercicio}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "catalogo",
+                "ejercicios",
+                "{{id_ejercicio}}"
+              ]
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. 409 si está en uso en rutinas activas."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Ejercicio eliminado\"\n}"
+            },
+            {
+              "name": "409 Conflict - En uso",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"No se puede eliminar: el ejercicio está siendo usado en rutinas activas\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /catalogo/alimentos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/catalogo/alimentos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "catalogo",
+                "alimentos"
+              ]
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Calorías calculadas (fórmula Atwater) vía vista v_alimento_calorias."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "[\n  {\n    \"id_alimento\": 1,\n    \"nombre_alimento\": \"Pechuga de pollo\",\n    \"proteinas\": 25.0,\n    \"carbohidratos\": 0.0,\n    \"grasas\": 3.0,\n    \"calorias_por_100g\": 130.0\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "POST /catalogo/alimentos",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/catalogo/alimentos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "catalogo",
+                "alimentos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre_alimento\": \"Avena\",\n  \"proteinas\": 13.5,\n  \"carbohidratos\": 66.0,\n  \"grasas\": 7.0\n}"
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Macros en gramos por 100 g (el backend calcula las calorías con Atwater)."
+          },
+          "response": [
+            {
+              "name": "201 Created - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"id\": 33,\n  \"message\": \"Alimento creado\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"nombre_alimento y todos los macros son requeridos\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Duplicado",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"Ya existe un alimento con ese nombre\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "PUT /catalogo/alimentos/:id",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/catalogo/alimentos/{{id_alimento}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "catalogo",
+                "alimentos",
+                "{{id_alimento}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre_alimento\": \"Avena\",\n  \"proteinas\": 13.5,\n  \"carbohidratos\": 66.0,\n  \"grasas\": 6.5\n}"
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Actualiza el alimento."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Alimento actualizado\"\n}"
+            },
+            {
+              "name": "404 Not Found - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"Alimento no encontrado\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "DELETE /catalogo/alimentos/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/catalogo/alimentos/{{id_alimento}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "catalogo",
+                "alimentos",
+                "{{id_alimento}}"
+              ]
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. 409 si está en uso en planes nutricionales activos."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Alimento eliminado\"\n}"
+            },
+            {
+              "name": "409 Conflict - En uso",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"No se puede eliminar: el alimento está siendo usado en planes nutricionales activos\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /catalogo/restricciones",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/catalogo/restricciones",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "catalogo",
+                "restricciones"
+              ]
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Catálogo de solo lectura (no hay POST/PUT/DELETE de restricciones)."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "[\n  {\n    \"id_restriccion\": 1,\n    \"nombre_restriccion\": \"Hipertensión\",\n    \"tipo\": \"Enfermedad\",\n    \"efecto_relevante\": \"Evitar esfuerzos máximos\"\n  }\n]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Notificaciones",
+      "item": [
+        {
+          "name": "GET /notificaciones",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/notificaciones",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "notificaciones"
+              ]
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Se calculan en vivo según el rol del token (sin tabla). Admin: membrancias por vencer, nuevos afiliados, personal pendiente. Recepcionista: pagos hoy/vencidos, cumpleaños, bienvenida. Entrenador: sin plan, progreso estancado, ciclos activos, restricciones."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "[\n  {\n    \"tipo\": \"membresias_por_vencer\",\n    \"mensaje\": \"12 membresías vencen en los próximos 7 días\",\n    \"cantidad\": 12,\n    \"icono\": \"⏰\",\n    \"ruta\": \"/pagos\"\n  },\n  {\n    \"tipo\": \"nuevos_afiliados\",\n    \"mensaje\": \"5 afiliados nuevos este mes\",\n    \"cantidad\": 5,\n    \"icono\": \"👥\",\n    \"ruta\": \"/afiliados\"\n  },\n  {\n    \"tipo\": \"personal_pendiente\",\n    \"mensaje\": \"2 empleados pendientes de activación\",\n    \"cantidad\": 2,\n    \"icono\": \"🛡️\",\n    \"ruta\": \"/personal\"\n  }\n]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Configuración",
+      "item": [
+        {
+          "name": "GET /configuracion/precio-membresia",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/configuracion/precio-membresia",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "configuracion",
+                "precio-membresia"
+              ]
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Solo Administrador. Devuelve 80000 si la clave no existe."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"clave\": \"precio_membresia\",\n  \"valor\": 80000\n}"
+            }
+          ]
+        },
+        {
+          "name": "PUT /configuracion/precio-membresia",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/configuracion/precio-membresia",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "configuracion",
+                "precio-membresia"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"valor\": 90000\n}"
+            },
+            "description": "Autenticación obligatoria en todos los endpoints (excepto los de Auth). El login guarda el token en la variable {{token}}. Solo Administrador. Valor numérico positivo (se redondea)."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Precio de membresia actualizado\",\n  \"valor\": 90000\n}"
+            },
+            {
+              "name": "400 Bad Request - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"valor debe ser un numero positivo\"\n}"
+            }
+          ]
         }
       ]
     }

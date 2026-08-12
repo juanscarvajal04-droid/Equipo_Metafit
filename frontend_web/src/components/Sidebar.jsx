@@ -6,7 +6,7 @@ import styles from "./Sidebar.module.css";
 // Cada rol tiene exactamente los links que le corresponden según el RBAC.
 // 'Administrador' es el único con acceso a /personal (Gestión de Personal).
 const NAV_OPERATIVO = {
-  // ADMINISTRADOR — acceso total + módulo exclusivo de personal
+  // ADMINISTRADOR — módulos completos + personal exclusivo
   Administrador: [
     { to: "/dashboard", icon: "📊", label: "Dashboard" },
     { to: "/finanzas",  icon: "💰", label: "Finanzas"  },
@@ -28,14 +28,14 @@ const NAV_OPERATIVO = {
   ],
 };
 
-// Link exclusivo del Super Usuario
+// Link exclusivo del Administrador
 const NAV_ADMIN_EXCLUSIVO = [
   { to: "/personal", icon: "🛡️", label: "Gestión de Personal" },
 ];
 
 /** Paleta de colores por rol — permanecen inline por ser dinámicos */
 const ROLE_GRADIENT = {
-  Administrador: "linear-gradient(135deg,#7c3aed,#4f46e5)",
+  Administrador: "linear-gradient(135deg,#e31c25,#b71c1c)",
   Recepcionista: "linear-gradient(135deg,#2563eb,#0891b2)",
   Entrenador:    "linear-gradient(135deg,#059669,#0d9488)",
 };
@@ -47,7 +47,7 @@ const ROLE_ICON = {
 };
 
 const ROLE_LABEL = {
-  Administrador: "Super Usuario",
+  Administrador: "Administrador",
   Recepcionista: "Recepcionista",
   Entrenador:    "Entrenador",
 };
@@ -58,7 +58,7 @@ export default function Sidebar() {
 
   const role     = user?.role || "Recepcionista";
   const links    = NAV_OPERATIVO[role] || [];
-  const gradient = ROLE_GRADIENT[role] || "#7c3aed";
+  const gradient = ROLE_GRADIENT[role] || "#e31c25";
   const isAdmin  = role === "Administrador";
 
   const handleLogout = () => { logout(); navigate("/"); };
@@ -88,25 +88,12 @@ export default function Sidebar() {
             <div className={styles.profileEmail}>
               {user?.email || "—"}
             </div>
-            {/* Badge — background y boxShadow son dinámicos */}
-            <span
-              className={`badge mt-1 ${styles.profileBadge}`}
-              style={{
-                background: gradient,
-                boxShadow: isAdmin ? "0 2px 8px rgba(124,58,237,0.45)" : "none",
-              }}
-            >
+            {/* Badge — fondo/acento definidos por token CSS (-mf-accent) */}
+            <span className={`badge mt-1 ${styles.profileBadge}`}>
               {ROLE_ICON[role]} {ROLE_LABEL[role]}
             </span>
           </div>
         </div>
-
-        {/* Banner exclusivo Admin */}
-        {isAdmin && (
-          <div className={styles.adminBanner}>
-            ✦ Acceso Total al Sistema ✦
-          </div>
-        )}
       </div>
 
       {/* ── Sección: Navegación Principal ── */}

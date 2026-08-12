@@ -1,0 +1,10 @@
+/* Fondo oscuro de marca para las historias */
+body,
+html {
+  background: #0a0a0f !important;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}

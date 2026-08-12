@@ -4,7 +4,7 @@
 .root {
   display: flex;
   min-height: 100vh;
-  background: #0a0a0f;
+  background: var(--mf-bg);
 }
 
 .rightCol {
@@ -17,5 +17,5 @@
 .main {
   flex: 1;
   overflow-y: auto;
-  background: #0a0a0f;
+  background: var(--mf-bg);
 }

@@ -6,13 +6,13 @@
 .headerTitle {
   font-size: 1.35rem;
   font-weight: 700;
-  color: #e0e0e0;
+  color: var(--mf-text);
   margin: 0;
 }
 
 .headerSub {
   font-size: 0.82rem;
-  color: #94a3b8;
+  color: var(--mf-muted);
   margin: 4px 0 0 0;
 }
 
@@ -30,8 +30,8 @@
 }
 
 .kpiCard {
-  background: #1a1a2e;
-  border: 1px solid #252545;
+  background: var(--mf-surface);
+  border: 1px solid var(--mf-border);
   border-radius: 12px;
   padding: 1rem;
   text-align: center;
@@ -39,7 +39,7 @@
 
 .kpiLabel {
   font-size: 0.72rem;
-  color: #94a3b8;
+  color: var(--mf-muted);
   margin-top: 2px;
   text-transform: uppercase;
   letter-spacing: 0.4px;
@@ -48,14 +48,14 @@
 .kpiValue {
   font-size: 1.6rem;
   font-weight: 700;
-  color: #e0e0e0;
+  color: var(--mf-text);
   line-height: 1.2;
 }
 
 /* Table card */
 .tableCard {
-  background: #1a1a2e;
-  border: 1px solid #252545;
+  background: var(--mf-surface);
+  border: 1px solid var(--mf-border);
   border-radius: 14px;
   overflow: hidden;
 }
@@ -65,7 +65,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid #252545;
+  border-bottom: 1px solid var(--mf-border);
 }
 
 .table {
@@ -78,30 +78,30 @@
   text-align: left;
   padding: 0.75rem 0.6rem;
   font-weight: 600;
-  color: #94a3b8;
+  color: var(--mf-muted);
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  border-bottom: 1px solid #252545;
+  border-bottom: 1px solid var(--mf-border);
   white-space: nowrap;
 }
 
 .table td {
   padding: 0.6rem;
-  color: #e0e0e0;
+  color: var(--mf-text);
   vertical-align: middle;
 }
 
 .table tbody tr:nth-child(odd) {
-  background: #1a1a2e;
+  background: var(--mf-surface);
 }
 
 .table tbody tr:nth-child(even) {
-  background: #16213e;
+  background: var(--mf-surface);
 }
 
 .table tbody tr:hover {
-  background: rgba(124, 58, 237, 0.08);
+  background: var(--mf-accent-soft);
 }
 
 /* Avatar */
@@ -145,27 +145,27 @@
 }
 
 .emailText {
-  color: #94a3b8;
+  color: var(--mf-muted);
   font-size: 0.75rem;
 }
 
 /* Search */
 .searchInput {
-  background: #0a0a0f;
-  border: 1px solid #252545;
-  color: #e0e0e0;
+  background: var(--mf-bg);
+  border: 1px solid var(--mf-border);
+  color: var(--mf-text);
   border-radius: 6px;
   outline: none;
   transition: border-color 0.2s;
 }
 
 .searchInput:focus {
-  border-color: #7c3aed;
+  border-color: #e31c25;
 }
 
 /* Label */
 .labelText {
-  color: #94a3b8;
+  color: var(--mf-muted);
   font-size: 0.78rem;
   font-weight: 500;
   margin-bottom: 4px;
@@ -174,9 +174,9 @@
 
 /* Form controls */
 .inputDark {
-  background: #0a0a0f;
-  border: 1px solid #252545;
-  color: #e0e0e0;
+  background: var(--mf-bg);
+  border: 1px solid var(--mf-border);
+  color: var(--mf-text);
   border-radius: 6px;
   padding: 0.5rem 0.75rem;
   font-size: 0.85rem;
@@ -185,13 +185,13 @@
 }
 
 .inputDark:focus {
-  border-color: #7c3aed;
+  border-color: #e31c25;
 }
 
 .selectDark {
-  background: #0a0a0f;
-  border: 1px solid #252545;
-  color: #e0e0e0;
+  background: var(--mf-bg);
+  border: 1px solid var(--mf-border);
+  color: var(--mf-text);
   border-radius: 6px;
   padding: 0.5rem 0.75rem;
   font-size: 0.85rem;
@@ -201,18 +201,18 @@
 }
 
 .selectDark:focus {
-  border-color: #7c3aed;
+  border-color: #e31c25;
 }
 
 .checkboxDark {
-  accent-color: #7c3aed;
+  accent-color: #e31c25;
   cursor: pointer;
 }
 
 .textareaDark {
-  background: #0a0a0f;
-  border: 1px solid #252545;
-  color: #e0e0e0;
+  background: var(--mf-bg);
+  border: 1px solid var(--mf-border);
+  color: var(--mf-text);
   border-radius: 6px;
   padding: 0.5rem 0.75rem;
   font-size: 0.85rem;
@@ -223,12 +223,12 @@
 }
 
 .textareaDark:focus {
-  border-color: #7c3aed;
+  border-color: #e31c25;
 }
 
 /* Buttons */
 .btnPrimary {
-  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  background: linear-gradient(135deg, #e31c25, #b71c1c);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -254,8 +254,8 @@
 
 .btnOutline {
   background: transparent;
-  border: 1px solid #7c3aed;
-  color: #a78bfa;
+  border: 1px solid #e31c25;
+  color: var(--mf-accent);
   border-radius: 8px;
   padding: 0.5rem 1rem;
   font-size: 0.85rem;
@@ -265,8 +265,8 @@
 }
 
 .btnOutline:hover {
-  background: rgba(124, 58, 237, 0.1);
-  color: #c4b5fd;
+  background: var(--mf-accent-soft);
+  color: var(--mf-accent);
 }
 
 .btnOutline:disabled {
@@ -388,8 +388,8 @@
 
 .btnRefresh {
   background: transparent;
-  border: 1px solid #252545;
-  color: #94a3b8;
+  border: 1px solid var(--mf-border);
+  color: var(--mf-muted);
   border-radius: 6px;
   padding: 0.4rem 0.65rem;
   font-size: 0.9rem;
@@ -401,9 +401,9 @@
 }
 
 .btnRefresh:hover {
-  background: rgba(124, 58, 237, 0.08);
-  color: #a78bfa;
-  border-color: #7c3aed;
+  background: var(--mf-accent-soft);
+  color: var(--mf-accent);
+  border-color: #e31c25;
 }
 
 .btnRefresh:disabled {
@@ -429,8 +429,8 @@
 .badgeDark {
   display: inline-flex;
   align-items: center;
-  background: #252545;
-  color: #94a3b8;
+  background: var(--mf-surface-3);
+  color: var(--mf-muted);
   padding: 0.2rem 0.6rem;
   border-radius: 12px;
   font-size: 0.72rem;
@@ -463,7 +463,7 @@
 .emptyState {
   text-align: center;
   padding: 2rem 1rem;
-  color: #94a3b8;
+  color: var(--mf-muted);
   font-size: 0.85rem;
 }
 
@@ -507,9 +507,9 @@
 }
 
 .modalContent {
-  background: #1a1a2e;
+  background: var(--mf-surface);
   border-radius: 12px;
-  border: 1px solid #252545;
+  border: 1px solid var(--mf-border);
   max-width: 750px;
   width: 95%;
   max-height: 90vh;
@@ -521,13 +521,13 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem 1.25rem;
-  border-bottom: 1px solid #252545;
+  border-bottom: 1px solid var(--mf-border);
 }
 
 .modalTitle {
   font-size: 1rem;
   font-weight: 700;
-  color: #e0e0e0;
+  color: var(--mf-text);
   margin: 0;
 }
 
@@ -540,7 +540,7 @@
   justify-content: flex-end;
   gap: 0.5rem;
   padding: 1rem 1.25rem;
-  border-top: 1px solid #252545;
+  border-top: 1px solid var(--mf-border);
 }
 
 /* Afiliado section */
@@ -549,16 +549,16 @@
 }
 
 .afiliadoInfoBox {
-  background: #0a0a0f;
-  border: 1px solid #252545;
+  background: var(--mf-bg);
+  border: 1px solid var(--mf-border);
   border-radius: 8px;
   padding: 0.75rem;
 }
 
 /* Info card */
 .infoCard {
-  background: #0a0a0f;
-  border: 1px solid #252545;
+  background: var(--mf-bg);
+  border: 1px solid var(--mf-border);
   border-radius: 8px;
   padding: 0.75rem;
 }
@@ -567,7 +567,7 @@
 .spinnerBrand {
   width: 1.25rem;
   height: 1.25rem;
-  border: 2px solid #7c3aed;
+  border: 2px solid #e31c25;
   border-top-color: transparent;
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
@@ -593,15 +593,15 @@
 /* Alimento items */
 .alimentoItem {
   padding: 0.5rem;
-  border: 1px solid #252545;
+  border: 1px solid var(--mf-border);
   border-radius: 8px;
   margin-bottom: 4px;
   transition: background 0.15s, border-color 0.15s;
 }
 
 .alimentoChecked {
-  background: rgba(124, 58, 237, 0.08);
-  border-color: rgba(124, 58, 237, 0.3);
+  background: var(--mf-accent-soft);
+  border-color: rgba(227, 28, 37, 0.3);
 }
 
 .alimentoRow {
@@ -614,12 +614,12 @@
   font-weight: 600;
   font-size: 0.85rem;
   flex: 1;
-  color: #e0e0e0;
+  color: var(--mf-text);
 }
 
 .alimentoNutrition {
   font-size: 0.72rem;
-  color: #94a3b8;
+  color: var(--mf-muted);
 }
 
 /* Inline form row */
@@ -638,15 +638,15 @@
 
 .inlineLabel {
   font-size: 0.7rem;
-  color: #94a3b8;
+  color: var(--mf-muted);
   display: block;
   margin-bottom: 2px;
 }
 
 .inlineInput {
-  background: #0a0a0f;
-  border: 1px solid #252545;
-  color: #e0e0e0;
+  background: var(--mf-bg);
+  border: 1px solid var(--mf-border);
+  color: var(--mf-text);
   border-radius: 4px;
   padding: 0.3rem 0.5rem;
   font-size: 0.78rem;
@@ -656,13 +656,13 @@
 }
 
 .inlineInput:focus {
-  border-color: #7c3aed;
+  border-color: #e31c25;
 }
 
 .inlineSelect {
-  background: #0a0a0f;
-  border: 1px solid #252545;
-  color: #e0e0e0;
+  background: var(--mf-bg);
+  border: 1px solid var(--mf-border);
+  color: var(--mf-text);
   border-radius: 4px;
   padding: 0.3rem 0.5rem;
   font-size: 0.78rem;
@@ -673,7 +673,7 @@
 }
 
 .inlineSelect:focus {
-  border-color: #7c3aed;
+  border-color: #e31c25;
 }
 
 /* Action buttons */
@@ -712,10 +712,10 @@
 }
 
 .modalContent::-webkit-scrollbar-thumb {
-  background: #252545;
+  background: var(--mf-surface-3);
   border-radius: 3px;
 }
 
 .modalContent::-webkit-scrollbar-thumb:hover {
-  background: #353560;
+  background: var(--mf-surface-3);
 }

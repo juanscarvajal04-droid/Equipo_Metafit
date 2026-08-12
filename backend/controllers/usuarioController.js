@@ -74,6 +74,19 @@ const UsuarioController = {
     }
   },
 
+  /** PUT /usuarios/me/push-token — guarda el Expo Push Token del login */
+  guardarPushToken: async (req, res) => {
+    const token = (req.body?.push_token || '').toString().trim();
+    if (!token) return res.status(400).json({ error: 'push_token es requerido' });
+    try {
+      await UsuarioService.guardarPushToken(req.user.sub, token);
+      return res.json({ message: 'Push token registrado' });
+    } catch (err) {
+      console.error('[usuarioController.guardarPushToken]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
   delete: async (req, res) => {
     try {
       const success = await UsuarioService.delete(req.params.id, req.user.sub);

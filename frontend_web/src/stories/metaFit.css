@@ -1,0 +1,150 @@
+/* src/stories/metaFit.css — componentes de demostración (Storybook) */
+.mfDemo {
+  background: #0a0a0f;
+  min-height: 100vh;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.mfDemoRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.mfDemoTitle {
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0 0 12px;
+}
+
+/* ── Badge ── */
+.mfBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* ── Button ── */
+.mfButton {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.18s, transform 0.12s;
+}
+
+.mfButton:hover {
+  opacity: 0.88;
+}
+
+.mfButton:active {
+  transform: scale(0.97);
+}
+
+.mfButton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ── Card ── */
+.mfCard {
+  background: #16171d;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 20px;
+  width: 280px;
+}
+
+.mfCardTitle {
+  color: #e2e8f0;
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+
+.mfCardText {
+  color: #94a3b8;
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 0 0 14px;
+}
+
+.mfCardFooter {
+  color: #64748b;
+  font-size: 12px;
+}
+
+/* ── Modal ── */
+.mfModalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.mfModal {
+  background: #16171d;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 420px;
+  padding: 24px;
+}
+
+.mfModalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.mfModalTitle {
+  color: #e2e8f0;
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.mfModalClose {
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  color: #94a3b8;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.mfModalBody {
+  color: #94a3b8;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+/* ── Avatar ── */
+.mfAvatar {
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  color: #ffffff;
+}

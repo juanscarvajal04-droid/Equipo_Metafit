@@ -1,0 +1,74 @@
+# GitHub Actions — CI/CD MetaFit
+# 1. CI: corre los test suites (backend, web, móvil) en cada push.
+# 2. CD: deploy automático a Render (backend y frontend) al llegar a `main`.
+name: CI/CD
+
+on:
+  push:
+    branches: [main, feature/juan-carvajal]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    name: CI — Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend_web/package-lock.json
+            movil/package-lock.json
+
+      - name: Backend — install + test
+        working-directory: backend
+        run: |
+          npm ci
+          npm test
+
+      - name: Frontend web — install + test + build
+        working-directory: frontend_web
+        run: |
+          npm ci
+          npm test
+          npm run build
+
+      - name: Móvil — install + test
+        working-directory: movil
+        run: |
+          npm ci
+          npm test
+
+  deploy:
+    name: CD — Deploy a Render
+    if: github.ref == 'refs/heads/main'
+    needs: ci
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy backend (Render Web Service)
+        env:
+          RENDER_API_TOKEN: ${{ secrets.RENDER_API_TOKEN }}
+        run: |
+          curl -s -X POST "https://api.render.com/v1/services/srv-d9ieq2rtqb8s738q2180/deploys" \
+            -H "Accept: application/json" -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $RENDER_API_TOKEN" \
+            -d '{"clearCache":"do_not_clear"}'
+
+      - name: Deploy frontend (Render Static Site)
+        env:
+          RENDER_API_TOKEN: ${{ secrets.RENDER_API_TOKEN }}
+        run: |
+          curl -s -X POST "https://api.render.com/v1/services/srv-d9kbkdm1egvs7385ofu0/deploys" \
+            -H "Accept: application/json" -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $RENDER_API_TOKEN" \
+            -d '{"clearCache":"do_not_clear"}'

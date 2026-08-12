@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
-import { getId, nombreCompleto, inicial } from "../utils/afiliadoHelpers";
+import { getId, nombreCompleto } from "../utils/afiliadoHelpers";
 import { useToast } from "../hooks/useToast";
+import { trackEvent } from "../utils/analytics";
+import { API_BASE_URL } from "../services/api";
 import s from "./AfiliadosView.module.css";
 
 const ESTADOS = ["Activo", "Inactivo", "Suspendido"];
@@ -52,6 +54,28 @@ const avatarColor = (nombre) => {
   return `hsl(${Math.abs(hash) % 360}, 65%, 55%)`;
 };
 
+const fotoUrl = (foto) =>
+  foto ? (foto.startsWith("http") ? foto : `${API_BASE_URL}${foto}`) : null;
+
+const AvatarFoto = ({ nombre, foto, size = 32, style }) => {
+  const url = fotoUrl(foto);
+  if (url) {
+    return (
+      <img
+        src={url}
+        alt={nombre}
+        style={{ width: size, height: size, borderRadius: "50%", objectFit: "cover", flexShrink: 0, ...style }}
+      />
+    );
+  }
+  const inicialLetra = nombre ? (nombre.trim()[0] || "?").toUpperCase() : "?";
+  return (
+    <div className={s.avatarTd} style={{ background: avatarColor(nombre), ...style }}>
+      {inicialLetra}
+    </div>
+  );
+};
+
 export default function AfiliadosView() {
   const { user, authAxios } = useAuth();
   const { toast, showToast } = useToast();
@@ -60,6 +84,8 @@ export default function AfiliadosView() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [saving, setSaving] = useState(false);
+  const [fotoFile, setFotoFile] = useState(null);
+  const [fotoPreview, setFotoPreview] = useState(null);
 
   const [detalleAfiliado, setDetalleAfiliado] = useState(null);
   const [editandoAfiliado, setEditandoAfiliado] = useState(null);
@@ -112,6 +138,8 @@ export default function AfiliadosView() {
 
   const abrirEdicion = (a) => {
     setEditandoAfiliado(a);
+    setFotoFile(null);
+    setFotoPreview(null);
     setFormEdit({
       nombres: a.nombres || "",
       apellidos: a.apellidos || "",
@@ -131,14 +159,25 @@ export default function AfiliadosView() {
     });
   };
 
+  const subirFoto = async (id, file) => {
+    const fd = new FormData();
+    fd.append("foto", file);
+    await authAxios.post(`/afiliados/${id}/foto`, fd, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  };
+
   const guardarEdicion = async (e) => {
     e.preventDefault();
     setSaving(true);
     try {
       const id = getId(editandoAfiliado);
       await authAxios.patch(`/afiliados/${id}`, formEdit);
+      if (fotoFile) await subirFoto(id, fotoFile);
       showToast("Afiliado actualizado correctamente", "success");
       setEditandoAfiliado(null);
+      setFotoFile(null);
+      setFotoPreview(null);
       fetchAfiliados();
       window.dispatchEvent(new CustomEvent("afiliado-modificado"));
     } catch (err) {
@@ -160,10 +199,14 @@ export default function AfiliadosView() {
         estado_afiliacion: formCrear.estado,
       };
       delete payload.estado;
-      await authAxios.post("/afiliados", payload);
+      const { data } = await authAxios.post("/afiliados", payload);
+      if (fotoFile && data?.id) await subirFoto(data.id, fotoFile);
       showToast("Afiliado creado correctamente", "success");
+      trackEvent("metaFit_afiliado_creado", { rol_creador: role });
       setCreandoAbierto(false);
       setFormCrear(FORM_VACIO);
+      setFotoFile(null);
+      setFotoPreview(null);
       fetchAfiliados();
       window.dispatchEvent(new CustomEvent("afiliado-modificado"));
     } catch (err) {
@@ -214,7 +257,7 @@ export default function AfiliadosView() {
             </p>
           </div>
           {puedeCrear && (
-            <button type="button" className={s.btnPrimary} onClick={() => setCreandoAbierto(true)}>
+            <button type="button" className={s.btnPrimary} onClick={() => { setCreandoAbierto(true); setFotoFile(null); setFotoPreview(null); }}>
               ➕ Nuevo afiliado
             </button>
           )}
@@ -231,7 +274,7 @@ export default function AfiliadosView() {
 
         <div className={s.tableCard}>
           {loading ? (
-            <div style={{ padding: "3rem 0", textAlign: "center", color: "#94a3b8" }}>Cargando afiliados...</div>
+            <div style={{ padding: "3rem 0", textAlign: "center", color: "var(--mf-muted)" }}>Cargando afiliados...</div>
           ) : afiliadosFiltrados.length === 0 ? (
             <div style={{ padding: "3rem 0", textAlign: "center" }}>
               <p className={s.emptyState}>No se encontraron afiliados.</p>
@@ -256,12 +299,10 @@ export default function AfiliadosView() {
                     const email = a.correo || a.email || "";
                     return (
                       <tr key={getId(a)}>
-                        <td style={{ color: "#94a3b8", fontSize: "0.78rem" }}>{idx + 1}</td>
+                        <td style={{ color: "var(--mf-muted)", fontSize: "0.78rem" }}>{idx + 1}</td>
                         <td>
                           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                            <div className={s.avatarTd} style={{ background: avatarColor(nombre) }}>
-                              {inicial(a)}
-                            </div>
+                            <AvatarFoto nombre={nombre} foto={a.foto} />
                             <div>
                               <div style={{ fontWeight: 600, fontSize: "0.85rem" }}>{nombre}</div>
                               <div className={s.emailSm}>{email}</div>
@@ -295,7 +336,10 @@ export default function AfiliadosView() {
         <div className={s.modalOverlay} onClick={() => !saving && setDetalleAfiliado(null)}>
           <div className={s.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: 650 }}>
             <div className={s.modalHeader}>
-              <h5 className={s.modalTitle}>👁 {nombreCompleto(detalleAfiliado)}</h5>
+              <h5 className={s.modalTitle} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <AvatarFoto nombre={nombreCompleto(detalleAfiliado)} foto={detalleAfiliado.foto} size={38} />
+                <span>👁 {nombreCompleto(detalleAfiliado)}</span>
+              </h5>
               <button type="button" className={s.btnOutline} onClick={() => !saving && setDetalleAfiliado(null)}>✕</button>
             </div>
             <div className={s.modalBody}>
@@ -355,13 +399,13 @@ export default function AfiliadosView() {
               </div>
 
               {detalleAfiliado.restricciones_medicas && (
-                <div style={{ marginTop: 12 }}>
+                <div className={s.detailRestricciones}>
                   <div className={s.detailLabel}>Restricciones médicas</div>
                   <div className={s.detailValue}>{detalleAfiliado.restricciones_medicas}</div>
                 </div>
               )}
 
-              <div style={{ display: "flex", gap: 4, marginTop: 20, borderBottom: "1px solid #252545" }}>
+              <div className={s.detailTabsBar}>
                 {tabsDisponibles.map((tab, i) => (
                   <button
                     key={tab}
@@ -374,7 +418,7 @@ export default function AfiliadosView() {
                 ))}
               </div>
 
-              <div style={{ marginTop: 16, minHeight: 80 }}>
+              <div className={s.detailTabsContent}>
                 {tabsDisponibles[tabActivo] === "Estado de Cuenta" && (
                   <div>
                     {detalleAfiliado.ultimo_pago ? (
@@ -383,7 +427,7 @@ export default function AfiliadosView() {
                         <div className={s.kpiValue} style={{ fontSize: "1rem" }}>
                           ${Number(detalleAfiliado.ultimo_pago.valor_pagado || 0).toLocaleString("es-CO")}
                         </div>
-                        <div style={{ fontSize: "0.75rem", color: "#94a3b8", marginTop: 4 }}>
+                        <div style={{ fontSize: "0.75rem", color: "var(--mf-muted)", marginTop: 4 }}>
                           {new Date(detalleAfiliado.ultimo_pago.fecha_pago).toLocaleDateString("es-CO")}
                         </div>
                       </div>
@@ -451,6 +495,24 @@ export default function AfiliadosView() {
                 <button type="button" className={s.btnOutline} onClick={() => !saving && setEditandoAfiliado(null)}>✕</button>
               </div>
               <div className={s.modalBody}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
+                  <AvatarFoto nombre={nombreCompleto(editandoAfiliado)} foto={fotoPreview || editandoAfiliado.foto} size={56} />
+                  <div style={{ flex: 1 }}>
+                    <label className={s.labelText}>Foto de perfil</label>
+                    <input
+                      className={s.inputDark}
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0] || null;
+                        setFotoFile(f);
+                        setFotoPreview(f ? URL.createObjectURL(f) : null);
+                      }}
+                      style={{ padding: "0.35rem 0.5rem" }}
+                    />
+                    <small style={{ color: "var(--mf-muted)" }}>JPG, PNG, WEBP o GIF · máx 5 MB</small>
+                  </div>
+                </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <div>
                     <label className={s.labelText}>Nombres</label>
@@ -546,6 +608,24 @@ export default function AfiliadosView() {
                 <button type="button" className={s.btnOutline} onClick={() => !saving && setCreandoAbierto(null)}>✕</button>
               </div>
               <div className={s.modalBody}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
+                  <AvatarFoto nombre={formCrear.nombres || "?"} foto={fotoPreview} size={56} />
+                  <div style={{ flex: 1 }}>
+                    <label className={s.labelText}>Foto de perfil</label>
+                    <input
+                      className={s.inputDark}
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0] || null;
+                        setFotoFile(f);
+                        setFotoPreview(f ? URL.createObjectURL(f) : null);
+                      }}
+                      style={{ padding: "0.35rem 0.5rem" }}
+                    />
+                    <small style={{ color: "var(--mf-muted)" }}>JPG, PNG, WEBP o GIF · máx 5 MB</small>
+                  </div>
+                </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <div>
                     <label className={s.labelText}>Nombres</label>

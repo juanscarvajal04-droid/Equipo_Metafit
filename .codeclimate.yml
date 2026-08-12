@@ -1,0 +1,88 @@
+# .codeclimate.yml
+# Configuración de Code Climate (calidad de código, duplicación y TODO).
+# Requiere: repo público en GitHub + login manual en https://codeclimate.com
+# (la API Code Climate no permite crear repositorios de forma automática).
+
+version: "2"
+
+checks:
+  argument-count:
+    config:
+      threshold: 5
+  complex-logic:
+    config:
+      threshold: 5
+  file-lines:
+    config:
+      threshold: 400
+  method-complexity:
+    config:
+      threshold: 8
+  method-count:
+    config:
+      threshold: 24
+  method-lines:
+    config:
+      threshold: 40
+  nested-control-flow:
+    config:
+      threshold: 4
+  return-statements:
+    config:
+      threshold: 4
+  similar-code:
+    config:
+      threshold: 60
+  identical-code:
+    config:
+      threshold: 45
+
+# Análisis de duplicación: solo código de producción (excluye tests,
+# builds, plantillas y dependencias).
+exclude_patterns:
+  - "**/node_modules/"
+  - "**/dist/"
+  - "**/build/"
+  - "**/.expo/"
+  - "**/babel.config.js"
+  - "**/jest.config.*"
+  - "**/*.config.js"
+  - "frontend_web/vite.config.js"
+  - "movil/metro.config.js"
+  - "**/__tests__/**"
+  - "**/__mocks__/**"
+  - "**/*.test.js"
+  - "**/*.test.jsx"
+  - "**/*.spec.js"
+  - "backend/templates/**"
+  - "documentacion/**"
+  - "frontend_web/public/**"
+  - "backend/uploads/**"
+
+plugins:
+  csslint:
+    enabled: false
+  eslint:
+    enabled: true
+    config:
+      extensions:
+        - .js
+        - .jsx
+  duplication:
+    enabled: true
+    config:
+      languages:
+        - javascript:
+            mass_threshold: 60
+        - jsx:
+            mass_threshold: 60
+  fixme:
+    enabled: true
+
+ratings:
+  paths:
+    - "backend/**.js"
+    - "frontend_web/src/**.js"
+    - "frontend_web/src/**.jsx"
+    - "movil/**.js"
+    - "movil/**.jsx"

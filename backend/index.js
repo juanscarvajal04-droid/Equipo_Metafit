@@ -3,6 +3,30 @@
 require('dotenv').config();
 require('./config/db');      // Inicia la conexión a MySQL al arrancar
 
+// ── Migración automática idempotente: tabla PASSWORD_RESET ────
+// Crea la tabla si no existe en cualquier entorno (local, Docker, Render)
+// sin depender de ejecutar scripts SQL manualmente.
+require('./models/passwordResetModel').ensureTable()
+  .then(() => console.log('✅ Tabla PASSWORD_RESET verificada/creada'))
+  .catch(err => console.error('[PASSWORD_RESET] error creando tabla:', err.message));
+
+// ── Migración idempotente: columna AFILIADO.foto + limpieza de datos temporales ─
+// Corre dentro del VM de Render (MySQL solo socket local, sin acceso externo).
+const { runMigraciones } = require('./migrations/migracionFotos');
+runMigraciones()
+  .then(() => console.log('✅ Migración de fotos verificada'))
+  .catch(err => console.error('[MIGRACION-FOTOS] error:', err.message));
+
+// ── Migración idempotente: columna USUARIO.push_token (push notifications) ──
+const { runMigraciones: runMigracionesPush } = require('./migrations/migracionPushToken');
+runMigracionesPush()
+  .then(() => console.log('✅ Migración de push_token verificada'))
+  .catch(err => console.error('[MIGRACION-PUSH] error:', err.message));
+
+// ── Cron: recordatorio de pagos por vencer (cada hora) ──
+const { iniciarCron } = require('./cron/recordatorioPagos');
+iniciarCron();
+
 const app  = require('./server');
 const PORT = process.env.PORT || 3001;
 

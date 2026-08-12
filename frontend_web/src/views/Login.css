@@ -15,7 +15,7 @@
   --login-dark2:     #12121e;
   --login-dark3:     #1a1a2e;
 
-  --role-admin:        #7c3aed;
+  --role-admin:        #e31c25;
   --role-trainer:      #059669;
   --role-receptionist: #2563eb;
 }
@@ -193,11 +193,11 @@
 
 /* Select con borde dinámico por rol (via clases JS) */
 .login-form__select--admin {
-  border-color: rgba(124, 58, 237, 0.31);
+  border-color: rgba(227, 28, 37, 0.31);
 }
 .login-form__select--admin:focus {
   border-color: var(--role-admin);
-  box-shadow:   0 0 0 3px rgba(124, 58, 237, 0.13);
+  box-shadow:   0 0 0 3px rgba(227, 28, 37, 0.13);
 }
 
 .login-form__select--trainer {

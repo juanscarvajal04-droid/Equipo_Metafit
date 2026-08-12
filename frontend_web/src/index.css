@@ -4,7 +4,7 @@
   --bg: #fff;
   --border: #e5e4e7;
   --code-bg: #f4f3ec;
-  --accent: #aa3bff;
+  --accent: #e31c25;
   --accent-bg: rgba(170, 59, 255, 0.1);
   --accent-border: rgba(170, 59, 255, 0.5);
   --social-bg: rgba(244, 243, 236, 0.5);
@@ -37,7 +37,7 @@
     --bg: #16171d;
     --border: #2e303a;
     --code-bg: #1f2028;
-    --accent: #c084fc;
+    --accent: #e31c25;
     --accent-bg: rgba(192, 132, 252, 0.15);
     --accent-border: rgba(192, 132, 252, 0.5);
     --social-bg: rgba(47, 48, 58, 0.5);
@@ -189,4 +189,141 @@ code {
   min-width: 130px;
   text-align: center;
   white-space: nowrap;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   MODO CLARO / OSCURO — design tokens profesionales (FASE rediseño 1-2)
+   Tema por defecto: OSCURO (valores base). [data-theme="light"] lo cambia.
+
+   Referencias de la investigación (FASE 1):
+   • Google Material Design 3 (https://m3.material.io/styles/elevation
+     y /styles/color): jerarquía de tokens reference → system → component;
+     superficies por roles (surface / surface-container / on-surface /
+     outline); elevación en niveles 0…5 con sombra y/o superficie tonal;
+     las interacciones SUBEN un nivel de elevación.
+   • Atlassian Design System (https://atlassian.design/foundations/elevation
+     y /foundations/color): elevaciones semánticas sunken / default /
+     raised / overlay, SIEMPRE con sombra (tinte azul-navy, nunca negro
+     puro); texto secundario como "ink" apagado; focus ring = anillo 3px
+     al 40% de alpha del acento; los estados hover/pressed varían la
+     superficie, no el color de marca.
+   • Apple HIG (https://developer.apple.com/design/human-interface-guidelines):
+     colores de etiqueta semánticos (primary / secondary / tertiary); la
+     profundidad se logra con fondos base vs elevated y sombras sutiles,
+     sin invertir ni forzar contrastes; jerarquía tipográfica con pesos.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── Tokens de referencia + sistema (estructura idéntica en ambos temas) ── */
+:root {
+  /* Superficies */
+  --mf-bg:         #0a0a0f;
+  --mf-bg-grad:    linear-gradient(180deg, #1a1a2e 0%, #0a0a0f 100%);
+  --mf-sidebar:    var(--mf-surface);   /* sólida, plana — como el Header */
+  --mf-surface:    #16171d;   /* card / modal base */
+  --mf-surface-2:  #1f2230;   /* hover / raised */
+  --mf-surface-3:  #2a2e3f;   /* shadow-raised / pill activa */
+  --mf-border:     rgba(255, 255, 255, 0.08);
+  --mf-border-strong: rgba(255, 255, 255, 0.18);
+
+  /* Texto */
+  --mf-text:       #e2e8f0;
+  --mf-muted:      #94a3b8;
+  --mf-faint:      #64748b;
+
+  /* Marca y estados */
+  --mf-accent:        #c1121f;
+  --mf-accent-hover:  #e31c25;
+  --mf-accent-soft:   rgba(193, 18, 31, 0.14);  /* hover bg */
+  --mf-accent-strong: rgba(193, 18, 31, 0.28);  /* pill activa */
+  --mf-on-accent:     #ffffff;
+  --mf-accent-2:      #4b9ecb;
+  --mf-success:       #22c55e;
+  --mf-error:         #f87171;
+  --mf-warning:       #fbbf24;
+
+  /* Tokens semánticos (roles de texto y hover, misma fuente) */
+  --mf-text-primary:   var(--mf-text);
+  --mf-text-secondary: var(--mf-muted);
+  --mf-text-tertiary:  var(--mf-faint);
+  --mf-hover:          var(--mf-accent-soft);
+  --mf-error-soft:     rgba(239, 68, 68, 0.18);
+
+  /* Elevación (Atlassian: sombras teñidas, nunca negro puro) */
+  --mf-shadow-card:    0 1px 2px rgba(9, 30, 66, 0.25);
+  --mf-shadow-raised:  0 8px 16px rgba(9, 30, 66, 0.32);
+  --mf-shadow-popover: 0 12px 24px rgba(9, 30, 66, 0.4);
+  --mf-shadow-modal:   0 24px 48px rgba(9, 30, 66, 0.5);
+  --mf-sidebar-shadow: 4px 0 20px rgba(0, 0, 0, 0.35);
+  --mf-focus-ring:     0 0 0 3px rgba(193, 18, 31, 0.5);
+
+  /* Forma y ritmo */
+  --mf-radius-sm: 6px;
+  --mf-radius-md: 10px;
+  --mf-radius-lg: 14px;
+
+  /* Espaciado */
+  --mf-spacing-xs: 4px;
+  --mf-spacing-sm: 8px;
+  --mf-spacing-md: 16px;
+  --mf-spacing-lg: 24px;
+  --mf-spacing-xl: 32px;
+}
+
+/* ── MODO CLARO PROFESIONAL ──
+   Paleta: fondo #FAFAFA (MD3 surface), superficie blanca (Atlassian
+   raised sobre sunken), texto #1A1A1A / #6B7280 (HIG primary/secondary),
+   acento #7C3AED (identidad MetaFit), hover translúcido del acento. */
+:root[data-theme='light'] {
+  --mf-bg:         #fafafa;
+  --mf-bg-grad:    linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+  --mf-sidebar:    var(--mf-surface);
+  --mf-surface:    #ffffff;
+  --mf-surface-2:  #f3f4f6;   /* hover / raised */
+  --mf-surface-3:  #e9eaee;   /* pill activa / bien definida */
+  --mf-border:     #e5e7eb;
+  --mf-border-strong: #d1d5db;
+
+  --mf-text:       #1a1a1a;
+  --mf-muted:      #6b7280;
+  --mf-faint:      #9ca3af;
+
+  --mf-accent:        #e31c25;
+  --mf-accent-hover:  #b71c1c;
+  --mf-accent-soft:   rgba(227, 28, 37, 0.08);  /* hover translúcido */
+  --mf-accent-strong: rgba(227, 28, 37, 0.16);  /* pill activa */
+  --mf-on-accent:     #ffffff;
+  --mf-accent-2:      #4b9ecb;
+  --mf-success:       #22c55e;
+  --mf-error:         #ef4444;
+  --mf-warning:       #eab308;
+
+  /* Tokens semánticos (roles de texto y hover, misma fuente) */
+  --mf-text-primary:   var(--mf-text);
+  --mf-text-secondary: var(--mf-muted);
+  --mf-text-tertiary:  var(--mf-faint);
+  --mf-hover:          var(--mf-accent-soft);
+  --mf-error-soft:     rgba(239, 68, 68, 0.12);
+
+  --mf-shadow-card:    0 1px 2px rgba(16, 24, 40, 0.05), 0 1px 3px rgba(16, 24, 40, 0.1);
+  --mf-shadow-raised:  0 4px 8px rgba(16, 24, 40, 0.04), 0 8px 16px rgba(16, 24, 40, 0.08);
+  --mf-shadow-popover: 0 8px 16px rgba(16, 24, 40, 0.06), 0 16px 32px rgba(16, 24, 40, 0.12);
+  --mf-shadow-modal:   0 24px 48px rgba(16, 24, 40, 0.18);
+  --mf-sidebar-shadow: 1px 0 0 var(--mf-border), 4px 0 16px rgba(16, 24, 40, 0.06);
+  --mf-focus-ring:     0 0 0 3px rgba(227, 28, 37, 0.35);
+
+  --mf-radius-sm: 6px;
+  --mf-radius-md: 10px;
+  --mf-radius-lg: 14px;
+
+  /* Espaciado */
+  --mf-spacing-xs: 4px;
+  --mf-spacing-sm: 8px;
+  --mf-spacing-md: 16px;
+  --mf-spacing-lg: 24px;
+  --mf-spacing-xl: 32px;
+}
+
+/* Transición suave al cambiar de tema */
+body, .root, .main, .header, .sidebar, .footer {
+  transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
 }

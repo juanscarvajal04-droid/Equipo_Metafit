@@ -4,7 +4,8 @@
 const express              = require('express');
 const router               = express.Router();
 const AfiliadoController   = require('../controllers/afiliadoController');
-const { requireAuth, requireAdmin, requireAdminOrEntrenador, requireStaff } = require('../middlewares/auth');
+const { requireAuth, requireAdmin, requireAdminOrEntrenador, requireAdminOrRecepcionista, requireStaff } = require('../middlewares/auth');
+const { uploadFoto }       = require('../middlewares/uploadFoto');
 
 /**
  * @swagger
@@ -198,7 +199,7 @@ router.get('/:id', requireAuth, requireStaff, AfiliadoController.getById);
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.post('/', requireAuth, AfiliadoController.create);
+router.post('/', requireAuth, requireAdminOrRecepcionista, AfiliadoController.create);
 
 /**
  * @swagger
@@ -233,7 +234,7 @@ router.post('/', requireAuth, AfiliadoController.create);
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.patch('/:id', requireAuth, AfiliadoController.update);
+router.patch('/:id', requireAuth, requireAdminOrRecepcionista, AfiliadoController.update);
 
 /**
  * @swagger
@@ -271,6 +272,92 @@ router.patch('/:id', requireAuth, AfiliadoController.update);
 router.delete('/:id', requireAuth, requireAdmin, AfiliadoController.delete);
 
 // ─────────────────────────────────────────────────────────────
+// FOTO DE PERFIL
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * @swagger
+ * /afiliados/me/foto:
+ *   post:
+ *     summary: Subir mi foto de perfil (afiliado autenticado)
+ *     description: >
+ *       Multipart/form-data, campo "foto" (PNG/JPG/WEBP/GIF, máx. 5 MB).
+ *       El archivo queda en backend/uploads y AFILIADO.foto guarda la ruta relativa.
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               foto:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Foto actualizada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message: { type: string }
+ *                 foto: { type: string }
+ *                 url: { type: string }
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.post('/me/foto', requireAuth, uploadFoto, AfiliadoController.subirFoto);
+
+/**
+ * @swagger
+ * /afiliados/{id}/foto:
+ *   post:
+ *     summary: Subir foto de perfil de un afiliado (Admin/Recepcionista)
+ *     description: Multipart/form-data en el campo "foto" (PNG/JPG/WEBP/GIF, máx. 5 MB).
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/idParam'
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               foto:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Foto actualizada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message: { type: string }
+ *                 foto: { type: string }
+ *                 url: { type: string }
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.post('/:id/foto', requireAuth, requireAdminOrRecepcionista, uploadFoto, AfiliadoController.subirFoto);
+
+// ─────────────────────────────────────────────────────────────
 // CICLOS
 // ─────────────────────────────────────────────────────────────
 
@@ -299,7 +386,7 @@ router.delete('/:id', requireAuth, requireAdmin, AfiliadoController.delete);
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.get('/:id/ciclos', requireAuth, AfiliadoController.getCiclos);
+router.get('/:id/ciclos', requireAuth, requireStaff, AfiliadoController.getCiclos);
 
 /**
  * @swagger
@@ -388,7 +475,7 @@ router.post('/ciclos', requireAuth, requireAdminOrEntrenador, AfiliadoController
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.get('/:id/restricciones', requireAuth, AfiliadoController.getRestricciones);
+router.get('/:id/restricciones', requireAuth, requireStaff, AfiliadoController.getRestricciones);
 
 /**
  * @swagger
@@ -470,7 +557,7 @@ router.delete('/:id/restricciones/:id_restriccion', requireAuth, requireAdminOrE
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.get('/:id/ejercicios-disponibles', requireAuth, AfiliadoController.getEjerciciosDisponibles);
+router.get('/:id/ejercicios-disponibles', requireAuth, requireStaff, AfiliadoController.getEjerciciosDisponibles);
 
 /**
  * @swagger
@@ -490,7 +577,7 @@ router.get('/:id/ejercicios-disponibles', requireAuth, AfiliadoController.getEje
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.get('/:id/alimentos-disponibles', requireAuth, AfiliadoController.getAlimentosDisponibles);
+router.get('/:id/alimentos-disponibles', requireAuth, requireStaff, AfiliadoController.getAlimentosDisponibles);
 
 // ─────────────────────────────────────────────────────────────
 // PROGRESO FÍSICO
@@ -538,7 +625,7 @@ router.get('/:id/alimentos-disponibles', requireAuth, AfiliadoController.getAlim
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.get('/:id/progreso', requireAuth, AfiliadoController.getProgreso);
+router.get('/:id/progreso', requireAuth, requireStaff, AfiliadoController.getProgreso);
 
 /**
  * @swagger

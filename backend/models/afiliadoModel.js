@@ -40,6 +40,7 @@ const AfiliadoModel = {
         a.direccion,
         a.estatura_cm,
         a.estado_afiliacion,
+        a.foto,
         a.fecha_registro        AS fecha_registro_afiliado,
         a.registrado_por,
         ur.nombres              AS registrado_por_nombre
@@ -196,7 +197,7 @@ const AfiliadoModel = {
         a.documento, a.fecha_nacimiento,
         TIMESTAMPDIFF(YEAR, a.fecha_nacimiento, CURDATE()) AS edad,
         a.sexo, a.telefono, a.direccion, a.estatura_cm,
-        a.estado_afiliacion, a.fecha_registro,
+        a.estado_afiliacion, a.foto, a.fecha_registro,
         a.fecha_ultima_modificacion, a.registrado_por
       FROM AFILIADO a
       JOIN USUARIO u ON a.id_usuario = u.id_usuario
@@ -460,12 +461,52 @@ const AfiliadoModel = {
     }
   },
 
-  delete: async (id) => {
-    // ON DELETE RESTRICT en FK → el afiliado con datos asociados no se puede eliminar
-    const [result] = await pool.query(
-      'DELETE FROM AFILIADO WHERE id_usuario=?', [id]
+  // ─────────────────────────────────────────────────────────
+  // getFoto / setFoto — ruta de la foto de perfil (AFILIADO.foto)
+  // ─────────────────────────────────────────────────────────
+  getFoto: async (id) => {
+    const [rows] = await pool.query(
+      'SELECT foto FROM AFILIADO WHERE id_usuario = ?', [id]
     );
-    return result.affectedRows;
+    return rows.length ? rows[0].foto : null;
+  },
+
+  setFoto: async (id, foto) => {
+    const [r] = await pool.query(
+      'UPDATE AFILIADO SET foto = ? WHERE id_usuario = ?', [foto, id]
+    );
+    return r.affectedRows > 0;
+  },
+
+  delete: async (id) => {
+    // ⚠️ Transacción: elimina AFILIADO y su USUARIO base.
+    // Si el afiliado tiene datos asociados (ciclos, planes, progreso), las FK
+    // RESTRICT lanzan ER_ROW_IS_REFERENCED_2 → rollback → el controller responde 400.
+    const conn = await pool.getConnection();
+    try {
+      await conn.beginTransaction();
+
+      const [afResult] = await conn.query(
+        'DELETE FROM AFILIADO WHERE id_usuario=?', [id]
+      );
+
+      let affectedRows = afResult.affectedRows;
+      if (affectedRows > 0) {
+        // Elimina la cuenta de login asociada (evita usuarios huérfanos activos)
+        const [uResult] = await conn.query(
+          'DELETE FROM USUARIO WHERE id_usuario=?', [id]
+        );
+        affectedRows = Math.min(affectedRows, uResult.affectedRows);
+      }
+
+      await conn.commit();
+      return affectedRows;
+    } catch (err) {
+      await conn.rollback();
+      throw err;
+    } finally {
+      conn.release();
+    }
   },
 };
 

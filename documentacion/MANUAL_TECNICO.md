@@ -440,606 +440,136 @@ CORS_ORIGINS=http://localhost:5173,http://localhost:3000
 
 # URL base para Swagger
 API_BASE_URL=http://localhost:3001
+
+# SMTP (envío real de correos de recuperación de contraseña)
+# En producción se usan SMTP_HOST/PORT/USER/PASS de Brevo (ver § Correo de recuperación)
+SMTP_HOST=smtp-relay.sendinblue.com
+SMTP_PORT=587
+SMTP_USER=tu_login_smtp
+SMTP_PASS=tu_clave_smtp
+SMTP_FROM=remitente@verificado.com
+FRONTEND_URL=http://localhost:5173
 ```
 
-### Credenciales de Prueba (Seed Data)
+### Correo de recuperación de contraseña (SMTP / API Brevo)
 
-| Nombre | Email | Contraseña | Rol | Estado |
-|---|---|---|---|---|
-| Carlos Ramirez | carlos@metafit.com | Admin123! | Administrador | Activo |
-| Laura Gomez | laura@metafit.com | Laura123! | Entrenador | Activo |
-| Andres Torres | andres@metafit.com | Andres123! | Entrenador | Activo |
-| Maria Lopez | maria@metafit.com | Maria123! | Recepcionista | Activo |
-| Pedro Suarez | pedro@metafit.com | Pedro123! | Recepcionista | Pendiente |
-| Juan Martinez | juan@gmail.com | MetaFit2025! | Afiliado | Activo |
-| Ana Rodriguez | ana@gmail.com | MetaFit2025! | Afiliado | Activo |
-| Luis Herrera | luis@gmail.com | MetaFit2025! | Afiliado | Activo |
-| Sofia Castro | sofia@gmail.com | MetaFit2025! | Afiliado | Activo |
+El endpoint `POST /auth/recuperar-password` genera un JWT de reset (15 min) y envía el enlace por correo de verdad. Sin SMTP/API configurado devuelve el token en `modoPrueba` (solo desarrollo).
 
----
+- **Servicio**: Brevo (plan free, 300 correos/día), relay `smtp-relay.sendinblue.com:587` con STARTTLS (`smtp-relay.brevo.com` falla por el certificado — el alias válido es `smtp-relay.sendinblue.com`).
+- **Dos vías de envío** (por orden de prioridad en `authController.js`):
+  1. **API REST Brevo** (`BREVO_API_KEY` seteada): `POST https://api.brevo.com/v3/smtp/email` por HTTPS. Es la vía recomendada: el tráfico TCP saliente de Render hacia puertos SMTP (465/587) puede estar bloqueado según la instancia, mientras que 443 siempre funciona.
+  2. **SMTP clásico** (nodemailer) con `SMTP_HOST/PORT/USER/PASS` (usado cuando no hay clave API o la API falla — fallback automático). Funciona solo en instancias con egress SMTP habilitado.
+- **Auth**: login del panel Brevo + clave SMTP (`xsmtpsib-…`, se crea en **SMTP & API → SMTP → Generar clave**) o clave API (`xkeysib-…`, en **SMTP & API → Claves API**).
+- **En Brevo**: las claves SMTP deben poder enviar desde cualquier IP — en **Seguridad → IP autorizadas → Claves SMTP** desactivar el bloqueo (si queda activo, el relay responde `525 5.7.1 Unauthorized IP address`).
+- **Sender**: `SMTP_FROM` debe estar verificado en Brevo (Transaccional → Senders). No es necesario que coincida con `SMTP_USER`.
+- **Variables en Render** (metafit-backend): `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`, `FRONTEND_URL` (para la URL del enlace) y **`BREVO_API_KEY` (configurada y activa, ago 2026)**. Timeouts 15/15/20 s en `createTransport` evitan que el endpoint cuelgue si el relay no responde.
+- **Diseño del correo**: plantilla HTML en `backend/templates/recuperar-password.html`, rediseñada con las prácticas de correos transaccionales de Atlassian/Notion/Brevo (CSS 100 % inline, tablas, compatible Gmail/Outlook/Apple Mail). Fondo exterior neutro `#f4f4f4`; tarjeta central **blanca `#ffffff`** de **600px máx** (radio 8px, sombra suave); texto principal `#0a0a0f`, secundario `#6b7280`, divisor `#e5e7eb`, pie sutil (12px, `#9ca3af`); acentos moderados: solo el logo y el botón `#7c3aed`. Logo mancuerna roja como **PNG público de 512 px** (`frontend_web/public/app/logo-metafit.png`, mostrado a 48px centrado). `{{NOMBRE}}`, `{{ENLACE}}` y `{{ANIO}}` se reemplazan en `authController.js`; si la plantilla no se lee, el correo cae a texto plano. Remitente **"MetaFit" &lt;metafit.sistema@gmail.com&gt;**.
+### Facturación por correo (pago de membresía)
 
-## 1.5 Frontend Web
+Cuando se registra un pago de membresía, el sistema genera automáticamente una **factura por correo** con el diseño corporativo de MetaFit.
 
-### Patrón de Diseño Componentes + Hooks + Context
+- **Flujo**: `POST /afiliados/:id/pagos` → `PagoModel.create` guarda el pago → `PagoController.create` dispara (en paralelo, sin bloquear la respuesta 201) `enviarFacturaPago(datosPago, afiliado)` de `backend/services/facturaService.js` → correo HTML al correo del afiliado.
+- **Plantilla**: `backend/templates/factura-pago.html` (mismo estilo limpio que la recuperación: CSS inline, tablas, 600px, colores `#0a0a0f`/`#6b7280`/`#7c3aed`). Placeholders: `{{NOMBRE_AFILIADO}}`, `{{DOCUMENTO}}`, `{{CORREO}}`, `{{TELEFONO}}`, `{{NUMERO_FACTURA}}` (`FAC-{año}-{id_pago}`), `{{FECHA_EMISION}}`, `{{FECHA_PAGO}}`, `{{VALOR_PAGADO}}` (formato `$X.XXX COP`), `{{METODO_PAGO}}` (default "Efectivo"), `{{ESTADO_PAGO}}` y `{{ANIO}}`.
+- **Asunto**: `Factura de pago - MetaFit - {nombre del afiliado}`. **Remitente**: "MetaFit" `<metafit.sistema@gmail.com>`.
+- **Envío**: prioridad API REST Brevo (HTTPS) con fallback a SMTP (nodemailer), igual que la recuperación de contraseña.
+- **Aislamiento de fallos**: el correo es un extra — si la factura falla (servicio, red, plantilla), el pago queda registrado igualmente y solo se loguea el error (`[facturaService]`, `[pagoController.create]`).
+- **Verificado en producción (ago 2026)**: pago real id 43 → correo entregado (eventos Brevo `request`/`delivered`/`opened`) hacia `metafit.sistema@gmail.com`.
 
-```
-  ┌──────────────┐
-  │   App.jsx    │  Router principal (BrowserRouter + Routes)
-  └──────┬───────┘
-         │
-  ┌──────▼─────────────────────────────────────────────────────┐
-  │  AuthProvider (AuthContext.jsx)                             │
-  │  - user, token, isAuthReady                                │
-  │  - login(), logout()                                       │
-  │  - authAxios (instancia axios configurada)                 │
-  └──────────────────────────┬──────────────────────────────────┘
-                             │
-               ┌──────────────┼──────────────┐
-               ▼              ▼              ▼
-     ┌─────────────────┐ ┌──────────┐ ┌──────────┐
-     │  PublicLayout   │ │Protected │ │  AppLayout│
-     │  (Landing,Login)│ │ Route    │ │(Sidebar + │
-     └─────────────────┘ └────┬─────┘ │Header+Foot│
-                             │       └──────────┘
-               ┌──────────────┼──────────────┐
-               ▼              ▼              ▼
-     ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
-     │Login        │ │Dashboard    │ │AfiliadosView│
-     │LandingPage  │ │GestionPers. │ │RutinasView  │
-     └─────────────┘ │PagosView    │ │DietasView   │
-                     │FinanzasView │ └─────────────┘
-                     └─────────────┘
-```
+### Fotos de perfil de afiliados
 
-### Vistas y Componentes
+El sistema permite subir una **foto de perfil** a cada afiliado, visible en la web (tabla y detalle) y en la app móvil (perfil propio).
 
-| Vista | Ruta | Roles | Responsabilidad |
-|---|---|---|---|
-| `Login.jsx` | `/login` | Público | Formulario de inicio de sesión con selector de rol |
-| `LandingPage.jsx` | `/` | Público | Página de aterrizaje informativa con KPI counters |
-| `Dashboard.jsx` | `/dashboard` | Admin | KPIs, gráficos (Chart.js), métricas del gimnasio, precio membresía editable |
-| `AdminDashboard.jsx` | Usado internamente | Admin | Dashboard avanzado con 6 KPIs, 4 gráficos (barras, línea, doughnut, barras horizontales) |
-| `AfiliadosView.jsx` | `/afiliados` | Todos | CRUD completo de afiliados con modal multi-pestaña |
-| `GestionPersonal.jsx` | `/personal` | Admin | CRUD de empleados (staff) |
-| `RutinasView.jsx` | `/rutinas` | Admin, Entrenador | Asignación de rutinas, CRUD ejercicios, visualización de planes |
-| `DietasView.jsx` | `/dietas` | Admin, Entrenador | Asignación de dietas, CRUD alimentos, visualización de planes |
-| `PagosView.jsx` | `/pagos` | Admin, Recepcionista | Registro de pagos, historial, semáforo de membresía |
-| `FinanzasView.jsx` | (sub-ruta admin) | Admin | Panel financiero con gráficos, KPIs, filtros y exportación PDF |
+- **Esquema**: columna `AFILIADO.foto VARCHAR(255) NULL` (ruta relativa, p. ej. `/uploads/172...-ab12.png`).
+- **Migración automática**: `backend/migrations/migracionFotos.js` se ejecuta al arrancar (`index.js`) y es idempotente: crea la columna si no existe (necesario porque la BD de Render corre por socket local y no hay acceso SQL externo). También limpia los datos temporales de la prueba de factura (`PAGO 43`, `AFILIADO 10`, `USUARIO 10`) si siguen presentes.
+- **Subida**: `multer` (`backend/middlewares/uploadFoto.js`) con almacenamiento en `backend/uploads/`, nombre único (timestamp + hex aleatorio), filtro de tipos (`image/png|jpe?g|webp|gif`) y límite de **5 MB**. Errores de multer se mapean a 400 en el error handler global de `server.js`.
+- **Servido público**: `app.use('/uploads', express.static(...))` en `server.js` (la validación de Content-Type de BUG-003 permite `multipart/form-data`).
+- **Endpoints** (en `routes/afiliadoRoutes.js`):
+  - `POST /afiliados/me/foto` — el afiliado sube **su propia** foto (solo `requireAuth`).
+  - `POST /afiliados/:id/foto` — admin o recepcionista sube la foto de cualquier afiliado (`requireAdminOrRecepcionista`).
+  - Ambos devuelven `{ message, foto, url }`; el controller borra (best effort) el archivo de la foto anterior y el archivo recién subido si el afiliado no existe.
+- **Modelo**: `afiliadoModel.js` incluye `a.foto` en los `SELECT` de `findAll`/`findById` y agrega `getFoto(id)`/`setFoto(id, ruta)`.
+- **Web** (`frontend_web/src/views/AfiliadosView.jsx`): input de archivo + preview en los modales de crear/editar; avatar circular con la foto (o iniciales de color si no hay) en la tabla y en el detalle. La URL absoluta se arma con `API_BASE_URL` (`services/api.js`).
+- **Móvil** (`movil/src/screens/MiPerfilScreen.js`): el avatar del header muestra la foto de `/afiliados/me` (componente `Avatar` con prop `foto`); al tocar el avatar se abre la galería (`expo-image-picker`) y se sube con FormData a `POST /afiliados/me/foto`, refrescando el perfil al terminar.
+- **Limitación de Render**: las fotos viven en el filesystem efímero de la instancia (`backend/uploads/`); no persisten entre redeploys. Para persistencia real habría que usar un bucket externo (S3/Cloudinary).
 
-| Componente | Responsabilidad |
-|---|---|
-| `AppLayout.jsx` | Layout interno con Sidebar + Header + Footer |
-| `PublicLayout.jsx` | Layout para páginas públicas (Landing, Login) |
-| `Sidebar.jsx` | Navegación lateral con enlaces por rol (3 menús distintos) |
-| `Header.jsx` | Barra superior con breadcrumb, fecha, campana de notificaciones (polling 60s), avatar |
-| `Footer.jsx` | Pie de página con términos y condiciones, Instagram |
-| `ProtectedRoute.jsx` | Guard de ruta con verificación de token y rol |
-| `HomeRedirect.jsx` | Redirección al home según el rol |
-| `ErrorBoundary.jsx` | Captura de errores de renderizado |
+### Analítica y SEO (Google Search Console + GA4 + GTM)
 
-### Sistema de Rutas y Protección por Roles (RBAC)
+El frontend web incluye los snippets de Google en `frontend_web/index.html`, todos asociados a `metafit.sistema@gmail.com`:
 
-```
-Ruta              Admin   Recepcionista   Entrenador
-/                   ✔         ✔              ✔          (Landing)
-/login              ✔         ✔              ✔          (Público)
-/dashboard          ✔         ✘              ✘
-/afiliados          ✔         ✔              ✔
-/personal           ✔         ✘              ✘
-/rutinas            ✔         ✘              ✔
-/dietas             ✔         ✘              ✔
-/pagos              ✔         ✔              ✘
-```
+- **Google Tag Manager (GTM)**: snippet principal en el `<head>` (lo más arriba posible) + iframe `noscript` al inicio del `<body>`. Container ID real: **`GTM-K6JZS4MG`**.
+- **Google Search Console**: verificación por **archivo HTML** `frontend_web/public/google784a94e7c83aeb9e.html` (servido en `https://metafit-frontend-78x6.onrender.com/google784a94e7c83aeb9e.html`, método elegido al agregar la propiedad de tipo Prefijo de URL).
+- **Google Analytics 4 (GA4)**: **NO** se incrusta gtag.js directo — se configura como **tag dentro de GTM** (consideración: el tag GA4 Configuration / Google Tag con el Measurement ID `G-XXXXXXXX`). Se evita el doble conteo de pageviews.
+- **SPA / HashRouter**: la app usa `HashRouter` (rutas `#/...`). GTM captura los cambios de ruta automáticamente con el trigger **"History Change"** (incluye cambios de hash), por lo que **no hay pageviews manuales** en el código (`frontend_web/src/utils/analytics.js` documenta esto y deja a mano una función `pageview()` comentada y lista por si algún día se migra a gtag.js directo; `App.jsx` no se modifica).
+- **Verificación**: en Search Console clic en "Verificar" tras publicar el meta tag; el estado del sitio se revisa en "Revisión de índice". En GTM, publicar el contenedor (botón **Enviar**) para que las etiquetas de GA4 queden activas. En GA4, el tráfico se ve en Tiempo real (En vivo) al entrar al sitio.
+- **Placeholders**: `G-81SWBDG2P6` (GA4) se configura **dentro de GTM** (no está en el código).
 
-Implementado con `ProtectedRoute` que verifica:
-1. Token existe (si no, redirige a `/login`)
-2. Rol del usuario está en `allowedRoles` (si no, redirige al home del rol)
-3. Muestra spinner mientras `isAuthReady` es false
+## 1.6 Extras "1000/10" (mejoras de nivel)
 
-### Sistema de Estilos
+### Modo claro/oscuro (web + móvil)
 
-- **Bootstrap 5.3.8** como framework CSS base (grid, componentes, utilidades)
-- **CSS Modules** por vista (ej: `Login.module.css`, `Dashboard.module.css`) para estilos específicos
-- Tema oscuro personalizado con gradientes, sombras y animaciones
-- Paleta de colores por rol (Admin: morado, Entrenador: verde, Recepcionista: azul)
+- **Web** (`frontend_web/src/utils/theme.js` + `index.css`): el tema se persiste en `localStorage` (`metafit_theme`, default `dark`). Se aplica al `<html>` vía `data-theme` en `main.jsx` (antes del render). Variables CSS globales `--mf-bg`, `--mf-bg-grad`, `--mf-sidebar`, `--mf-border`, `--mf-text`, `--mf-muted`, `--mf-accent` con paleta clara en `:root[data-theme='light']`; los módulos del shell (`AppLayout`, `Header`, `Sidebar`, `Footer`) las consumen. El toggle ☀️/🌙 vive en `Header.jsx` (botón `#btn-tema`) y re-renderiza el estado local.
+- **Móvil** (`movil/src/context/ThemeContext.jsx`): decisión persistida en `AsyncStorage` (`metafit_theme_movil`), default = seguir el tema del sistema (`useColorScheme`). `swapPalette(isDark)` muta el objeto `COLORS` in-place (todos los consumidores comparten la referencia) y `AppNavigator` fuerza el remontaje con `key={isDark?'d':'l'}` para que todas las pantallas lean la paleta aplicada. Toggle en el header de `MiPerfilScreen`.
 
-### Sistema de Notificaciones en Frontend
+### Eventos de analítica (GA4 vía GTM dataLayer)
 
-El componente `Header.jsx` implementa un sistema de notificaciones en tiempo real:
+`frontend_web/src/utils/analytics.js` exporta `trackEvent(eventName, params)`, que hace `window.dataLayer.push({event, ...params})` con try/catch (la analítica nunca rompe la app). Eventos implementados:
 
-1. **Polling**: cada 60 segundos mediante `setInterval` a `GET /notificaciones`
-2. **Auto-cancelación**: se limpia el intervalo al desmontar el componente o al recibir 401
-3. **Badge**: muestra el número total de notificaciones no leídas como badge rojo
-4. **Dropdown**: al hacer clic en la campana, muestra lista de notificaciones con:
-   - Mensaje descriptivo
-   - Enlace a la ruta correspondiente
-   - Al hacer clic, navega a la ruta y cierra el dropdown
-5. **Actualización en tiempo real**: al registrar un pago, se dispara evento `pago-registrado`
-
-### Panel de Finanzas (FinanzasView.jsx)
-
-El panel financiero exclusivo para Admin incluye:
-
-- **KPIs**: Total recaudado, recaudado este mes, mes anterior, promedio mensual, mejor recepcionista
-- **Filtros**: Rango de fechas (inicio/fin) y selector de recepcionista
-- **Gráfico de barras** (Chart.js + chartjs-plugin-datalabels): Ingresos por mes (últimos 6 meses)
-- **Gráfico doughnut**: Recaudación por recepcionista (agrupa valores pequeños en "Otros")
-- **Últimos pagos**: Grid de tarjetas con avatar, nombre, fecha, monto, estado, recepcionista
-- **Exportación PDF**: Genera reporte PDF con jsPDF + jspdf-autotable que incluye:
-  - Período del reporte
-  - Tabla de pagos con todas las columnas
-  - Totales por columna
-  - Fecha de generación y footer
-- **Actualización automática**: Se refresca al recibir evento `pago-registrado`
-
-### Flujo de Autenticación
-
-```
-1. Usuario ingresa credenciales en Login.jsx
-2. Login.jsx llama a AuthContext.login({ correo, contrasena })
-3. AuthContext.login() llama a authService.loginUser()
-   └─> POST /login con { email, password }
-4. Backend verifica credenciales, devuelve { accessToken, user }
-5. authService.persistSession() guarda en localStorage
-6. AuthContext actualiza estado con flushSync()
-7. Login.jsx navega al home del rol
-8. ProtectedRoute verifica token + rol en cada ruta
-9. Cada request usa authAxios con header Authorization: Bearer <token>
-```
-
----
-
-## 1.6 App Móvil
-
-### Framework
-
-React Native 0.83.6 + Expo SDK ~55.0.0. Aplicación nativa para iOS y Android, con soporte web via `react-native-web`.
-
-### Pantallas
-
-| Pantalla | Responsabilidad | API Calls |
+| Evento | Lugar | Params |
 |---|---|---|
-| `LandingScreen.js` | Página de bienvenida informativa. Hero, KPIs, features, cómo funciona, sede, CTA | Ninguna |
-| `LoginScreen.js` | Inicio de sesión del afiliado. Muestra error de conexión o credenciales inválidas | `POST /login` |
-| `MiPerfilScreen.js` | Perfil personal + datos físicos + restricciones + botón de cerrar sesión | `GET /afiliados/me` |
-| `MiRutinaScreen.js` | Plan de entrenamiento con ejercicios por día. Tarjetas expandibles | `GET /afiliados/me/ciclos` → `GET /planes/entrenamiento/:id` |
-| `MiDietaScreen.js` | Plan nutricional con calorías y comidas. Tarjetas expandibles con macros | `GET /afiliados/me/ciclos` → `GET /planes/nutricional/:id` |
-| `MiProgresoScreen.js` | Historial de progreso físico (peso, IMC, % grasa, medidas) | `GET /afiliados/me/progreso` |
-
-### Detalle de LandingScreen
-
-- **Hero**: Gradiente oscuro, badge "Sistema de Gestión Deportiva v1.0", logo MetaFit, tagline, descripción, CTA "Ingresar al Sistema"
-- **KPIs**: 4 indicadores (1,200+ afiliados, 500+ planes, 20+ entrenadores, 98% satisfacción)
-- **Features**: 4 tarjetas (Rutinas Personalizadas, Plan Nutricional, Progreso Físico, Datos Seguros) con gradientes por color de rol
-- **Cómo funciona**: 3 pasos numerados (Visitar gym → Crear perfil → Acceder desde app)
-- **Sede**: Información de Sport Gym Sede 80 con stats (3,500 m², horario, ubicación)
-- **CTA final**: "¿Ya sos miembro?" con botón de inicio de sesión
-- **Footer**: Copyright, contacto, Instagram
-
-### Sistema de Navegación
-
-```
-NavigationContainer
-│
-├─ [No token] Stack Navigator (headerShown: false)
-│   ├── Landing → LandingScreen
-│   └── Login   → LoginScreen
-│
-└─ [Token existe] Bottom Tab Navigator
-    ├── Perfil   → MiPerfilScreen    (icono: 👤)
-    ├── Rutina   → MiRutinaScreen    (icono: 💪)
-    ├── Dieta    → MiDietaScreen     (icono: 🥗)
-    └── Progreso → MiProgresoScreen  (icono: 📊)
-```
-
-El cambio entre Stack y Tabs es automático: cuando `AuthContext.token` cambia de `null` a valor, el navigador renderiza Tabs; cuando se cierra sesión, vuelve a Stack.
-
-### Sistema de Temas (theme.js)
-
-Tema oscuro unificado con paleta:
-
-```js
-COLORS = {
-  bg: '#0a0a0f',             // Fondo principal
-  bgSecondary: '#12121e',    // Fondo secundario
-  bgCard: '#1a1a2e',         // Fondo tarjetas
-  text: '#ffffff',           // Texto principal
-  textSecondary: 'rgba(255,255,255,0.5)',
-  textMuted: 'rgba(255,255,255,0.3)',
-  red: '#e31c25',            // Color marca
-  redDark: '#b71c1c',
-  admin: '#7c3aed',          // Color rol Admin
-  entrenador: '#059669',     // Color rol Entrenador
-  recepcionista: '#2563eb',  // Color rol Recepcionista
-  success: '#059669',
-  warning: '#f59e0b',
-  error: '#e31c25',
-  border: 'rgba(255,255,255,0.1)',
-  inputBg: '#1a1a2e',
-}
-```
-
-Además exporta: `GRADIENTS` (5 degradados), `FONTS` (tamaños), `SPACING` (espaciados), `SHADOWS` (sombras), `BORDER_RADIUS`.
-
-### Flujo de Autenticación Móvil
-
-```
-1. Usuario abre app → LandingScreen (si no hay token)
-2. Navega a LoginScreen
-3. Ingresa credenciales → AuthContext.login(correo, contrasena)
-   └─> api.loginRequest(correo, contrasena)
-       └─> POST /login con { email: correo, password: contrasena }
-4. Backend devuelve { accessToken, user }
-5. AuthContext guarda en AsyncStorage: token, user, role
-6. Token cambia de null a valor → Navigator cambia a MainTabs
-7. Cada request API usa interceptor que lee token de AsyncStorage
-8. Auto-logout en 401 (response interceptor excepto /login)
-```
-
-### Configuración de API URL
-
-La URL del backend se determina por:
-
-1. Variable de entorno `EXPO_PUBLIC_API_URL` (definida en `.env` del proyecto móvil)
-2. Fallback a `http://localhost:3001`
-
-Para dispositivos físicos, se debe configurar la IP local del servidor en `movil/.env`:
-```
-EXPO_PUBLIC_API_URL=http://192.168.X.X:3001
-```
-
----
-
-## 1.7 Base de Datos
-
-### Diagrama Entidad-Relación (Texto/ASCII)
-
-```
-  ┌─────────────────────────────────────────────────────────────────────┐
-  │                          USUARIO                                    │
-  │  id_usuario (PK) · nombres · apellidos · correo (UQ)               │
-  │  contrasena (bcrypt) · rol (ENUM) · estado · fecha_registro        │
-  └────────┬───────────────┬──────────────┬──────────────┬──────────────┘
-           │               │              │              │
-           │ 1:1           │ 1:N          │ 1:N          │ 1:N
-           ▼               ▼              ▼              ▼
-  ┌────────────────┐ ┌──────────┐ ┌──────────┐ ┌───────────────┐
-  │   AFILIADO     │ │   PAGO   │ │ CICLO    │ │ NOTIFICACION  │
-  │ id_usuario(PK) │ │ id_pago  │ │ id_ciclo │ │ (virtual,     │
-  │ · documento UQ │ │ · id_usr │ │ · id_usr │ │  calculada en │
-  │ · fecha_nac    │ │ · fecha  │ │ · activo │ │  backend)     │
-  │ · sexo         │ │ · valor  │ └────┬─────┘ └───────────────┘
-  │ · estatura_cm  │ └──────────┘      │
-  └────┬───────────┘                   │ 1:1
-       │                               ├──────────────┬──────────────┐
-       │ N:M                           ▼              ▼              ▼
-       ├──────────────────┐  ┌────────────────┐ ┌──────────────┐ ┌──────────────┐
-       ▼                  ▼  │PLAN_ENTRENA.   │ │PLAN_NUTRI.   │ │CONFIGURACION │
-  ┌──────────────┐  ┌────────┐ │ id_ciclo (PK)  │ │ id_ciclo (PK) │ │ clave (PK)    │
-  │AFILIADO_REST │  │RESTRICC│ │ · observac.    │ │ · cal_objetivo│ │ valor         │
-  │ id_usuario   │  │id_rest │ └────────┬───────┘ └────────┬───────┘ └──────────────┘
-  │ id_restricc  │◀─┤ nombre │          │1:N              │1:N
-  └──────────────┘  │ tipo   │          ▼                  ▼
-                    │ efecto │ ┌────────────┐  ┌──────────────────┐
-                    └────────┘ │   RUTINA   │  │DETALLE_NUTRI.    │
-          ┌──────────┐        │ id_rutina  │  │· id_ciclo (PK)   │
-          │EJERCICIO │        │ id_ciclo   │  │· num_comida (PK) │
-          │id_ejer   │        │ nombre     │  │· id_alimento (PK)│
-          │ nombre   │        │ dia_numero │  │· cantidad_g      │
-          │ grupo_mus│        └─────┬──────┘  └──────────────────┘
-          └────┬─────┘              │1:N
-               │          ┌─────────────────┐
-    ┌──────────┴──┐      │RUTINA_EJERCICIO  │
-    │EJERCICIO_   │      │· id_rutina (PK)  │
-    │RESTRIC_EXCL │      │· orden     (PK)  │
-    │· id_ejer(PK)│      │· id_ejercicio    │
-    │· id_rest(PK)│      │· series          │
-    └─────────────┘      │· repeticiones    │
-          ┌──────────┐   └──────────────────┘
-          │ALIMENTO  │
-          │id_alim   │   ┌──────────────────┐
-          │ nombre   │   │ALIMENTO_RESTRIC  │
-          │ macros   │   │· id_alimento(PK) │
-          └────┬─────┘   │· id_restricc(PK) │
-               │         └──────────────────┘
-               │  ┌──────────────────┐
-               └──┤PROGRESO_FISICO   │
-                  │· id_ciclo (PK)   │
-                  │· fecha_reg (PK)  │
-                  │· peso_kg         │
-                  │· %grasa          │
-                  │· medidas         │
-                  └──────────────────┘
-```
-
-### Tablas (17)
-
-| Tabla | Columnas Clave | Tipo | FK |
-|---|---|---|---|
-| **USUARIO** | id_usuario (PK), nombres, apellidos, correo (UQ), contrasena, rol ENUM, estado ENUM, fecha_registro | Super-tipo | — |
-| **AFILIADO** | id_usuario (PK), documento (UQ), fecha_nacimiento, sexo ENUM, telefono, direccion, estatura_cm, estado_afiliacion ENUM, registrado_por | Sub-tipo | USUARIO (id_usuario), USUARIO (registrado_por) |
-| **RESTRICCION** | id_restriccion (PK), nombre_restriccion (UQ), tipo ENUM, efecto_relevante | Catálogo | — |
-| **EJERCICIO** | id_ejercicio (PK), nombre_ejercicio (UQ), grupo_muscular ENUM, descripcion, nivel_minimo ENUM | Catálogo | — |
-| **ALIMENTO** | id_alimento (PK), nombre_alimento (UQ), proteinas, carbohidratos, grasas | Catálogo | — |
-| **AFILIADO_RESTRICCION** | id_usuario (PK), id_restriccion (PK) | Pivot N:M | AFILIADO, RESTRICCION |
-| **EJERCICIO_RESTRICCION_EXCLUIDA** | id_ejercicio (PK), id_restriccion (PK) | Pivot N:M | EJERCICIO, RESTRICCION |
-| **ALIMENTO_RESTRICCION_EXCLUIDA** | id_alimento (PK), id_restriccion (PK) | Pivot N:M | ALIMENTO, RESTRICCION |
-| **CICLO** | id_ciclo (PK), id_usuario, fecha_inicio, fecha_fin, activo, objetivo_fisico ENUM, grupo_muscular_prioritario, nivel_experiencia ENUM, disponibilidad_dias, registrado_por | Perfil dinámico | AFILIADO, USUARIO |
-| **PLAN_ENTRENAMIENTO** | id_ciclo (PK), observaciones, modificado_por | 1:1 con CICLO | CICLO, USUARIO |
-| **PLAN_NUTRICIONAL** | id_ciclo (PK), calorias_objetivo, num_comidas, observaciones, modificado_por | 1:1 con CICLO | CICLO, USUARIO |
-| **RUTINA** | id_rutina (PK), id_ciclo, nombre_rutina, enfoque_muscular ENUM, dia_numero (UQ: ciclo+día) | Día de entreno | PLAN_ENTRENAMIENTO |
-| **RUTINA_EJERCICIO** | id_rutina (PK), orden (PK), id_ejercicio, series, repeticiones | Pivot ordenada | RUTINA, EJERCICIO |
-| **DETALLE_NUTRICIONAL** | id_ciclo (PK), num_comida (PK), id_alimento (PK), cantidad_g | Triple PK natural | PLAN_NUTRICIONAL, ALIMENTO |
-| **PROGRESO_FISICO** | id_ciclo (PK), fecha_registro (PK), peso_kg, porcentaje_grasa, medida_cintura, medida_brazo, medida_pierna, observaciones, registrado_por | Alta frecuencia | CICLO, USUARIO |
-| **PAGO** | id_pago (PK), id_usuario, fecha_pago, valor_pagado, estado ENUM, fecha_vencimiento, id_recepcionista | Transaccional | AFILIADO, USUARIO |
-| **CONFIGURACION** | clave (PK), valor | Clave-valor | — |
-
-### Vistas (5)
-
-| Vista | Propósito |
-|---|---|
-| `v_alimento_calorias` | Calcula calorías por 100g con fórmula de Atwater (proteínas×4 + carbs×4 + grasas×9) |
-| `v_perfil_afiliado` | Perfil completo con JOIN USUARIO + AFILIADO + edad calculada |
-| `v_ciclo_activo_afiliado` | Ciclo activo con número de ciclo, días restantes, % avance |
-| `v_ultimo_progreso` | Última medición por ciclo + IMC + clasificación OMS |
-| `v_catalogo_ejercicios_disponibles` | Ejercicios filtrados por restricciones del afiliado |
-
-### Triggers (1)
-
-| Trigger | Evento | Propósito |
-|---|---|---|
-| `trg_ciclo_no_solapamiento_insert` | BEFORE INSERT ON CICLO | Rechaza ciclos con fechas solapadas sobre ciclos activos |
-
-### Patrón de Herencia USUARIO → AFILIADO
-
-```
-USUARIO (super-tipo)
-├── id_usuario (PK)
-├── nombres, apellidos, correo, contrasena
-├── rol = 'Afiliado' | 'Administrador' | 'Recepcionista' | 'Entrenador'
-├── estado = 'Activo' | 'Inactivo' | 'Pendiente'
-└── fecha_registro
-      │
-      ▼
-AFILIADO (sub-tipo)
-├── id_usuario (PK, FK → USUARIO)
-├── documento, fecha_nacimiento, sexo, telefono, direccion
-├── estatura_cm, estado_afiliacion
-└── registrado_por (FK → USUARIO)
-```
-
-- Relación 1:1 con `ON DELETE RESTRICT ON UPDATE CASCADE`
-- El afiliado se autentica via USUARIO (correo + contrasena)
-- Los datos físicos están en AFILIADO (estáticos)
-- Los datos de objetivo/nivel/disponibilidad están en CICLO (cambian por macrociclo)
-
-### Normalización (3FN)
-
-| Forma | Evidencia |
-|---|---|
-| **1FN** | Todas las columnas son atómicas. Sin grupos repetitivos. PKs compuestas donde es necesario. |
-| **2FN** | Tablas pivote (AFILIADO_RESTRICCION, RUTINA_EJERCICIO, DETALLE_NUTRICIONAL) separan relaciones N:M con sus props. |
-| **3FN** | Datos de objetivo/nivel/disponibilidad separados en CICLO (no en AFILIADO). Datos de personal (registrado_por) referencian USUARIO por FK. CHECK constraints garantizan integridad de dominios. |
-
----
-
-## 1.8 Seguridad
-
-### Autenticación JWT + bcrypt
-
-- **JWT**: Token firmado con `JWT_SECRET`, expira en 8 horas. Payload: `{ sub: id, email, role }`.
-- **bcrypt**: 12 rondas de salt. Validación de límite de 72 bytes. Contraseña generada automática: `MF_{documento}@2025`.
-- **Rate limiting**: 10 intentos por 15 minutos en `/login` (express-rate-limit). Solo cuenta intentos fallidos.
-
-### Protección de Rutas por Rol
-
-6 middlewares progresivos:
-- `requireAuth` → cualquier token válido
-- `requireAdmin` → solo Administrador
-- `requireAdminOrEntrenador` → Admin o Entrenador
-- `requireAdminOrRecepcionista` → Admin o Recepcionista
-- `requireStaff` → Admin, Entrenador o Recepcionista (excluye Afiliado)
-- `requireOwnCiclo` → verifica propiedad del ciclo o rol staff
-
-### Validación de Datos
-
-- **Backend**: Validación de campos requeridos en servicios, CHECK constraints en MySQL, Content-Type validation (415 si no es JSON), límite de 50kb en body.
-- **Frontend**: Validación de formularios con campos required, honeypot anti-autocomplete en login, toggle de visibilidad de contraseña.
-- **Móvil**: Validación de campos requeridos antes de enviar, manejo de errores de conexión vs credenciales.
-
-### Seguridad Adicional
-
-- **Helmet**: Headers HTTP seguros (X-Content-Type-Options, X-Frame-Options, etc.)
-- **CORS**: Solo orígenes configurados en `CORS_ORIGINS` (por defecto localhost:5173 y 3000). Abierto para Swagger y health.
-- **Endpoints /me**: Los afiliados solo acceden a sus propios datos via `/afiliados/me/*`. Nunca reciben ID de otro usuario.
-- **requireStaff**: Impide que afiliados accedan a listados de otros afiliados (BUG-002).
-- **requireAdmin en /usuarios**: Impide que afiliados vean el listado de personal (BUG-003).
-- **Sin secretos hardcodeados**: Todas las credenciales via variables de entorno.
-
----
-
-## 1.9 Pruebas
-
-### Tipos de Pruebas
-
-| Tipo | Archivo | Framework | Cobertura |
-|---|---|---|---|
-| Integración API | `__tests__/api.test.js` | Jest + Supertest | Login, usuarios, afiliados, ejercicios disponibles, notificaciones, dashboard, configuracion |
-| Unitarias | `__tests__/afiliadoService.test.js` | Jest | `normalizarFecha()` utilidad |
-
-### Resultados
-
-```
-Test Suites: 2 passed, 2 total
-Tests:       16 passed, 16 total
-```
-
-Casos de prueba cubiertos:
-- Login exitoso con credenciales de Admin, Entrenador, Recepcionista, Afiliado
-- Login fallido con credenciales inválidas → 401
-- Login sin credenciales → 400
-- Cuenta Pendiente rechazada → 403 (Pedro Suarez)
-- Rate limiter (10+ intentos fallidos) → 429
-- Acceso a rutas protegidas sin token → 401
-- Acceso a rutas de admin sin rol Admin → 403
-- Afiliado restringido de ver lista de afiliados → 403 (BUG-002)
-- Afiliado restringido de ver lista de personal → 403 (BUG-003)
-- CRUD de afiliados (listar, crear, eliminar)
-- Ejercicios disponibles filtrados por restricciones
-- Pagos y notificaciones con diferentes roles
-- Dashboard KPIs solo para Admin
-- Configuración de precio membresía solo para Admin
-- Normalización de fechas (DD/MM/YYYY, YYYY-MM-DD, ISO 8601)
-- Casos borde de fechas (null, undefined, string vacío, formato inválido)
-
-### Auditoría QA (Reporte Completo en QA_REPORT.md)
-
-Se realizó una auditoría manual de **51 pruebas** distribuidas en 10 fases:
-
-| Fase | Tests | Resultado |
-|---|---|---|
-| 0 — Preparación del entorno | 4/4 | ✅ |
-| 1 — Autenticación | 6/6 | ✅ |
-| 2 — CRUD Afiliados | 10/10 | ✅ |
-| 3 — Gestión de Personal | 3/3 | ✅ |
-| 4 — Rutinas y Ejercicios | 4/4 | ✅ |
-| 5 — Dietas y Alimentos | 2/2 | ✅ |
-| 6 — Pagos | 3/3 | ✅ |
-| 7 — Dashboard Admin | 3/3 | ✅ |
-| 8 — Notificaciones | 2/2 | ✅ |
-| 9 — Frontend Web | 2/2 | ✅ |
-| 10 — Base de Datos | 12/12 | ✅ |
-| **Total** | **51/51** | **✅ 100%** |
-
-### Bugs Encontrados y Corregidos en Auditoría
-
-| Bug | Severidad | Archivo | Solución |
-|---|---|---|---|
-| BUG-001: Rate Limiter Global | Crítico | `server.js:108` | Separado en `app.use('/login', loginLimiter)` |
-| BUG-002: Afiliados listaban usuarios | Alto | `routes/afiliadoRoutes.js:46` | Nuevo middleware `requireStaff` |
-| BUG-003: Usuarios sin restricción | Alto | `routes/usuarioRoutes.js` | Agregado `requireAdmin` |
-| Banner ruta `/660/` | Medio | `backend/index.js` | Corregido a `/catalogo/` |
-| JSDoc ruta `/660/` | Medio | `routes/catalogoRoutes.js` | Corregido a `/catalogo/` |
-| Schema `DashboardKPIs` | Medio | `config/swagger.js` | Agregadas propiedades faltantes |
-| `apis[]` incompleto | Medio | `config/swagger.js` | Agregadas rutas faltantes |
-
----
-
-## 1.10 Despliegue
-
-### Docker Compose
-
-```yaml
-Servicios:
-  mysql:      Imagen mysql:8.0, puerto 3307:3306, volumen persistente
-  backend:    Imagen node:22, puerto 3001, depende de mysql (healthy)
-  frontend:   Imagen node:22 (Vite dev), puerto 5173, VITE_API_URL=http://localhost:3001
-  phpmyadmin: Imagen phpmyadmin, puerto 8080, depende de mysql
-```
-
-### Instrucciones Paso a Paso
-
-```bash
-# 1. Clonar repositorio
-git clone <repo-url>
-cd Equipo_Metafit
-
-# 2. Configurar variables de entorno (opcional, hay defaults)
-# Editar .env con tus valores
-
-# 3. Iniciar todos los servicios
-docker compose up -d --build
-
-# 4. Verificar estado
-docker compose ps
-
-# 5. Acceder a:
-#    Frontend:  http://localhost:5173
-#    Backend:   http://localhost:3001
-#    Swagger:   http://localhost:3001/api-docs
-#    phpMyAdmin: http://localhost:8080 (root / MetaFit2025Dev!)
-
-# 6. Detener servicios
-docker compose down
-
-# 7. Eliminar volúmenes (borra datos)
-docker compose down -v
-```
-
-### Sin Docker (desarrollo local)
-
-```bash
-# Backend
-cd backend
-npm install
-cp .env.example .env  # configurar credenciales MySQL
-npm run dev            # nodemon, http://localhost:3001
-
-# Frontend Web
-cd frontend_web
-npm install
-npm run dev            # Vite, http://localhost:5173
-
-# App Móvil
-cd movil
-npm install
-npx expo start         # Expo, escanear QR con Expo Go
-```
-
----
-
-## 1.11 Postman
-
-### Colecciones Disponibles
-
-| Colección | Archivo | Endpoints | Para quién |
-|---|---|---|---|
-| **Web (Staff)** | `MetaFit_API_Web.postman_collection.json` | 18 | Admin, Recepcionista, Entrenador |
-| **Móvil (Afiliado)** | `MetaFit_API_Movil.postman_collection.json` | 7 | Afiliado |
-
-### Cómo Importar y Configurar
-
-1. Abrir Postman → File → Import → seleccionar el archivo `.json`
-2. Crear un entorno: `base_url = http://localhost:3001`
-3. Las variables `password_admin`, `password_recepcionista`, `password_entrenador`, `password_afiliado` ya están definidas en la colección
-4. Ejecutar primero el login correspondiente — el script de test guarda `{{token}}` automáticamente
-5. El resto de requests usan `Authorization: Bearer {{token}}`
-
-### Endpoints por Colección
-
-**Web (Staff)**: Health, Auth (3 logins), Usuarios/Personal (2), Afiliados (3), Catálogos Filtrados (2), Dashboard (1), Pagos (1), Configuración (2), Catálogo Global (3)
-
-**Móvil (Afiliado)**: Auth (1), Mi Perfil, Mis Ciclos, Mi Progreso, Mis Restricciones, Plan de Entrenamiento, Plan Nutricional
-
----
-
-## 1.12 Mantenimiento y Escalabilidad
-
-### Cómo Agregar Nuevos Módulos
-
-1. **Backend**: Crear modelo → service → controller → routes (con JSDoc)
-2. **Registrar ruta** en `server.js` con `app.use('/ruta', rutaRoutes)`
-3. **Agregar a Swagger**: incluir en `apis: []` de `swagger.js`
-4. **Frontend**: Crear vista → sumar a `App.jsx` con `ProtectedRoute`
-5. **Móvil**: Crear screen → agregar al navigator en `AppNavigator.js`
-6. **Base de Datos**: Agregar migración SQL con `CREATE TABLE IF NOT EXISTS`
-
-### Convenciones de Código
-
-- **Backend**: camelCase en JS, snake_case en SQL. Servicios retornan objetos planos.
-- **Frontend**: PascalCase para componentes, camelCase para hooks y funciones.
-- **Móvil**: Sufijo `Screen.js` para pantallas. Theme centralizado en `theme.js`.
-- **SQL**: Nombres en MAYÚSCULAS. Prefijo `uq_` para unique, `idx_` para índices, `fk_` para foreign keys, `trg_` para triggers.
-
-### Estándares ISO 25000
-
-| Característica | Implementación |
-|---|---|
-| **Mantenibilidad** | MVC + Services, responsabilidad única por archivo |
-| **Modularidad** | Frontend/backend desacoplados via API REST |
-| **Analizabilidad** | Swagger JSDoc, README, nombres autoexplicativos |
-| **Seguridad** | JWT + bcrypt + helmet + rate limit + CORS + RBAC |
-| **Capacidad de prueba** | Jest + Supertest + QA Audit (51 pruebas) |
-| **Funcionalidad** | 54 endpoints REST documentados |
-| **Confiabilidad** | Try-catch + códigos HTTP semánticos + validación + auditoría |
-| **Eficiencia** | Índices en FKs, vistas materializadas, paginación |
+| `metaFit_afiliado_creado` | `AfiliadosView.jsx` (handleCrear OK) | `rol_creador` |
+| `metaFit_rutina_asignada` | `RutinasView.jsx` (asignación OK) | `afiliado_id` |
+| `metaFit_dieta_asignada` | `DietasView.jsx` (asignación OK) | `afiliado_id` |
+| `metaFit_apk_descargado` | `LandingPage.jsx` (botón APK) | — |
+
+En GTM hay que crear **4 triggers “Custom Event”** con esos nombres y apuntarlos a un tag GA4 (Measurement ID `G-81SWBDG2P6`).
+
+### Notificaciones push (Expo Push Service)
+
+- **Columna** `USUARIO.push_token VARCHAR(255) NULL`, creada por migración de boot idempotente `backend/migrations/migracionPushToken.js`.
+- **Endpoint**: `PUT /usuarios/me/push-token` (`requireAuth`) → `UsuarioService.guardarPushToken(id, token)`.
+- **Servicio**: `backend/services/pushService.js` con `sendPush()`, `getPushToken()` y `enviarPushAUsuarioDelCiclo()`. Usa la API REST de Expo (`https://exp.host/--/api/v2/push/send`) con fetch — sin SDK pesado. Nunca lanza.
+- **Trigger**: al crear plan de entrenamiento (`POST /planes/entrenamiento`) → push "🏋️ Nueva rutina asignada"; al crear plan nutricional (`POST /planes/nutricional`) → push "🥗 Nueva dieta asignada" (`planController`).
+- **Móvil**: `movil/src/services/notifications.js` — `expo-notifications` con handler de banners, permisos, obtención del token (`getExpoPushTokenAsync` con `extra.eas.projectId` de `app.json`) y registro en el backend. Se activa tras el login (`LoginScreen`) y de forma idempotente en `MiPerfilScreen`.
+- **Avísame**: para probar de punta a punta instala el APK, inicia sesión y pide que te asignen una rutina desde el panel web.
+
+### Correo de bienvenida (Brevo)
+
+- Servicio compartido `backend/services/correoService.js`: API REST Brevo (`api.brevo.com/v3/smtp/email`) con fallback SMTP (nodemailer). Devuelve true/false, nunca lanza.
+- `backend/services/bienvenidaService.js` + plantilla `backend/templates/bienvenida-afiliado.html` (estilo 600px de marca): credenciales de acceso (correo + contraseña temporal `MF_<doc>@2025` si no se define una).
+- Se dispara fire-and-forget en `afiliadoController.create`; la creación del afiliado nunca depende del correo.
+
+### Recordatorio automático de pagos (cron)
+
+- `backend/cron/recordatorioPagos.js` con **node-cron**: `0 * * * *` (cada hora). Consulta pagos `estado='Pagado'` con `fecha_vencimiento` dentro de los próximos **3 días** y envía la plantilla `backend/templates/recordatorio-pago.html`.
+- **Dedupe diario**: tabla `PAGO_RECORDATORIO (id_pago PK, fecha_envio)` — un mismo pago solo recibe 1 recordatorio por día.
+- Arranca en `backend/index.js` (`iniciarCron()`).
+
+### Cloudinary (fotos en la nube, opcional)
+
+`backend/middlewares/uploadFoto.js` selecciona el storage en caliente:
+
+- Si existen `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY` y `CLOUDINARY_API_SECRET` → **CloudinaryStorage** (carpeta `metafit/afiliados`, formatos png/jpg/jpeg/webp/gif, transformación 600x600 limit).
+- Sin esas variables → **disco local** (`uploads/`) como antes. La URL se guarda en `AFILIADO.foto` (https en Cloudinary, `/uploads/...` en disco).
+- `eliminarFotoAnterior()` borra la versión previa en el storage correcto (destroy por public_id en Cloudinary, unlink en disco).
+
+### Code Climate (calidad de código)
+
+- `.codeclimate.yml` en la raíz: umbrales de complejidad/duplicación/líneas por archivo, exclusión de tests/builds/plantillas y plugins eslint + duplication + fixme.
+- **Requisito manual**: el repo debe ser **público** en GitHub y entrar con la cuenta del equipo a [codeclimate.com](https://codeclimate.com) → "Add repository" una sola vez (la API del servicio no permite crearlos automáticamente). Informe: https://codeclimate.com/github/juanscarvajal04-droid/Equipo_Metafit
+
+### GitHub Actions (CI/CD)
+
+- `.github/workflows/ci.yml`:
+  - **CI** (push a `main`/`feature/juan-carvajal` y PRs): Node 20 + `npm ci` + `npm test` en backend (25), frontend web (30 + build) y móvil (19).
+  - **CD** (push a `main`, tras CI verde): deploy automático a Render vía API (`POST /services/{id}/deploys`) para backend `srv-d9ieq2rtqb8s738q2180` y frontend `srv-d9kbkdm1egvs7385ofu0`. Requiere el secret `RENDER_API_TOKEN` en el repo.
+- La rama `feature/juan-carvajal` además desplega directo en Render por su auto-deploy (push = deploy).
+
+### UptimeRobot (monitoreo)
+
+Guía completa en `documentacion/UPTIME_ROBOT.md`: monitores HTTPS recomendados (backend `/health`, frontend y APK), configuración manual en el dashboard (la API gratuita no crea monitores), contactos de alerta y respuestas ante caída.
+
+### Storybook (biblioteca de componentes)
+
+- Storybook 10 (`npx storybook@latest init`) en `frontend_web` con addons a11y/docs/chromatic.
+- Historias en `frontend_web/src/stories/metaFit.stories.jsx` (5): **Badge, Button, Card, Modal, Avatar** — tema oscuro MetaFit forzado desde `.storybook/preview.jsx` (decorador `data-theme="dark"` + CSS propio `src/stories/metaFit.css`).
+- Scripts: `npm run storybook` (dev en :6006) y `npm run build-storybook` (build estático validado en CI local).

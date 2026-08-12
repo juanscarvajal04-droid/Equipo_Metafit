@@ -98,9 +98,20 @@ const PlanModel = {
   },
 
   deleteRutina: async (id_rutina) => {
-    await pool.query('DELETE FROM RUTINA_EJERCICIO WHERE id_rutina = ?', [id_rutina]);
-    const [r] = await pool.query('DELETE FROM RUTINA WHERE id_rutina = ?', [id_rutina]);
-    return r.affectedRows;
+    // Transacción: limpia los ejercicios asociados y la rutina (todo o nada)
+    const conn = await pool.getConnection();
+    try {
+      await conn.beginTransaction();
+      await conn.query('DELETE FROM RUTINA_EJERCICIO WHERE id_rutina = ?', [id_rutina]);
+      const [r] = await conn.query('DELETE FROM RUTINA WHERE id_rutina = ?', [id_rutina]);
+      await conn.commit();
+      return r.affectedRows;
+    } catch (err) {
+      await conn.rollback();
+      throw err;
+    } finally {
+      conn.release();
+    }
   },
 
   // ── NUTRICIONAL ───────────────────────────────────────────

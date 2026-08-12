@@ -41,6 +41,12 @@ export { TOKEN_KEY, USER_KEY, ROLE_KEY, API_URL };
 export const loginRequest = (correo, contrasena) =>
   api.post('/login', { email: correo, password: contrasena });
 
+export const solicitarRecuperacion = (email) =>
+  api.post('/auth/recuperar-password', { email });
+
+export const resetPasswordRequest = (token, nuevaPassword) =>
+  api.post('/auth/reset-password', { token, nuevaPassword });
+
 export const getMiPerfil = () => api.get('/afiliados/me');
 export const getMisCiclos = () => api.get('/afiliados/me/ciclos');
 export const getMiProgreso = () => api.get('/afiliados/me/progreso');

@@ -5,7 +5,7 @@
   width: 100%;
   padding: 10px 24px;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
-  background: linear-gradient(90deg, #0f0f1a, #14142b);
+  background: var(--mf-sidebar);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -17,21 +17,21 @@
 /* ── Copyright ── */
 .copyright {
   font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.35);
+  color: var(--mf-muted);
   white-space: nowrap;
 }
 
 .copyrightBrand {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--mf-text);
 }
 
 .copyrightSub {
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--mf-muted);
 }
 
 /* ── Links / botones del footer ── */
 .link {
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--mf-muted);
   text-decoration: none;
   font-size: 0.7rem;
   font-weight: 500;
@@ -48,7 +48,7 @@
 }
 
 .linkIg {
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--mf-muted);
   text-decoration: none;
   font-size: 0.7rem;
   font-weight: 500;

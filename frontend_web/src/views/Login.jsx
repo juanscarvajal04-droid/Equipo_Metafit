@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import PublicLayout from "../components/PublicLayout";
 import styles from "./Login.module.css";
@@ -20,7 +20,7 @@ const ROLES = [
 ];
 
 const ROLE_COLOR = {
-  Administrador: "#7c3aed",
+  Administrador: "#e31c25",
   Entrenador:    "#059669",
   Recepcionista: "#2563eb",
 };
@@ -36,7 +36,7 @@ export default function Login() {
   const navigate  = useNavigate();
 
   const [form, setForm] = useState({ meta_user: "", meta_pass: "", rol: "Administrador" });
-  const [passType, setPassType] = useState("text");
+  const [showPass, setShowPass] = useState(false);
   const [isReady,  setIsReady]  = useState(false);
   const [error,    setError]    = useState("");
   const [loading,  setLoading]  = useState(false);
@@ -66,7 +66,7 @@ export default function Login() {
       setError(
         status === 400 || status === 401
           ? "Correo o contraseña incorrectos."
-          : "Error de conexión. Verifica que el servidor esté activo en el puerto 3001."
+          : "Error de conexión con el servidor. Revisá tu internet e intentá de nuevo."
       );
       setLoading(false);
     }
@@ -158,15 +158,26 @@ export default function Login() {
 
                   <div className={styles.fieldGroupLast}>
                     <label className={styles.label}>Contraseña</label>
-                    <input
-                      type={passType} id="meta_pass" name="meta_pass"
-                      value={form.meta_pass} onChange={handleChange}
-                      placeholder="Ingresa tu contraseña"
-                      required autoComplete="new-password"
-                      className={styles.input}
-                      onFocus={e => { setPassType("password"); e.target.style.borderColor = RED; e.target.style.boxShadow = `0 0 0 3px ${RED_GLOW}`; }}
-                      onBlur={e  => { e.target.style.borderColor = "rgba(255,255,255,0.1)"; e.target.style.boxShadow = "none"; }}
-                    />
+                    <div className={styles.passWrap}>
+                      <input
+                        type={showPass ? "text" : "password"} id="meta_pass" name="meta_pass"
+                        value={form.meta_pass} onChange={handleChange}
+                        placeholder="Ingresa tu contraseña"
+                        required autoComplete="new-password"
+                        className={`${styles.input} ${styles.passInput}`}
+                        onFocus={e => { e.target.style.borderColor = RED; e.target.style.boxShadow = `0 0 0 3px ${RED_GLOW}`; }}
+                        onBlur={e  => { e.target.style.borderColor = "rgba(255,255,255,0.1)"; e.target.style.boxShadow = "none"; }}
+                      />
+                      <button
+                        type="button"
+                        id="btn-toggle-pass"
+                        aria-label={showPass ? "Ocultar contraseña" : "Mostrar contraseña"}
+                        className={styles.eyeBtn}
+                        onClick={() => setShowPass(prev => !prev)}
+                      >
+                        {showPass ? "🙈" : "👁️"}
+                      </button>
+                    </div>
                   </div>
                 </>
               )}
@@ -198,6 +209,12 @@ export default function Login() {
                   <>Ingresar al Sistema <span className={styles.arrowIcon}>→</span></>
                 )}
               </button>
+
+              <div className={styles.forgotRow}>
+                <Link to="/recuperar-password" className={styles.forgotLink}>
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </div>
             </form>
           </div>
 

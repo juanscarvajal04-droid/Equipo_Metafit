@@ -2,6 +2,7 @@
 'use strict';
 
 const UsuarioModel = require('../models/usuarioModel');
+const pool = require('../config/db');
 
 const UsuarioService = {
 
@@ -13,6 +14,27 @@ const UsuarioService = {
   getById: async (id) => {
     const user = await UsuarioModel.findById(id);
     return UsuarioService.normalizarUsuario(user);
+  },
+
+  guardarPushToken: async (idUsuario, pushToken) => {
+    const probar = () =>
+      pool.query(
+        `UPDATE USUARIO SET push_token = ? WHERE id_usuario = ?`,
+        [pushToken, idUsuario]
+      );
+    try {
+      await probar();
+    } catch (err) {
+      // Auto-sanación: si la columna no existe (migración no corrió aún),
+      // la crea en caliente e intenta de nuevo (idempotente).
+      if (err.code === 'ER_BAD_FIELD_ERROR') {
+        const { asegurarColumnaPushToken } = require('../migrations/migracionPushToken');
+        await asegurarColumnaPushToken();
+        await probar();
+        return;
+      }
+      throw err;
+    }
   },
 
   create: async (datos) => {

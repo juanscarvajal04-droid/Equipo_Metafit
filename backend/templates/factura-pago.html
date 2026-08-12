@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="x-apple-disable-message-reformatting">
+  <title>Factura de pago - MetaFit</title>
+</head>
+<body style="margin:0;padding:0;background-color:#ffffff;-webkit-text-size-adjust:100%;word-break:break-word;font-family:Helvetica,Arial,sans-serif;">
+  <!-- Preheader invisible -->
+  <div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;font-family:Helvetica,Arial,sans-serif;color:#ffffff;">Factura {{NUMERO_FACTURA}} — Gracias por tu pago en MetaFit.</div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#ffffff;">
+    <tr>
+      <td align="center" style="padding:40px 16px 48px 16px;">
+
+        <!-- ───── Tarjeta: 600px, blanca, borde sutil ───── -->
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;background-color:#ffffff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 1px 6px rgba(16,24,40,0.08);">
+
+          <!-- Encabezado con logo -->
+          <tr>
+            <td align="center" style="padding:36px 40px 0 40px;">
+              <img src="https://metafit-frontend-78x6.onrender.com/app/logo-metafit.png" alt="MetaFit" width="48" height="48" style="display:block;width:48px;height:48px;border:0;outline:none;">
+            </td>
+          </tr>
+
+          <!-- Título -->
+          <tr>
+            <td align="center" style="padding:20px 40px 4px 40px;">
+              <h1 style="margin:0;font-size:22px;line-height:30px;font-weight:700;color:#0a0a0f;letter-spacing:0.5px;">FACTURA DE PAGO</h1>
+              <p style="margin:2px 0 0 0;font-size:13px;line-height:18px;color:#6b7280;">MetaFit · Sport Gym Sede 80</p>
+            </td>
+          </tr>
+
+          <!-- Nro de factura y fecha de emisión -->
+          <tr>
+            <td align="left" style="padding:24px 40px 0 40px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td width="50%" style="font-size:13px;line-height:20px;color:#6b7280;">
+                    <strong style="color:#7c3aed;">Número de factura</strong><br>
+                    <span style="color:#0a0a0f;font-weight:600;">{{NUMERO_FACTURA}}</span>
+                  </td>
+                  <td width="50%" align="right" style="font-size:13px;line-height:20px;color:#6b7280;">
+                    <strong style="color:#7c3aed;">Fecha de emisión</strong><br>
+                    <span style="color:#0a0a0f;font-weight:600;">{{FECHA_EMISION}}</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Datos del afiliado -->
+          <tr>
+            <td align="left" style="padding:24px 40px 0 40px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td style="padding:12px 16px;background-color:#f9fafb;border-radius:6px;">
+                    <p style="margin:0 0 8px 0;font-size:11px;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:0.4px;">Datos del afiliado</p>
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                      <tr>
+                        <td width="50%" style="font-size:13px;line-height:22px;color:#6b7280;">Nombre</td>
+                        <td width="50%" style="font-size:13px;line-height:22px;color:#0a0a0f;font-weight:600;">{{NOMBRE_AFILIADO}}</td>
+                      </tr>
+                      <tr>
+                        <td style="font-size:13px;line-height:22px;color:#6b7280;">Documento</td>
+                        <td style="font-size:13px;line-height:22px;color:#0a0a0f;font-weight:600;">{{DOCUMENTO}}</td>
+                      </tr>
+                      <tr>
+                        <td style="font-size:13px;line-height:22px;color:#6b7280;">Correo</td>
+                        <td style="font-size:13px;line-height:22px;color:#0a0a0f;font-weight:600;">{{CORREO}}</td>
+                      </tr>
+                      <tr>
+                        <td style="font-size:13px;line-height:22px;color:#6b7280;">Teléfono</td>
+                        <td style="font-size:13px;line-height:22px;color:#0a0a0f;font-weight:600;">{{TELEFONO}}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Detalle del pago -->
+          <tr>
+            <td align="left" style="padding:20px 40px 0 40px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td style="padding:12px 16px;background-color:#f9fafb;border-radius:6px;">
+                    <p style="margin:0 0 8px 0;font-size:11px;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:0.4px;">Detalle del pago</p>
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                      <tr>
+                        <td style="font-size:13px;line-height:22px;color:#6b7280;">Concepto</td>
+                        <td style="font-size:13px;line-height:22px;color:#0a0a0f;font-weight:600;">Mensualidad Sport Gym Sede 80</td>
+                      </tr>
+                      <tr>
+                        <td style="font-size:13px;line-height:22px;color:#6b7280;">Método de pago</td>
+                        <td style="font-size:13px;line-height:22px;color:#0a0a0f;font-weight:600;">{{METODO_PAGO}}</td>
+                      </tr>
+                      <tr>
+                        <td style="font-size:13px;line-height:22px;color:#6b7280;">Fecha del pago</td>
+                        <td style="font-size:13px;line-height:22px;color:#0a0a0f;font-weight:600;">{{FECHA_PAGO}}</td>
+                      </tr>
+                    </table>
+                    <!-- Subtotal de líneay final -->
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top:12px;">
+                      <tr>
+                        <td style="height:1px;background-color:#e5e7eb;line-height:1px;font-size:1px;">&nbsp;</td>
+                      </tr>
+                    </table>
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top:12px;">
+                      <tr>
+                        <td style="font-size:14px;line-height:24px;color:#6b7280;font-weight:600;">Valor pagado</td>
+                        <td align="right" style="font-size:20px;line-height:28px;color:#0a0a0f;font-weight:700;">{{VALOR_PAGADO}}</td>
+                      </tr>
+                      <tr>
+                        <td style="font-size:13px;line-height:22px;color:#6b7280;">Estado del pago</td>
+                        <td align="right" style="padding-top:6px;">
+                          <span style="display:inline-block;padding:4px 12px;border-radius:20px;background-color:#7c3aed;color:#ffffff;font-size:11px;font-weight:700;letter-spacing:0.4px;">{{ESTADO_PAGO}}</span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Mensaje de gracias -->
+          <tr>
+            <td align="center" style="padding:24px 40px 0 40px;">
+              <p style="margin:0;font-size:13px;line-height:20px;color:#9ca3af;">¡Gracias por tu mensualidad! Cualquier duda, escribinos a <span style="color:#7c3aed;">metafit.sistema@gmail.com</span></p>
+            </td>
+          </tr>
+
+          <!-- Divisor -->
+          <tr>
+            <td style="padding:20px 40px 0 40px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td style="height:1px;background-color:#e5e7eb;line-height:1px;font-size:1px;">&nbsp;</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Pie -->
+          <tr>
+            <td align="center" style="padding:20px 40px 24px 40px;">
+              <p style="margin:0 0 4px 0;font-size:12px;line-height:18px;color:#6b7280;font-weight:600;">MetaFit · Sport Gym Sede 80</p>
+              <p style="margin:0;font-size:11px;line-height:16px;color:#b0b5bf;">Calle 80 11-22, Bogotá, Colombia · {{ANIO}}</p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

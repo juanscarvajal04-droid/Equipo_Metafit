@@ -64,15 +64,17 @@ Los scripts SQL (`01_schema.sql`, `02_seed.sql`) se ejecutan automáticamente al
 ## 🔬 Tests
 
 ```bash
-# Backend (16 tests — integración + unitarios)
+# Backend (25 tests — integración + unitarios)
 cd backend && npm test
 ```
 
 Respuesta esperada:
 ```
 Test Suites: 2 passed, 2 total
-Tests:       16 passed, 16 total
+Tests:       25 passed, 25 total
 ```
+
+Además: `frontend_web` (30 tests, `npm test`) y `movil` (19 tests, `npx jest`). Total: **74 tests verdes**. CI los corre todos en GitHub Actions (`.github/workflows/ci.yml`).
 
 ## 📬 Postman
 
@@ -112,6 +114,48 @@ Todos los documentos se encuentran en la carpeta [`documentacion/`](./documentac
 | `documentacion/PRESENTACION.md` | Guion de sustentación (15-20 min) con diapositivas |
 | `documentacion/QA_REPORT.md` | Reporte de aseguramiento de calidad |
 | `documentacion/AUDITORIA_FINAL.md` | Auditoría final del proyecto |
+| `documentacion/UPTIME_ROBOT.md` | Monitoreo 24/7 con UptimeRobot (config manual) |
+| `documentacion/GUION_VIDEO_DEMO.md` | Guion del video demo (3–5 min, 3 roles) |
+
+## 🚀 Mejoras "1000/10" (últimas fases)
+
+| Mejora | Estado |
+|---|---|
+| Modo claro/oscuro (web + app móvil) | ✅ Toggle ☀️/🌙 persistente |
+| Analítica GA4 + GTM + GSC | ✅ GTM-K6JZS4MG activo, 4 eventos dataLayer |
+| Push notifications (Expo) | ✅ `push_token` + avisos de rutina/dieta |
+| Correo de bienvenida (Brevo) | ✅ Plantilla 600px + credenciales |
+| Recordatorio de pagos (cron) | ✅ Cada hora, vence en ≤3 días, dedupe diario |
+| Code Climate | ⏳ `.codeclimate.yml` listo (requiere repo público + login manual) |
+| GitHub Actions CI/CD | ✅ 74 tests en CI + deploy automático a Render en `main` |
+| UptimeRobot | ⏳ Guía lista (`documentacion/UPTIME_ROBOT.md`), monitores manuales |
+| Cloudinary | ✅ Con fallback a disco (activa con 3 env vars) |
+| Storybook | ✅ 5 historias (Badge, Button, Card, Modal, Avatar) tema oscuro |
+
+---
+
+## ⚠️ CORS abierto temporalmente (pruebas en la red del SENA)
+
+**Estado actual: `app.use(cors({ origin: '*' }))`** en `backend/server.js` + `CORS_ORIGINS="*"`
+en Render. Esto permite cualquier origen para que la demo funcione desde la red del SENA.
+
+**Después de la presentación hay que RESTRINGIRLO de nuevo** a la lista blanca:
+
+```js
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin) return callback(null, true);   // sin Origin: móvil/curl
+    const allowed = (process.env.CORS_ORIGINS || DEFAULT_CORS_ORIGIN)
+      .split(',').map((s) => s.trim()).filter(Boolean);
+    if (allowed.includes('*') || allowed.includes(origin)) return callback(null, true);
+    return callback(new Error('CORS no permitido para este origen'));
+  },
+  credentials: false,
+}));
+```
+
+El código original completo está comentado en `backend/server.js` (sección CORS).
+Render: `CORS_ORIGINS = https://metafit-frontend-78x6.onrender.com,http://localhost:5173,http://127.0.0.1:5173`
 
 ---
 *MetaFit Inc. · Sport Gym Sede 80 · Bogotá, Colombia* 

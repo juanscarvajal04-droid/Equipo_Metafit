@@ -12,13 +12,16 @@ import {
   ScrollView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
+import { activarPushNotifications } from '../services/notifications';
 import { COLORS, GRADIENTS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../theme';
 
-export default function LoginScreen() {
+export default function LoginScreen({ navigation }) {
   const { login } = useAuth();
   const [correo, setCorreo] = useState('');
   const [contrasena, setContrasena] = useState('');
+  const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -31,9 +34,10 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await login(correo.trim(), contrasena);
+      activarPushNotifications();
     } catch (err) {
       if (!err.response) {
-        setError('Error de conexión. Verificá que el servidor esté activo en 192.168.0.4:3001.');
+        setError('Error de conexión. Verificá tu conexión a internet e intentá de nuevo.');
       } else {
         const msg = err.response?.data?.error || 'Correo o contraseña incorrectos';
         setError(msg);
@@ -82,14 +86,27 @@ export default function LoginScreen() {
               keyboardType="email-address"
             />
 
-            <TextInput
-              style={styles.input}
-              placeholder="Contraseña"
-              placeholderTextColor={COLORS.textMuted}
-              value={contrasena}
-              onChangeText={setContrasena}
-              secureTextEntry
-            />
+            <View style={styles.passWrap}>
+              <TextInput
+                style={styles.input}
+                placeholder="Contraseña"
+                placeholderTextColor={COLORS.textMuted}
+                value={contrasena}
+                onChangeText={setContrasena}
+                secureTextEntry={!showPass}
+              />
+              <TouchableOpacity
+                style={styles.eyeBtn}
+                onPress={() => setShowPass(prev => !prev)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Ionicons
+                  name={showPass ? 'eye-off' : 'eye'}
+                  size={20}
+                  color={COLORS.textMuted}
+                />
+              </TouchableOpacity>
+            </View>
 
             <TouchableOpacity
               onPress={handleLogin}
@@ -108,6 +125,13 @@ export default function LoginScreen() {
                   <Text style={styles.buttonText}>Ingresar al Sistema →</Text>
                 )}
               </LinearGradient>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => navigation.navigate('RecuperarPassword')}
+              style={styles.forgotRow}
+            >
+              <Text style={styles.forgotText}>¿Olvidaste tu contraseña?</Text>
             </TouchableOpacity>
           </View>
 
@@ -205,6 +229,23 @@ const styles = StyleSheet.create({
     fontSize: FONTS.body,
     color: COLORS.text,
     marginBottom: SPACING.md,
+  },
+  passWrap: {
+    position: 'relative',
+  },
+  eyeBtn: {
+    position: 'absolute',
+    right: 12,
+    top: 15,
+  },
+  forgotRow: {
+    marginTop: SPACING.lg,
+    alignItems: 'center',
+    paddingVertical: SPACING.xs,
+  },
+  forgotText: {
+    color: COLORS.textMuted,
+    fontSize: FONTS.small,
   },
   button: {
     borderRadius: BORDER_RADIUS.md,
