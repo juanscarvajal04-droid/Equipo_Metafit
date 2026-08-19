@@ -31,7 +31,10 @@ const PlanModel = {
             'nombre_ejercicio', e.nombre_ejercicio,
             'grupo_muscular', e.grupo_muscular,
             'series',         re.series,
-            'repeticiones',   re.repeticiones
+            'repeticiones',   re.repeticiones,
+            'peso_kg',        re.peso_kg,
+            'descanso_seg',   re.descanso_seg,
+            'instrucciones',  e.descripcion
           )
         ) AS ejercicios
       FROM RUTINA r

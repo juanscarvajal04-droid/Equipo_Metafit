@@ -19,6 +19,7 @@ import {
   getAguaHoy,
   guardarConsumoAlimento,
 } from '../services/api';
+import { seleccionarCicloActivo } from '../utils/cicloUtils';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const MAX_VASOS = 8;
@@ -156,7 +157,7 @@ export default function MiDietaScreen() {
     try {
       setError(null);
       const ciclosRes = await getMisCiclos();
-      const cicloData = ciclosRes.data?.cicloActual || ciclosRes.data?.[0] || null;
+      const cicloData = seleccionarCicloActivo(ciclosRes.data);
       if (!cicloData) {
         setError('No tenés un ciclo asignado.');
         setLoading(false);
@@ -169,8 +170,15 @@ export default function MiDietaScreen() {
         getAguaHoy(hoy).catch(() => ({ data: { vasos: 0 } })),
       ]);
 
-      const planData = planRes.data?.alimentos || planRes.data?.plan || planRes.data || [];
-      setAlimentos(Array.isArray(planData) ? planData : []);
+      // Contrato real del backend: { detalle: [{ num_comida, id_alimento, cantidad_g, nombre_alimento, ... }] }
+      const planData = planRes.data?.detalle || planRes.data?.alimentos || planRes.data?.plan || [];
+      const alimentosPlan = (Array.isArray(planData) ? planData : []).map((a) => ({
+        ...a,
+        nombre: a.nombre_alimento || a.nombre,
+        cantidad: a.cantidad_g ?? a.cantidad,
+        calorias: a.calorias_por_100g ?? a.calorias,
+      }));
+      setAlimentos(alimentosPlan);
 
       setAgua(aguaRes.data?.vasos ?? 0);
 

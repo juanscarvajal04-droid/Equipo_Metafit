@@ -375,12 +375,18 @@ CREATE TABLE IF NOT EXISTS `RUTINA` (
 
 -- Originado en JSON.rutinas[].ejercicios[]
 -- PK (id_rutina, orden): permite repetir el mismo ejercicio en distintas posiciones.
+-- peso_kg / descanso_seg: configuración del ejercicio DENTRO de la rutina (HU43 CA2).
+--   Pertenecen aquí (no a EJERCICIO) porque varían por rutina: el mismo ejercicio
+--   puede pedir 20 kg en una rutina y 30 kg en otra.
+--   NULL = sin carga (ejercicio a peso corporal) / sin descanso definido.
 CREATE TABLE IF NOT EXISTS `RUTINA_EJERCICIO` (
   `id_rutina`    INT NOT NULL,
   `orden`        INT NOT NULL CHECK (`orden` >= 1),
   `id_ejercicio` INT NOT NULL,
   `series`       INT NOT NULL CHECK (`series`       >= 1),
   `repeticiones` INT NOT NULL CHECK (`repeticiones` >= 1),
+  `peso_kg`      DECIMAL(5,2) NULL CHECK (`peso_kg`      IS NULL OR `peso_kg`      > 0),
+  `descanso_seg` INT          NULL CHECK (`descanso_seg` IS NULL OR `descanso_seg` >= 0),
 
   PRIMARY KEY (`id_rutina`, `orden`),
   INDEX `idx_rutejec_ejercicio` (`id_ejercicio`),

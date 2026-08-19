@@ -19,6 +19,7 @@ import api, { API_URL } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { activarPushNotifications } from '../services/notifications';
+import { seleccionarCicloActivo, esCicloActivo, formatearFecha } from '../utils/cicloUtils';
 
 function Avatar({ nombre, foto, size = 80 }) {
   const initials = (nombre || 'U')
@@ -147,7 +148,7 @@ export default function MiPerfilScreen({ navigation }) {
         getMisRestricciones(),
       ]);
       setPerfil(perfilRes.data);
-      setCiclo(ciclosRes.data?.cicloActual || ciclosRes.data?.[0] || null);
+      setCiclo(seleccionarCicloActivo(ciclosRes.data));
       setRestricciones(restricRes.data || []);
     } catch (err) {
       Alert.alert('Error', 'No se pudo cargar el perfil.');
@@ -278,18 +279,25 @@ export default function MiPerfilScreen({ navigation }) {
           <InfoRow icon="call-outline" label="Teléfono" value={u.telefono || '-'} />
         </SectionCard>
 
-        {ciclo && (
+        {ciclo ? (
           <SectionCard title="Estado Físico" icon="fitness-outline">
-            <InfoRow icon="barbell-outline" label="Ciclo Actual" value={ciclo.nombre || `#${ciclo.id_ciclo}`} />
-            {ciclo.dias_entreno != null && (
-              <InfoRow icon="calendar-outline" label="Días de Entreno" value={`${ciclo.dias_entreno}/semana`} />
+            <InfoRow icon="barbell-outline" label="Ciclo Actual" value={`Ciclo ${ciclo.numero_ciclo || ciclo.id_ciclo}`} />
+            {ciclo.objetivo_fisico && (
+              <InfoRow icon="flag-outline" label="Objetivo" value={ciclo.objetivo_fisico} />
             )}
-            {ciclo.objetivo && (
-              <InfoRow icon="flag-outline" label="Objetivo" value={ciclo.objetivo} />
+            {ciclo.fecha_inicio && ciclo.fecha_fin && (
+              <InfoRow icon="calendar-outline" label="Fechas" value={`${formatearFecha(ciclo.fecha_inicio)} → ${formatearFecha(ciclo.fecha_fin)}`} />
             )}
-            {ciclo.estado && (
-              <InfoRow icon="pulse-outline" label="Estado" value={ciclo.estado} />
+            {ciclo.disponibilidad_dias != null && (
+              <InfoRow icon="calendar-outline" label="Días de Entreno" value={`${ciclo.disponibilidad_dias}/semana`} />
             )}
+            <InfoRow icon="pulse-outline" label="Estado" value={esCicloActivo(ciclo) ? 'Activo' : 'Inactivo'} />
+          </SectionCard>
+        ) : (
+          <SectionCard title="Estado Físico" icon="fitness-outline">
+            <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.body }}>
+              No tienes un ciclo asignado. Consulta con tu entrenador.
+            </Text>
           </SectionCard>
         )}
 

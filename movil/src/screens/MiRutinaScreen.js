@@ -8,9 +8,7 @@ import {
   Alert,
   Animated,
   RefreshControl,
-  Dimensions,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, GRADIENTS, FONTS, SPACING, SHADOWS, BORDER_RADIUS } from '../theme';
@@ -20,11 +18,13 @@ import {
   guardarProgresoEjercicio,
   getProgresoEjercicioHoy,
 } from '../services/api';
+import { seleccionarCicloActivo } from '../utils/cicloUtils';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+const EJERCICIO_ROW_H = 58;
+const INSTRUCCIONES_H = 96;
 
-function DiaCard({ dia, ejercicios, completados, onToggle, expandido, setExpandido }) {
+function DiaCard({ dia, ejercicios, completados, onToggle, expandido, setExpandido, detalleEjercicio, onToggleDetalle }) {
   const completadosCount = ejercicios.filter((e) => completados[e.id_ejercicio]).length;
   const total = ejercicios.length;
   const progress = total > 0 ? completadosCount / total : 0;
@@ -38,10 +38,10 @@ function DiaCard({ dia, ejercicios, completados, onToggle, expandido, setExpandi
     }).start();
   }, [expandido]);
 
-  const contentHeight = anim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, ejercicios.length * 58],
-  });
+  const contentHeight = ejercicios.reduce(
+    (h, ej) => h + EJERCICIO_ROW_H + (detalleEjercicio === ej.id_ejercicio ? INSTRUCCIONES_H : 0),
+    0
+  );
 
   return (
     <View style={{
@@ -100,15 +100,20 @@ function DiaCard({ dia, ejercicios, completados, onToggle, expandido, setExpandi
         </View>
       </TouchableOpacity>
 
-      <Animated.View style={{ height: contentHeight, overflow: 'hidden' }}>
+      <Animated.View style={{
+        height: anim.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, contentHeight],
+        }),
+        overflow: 'hidden',
+      }}>
         <View style={{ paddingHorizontal: SPACING.md, paddingBottom: SPACING.md }}>
           {ejercicios.map((ej) => {
             const done = completados[ej.id_ejercicio];
+            const detalleAbierto = detalleEjercicio === ej.id_ejercicio;
             return (
-              <TouchableOpacity
+              <View
                 key={ej.id_ejercicio}
-                onPress={() => onToggle(ej.id_ejercicio)}
-                activeOpacity={0.7}
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
@@ -117,41 +122,67 @@ function DiaCard({ dia, ejercicios, completados, onToggle, expandido, setExpandi
                   borderBottomColor: COLORS.border,
                 }}
               >
-                <LinearGradient
-                  colors={done ? ['#10b981', '#059669'] : GRADIENTS.purpleDark}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={{
-                    width: 26,
-                    height: 26,
-                    borderRadius: 13,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    marginRight: SPACING.md,
-                  }}
+                <TouchableOpacity
+                  onPress={() => onToggle(ej.id_ejercicio)}
+                  activeOpacity={0.7}
+                  style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
                 >
-                  {done && <Ionicons name="checkmark" size={18} color="#fff" />}
-                </LinearGradient>
-                <View style={{ flex: 1 }}>
-                  <Text style={{
-                    color: COLORS.text,
-                    fontSize: FONTS.body,
-                    fontWeight: '500',
-                    textDecorationLine: done ? 'line-through' : 'none',
-                    opacity: done ? 0.6 : 1,
-                  }}>
-                    {ej.nombre || `Ejercicio ${ej.id_ejercicio}`}
-                  </Text>
-                  {(ej.series || ej.repeticiones) && (
-                    <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.small, marginTop: 1 }}>
-                      {ej.series ? `${ej.series} series` : ''}
-                      {ej.series && ej.repeticiones ? ' × ' : ''}
-                      {ej.repeticiones ? `${ej.repeticiones} reps` : ''}
+                  <LinearGradient
+                    colors={done ? ['#10b981', '#059669'] : GRADIENTS.purpleDark}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={{
+                      width: 26,
+                      height: 26,
+                      borderRadius: 13,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      marginRight: SPACING.md,
+                    }}
+                  >
+                    {done && <Ionicons name="checkmark" size={18} color="#fff" />}
+                  </LinearGradient>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{
+                      color: COLORS.text,
+                      fontSize: FONTS.body,
+                      fontWeight: '500',
+                      textDecorationLine: done ? 'line-through' : 'none',
+                      opacity: done ? 0.6 : 1,
+                    }}>
+                      {ej.nombre || `Ejercicio ${ej.id_ejercicio}`}
                     </Text>
-                  )}
-                </View>
-                {done && <Ionicons name="checkmark-circle" size={18} color={COLORS.check} />}
-              </TouchableOpacity>
+                    {(ej.series || ej.repeticiones || ej.peso_kg != null || ej.descanso_seg != null) && (
+                      <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.small, marginTop: 1 }}>
+                        {ej.series ? `${ej.series} series` : ''}
+                        {ej.series && ej.repeticiones ? ' × ' : ''}
+                        {ej.repeticiones ? `${ej.repeticiones} reps` : ''}
+                        {ej.peso_kg != null ? ` · ${ej.peso_kg} kg` : ''}
+                        {ej.descanso_seg != null ? ` · ${ej.descanso_seg}s descanso` : ''}
+                      </Text>
+                    )}
+                    {detalleAbierto && (
+                      <View style={{ marginTop: SPACING.sm, paddingTop: SPACING.sm, borderTopWidth: 1, borderTopColor: COLORS.border }}>
+                        <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.small, lineHeight: 18 }}>
+                          {ej.instrucciones || 'Sin instrucciones disponibles para este ejercicio.'}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => onToggleDetalle(ej.id_ejercicio)}
+                  activeOpacity={0.7}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  style={{ padding: SPACING.xs, marginLeft: SPACING.sm }}
+                >
+                  <Ionicons
+                    name={detalleAbierto ? 'chevron-up-circle-outline' : 'information-circle-outline'}
+                    size={20}
+                    color={COLORS.textSecondary}
+                  />
+                </TouchableOpacity>
+              </View>
             );
           })}
         </View>
@@ -168,16 +199,19 @@ export default function MiRutinaScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [expandido, setExpandido] = useState(null);
+  const [detalleEjercicio, setDetalleEjercicio] = useState(null);
+  const [diaSeleccionado, setDiaSeleccionado] = useState(null);
   const [error, setError] = useState(null);
 
   const hoy = new Date().toISOString().slice(0, 10);
   const diaSemana = DAYS[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1];
+  const diaNumeroHoy = new Date().getDay() === 0 ? 7 : new Date().getDay();
 
   const fetchData = useCallback(async () => {
     try {
       setError(null);
       const ciclosRes = await getMisCiclos();
-      const cicloData = ciclosRes.data?.cicloActual || ciclosRes.data?.[0] || null;
+      const cicloData = seleccionarCicloActivo(ciclosRes.data);
       if (!cicloData) {
         setError('No tenés un ciclo asignado.');
         setLoading(false);
@@ -186,10 +220,20 @@ export default function MiRutinaScreen() {
       setCiclo(cicloData);
 
       const planRes = await getPlanEntrenamiento(cicloData.id_ciclo);
-      const planData = planRes.data?.ejercicios || planRes.data?.plan || planRes.data || [];
-      setEjercicios(Array.isArray(planData) ? planData : []);
+      // Contrato real del backend: { rutinas: [{ nombre_rutina, dia_numero, ejercicios: [...] }] }
+      const rutinas = planRes.data?.rutinas || [];
+      const ejerciciosPlan = rutinas.flatMap((r) =>
+        (r.ejercicios || []).map((e) => ({
+          ...e,
+          nombre: e.nombre_ejercicio,
+          dia: r.nombre_rutina,
+          dia_numero: r.dia_numero,
+        }))
+      );
+      setEjercicios(ejerciciosPlan);
+      setDiaSeleccionado(null);
 
-      const ids = Array.isArray(planData) ? planData.map((e) => e.id_ejercicio) : [];
+      const ids = ejerciciosPlan.map((e) => e.id_ejercicio);
       if (ids.length > 0) {
         try {
           const progRes = await getProgresoEjercicioHoy(cicloData.id_ciclo, hoy);
@@ -217,6 +261,10 @@ export default function MiRutinaScreen() {
     setCompletados((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const toggleDetalle = (id) => {
+    setDetalleEjercicio((prev) => (prev === id ? null : id));
+  };
+
   const handleSave = async () => {
     if (!ciclo) return;
     setSaving(true);
@@ -242,7 +290,9 @@ export default function MiRutinaScreen() {
       if (!days[d]) days[d] = [];
       days[d].push(ej);
     });
-    return Object.entries(days);
+    return Object.entries(days).sort(
+      (a, b) => (a[1][0].dia_numero ?? 99) - (b[1][0].dia_numero ?? 99)
+    );
   };
 
   if (loading) {
@@ -254,6 +304,10 @@ export default function MiRutinaScreen() {
   }
 
   const diasData = getDiasData();
+  const diaDefault =
+    diasData.find(([, ej]) => ej[0].dia_numero === diaNumeroHoy)?.[0] || diasData[0]?.[0] || null;
+  const diaVisible = diaSeleccionado || diaDefault;
+  const ejerciciosDia = diasData.find(([dia]) => dia === diaVisible)?.[1] || [];
   const totalEj = ejercicios.length;
   const totalDone = Object.values(completados).filter(Boolean).length;
   const globalProgress = totalEj > 0 ? totalDone / totalEj : 0;
@@ -302,30 +356,68 @@ export default function MiRutinaScreen() {
           </Text>
         </View>
       ) : (
-        <ScrollView
-          contentContainerStyle={{ padding: SPACING.md, paddingBottom: 100 }}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.purple} colors={[COLORS.purple]} />
-          }
-        >
-          {diasData.length === 0 ? (
-            <Text style={{ color: COLORS.textSecondary, textAlign: 'center', marginTop: SPACING.lg }}>
-              No hay ejercicios en tu plan actual.
-            </Text>
-          ) : (
-            diasData.map(([dia, ej]) => (
+        <>
+          {diasData.length > 0 && (
+            <View style={{ paddingHorizontal: SPACING.md, paddingTop: SPACING.sm }}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ gap: SPACING.sm }}
+              >
+                {diasData.map(([dia, ej]) => {
+                  const activo = dia === diaVisible;
+                  const label = DAYS[(ej[0].dia_numero ?? 1) - 1] || dia;
+                  return (
+                    <TouchableOpacity
+                      key={dia}
+                      onPress={() => setDiaSeleccionado(dia)}
+                      activeOpacity={0.8}
+                      style={{
+                        paddingHorizontal: SPACING.md,
+                        paddingVertical: SPACING.sm,
+                        borderRadius: BORDER_RADIUS.md,
+                        backgroundColor: activo ? COLORS.purple : COLORS.bgCard,
+                        ...(activo ? SHADOWS.purple : SHADOWS.subtle),
+                      }}
+                    >
+                      <Text style={{
+                        color: activo ? '#fff' : COLORS.text,
+                        fontSize: FONTS.small,
+                        fontWeight: '600',
+                      }}>
+                        {label}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            </View>
+          )}
+
+          <ScrollView
+            contentContainerStyle={{ padding: SPACING.md, paddingBottom: 100 }}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.purple} colors={[COLORS.purple]} />
+            }
+          >
+            {diasData.length === 0 ? (
+              <Text style={{ color: COLORS.textSecondary, textAlign: 'center', marginTop: SPACING.lg }}>
+                No hay ejercicios en tu plan actual.
+              </Text>
+            ) : (
               <DiaCard
-                key={dia}
-                dia={dia}
-                ejercicios={ej}
+                dia={diaVisible}
+                ejercicios={ejerciciosDia}
                 completados={completados}
                 onToggle={toggleEjercicio}
                 expandido={expandido}
                 setExpandido={setExpandido}
+                detalleEjercicio={detalleEjercicio}
+                onToggleDetalle={toggleDetalle}
               />
-            ))
-          )}
-        </ScrollView>
+            )}
+          </ScrollView>
+        </>
       )}
 
       {!error && (
