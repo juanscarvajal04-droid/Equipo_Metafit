@@ -158,4 +158,36 @@ El código original completo está comentado en `backend/server.js` (sección CO
 Render: `CORS_ORIGINS = https://metafit-frontend-78x6.onrender.com,http://localhost:5173,http://127.0.0.1:5173`
 
 ---
-*MetaFit Inc. · Sport Gym Sede 80 · Bogotá, Colombia* 
+
+## 🧠 Obsidian Vault
+
+El proyecto incluye un **vault de Obsidian** con documentación viva en `documentacion/brain/`:
+
+- **28 notas interconectadas** cubriendo arquitectura, APIs, despliegue, bugs, manuales y diseño.
+- Cada nota usa enlaces `[[doble corchete]]` para navegar entre temas.
+- Basado en el código real del proyecto (endpoints, middlewares, schemas, configs).
+
+### Cómo abrirlo en Obsidian
+
+1. Abrir Obsidian
+2. `File > Open folder as vault`
+3. Seleccionar `documentacion/brain/`
+4. Explorar desde `Home.md` como punto de entrada
+
+### Estructura
+
+```
+documentacion/brain/
+├── Home.md              ← Punto de entrada
+├── Proyecto/            ← Visión general, historias, roadmap
+├── Arquitectura/        ← Backend, Frontend, Móvil, BD
+├── APIs/                ← Autenticación, Afiliados, Pagos, Planes
+├── Despliegue/          ← Render, Railway, Brevo, Cloudinary, CI/CD
+├── Bugs y soluciones/   ← Historial y lecciones aprendidas
+├── Manuales/            ← Técnico, Usuario, Postman
+├── Diseño/              ← Colores, tokens CSS, favicon
+└── Enlaces útiles.md
+```
+
+---
+*MetaFit Inc. · Sport Gym Sede 80 · Bogotá, Colombia*
