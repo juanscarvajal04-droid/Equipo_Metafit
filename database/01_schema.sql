@@ -113,7 +113,7 @@ CREATE TABLE IF NOT EXISTS `EJERCICIO` (
   `id_ejercicio`     INT          NOT NULL AUTO_INCREMENT,
   `nombre_ejercicio` VARCHAR(80)  NOT NULL,
   `grupo_muscular`   ENUM('Piernas','Pecho','Espalda','Hombros','Biceps','Triceps','Core','Gluteos') NOT NULL,
-  `descripcion`      VARCHAR(200) NULL,
+  `descripcion`      VARCHAR(500) NULL,
   `nivel_minimo`     ENUM('Principiante','Intermedio','Avanzado') NOT NULL DEFAULT 'Principiante',
 
   PRIMARY KEY (`id_ejercicio`),

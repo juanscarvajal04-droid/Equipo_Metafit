@@ -29,7 +29,25 @@ async function asegurarColumna(columna) {
   }
 }
 
+async function asegurarAnchoDescripcion() {
+  const [rows] = await pool.query(
+    `SELECT CHARACTER_MAXIMUM_LENGTH AS n
+       FROM information_schema.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE()
+        AND TABLE_NAME = 'EJERCICIO'
+        AND COLUMN_NAME = 'descripcion'`
+  );
+  const actual = rows[0] ? Number(rows[0].n) : 0;
+  if (actual < 500) {
+    await pool.query('ALTER TABLE EJERCICIO MODIFY descripcion VARCHAR(500) NULL');
+    console.log('[migracion] EJERCICIO.descripcion ampliada a VARCHAR(500)');
+  } else {
+    console.log('[migracion] EJERCICIO.descripcion ya soporta VARCHAR(500)');
+  }
+}
+
 async function runMigraciones() {
+  await asegurarAnchoDescripcion();
   for (const columna of COLUMNAS) {
     await asegurarColumna(columna);
   }
