@@ -135,6 +135,7 @@ export default function MiPerfilScreen({ navigation }) {
   const { logout } = useAuth();
   const [perfil, setPerfil] = useState(null);
   const [ciclo, setCiclo] = useState(null);
+  const [ciclos, setCiclos] = useState([]);
   const [restricciones, setRestricciones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -148,6 +149,7 @@ export default function MiPerfilScreen({ navigation }) {
         getMisRestricciones(),
       ]);
       setPerfil(perfilRes.data);
+      setCiclos(ciclosRes.data || []);
       setCiclo(seleccionarCicloActivo(ciclosRes.data));
       setRestricciones(restricRes.data || []);
     } catch (err) {
@@ -213,6 +215,10 @@ export default function MiPerfilScreen({ navigation }) {
   const edad = u.edad || '-';
   const peso = u.peso ?? perfil?.peso ?? '-';
   const altura = u.altura ?? perfil?.altura ?? '-';
+
+  const historial = ciclos
+    .filter((c) => !esCicloActivo(c))
+    .sort((a, b) => (b.numero_ciclo || b.id_ciclo || 0) - (a.numero_ciclo || a.id_ciclo || 0));
 
   const headerHeight = scrollY.interpolate({
     inputRange: [0, 120],
@@ -298,6 +304,23 @@ export default function MiPerfilScreen({ navigation }) {
             <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.body }}>
               No tienes un ciclo asignado. Consulta con tu entrenador.
             </Text>
+          </SectionCard>
+        )}
+
+        {historial.length > 0 && (
+          <SectionCard title="Historial de Ciclos" icon="time-outline">
+            {historial.map((c) => (
+              <InfoRow
+                key={c.id_ciclo}
+                icon="calendar-outline"
+                label={`Ciclo ${c.numero_ciclo || c.id_ciclo}`}
+                value={
+                  c.fecha_inicio && c.fecha_fin
+                    ? `${formatearFecha(c.fecha_inicio)} → ${formatearFecha(c.fecha_fin)}${c.objetivo_fisico ? ` · ${c.objetivo_fisico}` : ''}`
+                    : (c.objetivo_fisico || '-')
+                }
+              />
+            ))}
           </SectionCard>
         )}
 
