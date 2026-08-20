@@ -32,6 +32,7 @@
 - [[Brevo]] — Envío de correos transaccionales
 - [[Cloudinary]] — Almacenamiento de fotos de perfil
 - [[CI-CD]] — GitHub Actions con 74 tests
+- [[n8n]] — Automatización: Telegram, Google Sheets, recordatorios
 
 ### 🐛 Bugs y Soluciones
 - [[Historial de bugs]] — Bugs documentados y cómo se resolvieron
@@ -61,6 +62,7 @@
 | App Móvil | React Native + Expo 55 | — |
 | Base de datos | MySQL 8.0 | 3306 |
 | phpMyAdmin | — | 8080 |
+| n8n | Automatización | 5678 |
 
 | Métrica | Valor |
 |---|---|

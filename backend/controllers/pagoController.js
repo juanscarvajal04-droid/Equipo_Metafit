@@ -53,7 +53,7 @@ const PagoController = {
     try {
       const { id_pago, fecha_vencimiento } = await PagoModel.create(req.params.id, req.body);
 
-      // ── Factura por correo (asíncrono, no bloquea la respuesta) ──
+      // ── Factura por correo + webhook n8n (asíncrono, no bloquea la respuesta) ──
       const datosPago = {
         id_pago,
         fecha_pago: req.body.fecha_pago || new Date().toISOString().split('T')[0],
@@ -64,16 +64,20 @@ const PagoController = {
       (async () => {
         try {
           const AfiliadoModel = require('../models/afiliadoModel');
-          const { enviarFacturaPago } = require('../services/facturaService');
           const afiliado = await AfiliadoModel.findById(req.params.id);
           if (!afiliado) {
             console.error('[pagoController.create] afiliado no encontrado para factura');
             return;
           }
+          // Factura por correo (Brevo)
+          const { enviarFacturaPago } = require('../services/facturaService');
           const enviado = await enviarFacturaPago(datosPago, afiliado);
           console.log(`[pagoController.create] factura FAC-${new Date().getFullYear()}-${id_pago} → ${enviado ? 'enviada' : 'NO enviada'} (${afiliado.correo})`);
+          // Webhook n8n (Telegram + Google Sheets + WhatsApp futuro)
+          const { notificarPago } = require('../services/n8nWebhookService');
+          await notificarPago({ ...datosPago, fecha_vencimiento }, afiliado);
         } catch (errFactura) {
-          console.error('[pagoController.create] error factura (no afecta el pago):', errFactura.message);
+          console.error('[pagoController.create] error post-pago (no afecta el pago):', errFactura.message);
         }
       })();
 

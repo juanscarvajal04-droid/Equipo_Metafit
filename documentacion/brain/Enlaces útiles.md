@@ -21,6 +21,7 @@
 | Frontend Web | http://localhost:5173 | 5173 |
 | Backend API | http://localhost:3001 | 3001 |
 | phpMyAdmin | http://localhost:8080 | 8080 |
+| n8n | http://localhost:5678 | 5678 |
 | MySQL | localhost | 3307 |
 
 ---

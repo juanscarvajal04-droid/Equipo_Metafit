@@ -1,0 +1,135 @@
+{
+  "name": "MetaFit — Notificaciones Telegram (Staff)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "nuevo-afiliado",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook-afiliado",
+      "name": "Webhook Nuevo Afiliado",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 200]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "factura-pago",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook-pago",
+      "name": "Webhook Pago Registrado",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 420]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "rutina-asignada",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook-rutina",
+      "name": "Webhook Rutina Asignada",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 640]
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body;\nconst af = body.afiliado;\nconst nombre = af.nombre || 'Sin nombre';\nconst correo = af.correo || 'N/A';\nconst doc = af.documento || 'N/A';\nconst obj = af.objetivo || 'No especificado';\n\nconst msg = `🏢 *Nuevo Afiliado — MetaFit*\\n\\n👤 Nombre: *${nombre}*\\n📧 Correo: ${correo}\\n🪪 Documento: ${doc}\\n🎯 Objetivo: ${obj}\\n\\nBienvenido al equipo. 💪`;\n\nreturn [{ json: { chat_id: '8824635784', text: msg, parse_mode: 'Markdown' } }];"
+      },
+      "id": "code-afiliado",
+      "name": "Formato Afiliado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body;\nconst p = body.pago;\nconst af = body.afiliado;\nconst nombre = af.nombre || 'Afiliado';\nconst valor = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(p.valor_pagado);\nconst factura = `FAC-${new Date().getFullYear()}-${String(p.id_pago).padStart(4, '0')}`;\n\nconst msg = `💰 *Pago Registrado — MetaFit*\\n\\n👤 Afiliado: *${nombre}*\\n📋 Factura: ${factura}\\n💵 Valor: *${valor}\\n📅 Fecha: ${p.fecha_pago}\\n💳 Método: ${p.metodo_pago}\\n📆 Vence: ${p.fecha_vencimiento}`;\n\nreturn [{ json: { chat_id: '8824635784', text: msg, parse_mode: 'Markdown' } }];"
+      },
+      "id": "code-pago",
+      "name": "Formato Pago",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 420]
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body;\nconst af = body.afiliado;\nconst c = body.ciclo;\nconst nombre = af.nombre || 'Afiliado';\n\nconst msg = `🏋️ *Rutina Asignada — MetaFit*\\n\\n👤 Afiliado: *${nombre}*\\n📅 Ciclo: ${c.fecha_inicio} → ${c.fecha_fin}\\n\\nSe le ha asignado un nuevo plan de entrenamiento. 💪`;\n\nreturn [{ json: { chat_id: '8824635784', text: msg, parse_mode: 'Markdown' } }];"
+      },
+      "id": "code-rutina",
+      "name": "Formato Rutina",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 640]
+    },
+    {
+      "parameters": {
+        "operation": "sendMessage",
+        "chatId": "8824635784",
+        "text": "={{ $json.text }}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "telegram-send",
+      "name": "Enviar a Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [760, 420],
+      "credentials": {
+        "telegramApi": {
+          "id": "CONFIGURAR_EN_N8N",
+          "name": "MetaFit Telegram Bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Nuevo Afiliado": {
+      "main": [
+        [{ "node": "Formato Afiliado", "type": "main", "index": 0 }]
+      ]
+    },
+    "Webhook Pago Registrado": {
+      "main": [
+        [{ "node": "Formato Pago", "type": "main", "index": 0 }]
+      ]
+    },
+    "Webhook Rutina Asignada": {
+      "main": [
+        [{ "node": "Formato Rutina", "type": "main", "index": 0 }]
+      ]
+    },
+    "Formato Afiliado": {
+      "main": [
+        [{ "node": "Enviar a Telegram", "type": "main", "index": 0 }]
+      ]
+    },
+    "Formato Pago": {
+      "main": [
+        [{ "node": "Enviar a Telegram", "type": "main", "index": 0 }]
+      ]
+    },
+    "Formato Rutina": {
+      "main": [
+        [{ "node": "Enviar a Telegram", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    { "name": "MetaFit" },
+    { "name": "Telegram" }
+  ]
+}

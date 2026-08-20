@@ -1,0 +1,86 @@
+{
+  "name": "MetaFit — Factura por Pago (WhatsApp + Email)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "factura-pago",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-factura",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const pago = $input.first().json.body.pago;\nconst afiliado = $input.first().json.body.afiliado;\n\nconst nombre = afiliado.nombre || 'Afiliado';\nconst correo = afiliado.correo || '';\nconst telefono = afiliado.telefono || '';\nconst valor = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(pago.valor_pagado);\nconst fecha = pago.fecha_pago;\nconst factura = `FAC-${new Date().getFullYear()}-${String(pago.id_pago).padStart(4, '0')}`;\n\n// Formato para WhatsApp (Twilio)\nconst mensajeWhatsApp = `🏋️ *MetaFit — Factura de Membresía*\\n\\nHola ${nombre},\\n\\nTu pago ha sido registrado:\\n\\n📋 Factura: *${factura}*\\n💰 Valor: *${valor}*\\n📅 Fecha: ${fecha}\\n💳 Método: ${pago.metodo_pago}\\n📆 Vence: ${pago.fecha_vencimiento}\\n\\nGracias por tu confianza. 💪\\n_ Sport Gym Sede 80_`;\n\n// Formato para correo Brevo\nconst asunto = `MetaFit — Tu factura ${factura} está lista`;\nconst htmlCorreo = `\n<div style=\"font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;\">\n  <div style=\"background:#e31c25;color:#fff;padding:20px;border-radius:8px 8px 0 0;text-align:center;\">\n    <h1 style=\"margin:0;\">🏋️ MetaFit</h1>\n    <p style=\"margin:5px 0 0;\">Factura de Membresía</p>\n  </div>\n  <div style=\"background:#f8f9fa;padding:20px;border:1px solid #dee2e6;\">\n    <p>Hola <strong>${nombre}</strong>,</p>\n    <p>Tu pago ha sido registrado exitosamente:</p>\n    <table style=\"width:100%;border-collapse:collapse;\">\n      <tr><td style=\"padding:8px;border-bottom:1px solid #dee2e6;\"><strong>Factura:</strong></td><td>${factura}</td></tr>\n      <tr><td style=\"padding:8px;border-bottom:1px solid #dee2e6;\"><strong>Valor:</strong></td><td>${valor}</td></tr>\n      <tr><td style=\"padding:8px;border-bottom:1px solid #dee2e6;\"><strong>Fecha:</strong></td><td>${fecha}</td></tr>\n      <tr><td style=\"padding:8px;border-bottom:1px solid #dee2e6;\"><strong>Método:</strong></td><td>${pago.metodo_pago}</td></tr>\n      <tr><td style=\"padding:8px;\"><strong>Vence:</strong></td><td>${pago.fecha_vencimiento}</td></tr>\n    </table>\n    <p style=\"margin-top:20px;color:#666;\">Gracias por tu confianza. 💪</p>\n  </div>\n  <div style=\"text-align:center;padding:10px;color:#999;font-size:12px;\">\n    Sport Gym Sede 80 — Bogotá, Colombia\n  </div>\n</div>`;\n\nreturn [{\n  json: {\n    nombre, correo, telefono,\n    mensajeWhatsApp,\n    asunto, htmlCorreo,\n    factura, valor, fecha,\n    id_pago: pago.id_pago\n  }\n}];"
+      },
+      "id": "code-formato",
+      "name": "Formatear Mensaje",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.brevo.com/v3/smtp/email",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"sender\": { \"name\": \"MetaFit\", \"email\": \"metafit.sistema@gmail.com\" },\n  \"to\": [{ \"email\": \"{{ $json.correo }}\", \"name\": \"{{ $json.nombre }}\" }],\n  \"subject\": \"{{ $json.asunto }}\",\n  \"htmlContent\": \"{{ $json.htmlCorreo }}\"\n}",
+        "options": {}
+      },
+      "id": "brevo-email",
+      "name": "Enviar Correo Brevo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [680, 200],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "CONFIGURAR_EN_N8N",
+          "name": "Brevo API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"ok\": true, \"factura\": \"{{ $json.factura }}\" }",
+        "options": {}
+      },
+      "id": "respond-webhook",
+      "name": "Respond OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [900, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [{ "node": "Formatear Mensaje", "type": "main", "index": 0 }]
+      ]
+    },
+    "Formatear Mensaje": {
+      "main": [
+        [
+          { "node": "Enviar Correo Brevo", "type": "main", "index": 0 },
+          { "node": "Respond OK", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    { "name": "MetaFit" },
+    { "name": "Pagos" }
+  ]
+}

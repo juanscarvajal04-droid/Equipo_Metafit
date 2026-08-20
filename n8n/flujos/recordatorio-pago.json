@@ -1,0 +1,120 @@
+{
+  "name": "MetaFit — Recordatorio de Pago (WhatsApp + Telegram + Email)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * *"
+            }
+          ]
+        }
+      },
+      "id": "cron-diario",
+      "name": "Cada día 8:00 AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT p.id_pago, p.valor_pagado, p.fecha_vencimiento, p.estado,\n       a.id AS id_afiliado, u.nombres, u.apellidos, u.correo, u.telefono,\n       DATEDIFF(p.fecha_vencimiento, CURDATE()) AS dias_restantes\nFROM PAGO p\nJOIN AFILIADO a ON p.id_afiliado = a.id_usuario\nJOIN USUARIO u ON a.id_usuario = u.id_usuario\nWHERE p.estado = 'Pagado'\n  AND p.fecha_vencimiento <= DATE_ADD(CURDATE(), INTERVAL 3 DAY)\n  AND p.fecha_vencimiento >= CURDATE()\nORDER BY p.fecha_vencimiento ASC;",
+        "options": {}
+      },
+      "id": "mysql-pagos",
+      "name": "Buscar Pagos por Vencer",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2,
+      "position": [460, 300],
+      "credentials": {
+        "mySql": {
+          "id": "CONFIGURAR_EN_N8N",
+          "name": "MySQL MetaFit"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const pagos = $input.all().json;\nif (!pagos || pagos.length === 0) {\n  return [{ json: { skip: true, reason: 'No hay pagos por vencer' } }];\n}\n\nconst resultados = pagos.map(p => {\n  const nombre = `${p.nombres || ''} ${p.apellidos || ''}`.trim();\n  const valor = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(p.valor_pagado);\n  const dias = p.dias_restantes;\n  \n  let urgencia = '';\n  if (dias <= 0) urgencia = '⚠️ *VENCE HOY*';\n  else if (dias === 1) urgencia = '⚠️ *VENCE MAÑANA*';\n  else urgencia = `📅 Vence en *${dias} días*`;\n  \n  const mensaje = `🏋️ *MetaFit — Recordatorio de Pembresía*\\n\\nHola ${nombre},\\n\\nTu membresía está por vencer:\\n\\n${urgencia}\\n💰 Valor: *${valor}*\\n📆 Vence: ${p.fecha_vencimiento}\\n\\nAcércate a la sede para renovar. ¡Te esperamos! 💪\\n_ Sport Gym Sede 80_`;\n\n  return {\n    json: {\n      nombre,\n      correo: p.correo,\n      telefono: p.telefono,\n      id_afiliado: p.id_afiliado,\n      valor,\n      dias,\n      fecha_vencimiento: p.fecha_vencimiento,\n      mensaje,\n      skip: false\n    }\n  };\n});\n\nreturn resultados;"
+      },
+      "id": "code-formato",
+      "name": "Formatear Recordatorios",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.skip }}",
+              "value2": false
+            }
+          ]
+        }
+      },
+      "id": "filter-skip",
+      "name": "¿Hay pagos?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.brevo.com/v3/smtp/email",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"sender\": { \"name\": \"MetaFit\", \"email\": \"metafit.sistema@gmail.com\" },\n  \"to\": [{ \"email\": \"{{ $json.correo }}\", \"name\": \"{{ $json.nombre }}\" }],\n  \"subject\": \"MetaFit — Tu membresía vence pronto\",\n  \"htmlContent\": \"<div style='font-family:Arial;max-width:500px;margin:auto;padding:20px;'><h2 style='color:#e31c25;'>🏋️ MetaFit</h2><p>Hola <strong>{{ $json.nombre }}</strong>,</p><p>Tu membresía vence el <strong>{{ $json.fecha_vencimiento }}</strong>.</p><p style='font-size:18px;'><strong>{{ $json.valor }}</strong></p><p>Acércate a la sede para renovar. 💪</p><hr><p style='color:#999;font-size:11px;'>Sport Gym Sede 80</p></div>\"\n}",
+        "options": {}
+      },
+      "id": "brevo-email",
+      "name": "Correo Recordatorio",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1120, 200],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "CONFIGURAR_EN_N8N",
+          "name": "Brevo API Key"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Cada día 8:00 AM": {
+      "main": [
+        [{ "node": "Buscar Pagos por Vencer", "type": "main", "index": 0 }]
+      ]
+    },
+    "Buscar Pagos por Vencer": {
+      "main": [
+        [{ "node": "Formatear Recordatorios", "type": "main", "index": 0 }]
+      ]
+    },
+    "Formatear Recordatorios": {
+      "main": [
+        [{ "node": "¿Hay pagos?", "type": "main", "index": 0 }]
+      ]
+    },
+    "¿Hay pagos?": {
+      "main": [
+        [{ "node": "Correo Recordatorio", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    { "name": "MetaFit" },
+    { "name": "Recordatorios" }
+  ]
+}
