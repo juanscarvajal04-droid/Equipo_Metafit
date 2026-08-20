@@ -58,12 +58,12 @@
 1. n8n → Settings → Credentials → Add → **Header Auth**
 2. Name: `Brevo API Key`
 3. Header Name: `api-key`
-4. Header Value: `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`
+4. Header Value: *(tu Brevo API Key — ver .env o dashboard Brevo)*
 
 ### Telegram Bot
 1. n8n → Settings → Credentials → Add → **Telegram API**
 2. Name: `MetaFit Telegram Bot`
-3. Access Token: `8705489577:AAF_tlcitOknwTsNRCQs8rMahnS_llBXqJs`
+3. Access Token: *(tu token de @metafit_sport_bot — ver BotFather)*
 
 ### MySQL MetaFit
 1. n8n → Settings → Credentials → Add → **MySQL**
