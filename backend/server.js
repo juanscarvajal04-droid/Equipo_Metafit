@@ -19,34 +19,35 @@ const IS_PROD = process.env.NODE_ENV === 'production';
 
 
 // ── CORS ──────────────────────────────────────────────────────
-// ⚠️ TEMPORAL (pruebas en la red del SENA): CORS abierto a cualquier
-// origen (origin: '*'). Después de la presentación, volver a la lista
-// blanca estricta usando la variable CORS_ORIGINS:
-//
-//   const DEFAULT_CORS_ORIGIN = [
-//     'https://metafit-frontend-78x6.onrender.com',
-//     'http://localhost:5173',
-//     'http://127.0.0.1:5173',
-//   ].join(',');
-//
-//   const corsOrigins = () =>
-//     (process.env.CORS_ORIGINS || DEFAULT_CORS_ORIGIN)
-//       .split(',')
-//       .map((s) => s.trim())
-//       .filter(Boolean);
-//
-//   app.use(cors({
-//     origin(origin, callback) {
-//       if (!origin) return callback(null, true);   // sin Origin: móvil/curl
-//       const allowed = corsOrigins();
-//       if (allowed.includes('*') || allowed.includes(origin)) {
-//         return callback(null, true);              // lista blanca
-//       }
-//       return callback(new Error('CORS no permitido para este origen'));
-//     },
-//     credentials: false,
-//   }));
-app.use(cors({ origin: '*' }));
+// ── CORS ──────────────────────────────────────────────────────
+// Whitelist de orígenes: en desarrollo acepta localhost en cualquier puerto,
+// en producción usa la whitelist de CORS_ORIGINS.
+// Solicitudes sin Origin (móvil, curl, Postman) siempre pasan.
+const DEFAULT_CORS_ORIGIN = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:8081',
+  'http://127.0.0.1:8081',
+  'https://metafit-frontend-78x6.onrender.com',
+].join(',');
+
+const corsOrigins = () =>
+  (process.env.CORS_ORIGINS || DEFAULT_CORS_ORIGIN)
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin) return callback(null, true);
+    const allowed = corsOrigins();
+    if (allowed.includes('*') || allowed.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('CORS no permitido para este origen'));
+  },
+  credentials: false,
+}));
 
 // ── ISO 25000 / 3.1: Helmet — cabeceras HTTP seguras ──────────
 // Desactivamos contentSecurityPolicy para que Swagger UI pueda

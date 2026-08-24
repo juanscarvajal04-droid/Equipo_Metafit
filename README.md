@@ -1,30 +1,31 @@
-<<<<<<< HEAD
-# 🚀 MetaFit - Proyecto Sport Gym Sede 80
-
-Bienvenido a la rama de desarrollo de Sofía Astudillo. 
-
-## 👤 Información del Integrante
-**Nombre:** Sofía Astudillo 
-**Rol:** Desarrolladora Frontend / Miembro del equipo MetaFit 
-**Estado:** Trabajando en la implementación de interfaces de usuario y lógica de gestión. 
-=======
 # 🚀 MetaFit - Sistema de Gestión Deportiva
 
 Bienvenido a la rama de trabajo de la dirección del proyecto. Esta sección es administrada por el líder técnico para garantizar la integridad del código.
 
 ## 👤 Perfil del Integrante
-**Nombre:** Juan Sebastián Carvajal 
-ilidades Técnicas:**
-    * Gestión y mantenimiento de la rama de Producción (`main`)
-    * Integración de código en la rama de Desarrollo (`develop`)
-    * Supervisión de Pull Requests y control de versiones mediante Git Flow
-    * Coordinación de los módulos de Administrador y Recepción 
-
-## 🛠️ Estado de la Rama
-Esta rama se encuentra sincronizada con la base estable de **MetaFit v2.0**. Aquí se realizan las validaciones finales antes de realizar los despliegues a las ramas globales del equipo.
->>>>>>> d0a52660c30914b314f8d2d0e3f16c539b4c8e42
+**Nombre:** Juan Sebastián Carvajal
 
 ---
+
+## 📋 Instalación local (sin Docker)
+
+```bash
+# 1. Clonar
+git clone <repo-url> && cd Equipo_Metafit
+
+# 2. Copiar variables de entorno
+cp .env.example .env
+# (editar .env si necesitas cambiar contraseña de MySQL, etc.)
+
+# 3. Backend
+cd backend && npm install && npm run dev
+
+# 4. Frontend (otra terminal)
+cd frontend_web && npm install && npm run dev
+```
+
+> El frontend usa `VITE_API_URL` (fallback: `http://localhost:3001`).
+> En Docker, `frontend_web/.env.development` ya está configurado automáticamente.
 
 ## 🐳 Levantar el proyecto con Docker
 
@@ -131,31 +132,20 @@ Todos los documentos se encuentran en la carpeta [`documentacion/`](./documentac
 | UptimeRobot | ⏳ Guía lista (`documentacion/UPTIME_ROBOT.md`), monitores manuales |
 | Cloudinary | ✅ Con fallback a disco (activa con 3 env vars) |
 | Storybook | ✅ 5 historias (Badge, Button, Card, Modal, Avatar) tema oscuro |
+| n8n (automatizaciones) | ✅ 4 flujos: pagos, recordatorios, Telegram, Google Sheets |
 
 ---
 
-## ⚠️ CORS abierto temporalmente (pruebas en la red del SENA)
+## 🔒 CORS (lista blanca)
 
-**Estado actual: `app.use(cors({ origin: '*' }))`** en `backend/server.js` + `CORS_ORIGINS="*"`
-en Render. Esto permite cualquier origen para que la demo funcione desde la red del SENA.
+El backend usa una **whitelist de orígenes** — solo permite conexiones desde:
 
-**Después de la presentación hay que RESTRINGIRLO de nuevo** a la lista blanca:
+| Entorno | Orígenes permitidos |
+|---|---|
+| Desarrollo | `localhost:5173`, `127.0.0.1:5173`, `localhost:8081`, `127.0.0.1:8081` |
+| Producción | `metafit-frontend-78x6.onrender.com` + los de desarrollo |
 
-```js
-app.use(cors({
-  origin(origin, callback) {
-    if (!origin) return callback(null, true);   // sin Origin: móvil/curl
-    const allowed = (process.env.CORS_ORIGINS || DEFAULT_CORS_ORIGIN)
-      .split(',').map((s) => s.trim()).filter(Boolean);
-    if (allowed.includes('*') || allowed.includes(origin)) return callback(null, true);
-    return callback(new Error('CORS no permitido para este origen'));
-  },
-  credentials: false,
-}));
-```
-
-El código original completo está comentado en `backend/server.js` (sección CORS).
-Render: `CORS_ORIGINS = https://metafit-frontend-78x6.onrender.com,http://localhost:5173,http://127.0.0.1:5173`
+Configurable vía `CORS_ORIGINS` en `.env` o en Render. Solicitudes sin `Origin` (móvil, curl, Postman) siempre pasan.
 
 ---
 
