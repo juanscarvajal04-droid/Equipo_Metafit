@@ -17,8 +17,9 @@ const app = express();
 
 const IS_PROD = process.env.NODE_ENV === 'production';
 
+// ── Cloudinary: verifica credenciales una sola vez al arrancar ─
+const { verificarCredenciales } = require('./config/cloudinary');
 
-// ── CORS ──────────────────────────────────────────────────────
 // ── CORS ──────────────────────────────────────────────────────
 // Whitelist de orígenes: en desarrollo acepta localhost en cualquier puerto,
 // en producción usa la whitelist de CORS_ORIGINS.
@@ -194,5 +195,8 @@ app.use((err, req, res, next) => {
   // Nunca filtrar stack traces al cliente
   res.status(500).json({ error: 'Error interno del servidor' });
 });
+
+// Verificación asíncrona de Cloudinary (no bloquea el arranque)
+verificarCredenciales();
 
 module.exports = app;

@@ -207,8 +207,10 @@ const AfiliadoController = {
 
       // /me/foto usa el id del token; /:id/foto lo toma del parámetro.
       const id = req.params.id || req.user.sub;
-      // Cloudinary: req.file.path = URL https completa; disco: /uploads/archivo
-      const foto = req.file.path || `/uploads/${req.file.filename}`;
+      // Cloudinary: req.file.path = URL https completa; disco: ruta /app/..., usar relativa.
+      const foto = /^https?:\/\//.test(req.file.path) ? req.file.path : `/uploads/${req.file.filename}`;
+      // Si ya es URL absoluta (Cloudinary), no concatenar el host local.
+      const url = /^https?:\/\//.test(foto) ? foto : `${req.protocol}://${req.get('host')}${foto}`;
 
       const fotoAnterior = await AfiliadoService.getFoto(id);
       const ok = await AfiliadoService.setFoto(id, foto);
@@ -227,7 +229,7 @@ const AfiliadoController = {
       return res.json({
         message: 'Foto de perfil actualizada',
         foto,
-        url: `${req.protocol}://${req.get('host')}${foto}`,
+        url,
       });
     } catch (err) {
       console.error('[afiliadoController.subirFoto]', err);

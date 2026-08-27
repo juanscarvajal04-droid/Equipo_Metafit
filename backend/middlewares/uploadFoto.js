@@ -10,6 +10,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const multer = require('multer');
+const { cloudinary, configurado, FOLDER, publicIdDesdeUrl } = require('../config/cloudinary');
 
 const UPLOADS_DIR = path.join(__dirname, '..', 'uploads');
 
@@ -24,30 +25,17 @@ const fileFilter = (req, file, cb) => {
   return cb(new Error('Solo se permiten imágenes (PNG, JPG, WEBP, GIF)'));
 };
 
-const usarCloudinary = Boolean(
-  process.env.CLOUDINARY_CLOUD_NAME &&
-  process.env.CLOUDINARY_API_KEY &&
-  process.env.CLOUDINARY_API_SECRET
-);
-
 let storage;
 let STORAGE_KIND = 'disk';
 
-if (usarCloudinary) {
+if (configurado) {
   try {
-    const cloudinary = require('cloudinary').v2;
     const { CloudinaryStorage } = require('multer-storage-cloudinary');
-
-    cloudinary.config({
-      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-      api_key: process.env.CLOUDINARY_API_KEY,
-      api_secret: process.env.CLOUDINARY_API_SECRET,
-    });
 
     storage = new CloudinaryStorage({
       cloudinary,
       params: {
-        folder: 'metafit/afiliados',
+        folder: FOLDER,
         allowed_formats: ['png', 'jpg', 'jpeg', 'webp', 'gif'],
         transformation: [{ width: 600, height: 600, crop: 'limit' }],
       },
@@ -76,9 +64,10 @@ const upload = multer({ storage, fileFilter, limits: { fileSize: 5 * 1024 * 1024
 const eliminarFotoAnterior = (foto) => {
   try {
     if (STORAGE_KIND === 'cloudinary' && /^https:\/\//.test(foto)) {
-      const cloudinary = require('cloudinary').v2;
-      const publicId = foto.split('/').slice(-2).join('/').split('?')[0].replace(/\.[a-z]+$/i, '');
-      cloudinary.uploader.destroy(`metafit/afiliados/${publicId.split('/').pop()}`, () => {});
+      const publicId = publicIdDesdeUrl(foto);
+      if (publicId) {
+        cloudinary.uploader.destroy(publicId, () => {});
+      }
       return;
     }
     if (/^\/uploads\//.test(foto)) {

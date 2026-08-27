@@ -479,10 +479,10 @@ Cuando se registra un pago de membresía, el sistema genera automáticamente una
 
 El sistema permite subir una **foto de perfil** a cada afiliado, visible en la web (tabla y detalle) y en la app móvil (perfil propio).
 
-- **Esquema**: columna `AFILIADO.foto VARCHAR(255) NULL` (ruta relativa, p. ej. `/uploads/172...-ab12.png`).
+- **Esquema**: columna `AFILIADO.foto VARCHAR(255) NULL`. Con Cloudinary guarda la **URL pública `https://res.cloudinary.com/...`**; con fallback a disco guarda una ruta relativa (`/uploads/172...-ab12.png`).
 - **Migración automática**: `backend/migrations/migracionFotos.js` se ejecuta al arrancar (`index.js`) y es idempotente: crea la columna si no existe (necesario porque la BD de Render corre por socket local y no hay acceso SQL externo). También limpia los datos temporales de la prueba de factura (`PAGO 43`, `AFILIADO 10`, `USUARIO 10`) si siguen presentes.
-- **Subida**: `multer` (`backend/middlewares/uploadFoto.js`) con almacenamiento en `backend/uploads/`, nombre único (timestamp + hex aleatorio), filtro de tipos (`image/png|jpe?g|webp|gif`) y límite de **5 MB**. Errores de multer se mapean a 400 en el error handler global de `server.js`.
-- **Servido público**: `app.use('/uploads', express.static(...))` en `server.js` (la validación de Content-Type de BUG-003 permite `multipart/form-data`).
+- **Subida**: `multer` (`backend/middlewares/uploadFoto.js`) con almacenamiento **Cloudinary** (carpeta `metafit/afiliados`) o **disco local** como fallback si faltan credenciales. Filtr<de tipos (`image/png|jpe?g|webp|gif`) y límite de **5 MB** (400 en el error handler global de `server.js`).
+- **Servido público**: con Cloudinary las fotos se sirven desde `res.cloudinary.com` (CDN); con disco, `app.use('/uploads', express.static(...))` en `server.js` (la validación de Content-Type de BUG-003 permite `multipart/form-data`).
 - **Endpoints** (en `routes/afiliadoRoutes.js`):
   - `POST /afiliados/me/foto` — el afiliado sube **su propia** foto (solo `requireAuth`).
   - `POST /afiliados/:id/foto` — admin o recepcionista sube la foto de cualquier afiliado (`requireAdminOrRecepcionista`).
@@ -490,7 +490,7 @@ El sistema permite subir una **foto de perfil** a cada afiliado, visible en la w
 - **Modelo**: `afiliadoModel.js` incluye `a.foto` en los `SELECT` de `findAll`/`findById` y agrega `getFoto(id)`/`setFoto(id, ruta)`.
 - **Web** (`frontend_web/src/views/AfiliadosView.jsx`): input de archivo + preview en los modales de crear/editar; avatar circular con la foto (o iniciales de color si no hay) en la tabla y en el detalle. La URL absoluta se arma con `API_BASE_URL` (`services/api.js`).
 - **Móvil** (`movil/src/screens/MiPerfilScreen.js`): el avatar del header muestra la foto de `/afiliados/me` (componente `Avatar` con prop `foto`); al tocar el avatar se abre la galería (`expo-image-picker`) y se sube con FormData a `POST /afiliados/me/foto`, refrescando el perfil al terminar.
-- **Limitación de Render**: las fotos viven en el filesystem efímero de la instancia (`backend/uploads/`); no persisten entre redeploys. Para persistencia real habría que usar un bucket externo (S3/Cloudinary).
+- **Persistencia**: con Cloudinary activo las fotos son **permanentes** (no se pierden en redeploys de Render). El disco local (`backend/uploads/`) queda solo como fallback.
 
 ### Analítica y SEO (Google Search Console + GA4 + GTM)
 
@@ -544,13 +544,16 @@ En GTM hay que crear **4 triggers “Custom Event”** con esos nombres y apunta
 - **Dedupe diario**: tabla `PAGO_RECORDATORIO (id_pago PK, fecha_envio)` — un mismo pago solo recibe 1 recordatorio por día.
 - Arranca en `backend/index.js` (`iniciarCron()`).
 
-### Cloudinary (fotos en la nube, opcional)
+### Cloudinary (fotos permanentes en la nube)
 
-`backend/middlewares/uploadFoto.js` selecciona el storage en caliente:
-
-- Si existen `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY` y `CLOUDINARY_API_SECRET` → **CloudinaryStorage** (carpeta `metafit/afiliados`, formatos png/jpg/jpeg/webp/gif, transformación 600x600 limit).
-- Sin esas variables → **disco local** (`uploads/`) como antes. La URL se guarda en `AFILIADO.foto` (https en Cloudinary, `/uploads/...` en disco).
-- `eliminarFotoAnterior()` borra la versión previa en el storage correcto (destroy por public_id en Cloudinary, unlink en disco).
+- **Configuración centralizada** en `backend/config/cloudinary.js`: inicializa el SDK v2 (secure), expone `configurado`, `FOLDER` (`metafit/afiliados`), `publicIdDesdeUrl(url)` y `verificarCredenciales()` (ping de autenticación al arrancar logueado el estado real).
+- `backend/middlewares/uploadFoto.js` selecciona el storage:
+  - Si existen `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY` y `CLOUDINARY_API_SECRET` → **CloudinaryStorage** (carpeta `metafit/afiliados`, formatos png/jpg/jpeg/webp/gif, transformación 600x600 limit). `req.file.path` = URL https completa.
+  - Sin esas variables → **disco local** (`uploads/`) como fallback.
+- La URL se guarda tal cual en `AFILIADO.foto` (https de res.cloudinary.com) y se devuelve en `{ message, foto, url }`.
+- `eliminarFotoAnterior()` borra la versión previa en el storage correcto (destroy por public_id en Cloudinary usando `publicIdDesdeUrl`, unlink en disco).
+- **Docker**: `docker-compose.yml` pasa `CLOUDINARY_*` al contenedor backend.
+- **Render**: las tres variables se configuran en el servicio (Panel o API) y aplican en el siguiente deploy.
 
 ### Code Climate (calidad de código)
 

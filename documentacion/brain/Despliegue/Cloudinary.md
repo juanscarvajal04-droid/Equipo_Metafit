@@ -6,7 +6,10 @@
 
 ## 🔧 Configuración
 
-Cloudinary almacena las fotos de perfil de los afiliados. Si no está configurado, el sistema usa almacenamiento local en `backend/uploads/`.
+Cloudinary almacena las fotos de perfil de los afiliados de forma **permanente** (CDN). Configuración centralizada en `backend/config/cloudinary.js`. Si las credenciales no están definidas o fallan la autenticación, el sistema cae a disco local (`backend/uploads/`) con un log claro en el arranque.
+
+- Verificación al arranque: `verificarCredenciales()` hace `api.ping()` y loguea el estado (`cloud_name mismatch`, `api_secret mismatch`, `unknown api_key`, etc.).
+- Al probar subidas: un error `cloud_name mismatch` (401) significa que el `cloud_name` NO pertenece a la cuenta de esa API key/secret → revisar el dashboard de Cloudinary.
 
 ---
 
@@ -23,16 +26,19 @@ Cloudinary almacena las fotos de perfil de los afiliados. Si no está configurad
 ## 🔄 Lógica de Selección
 
 ```js
-// middlewares/uploadFoto.js
+// config/cloudinary.js + middlewares/uploadFoto.js
+const { cloudinary, configurado, FOLDER, publicIdDesdeUrl } = require('../config/cloudinary');
 
 // ¿Las 3 variables de entorno están definidas?
-// SÍ → Cloudinary Storage
-//      Folder: metafit/afiliados
+// SÍ → CloudinaryStorage (folder FOLDER = metafit/afiliados)
 //      Transformation: max 600x600, crop limit
 //      Formatos: png, jpg, jpeg, webp, gif
+//      req.file.path devuelve la URL https completa de res.cloudinary.com
 //
 // NO → Disco local (backend/uploads/)
 ```
+
+Las variables `CLOUDINARY_*` se pasan al contenedor backend vía `docker-compose.yml` y se configuran en Render (Panel o API).
 
 ---
 
@@ -58,9 +64,11 @@ module.exports = {
 
 ```js
 // Al subir una foto nueva, se elimina la anterior:
-// - Cloudinary: API destroy por public_id
+// - Cloudinary: API destroy por public_id (extraído con publicIdDesdeUrl)
 // - Local: fs.unlinkSync(ruta)
 ```
+
+El `afiliadoController.subirFoto` además valida: si la foto ya es URL absoluta (https de Cloudinary) la guarda tal cual, sin concatenar el host local.
 
 ---
 
