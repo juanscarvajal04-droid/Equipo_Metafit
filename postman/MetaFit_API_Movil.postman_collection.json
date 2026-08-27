@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "MetaFit API - Movil",
-    "description": "Colección reescrita a partir del código real del backend y de la app móvil (08/2026). Autenticación Bearer {{token}} (rol Afiliado). Incluye perfil, ciclos, progreso diario, hábitos (agua/consumo), restricciones, planes y push token. Base: https://metafit-backend-rr18.onrender.com",
+    "description": "Colección reescrita a partir del código real del backend y de la app móvil (08/2026). Autenticación Bearer {{token}} (rol Afiliado). Incluye perfil, ciclos, progreso diario, hábitos (agua/consumo), restricciones, planes, recuperación de contraseña y push token. Base: https://metafit-backend-rr18.onrender.com",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "MetaFit"
   },
@@ -106,6 +106,160 @@
               "cookie": [],
               "_postman_previewlanguage": "json",
               "body": "{\n  \"error\": \"Correo o contraseña incorrectos\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST /auth/recuperar-password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/recuperar-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "recuperar-password"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"juan@gmail.com\"\n}"
+            },
+            "description": "Solicita recuperación de contraseña desde la app móvil (5 intentos/15 min). Siempre responde 200. En modoPrueba (sin SMTP) incluye el token de 15 min."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"mensaje\": \"Si el correo existe, recibirás un enlace para restablecer tu contraseña\",\n  \"modoPrueba\": true,\n  \"token\": \"eyJ...tokenReset15min\"\n}"
+            },
+            {
+              "name": "429 Too Many Requests",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"Demasiadas solicitudes de recuperación. Intenta en 15 minutos.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST /auth/reset-password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/reset-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "reset-password"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"eyJ...tokenDelCorreoODeModoPrueba\",\n  \"nuevaPassword\": \"NuevaClave123!\"\n}"
+            },
+            "description": "Cambia la contraseña con el token de recuperación (JWT 15 min). Usado por la app móvil tras recuperar-password."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"mensaje\": \"Contraseña actualizada correctamente\"\n}"
+            },
+            {
+              "name": "400 Bad Request - Token malo/expirado",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"error\": \"Token inválido o expirado\"\n}"
             }
           ]
         }
@@ -907,82 +1061,6 @@
               "cookie": [],
               "_postman_previewlanguage": "json",
               "body": "{\n  \"error\": \"Plan nutricional no encontrado para este ciclo\"\n}"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Mis Pagos",
-      "item": [
-        {
-          "name": "GET /afiliados/me/pagos",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/afiliados/me/pagos",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "afiliados",
-                "me",
-                "pagos"
-              ]
-            },
-            "description": "Consulta de pagos del afiliado autenticado. NOTA: en el backend actual esta ruta no existe como tal: se resuelve por GET /afiliados/:id/pagos (staff: Admin/Entrenador/Recepcionista), por lo que con un token de rol Afiliado responde 403 hasta habilitar el acceso del propio afiliado. Se incluye por la especificación de la app móvil; el ejemplo de éxito es la forma real de GET /afiliados/:id/pagos."
-          },
-          "response": [
-            {
-              "name": "200 OK - Success",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{base_url}}"
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json",
-                  "type": "text"
-                }
-              ],
-              "cookie": [],
-              "_postman_previewlanguage": "json",
-              "body": "[\n  {\n    \"id_pago\": 41,\n    \"id_usuario\": 6,\n    \"fecha_pago\": \"2026-08-01\",\n    \"valor_pagado\": 80000.0,\n    \"estado\": \"Pagado\",\n    \"fecha_vencimiento\": \"2026-09-01\",\n    \"observaciones\": null,\n    \"registrado_por\": 1,\n    \"fecha_creacion\": \"2026-08-01T10:00:00.000Z\"\n  }\n]"
-            },
-            {
-              "name": "403 Forbidden - Estado actual del backend",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{base_url}}"
-                }
-              },
-              "status": "Forbidden",
-              "code": 403,
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json",
-                  "type": "text"
-                }
-              ],
-              "cookie": [],
-              "_postman_previewlanguage": "json",
-              "body": "{\n  \"error\": \"Acceso denegado: se requiere rol de staff\"\n}"
             }
           ]
         }
