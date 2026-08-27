@@ -20,7 +20,7 @@ const ROLES = [
 ];
 
 const ROLE_COLOR = {
-  Administrador: "#7c3aed",
+  Administrador: "#e31c25",
   Entrenador:    "#059669",
   Recepcionista: "#2563eb",
 };
@@ -66,7 +66,7 @@ export default function Login() {
       setError(
         status === 400 || status === 401
           ? "Correo o contraseña incorrectos."
-          : "Error de conexión. Verifica que el servidor esté activo en el puerto 3001."
+          : "Error de conexión con el servidor. Revisá tu internet e intentá de nuevo."
       );
       setLoading(false);
     }

@@ -14,6 +14,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
+import { activarPushNotifications } from '../services/notifications';
 import { COLORS, GRADIENTS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../theme';
 
 export default function LoginScreen({ navigation }) {
@@ -33,6 +34,7 @@ export default function LoginScreen({ navigation }) {
     setLoading(true);
     try {
       await login(correo.trim(), contrasena);
+      activarPushNotifications();
     } catch (err) {
       if (!err.response) {
         setError('Error de conexión. Verificá tu conexión a internet e intentá de nuevo.');

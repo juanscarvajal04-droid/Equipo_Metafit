@@ -41,6 +41,14 @@ const AfiliadoService = {
     return affected > 0;
   },
 
+  getFoto: async (id) => {
+    return AfiliadoModel.getFoto(id);
+  },
+
+  setFoto: async (id, foto) => {
+    return AfiliadoModel.setFoto(id, foto);
+  },
+
   delete: async (id) => {
     const affected = await AfiliadoModel.delete(id);
     return affected > 0;

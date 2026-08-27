@@ -27,6 +27,18 @@ Qué cubren (26 tests):
 
 Los archivos de prueba viven junto al código en subcarpetas `__tests__/`. La configuración está en `vite.config.js` (`test.globals`, `environment: 'jsdom'`, `setupFiles: ./src/test/setup.js`).
 
+## Google Analytics / Tag Manager / Search Console
+
+El sitio trae integrados los snippets de Google en `index.html` (GTM + verificación de Search Console). Son **placeholders** que deben reemplazarse por los IDs reales de las cuentas de `metafit.sistema@gmail.com`:
+
+| Servicio | Dónde reemplazar | Valor |
+|---|---|---|
+| Google Tag Manager | `index.html` (2 ocurrencias de `GTM-K6JZS4MG`) | ✅ ya configurado |
+| Google Search Console | `public/google784a94e7c83aeb9e.html` | ✅ verificación por archivo |
+| Google Analytics 4 | Dentro de GTM (tag GA4 Configuration) | Measurement ID `G-81SWBDG2P6` |
+
+> **Importante**: este proyecto usa GA4 **vía GTM** (no gtag.js directo) para evitar doble conteo; la app usa `HashRouter`, y GTM captura los cambios de ruta con el trigger "History Change". Ver `src/utils/analytics.js` para más contexto.
+
 ## React Compiler
 
 The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).

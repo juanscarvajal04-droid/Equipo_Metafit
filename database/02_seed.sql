@@ -127,6 +127,40 @@ VALUES
   (19, 'Jalon al pecho',        'Espalda',  NULL, 'Principiante');
 
 
+-- ── Instrucciones de ejecución (HU43 CA3) ─────────────────────
+-- EJERCICIO.descripcion: instrucciones detalladas del movimiento.
+-- Solo los ejercicios de las rutinas 22-24 (Sofía, ciclo activo) para demostrar la HU.
+-- El resto queda NULL (sin instrucciones disponibles en la app).
+
+UPDATE `EJERCICIO` SET `descripcion` =
+  'Colócate con los pies al ancho de los hombros y la espalda neutra. Baja flexionando rodillas y cadera como si fueras a sentarte, manteniendo el pecho arriba. Empuja con todo el pie para volver a la posición inicial.'
+  WHERE `id_ejercicio` = 1;
+
+UPDATE `EJERCICIO` SET `descripcion` =
+  'Acuéstate en el banco con los pies firmes en el suelo. Baja la barra hasta el pecho con control y empújala hacia arriba hasta extender los brazos, sin bloquear los codos.'
+  WHERE `id_ejercicio` = 2;
+
+UPDATE `EJERCICIO` SET `descripcion` =
+  'De pie o sentado, toma la barra a la altura de los hombros. Empuja hacia arriba hasta extender los brazos y baja con control hasta los hombros.'
+  WHERE `id_ejercicio` = 4;
+
+UPDATE `EJERCICIO` SET `descripcion` =
+  'De pie, con los codos pegados al torso, flexiona los codos levantando las mancuernas hacia los hombros. Baja con control sin balancear el torso.'
+  WHERE `id_ejercicio` = 5;
+
+UPDATE `EJERCICIO` SET `descripcion` =
+  'De pie o sentado, extiende los codos llevando las mancuernas o polea hacia abajo hasta bloquear los brazos. Vuelve a la posición inicial con control.'
+  WHERE `id_ejercicio` = 6;
+
+UPDATE `EJERCICIO` SET `descripcion` =
+  'Recuéstate boca arriba con la espalda apoyada en el banco y la barra o disco sobre la cadera. Empuja con la cadera hacia arriba apretando los glúteos y baja con control.'
+  WHERE `id_ejercicio` = 7;
+
+UPDATE `EJERCICIO` SET `descripcion` =
+  'De pie, da un paso largo hacia adelante y baja hasta que ambas rodillas formen 90 grados. Empuja con el pie delantero para volver y alterna las piernas.'
+  WHERE `id_ejercicio` = 9;
+
+
 -- ============================================================================================================================
 -- BLOQUE 4 — CATALOGO DE ALIMENTOS (macros por 100g)
 -- Originado en JSON.alimentos[]. calorias_calculadas DESCARTADA (es campo derivado -> VIEW).
@@ -473,6 +507,23 @@ VALUES
   (24, 1, 1, 4, 12),  -- Sentadilla
   (24, 2, 7, 3, 12),  -- Hip thrust
   (24, 3, 6, 3, 15);  -- Extension de triceps
+
+
+-- ── Peso y descanso por ejercicio en la rutina (HU43 CA2) ────
+-- Configuración del ejercicio DENTRO de la rutina de Sofía (ciclo activo, id_ciclo=8).
+-- peso_kg NULL = ejercicio a peso corporal. descanso_seg en segundos.
+
+UPDATE `RUTINA_EJERCICIO` SET `peso_kg` = 20.00, `descanso_seg` =  90 WHERE `id_rutina` = 22 AND `orden` = 1;  -- Press de banca
+UPDATE `RUTINA_EJERCICIO` SET `peso_kg` = 25.00, `descanso_seg` =  90 WHERE `id_rutina` = 22 AND `orden` = 2;  -- Sentadilla
+UPDATE `RUTINA_EJERCICIO` SET `peso_kg` =  8.00, `descanso_seg` =  60 WHERE `id_rutina` = 22 AND `orden` = 3;  -- Curl de biceps
+
+UPDATE `RUTINA_EJERCICIO` SET `peso_kg` = 12.00, `descanso_seg` =  60 WHERE `id_rutina` = 23 AND `orden` = 1;  -- Extension de triceps
+UPDATE `RUTINA_EJERCICIO` SET `peso_kg` = 20.00, `descanso_seg` =  90 WHERE `id_rutina` = 23 AND `orden` = 2;  -- Zancadas
+UPDATE `RUTINA_EJERCICIO` SET `peso_kg` = 15.00, `descanso_seg` =  90 WHERE `id_rutina` = 23 AND `orden` = 3;  -- Press militar
+
+UPDATE `RUTINA_EJERCICIO` SET `peso_kg` = 25.00, `descanso_seg` =  90 WHERE `id_rutina` = 24 AND `orden` = 1;  -- Sentadilla
+UPDATE `RUTINA_EJERCICIO` SET `peso_kg` = 30.00, `descanso_seg` = 120 WHERE `id_rutina` = 24 AND `orden` = 2;  -- Hip thrust
+UPDATE `RUTINA_EJERCICIO` SET `peso_kg` = 12.00, `descanso_seg` =  60 WHERE `id_rutina` = 24 AND `orden` = 3;  -- Extension de triceps
 
 
 -- ============================================================================================================================

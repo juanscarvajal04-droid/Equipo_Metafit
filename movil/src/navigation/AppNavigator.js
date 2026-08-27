@@ -6,6 +6,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import LandingScreen from '../screens/LandingScreen';
 import LoginScreen from '../screens/LoginScreen';
 import RecuperarPasswordScreen from '../screens/RecuperarPasswordScreen';
@@ -69,13 +70,16 @@ function MainTabs() {
 
 export default function AppNavigator() {
   const { token, loading } = useAuth();
+  const { isDark } = useTheme();
 
   if (loading) {
     return <LoadingScreen />;
   }
 
+  // key={isDark ? 'd' : 'l'} fuerza un remontaje al cambiar de tema:
+  // todas las pantallas se re-renderizan y leen la paleta ya aplicada.
   return (
-    <NavigationContainer>
+    <NavigationContainer key={isDark ? 'd' : 'l'}>
       {token ? (
         <MainTabs key="main-tabs" />
       ) : (

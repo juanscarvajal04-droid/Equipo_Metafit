@@ -112,17 +112,9 @@ describe('API Integration — Catálogos Filtrados', () => {
     expect(res.status).toBe(401);
   });
 
-  // ── ISO 25010 · Seguridad: CORS con lista blanca ──────────────
-  test('Origen ajeno a la lista blanca recibe 403 CORS', async () => {
-    const res = await request(app)
-      .get('/health')
-      .set('Origin', 'https://evil.example.com')
-      .expect('Content-Type', /json/);
-
-    expect(res.status).toBe(403);
-    expect(res.body.error).toMatch(/CORS/);
-  });
-
+  // ── ISO 25010 · Seguridad: CORS ───────────────────────────────
+  // ⚠️ TEMPORAL (pruebas en la red del SENA): CORS abierto (origin: '*').
+  // Al restaurar la lista blanca, reactivar el test 'Origen ajeno recibe 403'.
   test('Origen de la lista blanca recibe headers CORS válidos', async () => {
     process.env.CORS_ORIGINS = 'https://metafit-frontend-78x6.onrender.com';
     const res = await request(app)
@@ -131,7 +123,7 @@ describe('API Integration — Catálogos Filtrados', () => {
 
     expect(res.status).toBe(200);
     expect(res.headers['access-control-allow-origin'])
-      .toBe('https://metafit-frontend-78x6.onrender.com');
+      .toMatch(/\*|https:\/\/metafit-frontend-78x6\.onrender\.com/);
   });
 
   // ── ISO 25010 · Seguridad: RBAC en mutaciones de afiliados ────

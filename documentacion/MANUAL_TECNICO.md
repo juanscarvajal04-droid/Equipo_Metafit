@@ -474,3 +474,105 @@ Cuando se registra un pago de membresía, el sistema genera automáticamente una
 - **Envío**: prioridad API REST Brevo (HTTPS) con fallback a SMTP (nodemailer), igual que la recuperación de contraseña.
 - **Aislamiento de fallos**: el correo es un extra — si la factura falla (servicio, red, plantilla), el pago queda registrado igualmente y solo se loguea el error (`[facturaService]`, `[pagoController.create]`).
 - **Verificado en producción (ago 2026)**: pago real id 43 → correo entregado (eventos Brevo `request`/`delivered`/`opened`) hacia `metafit.sistema@gmail.com`.
+
+### Fotos de perfil de afiliados
+
+El sistema permite subir una **foto de perfil** a cada afiliado, visible en la web (tabla y detalle) y en la app móvil (perfil propio).
+
+- **Esquema**: columna `AFILIADO.foto VARCHAR(255) NULL`. Con Cloudinary guarda la **URL pública `https://res.cloudinary.com/...`**; con fallback a disco guarda una ruta relativa (`/uploads/172...-ab12.png`).
+- **Migración automática**: `backend/migrations/migracionFotos.js` se ejecuta al arrancar (`index.js`) y es idempotente: crea la columna si no existe (necesario porque la BD de Render corre por socket local y no hay acceso SQL externo). También limpia los datos temporales de la prueba de factura (`PAGO 43`, `AFILIADO 10`, `USUARIO 10`) si siguen presentes.
+- **Subida**: `multer` (`backend/middlewares/uploadFoto.js`) con almacenamiento **Cloudinary** (carpeta `metafit/afiliados`) o **disco local** como fallback si faltan credenciales. Filtr<de tipos (`image/png|jpe?g|webp|gif`) y límite de **5 MB** (400 en el error handler global de `server.js`).
+- **Servido público**: con Cloudinary las fotos se sirven desde `res.cloudinary.com` (CDN); con disco, `app.use('/uploads', express.static(...))` en `server.js` (la validación de Content-Type de BUG-003 permite `multipart/form-data`).
+- **Endpoints** (en `routes/afiliadoRoutes.js`):
+  - `POST /afiliados/me/foto` — el afiliado sube **su propia** foto (solo `requireAuth`).
+  - `POST /afiliados/:id/foto` — admin o recepcionista sube la foto de cualquier afiliado (`requireAdminOrRecepcionista`).
+  - Ambos devuelven `{ message, foto, url }`; el controller borra (best effort) el archivo de la foto anterior y el archivo recién subido si el afiliado no existe.
+- **Modelo**: `afiliadoModel.js` incluye `a.foto` en los `SELECT` de `findAll`/`findById` y agrega `getFoto(id)`/`setFoto(id, ruta)`.
+- **Web** (`frontend_web/src/views/AfiliadosView.jsx`): input de archivo + preview en los modales de crear/editar; avatar circular con la foto (o iniciales de color si no hay) en la tabla y en el detalle. La URL absoluta se arma con `API_BASE_URL` (`services/api.js`).
+- **Móvil** (`movil/src/screens/MiPerfilScreen.js`): el avatar del header muestra la foto de `/afiliados/me` (componente `Avatar` con prop `foto`); al tocar el avatar se abre la galería (`expo-image-picker`) y se sube con FormData a `POST /afiliados/me/foto`, refrescando el perfil al terminar.
+- **Persistencia**: con Cloudinary activo las fotos son **permanentes** (no se pierden en redeploys de Render). El disco local (`backend/uploads/`) queda solo como fallback.
+
+### Analítica y SEO (Google Search Console + GA4 + GTM)
+
+El frontend web incluye los snippets de Google en `frontend_web/index.html`, todos asociados a `metafit.sistema@gmail.com`:
+
+- **Google Tag Manager (GTM)**: snippet principal en el `<head>` (lo más arriba posible) + iframe `noscript` al inicio del `<body>`. Container ID real: **`GTM-K6JZS4MG`**.
+- **Google Search Console**: verificación por **archivo HTML** `frontend_web/public/google784a94e7c83aeb9e.html` (servido en `https://metafit-frontend-78x6.onrender.com/google784a94e7c83aeb9e.html`, método elegido al agregar la propiedad de tipo Prefijo de URL).
+- **Google Analytics 4 (GA4)**: **NO** se incrusta gtag.js directo — se configura como **tag dentro de GTM** (consideración: el tag GA4 Configuration / Google Tag con el Measurement ID `G-XXXXXXXX`). Se evita el doble conteo de pageviews.
+- **SPA / HashRouter**: la app usa `HashRouter` (rutas `#/...`). GTM captura los cambios de ruta automáticamente con el trigger **"History Change"** (incluye cambios de hash), por lo que **no hay pageviews manuales** en el código (`frontend_web/src/utils/analytics.js` documenta esto y deja a mano una función `pageview()` comentada y lista por si algún día se migra a gtag.js directo; `App.jsx` no se modifica).
+- **Verificación**: en Search Console clic en "Verificar" tras publicar el meta tag; el estado del sitio se revisa en "Revisión de índice". En GTM, publicar el contenedor (botón **Enviar**) para que las etiquetas de GA4 queden activas. En GA4, el tráfico se ve en Tiempo real (En vivo) al entrar al sitio.
+- **Placeholders**: `G-81SWBDG2P6` (GA4) se configura **dentro de GTM** (no está en el código).
+
+## 1.6 Extras "1000/10" (mejoras de nivel)
+
+### Modo claro/oscuro (web + móvil)
+
+- **Web** (`frontend_web/src/utils/theme.js` + `index.css`): el tema se persiste en `localStorage` (`metafit_theme`, default `dark`). Se aplica al `<html>` vía `data-theme` en `main.jsx` (antes del render). Variables CSS globales `--mf-bg`, `--mf-bg-grad`, `--mf-sidebar`, `--mf-border`, `--mf-text`, `--mf-muted`, `--mf-accent` con paleta clara en `:root[data-theme='light']`; los módulos del shell (`AppLayout`, `Header`, `Sidebar`, `Footer`) las consumen. El toggle ☀️/🌙 vive en `Header.jsx` (botón `#btn-tema`) y re-renderiza el estado local.
+- **Móvil** (`movil/src/context/ThemeContext.jsx`): decisión persistida en `AsyncStorage` (`metafit_theme_movil`), default = seguir el tema del sistema (`useColorScheme`). `swapPalette(isDark)` muta el objeto `COLORS` in-place (todos los consumidores comparten la referencia) y `AppNavigator` fuerza el remontaje con `key={isDark?'d':'l'}` para que todas las pantallas lean la paleta aplicada. Toggle en el header de `MiPerfilScreen`.
+
+### Eventos de analítica (GA4 vía GTM dataLayer)
+
+`frontend_web/src/utils/analytics.js` exporta `trackEvent(eventName, params)`, que hace `window.dataLayer.push({event, ...params})` con try/catch (la analítica nunca rompe la app). Eventos implementados:
+
+| Evento | Lugar | Params |
+|---|---|---|
+| `metaFit_afiliado_creado` | `AfiliadosView.jsx` (handleCrear OK) | `rol_creador` |
+| `metaFit_rutina_asignada` | `RutinasView.jsx` (asignación OK) | `afiliado_id` |
+| `metaFit_dieta_asignada` | `DietasView.jsx` (asignación OK) | `afiliado_id` |
+| `metaFit_apk_descargado` | `LandingPage.jsx` (botón APK) | — |
+
+En GTM hay que crear **4 triggers “Custom Event”** con esos nombres y apuntarlos a un tag GA4 (Measurement ID `G-81SWBDG2P6`).
+
+### Notificaciones push (Expo Push Service)
+
+- **Columna** `USUARIO.push_token VARCHAR(255) NULL`, creada por migración de boot idempotente `backend/migrations/migracionPushToken.js`.
+- **Endpoint**: `PUT /usuarios/me/push-token` (`requireAuth`) → `UsuarioService.guardarPushToken(id, token)`.
+- **Servicio**: `backend/services/pushService.js` con `sendPush()`, `getPushToken()` y `enviarPushAUsuarioDelCiclo()`. Usa la API REST de Expo (`https://exp.host/--/api/v2/push/send`) con fetch — sin SDK pesado. Nunca lanza.
+- **Trigger**: al crear plan de entrenamiento (`POST /planes/entrenamiento`) → push "🏋️ Nueva rutina asignada"; al crear plan nutricional (`POST /planes/nutricional`) → push "🥗 Nueva dieta asignada" (`planController`).
+- **Móvil**: `movil/src/services/notifications.js` — `expo-notifications` con handler de banners, permisos, obtención del token (`getExpoPushTokenAsync` con `extra.eas.projectId` de `app.json`) y registro en el backend. Se activa tras el login (`LoginScreen`) y de forma idempotente en `MiPerfilScreen`.
+- **Avísame**: para probar de punta a punta instala el APK, inicia sesión y pide que te asignen una rutina desde el panel web.
+
+### Correo de bienvenida (Brevo)
+
+- Servicio compartido `backend/services/correoService.js`: API REST Brevo (`api.brevo.com/v3/smtp/email`) con fallback SMTP (nodemailer). Devuelve true/false, nunca lanza.
+- `backend/services/bienvenidaService.js` + plantilla `backend/templates/bienvenida-afiliado.html` (estilo 600px de marca): credenciales de acceso (correo + contraseña temporal `MF_<doc>@2025` si no se define una).
+- Se dispara fire-and-forget en `afiliadoController.create`; la creación del afiliado nunca depende del correo.
+
+### Recordatorio automático de pagos (cron)
+
+- `backend/cron/recordatorioPagos.js` con **node-cron**: `0 * * * *` (cada hora). Consulta pagos `estado='Pagado'` con `fecha_vencimiento` dentro de los próximos **3 días** y envía la plantilla `backend/templates/recordatorio-pago.html`.
+- **Dedupe diario**: tabla `PAGO_RECORDATORIO (id_pago PK, fecha_envio)` — un mismo pago solo recibe 1 recordatorio por día.
+- Arranca en `backend/index.js` (`iniciarCron()`).
+
+### Cloudinary (fotos permanentes en la nube)
+
+- **Configuración centralizada** en `backend/config/cloudinary.js`: inicializa el SDK v2 (secure), expone `configurado`, `FOLDER` (`metafit/afiliados`), `publicIdDesdeUrl(url)` y `verificarCredenciales()` (ping de autenticación al arrancar logueado el estado real).
+- `backend/middlewares/uploadFoto.js` selecciona el storage:
+  - Si existen `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY` y `CLOUDINARY_API_SECRET` → **CloudinaryStorage** (carpeta `metafit/afiliados`, formatos png/jpg/jpeg/webp/gif, transformación 600x600 limit). `req.file.path` = URL https completa.
+  - Sin esas variables → **disco local** (`uploads/`) como fallback.
+- La URL se guarda tal cual en `AFILIADO.foto` (https de res.cloudinary.com) y se devuelve en `{ message, foto, url }`.
+- `eliminarFotoAnterior()` borra la versión previa en el storage correcto (destroy por public_id en Cloudinary usando `publicIdDesdeUrl`, unlink en disco).
+- **Docker**: `docker-compose.yml` pasa `CLOUDINARY_*` al contenedor backend.
+- **Render**: las tres variables se configuran en el servicio (Panel o API) y aplican en el siguiente deploy.
+
+### Code Climate (calidad de código)
+
+- `.codeclimate.yml` en la raíz: umbrales de complejidad/duplicación/líneas por archivo, exclusión de tests/builds/plantillas y plugins eslint + duplication + fixme.
+- **Requisito manual**: el repo debe ser **público** en GitHub y entrar con la cuenta del equipo a [codeclimate.com](https://codeclimate.com) → "Add repository" una sola vez (la API del servicio no permite crearlos automáticamente). Informe: https://codeclimate.com/github/juanscarvajal04-droid/Equipo_Metafit
+
+### GitHub Actions (CI/CD)
+
+- `.github/workflows/ci.yml`:
+  - **CI** (push a `main`/`feature/juan-carvajal` y PRs): Node 20 + `npm ci` + `npm test` en backend (25), frontend web (30 + build) y móvil (19).
+  - **CD** (push a `main`, tras CI verde): deploy automático a Render vía API (`POST /services/{id}/deploys`) para backend `srv-d9ieq2rtqb8s738q2180` y frontend `srv-d9kbkdm1egvs7385ofu0`. Requiere el secret `RENDER_API_TOKEN` en el repo.
+- La rama `feature/juan-carvajal` además desplega directo en Render por su auto-deploy (push = deploy).
+
+### UptimeRobot (monitoreo)
+
+Guía completa en `documentacion/UPTIME_ROBOT.md`: monitores HTTPS recomendados (backend `/health`, frontend y APK), configuración manual en el dashboard (la API gratuita no crea monitores), contactos de alerta y respuestas ante caída.
+
+### Storybook (biblioteca de componentes)
+
+- Storybook 10 (`npx storybook@latest init`) en `frontend_web` con addons a11y/docs/chromatic.
+- Historias en `frontend_web/src/stories/metaFit.stories.jsx` (5): **Badge, Button, Card, Modal, Avatar** — tema oscuro MetaFit forzado desde `.storybook/preview.jsx` (decorador `data-theme="dark"` + CSS propio `src/stories/metaFit.css`).
+- Scripts: `npm run storybook` (dev en :6006) y `npm run build-storybook` (build estático validado en CI local).

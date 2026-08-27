@@ -11,6 +11,10 @@ jest.mock('../../context/AuthContext', () => ({
   useAuth: () => ({ login: mockLogin }),
 }));
 
+jest.mock('../../services/notifications', () => ({
+  activarPushNotifications: jest.fn().mockResolvedValue(null),
+}));
+
 const navigation = { navigate: jest.fn(), replace: jest.fn() };
 
 describe('<LoginScreen />', () => {

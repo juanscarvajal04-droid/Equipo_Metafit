@@ -6,23 +6,31 @@
 'use strict';
 
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const multer = require('multer');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger');
 const app = express();
 
 const IS_PROD = process.env.NODE_ENV === 'production';
 
+// ── Cloudinary: verifica credenciales una sola vez al arrancar ─
+const { verificarCredenciales } = require('./config/cloudinary');
 
 // ── CORS ──────────────────────────────────────────────────────
-// Lista blanca estricta desde CORS_ORIGINS (coma-separada, sin espacios).
-// En producción Render: "https://metafit-frontend-78x6.onrender.com"
-// Si CORS_ORIGINS está vacío, se usa el frontend oficial como default.
-// Requests SIN Origin (app móvil, curl, server-to-server) se permiten.
-// Cualquier otro origen → callback(error) → el error handler responde 403.
-const DEFAULT_CORS_ORIGIN = 'https://metafit-frontend-78x6.onrender.com';
+// Whitelist de orígenes: en desarrollo acepta localhost en cualquier puerto,
+// en producción usa la whitelist de CORS_ORIGINS.
+// Solicitudes sin Origin (móvil, curl, Postman) siempre pasan.
+const DEFAULT_CORS_ORIGIN = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:8081',
+  'http://127.0.0.1:8081',
+  'https://metafit-frontend-78x6.onrender.com',
+].join(',');
 
 const corsOrigins = () =>
   (process.env.CORS_ORIGINS || DEFAULT_CORS_ORIGIN)
@@ -32,10 +40,10 @@ const corsOrigins = () =>
 
 app.use(cors({
   origin(origin, callback) {
-    if (!origin) return callback(null, true);   // sin Origin: móvil/curl
+    if (!origin) return callback(null, true);
     const allowed = corsOrigins();
     if (allowed.includes('*') || allowed.includes(origin)) {
-      return callback(null, true);              // lista blanca
+      return callback(null, true);
     }
     return callback(new Error('CORS no permitido para este origen'));
   },
@@ -56,12 +64,13 @@ app.use(express.urlencoded({ extended: true, limit: '50kb' }));
 // Los endpoints POST, PUT y PATCH deben recibir JSON.
 // Sin esta validación, un body enviado como text/plain o form-data
 // resulta en req.body = undefined y errores silenciosos difíciles de depurar.
-// Excepción: rutas de Swagger UI realizan requests internos sin application/json.
+// Excepciones: rutas de Swagger UI (requests internos) y POST /afiliados/.../foto
+//              que llegan como multipart/form-data (multer).
 app.use((req, res, next) => {
   const isSwaggerPath = req.path.startsWith('/api-docs') || req.path.startsWith('/swagger');
   if (!isSwaggerPath && ['POST', 'PUT', 'PATCH'].includes(req.method)) {
     const ct = req.headers['content-type'] || '';
-    if (!ct.includes('application/json')) {
+    if (!(ct.includes('application/json') || ct.includes('multipart/form-data'))) {
       return res.status(415).json({
         error: 'Content-Type debe ser application/json',
       });
@@ -83,6 +92,10 @@ const loginLimiter = rateLimit({
   message: { error: 'Demasiados intentos de inicio de sesión. Intenta nuevamente en 15 minutos.' },
   skipSuccessfulRequests: true,         // los logins exitosos no cuentan contra el límite
 });
+
+// ── Archivos subidos (fotos de perfil) ────────────────────────
+// Sirve backend/uploads/ bajo la ruta pública /uploads.
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ── Rutas ──────────────────────────────────────────────────────
 const authRoutes = require('./routes/authRoutes');
@@ -166,8 +179,24 @@ app.use((err, req, res, next) => {
     return res.status(400).json({ error: 'JSON malformado en el body' });
   }
 
+  // Error de contenido no permitido por multer (tipo de archivo)
+  if (err.message && err.message.startsWith('Solo se permiten')) {
+    return res.status(400).json({ error: err.message });
+  }
+
+  // Error de multer (tamaño, etc.)
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ error: 'La imagen supera el tamaño máximo de 5 MB' });
+    }
+    return res.status(400).json({ error: 'Error al procesar la imagen' });
+  }
+
   // Nunca filtrar stack traces al cliente
   res.status(500).json({ error: 'Error interno del servidor' });
 });
+
+// Verificación asíncrona de Cloudinary (no bloquea el arranque)
+verificarCredenciales();
 
 module.exports = app;

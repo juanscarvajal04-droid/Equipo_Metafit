@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 /**
  * HomeRedirect — Redirige al usuario a la página de inicio correcta según su rol.
  *
- * Administrador → /dashboard  (acceso total)
+ * Administrador → /dashboard  (módulos completos)
  * Recepcionista → /afiliados  (gestión de membresías)
  * Entrenador    → /rutinas    (su módulo principal; /afiliados es solo lectura para él)
  *

@@ -1,0 +1,127 @@
+{
+  "name": "MetaFit — Google Sheets (Registro Automático)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "sheets-nuevo-afiliado",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook-afiliado-sheets",
+      "name": "Webhook Afiliado",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 200]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "sheets-pago",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook-pago-sheets",
+      "name": "Webhook Pago",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 420]
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body;\nconst af = body.afiliado;\nconst now = new Date().toISOString().split('T')[0];\n\nreturn [{\n  json: {\n    Fecha: now,\n    Nombre: af.nombre || '',\n    Correo: af.correo || '',\n    Documento: af.documento || '',\n    Objetivo: af.objetivo || '',\n    Telefono: af.telefono || '',\n    Evento: 'Nuevo Afiliado'\n  }\n}];"
+      },
+      "id": "code-afiliado",
+      "name": "Formato Afiliado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body;\nconst p = body.pago;\nconst af = body.afiliado;\nconst now = new Date().toISOString().split('T')[0];\nconst valor = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(p.valor_pagado);\n\nreturn [{\n  json: {\n    Fecha: now,\n    Afiliado: af.nombre || '',\n    Correo: af.correo || '',\n    Valor: valor,\n    Metodo: p.metodo_pago || '',\n    Estado: p.estado || 'Pagado\",\n    Vence: p.fecha_vencimiento || '',\n    Evento: 'Pago Registrado'\n  }\n}];"
+      },
+      "id": "code-pago",
+      "name": "Formato Pago",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 420]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "__rl": true, "mode": "list", "value": "CONFIGURAR_ID_DE_GOOGLE_SHEET" },
+        "sheetName": { "__rl": true, "mode": "list", "value": "Afiliados" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": "={{ JSON.stringify($json) }}"
+        },
+        "options": {}
+      },
+      "id": "sheets-afiliado",
+      "name": "Sheet: Afiliados",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [760, 200],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "CONFIGURAR_EN_N8N",
+          "name": "Google Sheets MetaFit"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "__rl": true, "mode": "list", "value": "CONFIGURAR_ID_DE_GOOGLE_SHEET" },
+        "sheetName": { "__rl": true, "mode": "list", "value": "Pagos" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": "={{ JSON.stringify($json) }}"
+        },
+        "options": {}
+      },
+      "id": "sheets-pago",
+      "name": "Sheet: Pagos",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [760, 420],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "CONFIGURAR_EN_N8N",
+          "name": "Google Sheets MetaFit"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Afiliado": {
+      "main": [
+        [{ "node": "Formato Afiliado", "type": "main", "index": 0 }]
+      ]
+    },
+    "Webhook Pago": {
+      "main": [
+        [{ "node": "Formato Pago", "type": "main", "index": 0 }]
+      ]
+    },
+    "Formato Afiliado": {
+      "main": [
+        [{ "node": "Sheet: Afiliados", "type": "main", "index": 0 }]
+      ]
+    },
+    "Formato Pago": {
+      "main": [
+        [{ "node": "Sheet: Pagos", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    { "name": "MetaFit" },
+    { "name": "Google Sheets" }
+  ]
+}

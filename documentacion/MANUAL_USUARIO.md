@@ -164,11 +164,14 @@
 3. Completar el formulario:
    - **Datos personales**: Nombres, Apellidos, Correo, Documento de identidad
    - **Datos físicos**: Fecha de nacimiento, Sexo, Teléfono, Dirección, Estatura (cm)
+   - **Foto de perfil** (opcional): Seleccionar una imagen (JPG, PNG, WEBP o GIF, máx. 5 MB) — se verá en la tabla, en el detalle y en la app del afiliado
    - **Restricciones médicas** (opcional): Escribir condiciones separadas por coma
 4. Hacer clic en **"Guardar"**
 5. El sistema genera automáticamente:
    - Contraseña inicial: `MF_{documento}@2025`
    - Ciclo inactivo (el entrenador lo activará)
+
+> 💡 **Foto de perfil**: el recepcionista o administrador puede subir o cambiar la foto de un afiliado en cualquier momento desde el modal **"Editar"** (campo "Foto de perfil"). Si no hay foto, se muestra un avatar circular con la inicial del nombre.
 
 ### Editar Datos de Afiliado
 
@@ -397,11 +400,12 @@ La pantalla de bienvenida incluye las siguientes secciones (desplazar hacia abaj
 
 1. Pestaña **"Perfil"** (icono 👤)
 2. Verá:
-   - **Avatar** con inicial y badge de estado (Activo/Inactivo)
+   - **Avatar** con foto de perfil (si no tiene foto, se muestra la inicial) y badge de estado (Activo/Inactivo)
    - **Datos personales**: Correo, documento, fecha de nacimiento, sexo, teléfono
    - **Información física**: Estatura, objetivo físico actual, nivel de experiencia
    - **Restricciones médicas** (si tiene)
-3. Para cerrar sesión: hacer clic en **"Cerrar sesión"** al final de la página
+3. Para **cambiar la foto de perfil**: tocar el avatar → elegir una imagen de la galería → se sube automáticamente y el perfil se actualiza
+4. Para cerrar sesión: hacer clic en **"Cerrar sesión"** al final de la página
 
 ### Consultar Rutina Asignada
 
@@ -528,3 +532,26 @@ El precio de la membresía es configurable por el Administrador desde el Dashboa
 | **3FN** | Tercera Forma Normal (diseño de base de datos sin redundancias) |
 | **JWT** | JSON Web Token (método de autenticación seguro) |
 | **bcrypt** | Algoritmo de hash para contraseñas |
+
+---
+
+## 2.10 Novedades "1000/10" para el usuario
+
+### ¿Cómo cambio entre modo claro y oscuro?
+
+- **En la web**: botón **☀️/🌙** en la barra superior (junto a la campana de notificaciones). La preferencia queda guardada para tus próximas visitas.
+- **En la app móvil**: botón **☀️/🌙** en la esquina superior derecha de la pantalla de **Perfil**. Por defecto sigue el tema del teléfono.
+
+### ¿Llegan notificaciones push al celular?
+
+Sí. Al iniciar sesión en la app se pide permiso para notificaciones. Cuando tu entrenador te asigne una **rutina** o una **dieta**, la app te avisa al instante ("🏋️ Nueva rutina asignada" / "🥗 Nueva dieta asignada"). Si denegaste el permiso, puedes activarlo en los ajustes del teléfono y volver a entrar a la app.
+
+### ¿Qué correos automáticos recibo?
+
+- **Bienvenida**: al ser registrado como afiliado te llega tu correo de bienvenida con tus credenciales de acceso (correo y contraseña temporal).
+- **Factura**: al pagar la mensualidad recibes tu factura.
+- **Recordatorio de pago**: si tu mensualidad vence en los próximos 3 días, recibes un recordatorio automático para que pases a renovarla.
+
+### ¿Dónde se guardan mis datos?
+
+Las fotos de perfil, tus planes y tu historial se sincronizan con el servidor de MetaFit. Foto de perfil: súbela desde el portal web o desde la app (Perfil → tocar la foto → galería). El sistema cuida que solo se acepten imágenes de hasta 5 MB.

@@ -5,6 +5,7 @@ const express              = require('express');
 const router               = express.Router();
 const AfiliadoController   = require('../controllers/afiliadoController');
 const { requireAuth, requireAdmin, requireAdminOrEntrenador, requireAdminOrRecepcionista, requireStaff } = require('../middlewares/auth');
+const { uploadFoto }       = require('../middlewares/uploadFoto');
 
 /**
  * @swagger
@@ -269,6 +270,92 @@ router.patch('/:id', requireAuth, requireAdminOrRecepcionista, AfiliadoControlle
  *         $ref: '#/components/responses/InternalError'
  */
 router.delete('/:id', requireAuth, requireAdmin, AfiliadoController.delete);
+
+// ─────────────────────────────────────────────────────────────
+// FOTO DE PERFIL
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * @swagger
+ * /afiliados/me/foto:
+ *   post:
+ *     summary: Subir mi foto de perfil (afiliado autenticado)
+ *     description: >
+ *       Multipart/form-data, campo "foto" (PNG/JPG/WEBP/GIF, máx. 5 MB).
+ *       El archivo queda en backend/uploads y AFILIADO.foto guarda la ruta relativa.
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               foto:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Foto actualizada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message: { type: string }
+ *                 foto: { type: string }
+ *                 url: { type: string }
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.post('/me/foto', requireAuth, uploadFoto, AfiliadoController.subirFoto);
+
+/**
+ * @swagger
+ * /afiliados/{id}/foto:
+ *   post:
+ *     summary: Subir foto de perfil de un afiliado (Admin/Recepcionista)
+ *     description: Multipart/form-data en el campo "foto" (PNG/JPG/WEBP/GIF, máx. 5 MB).
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/idParam'
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               foto:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Foto actualizada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message: { type: string }
+ *                 foto: { type: string }
+ *                 url: { type: string }
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.post('/:id/foto', requireAuth, requireAdminOrRecepcionista, uploadFoto, AfiliadoController.subirFoto);
 
 // ─────────────────────────────────────────────────────────────
 // CICLOS

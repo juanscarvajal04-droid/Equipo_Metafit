@@ -10,6 +10,29 @@ require('./models/passwordResetModel').ensureTable()
   .then(() => console.log('✅ Tabla PASSWORD_RESET verificada/creada'))
   .catch(err => console.error('[PASSWORD_RESET] error creando tabla:', err.message));
 
+// ── Migración idempotente: columna AFILIADO.foto + limpieza de datos temporales ─
+// Corre dentro del VM de Render (MySQL solo socket local, sin acceso externo).
+const { runMigraciones } = require('./migrations/migracionFotos');
+runMigraciones()
+  .then(() => console.log('✅ Migración de fotos verificada'))
+  .catch(err => console.error('[MIGRACION-FOTOS] error:', err.message));
+
+// ── Migración idempotente: columna USUARIO.push_token (push notifications) ──
+const { runMigraciones: runMigracionesPush } = require('./migrations/migracionPushToken');
+runMigracionesPush()
+  .then(() => console.log('✅ Migración de push_token verificada'))
+  .catch(err => console.error('[MIGRACION-PUSH] error:', err.message));
+
+// ── Migración idempotente: RUTINA_EJERCICIO.peso_kg + RUTINA_EJERCICIO.descanso_seg (HU43 CA2) ──
+const { runMigraciones: runMigracionesRutinaDetalles } = require('./migrations/migracionRutinaDetalles');
+runMigracionesRutinaDetalles()
+  .then(() => console.log('✅ Migración de detalles de rutina verificada'))
+  .catch(err => console.error('[MIGRACION-RUTINA-DETALLES] error:', err.message));
+
+// ── Cron: recordatorio de pagos por vencer (cada hora) ──
+const { iniciarCron } = require('./cron/recordatorioPagos');
+iniciarCron();
+
 const app  = require('./server');
 const PORT = process.env.PORT || 3001;
 
