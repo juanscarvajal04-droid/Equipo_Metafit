@@ -155,7 +155,6 @@ const PlanController = {
       await PlanModel.updateNutricional(
         req.params.id, { calorias_objetivo, num_comidas, observaciones }, req.user.sub
       );
-      await PlanModel.clearDetalleNutricional(req.params.id);
       res.json({ message: 'Plan nutricional actualizado' });
     } catch (err) {
       console.error('[planController.updateNutricional]', err);

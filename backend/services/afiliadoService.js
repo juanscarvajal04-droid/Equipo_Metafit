@@ -117,7 +117,7 @@ const AfiliadoService = {
   },
 
   createProgreso: async (datos, creatorId) => {
-    if (!datos.id_ciclo || !datos.fecha_registro || !datos.peso) {
+    if (!datos.id_ciclo || !datos.fecha_registro || (!datos.peso_kg && !datos.peso)) {
       throw new Error('id_ciclo, fecha_registro y peso son requeridos');
     }
     await CatalogoModel.createProgreso(datos, creatorId);

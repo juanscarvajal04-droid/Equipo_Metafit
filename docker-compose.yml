@@ -139,32 +139,10 @@ services:
       - N8N_PORT=5678
       - N8N_PROTOCOL=http
       - WEBHOOK_URL=http://localhost:5678/
-      - DB_TYPE=postgresdb
-      - DB_POSTGRESDB_HOST=db
-      - DB_POSTGRESDB_PORT=5432
-      - DB_POSTGRESDB_DATABASE=n8n
-      - DB_POSTGRESDB_USER=n8n
-      - DB_POSTGRESDB_PASSWORD=n8n_password
     ports:
       - "5678:5678"
     volumes:
       - n8n_data:/home/node/.n8n
-    networks:
-      - metafit_net
-
-  # ──────────────────────────────────────────────────────────
-  # SERVICIO 6: PostgreSQL para n8n (requerido)
-  # ──────────────────────────────────────────────────────────
-  n8n-db:
-    image: postgres:15-alpine
-    container_name: metafit_n8n_db
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: n8n
-      POSTGRES_USER: n8n
-      POSTGRES_PASSWORD: n8n_password
-    volumes:
-      - n8n_db_data:/var/lib/postgresql/data
     networks:
       - metafit_net
 
@@ -176,7 +154,6 @@ volumes:
     # Para borrar el volumen y re-inicializar la DB desde cero:
     # docker compose down -v && docker compose up --build
   n8n_data:
-  n8n_db_data:
 
 networks:
   metafit_net:
