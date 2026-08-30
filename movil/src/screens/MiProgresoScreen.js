@@ -11,7 +11,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, GRADIENTS, FONTS, SPACING, SHADOWS, BORDER_RADIUS } from '../theme';
-import { getMiProgreso } from '../services/api';
+import { getMiProgreso, getAguaHistorial, getConsumoHistorial, getProgresoEjercicioHistorial } from '../services/api';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -143,6 +143,9 @@ function ProgresoItem({ item, isLatest }) {
 
 export default function MiProgresoScreen() {
   const [progreso, setProgreso] = useState([]);
+  const [aguaHistorial, setAguaHistorial] = useState([]);
+  const [consumoHistorial, setConsumoHistorial] = useState([]);
+  const [ejercicioHistorial, setEjercicioHistorial] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [showAll, setShowAll] = useState(false);
@@ -151,9 +154,17 @@ export default function MiProgresoScreen() {
   const fetchData = useCallback(async () => {
     try {
       setError(null);
-      const res = await getMiProgreso();
-      const data = res.data?.progreso || res.data || [];
+      const [res, aguaRes, consumoRes, ejercRes] = await Promise.allSettled([
+        getMiProgreso(),
+        getAguaHistorial(),
+        getConsumoHistorial(),
+        getProgresoEjercicioHistorial(),
+      ]);
+      const data = res.status === 'fulfilled' ? (res.value.data?.progreso || res.value.data || []) : [];
       setProgreso(Array.isArray(data) ? data : []);
+      setAguaHistorial(aguaRes.status === 'fulfilled' ? (aguaRes.value.data || []) : []);
+      setConsumoHistorial(consumoRes.status === 'fulfilled' ? (consumoRes.value.data || []) : []);
+      setEjercicioHistorial(ejercRes.status === 'fulfilled' ? (ejercRes.value.data || []) : []);
     } catch (_) {
       setError('Error al cargar el progreso.');
     } finally {
@@ -271,6 +282,105 @@ export default function MiProgresoScreen() {
                 {showAll ? 'Mostrar menos' : 'Ver historial completo'}
               </Text>
             </TouchableOpacity>
+          )}
+
+          {ejercicioHistorial.length > 0 && (
+            <View style={{ marginTop: SPACING.lg }}>
+              <Text style={{ color: COLORS.text, fontSize: FONTS.body, fontWeight: '700', marginBottom: SPACING.sm }}>
+                Ejercicios Completados
+              </Text>
+              {(() => {
+                const agrupado = {};
+                ejercicioHistorial.forEach((e) => {
+                  if (!agrupado[e.fecha]) agrupado[e.fecha] = { total: 0, completados: 0 };
+                  agrupado[e.fecha].total++;
+                  if (e.completado) agrupado[e.fecha].completados++;
+                });
+                return Object.entries(agrupado).slice(0, 10).map(([fecha, { total, completados }]) => (
+                  <View key={fecha} style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    backgroundColor: COLORS.bgCard,
+                    borderRadius: BORDER_RADIUS.md,
+                    padding: SPACING.sm,
+                    marginBottom: SPACING.xs,
+                  }}>
+                    <Text style={{ color: COLORS.text, fontSize: FONTS.body }}>{fecha}</Text>
+                    <Text style={{
+                      color: completados === total ? COLORS.check : COLORS.warning,
+                      fontSize: FONTS.body, fontWeight: '700',
+                    }}>
+                      {completados}/{total}
+                    </Text>
+                  </View>
+                ));
+              })()}
+            </View>
+          )}
+
+          {aguaHistorial.length > 0 && (
+            <View style={{ marginTop: SPACING.lg }}>
+              <Text style={{ color: COLORS.text, fontSize: FONTS.body, fontWeight: '700', marginBottom: SPACING.sm }}>
+                Consumo de Agua
+              </Text>
+              {aguaHistorial.slice(0, 10).map((a) => (
+                <View key={a.fecha} style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  backgroundColor: COLORS.bgCard,
+                  borderRadius: BORDER_RADIUS.md,
+                  padding: SPACING.sm,
+                  marginBottom: SPACING.xs,
+                }}>
+                  <Text style={{ color: COLORS.text, fontSize: FONTS.body }}>{a.fecha}</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Ionicons name="water" size={16} color={COLORS.water} />
+                    <Text style={{ color: COLORS.text, fontSize: FONTS.body, fontWeight: '700', marginLeft: SPACING.xs }}>
+                      {a.vasos}/8
+                    </Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          )}
+
+          {consumoHistorial.length > 0 && (
+            <View style={{ marginTop: SPACING.lg }}>
+              <Text style={{ color: COLORS.text, fontSize: FONTS.body, fontWeight: '700', marginBottom: SPACING.sm }}>
+                Consumo de Alimentos
+              </Text>
+              {(() => {
+                const porFecha = {};
+                consumoHistorial.forEach((c) => {
+                  if (!porFecha[c.fecha]) porFecha[c.fecha] = [];
+                  porFecha[c.fecha].push(c);
+                });
+                return Object.entries(porFecha).slice(0, 7).map(([fecha, items]) => (
+                  <View key={fecha} style={{
+                    backgroundColor: COLORS.bgCard,
+                    borderRadius: BORDER_RADIUS.md,
+                    padding: SPACING.sm,
+                    marginBottom: SPACING.xs,
+                  }}>
+                    <Text style={{ color: COLORS.text, fontSize: FONTS.body, fontWeight: '700', marginBottom: SPACING.xs }}>
+                      {fecha}
+                    </Text>
+                    {items.map((c, i) => (
+                      <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 2 }}>
+                        <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.small }}>{c.nombre_alimento}</Text>
+                        <Ionicons
+                          name={c.consumado ? 'checkmark-circle' : 'close-circle'}
+                          size={16}
+                          color={c.consumado ? COLORS.check : COLORS.textSecondary}
+                        />
+                      </View>
+                    ))}
+                  </View>
+                ));
+              })()}
+            </View>
           )}
         </ScrollView>
       )}

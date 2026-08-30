@@ -338,6 +338,36 @@ const AfiliadoController = {
       return res.status(500).json({ error: 'Error interno del servidor' });
     }
   },
+
+  getAguaHistorial: async (req, res) => {
+    try {
+      const result = await AfiliadoService.getAguaHistorial(req.user.sub, req.query);
+      return res.json(result);
+    } catch (err) {
+      console.error('[afiliadoController.getAguaHistorial]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
+  getConsumoHistorial: async (req, res) => {
+    try {
+      const result = await AfiliadoService.getConsumoHistorial(req.user.sub, req.query);
+      return res.json(result);
+    } catch (err) {
+      console.error('[afiliadoController.getConsumoHistorial]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
+  getProgresoEjercicioHistorial: async (req, res) => {
+    try {
+      const result = await AfiliadoService.getProgresoEjercicioHistorial(req.user.sub, req.query);
+      return res.json(result);
+    } catch (err) {
+      console.error('[afiliadoController.getProgresoEjercicioHistorial]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
 };
 
 module.exports = AfiliadoController;

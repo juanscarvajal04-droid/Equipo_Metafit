@@ -851,4 +851,80 @@ router.get('/me/agua/:fecha', requireAuth, AfiliadoController.getAgua);
  */
 router.post('/me/consumo-alimento', requireAuth, AfiliadoController.saveConsumoAlimento);
 
+// ─────────────────────────────────────────────────────────────
+// HISTORIAL (app móvil)
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * @swagger
+ * /afiliados/me/agua/historial:
+ *   get:
+ *     summary: Historial de consumo de agua (últimos 30 días)
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: fechaInicio
+ *         schema: { type: string, format: date }
+ *       - in: query
+ *         name: fechaFin
+ *         schema: { type: string, format: date }
+ *     responses:
+ *       200:
+ *         description: Lista de registros de agua
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ */
+router.get('/me/agua/historial', requireAuth, AfiliadoController.getAguaHistorial);
+
+/**
+ * @swagger
+ * /afiliados/me/consumo/historial:
+ *   get:
+ *     summary: Historial de consumo de alimentos (últimos 100 registros)
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: fechaInicio
+ *         schema: { type: string, format: date }
+ *       - in: query
+ *         name: fechaFin
+ *         schema: { type: string, format: date }
+ *     responses:
+ *       200:
+ *         description: Lista de registros de consumo
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ */
+router.get('/me/consumo/historial', requireAuth, AfiliadoController.getConsumoHistorial);
+
+/**
+ * @swagger
+ * /afiliados/me/progreso-ejercicio/historial:
+ *   get:
+ *     summary: Historial de progreso de ejercicios (últimos 200 registros)
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: id_ciclo
+ *         schema: { type: integer }
+ *       - in: query
+ *         name: fechaInicio
+ *         schema: { type: string, format: date }
+ *       - in: query
+ *         name: fechaFin
+ *         schema: { type: string, format: date }
+ *     responses:
+ *       200:
+ *         description: Lista de progreso de ejercicios
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ */
+router.get('/me/progreso-ejercicio/historial', requireAuth, AfiliadoController.getProgresoEjercicioHistorial);
+
 module.exports = router;

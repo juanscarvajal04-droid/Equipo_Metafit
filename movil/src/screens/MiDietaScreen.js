@@ -142,6 +142,8 @@ function ComidaCard({ numComida, alimentos, consumidos, onToggle }) {
 
 export default function MiDietaScreen() {
   const [ciclo, setCiclo] = useState(null);
+  const [ciclos, setCiclos] = useState([]);
+  const [showPicker, setShowPicker] = useState(false);
   const [alimentos, setAlimentos] = useState([]);
   const [agua, setAgua] = useState(0);
   const [consumidos, setConsumidos] = useState({});
@@ -153,11 +155,14 @@ export default function MiDietaScreen() {
 
   const hoy = new Date().toISOString().slice(0, 10);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (cicloSeleccionado) => {
     try {
       setError(null);
       const ciclosRes = await getMisCiclos();
-      const cicloData = seleccionarCicloActivo(ciclosRes.data);
+      const allCiclos = Array.isArray(ciclosRes.data) ? ciclosRes.data : [];
+      setCiclos(allCiclos);
+
+      const cicloData = cicloSeleccionado || seleccionarCicloActivo(allCiclos);
       if (!cicloData) {
         setError('No tenés un ciclo asignado.');
         setLoading(false);
@@ -195,6 +200,12 @@ export default function MiDietaScreen() {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const onRefresh = () => { setRefreshing(true); fetchData(); };
+
+  const handleCicloChange = (c) => {
+    setShowPicker(false);
+    setLoading(true);
+    fetchData(c);
+  };
 
   const handleAgua = async (index) => {
     const nuevosVasos = index + 1 === agua ? index : index + 1;
@@ -280,6 +291,61 @@ export default function MiDietaScreen() {
             ))}
           </View>
         </View>
+
+        {ciclos.length > 1 && (
+          <TouchableOpacity
+            onPress={() => setShowPicker(!showPicker)}
+            activeOpacity={0.7}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              backgroundColor: 'rgba(255,255,255,0.15)',
+              borderRadius: BORDER_RADIUS.md,
+              padding: SPACING.sm,
+              marginTop: SPACING.sm,
+            }}
+          >
+            <Ionicons name="swap-horizontal" size={16} color="rgba(255,255,255,0.7)" />
+            <Text style={{ color: '#fff', fontSize: FONTS.small, marginLeft: SPACING.xs, flex: 1 }}>
+              Ciclo: {ciclo?.nombre_ciclo || ciclo?.id_ciclo}
+            </Text>
+            <Ionicons name={showPicker ? 'chevron-up' : 'chevron-down'} size={16} color="rgba(255,255,255,0.7)" />
+          </TouchableOpacity>
+        )}
+
+        {showPicker && (
+          <View style={{
+            backgroundColor: COLORS.bgCard,
+            borderRadius: BORDER_RADIUS.md,
+            marginTop: SPACING.sm,
+            overflow: 'hidden',
+          }}>
+            {ciclos.map((c) => {
+              const activo = c.id_ciclo === ciclo?.id_ciclo;
+              return (
+                <TouchableOpacity
+                  key={c.id_ciclo}
+                  onPress={() => handleCicloChange(c)}
+                  activeOpacity={0.7}
+                  style={{
+                    paddingVertical: SPACING.sm,
+                    paddingHorizontal: SPACING.md,
+                    borderBottomWidth: 1,
+                    borderBottomColor: COLORS.border,
+                    backgroundColor: activo ? 'rgba(168,85,247,0.2)' : 'transparent',
+                  }}
+                >
+                  <Text style={{ color: COLORS.text, fontSize: FONTS.body, fontWeight: activo ? '700' : '400' }}>
+                    {c.nombre_ciclo || `Ciclo ${c.id_ciclo}`}
+                  </Text>
+                  <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.small, marginTop: 2 }}>
+                    {c.fecha_inicio} — {c.fecha_fin || 'Activo'}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        )}
       </LinearGradient>
 
       {error ? (

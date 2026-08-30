@@ -51,7 +51,10 @@ const PagoController = {
    *  si el correo falla, el pago queda registrado igualmente (la factura es un extra). */
   create: async (req, res) => {
     try {
-      const { id_pago, fecha_vencimiento } = await PagoModel.create(req.params.id, req.body);
+      const { id_pago, fecha_vencimiento } = await PagoModel.create(req.params.id, {
+        ...req.body,
+        registrado_por: req.user.sub,
+      });
 
       // ── Factura por correo + webhook n8n (asíncrono, no bloquea la respuesta) ──
       const datosPago = {

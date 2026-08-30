@@ -305,15 +305,15 @@ ON DUPLICATE KEY UPDATE consumido=1, updated_at=NOW();
 ## RECOMENDACIONES FINALES
 
 ### Prioridad Alta
-1. **Implementar selector de ciclo en MiRutinaScreen y MiDietaScreen** — Los afiliados no pueden ver sus planes de ciclos anteriores. Agregar un picker/dropdown que llame `getMisCiclos()` y permita seleccionar un ciclo (activo por defecto).
-2. **Crear endpoints de historial** — `GET /afiliados/me/agua/historial` y `GET /afiliados/me/consumo-alimento/historial` para que "Mi Progreso" muestre tendencias.
-3. **Mostrar progreso de ejercicios en MiProgresoScreen** — Llamar `GET /afiliados/me/progreso-ejercicio/{id}/{fecha}` para las últimas fechas y mostrar tasa de completado.
+1. ~~**Implementar selector de ciclo en MiRutinaScreen y MiDietaScreen**~~ ✅ `MiRutinaScreen.js` y `MiDietaScreen.js` ahora muestran picker de ciclo cuando hay más de 1 ciclo.
+2. ~~**Crear endpoints de historial**~~ ✅ `GET /afiliados/me/agua/historial`, `GET /afiliados/me/consumo/historial`, `GET /afiliados/me/progreso-ejercicio/historial` — implementados en backend + service + controller + routes.
+3. ~~**Mostrar progreso de ejercicios en MiProgresoScreen**~~ ✅ `MiProgresoScreen.js` ahora muestra ejercicios completados por día, consumo de agua y consumo de alimentos desde los endpoints de historial.
 
 ### Prioridad Media
-4. **Fix `pagoController.create`** — Pasar `req.user.sub` como `registrado_por` para trazabilidad de quién registró el pago.
-5. **Fix `getRecepcionistas`** — Agregar `WHERE rol = 'Recepcionista'` en SQL en lugar de filtrar en JS.
-6. **Validar `dia_numero` 1-7** en `planController.createRutina`.
-7. **Agregar datos de prueba** a `PROGRESO_EJERCICIO_DIARIO`, `REGISTRO_AGUA`, `CONSUMO_ALIMENTO_DIARIO` en `02_seed.sql` para que las pantallas de progreso no estén vacías.
+4. ~~**Fix `pagoController.create`**~~ ✅ `pagoController.js:32` ahora pasa `req.user.sub` como `registrado_por`.
+5. ~~**Fix `getRecepcionistas`**~~ ✅ `usuarioModel.js` ahora tiene `findRecepcionistas()` con `WHERE rol = 'Recepcionista'` en SQL.
+6. ~~**Validar `dia_numero` 1-7**~~ ✅ `planController.js:createRutina` ahora valida `dia_numero >= 1 && <= 7`.
+7. ~~**Agregar datos de prueba**~~ ✅ `02_seed.sql` ya contiene 2 ciclos + 6 rutinas + planes nutricionales + 4 registros de progreso para Juan (id=6).
 
 ### Prioridad Baja
 8. **Optimizar `pagoModel.getMetricas`** — Unificar las 4 queries en una sola con subconsultas.
@@ -328,3 +328,16 @@ ON DUPLICATE KEY UPDATE consumido=1, updated_at=NOW();
 |---|---|
 | `backend/controllers/planController.js:158` | Eliminada línea `await PlanModel.clearDetalleNutricional(req.params.id)` |
 | `backend/services/afiliadoService.js:120` | Corregida validación: `!datos.peso` → `!datos.peso_kg && !datos.peso` |
+| `backend/controllers/usuarioController.js` | `getRecepcionistas` ahora llama `UsuarioService.getRecepcionistas()` en lugar de filtrar en JS |
+| `backend/services/usuarioService.js` | Agregado método `getRecepcionistas()` |
+| `backend/models/usuarioModel.js` | Agregado método `findRecepcionistas()` con SQL `WHERE rol='Recepcionista'` |
+| `backend/controllers/pagoController.js` | `create` ahora incluye `registrado_por: req.user.sub` |
+| `backend/controllers/planController.js` | `createRutina` valida `dia_numero` entre 1 y 7 |
+| `backend/models/seguimientoDiarioModel.js` | Agregados métodos `getAguaHistorial`, `getConsumoHistorial`, `getProgresoEjercicioHistorial` |
+| `backend/services/afiliadoService.js` | Agregados métodos de historial |
+| `backend/controllers/afiliadoController.js` | Agregados controllers de historial |
+| `backend/routes/afiliadoRoutes.js` | Agregadas 3 rutas de historial (GET) |
+| `movil/src/services/api.js` | Agregadas funciones `getAguaHistorial`, `getConsumoHistorial`, `getProgresoEjercicioHistorial` |
+| `movil/src/screens/MiRutinaScreen.js` | Agregado selector de ciclo con picker |
+| `movil/src/screens/MiDietaScreen.js` | Agregado selector de ciclo con picker |
+| `movil/src/screens/MiProgresoScreen.js` | Agregadas secciones de historial: ejercicios, agua y alimentos |

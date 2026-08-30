@@ -11,6 +11,11 @@ const UsuarioService = {
     return users.map(u => UsuarioService.normalizarUsuario(u));
   },
 
+  getRecepcionistas: async () => {
+    const users = await UsuarioModel.findRecepcionistas();
+    return users.map(u => UsuarioService.normalizarUsuario(u));
+  },
+
   getById: async (id) => {
     const user = await UsuarioModel.findById(id);
     return UsuarioService.normalizarUsuario(user);
