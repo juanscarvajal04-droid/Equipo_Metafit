@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { COLORS, GRADIENTS, FONTS, SPACING, SHADOWS, BORDER_RADIUS } from '../theme';
 import {
   getMisCiclos,
@@ -24,7 +25,7 @@ const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', '
 const EJERCICIO_ROW_H = 58;
 const INSTRUCCIONES_H = 96;
 
-function DiaCard({ dia, ejercicios, completados, onToggle, expandido, setExpandido, detalleEjercicio, onToggleDetalle }) {
+function DiaCard({ dia, ejercicios, completados, onToggle, expandido, setExpandido, detalleEjercicio, onToggleDetalle, onRegistrar }) {
   const completadosCount = ejercicios.filter((e) => completados[e.id_ejercicio]).length;
   const total = ejercicios.length;
   const progress = total > 0 ? completadosCount / total : 0;
@@ -182,6 +183,14 @@ function DiaCard({ dia, ejercicios, completados, onToggle, expandido, setExpandi
                     color={COLORS.textSecondary}
                   />
                 </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => onRegistrar(ej)}
+                  activeOpacity={0.7}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  style={{ padding: SPACING.xs, marginLeft: SPACING.xs }}
+                >
+                  <Ionicons name="add-circle-outline" size={20} color={COLORS.purpleLight} />
+                </TouchableOpacity>
               </View>
             );
           })}
@@ -192,6 +201,7 @@ function DiaCard({ dia, ejercicios, completados, onToggle, expandido, setExpandi
 }
 
 export default function MiRutinaScreen() {
+  const navigation = useNavigation();
   const [ciclo, setCiclo] = useState(null);
   const [ciclos, setCiclos] = useState([]);
   const [showPicker, setShowPicker] = useState(false);
@@ -230,6 +240,7 @@ export default function MiRutinaScreen() {
       const ejerciciosPlan = rutinas.flatMap((r) =>
         (r.ejercicios || []).map((e) => ({
           ...e,
+          id_rutina: r.id_rutina,
           nombre: e.nombre_ejercicio,
           dia: r.nombre_rutina,
           dia_numero: r.dia_numero,
@@ -276,6 +287,16 @@ export default function MiRutinaScreen() {
 
   const toggleDetalle = (id) => {
     setDetalleEjercicio((prev) => (prev === id ? null : id));
+  };
+
+  const openRegistro = (ej) => {
+    navigation.getParent()?.navigate('RegistroEjercicio', {
+      id_ciclo: ciclo?.id_ciclo,
+      id_rutina: ej.id_rutina,
+      orden: ej.orden,
+      nombre: ej.nombre,
+      nombre_rutina: ej.dia,
+    });
   };
 
   const handleSave = async () => {
@@ -482,6 +503,7 @@ export default function MiRutinaScreen() {
                 setExpandido={setExpandido}
                 detalleEjercicio={detalleEjercicio}
                 onToggleDetalle={toggleDetalle}
+                onRegistrar={openRegistro}
               />
             )}
           </ScrollView>

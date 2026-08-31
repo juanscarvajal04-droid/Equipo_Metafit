@@ -36,12 +36,16 @@ DB_EXISTS=$(mysql --socket="$MYSQL_SOCK" -e "SELECT 1 FROM information_schema.SC
 if [ -z "$DB_EXISTS" ]; then
   echo ">>> Creando base de datos metafit..."
   mysql --socket="$MYSQL_SOCK" -e "CREATE DATABASE IF NOT EXISTS metafit CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
-  echo ">>> Ejecutando schema..."
-  mysql --socket="$MYSQL_SOCK" metafit < /app/database/01_schema.sql
-  echo ">>> Ejecutando seed..."
-  mysql --socket="$MYSQL_SOCK" metafit < /app/database/02_seed.sql
-  echo ">>> Ejecutando migración..."
-  mysql --socket="$MYSQL_SOCK" metafit < /app/database/04_migracion_app_movil.sql
+  echo ">>> Ejecutando 01_estructura..."
+  mysql --socket="$MYSQL_SOCK" metafit < /app/database/01_estructura.sql
+  echo ">>> Ejecutando 02_migracion_movil..."
+  mysql --socket="$MYSQL_SOCK" metafit < /app/database/02_migracion_movil.sql
+  echo ">>> Ejecutando 03_mejoras_estructura..."
+  mysql --socket="$MYSQL_SOCK" metafit < /app/database/03_mejoras_estructura.sql
+  echo ">>> Ejecutando 04_datos_iniciales..."
+  mysql --socket="$MYSQL_SOCK" metafit < /app/database/04_datos_iniciales.sql
+  echo ">>> Ejecutando 05_password_reset..."
+  mysql --socket="$MYSQL_SOCK" metafit < /app/database/05_password_reset.sql
   echo ">>> Base de datos inicializada!"
 else
   echo ">>> Base de datos metafit ya existe"

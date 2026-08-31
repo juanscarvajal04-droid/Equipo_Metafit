@@ -41,7 +41,7 @@ docker compose up -d --build
 docker compose ps
 ```
 
-Los scripts SQL (`01_schema.sql`, `02_seed.sql`) se ejecutan automáticamente al iniciar MySQL por primera vez.
+Los scripts SQL de [`database/`](./database) se ejecutan automáticamente al iniciar MariaDB por primera vez. El orden lexicográfico coincide con las dependencias: `01_estructura → 02_migracion_movil → 03_mejoras_estructura → 04_datos_iniciales → 05_password_reset` (detalles en [`database/README.md`](./database/README.md)).
 
 ## 🔌 Puertos
 

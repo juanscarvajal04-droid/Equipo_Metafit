@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
 import { getId, nombreCompleto } from "../utils/afiliadoHelpers";
 import { useToast } from "../hooks/useToast";
 import { trackEvent } from "../utils/analytics";
 import { API_BASE_URL } from "../services/api";
+import RestriccionSelector from "../components/common/RestriccionSelector";
 import s from "./AfiliadosView.module.css";
 
 const ESTADOS = ["Activo", "Inactivo", "Suspendido"];
@@ -78,6 +80,7 @@ const AvatarFoto = ({ nombre, foto, size = 32, style }) => {
 
 export default function AfiliadosView() {
   const { user, authAxios } = useAuth();
+  const navigate = useNavigate();
   const { toast, showToast } = useToast();
 
   const [afiliados, setAfiliados] = useState([]);
@@ -94,6 +97,7 @@ export default function AfiliadosView() {
   const [tabActivo, setTabActivo] = useState(0);
   const [formEdit, setFormEdit] = useState(FORM_VACIO);
   const [formCrear, setFormCrear] = useState(FORM_VACIO);
+  const [restriccionesSeleccionadas, setRestriccionesSeleccionadas] = useState([]);
 
   const role = user?.role || "Recepcionista";
   const tabsDisponibles = TABS_POR_ROL[role] || TABS_POR_ROL.Recepcionista;
@@ -201,12 +205,22 @@ export default function AfiliadosView() {
       delete payload.estado;
       const { data } = await authAxios.post("/afiliados", payload);
       if (fotoFile && data?.id) await subirFoto(data.id, fotoFile);
+      // Asignar restricciones seleccionadas en el registro (crear → asignar)
+      if (data?.id && restriccionesSeleccionadas.length > 0) {
+        for (const r of restriccionesSeleccionadas) {
+          const rid = r?.id_restriccion ?? r?.id;
+          if (rid != null) {
+            await authAxios.post(`/afiliados/${data.id}/restricciones`, { id_restriccion: rid });
+          }
+        }
+      }
       showToast("Afiliado creado correctamente", "success");
-      trackEvent("metaFit_afiliado_creado", { rol_creador: role });
+      trackEvent("metaFit_afiliado_creado", { rol_creador: role, restricciones: restriccionesSeleccionadas.length });
       setCreandoAbierto(false);
       setFormCrear(FORM_VACIO);
       setFotoFile(null);
       setFotoPreview(null);
+      setRestriccionesSeleccionadas([]);
       fetchAfiliados();
       window.dispatchEvent(new CustomEvent("afiliado-modificado"));
     } catch (err) {
@@ -233,6 +247,83 @@ export default function AfiliadosView() {
 
   const puedeCrear = role === "Administrador" || role === "Recepcionista";
 
+  // ── Restricciones médicas durante el REGISTRO (estado local) ────────────
+  // La Recepcionista selecciona del catálogo al crear el afiliado; las
+  // restricciones se asignan en el backend tras crear (POST /afiliados → id).
+  const handleAddRestriccionTemporal = (restriccion) => {
+    const rid = restriccion?.id_restriccion ?? restriccion?.id;
+    setRestriccionesSeleccionadas((prev) =>
+      prev.some((r) => (r?.id_restriccion ?? r?.id) === rid)
+        ? prev
+        : [...prev, restriccion]
+    );
+  };
+
+  const handleRemoveRestriccionTemporal = (restriccionId) => {
+    setRestriccionesSeleccionadas((prev) =>
+      prev.filter((r) => (r?.id_restriccion ?? r?.id) !== restriccionId)
+    );
+  };
+
+  const abrirNuevo = () => {
+    setFormCrear(FORM_VACIO);
+    setFotoFile(null);
+    setFotoPreview(null);
+    setRestriccionesSeleccionadas([]);
+    setCreandoAbierto(true);
+  };
+
+  const cerrarNuevo = () => {
+    if (saving) return;
+    setCreandoAbierto(false);
+    setRestriccionesSeleccionadas([]);
+  };
+
+  // ── Restricciones médicas (catálogo por afiliado) ────────────────────────
+  // Permisos: el backend acepta rol staff (Admin, Entrenador, Recepcionista).
+  // En el modal de detalle se mantiene readOnly para Recepcionista (solo ve);
+  // la Recepcionista edita restricciones ÚNICAMENTE en el flujo de nuevo registro.
+  const puedeEditarRestricciones =
+    role === "Administrador" || role === "Entrenador";
+
+  const handleAddRestriccion = async (restriccionId) => {
+    try {
+      const id = getId(detalleAfiliado);
+      await authAxios.post(`/afiliados/${id}/restricciones`, {
+        id_restriccion: restriccionId,
+      });
+      showToast("Restricción asignada correctamente", "success");
+      trackEvent("metaFit_restriccion_asignada", { afiliado: id, restriccion: restriccionId });
+      await abrirDetalleAFresco(id);
+    } catch (err) {
+      console.error("[AfiliadosView] asignar restricción:", err);
+      showToast("Error al asignar restricción", "danger");
+    }
+  };
+
+  const handleRemoveRestriccion = async (restriccionId) => {
+    try {
+      const id = getId(detalleAfiliado);
+      await authAxios.delete(`/afiliados/${id}/restricciones/${restriccionId}`);
+      showToast("Restricción removida correctamente", "success");
+      trackEvent("metaFit_restriccion_removida", { afiliado: id, restriccion: restriccionId });
+      await abrirDetalleAFresco(id);
+    } catch (err) {
+      console.error("[AfiliadosView] remover restricción:", err);
+      showToast("Error al remover restricción", "danger");
+    }
+  };
+
+  // Recarga el detalle SIN cerrar el modal (refresca los badges tras add/remove)
+  const abrirDetalleAFresco = async (id) => {
+    try {
+      const { data } = await authAxios.get(`/afiliados/${id}`);
+      setDetalleAfiliado(data);
+    } catch (err) {
+      console.error("[AfiliadosView] refrescar detalle:", err);
+    }
+  };
+
   return (
     <AppLayout>
       {toast.msg && (
@@ -257,7 +348,7 @@ export default function AfiliadosView() {
             </p>
           </div>
           {puedeCrear && (
-            <button type="button" className={s.btnPrimary} onClick={() => { setCreandoAbierto(true); setFotoFile(null); setFotoPreview(null); }}>
+            <button type="button" className={s.btnPrimary} onClick={abrirNuevo}>
               ➕ Nuevo afiliado
             </button>
           )}
@@ -317,6 +408,9 @@ export default function AfiliadosView() {
                           <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
                             <button type="button" className={s.btnIcon} title="Ver" onClick={() => abrirDetalle(a)}>👁</button>
                             <button type="button" className={s.btnIcon} title="Editar" onClick={() => abrirEdicion(a)}>✏️</button>
+                            {(role === "Administrador" || role === "Entrenador") && (
+                              <button type="button" className={s.btnIcon} title="Progreso" onClick={() => navigate(`/progreso/${getId(a)}`)}>📊</button>
+                            )}
                             {role === "Administrador" && (
                               <button type="button" className={s.btnIcon} title="Eliminar" onClick={() => handleEliminar(a)}>🗑️</button>
                             )}
@@ -398,12 +492,15 @@ export default function AfiliadosView() {
                 </div>
               </div>
 
-              {detalleAfiliado.restricciones_medicas && (
-                <div className={s.detailRestricciones}>
+              <div className={s.detailRestricciones}>
                   <div className={s.detailLabel}>Restricciones médicas</div>
-                  <div className={s.detailValue}>{detalleAfiliado.restricciones_medicas}</div>
+                  <RestriccionSelector
+                    restriccionesAsignadas={detalleAfiliado.restricciones || []}
+                    onAdd={puedeEditarRestricciones ? handleAddRestriccion : undefined}
+                    onRemove={puedeEditarRestricciones ? handleRemoveRestriccion : undefined}
+                    readOnly={!puedeEditarRestricciones}
+                  />
                 </div>
-              )}
 
               <div className={s.detailTabsBar}>
                 {tabsDisponibles.map((tab, i) => (
@@ -600,12 +697,12 @@ export default function AfiliadosView() {
       )}
 
       {creandoAbierto && (
-        <div className={s.modalOverlay} onClick={() => !saving && setCreandoAbierto(null)}>
+        <div className={s.modalOverlay} onClick={cerrarNuevo}>
           <div className={s.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: 650 }}>
             <form onSubmit={handleCrear}>
               <div className={s.modalHeader}>
                 <h5 className={s.modalTitle}>➕ Nuevo afiliado</h5>
-                <button type="button" className={s.btnOutline} onClick={() => !saving && setCreandoAbierto(null)}>✕</button>
+                <button type="button" className={s.btnOutline} onClick={cerrarNuevo}>✕</button>
               </div>
               <div className={s.modalBody}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
@@ -695,12 +792,21 @@ export default function AfiliadosView() {
                   </div>
                 </div>
                 <div style={{ marginTop: 12 }}>
-                  <label className={s.labelText}>Restricciones médicas</label>
+                  <label className={s.labelText}>Restricciones médicas (catálogo)</label>
+                  <RestriccionSelector
+                    restriccionesAsignadas={restriccionesSeleccionadas}
+                    onAdd={handleAddRestriccionTemporal}
+                    onRemove={handleRemoveRestriccionTemporal}
+                    isRegistration
+                  />
+                </div>
+                <div style={{ marginTop: 8 }}>
+                  <label className={s.labelText}>Otros antecedentes (texto libre)</label>
                   <textarea className={s.inputDark} rows={2} value={formCrear.restricciones_medicas} onChange={(e) => setFormCrear({ ...formCrear, restricciones_medicas: e.target.value })} />
                 </div>
               </div>
               <div className={s.modalFooter}>
-                <button type="button" className={s.btnOutline} onClick={() => setCreandoAbierto(null)} disabled={saving}>
+                <button type="button" className={s.btnOutline} onClick={cerrarNuevo} disabled={saving}>
                   Cancelar
                 </button>
                 <button type="submit" className={s.btnPrimary} disabled={saving}>

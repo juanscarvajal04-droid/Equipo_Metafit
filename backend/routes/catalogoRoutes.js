@@ -190,4 +190,122 @@ router.delete('/alimentos/:id', requireAuth, requireAdminOrEntrenador, CatalogoC
  */
 router.get('/restricciones', requireAuth, CatalogoController.getAllRestricciones);
 
+/**
+ * @swagger
+ * /catalogo/restricciones:
+ *   post:
+ *     summary: Crear restricción médica en el catálogo (solo Administrador)
+ *     tags: [Catálogos]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [nombre_restriccion, tipo]
+ *             properties:
+ *               nombre_restriccion: { type: string,  example: Asma }
+ *               tipo:               { type: string,  enum: [Enfermedad, Lesion, Alergia, Medicamento, Otra] }
+ *               efecto_relevante:
+ *                 type: string
+ *                 nullable: true
+ *                 example: Evitar esfuerzos de alta intensidad
+ *     responses:
+ *       201:
+ *         description: Restricción creada
+ *       400:
+ *         description: Nombre duplicado o campos inválidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.post('/restricciones', requireAuth, requireAdmin, CatalogoController.createRestriccion);
+
+/**
+ * @swagger
+ * /catalogo/restricciones/{id}:
+ *   put:
+ *     summary: Actualizar restricción del catálogo (solo Administrador)
+ *     tags: [Catálogos]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [nombre_restriccion, tipo]
+ *             properties:
+ *               nombre_restriccion: { type: string }
+ *               tipo:               { type: string, enum: [Enfermedad, Lesion, Alergia, Medicamento, Otra] }
+ *               efecto_relevante:
+ *                 type: string
+ *                 nullable: true
+ *     responses:
+ *       200:
+ *         description: Restricción actualizada
+ *       400:
+ *         description: Nombre duplicado o campos inválidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.put('/restricciones/:id', requireAuth, requireAdmin, CatalogoController.updateRestriccion);
+
+/**
+ * @swagger
+ * /catalogo/restricciones/{id}:
+ *   delete:
+ *     summary: Eliminar restricción del catálogo (solo Administrador)
+ *     description: >
+ *       Fallará con 409 si la restricción está referenciada por afiliados,
+ *       ejercicios o alimentos (integridad referencial).
+ *     tags: [Catálogos]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Restricción eliminada
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *       409:
+ *         description: Restricción en uso
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.delete('/restricciones/:id', requireAuth, requireAdmin, CatalogoController.deleteRestriccion);
+
 module.exports = router;

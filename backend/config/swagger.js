@@ -230,6 +230,7 @@ Todos los endpoints protegidos requieren un **Bearer Token JWT**.
     './routes/pagoRoutes.js',
     './routes/configuracionRoutes.js',
     './routes/notificacionRoutes.js',
+    './routes/progresoRoutes.js',
   ],
 };
 

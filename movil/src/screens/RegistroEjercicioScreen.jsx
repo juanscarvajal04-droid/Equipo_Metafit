@@ -1,0 +1,245 @@
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { COLORS, GRADIENTS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../theme';
+import useMutation from '../hooks/useMutation';
+import { registrarEjercicioReal } from '../services/registroService';
+
+const fechaLocal = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
+export default function RegistroEjercicioScreen({ navigation, route }) {
+  const { id_ciclo, id_rutina, orden, nombre, nombre_rutina } = route.params || {};
+
+  const [series, setSeries] = useState('');
+  const [repeticiones, setRepeticiones] = useState('');
+  const [peso, setPeso] = useState('');
+  const [notas, setNotas] = useState('');
+
+  const { execute, loading } = useMutation(registrarEjercicioReal, {
+    onSuccess: () => {
+      Alert.alert('Registrado', 'Ejercicio guardado correctamente.', [
+        { text: 'OK', onPress: () => navigation.goBack() },
+      ]);
+    },
+    onError: (_err, msg) => Alert.alert('Error', msg),
+  });
+
+  const handleSubmit = () => {
+    const s = Number(series);
+    const r = Number(repeticiones);
+    if (!series.trim() || !repeticiones.trim() || s < 1 || r < 1) {
+      Alert.alert('Datos incompletos', 'Ingresá series y repeticiones (mínimo 1).');
+      return;
+    }
+    execute({
+      id_ciclo,
+      id_rutina,
+      orden,
+      fecha: fechaLocal(),
+      series: s,
+      repeticiones: r,
+      peso_utilizado_kg: peso.trim() ? Number(peso) : null,
+      notas: notas.trim() ? notas.trim() : null,
+    });
+  };
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+          <LinearGradient colors={GRADIENTS.purple} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+            style={styles.header}>
+            <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.7}
+              style={styles.backBtn}>
+              <Ionicons name="arrow-back" size={22} color="#fff" />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Registrar Ejercicio</Text>
+            <View style={{ width: 22 }} />
+          </LinearGradient>
+
+          <View style={styles.card}>
+            <Text style={styles.subtitle}>Fecha</Text>
+            <Text style={styles.fecha}>{fechaLocal()}</Text>
+
+            <Text style={styles.subtitle}>Ejercicio</Text>
+            <Text style={styles.nombre}>{nombre || 'Ejercicio'}</Text>
+            {nombre_rutina ? (
+              <Text style={styles.contexto}>{nombre_rutina}</Text>
+            ) : null}
+
+            <Text style={styles.subtitle}>Series</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Número de series realizadas"
+              placeholderTextColor={COLORS.textMuted}
+              value={series}
+              onChangeText={setSeries}
+              keyboardType="number-pad"
+            />
+
+            <Text style={styles.subtitle}>Repeticiones</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Repeticiones por serie"
+              placeholderTextColor={COLORS.textMuted}
+              value={repeticiones}
+              onChangeText={setRepeticiones}
+              keyboardType="number-pad"
+            />
+
+            <Text style={styles.subtitle}>Peso utilizado (kg) — opcional</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Ej: 40.5"
+              placeholderTextColor={COLORS.textMuted}
+              value={peso}
+              onChangeText={setPeso}
+              keyboardType="decimal-pad"
+            />
+
+            <Text style={styles.subtitle}>Notas — opcional</Text>
+            <TextInput
+              style={[styles.input, styles.notas]}
+              placeholder="Cómo te sentiste, dificultad, variaciones..."
+              placeholderTextColor={COLORS.textMuted}
+              value={notas}
+              onChangeText={setNotas}
+              multiline
+              textAlignVertical="top"
+            />
+
+            <TouchableOpacity onPress={handleSubmit} disabled={loading} activeOpacity={0.85}>
+              <LinearGradient
+                colors={loading ? ['#555', '#555'] : GRADIENTS.purple}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={[styles.button, loading && styles.buttonDisabled]}
+              >
+                {loading ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>Guardar ejercicio</Text>
+                )}
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: COLORS.bg,
+  },
+  flex: {
+    flex: 1,
+  },
+  scroll: {
+    flexGrow: 1,
+    paddingBottom: SPACING.xl,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm + 2,
+  },
+  backBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerTitle: {
+    color: '#fff',
+    fontSize: FONTS.subtitle,
+    fontWeight: '700',
+  },
+  card: {
+    backgroundColor: COLORS.bgSecondary,
+    borderRadius: BORDER_RADIUS.lg,
+    padding: SPACING.lg,
+    margin: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    ...SHADOWS.card,
+  },
+  fecha: {
+    color: COLORS.text,
+    fontSize: FONTS.body,
+    fontWeight: '600',
+    marginBottom: SPACING.md,
+  },
+  subtitle: {
+    color: COLORS.textSecondary,
+    fontSize: FONTS.xsmall,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: SPACING.xs,
+    marginTop: SPACING.xs,
+  },
+  nombre: {
+    color: COLORS.text,
+    fontSize: FONTS.subtitle,
+    fontWeight: '700',
+  },
+  contexto: {
+    color: COLORS.purpleLight,
+    fontSize: FONTS.small,
+    marginBottom: SPACING.md,
+  },
+  input: {
+    backgroundColor: COLORS.inputBg,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: BORDER_RADIUS.md,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: 14,
+    fontSize: FONTS.body,
+    color: COLORS.text,
+    marginBottom: SPACING.md,
+  },
+  notas: {
+    minHeight: 90,
+  },
+  button: {
+    borderRadius: BORDER_RADIUS.md,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginTop: SPACING.sm,
+    ...SHADOWS.purple,
+  },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: FONTS.body,
+    fontWeight: '700',
+  },
+});

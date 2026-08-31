@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { COLORS, GRADIENTS, FONTS, SPACING, SHADOWS, BORDER_RADIUS } from '../theme';
 import {
   getMisCiclos,
@@ -37,7 +38,7 @@ function VasoAgua({ lleno, index, onPress }) {
   );
 }
 
-function ComidaCard({ numComida, alimentos, consumidos, onToggle }) {
+function ComidaCard({ numComida, alimentos, consumidos, onToggle, onRegistrar }) {
   const total = alimentos.length;
   const hechos = alimentos.filter((a) => consumidos[a.id_alimento]).length;
   const progress = total > 0 ? hechos / total : 0;
@@ -87,10 +88,8 @@ function ComidaCard({ numComida, alimentos, consumidos, onToggle }) {
       {alimentos.map((al) => {
         const done = consumidos[al.id_alimento];
         return (
-          <TouchableOpacity
+          <View
             key={al.id_alimento}
-            onPress={() => onToggle(al.id_alimento)}
-            activeOpacity={0.7}
             style={{
               flexDirection: 'row',
               alignItems: 'center',
@@ -99,41 +98,55 @@ function ComidaCard({ numComida, alimentos, consumidos, onToggle }) {
               borderBottomColor: COLORS.border,
             }}
           >
-            <LinearGradient
-              colors={done ? ['#10b981', '#059669'] : COLORS.borderActive ? ['rgba(255,255,255,0.1)', 'rgba(255,255,255,0.05)'] : ['#333', '#333']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={{
-                width: 24,
-                height: 24,
-                borderRadius: 12,
-                justifyContent: 'center',
-                alignItems: 'center',
-                marginRight: SPACING.md,
-              }}
+            <TouchableOpacity
+              onPress={() => onToggle(al.id_alimento)}
+              activeOpacity={0.7}
+              style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
             >
-              {done && <Ionicons name="checkmark" size={16} color="#fff" />}
-            </LinearGradient>
-            <View style={{ flex: 1 }}>
-              <Text style={{
-                color: COLORS.text,
-                fontSize: FONTS.body,
-                fontWeight: '500',
-                textDecorationLine: done ? 'line-through' : 'none',
-                opacity: done ? 0.6 : 1,
-              }}>
-                {al.nombre || `Alimento ${al.id_alimento}`}
-              </Text>
-              {(al.calorias || al.cantidad) && (
-                <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.small, marginTop: 1 }}>
-                  {al.cantidad ? `${al.cantidad}g` : ''}
-                  {al.cantidad && al.calorias ? ' · ' : ''}
-                  {al.calorias ? `${al.calorias} kcal` : ''}
+              <LinearGradient
+                colors={done ? ['#10b981', '#059669'] : COLORS.borderActive ? ['rgba(255,255,255,0.1)', 'rgba(255,255,255,0.05)'] : ['#333', '#333']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: 12,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  marginRight: SPACING.md,
+                }}
+              >
+                {done && <Ionicons name="checkmark" size={16} color="#fff" />}
+              </LinearGradient>
+              <View style={{ flex: 1 }}>
+                <Text style={{
+                  color: COLORS.text,
+                  fontSize: FONTS.body,
+                  fontWeight: '500',
+                  textDecorationLine: done ? 'line-through' : 'none',
+                  opacity: done ? 0.6 : 1,
+                }}>
+                  {al.nombre || `Alimento ${al.id_alimento}`}
                 </Text>
-              )}
-            </View>
-            {done && <Ionicons name="checkmark-circle" size={18} color={COLORS.check} />}
-          </TouchableOpacity>
+                {(al.calorias || al.cantidad) && (
+                  <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.small, marginTop: 1 }}>
+                    {al.cantidad ? `${al.cantidad}g` : ''}
+                    {al.cantidad && al.calorias ? ' · ' : ''}
+                    {al.calorias ? `${al.calorias} kcal` : ''}
+                  </Text>
+                )}
+              </View>
+              {done && <Ionicons name="checkmark-circle" size={18} color={COLORS.check} />}
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => onRegistrar(al)}
+              activeOpacity={0.7}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              style={{ padding: SPACING.xs, marginLeft: SPACING.sm }}
+            >
+              <Ionicons name="add-circle-outline" size={20} color={COLORS.purpleLight} />
+            </TouchableOpacity>
+          </View>
         );
       })}
     </View>
@@ -141,6 +154,7 @@ function ComidaCard({ numComida, alimentos, consumidos, onToggle }) {
 }
 
 export default function MiDietaScreen() {
+  const navigation = useNavigation();
   const [ciclo, setCiclo] = useState(null);
   const [ciclos, setCiclos] = useState([]);
   const [showPicker, setShowPicker] = useState(false);
@@ -222,6 +236,15 @@ export default function MiDietaScreen() {
 
   const toggleAlimento = (id) => {
     setConsumidos((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const openRegistro = (al) => {
+    navigation.getParent()?.navigate('RegistroConsumo', {
+      id_ciclo: ciclo?.id_ciclo,
+      num_comida: al.num_comida || 1,
+      id_alimento: al.id_alimento,
+      nombre: al.nombre || al.nombre_alimento,
+    });
   };
 
   const handleSave = async () => {
@@ -374,6 +397,7 @@ export default function MiDietaScreen() {
                 alimentos={al}
                 consumidos={consumidos}
                 onToggle={toggleAlimento}
+                onRegistrar={openRegistro}
               />
             ))
           )}

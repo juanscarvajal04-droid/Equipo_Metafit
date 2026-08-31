@@ -128,6 +128,64 @@ const CatalogoController = {
       res.status(500).json({ error: 'Error interno del servidor' });
     }
   },
+
+  // Valores permitidos por el ENUM del schema (01_estructura.sql)
+  TIPOS_RESTRICCION: ['Enfermedad', 'Lesion', 'Alergia', 'Medicamento', 'Otra'],
+
+  createRestriccion: async (req, res) => {
+    const { nombre_restriccion, tipo } = req.body;
+    if (!nombre_restriccion || !tipo)
+      return res.status(400).json({ error: 'nombre_restriccion y tipo son requeridos' });
+    if (!CatalogoController.TIPOS_RESTRICCION.includes(tipo))
+      return res.status(400).json({
+        error: `tipo debe ser uno de: ${CatalogoController.TIPOS_RESTRICCION.join(', ')}`,
+      });
+    try {
+      const id = await CatalogoModel.createRestriccion(req.body);
+      res.status(201).json({ id, message: 'Restricción creada' });
+    } catch (err) {
+      if (err.code === 'ER_DUP_ENTRY')
+        return res.status(400).json({ error: 'Ya existe una restricción con ese nombre' });
+      console.error('[catalogoController.createRestriccion]', err);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
+  updateRestriccion: async (req, res) => {
+    const { nombre_restriccion, tipo } = req.body;
+    if (!nombre_restriccion || !tipo)
+      return res.status(400).json({ error: 'nombre_restriccion y tipo son requeridos' });
+    if (!CatalogoController.TIPOS_RESTRICCION.includes(tipo))
+      return res.status(400).json({
+        error: `tipo debe ser uno de: ${CatalogoController.TIPOS_RESTRICCION.join(', ')}`,
+      });
+    try {
+      const affected = await CatalogoModel.updateRestriccion(req.params.id, req.body);
+      if (affected === 0) return res.status(404).json({ error: 'Restricción no encontrada' });
+      res.json({ message: 'Restricción actualizada' });
+    } catch (err) {
+      if (err.code === 'ER_DUP_ENTRY')
+        return res.status(400).json({ error: 'Ya existe una restricción con ese nombre' });
+      console.error('[catalogoController.updateRestriccion]', err);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
+  deleteRestriccion: async (req, res) => {
+    try {
+      const affected = await CatalogoModel.deleteRestriccion(req.params.id);
+      if (affected === 0) return res.status(404).json({ error: 'Restricción no encontrada' });
+      res.json({ message: 'Restricción eliminada' });
+    } catch (err) {
+      if (err.code === 'ER_ROW_IS_REFERENCED_2' || err.code === 'ER_ROW_IS_REFERENCED') {
+        return res.status(409).json({
+          error: 'No se puede eliminar: la restricción está asignada a afiliados, ejercicios o alimentos',
+        });
+      }
+      console.error('[catalogoController.deleteRestriccion]', err);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
 };
 
 module.exports = CatalogoController;

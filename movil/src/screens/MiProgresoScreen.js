@@ -12,6 +12,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, GRADIENTS, FONTS, SPACING, SHADOWS, BORDER_RADIUS } from '../theme';
 import { getMiProgreso, getAguaHistorial, getConsumoHistorial, getProgresoEjercicioHistorial } from '../services/api';
+import { getHistorialEjerciciosReales, getHistorialConsumosReales } from '../services/registroService';
+import StatsCard from '../components/common/StatsCard';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -146,6 +148,8 @@ export default function MiProgresoScreen() {
   const [aguaHistorial, setAguaHistorial] = useState([]);
   const [consumoHistorial, setConsumoHistorial] = useState([]);
   const [ejercicioHistorial, setEjercicioHistorial] = useState([]);
+  const [registrosEjercicio, setRegistrosEjercicio] = useState([]);
+  const [registrosConsumo, setRegistrosConsumo] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [showAll, setShowAll] = useState(false);
@@ -154,17 +158,21 @@ export default function MiProgresoScreen() {
   const fetchData = useCallback(async () => {
     try {
       setError(null);
-      const [res, aguaRes, consumoRes, ejercRes] = await Promise.allSettled([
+      const [res, aguaRes, consumoRes, ejercRes, realEjercRes, realConsumoRes] = await Promise.allSettled([
         getMiProgreso(),
         getAguaHistorial(),
         getConsumoHistorial(),
         getProgresoEjercicioHistorial(),
+        getHistorialEjerciciosReales(),
+        getHistorialConsumosReales(),
       ]);
       const data = res.status === 'fulfilled' ? (res.value.data?.progreso || res.value.data || []) : [];
       setProgreso(Array.isArray(data) ? data : []);
       setAguaHistorial(aguaRes.status === 'fulfilled' ? (aguaRes.value.data || []) : []);
       setConsumoHistorial(consumoRes.status === 'fulfilled' ? (consumoRes.value.data || []) : []);
       setEjercicioHistorial(ejercRes.status === 'fulfilled' ? (ejercRes.value.data || []) : []);
+      setRegistrosEjercicio(realEjercRes.status === 'fulfilled' ? (realEjercRes.value.data || []) : []);
+      setRegistrosConsumo(realConsumoRes.status === 'fulfilled' ? (realConsumoRes.value.data || []) : []);
     } catch (_) {
       setError('Error al cargar el progreso.');
     } finally {
@@ -194,6 +202,9 @@ export default function MiProgresoScreen() {
   const diffPeso = (pesoActual !== '-' && pesoAnterior != null)
     ? (Number(pesoActual) - Number(pesoAnterior)).toFixed(1)
     : null;
+
+  const totalVolumen = registrosEjercicio.reduce((sum, r) => sum + Number(r.volumen || 0), 0);
+  const totalKcal = registrosConsumo.reduce((sum, c) => sum + Number(c.calorias_consumidas || 0), 0);
 
   return (
     <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
@@ -235,6 +246,25 @@ export default function MiProgresoScreen() {
               color={diffPeso != null && Number(diffPeso) < 0 ? COLORS.check : COLORS.warning}
             />
             <ProgressStatCard icon="calendar-outline" label="Registros" value={`${progreso.length}`} color={COLORS.water} />
+          </View>
+
+          <View style={{ flexDirection: 'row', gap: SPACING.sm, marginBottom: SPACING.lg }}>
+            {registrosEjercicio.length > 0 && (
+              <StatsCard
+                icon="barbell-outline"
+                label="Volumen total"
+                value={`${totalVolumen.toFixed(0)} kg`}
+                color={COLORS.purpleLight}
+              />
+            )}
+            {registrosConsumo.length > 0 && (
+              <StatsCard
+                icon="flame-outline"
+                label="Kcal consumidas"
+                value={`${totalKcal.toFixed(0)}`}
+                color={COLORS.warning}
+              />
+            )}
           </View>
 
           {latest && (
@@ -380,6 +410,73 @@ export default function MiProgresoScreen() {
                   </View>
                 ));
               })()}
+            </View>
+          )}
+
+          {registrosEjercicio.length > 0 && (
+            <View style={{ marginTop: SPACING.lg }}>
+              <Text style={{ color: COLORS.text, fontSize: FONTS.body, fontWeight: '700', marginBottom: SPACING.sm }}>
+                Ejercicios Registrados
+              </Text>
+              {registrosEjercicio.slice(0, 10).map((r) => (
+                <View key={r.id_registro} style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  backgroundColor: COLORS.bgCard,
+                  borderRadius: BORDER_RADIUS.md,
+                  padding: SPACING.sm,
+                  marginBottom: SPACING.xs,
+                }}>
+                  <View style={{ flex: 1, marginRight: SPACING.sm }}>
+                    <Text style={{ color: COLORS.text, fontSize: FONTS.body, fontWeight: '600' }}>
+                      {r.nombre_ejercicio}
+                    </Text>
+                    <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.xsmall, marginTop: 1 }}>
+                      {r.fecha}
+                    </Text>
+                    <Text style={{ color: COLORS.textMuted, fontSize: FONTS.xsmall, marginTop: 1 }}>
+                      {r.series}×{r.repeticiones}
+                      {r.peso_utilizado_kg != null ? ` · ${r.peso_utilizado_kg} kg` : ''}
+                      {r.notas ? ` · ${r.notas}` : ''}
+                    </Text>
+                  </View>
+                  <Text style={{ color: COLORS.purpleLight, fontSize: FONTS.body, fontWeight: '700' }}>
+                    {r.volumen} kg
+                  </Text>
+                </View>
+              ))}
+            </View>
+          )}
+
+          {registrosConsumo.length > 0 && (
+            <View style={{ marginTop: SPACING.lg }}>
+              <Text style={{ color: COLORS.text, fontSize: FONTS.body, fontWeight: '700', marginBottom: SPACING.sm }}>
+                Consumos Registrados
+              </Text>
+              {registrosConsumo.slice(0, 10).map((c) => (
+                <View key={c.id_consumo} style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  backgroundColor: COLORS.bgCard,
+                  borderRadius: BORDER_RADIUS.md,
+                  padding: SPACING.sm,
+                  marginBottom: SPACING.xs,
+                }}>
+                  <View style={{ flex: 1, marginRight: SPACING.sm }}>
+                    <Text style={{ color: COLORS.text, fontSize: FONTS.body, fontWeight: '600' }}>
+                      {c.nombre_alimento}
+                    </Text>
+                    <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.xsmall, marginTop: 1 }}>
+                      {c.fecha} · Comida {c.num_comida}
+                    </Text>
+                  </View>
+                  <Text style={{ color: COLORS.warning, fontSize: FONTS.body, fontWeight: '700' }}>
+                    {c.cantidad_g_consumida}g · {c.calorias_consumidas} kcal
+                  </Text>
+                </View>
+              ))}
             </View>
           )}
         </ScrollView>
