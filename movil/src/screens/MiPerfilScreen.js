@@ -326,21 +326,46 @@ export default function MiPerfilScreen({ navigation }) {
 
         {restricciones.length > 0 && (
           <SectionCard title="Restricciones" icon="warning-outline">
-            {restricciones.map((r, i) => (
-              <View key={i} style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                backgroundColor: 'rgba(227,28,37,0.1)',
-                borderRadius: BORDER_RADIUS.sm,
-                padding: SPACING.sm,
-                marginBottom: SPACING.xs,
-              }}>
-                <Ionicons name="alert-circle" size={16} color={COLORS.error} style={{ marginRight: SPACING.sm }} />
-                <Text style={{ color: COLORS.text, fontSize: FONTS.small, flex: 1 }}>
-                  {r.descripcion || r.nombre || `Restricción`}
-                </Text>
-              </View>
-            ))}
+            {restricciones.map((r, i) => {
+              const nombre = r.nombre_restriccion || r.descripcion || r.nombre || 'Restricción';
+              return (
+                <View key={r.id_restriccion ?? i} style={{
+                  flexDirection: 'row',
+                  alignItems: 'flex-start',
+                  backgroundColor: 'rgba(227,28,37,0.1)',
+                  borderRadius: BORDER_RADIUS.sm,
+                  padding: SPACING.sm,
+                  marginBottom: SPACING.xs,
+                }}>
+                  <Ionicons name="alert-circle" size={16} color={COLORS.error} style={{ marginRight: SPACING.sm, marginTop: 2 }} />
+                  <View style={{ flex: 1 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }}>
+                      <Text style={{ color: COLORS.text, fontSize: FONTS.small, fontWeight: '600', flexShrink: 1 }}>
+                        {nombre}
+                      </Text>
+                      {r.tipo ? (
+                        <View style={{
+                          backgroundColor: COLORS.purpleGlow,
+                          borderRadius: 10,
+                          paddingHorizontal: 8,
+                          paddingVertical: 2,
+                          marginLeft: SPACING.sm,
+                        }}>
+                          <Text style={{ color: COLORS.purpleLight, fontSize: FONTS.xsmall, fontWeight: '600' }}>
+                            {r.tipo}
+                          </Text>
+                        </View>
+                      ) : null}
+                    </View>
+                    {r.efecto_relevante ? (
+                      <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.xsmall, marginTop: 2 }}>
+                        {r.efecto_relevante}
+                      </Text>
+                    ) : null}
+                  </View>
+                </View>
+              );
+            })}
           </SectionCard>
         )}
 

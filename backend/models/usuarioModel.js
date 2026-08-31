@@ -30,6 +30,17 @@ const UsuarioModel = {
     return rows;
   },
 
+  findRecepcionistas: async () => {
+    const [rows] = await pool.query(
+      `SELECT id_usuario, nombres, apellidos, correo,
+              rol, estado, fecha_registro
+       FROM USUARIO
+       WHERE rol = 'Recepcionista' AND estado = 'Activo'
+       ORDER BY nombres`
+    );
+    return rows;
+  },
+
   findById: async (id) => {
     const [rows] = await pool.query(
       `SELECT id_usuario, nombres, apellidos, correo,

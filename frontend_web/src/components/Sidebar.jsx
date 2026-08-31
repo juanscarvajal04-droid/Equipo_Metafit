@@ -31,6 +31,7 @@ const NAV_OPERATIVO = {
 // Link exclusivo del Administrador
 const NAV_ADMIN_EXCLUSIVO = [
   { to: "/personal", icon: "🛡️", label: "Gestión de Personal" },
+  { to: "/admin/restricciones", icon: "🚫", label: "Restricciones" },
 ];
 
 /** Paleta de colores por rol — permanecen inline por ser dinámicos */

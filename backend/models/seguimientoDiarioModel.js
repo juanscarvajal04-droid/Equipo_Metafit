@@ -75,6 +75,44 @@ const SeguimientoDiarioModel = {
       conn.release();
     }
   },
+
+  getAguaHistorial: async (idUsuario, fechaInicio, fechaFin) => {
+    let sql = `SELECT fecha, vasos FROM REGISTRO_AGUA WHERE id_usuario = ?`;
+    const params = [idUsuario];
+    if (fechaInicio) { sql += ` AND fecha >= ?`; params.push(fechaInicio); }
+    if (fechaFin)   { sql += ` AND fecha <= ?`; params.push(fechaFin); }
+    sql += ` ORDER BY fecha DESC LIMIT 30`;
+    const [rows] = await pool.query(sql, params);
+    return rows;
+  },
+
+  getConsumoHistorial: async (idUsuario, fechaInicio, fechaFin) => {
+    let sql = `SELECT ca.fecha, ca.id_ciclo, ca.id_alimento, ca.num_comida, ca.consumido,
+                      al.nombre_alimento
+               FROM CONSUMO_ALIMENTO_DIARIO ca
+               JOIN ALIMENTO al ON ca.id_alimento = al.id_alimento
+               WHERE ca.id_usuario = ?`;
+    const params = [idUsuario];
+    if (fechaInicio) { sql += ` AND ca.fecha >= ?`; params.push(fechaInicio); }
+    if (fechaFin)   { sql += ` AND ca.fecha <= ?`; params.push(fechaFin); }
+    sql += ` ORDER BY ca.fecha DESC, ca.num_comida LIMIT 100`;
+    const [rows] = await pool.query(sql, params);
+    return rows;
+  },
+
+  getProgresoEjercicioHistorial: async (idUsuario, idCiclo, fechaInicio, fechaFin) => {
+    let sql = `SELECT pe.fecha, pe.id_ejercicio, pe.completado, e.nombre_ejercicio
+               FROM PROGRESO_EJERCICIO_DIARIO pe
+               JOIN EJERCICIO e ON pe.id_ejercicio = e.id_ejercicio
+               WHERE pe.id_usuario = ?`;
+    const params = [idUsuario];
+    if (idCiclo)    { sql += ` AND pe.id_ciclo = ?`; params.push(idCiclo); }
+    if (fechaInicio) { sql += ` AND pe.fecha >= ?`; params.push(fechaInicio); }
+    if (fechaFin)   { sql += ` AND pe.fecha <= ?`; params.push(fechaFin); }
+    sql += ` ORDER BY pe.fecha DESC, pe.id_ejercicio LIMIT 200`;
+    const [rows] = await pool.query(sql, params);
+    return rows;
+  },
 };
 
 module.exports = SeguimientoDiarioModel;

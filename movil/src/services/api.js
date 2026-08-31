@@ -68,3 +68,12 @@ export const getAguaHoy = (fecha) =>
 
 export const guardarConsumoAlimento = (idCiclo, fecha, alimentos) =>
   api.post('/afiliados/me/consumo-alimento', { id_ciclo: idCiclo, fecha, alimentos });
+
+export const getAguaHistorial = (params = {}) =>
+  api.get('/afiliados/me/agua/historial', { params });
+
+export const getConsumoHistorial = (params = {}) =>
+  api.get('/afiliados/me/consumo/historial', { params });
+
+export const getProgresoEjercicioHistorial = (params = {}) =>
+  api.get('/afiliados/me/progreso-ejercicio/historial', { params });

@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { COLORS, GRADIENTS, FONTS, SPACING, SHADOWS, BORDER_RADIUS } from '../theme';
 import {
   getMisCiclos,
@@ -24,7 +25,7 @@ const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', '
 const EJERCICIO_ROW_H = 58;
 const INSTRUCCIONES_H = 96;
 
-function DiaCard({ dia, ejercicios, completados, onToggle, expandido, setExpandido, detalleEjercicio, onToggleDetalle }) {
+function DiaCard({ dia, ejercicios, completados, onToggle, expandido, setExpandido, detalleEjercicio, onToggleDetalle, onRegistrar }) {
   const completadosCount = ejercicios.filter((e) => completados[e.id_ejercicio]).length;
   const total = ejercicios.length;
   const progress = total > 0 ? completadosCount / total : 0;
@@ -182,6 +183,14 @@ function DiaCard({ dia, ejercicios, completados, onToggle, expandido, setExpandi
                     color={COLORS.textSecondary}
                   />
                 </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => onRegistrar(ej)}
+                  activeOpacity={0.7}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  style={{ padding: SPACING.xs, marginLeft: SPACING.xs }}
+                >
+                  <Ionicons name="add-circle-outline" size={20} color={COLORS.purpleLight} />
+                </TouchableOpacity>
               </View>
             );
           })}
@@ -192,7 +201,10 @@ function DiaCard({ dia, ejercicios, completados, onToggle, expandido, setExpandi
 }
 
 export default function MiRutinaScreen() {
+  const navigation = useNavigation();
   const [ciclo, setCiclo] = useState(null);
+  const [ciclos, setCiclos] = useState([]);
+  const [showPicker, setShowPicker] = useState(false);
   const [ejercicios, setEjercicios] = useState([]);
   const [completados, setCompletados] = useState({});
   const [loading, setLoading] = useState(true);
@@ -207,11 +219,14 @@ export default function MiRutinaScreen() {
   const diaSemana = DAYS[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1];
   const diaNumeroHoy = new Date().getDay() === 0 ? 7 : new Date().getDay();
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (cicloSeleccionado) => {
     try {
       setError(null);
       const ciclosRes = await getMisCiclos();
-      const cicloData = seleccionarCicloActivo(ciclosRes.data);
+      const allCiclos = Array.isArray(ciclosRes.data) ? ciclosRes.data : [];
+      setCiclos(allCiclos);
+
+      const cicloData = cicloSeleccionado || seleccionarCicloActivo(allCiclos);
       if (!cicloData) {
         setError('No tenés un ciclo asignado.');
         setLoading(false);
@@ -225,6 +240,7 @@ export default function MiRutinaScreen() {
       const ejerciciosPlan = rutinas.flatMap((r) =>
         (r.ejercicios || []).map((e) => ({
           ...e,
+          id_rutina: r.id_rutina,
           nombre: e.nombre_ejercicio,
           dia: r.nombre_rutina,
           dia_numero: r.dia_numero,
@@ -257,12 +273,30 @@ export default function MiRutinaScreen() {
 
   const onRefresh = () => { setRefreshing(true); fetchData(); };
 
+  const handleCicloChange = (c) => {
+    setShowPicker(false);
+    setDiaSeleccionado(null);
+    setExpandido(null);
+    setLoading(true);
+    fetchData(c);
+  };
+
   const toggleEjercicio = (id) => {
     setCompletados((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   const toggleDetalle = (id) => {
     setDetalleEjercicio((prev) => (prev === id ? null : id));
+  };
+
+  const openRegistro = (ej) => {
+    navigation.getParent()?.navigate('RegistroEjercicio', {
+      id_ciclo: ciclo?.id_ciclo,
+      id_rutina: ej.id_rutina,
+      orden: ej.orden,
+      nombre: ej.nombre,
+      nombre_rutina: ej.dia,
+    });
   };
 
   const handleSave = async () => {
@@ -346,6 +380,61 @@ export default function MiRutinaScreen() {
             }} />
           </View>
         </View>
+
+        {ciclos.length > 1 && (
+          <TouchableOpacity
+            onPress={() => setShowPicker(!showPicker)}
+            activeOpacity={0.7}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              backgroundColor: 'rgba(255,255,255,0.15)',
+              borderRadius: BORDER_RADIUS.md,
+              padding: SPACING.sm,
+              marginTop: SPACING.sm,
+            }}
+          >
+            <Ionicons name="swap-horizontal" size={16} color="rgba(255,255,255,0.7)" />
+            <Text style={{ color: '#fff', fontSize: FONTS.small, marginLeft: SPACING.xs, flex: 1 }}>
+              Ciclo: {ciclo?.nombre_ciclo || ciclo?.id_ciclo}
+            </Text>
+            <Ionicons name={showPicker ? 'chevron-up' : 'chevron-down'} size={16} color="rgba(255,255,255,0.7)" />
+          </TouchableOpacity>
+        )}
+
+        {showPicker && (
+          <View style={{
+            backgroundColor: COLORS.bgCard,
+            borderRadius: BORDER_RADIUS.md,
+            marginTop: SPACING.sm,
+            overflow: 'hidden',
+          }}>
+            {ciclos.map((c) => {
+              const activo = c.id_ciclo === ciclo?.id_ciclo;
+              return (
+                <TouchableOpacity
+                  key={c.id_ciclo}
+                  onPress={() => handleCicloChange(c)}
+                  activeOpacity={0.7}
+                  style={{
+                    paddingVertical: SPACING.sm,
+                    paddingHorizontal: SPACING.md,
+                    borderBottomWidth: 1,
+                    borderBottomColor: COLORS.border,
+                    backgroundColor: activo ? 'rgba(168,85,247,0.2)' : 'transparent',
+                  }}
+                >
+                  <Text style={{ color: COLORS.text, fontSize: FONTS.body, fontWeight: activo ? '700' : '400' }}>
+                    {c.nombre_ciclo || `Ciclo ${c.id_ciclo}`}
+                  </Text>
+                  <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.small, marginTop: 2 }}>
+                    {c.fecha_inicio} — {c.fecha_fin || 'Activo'}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        )}
       </LinearGradient>
 
       {error ? (
@@ -414,6 +503,7 @@ export default function MiRutinaScreen() {
                 setExpandido={setExpandido}
                 detalleEjercicio={detalleEjercicio}
                 onToggleDetalle={toggleDetalle}
+                onRegistrar={openRegistro}
               />
             )}
           </ScrollView>

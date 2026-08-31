@@ -54,6 +54,8 @@ const PlanController = {
     const { id_ciclo, nombre_rutina, enfoque_muscular, dia_numero } = req.body;
     if (!id_ciclo || !nombre_rutina || !dia_numero)
       return res.status(400).json({ error: 'id_ciclo, nombre_rutina y dia_numero son requeridos' });
+    if (dia_numero < 1 || dia_numero > 7)
+      return res.status(400).json({ error: 'dia_numero debe estar entre 1 y 7' });
     try {
       const id = await PlanModel.createRutina(
         id_ciclo, nombre_rutina, enfoque_muscular, dia_numero
@@ -155,7 +157,6 @@ const PlanController = {
       await PlanModel.updateNutricional(
         req.params.id, { calorias_objetivo, num_comidas, observaciones }, req.user.sub
       );
-      await PlanModel.clearDetalleNutricional(req.params.id);
       res.json({ message: 'Plan nutricional actualizado' });
     } catch (err) {
       console.error('[planController.updateNutricional]', err);

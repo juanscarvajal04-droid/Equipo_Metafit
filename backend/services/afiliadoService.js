@@ -117,7 +117,7 @@ const AfiliadoService = {
   },
 
   createProgreso: async (datos, creatorId) => {
-    if (!datos.id_ciclo || !datos.fecha_registro || !datos.peso) {
+    if (!datos.id_ciclo || !datos.fecha_registro || (!datos.peso_kg && !datos.peso)) {
       throw new Error('id_ciclo, fecha_registro y peso son requeridos');
     }
     await CatalogoModel.createProgreso(datos, creatorId);
@@ -154,7 +154,21 @@ const AfiliadoService = {
       throw new Error('id_ciclo, fecha y alimentos son requeridos');
     }
     return SeguimientoDiarioModel.saveConsumoAlimento(idUsuario, id_ciclo, fecha, alimentos);
-  }
+  },
+
+  getAguaHistorial: async (idUsuario, query) => {
+    return SeguimientoDiarioModel.getAguaHistorial(idUsuario, query.fechaInicio, query.fechaFin);
+  },
+
+  getConsumoHistorial: async (idUsuario, query) => {
+    return SeguimientoDiarioModel.getConsumoHistorial(idUsuario, query.fechaInicio, query.fechaFin);
+  },
+
+  getProgresoEjercicioHistorial: async (idUsuario, query) => {
+    return SeguimientoDiarioModel.getProgresoEjercicioHistorial(
+      idUsuario, query.id_ciclo, query.fechaInicio, query.fechaFin
+    );
+  },
 };
 
 module.exports = AfiliadoService;

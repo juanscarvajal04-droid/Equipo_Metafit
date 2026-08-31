@@ -105,6 +105,27 @@ const CatalogoModel = {
     return rows;
   },
 
+  createRestriccion: async ({ nombre_restriccion, tipo, efecto_relevante }) => {
+    const [r] = await pool.query(
+      'INSERT INTO RESTRICCION (nombre_restriccion, tipo, efecto_relevante) VALUES (?,?,?)',
+      [nombre_restriccion, tipo, efecto_relevante || null]
+    );
+    return r.insertId;
+  },
+
+  updateRestriccion: async (id, { nombre_restriccion, tipo, efecto_relevante }) => {
+    const [r] = await pool.query(
+      'UPDATE RESTRICCION SET nombre_restriccion = ?, tipo = ?, efecto_relevante = ? WHERE id_restriccion = ?',
+      [nombre_restriccion, tipo, efecto_relevante || null, id]
+    );
+    return r.affectedRows;
+  },
+
+  deleteRestriccion: async (id) => {
+    const [r] = await pool.query('DELETE FROM RESTRICCION WHERE id_restriccion = ?', [id]);
+    return r.affectedRows;
+  },
+
   // ── EJERCICIOS DISPONIBLES POR AFILIADO ────────────────────
   // Excluye los ejercicios que estén en EJERCICIO_RESTRICCION_EXCLUIDA
   // para las restricciones del afiliado, y filtra por nivel de experiencia

@@ -9,8 +9,7 @@ const UsuarioController = {
   /** GET /usuarios/recepcionistas — solo usuarios con rol Recepcionista */
   getRecepcionistas: async (req, res) => {
     try {
-      const all = await UsuarioService.getAll();
-      const recepcionistas = all.filter(u => u.rol === 'Recepcionista');
+      const recepcionistas = await UsuarioService.getRecepcionistas();
       return res.json(recepcionistas);
     } catch (err) {
       console.error('[usuarioController.getRecepcionistas]', err);
