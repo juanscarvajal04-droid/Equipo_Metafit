@@ -959,7 +959,7 @@ Si la build es exitosa, el último mensaje será:
 ✔ Build finished successfully
 
 🤖 Android build:
-  Application Archive: https://expo.dev/artifacts/eas/1bfCWUQ6rMFIYkJLU15dgp_dBaZvyGu2D1GSWh67pSo.apk
+  Application Archive: https://expo.dev/artifacts/eas/3mCh0-T8CEI3jK_APZUO6rM6-Al1ryP4kxRezmF-i7k.apk
 ```
 
 **Verificando una build específica:**
@@ -984,7 +984,7 @@ Abre la URL de la build en tu navegador. Una build exitosa muestra un checkmark 
 | Fecha de creación | 2026-07-29T01:29:27Z |
 | Fecha de finalización | 2026-07-29T01:48:29Z |
 | Duración total | ~19 minutos (incluyendo cola) |
-| APK URL | `https://expo.dev/artifacts/eas/1bfCWUQ6rMFIYkJLU15dgp_dBaZvyGu2D1GSWh67pSo.apk` |
+| APK URL | `https://expo.dev/artifacts/eas/3mCh0-T8CEI3jK_APZUO6rM6-Al1ryP4kxRezmF-i7k.apk` |
 
 ### 8.3 Tamaño esperado del APK
 
@@ -1040,7 +1040,7 @@ Una vez que la build ha terminado exitosamente, Expo te proporciona una URL de d
 Para descargar el APK directamente desde la terminal sin necesidad de abrir un navegador:
 
 ```bash
-curl -L --max-time 120 -o metafit.apk "https://expo.dev/artifacts/eas/1bfCWUQ6rMFIYkJLU15dgp_dBaZvyGu2D1GSWh67pSo.apk"
+curl -L --max-time 120 -o metafit.apk "https://expo.dev/artifacts/eas/3mCh0-T8CEI3jK_APZUO6rM6-Al1ryP4kxRezmF-i7k.apk"
 ```
 
 **Desglose del comando:**

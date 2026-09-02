@@ -527,8 +527,8 @@ export default function LandingPage() {
 
             {/* Botón descarga */}
             <a
-              href="/app/metafit.apk"
-              download
+              href="https://expo.dev/artifacts/eas/3mCh0-T8CEI3jK_APZUO6rM6-Al1ryP4kxRezmF-i7k.apk"
+              download="metafit.apk"
               className={s.btnAppDownload}
               onClick={() => trackEvent("metaFit_apk_descargado")}
             >
