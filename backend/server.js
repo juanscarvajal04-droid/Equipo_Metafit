@@ -27,8 +27,12 @@ const { verificarCredenciales } = require('./config/cloudinary');
 const DEFAULT_CORS_ORIGIN = [
   'http://localhost:5173',
   'http://127.0.0.1:5173',
+  'http://localhost:5174',
+  'http://localhost:5175',
   'http://localhost:8081',
   'http://127.0.0.1:8081',
+  'http://localhost:3001',
+  'http://127.0.0.1:3001',
   'https://metafit-frontend-78x6.onrender.com',
 ].join(',');
 
@@ -47,7 +51,9 @@ app.use(cors({
     }
     return callback(new Error('CORS no permitido para este origen'));
   },
-  credentials: false,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 // ── ISO 25000 / 3.1: Helmet — cabeceras HTTP seguras ──────────
