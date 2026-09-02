@@ -28,7 +28,7 @@ services:
       # Forzar utf8mb4 desde arranque para evitar problemas de encoding
       MYSQL_INITDB_SKIP_TZINFO: "true"
     ports:
-      - "3307:3306"
+      - "3306:3306"
     volumes:
       # Se monta la CARPETA completa. Docker ejecuta TODOS los .sql en
       # orden lexicográfico, que ya coincide con las dependencias:
