@@ -92,12 +92,19 @@ const RegistroService = {
     const conn = await pool.getConnection();
     try {
       await conn.beginTransaction();
-      const { id_consumo, calorias_consumidas } = await ConsumoAlimentoRealModel.insertar(conn, {
-        id_usuario: idUsuario, id_ciclo, num_comida, id_alimento, fecha: fechaN, cantidad_g_consumida,
-      });
+      const { id_consumo, calorias_consumidas,
+              proteinas_consumidas, carbohidratos_consumidos, grasas_consumidas } =
+        await ConsumoAlimentoRealModel.insertar(conn, {
+          id_usuario: idUsuario, id_ciclo, num_comida, id_alimento, fecha: fechaN, cantidad_g_consumida,
+        });
       const resumen = await ProgresoDiarioModel.sincronizar(conn, idUsuario, fechaN);
       await conn.commit();
-      return { message: 'Consumo de alimento registrado correctamente', id_consumo, calorias_consumidas, resumen };
+      return {
+        message: 'Consumo de alimento registrado correctamente',
+        id_consumo, calorias_consumidas,
+        proteinas_consumidas, carbohidratos_consumidos, grasas_consumidas,
+        resumen,
+      };
     } catch (err) {
       await conn.rollback();
       throw err;

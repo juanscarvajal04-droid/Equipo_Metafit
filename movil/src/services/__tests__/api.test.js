@@ -19,6 +19,7 @@ const mockInstance = {
   get: jest.fn(),
   put: jest.fn(),
   delete: jest.fn(),
+  patch: jest.fn(),
   interceptors: { request: { use: jest.fn() }, response: { use: jest.fn() } },
 };
 axios.create.mockReturnValue(mockInstance);
@@ -66,6 +67,28 @@ describe('Cliente API móvil (axios + AsyncStorage)', () => {
 
     expect(mockInstance.get).toHaveBeenCalledWith('/afiliados/me');
     expect(res.data.id).toBe(5);
+  });
+
+  test('actualizarMiPerfil hace PATCH /afiliados/me con los datos', async () => {
+    mockInstance.patch.mockResolvedValueOnce({ data: { message: 'ok', imc: 26.62 } });
+
+    const res = await api.actualizarMiPerfil({ peso_kg: 82, estatura_cm: 175.5, correo: 'afi@metafit.com' });
+
+    expect(mockInstance.patch).toHaveBeenCalledWith('/afiliados/me', {
+      peso_kg: 82,
+      estatura_cm: 175.5,
+      correo: 'afi@metafit.com',
+    });
+    expect(res.data.imc).toBe(26.62);
+  });
+
+  test('getPlanRutinaDia consulta la rutina filtrada del día', async () => {
+    mockInstance.get.mockResolvedValueOnce({ data: { id_rutina: 9, dia_numero: 3, ejercicios: [] } });
+
+    const res = await api.getPlanRutinaDia(5, 3);
+
+    expect(mockInstance.get).toHaveBeenCalledWith('/planes/entrenamiento/5/rutina/3');
+    expect(res.data.id_rutina).toBe(9);
   });
 
   test('un 401 fuera de /login limpia las claves de sesión', async () => {

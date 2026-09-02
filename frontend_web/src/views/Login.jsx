@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { persistUserRole } from "../services/authService";
 import PublicLayout from "../components/PublicLayout";
 import styles from "./Login.module.css";
 
@@ -32,7 +33,7 @@ const ROLE_MAP = {
 };
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, logout } = useAuth();
   const navigate  = useNavigate();
 
   const [form, setForm] = useState({ meta_user: "", meta_pass: "", rol: "Administrador" });
@@ -59,7 +60,17 @@ export default function Login() {
     try {
       const userData = await login({ correo: form.meta_user, contrasena: form.meta_pass });
       const role = userData?.role;
-      localStorage.setItem("metafit_role", role || "");
+
+      // Afiliados NO pueden ingresar a la plataforma web: es solo para personal
+      // administrativo. Su app es la móvil (MetaFit App).
+      if (role === "Afiliado") {
+        logout();
+        setError("Esta plataforma es solo para personal administrativo. Usa la app móvil.");
+        setLoading(false);
+        return;
+      }
+
+      persistUserRole(role || "");
       navigate(ROLE_MAP[role] || "/afiliados", { replace: true });
     } catch (err) {
       const status = err?.response?.status;

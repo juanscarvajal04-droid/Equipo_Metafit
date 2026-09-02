@@ -74,6 +74,67 @@ router.get('/me', requireAuth, AfiliadoController.getMe);
 
 /**
  * @swagger
+ * /afiliados/me:
+ *   patch:
+ *     summary: Actualizar mi perfil (afiliado autenticado)
+ *     description: >
+ *       Actualiza SOLO los campos del perfil del afiliado autenticado.
+ *       · peso (kg)    → PROGRESO_FISICO del ciclo activo (rango 20–300).
+ *       · talla (cm)   → AFILIADO.estatura_cm (rango 1–300).
+ *       · telefono     → AFILIADO.telefono.
+ *       · correo       → USUARIO.correo (debe ser único).
+ *       Responde el IMC recalculado a partir de peso y estatura.
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               peso:
+ *                 type: number
+ *                 description: Peso en kg (20–300) — se guarda como progreso del día
+ *               talla:
+ *                 type: number
+ *                 description: Altura en cm (1–300)
+ *               telefono:
+ *                 type: string
+ *                 maxLength: 20
+ *               correo:
+ *                 type: string
+ *                 format: email
+ *     responses:
+ *       200:
+ *         description: Perfil actualizado correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message: { type: string }
+ *                 imc: { type: number, nullable: true }
+ *                 perfil:
+ *                   type: object
+ *                   properties:
+ *                     id_usuario: { type: integer }
+ *                     telefono: { type: string }
+ *                     estatura_cm: { type: number }
+ *                     correo: { type: string }
+ *                     peso_kg: { type: number }
+ *       400:
+ *         description: Campos inválidos, sin ciclo activo o correo en uso
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.patch('/me', requireAuth, AfiliadoController.updateMe);
+
+/**
+ * @swagger
  * /afiliados/me/ciclos:
  *   get:
  *     summary: Obtener mis ciclos (afiliado autenticado)

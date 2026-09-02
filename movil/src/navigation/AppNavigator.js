@@ -16,6 +16,7 @@ import MiDietaScreen from '../screens/MiDietaScreen';
 import MiProgresoScreen from '../screens/MiProgresoScreen';
 import RegistroEjercicioScreen from '../screens/RegistroEjercicioScreen';
 import RegistroConsumoScreen from '../screens/RegistroConsumoScreen';
+import EditarPerfilScreen from '../screens/EditarPerfilScreen';
 import { COLORS, FONTS } from '../theme';
 
 const Stack = createNativeStackNavigator();
@@ -37,13 +38,15 @@ const TAB_ICONS = {
 };
 
 // Stack raíz que envuelve las tabs: permite abrir pantallas de registro
-// (RegistroEjercicio/RegistroConsumo) encima del área logeada.
+// (RegistroEjercicio/RegistroConsumo) y de edición del perfil (EditarPerfil)
+// encima del área logeada.
 function RootStack() {
   return (
     <Stack.Navigator key="root-stack" screenOptions={{ headerShown: false }}>
       <Stack.Screen name="MainTabs" component={MainTabs} />
       <Stack.Screen name="RegistroEjercicio" component={RegistroEjercicioScreen} />
       <Stack.Screen name="RegistroConsumo" component={RegistroConsumoScreen} />
+      <Stack.Screen name="EditarPerfil" component={EditarPerfilScreen} />
     </Stack.Navigator>
   );
 }

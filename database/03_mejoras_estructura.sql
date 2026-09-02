@@ -130,6 +130,9 @@ CREATE TABLE IF NOT EXISTS `CONSUMO_ALIMENTO_REAL` (
   `fecha`                 DATE         NOT NULL,
   `cantidad_g_consumida`  DECIMAL(7,2) NOT NULL CHECK (`cantidad_g_consumida` > 0),
   `calorias_consumidas`   DECIMAL(8,2) NOT NULL CHECK (`calorias_consumidas` >= 0),
+  `proteinas_consumidas`     DECIMAL(8,2) NOT NULL DEFAULT 0 COMMENT 'Atwater: proteinas_por_100g x gramos / 100',
+  `carbohidratos_consumidos` DECIMAL(8,2) NOT NULL DEFAULT 0 COMMENT 'Atwater: carbohidratos_por_100g x gramos / 100',
+  `grasas_consumidas`        DECIMAL(8,2) NOT NULL DEFAULT 0 COMMENT 'Atwater: grasas_por_100g x gramos / 100',
   `created_at`            DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
   PRIMARY KEY (`id_consumo`),
@@ -154,7 +157,7 @@ CREATE TABLE IF NOT EXISTS `CONSUMO_ALIMENTO_REAL` (
     ON DELETE RESTRICT ON UPDATE CASCADE
 
 ) ENGINE = InnoDB
-  COMMENT = 'Alto volumen. Consumo real por alimento del plan. Calorias = Atwater calculadas en INSERT.';
+  COMMENT = 'Alto volumen. Consumo real por alimento del plan. Calorias y macros = Atwater calculadas en INSERT.';
 
 
 -- ============================================================================================================================

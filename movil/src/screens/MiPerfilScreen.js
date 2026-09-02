@@ -19,7 +19,10 @@ import api, { API_URL } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { activarPushNotifications } from '../services/notifications';
-import { seleccionarCicloActivo, esCicloActivo, formatearFecha } from '../utils/cicloUtils';
+import { seleccionarCicloActivo, esCicloActivo } from '../utils/cicloUtils';
+import { formatearFechaLegible, formatearPeso, formatearAltura, formatearNumero, calcularIMC } from '../utils/formateadores';
+import BadgeRestriccion from '../components/common/BadgeRestriccion';
+import ResumenCiclo from '../components/historial/ResumenCiclo';
 
 function Avatar({ nombre, foto, size = 80 }) {
   const initials = (nombre || 'U')
@@ -162,6 +165,12 @@ export default function MiPerfilScreen({ navigation }) {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
+  // Refetch al volver del editor de perfil (EditarPerfil).
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => { fetchData(); });
+    return unsubscribe;
+  }, [navigation, fetchData]);
+
   // Registro idempotente del push token (si el login no lo hizo aún)
   useEffect(() => { activarPushNotifications(); }, []);
 
@@ -211,10 +220,16 @@ export default function MiPerfilScreen({ navigation }) {
 
   const u = perfil?.usuario || perfil || {};
   const rol = u.nombre_rol || perfil?.rol || 'AFILIADO';
-  const nombreCompleto = `${u.nombre || ''} ${u.apellido || ''}`.trim() || 'Usuario';
-  const edad = u.edad || '-';
-  const peso = u.peso ?? perfil?.peso ?? '-';
-  const altura = u.altura ?? perfil?.altura ?? '-';
+  const nombreCompleto =
+    `${perfil?.nombres || u.nombre || ''} ${perfil?.apellidos || u.apellido || ''}`.trim()
+    || (perfil?.correo ? perfil.correo.split('@')[0] : '')
+    || 'Usuario';
+  const correo = perfil?.correo || u.correo || '';
+  const telefono = perfil?.telefono || u.telefono || '';
+  const edad = perfil?.edad ?? u.edad ?? '-';
+  const peso = perfil?.ciclo_activo?.progreso_fisico?.[0]?.peso_kg ?? perfil?.peso ?? u.peso ?? null;
+  const altura = perfil?.estatura_cm ?? perfil?.altura ?? u.altura ?? null;
+  const imc = perfil?.ciclo_activo?.progreso_fisico?.[0]?.imc ?? calcularIMC(peso, altura);
 
   const historial = ciclos
     .filter((c) => !esCicloActivo(c))
@@ -261,7 +276,7 @@ export default function MiPerfilScreen({ navigation }) {
                 {nombreCompleto}
               </Text>
               <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: FONTS.body, marginTop: 2 }}>
-                {u.correo || ''}
+                {correo}
               </Text>
               <View style={{ flexDirection: 'row', marginTop: SPACING.sm }}>
                 <Badge role={rol} />
@@ -279,10 +294,30 @@ export default function MiPerfilScreen({ navigation }) {
       >
         <SectionCard title="Información Personal" icon="person-outline">
           <InfoRow icon="calendar-outline" label="Edad" value={`${edad} años`} />
-          <InfoRow icon="scale-outline" label="Peso" value={`${peso} kg`} />
-          <InfoRow icon="resize-outline" label="Altura" value={`${altura} cm`} />
-          <InfoRow icon="mail-outline" label="Correo" value={u.correo || '-'} />
-          <InfoRow icon="call-outline" label="Teléfono" value={u.telefono || '-'} />
+          <InfoRow icon="scale-outline" label="Peso" value={formatearPeso(peso)} />
+          <InfoRow icon="resize-outline" label="Altura" value={formatearAltura(altura)} />
+          <InfoRow icon="pulse-outline" label="IMC" value={imc != null ? formatearNumero(imc, 2) : '-'} />
+          <InfoRow icon="mail-outline" label="Correo" value={correo || '-'} />
+          <InfoRow icon="call-outline" label="Teléfono" value={telefono || '-'} />
+
+          <TouchableOpacity
+            onPress={() => navigation.navigate('EditarPerfil')}
+            activeOpacity={0.8}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: COLORS.purpleGlow,
+              borderRadius: BORDER_RADIUS.md,
+              padding: SPACING.sm,
+              marginTop: SPACING.sm,
+            }}
+          >
+            <Ionicons name="create-outline" size={18} color={COLORS.purpleLight} style={{ marginRight: SPACING.sm }} />
+            <Text style={{ color: COLORS.purpleLight, fontSize: FONTS.body, fontWeight: '600' }}>
+              Editar perfil
+            </Text>
+          </TouchableOpacity>
         </SectionCard>
 
         {ciclo ? (
@@ -292,7 +327,7 @@ export default function MiPerfilScreen({ navigation }) {
               <InfoRow icon="flag-outline" label="Objetivo" value={ciclo.objetivo_fisico} />
             )}
             {ciclo.fecha_inicio && ciclo.fecha_fin && (
-              <InfoRow icon="calendar-outline" label="Fechas" value={`${formatearFecha(ciclo.fecha_inicio)} → ${formatearFecha(ciclo.fecha_fin)}`} />
+              <InfoRow icon="calendar-outline" label="Fechas" value={`${formatearFechaLegible(ciclo.fecha_inicio)} → ${formatearFechaLegible(ciclo.fecha_fin)}`} />
             )}
             {ciclo.disponibilidad_dias != null && (
               <InfoRow icon="calendar-outline" label="Días de Entreno" value={`${ciclo.disponibilidad_dias}/semana`} />
@@ -309,63 +344,26 @@ export default function MiPerfilScreen({ navigation }) {
 
         {historial.length > 0 && (
           <SectionCard title="Historial de Ciclos" icon="time-outline">
-            {historial.map((c) => (
-              <InfoRow
-                key={c.id_ciclo}
-                icon="calendar-outline"
-                label={`Ciclo ${c.numero_ciclo || c.id_ciclo}`}
-                value={
-                  c.fecha_inicio && c.fecha_fin
-                    ? `${formatearFecha(c.fecha_inicio)} → ${formatearFecha(c.fecha_fin)}${c.objetivo_fisico ? ` · ${c.objetivo_fisico}` : ''}`
-                    : (c.objetivo_fisico || '-')
-                }
-              />
-            ))}
+            <View style={{ marginTop: SPACING.xs }}>
+              {historial.map((c) => (
+                <ResumenCiclo key={c.id_ciclo} ciclo={c} />
+              ))}
+            </View>
           </SectionCard>
         )}
 
         {restricciones.length > 0 && (
           <SectionCard title="Restricciones" icon="warning-outline">
-            {restricciones.map((r, i) => {
-              const nombre = r.nombre_restriccion || r.descripcion || r.nombre || 'Restricción';
-              return (
-                <View key={r.id_restriccion ?? i} style={{
-                  flexDirection: 'row',
-                  alignItems: 'flex-start',
-                  backgroundColor: 'rgba(227,28,37,0.1)',
-                  borderRadius: BORDER_RADIUS.sm,
-                  padding: SPACING.sm,
-                  marginBottom: SPACING.xs,
-                }}>
-                  <Ionicons name="alert-circle" size={16} color={COLORS.error} style={{ marginRight: SPACING.sm, marginTop: 2 }} />
-                  <View style={{ flex: 1 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' }}>
-                      <Text style={{ color: COLORS.text, fontSize: FONTS.small, fontWeight: '600', flexShrink: 1 }}>
-                        {nombre}
-                      </Text>
-                      {r.tipo ? (
-                        <View style={{
-                          backgroundColor: COLORS.purpleGlow,
-                          borderRadius: 10,
-                          paddingHorizontal: 8,
-                          paddingVertical: 2,
-                          marginLeft: SPACING.sm,
-                        }}>
-                          <Text style={{ color: COLORS.purpleLight, fontSize: FONTS.xsmall, fontWeight: '600' }}>
-                            {r.tipo}
-                          </Text>
-                        </View>
-                      ) : null}
-                    </View>
-                    {r.efecto_relevante ? (
-                      <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.xsmall, marginTop: 2 }}>
-                        {r.efecto_relevante}
-                      </Text>
-                    ) : null}
-                  </View>
-                </View>
-              );
-            })}
+            {restricciones.map((r, i) => (
+              <View key={r.id_restriccion ?? i} style={{ marginBottom: SPACING.xs }}>
+                <BadgeRestriccion restriccion={r} />
+                {r.efecto_relevante ? (
+                  <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.xsmall, marginTop: 2, marginLeft: SPACING.sm }}>
+                    {r.efecto_relevante}
+                  </Text>
+                ) : null}
+              </View>
+            ))}
           </SectionCard>
         )}
 

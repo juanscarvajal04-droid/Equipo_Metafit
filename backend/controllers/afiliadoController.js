@@ -268,6 +268,32 @@ const AfiliadoController = {
     }
   },
 
+  // FASE A.1: el afiliado autenticado edita su perfil (PATCH /afiliados/me)
+  updateMe: async (req, res) => {
+    try {
+      const result = await AfiliadoService.updateMe(req.user.sub, req.body);
+      return res.json(result);
+    } catch (err) {
+      if (err.code === 'DATOS_INVALIDOS' || err.code === 'SIN_CICLO_ACTIVO') {
+        return res.status(400).json({ error: err.message });
+      }
+      if (err.code === 'CORREO_EN_USO') {
+        return res.status(409).json({ error: err.message });
+      }
+      if (err.code === 'NO_ENCONTRADO') {
+        return res.status(404).json({ error: err.message });
+      }
+      if (err.code === 'ER_DUP_ENTRY') {
+        return res.status(400).json({ error: 'Ya existe un afiliado con ese correo' });
+      }
+      if (err.code === 'ER_CHECK_CONSTRAINT_VIOLATED') {
+        return res.status(400).json({ error: 'El peso debe estar entre 20 y 300 kg' });
+      }
+      console.error('[afiliadoController.updateMe]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
   getMisRestricciones: async (req, res) => {
     try {
       const restr = await AfiliadoService.getRestricciones(req.user.sub);

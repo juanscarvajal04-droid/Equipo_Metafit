@@ -13,7 +13,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS, GRADIENTS, FONTS, SPACING, SHADOWS, BORDER_RADIUS } from '../theme';
 import { getMiProgreso, getAguaHistorial, getConsumoHistorial, getProgresoEjercicioHistorial } from '../services/api';
 import { getHistorialEjerciciosReales, getHistorialConsumosReales } from '../services/registroService';
+import { formatearFechaLegible, nombreComida } from '../utils/formateadores';
 import StatsCard from '../components/common/StatsCard';
+import GraficoPeso from '../components/graficos/GraficoPeso';
+import GraficoVolumen from '../components/graficos/GraficoVolumen';
+import GraficoCumplimiento from '../components/graficos/GraficoCumplimiento';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -48,7 +52,7 @@ function ProgressStatCard({ icon, label, value, color }) {
 }
 
 function ProgresoItem({ item, isLatest }) {
-  const fecha = item.fecha || item.created_at || '-';
+  const fecha = formatearFechaLegible(item.fecha || item.created_at);
   const peso = item.peso ?? '-';
   const imc = item.imc ?? item.IMC ?? '-';
   const grasa = item.grasa_corporal ?? item.grasa ?? item.porcentaje_grasa ?? '-';
@@ -267,6 +271,40 @@ export default function MiProgresoScreen() {
             )}
           </View>
 
+          <GraficoPeso data={progreso} />
+          <GraficoVolumen data={registrosEjercicio} />
+          <GraficoCumplimiento registrosConsumo={registrosConsumo} />
+
+          <View style={{
+            backgroundColor: COLORS.bgCard,
+            borderRadius: BORDER_RADIUS.md,
+            padding: SPACING.md,
+            borderWidth: 1,
+            borderColor: COLORS.border,
+            marginBottom: SPACING.lg,
+            ...SHADOWS.subtle,
+          }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: SPACING.sm }}>
+              <Ionicons name="information-circle-outline" size={18} color={COLORS.purpleLight} style={{ marginRight: SPACING.sm }} />
+              <Text style={{ color: COLORS.text, fontSize: FONTS.body, fontWeight: '700' }}>
+                ¿De dónde vienen estos datos?
+              </Text>
+            </View>
+            {[
+              { icon: 'scale-outline', txt: 'Peso e IMC: fichas de progreso físico registradas por tu entrenador.' },
+              { icon: 'barbell-outline', txt: 'Ejercicios: tu progreso diario y los registros reales (series × reps × peso).' },
+              { icon: 'water-outline', txt: 'Agua: los vasos que registrás cada día en la sección Dieta.' },
+              { icon: 'restaurant-outline', txt: 'Alimentos: lo que consumís al registrar cada comida (gramos y kcal).' },
+            ].map((item) => (
+              <View key={item.icon} style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: SPACING.xs }}>
+                <Ionicons name={item.icon} size={14} color={COLORS.textSecondary} style={{ marginRight: SPACING.sm, marginTop: 2 }} />
+                <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.small, flex: 1 }}>
+                  {item.txt}
+                </Text>
+              </View>
+            ))}
+          </View>
+
           {latest && (
             <View style={{ marginBottom: SPACING.md }}>
               <Text style={{ color: COLORS.text, fontSize: FONTS.body, fontWeight: '700', marginBottom: SPACING.sm }}>
@@ -336,7 +374,7 @@ export default function MiProgresoScreen() {
                     padding: SPACING.sm,
                     marginBottom: SPACING.xs,
                   }}>
-                    <Text style={{ color: COLORS.text, fontSize: FONTS.body }}>{fecha}</Text>
+                    <Text style={{ color: COLORS.text, fontSize: FONTS.body }}>{formatearFechaLegible(fecha)}</Text>
                     <Text style={{
                       color: completados === total ? COLORS.check : COLORS.warning,
                       fontSize: FONTS.body, fontWeight: '700',
@@ -364,7 +402,7 @@ export default function MiProgresoScreen() {
                   padding: SPACING.sm,
                   marginBottom: SPACING.xs,
                 }}>
-                  <Text style={{ color: COLORS.text, fontSize: FONTS.body }}>{a.fecha}</Text>
+                  <Text style={{ color: COLORS.text, fontSize: FONTS.body }}>{formatearFechaLegible(a.fecha)}</Text>
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Ionicons name="water" size={16} color={COLORS.water} />
                     <Text style={{ color: COLORS.text, fontSize: FONTS.body, fontWeight: '700', marginLeft: SPACING.xs }}>
@@ -395,7 +433,7 @@ export default function MiProgresoScreen() {
                     marginBottom: SPACING.xs,
                   }}>
                     <Text style={{ color: COLORS.text, fontSize: FONTS.body, fontWeight: '700', marginBottom: SPACING.xs }}>
-                      {fecha}
+                      {formatearFechaLegible(fecha)}
                     </Text>
                     {items.map((c, i) => (
                       <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 2 }}>
@@ -433,7 +471,7 @@ export default function MiProgresoScreen() {
                       {r.nombre_ejercicio}
                     </Text>
                     <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.xsmall, marginTop: 1 }}>
-                      {r.fecha}
+                      {formatearFechaLegible(r.fecha)}
                     </Text>
                     <Text style={{ color: COLORS.textMuted, fontSize: FONTS.xsmall, marginTop: 1 }}>
                       {r.series}×{r.repeticiones}
@@ -469,7 +507,7 @@ export default function MiProgresoScreen() {
                       {c.nombre_alimento}
                     </Text>
                     <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.xsmall, marginTop: 1 }}>
-                      {c.fecha} · Comida {c.num_comida}
+                      {formatearFechaLegible(c.fecha)} · {nombreComida(c.num_comida)}
                     </Text>
                   </View>
                   <Text style={{ color: COLORS.warning, fontSize: FONTS.body, fontWeight: '700' }}>
