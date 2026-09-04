@@ -56,24 +56,28 @@ const avatarColor = (nombre) => {
   return `hsl(${Math.abs(hash) % 360}, 65%, 55%)`;
 };
 
-const fotoUrl = (foto) =>
-  foto ? (foto.startsWith("http") ? foto : `${API_BASE_URL}${foto}`) : null;
+const fotoUrl = (foto) => {
+  if (!foto || typeof foto !== "string") return null;
+  return foto.startsWith("http") ? foto : `${API_BASE_URL}${foto}`;
+};
 
 const AvatarFoto = ({ nombre, foto, size = 32, style }) => {
+  const safeNombre = nombre || "";
   const url = fotoUrl(foto);
   if (url) {
     return (
       <img
         src={url}
-        alt={nombre}
+        alt={safeNombre}
+        onError={(e) => { e.target.style.display = "none"; }}
         style={{ width: size, height: size, borderRadius: "50%", objectFit: "cover", flexShrink: 0, ...style }}
       />
     );
   }
-  const inicialLetra = nombre ? (nombre.trim()[0] || "?").toUpperCase() : "?";
+  const inicialLetra = safeNombre.trim()[0] || "?";
   return (
-    <div className={s.avatarTd} style={{ background: avatarColor(nombre), ...style }}>
-      {inicialLetra}
+    <div className={s.avatarTd} style={{ background: avatarColor(safeNombre || "?"), ...style }}>
+      {inicialLetra.toUpperCase()}
     </div>
   );
 };
@@ -108,8 +112,8 @@ export default function AfiliadosView() {
       const { data } = await authAxios.get("/afiliados");
       setAfiliados(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error("[AfiliadosView]", err);
-      showToast("Error al cargar afiliados", "danger");
+      console.error("[AfiliadosView] fetchAfiliados:", err?.response?.data || err);
+      setAfiliados([]);
     } finally {
       setLoading(false);
     }
@@ -118,6 +122,14 @@ export default function AfiliadosView() {
   useEffect(() => {
     fetchAfiliados();
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (fotoPreview && fotoPreview.startsWith("blob:")) {
+        URL.revokeObjectURL(fotoPreview);
+      }
+    };
+  }, [fotoPreview]);
 
   const afiliadosFiltrados = afiliados.filter((a) => {
     if (!search) return true;
@@ -131,11 +143,15 @@ export default function AfiliadosView() {
   const abrirDetalle = async (a) => {
     try {
       const id = getId(a);
+      if (!id) {
+        showToast("Error: no se pudo identificar el afiliado", "danger");
+        return;
+      }
       const { data } = await authAxios.get(`/afiliados/${id}`);
       setDetalleAfiliado(data);
       setTabActivo(0);
     } catch (err) {
-      console.error("[AfiliadosView] detalle:", err);
+      console.error("[AfiliadosView] detalle:", err?.response?.data || err);
       showToast("Error al cargar detalle del afiliado", "danger");
     }
   };
@@ -166,27 +182,37 @@ export default function AfiliadosView() {
   const subirFoto = async (id, file) => {
     const fd = new FormData();
     fd.append("foto", file);
-    await authAxios.post(`/afiliados/${id}/foto`, fd, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+    await authAxios.post(`/afiliados/${id}/foto`, fd);
   };
 
   const guardarEdicion = async (e) => {
     e.preventDefault();
+    if (saving) return;
     setSaving(true);
     try {
       const id = getId(editandoAfiliado);
+      if (!id) {
+        showToast("Error: no se pudo identificar el afiliado", "danger");
+        return;
+      }
       await authAxios.patch(`/afiliados/${id}`, formEdit);
-      if (fotoFile) await subirFoto(id, fotoFile);
+      if (fotoFile) {
+        try {
+          await subirFoto(id, fotoFile);
+        } catch (fotoErr) {
+          console.error("[AfiliadosView] subirFoto edicion:", fotoErr);
+        }
+      }
       showToast("Afiliado actualizado correctamente", "success");
       setEditandoAfiliado(null);
       setFotoFile(null);
       setFotoPreview(null);
-      fetchAfiliados();
+      await fetchAfiliados();
       window.dispatchEvent(new CustomEvent("afiliado-modificado"));
     } catch (err) {
-      console.error("[AfiliadosView] edicion:", err);
-      showToast("Error al actualizar afiliado", "danger");
+      console.error("[AfiliadosView] edicion:", err?.response?.data || err);
+      const msg = err?.response?.data?.error || "Error al actualizar afiliado";
+      showToast(msg, "danger");
     } finally {
       setSaving(false);
     }
@@ -194,6 +220,7 @@ export default function AfiliadosView() {
 
   const handleCrear = async (e) => {
     e.preventDefault();
+    if (saving) return;
     setSaving(true);
     try {
       const payload = {
@@ -204,7 +231,13 @@ export default function AfiliadosView() {
       };
       delete payload.estado;
       const { data } = await authAxios.post("/afiliados", payload);
-      if (fotoFile && data?.id) await subirFoto(data.id, fotoFile);
+      if (fotoFile && data?.id) {
+        try {
+          await subirFoto(data.id, fotoFile);
+        } catch (fotoErr) {
+          console.error("[AfiliadosView] subirFoto:", fotoErr);
+        }
+      }
       // Asignar restricciones seleccionadas en el registro (crear → asignar)
       if (data?.id && restriccionesSeleccionadas.length > 0) {
         for (const r of restriccionesSeleccionadas) {
@@ -221,27 +254,34 @@ export default function AfiliadosView() {
       setFotoFile(null);
       setFotoPreview(null);
       setRestriccionesSeleccionadas([]);
-      fetchAfiliados();
+      await fetchAfiliados();
       window.dispatchEvent(new CustomEvent("afiliado-modificado"));
     } catch (err) {
-      console.error("[AfiliadosView] crear:", err);
-      showToast("Error al crear afiliado", "danger");
+      console.error("[AfiliadosView] crear:", err?.response?.data || err);
+      const msg = err?.response?.data?.error || "Error al crear afiliado";
+      showToast(msg, "danger");
     } finally {
       setSaving(false);
     }
   };
 
   const handleEliminar = async (a) => {
-    if (!window.confirm(`¿Eliminar a ${nombreCompleto(a)}?`)) return;
+    const nombre = nombreCompleto(a);
+    if (!window.confirm(`¿Eliminar a ${nombre}?`)) return;
     try {
       const id = getId(a);
+      if (!id) {
+        showToast("Error: no se pudo identificar el afiliado", "danger");
+        return;
+      }
       await authAxios.delete(`/afiliados/${id}`);
       showToast("Afiliado eliminado", "success");
-      fetchAfiliados();
+      await fetchAfiliados();
       window.dispatchEvent(new CustomEvent("afiliado-modificado"));
     } catch (err) {
-      console.error("[AfiliadosView] eliminar:", err);
-      showToast("Error al eliminar afiliado", "danger");
+      console.error("[AfiliadosView] eliminar:", err?.response?.data || err);
+      const msg = err?.response?.data?.error || "Error al eliminar afiliado";
+      showToast(msg, "danger");
     }
   };
 
