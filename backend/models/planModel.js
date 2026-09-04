@@ -55,6 +55,56 @@ const PlanModel = {
     return plan;
   },
 
+  // ── RUTINA DEL DÍA (FASE A.3) ─────────────────────────────
+  // Devuelve la rutina de UN día con SOLO los ejercicios del grupo
+  // muscular del día (el enfoque_muscular de la rutina), opcionalmente
+  // sobrescrito por ?grupo_muscular=. El contrato del móvil (todas las
+  // rutinas con ejercicios) queda intacto vía getEntrenamientoByCiclo.
+  getRutinaDiaria: async (id_ciclo, dia_numero, grupo_muscular) => {
+    const [rutinas] = await pool.query(`
+      SELECT r.id_rutina, r.nombre_rutina, r.enfoque_muscular, r.dia_numero,
+        JSON_ARRAYAGG(
+          JSON_OBJECT(
+            'orden',          re.orden,
+            'id_ejercicio',   e.id_ejercicio,
+            'nombre_ejercicio', e.nombre_ejercicio,
+            'grupo_muscular', e.grupo_muscular,
+            'series',         re.series,
+            'repeticiones',   re.repeticiones,
+            'peso_kg',        re.peso_kg,
+            'descanso_seg',   re.descanso_seg,
+            'instrucciones',  e.descripcion
+          )
+        ) AS ejercicios
+      FROM RUTINA r
+      LEFT JOIN RUTINA_EJERCICIO re ON r.id_rutina = re.id_rutina
+      LEFT JOIN EJERCICIO e ON re.id_ejercicio = e.id_ejercicio
+      WHERE r.id_ciclo = ? AND r.dia_numero = ?
+      GROUP BY r.id_rutina
+    `, [id_ciclo, dia_numero]);
+    if (!rutinas.length) return null;
+
+    const rutina = rutinas[0];
+    if (typeof rutina.ejercicios === 'string') {
+      rutina.ejercicios = JSON.parse(rutina.ejercicios);
+    }
+    const todos = (rutina.ejercicios || [])
+      .filter(e => e && e.id_ejercicio != null)
+      .sort((a, b) => a.orden - b.orden);
+
+    // Filtro por grupo muscular del día (default: el enfoque de la rutina)
+    const grupo = (grupo_muscular || rutina.enfoque_muscular || '').toLowerCase();
+    const filtrados = todos.filter(e =>
+      (e.grupo_muscular || '').toLowerCase() === grupo
+    );
+
+    // Fallback: si ningún ejercicio coincide con el grupo del día
+    // (datos mal etiquetados), mostrar TODA la rutina del día para que
+    // el afiliado nunca reciba un plan vacío.
+    rutina.ejercicios = filtrados.length ? filtrados : todos;
+    return rutina;
+  },
+
   // Sin es_automatico (eliminado en schema: decisión YAGNI)
   createEntrenamiento: async (id_ciclo, modificado_por, observaciones) => {
     const [r] = await pool.query(

@@ -27,21 +27,18 @@
 - [[Notificaciones]] — Push notifications y notificaciones por rol
 
 ### 🚀 Despliegue
-- [[Render]] — Backend en Render.com con Docker
-- [[Railway]] — Base de datos MySQL en Railway
-- [[Brevo]] — Envío de correos transaccionales
-- [[Cloudinary]] — Almacenamiento de fotos de perfil
-- [[CI-CD]] — GitHub Actions con 74 tests
-- [[n8n]] — Automatización: Telegram, Google Sheets, recordatorios
+- `../manual_despliegue.md` — Guía completa de despliegue (Render, Railway, Brevo, Cloudinary, CI/CD)
+- `../n8n.md` — Automatización n8n: webhooks, credenciales, troubleshooting
 
 ### 🐛 Bugs y Soluciones
 - [[Historial de bugs]] — Bugs documentados y cómo se resolvieron
 - [[Lecciones aprendidas]] — Mejores prácticas descubiertas
 
 ### 📖 Manuales
-- [[ManualTécnico|Técnico]] — Arquitectura, seguridad, endpoints
-- [[ManualUsuario|Usuario]] — Guías por rol (Admin, Entrenador, Recepcionista, Afiliado)
-- [[ManualPostman|Postman]] — Colecciones y uso de la API
+- `../MANUAL_TECNICO.md` — Arquitectura, seguridad, endpoints
+- `../MANUAL_USUARIO.md` — Guías por rol (Admin, Entrenador, Recepcionista, Afiliado)
+- `../MANUAL_POSTMAN.md` — Colecciones y uso de la API
+- `../MANUAL_INGENIERIA_COMPLETO.md` — Manual integral de ingeniería
 
 ### 🎨 Diseño
 - [[Paleta de colores]] — Tokens de color dark/light, roles, marca

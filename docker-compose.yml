@@ -3,20 +3,23 @@
 # Archivo: /docker-compose.yml  (raíz del proyecto)
 # Uso:     docker compose up --build
 #
-# FIX: volumen de DB apunta ahora a ./database/ (carpeta completa),
-#      no a un archivo individual. Docker ejecuta todos los .sql
-#      dentro de /docker-entrypoint-initdb.d/ en orden LEXICOGRÁFICO:
-#        01_schema.sql  -> CREATE TABLE (primero)
-#        02_seed.sql    -> INSERT INTO  (segundo, después de crear tablas)
+# BD: imagen mariadb:11 (motor de producción). Docker ejecuta todos
+#      los .sql de ./database/ dentro de /docker-entrypoint-initdb.d/
+#      en orden LEXICOGRÁFICO, que coincide con las DEPENDENCIAS:
+#        01_estructura.sql         -> tablas base
+#        02_migracion_movil.sql    -> tablas app móvil   (depende de 01)
+#        03_mejoras_estructura.sql -> columnas + tablas  (depende de 01 y 02)
+#        04_datos_iniciales.sql    -> TODOS los datos    (depende de 01, 02 y 03)
+#        05_password_reset.sql     -> tabla recuperación (depende de 01)
 # ============================================================
 
 services:
 
   # ──────────────────────────────────────────────────────────
-  # SERVICIO 1: Base de Datos MySQL 8
+  # SERVICIO 1: Base de Datos MariaDB 11
   # ──────────────────────────────────────────────────────────
   db:
-    image: mysql:8.0
+    image: mariadb:11
     container_name: metafit_db
     restart: unless-stopped
     environment:
@@ -25,19 +28,19 @@ services:
       # Forzar utf8mb4 desde arranque para evitar problemas de encoding
       MYSQL_INITDB_SKIP_TZINFO: "true"
     ports:
-      - "3307:3306"
+      - "3306:3306"
     volumes:
-      # FIX: se monta la CARPETA completa (no un archivo individual).
-      # Docker ejecuta TODOS los .sql en orden lexicográfico:
-      #   01_schema.sql → primero (DDL: CREATE TABLE)
-      #   02_seed.sql   → segundo (DML: INSERT INTO)
+      # Se monta la CARPETA completa. Docker ejecuta TODOS los .sql en
+      # orden lexicográfico, que ya coincide con las dependencias:
+      #   01_estructura -> 02_migracion_movil -> 03_mejoras_estructura
+      #   -> 04_datos_iniciales -> 05_password_reset
       # Los scripts solo se ejecutan si el volumen de datos está vacío
       # (primer arranque). Para re-ejecutarlos: docker compose down -v
       - ./database:/docker-entrypoint-initdb.d:ro
       # Persistencia de datos entre reinicios
       - metafit_db_data:/var/lib/mysql
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}" ]
+      test: [ "CMD", "mariadb-admin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}" ]
       interval: 10s
       timeout: 5s
       retries: 10

@@ -13,9 +13,9 @@ import axios from 'axios';
  * En producción Render se inyecta: VITE_API_URL=https://metafit-backend-rr18.onrender.com
  * En desarrollo local, crea un .env en /frontend_web:
  *   VITE_API_URL=http://localhost:3001
- * El fallback apunta SIEMPRE al backend de producción (nunca a localhost).
+ * El fallback apunta al backend local de desarrollo.
  */
-const BASE_URL = import.meta.env.VITE_API_URL || 'https://metafit-backend-rr18.onrender.com';
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 /** URL base pública del backend (para imágenes servidas bajo /uploads) */
 export const API_BASE_URL = BASE_URL;

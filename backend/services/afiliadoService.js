@@ -5,6 +5,7 @@ const AfiliadoModel          = require('../models/afiliadoModel');
 const CicloModel             = require('../models/cicloModel');
 const CatalogoModel          = require('../models/catalogoModel');
 const SeguimientoDiarioModel = require('../models/seguimientoDiarioModel');
+const UsuarioModel           = require('../models/usuarioModel');
 
 // FIX 1.3 / ISO 25000: normalizarFecha extraída a utils/fechaUtils.js
 // para que sea testeable sin dependencia de BD.
@@ -39,6 +40,101 @@ const AfiliadoService = {
   update: async (id, datos) => {
     const affected = await AfiliadoModel.update(id, datos);
     return affected > 0;
+  },
+
+  // ── FASE A.1: el afiliado edita su PROPIO perfil (PATCH /afiliados/me) ──
+  // Validaciones basadas en el esquema real:
+  //   · peso  → PROGRESO_FISICO.peso_kg         → CHECK 20–300 kg
+  //   · talla → AFILIADO.estatura_cm            → 1–300 cm
+  //   · correo→ USUARIO.correo                  → regex + unicidad (uq_usuario_correo)
+  updateMe: async (id, datos) => {
+    // Acepta alias usados por los frontends (peso o peso_kg, talla/altura_cm/estatura_cm)
+    const pesoKg     = datos.peso_kg !== undefined ? datos.peso_kg : datos.peso;
+    const estaturaCm = datos.estatura_cm !== undefined
+      ? datos.estatura_cm
+      : (datos.altura_cm !== undefined ? datos.altura_cm : datos.talla);
+    const telefono   = datos.telefono;
+    const correo     = datos.correo;
+
+    if (pesoKg === undefined && estaturaCm === undefined
+        && telefono === undefined && correo === undefined) {
+      const err = new Error('No hay campos para actualizar. Envía peso, talla, telefono o correo.');
+      err.code = 'DATOS_INVALIDOS';
+      throw err;
+    }
+
+    // ── Validaciones individuales ──────────────────────────
+    if (pesoKg !== undefined) {
+      if (!Number.isFinite(Number(pesoKg)) || Number(pesoKg) < 20 || Number(pesoKg) > 300) {
+        const err = new Error('El peso debe estar entre 20 y 300 kg');
+        err.code = 'DATOS_INVALIDOS';
+        throw err;
+      }
+    }
+
+    if (estaturaCm !== undefined) {
+      if (!Number.isFinite(Number(estaturaCm)) || Number(estaturaCm) < 1 || Number(estaturaCm) > 300) {
+        const err = new Error('La altura debe estar entre 1 y 300 cm');
+        err.code = 'DATOS_INVALIDOS';
+        throw err;
+      }
+    }
+
+    if (telefono !== undefined && String(telefono).length > 20) {
+      const err = new Error('El teléfono no puede superar 20 caracteres');
+      err.code = 'DATOS_INVALIDOS';
+      throw err;
+    }
+
+    let correoNormalizado;
+    if (correo !== undefined) {
+      correoNormalizado = String(correo).trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correoNormalizado)) {
+        const err = new Error('Formato de correo inválido');
+        err.code = 'DATOS_INVALIDOS';
+        throw err;
+      }
+      // Unicidad: uq_usuario_correo (excepto si es su propio correo)
+      const existente = await UsuarioModel.findByEmail(correoNormalizado);
+      if (existente && Number(existente.id_usuario) !== Number(id)) {
+        const err = new Error('Ese correo ya está en uso por otro usuario');
+        err.code = 'CORREO_EN_USO';
+        throw err;
+      }
+    }
+
+    // ── Persistir ──────────────────────────────────────────
+    const act = await AfiliadoModel.updateMe(id, {
+      telefono,
+      estatura_cm: estaturaCm !== undefined ? Number(estaturaCm) : undefined,
+      correo:      correoNormalizado,
+      peso_kg:     pesoKg !== undefined ? Number(pesoKg) : undefined,
+    });
+
+    if (!act) {
+      const err = new Error('Afiliado no encontrado');
+      err.code = 'NO_ENCONTRADO';
+      throw err;
+    }
+
+    // ── Recalcular IMC con los datos ya persistidos ────────
+    const perfil = await AfiliadoModel.getMeData(id);
+    let imc = null;
+    if (perfil && perfil.estatura_cm && perfil.peso_kg && Number(perfil.estatura_cm) > 0) {
+      imc = Math.round((perfil.peso_kg / Math.pow(perfil.estatura_cm / 100, 2)) * 100) / 100;
+    }
+
+    return {
+      message: 'Perfil actualizado correctamente',
+      imc,
+      perfil: {
+        id_usuario:  perfil?.id_usuario  ?? id,
+        telefono:    perfil?.telefono    ?? null,
+        estatura_cm: perfil?.estatura_cm ?? null,
+        correo:      perfil?.correo      ?? null,
+        peso_kg:     perfil?.peso_kg     ?? null,
+      },
+    };
   },
 
   getFoto: async (id) => {

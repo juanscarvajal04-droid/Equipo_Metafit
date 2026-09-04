@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { COLORS, GRADIENTS, FONTS, SPACING, SHADOWS, BORDER_RADIUS } from '../theme';
 import {
   getMisCiclos,
@@ -20,6 +21,8 @@ import {
   guardarConsumoAlimento,
 } from '../services/api';
 import { seleccionarCicloActivo } from '../utils/cicloUtils';
+import { formatearFechaLegible, nombreComida } from '../utils/formateadores';
+import BarraAgua from '../components/common/BarraAgua';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const MAX_VASOS = 8;
@@ -37,7 +40,7 @@ function VasoAgua({ lleno, index, onPress }) {
   );
 }
 
-function ComidaCard({ numComida, alimentos, consumidos, onToggle }) {
+function ComidaCard({ comidaNombre, alimentos, consumidos, onToggle, onRegistrar }) {
   const total = alimentos.length;
   const hechos = alimentos.filter((a) => consumidos[a.id_alimento]).length;
   const progress = total > 0 ? hechos / total : 0;
@@ -64,7 +67,7 @@ function ComidaCard({ numComida, alimentos, consumidos, onToggle }) {
         </LinearGradient>
         <View style={{ flex: 1 }}>
           <Text style={{ color: COLORS.text, fontSize: FONTS.body, fontWeight: '700' }}>
-            Comida {numComida}
+            {comidaNombre}
           </Text>
           <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.small }}>
             {hechos}/{total} alimentos
@@ -87,10 +90,8 @@ function ComidaCard({ numComida, alimentos, consumidos, onToggle }) {
       {alimentos.map((al) => {
         const done = consumidos[al.id_alimento];
         return (
-          <TouchableOpacity
+          <View
             key={al.id_alimento}
-            onPress={() => onToggle(al.id_alimento)}
-            activeOpacity={0.7}
             style={{
               flexDirection: 'row',
               alignItems: 'center',
@@ -99,41 +100,55 @@ function ComidaCard({ numComida, alimentos, consumidos, onToggle }) {
               borderBottomColor: COLORS.border,
             }}
           >
-            <LinearGradient
-              colors={done ? ['#10b981', '#059669'] : COLORS.borderActive ? ['rgba(255,255,255,0.1)', 'rgba(255,255,255,0.05)'] : ['#333', '#333']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={{
-                width: 24,
-                height: 24,
-                borderRadius: 12,
-                justifyContent: 'center',
-                alignItems: 'center',
-                marginRight: SPACING.md,
-              }}
+            <TouchableOpacity
+              onPress={() => onToggle(al.id_alimento)}
+              activeOpacity={0.7}
+              style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
             >
-              {done && <Ionicons name="checkmark" size={16} color="#fff" />}
-            </LinearGradient>
-            <View style={{ flex: 1 }}>
-              <Text style={{
-                color: COLORS.text,
-                fontSize: FONTS.body,
-                fontWeight: '500',
-                textDecorationLine: done ? 'line-through' : 'none',
-                opacity: done ? 0.6 : 1,
-              }}>
-                {al.nombre || `Alimento ${al.id_alimento}`}
-              </Text>
-              {(al.calorias || al.cantidad) && (
-                <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.small, marginTop: 1 }}>
-                  {al.cantidad ? `${al.cantidad}g` : ''}
-                  {al.cantidad && al.calorias ? ' · ' : ''}
-                  {al.calorias ? `${al.calorias} kcal` : ''}
+              <LinearGradient
+                colors={done ? ['#10b981', '#059669'] : COLORS.borderActive ? ['rgba(255,255,255,0.1)', 'rgba(255,255,255,0.05)'] : ['#333', '#333']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: 12,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  marginRight: SPACING.md,
+                }}
+              >
+                {done && <Ionicons name="checkmark" size={16} color="#fff" />}
+              </LinearGradient>
+              <View style={{ flex: 1 }}>
+                <Text style={{
+                  color: COLORS.text,
+                  fontSize: FONTS.body,
+                  fontWeight: '500',
+                  textDecorationLine: done ? 'line-through' : 'none',
+                  opacity: done ? 0.6 : 1,
+                }}>
+                  {al.nombre || `Alimento ${al.id_alimento}`}
                 </Text>
-              )}
-            </View>
-            {done && <Ionicons name="checkmark-circle" size={18} color={COLORS.check} />}
-          </TouchableOpacity>
+                {(al.calorias || al.cantidad) && (
+                  <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.small, marginTop: 1 }}>
+                    {al.cantidad ? `${al.cantidad}g` : ''}
+                    {al.cantidad && al.calorias ? ' · ' : ''}
+                    {al.calorias ? `${al.calorias} kcal` : ''}
+                  </Text>
+                )}
+              </View>
+              {done && <Ionicons name="checkmark-circle" size={18} color={COLORS.check} />}
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => onRegistrar(al)}
+              activeOpacity={0.7}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              style={{ padding: SPACING.xs, marginLeft: SPACING.sm }}
+            >
+              <Ionicons name="add-circle-outline" size={20} color={COLORS.purpleLight} />
+            </TouchableOpacity>
+          </View>
         );
       })}
     </View>
@@ -141,6 +156,7 @@ function ComidaCard({ numComida, alimentos, consumidos, onToggle }) {
 }
 
 export default function MiDietaScreen() {
+  const navigation = useNavigation();
   const [ciclo, setCiclo] = useState(null);
   const [ciclos, setCiclos] = useState([]);
   const [showPicker, setShowPicker] = useState(false);
@@ -224,6 +240,21 @@ export default function MiDietaScreen() {
     setConsumidos((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const openRegistro = (al) => {
+    navigation.getParent()?.navigate('RegistroConsumo', {
+      id_ciclo: ciclo?.id_ciclo,
+      num_comida: al.num_comida || 1,
+      id_alimento: al.id_alimento,
+      nombre: al.nombre || al.nombre_alimento,
+      macrosPor100g: {
+        calorias: al.calorias ?? null,
+        proteinas: al.proteinas ?? null,
+        carbohidratos: al.carbohidratos ?? null,
+        grasas: al.grasas ?? null,
+      },
+    });
+  };
+
   const handleSave = async () => {
     if (!ciclo) return;
     setSaving(true);
@@ -270,7 +301,9 @@ export default function MiDietaScreen() {
       <LinearGradient colors={GRADIENTS.purple} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
         style={{ paddingHorizontal: SPACING.lg, paddingTop: SPACING.xl, paddingBottom: SPACING.lg }}>
         <Text style={{ color: '#fff', fontSize: FONTS.title, fontWeight: '800' }}>Mi Dieta</Text>
-        <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: FONTS.body, marginTop: 4 }}>{hoy}</Text>
+        <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: FONTS.body, marginTop: 4 }}>
+          {formatearFechaLegible(hoy)}
+        </Text>
 
         <View style={{
           backgroundColor: 'rgba(255,255,255,0.1)',
@@ -290,6 +323,8 @@ export default function MiDietaScreen() {
               <VasoAgua key={i} index={i} lleno={i < agua} onPress={handleAgua} />
             ))}
           </View>
+
+          <BarraAgua actual={agua} meta={MAX_VASOS} />
         </View>
 
         {ciclos.length > 1 && (
@@ -339,7 +374,7 @@ export default function MiDietaScreen() {
                     {c.nombre_ciclo || `Ciclo ${c.id_ciclo}`}
                   </Text>
                   <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.small, marginTop: 2 }}>
-                    {c.fecha_inicio} — {c.fecha_fin || 'Activo'}
+                    {formatearFechaLegible(c.fecha_inicio)} — {c.fecha_fin ? formatearFechaLegible(c.fecha_fin) : 'Activo'}
                   </Text>
                 </TouchableOpacity>
               );
@@ -370,10 +405,11 @@ export default function MiDietaScreen() {
             comidas.map(([num, al]) => (
               <ComidaCard
                 key={num}
-                numComida={num}
+                comidaNombre={nombreComida(num)}
                 alimentos={al}
                 consumidos={consumidos}
                 onToggle={toggleAlimento}
+                onRegistrar={openRegistro}
               />
             ))
           )}

@@ -462,6 +462,116 @@ const AfiliadoModel = {
   },
 
   // ─────────────────────────────────────────────────────────
+  // updateMe — el afiliado actualiza su PROPIO perfil autenticado.
+  //   telefono / direccion / estatura_cm → AFILIADO
+  //   correo                              → USUARIO
+  //   peso_kg                             → PROGRESO_FISICO (ciclo activo,
+  //                                        upsert con fecha de hoy).
+  //   El IMC NO se almacena: se recalcula en getMeData.
+  // ─────────────────────────────────────────────────────────
+  updateMe: async (id, campos) => {
+    const permitidosAfiliado = ['telefono', 'direccion', 'estatura_cm'];
+    const permitidosUsuario  = ['correo'];
+
+    const setsAfiliado = [];
+    const valsAfiliado = [];
+    for (const key of permitidosAfiliado) {
+      if (campos[key] !== undefined) {
+        setsAfiliado.push(`${key}=?`);
+        valsAfiliado.push(campos[key]);
+      }
+    }
+
+    const setsUsuario = [];
+    const valsUsuario = [];
+    for (const key of permitidosUsuario) {
+      if (campos[key] !== undefined) {
+        setsUsuario.push(`${key}=?`);
+        valsUsuario.push(campos[key]);
+      }
+    }
+
+    if (!setsAfiliado.length && !setsUsuario.length && campos.peso_kg === undefined) return 0;
+
+    const conn = await pool.getConnection();
+    try {
+      await conn.beginTransaction();
+      let affected = 0;
+
+      if (setsAfiliado.length) {
+        setsAfiliado.push('fecha_ultima_modificacion = NOW()');
+        const [r] = await conn.query(
+          `UPDATE AFILIADO SET ${setsAfiliado.join(',')} WHERE id_usuario=?`,
+          [...valsAfiliado, id]
+        );
+        affected = r.affectedRows;
+      }
+
+      if (setsUsuario.length) {
+        const [r] = await conn.query(
+          `UPDATE USUARIO SET ${setsUsuario.join(',')} WHERE id_usuario=?`,
+          [...valsUsuario, id]
+        );
+        if (!setsAfiliado.length) affected = r.affectedRows;
+      }
+
+      // Peso → PROGRESO_FISICO del ciclo activo (registrado por sí mismo = afiliado)
+      if (campos.peso_kg !== undefined) {
+        const [ciclos] = await conn.query(
+          'SELECT id_ciclo FROM CICLO WHERE id_usuario = ? AND activo = 1 ORDER BY fecha_inicio DESC LIMIT 1',
+          [id]
+        );
+        if (!ciclos.length) {
+          const err = new Error('No hay un ciclo activo para registrar el peso');
+          err.code = 'SIN_CICLO_ACTIVO';
+          throw err;
+        }
+        await conn.query(
+          `INSERT INTO PROGRESO_FISICO (id_ciclo, fecha_registro, peso_kg, registrado_por)
+           VALUES (?, CURDATE(), ?, ?)
+           ON DUPLICATE KEY UPDATE peso_kg = VALUES(peso_kg)`,
+          [ciclos[0].id_ciclo, campos.peso_kg, id]
+        );
+      }
+
+      await conn.commit();
+      return true;
+    } catch (err) {
+      await conn.rollback();
+      throw err;
+    } finally {
+      conn.release();
+    }
+  },
+
+  // ─────────────────────────────────────────────────────────
+  // getMeData — datos ligeros del perfil autenticado para
+  //             recalcular IMC (peso + estatura) tras updateMe.
+  // ─────────────────────────────────────────────────────────
+  getMeData: async (id) => {
+    const [rows] = await pool.query(`
+      SELECT
+        a.id_usuario,
+        a.telefono,
+        a.estatura_cm,
+        u.correo,
+        u.estado,
+        (
+          SELECT pf.peso_kg
+          FROM PROGRESO_FISICO pf
+          JOIN CICLO c ON pf.id_ciclo = c.id_ciclo
+          WHERE c.id_usuario = a.id_usuario AND c.activo = 1
+          ORDER BY pf.fecha_registro DESC
+          LIMIT 1
+        ) AS peso_kg
+      FROM AFILIADO a
+      JOIN USUARIO u ON a.id_usuario = u.id_usuario
+      WHERE a.id_usuario = ?
+    `, [id]);
+    return rows[0] || null;
+  },
+
+  // ─────────────────────────────────────────────────────────
   // getFoto / setFoto — ruta de la foto de perfil (AFILIADO.foto)
   // ─────────────────────────────────────────────────────────
   getFoto: async (id) => {

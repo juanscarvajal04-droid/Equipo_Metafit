@@ -29,6 +29,12 @@ runMigracionesRutinaDetalles()
   .then(() => console.log('✅ Migración de detalles de rutina verificada'))
   .catch(err => console.error('[MIGRACION-RUTINA-DETALLES] error:', err.message));
 
+// ── Migración idempotente: macronutrientes en CONSUMO_ALIMENTO_REAL (FASE A.2) ──
+const { runMigraciones: runMigracionesNutrientes } = require('./migrations/migracionNutrientesConsumo');
+runMigracionesNutrientes()
+  .then(() => console.log('✅ Migración de nutrientes de consumo verificada'))
+  .catch(err => console.error('[MIGRACION-NUTRIENTES-CONSUMO] error:', err.message));
+
 // ── Cron: recordatorio de pagos por vencer (cada hora) ──
 const { iniciarCron } = require('./cron/recordatorioPagos');
 iniciarCron();

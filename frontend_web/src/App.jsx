@@ -15,6 +15,8 @@ const AfiliadosView    = lazy(() => import("./views/AfiliadosView"));
 const GestionPersonal  = lazy(() => import("./views/GestionPersonal"));
 const RutinasView      = lazy(() => import("./views/RutinasView"));
 const DietasView       = lazy(() => import("./views/DietasView"));
+const RestriccionesAdmin = lazy(() => import("./views/RestriccionesAdmin"));
+const ProgresoAfiliado = lazy(() => import("./views/ProgresoAfiliado"));
 const PagosView        = lazy(() => import("./views/PagosView"));
 const FinanzasView     = lazy(() => import("./views/FinanzasView"));
 
@@ -100,6 +102,8 @@ export default function App() {
               <Route path="/personal" element={<GestionPersonal />} />
               {/* 💰 Panel de Finanzas — Solo Administrador */}
               <Route path="/finanzas" element={<FinanzasView />} />
+              {/* 🛡️ Catálogo de Restricciones Médicas — Solo Administrador */}
+              <Route path="/admin/restricciones" element={<RestriccionesAdmin />} />
             </Route>
 
             {/* ══════════════════════════════════════════════════════════════
@@ -120,6 +124,8 @@ export default function App() {
             <Route element={<ProtectedRoute allowedRoles={ADMIN_TRAIN} />}>
               <Route path="/rutinas" element={<RutinasView />} />
               <Route path="/dietas" element={<DietasView />} />
+              {/* 📊 Dashboard de progreso por afiliado — Admin + Entrenador */}
+              <Route path="/progreso/:id" element={<ProgresoAfiliado />} />
             </Route>
 
             {/* ══════════════════════════════════════════════════════════════

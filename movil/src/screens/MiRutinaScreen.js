@@ -11,20 +11,23 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { COLORS, GRADIENTS, FONTS, SPACING, SHADOWS, BORDER_RADIUS } from '../theme';
 import {
   getMisCiclos,
   getPlanEntrenamiento,
+  getPlanRutinaDia,
   guardarProgresoEjercicio,
   getProgresoEjercicioHoy,
 } from '../services/api';
 import { seleccionarCicloActivo } from '../utils/cicloUtils';
+import { formatearFechaLegible, capitalizar } from '../utils/formateadores';
 
 const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 const EJERCICIO_ROW_H = 58;
 const INSTRUCCIONES_H = 96;
 
-function DiaCard({ dia, ejercicios, completados, onToggle, expandido, setExpandido, detalleEjercicio, onToggleDetalle }) {
+function DiaCard({ dia, ejercicios, completados, onToggle, expandido, setExpandido, detalleEjercicio, onToggleDetalle, onRegistrar, grupo }) {
   const completadosCount = ejercicios.filter((e) => completados[e.id_ejercicio]).length;
   const total = ejercicios.length;
   const progress = total > 0 ? completadosCount / total : 0;
@@ -74,9 +77,24 @@ function DiaCard({ dia, ejercicios, completados, onToggle, expandido, setExpandi
           </View>
           <View style={{ flex: 1 }}>
             <Text style={{ color: COLORS.text, fontSize: FONTS.body, fontWeight: '700' }}>{dia}</Text>
-            <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.small, marginTop: 2 }}>
-              {completadosCount}/{total} ejercicios
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
+              <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.small }}>
+                {completadosCount}/{total} ejercicios
+              </Text>
+              {grupo ? (
+                <View style={{
+                  backgroundColor: COLORS.purpleGlow,
+                  borderRadius: 10,
+                  paddingHorizontal: 8,
+                  paddingVertical: 1,
+                  marginLeft: SPACING.sm,
+                }}>
+                  <Text style={{ color: COLORS.purpleLight, fontSize: FONTS.xsmall, fontWeight: '600' }}>
+                    {grupo}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
           </View>
           <Ionicons
             name={expandido === dia ? 'chevron-up' : 'chevron-down'}
@@ -182,6 +200,14 @@ function DiaCard({ dia, ejercicios, completados, onToggle, expandido, setExpandi
                     color={COLORS.textSecondary}
                   />
                 </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => onRegistrar(ej)}
+                  activeOpacity={0.7}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  style={{ padding: SPACING.xs, marginLeft: SPACING.xs }}
+                >
+                  <Ionicons name="add-circle-outline" size={20} color={COLORS.purpleLight} />
+                </TouchableOpacity>
               </View>
             );
           })}
@@ -192,6 +218,7 @@ function DiaCard({ dia, ejercicios, completados, onToggle, expandido, setExpandi
 }
 
 export default function MiRutinaScreen() {
+  const navigation = useNavigation();
   const [ciclo, setCiclo] = useState(null);
   const [ciclos, setCiclos] = useState([]);
   const [showPicker, setShowPicker] = useState(false);
@@ -203,11 +230,25 @@ export default function MiRutinaScreen() {
   const [expandido, setExpandido] = useState(null);
   const [detalleEjercicio, setDetalleEjercicio] = useState(null);
   const [diaSeleccionado, setDiaSeleccionado] = useState(null);
+  const [rutinaDia, setRutinaDia] = useState(null);
   const [error, setError] = useState(null);
 
   const hoy = new Date().toISOString().slice(0, 10);
   const diaSemana = DAYS[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1];
   const diaNumeroHoy = new Date().getDay() === 0 ? 7 : new Date().getDay();
+
+  // Rutina del día filtrada por su grupo muscular (endpoint FASE A.3).
+  // Si el endpoint falla (día sin rutina), se cae al plan completo.
+  const loadRutinaDia = useCallback(async (cicloId, diaNumero) => {
+    setRutinaDia(null);
+    if (!cicloId || !diaNumero) return;
+    try {
+      const res = await getPlanRutinaDia(cicloId, diaNumero);
+      setRutinaDia(res.data || null);
+    } catch (_) {
+      setRutinaDia(null);
+    }
+  }, []);
 
   const fetchData = useCallback(async (cicloSeleccionado) => {
     try {
@@ -230,6 +271,7 @@ export default function MiRutinaScreen() {
       const ejerciciosPlan = rutinas.flatMap((r) =>
         (r.ejercicios || []).map((e) => ({
           ...e,
+          id_rutina: r.id_rutina,
           nombre: e.nombre_ejercicio,
           dia: r.nombre_rutina,
           dia_numero: r.dia_numero,
@@ -237,6 +279,8 @@ export default function MiRutinaScreen() {
       );
       setEjercicios(ejerciciosPlan);
       setDiaSeleccionado(null);
+
+      loadRutinaDia(cicloData.id_ciclo, diaNumeroHoy);
 
       const ids = ejerciciosPlan.map((e) => e.id_ejercicio);
       if (ids.length > 0) {
@@ -256,7 +300,7 @@ export default function MiRutinaScreen() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [loadRutinaDia, diaNumeroHoy]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -276,6 +320,24 @@ export default function MiRutinaScreen() {
 
   const toggleDetalle = (id) => {
     setDetalleEjercicio((prev) => (prev === id ? null : id));
+  };
+
+  const openRegistro = (ej) => {
+    navigation.getParent()?.navigate('RegistroEjercicio', {
+      id_ciclo: ciclo?.id_ciclo,
+      id_rutina: ej.id_rutina,
+      orden: ej.orden,
+      nombre: ej.nombre,
+      nombre_rutina: ej.dia,
+    });
+  };
+
+  // Al elegir un día, carga su rutina filtrada por grupo muscular (A.3).
+  const selectDia = (dia) => {
+    const seccion = getDiasData().find(([d]) => d === dia)?.[1];
+    const diaNumero = seccion?.[0]?.dia_numero;
+    setDiaSeleccionado(dia);
+    if (ciclo?.id_ciclo && diaNumero) loadRutinaDia(ciclo.id_ciclo, diaNumero);
   };
 
   const handleSave = async () => {
@@ -320,7 +382,25 @@ export default function MiRutinaScreen() {
   const diaDefault =
     diasData.find(([, ej]) => ej[0].dia_numero === diaNumeroHoy)?.[0] || diasData[0]?.[0] || null;
   const diaVisible = diaSeleccionado || diaDefault;
-  const ejerciciosDia = diasData.find(([dia]) => dia === diaVisible)?.[1] || [];
+  const ejerciciosDiaRaw = diasData.find(([dia]) => dia === diaVisible)?.[1] || [];
+  // Usa la rutina del día filtrada por grupo muscular (A.3) cuando llega;
+  // si no (fallback o error), muestra el plan completo del día.
+  const rutinaDiaAplicable =
+    rutinaDia &&
+    ejerciciosDiaRaw.length &&
+    rutinaDia.dia_numero === ejerciciosDiaRaw[0].dia_numero;
+  const ejerciciosDia = rutinaDiaAplicable
+    ? (rutinaDia.ejercicios || []).map((e) => ({
+        ...e,
+        id_rutina: rutinaDia.id_rutina,
+        nombre: e.nombre_ejercicio,
+        dia: diaVisible,
+        dia_numero: rutinaDia.dia_numero,
+      }))
+    : ejerciciosDiaRaw;
+  const grupoMuscular = rutinaDiaAplicable
+    ? capitalizar(rutinaDia.enfoque_muscular)
+    : (ejerciciosDiaRaw[0]?.grupo_muscular ? capitalizar(ejerciciosDiaRaw[0].grupo_muscular) : '');
   const totalEj = ejercicios.length;
   const totalDone = Object.values(completados).filter(Boolean).length;
   const globalProgress = totalEj > 0 ? totalDone / totalEj : 0;
@@ -331,7 +411,7 @@ export default function MiRutinaScreen() {
         style={{ paddingHorizontal: SPACING.lg, paddingTop: SPACING.xl, paddingBottom: SPACING.lg }}>
         <Text style={{ color: '#fff', fontSize: FONTS.title, fontWeight: '800' }}>Mi Rutina</Text>
         <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: FONTS.body, marginTop: 4 }}>
-          {hoy} — {diaSemana}
+          {formatearFechaLegible(hoy)} — {diaSemana}
         </Text>
 
         <View style={{
@@ -407,7 +487,7 @@ export default function MiRutinaScreen() {
                     {c.nombre_ciclo || `Ciclo ${c.id_ciclo}`}
                   </Text>
                   <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.small, marginTop: 2 }}>
-                    {c.fecha_inicio} — {c.fecha_fin || 'Activo'}
+                    {formatearFechaLegible(c.fecha_inicio)} — {c.fecha_fin ? formatearFechaLegible(c.fecha_fin) : 'Activo'}
                   </Text>
                 </TouchableOpacity>
               );
@@ -438,7 +518,7 @@ export default function MiRutinaScreen() {
                   return (
                     <TouchableOpacity
                       key={dia}
-                      onPress={() => setDiaSeleccionado(dia)}
+                      onPress={() => selectDia(dia)}
                       activeOpacity={0.8}
                       style={{
                         paddingHorizontal: SPACING.md,
@@ -482,6 +562,8 @@ export default function MiRutinaScreen() {
                 setExpandido={setExpandido}
                 detalleEjercicio={detalleEjercicio}
                 onToggleDetalle={toggleDetalle}
+                onRegistrar={openRegistro}
+                grupo={grupoMuscular}
               />
             )}
           </ScrollView>

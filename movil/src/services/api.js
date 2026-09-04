@@ -77,3 +77,9 @@ export const getConsumoHistorial = (params = {}) =>
 
 export const getProgresoEjercicioHistorial = (params = {}) =>
   api.get('/afiliados/me/progreso-ejercicio/historial', { params });
+
+export const actualizarMiPerfil = (datos) =>
+  api.patch('/afiliados/me', datos);
+
+export const getPlanRutinaDia = (idCiclo, diaNumero) =>
+  api.get(`/planes/entrenamiento/${idCiclo}/rutina/${diaNumero}`);

@@ -18,6 +18,26 @@ const PlanController = {
     }
   },
 
+  // FASE A.3: rutina del día filtrada por su grupo muscular
+  getRutinaDiaria: async (req, res) => {
+    const diaNumero = parseInt(req.params.dia_numero, 10);
+    if (!Number.isInteger(diaNumero) || diaNumero < 1 || diaNumero > 7) {
+      return res.status(400).json({ error: 'dia_numero debe estar entre 1 y 7' });
+    }
+    try {
+      const rutina = await PlanModel.getRutinaDiaria(
+        req.params.id_ciclo, diaNumero, req.query.grupo_muscular
+      );
+      if (!rutina) {
+        return res.status(404).json({ error: 'No hay rutina para ese día en este ciclo' });
+      }
+      res.json(rutina);
+    } catch (err) {
+      console.error('[planController.getRutinaDiaria]', err);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
   createEntrenamiento: async (req, res) => {
     const { id_ciclo, observaciones } = req.body;
     if (!id_ciclo) return res.status(400).json({ error: 'id_ciclo es requerido' });

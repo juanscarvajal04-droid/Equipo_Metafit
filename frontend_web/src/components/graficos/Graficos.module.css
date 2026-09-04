@@ -1,0 +1,12 @@
+.chartWrap {
+  position: relative;
+  height: 280px;
+  width: 100%;
+}
+
+.vacio {
+  color: var(--mf-muted);
+  font-size: 0.85rem;
+  font-style: italic;
+  padding: 1.5rem 0;
+}

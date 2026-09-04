@@ -4,6 +4,7 @@
 const express              = require('express');
 const router               = express.Router();
 const AfiliadoController   = require('../controllers/afiliadoController');
+const RegistroController   = require('../controllers/registroController');
 const { requireAuth, requireAdmin, requireAdminOrEntrenador, requireAdminOrRecepcionista, requireStaff } = require('../middlewares/auth');
 const { uploadFoto }       = require('../middlewares/uploadFoto');
 
@@ -73,6 +74,67 @@ router.get('/me', requireAuth, AfiliadoController.getMe);
 
 /**
  * @swagger
+ * /afiliados/me:
+ *   patch:
+ *     summary: Actualizar mi perfil (afiliado autenticado)
+ *     description: >
+ *       Actualiza SOLO los campos del perfil del afiliado autenticado.
+ *       · peso (kg)    → PROGRESO_FISICO del ciclo activo (rango 20–300).
+ *       · talla (cm)   → AFILIADO.estatura_cm (rango 1–300).
+ *       · telefono     → AFILIADO.telefono.
+ *       · correo       → USUARIO.correo (debe ser único).
+ *       Responde el IMC recalculado a partir de peso y estatura.
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               peso:
+ *                 type: number
+ *                 description: Peso en kg (20–300) — se guarda como progreso del día
+ *               talla:
+ *                 type: number
+ *                 description: Altura en cm (1–300)
+ *               telefono:
+ *                 type: string
+ *                 maxLength: 20
+ *               correo:
+ *                 type: string
+ *                 format: email
+ *     responses:
+ *       200:
+ *         description: Perfil actualizado correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message: { type: string }
+ *                 imc: { type: number, nullable: true }
+ *                 perfil:
+ *                   type: object
+ *                   properties:
+ *                     id_usuario: { type: integer }
+ *                     telefono: { type: string }
+ *                     estatura_cm: { type: number }
+ *                     correo: { type: string }
+ *                     peso_kg: { type: number }
+ *       400:
+ *         description: Campos inválidos, sin ciclo activo o correo en uso
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.patch('/me', requireAuth, AfiliadoController.updateMe);
+
+/**
+ * @swagger
  * /afiliados/me/ciclos:
  *   get:
  *     summary: Obtener mis ciclos (afiliado autenticado)
@@ -130,6 +192,219 @@ router.get('/me/progreso', requireAuth, AfiliadoController.getMiProgreso);
  *         $ref: '#/components/responses/InternalError'
  */
 router.get('/me/restricciones', requireAuth, AfiliadoController.getMisRestricciones);
+
+// ─────────────────────────────────────────────────────────────
+// REGISTRO REAL (FASE 1) — app móvil
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * @swagger
+ * /afiliados/me/ejercicios-disponibles:
+ *   get:
+ *     summary: Ejercicios disponibles para el afiliado autenticado (excluye los prohibidos por sus restricciones)
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: grupo_muscular
+ *         schema: { type: string }
+ *         description: Filtro opcional por grupo muscular
+ *     responses:
+ *       200:
+ *         description: Lista de ejercicios permitidos para el afiliado
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.get('/me/ejercicios-disponibles', requireAuth, RegistroController.getEjerciciosDisponibles);
+
+/**
+ * @swagger
+ * /afiliados/me/alimentos-disponibles:
+ *   get:
+ *     summary: Alimentos disponibles para el afiliado autenticado (excluye los prohibidos por sus restricciones)
+ *     description: Enriquecidos con calorías por 100 g (vista v_alimento_calorias).
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: max_kcal
+ *         schema: { type: number }
+ *         description: Filtro opcional de calorías máximas por 100 g
+ *       - in: query
+ *         name: min_proteinas
+ *         schema: { type: number }
+ *         description: Filtro opcional de proteína mínima (g/100 g)
+ *     responses:
+ *       200:
+ *         description: Lista de alimentos permitidos para el afiliado
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.get('/me/alimentos-disponibles', requireAuth, RegistroController.getAlimentosDisponibles);
+
+/**
+ * @swagger
+ * /afiliados/me/registro-ejercicio:
+ *   post:
+ *     summary: Registrar ejecución real de un ejercicio (series, reps y peso)
+ *     description: >
+ *       Guarda un registro en REGISTRO_EJERCICIO para el afiliado autenticado.
+ *       Requiere id_ciclo, id_rutina, orden, fecha, series y repeticiones.
+ *       Se valida que el ciclo le pertenezca y que el ejercicio esté en la rutina.
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [id_ciclo, id_rutina, orden, fecha, series, repeticiones]
+ *             properties:
+ *               id_ciclo:          { type: integer }
+ *               id_rutina:         { type: integer }
+ *               orden:             { type: integer }
+ *               fecha:             { type: string, format: date }
+ *               series:            { type: integer, minimum: 1 }
+ *               repeticiones:      { type: integer, minimum: 1 }
+ *               peso_utilizado_kg: { type: number, example: 60.0 }
+ *               notas:             { type: string }
+ *     responses:
+ *       201:
+ *         description: Ejercicio registrado correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:      { type: string }
+ *                 id_registro:  { type: integer }
+ *                 resumen:      { type: object, description: Resumen diario actualizado }
+ *       400:
+ *         description: Datos faltantes/inválidos o ejercicio fuera de la rutina
+ *       403:
+ *         description: El ciclo no pertenece al afiliado
+ *       404:
+ *         description: Ciclo no encontrado
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       409:
+ *         description: Ya existe un registro idéntico para esa fecha
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.post('/me/registro-ejercicio', requireAuth, RegistroController.registerEjercicio);
+
+/**
+ * @swagger
+ * /afiliados/me/registro-ejercicio/historial:
+ *   get:
+ *     summary: Historial de registros reales de ejercicios (máx. 300)
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: id_ciclo
+ *         schema: { type: integer }
+ *       - in: query
+ *         name: fechaInicio
+ *         schema: { type: string, format: date }
+ *       - in: query
+ *         name: fechaFin
+ *         schema: { type: string, format: date }
+ *     responses:
+ *       200:
+ *         description: Lista de registros con ejercicio, volumen calculado y fecha
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ */
+router.get('/me/registro-ejercicio/historial', requireAuth, RegistroController.getHistorialEjercicios);
+
+/**
+ * @swagger
+ * /afiliados/me/consumo-alimento-real:
+ *   post:
+ *     summary: Registrar consumo real de un alimento del plan
+ *     description: >
+ *       Guarda en CONSUMO_ALIMENTO_REAL. Las calorías se calculan con la fórmula Atwater
+ *       sobre los macros reales del alimento y la cantidad. El alimento debe pertenecer
+ *       al plan nutricional del ciclo (FK compuesta a DETALLE_NUTRICIONAL).
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [id_ciclo, num_comida, id_alimento, fecha, cantidad_g_consumida]
+ *             properties:
+ *               id_ciclo:             { type: integer }
+ *               num_comida:           { type: integer, description: Número de comida (1..4) }
+ *               id_alimento:          { type: integer }
+ *               fecha:                { type: string, format: date }
+ *               cantidad_g_consumida: { type: number, example: 150 }
+ *     responses:
+ *       201:
+ *         description: Consumo registrado correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:               { type: string }
+ *                 id_consumo:            { type: integer }
+ *                 calorias_consumidas:   { type: number }
+ *                 resumen:               { type: object, description: Resumen diario actualizado }
+ *       400:
+ *         description: Datos faltantes/inválidos o alimento fuera del plan
+ *       403:
+ *         description: El ciclo no pertenece al afiliado
+ *       404:
+ *         description: Ciclo no encontrado
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       409:
+ *         description: Ya existe un registro idéntico para esa fecha
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.post('/me/consumo-alimento-real', requireAuth, RegistroController.registerConsumoAlimento);
+
+/**
+ * @swagger
+ * /afiliados/me/consumo-alimento-real/historial:
+ *   get:
+ *     summary: Historial de consumos reales de alimentos (máx. 300)
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: id_ciclo
+ *         schema: { type: integer }
+ *       - in: query
+ *         name: fechaInicio
+ *         schema: { type: string, format: date }
+ *       - in: query
+ *         name: fechaFin
+ *         schema: { type: string, format: date }
+ *     responses:
+ *       200:
+ *         description: Lista de consumos con alimento, cantidad y calorías
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ */
+router.get('/me/consumo-alimento-real/historial', requireAuth, RegistroController.getHistorialConsumos);
 
 /**
  * @swagger
@@ -481,7 +756,10 @@ router.get('/:id/restricciones', requireAuth, requireStaff, AfiliadoController.g
  * @swagger
  * /afiliados/{id}/restricciones:
  *   post:
- *     summary: Asignar restricción médica al afiliado (Admin o Entrenador)
+ *     summary: Asignar restricción médica al afiliado (rol staff)
+ *     description: >
+ *       Disponible para Administrador, Entrenador y Recepcionista.
+ *       La Recepcionista lo usa al registrar un afiliado nuevo (crear → asignar).
  *     tags: [Afiliados]
  *     security:
  *       - bearerAuth: []
@@ -506,13 +784,13 @@ router.get('/:id/restricciones', requireAuth, requireStaff, AfiliadoController.g
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.post('/:id/restricciones', requireAuth, requireAdminOrEntrenador, AfiliadoController.addRestriccion);
+router.post('/:id/restricciones', requireAuth, requireStaff, AfiliadoController.addRestriccion);
 
 /**
  * @swagger
  * /afiliados/{id}/restricciones/{id_restriccion}:
  *   delete:
- *     summary: Remover restricción médica de un afiliado (Admin o Entrenador)
+ *     summary: Remover restricción médica de un afiliado (rol staff)
  *     tags: [Afiliados]
  *     security:
  *       - bearerAuth: []
@@ -533,7 +811,7 @@ router.post('/:id/restricciones', requireAuth, requireAdminOrEntrenador, Afiliad
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.delete('/:id/restricciones/:id_restriccion', requireAuth, requireAdminOrEntrenador, AfiliadoController.removeRestriccion);
+router.delete('/:id/restricciones/:id_restriccion', requireAuth, requireStaff, AfiliadoController.removeRestriccion);
 
 // ─────────────────────────────────────────────────────────────
 // CATÁLOGOS FILTRADOS POR RESTRICCIONES DEL AFILIADO

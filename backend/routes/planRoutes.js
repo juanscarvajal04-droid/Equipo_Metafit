@@ -69,6 +69,58 @@ router.get('/entrenamiento/:id_ciclo', requireAuth, requireOwnCiclo, PlanControl
 
 /**
  * @swagger
+ * /planes/entrenamiento/{id_ciclo}/rutina/{dia_numero}:
+ *   get:
+ *     summary: Obtener la rutina del día filtrada por su grupo muscular (FASE A.3)
+ *     description: >
+ *       Devuelve la rutina del día indicado con SOLO los ejercicios cuyo
+ *       grupo_muscular coincide con el enfoque_muscular de la rutina (grupo
+ *       muscular del día). Opcional: ?grupo_muscular= para sobrescribir el filtro.
+ *     tags: [Planes]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id_ciclo
+ *         required: true
+ *         schema: { type: integer }
+ *         description: Identificador del ciclo
+ *       - in: path
+ *         name: dia_numero
+ *         required: true
+ *         schema: { type: integer, minimum: 1, maximum: 7 }
+ *         description: Día de la semana (1=domingo … 7=sábado)
+ *       - in: query
+ *         name: grupo_muscular
+ *         required: false
+ *         schema: { type: string }
+ *         description: Grupo muscular por el que filtrar (default: enfoque_muscular del día)
+ *     responses:
+ *       200:
+ *         description: Rutina del día con ejercicios filtrados
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id_rutina:      { type: integer }
+ *                 nombre_rutina:  { type: string }
+ *                 enfoque_muscular: { type: string }
+ *                 dia_numero:     { type: integer }
+ *                 ejercicios:     { type: array }
+ *       400:
+ *         description: dia_numero inválido
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       404:
+ *         description: No hay rutina para ese día en este ciclo
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.get('/entrenamiento/:id_ciclo/rutina/:dia_numero', requireAuth, requireOwnCiclo, PlanController.getRutinaDiaria);
+
+/**
+ * @swagger
  * /planes/entrenamiento:
  *   post:
  *     summary: Crear plan de entrenamiento para un ciclo (Admin o Entrenador)
