@@ -395,7 +395,7 @@ DB_PASSWORD=Admin123!
 DB_NAME=metafit
 JWT_SECRET=metafit_jwt_secret_key_2024
 JWT_EXPIRES_IN=8h
-CORS_ORIGINS=http://localhost:5173,http://localhost:8081,http://192.168.0.4:8081,exp://192.168.0.4:8081
+CORS_ORIGINS=http://localhost:5173,http://localhost:8081,http://127.0.0.1:5173,http://127.0.0.1:8081
 ```
 
 **⚠️ ADVERTENCIA DE SEGURIDAD:** Este `.env` contiene credenciales para desarrollo local. NUNCA subas este archivo a GitHub. Ya está en `.gitignore`, pero verificá:
