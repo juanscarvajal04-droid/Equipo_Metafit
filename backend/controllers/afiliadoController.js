@@ -35,7 +35,11 @@ const AfiliadoController = {
       const result = await AfiliadoService.create(req.body, req.user.sub);
       // Correo de bienvenida + webhook n8n (fire-and-forget: nunca bloquea la respuesta)
       if (result?.id) {
-        const passwordTemporal = req.body.contrasena || req.body.password || null;
+        // Contraseña efectiva: la que genera el backend (MF_{documento}@2025)
+        // si el frontend no envía `contrasena`. Fallback documentado.
+        const passwordTemporal = result.password_temporal
+          || req.body.contrasena || req.body.password
+          || 'MetaFit2025!';
         AfiliadoService.getById(result.id)
           .then((detalle) => {
             if (!detalle) return null;

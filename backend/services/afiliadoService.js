@@ -34,8 +34,14 @@ const AfiliadoService = {
       fecha_nacimiento: normalizarFecha(datos.fecha_nacimiento),
     };
 
-    const id = await AfiliadoModel.create(datosNormalizados, creatorId);
-    return { id, message: 'Afiliado creado correctamente' };
+    const creado = await AfiliadoModel.create(datosNormalizados, creatorId);
+    return {
+      id: creado.id_usuario,
+      message: 'Afiliado creado correctamente',
+      // Contraseña efectiva (generada por el modelo si el frontend no la envió).
+      // Se usa para el correo de bienvenida y el webhook n8n.
+      password_temporal: creado.password_temporal,
+    };
   },
 
   update: async (id, datos) => {

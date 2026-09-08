@@ -71,6 +71,15 @@ services:
       CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME:-}
       CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY:-}
       CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET:-}
+      # Correo de bienvenida (Brevo). SMTP_FROM debe ser remitente verificado en Brevo.
+      BREVO_API_KEY: ${BREVO_API_KEY:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-metafit.sistema@gmail.com}
+      URL_APK: ${URL_APK:-https://metafit-frontend-78x6.onrender.com/app/metafit.apk}
     ports:
       - "${PORT}:${PORT}"
     depends_on:
