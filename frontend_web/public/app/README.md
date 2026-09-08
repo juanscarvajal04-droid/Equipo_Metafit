@@ -1,7 +1,8 @@
 # APK de MetaFit — App Móvil
 
-Colocá el archivo `metafit.apk` en esta carpeta para que esté disponible
-para descarga desde la landing page en `/app/metafit.apk`.
+El APK de la app móvil se coloca en esta carpeta para que esté disponible por
+descarga desde la landing page en `/app/metafit.apk` y desde el correo de
+bienvenida (URL `https://metafit-frontend-78x6.onrender.com/app/metafit.apk`).
 
 ## Versión actual
 
@@ -43,4 +44,10 @@ cp movil/android/app/build/outputs/apk/release/app-release.apk frontend_web/publ
 cp movil/android/app/build/outputs/apk/release/app-release.apk frontend_web/dist/app/metafit.apk
 ```
 
-Alternativa en la nube: `cd movil && npx eas build --platform android --profile production`.
+## Nota
+
+Alternativa: la landing page también puede apuntar directamente al artefacto de
+EAS (`https://expo.dev/artifacts/eas/<id>.apk`) en `frontend_web/src/views/LandingPage.jsx`,
+sin subir el binario al repositorio. El enfoque que mantiene el binario en
+`frontend_web/public/app/metafit.apk` es el que usa actualmente el correo de
+bienvenida y permite servir el APK desde el sitio estático.
