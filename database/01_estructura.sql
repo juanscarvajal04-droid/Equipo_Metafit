@@ -676,3 +676,45 @@ SET FOREIGN_KEY_CHECKS = 1;
 --   EJERCICIO (N) >--< (N) RESTRICCION via EJERCICIO_RESTRICCION_EXCLUIDA
 --   ALIMENTO  (N) >--< (N) RESTRICCION via ALIMENTO_RESTRICCION_EXCLUIDA
 -- ============================================================================================================================
+
+
+-- ============================================================================================================================
+-- BLOQUE 12 - NOTA_EJERCICIO (Parte 3: nota del afiliado sobre un ejercicio)
+-- Feedback del afiliado sobre un ejercicio de su plan, visible para staff en la web.
+-- UNIQUE (id_usuario, id_ejercicio, id_ciclo, fecha_nota): el móvil hace upsert
+-- idempotente al tocar "Guardar nota" (1 nota por ejercicio/plan/día).
+-- Duplicada en backend/migrations/migracionNotaEjercicio.js para entornos runtime (Render)
+-- donde el arranque crea la tabla automáticamente sin SQL manual.
+-- ============================================================================================================================
+
+CREATE TABLE IF NOT EXISTS `NOTA_EJERCICIO` (
+  `id_nota`      INT          NOT NULL AUTO_INCREMENT,
+  `id_usuario`   INT          NOT NULL,
+  `id_ejercicio` INT          NOT NULL,
+  `id_ciclo`     INT          NOT NULL,
+  `nota`         TEXT         NULL,
+  `fecha_nota`   DATE         NOT NULL,
+
+  PRIMARY KEY (`id_nota`),
+  UNIQUE INDEX `uq_nota_ejercicio_dia` (`id_usuario`, `id_ejercicio`, `id_ciclo`, `fecha_nota`),
+  INDEX `idx_nota_usuario`   (`id_usuario`),
+  INDEX `idx_nota_ejercicio` (`id_ejercicio`),
+  INDEX `idx_nota_ciclo`     (`id_ciclo`),
+
+  CONSTRAINT `fk_nota_usuario`
+    FOREIGN KEY (`id_usuario`)
+    REFERENCES `USUARIO` (`id_usuario`)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+
+  CONSTRAINT `fk_nota_ejercicio`
+    FOREIGN KEY (`id_ejercicio`)
+    REFERENCES `EJERCICIO` (`id_ejercicio`)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+
+  CONSTRAINT `fk_nota_ciclo`
+    FOREIGN KEY (`id_ciclo`)
+    REFERENCES `CICLO` (`id_ciclo`)
+    ON DELETE CASCADE ON UPDATE CASCADE
+
+) ENGINE = InnoDB
+  COMMENT = 'Nota del afiliado sobre un ejercicio de su plan (feedback para el entrenador).';

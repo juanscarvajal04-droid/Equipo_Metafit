@@ -83,3 +83,13 @@ export const actualizarMiPerfil = (datos) =>
 
 export const getPlanRutinaDia = (idCiclo, diaNumero) =>
   api.get(`/planes/entrenamiento/${idCiclo}/rutina/${diaNumero}`);
+
+// Parte 3: Nota del afiliado sobre un ejercicio (upsert por día)
+export const guardarNotaEjercicio = (datos) =>
+  api.post('/afiliados/me/notas-ejercicio', datos);
+
+export const getMisNotasEjercicio = (idCiclo) =>
+  api.get('/afiliados/me/notas-ejercicio', { params: idCiclo ? { id_ciclo: idCiclo } : {} });
+
+export const actualizarNotaEjercicio = (idNota, nota) =>
+  api.patch(`/afiliados/me/notas-ejercicio/${idNota}`, { nota });

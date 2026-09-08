@@ -72,6 +72,12 @@ router.get('/', requireAuth, requireStaff, AfiliadoController.getAll);
  */
 router.get('/me', requireAuth, AfiliadoController.getMe);
 
+// Parte 3: Notas del afiliado sobre ejercicios (ANTES de las rutas /:id paramétricas)
+router.post('/me/notas-ejercicio', requireAuth, AfiliadoController.crearNotaEjercicio);
+router.get('/me/notas-ejercicio', requireAuth, AfiliadoController.getMisNotasEjercicio);
+router.patch('/me/notas-ejercicio/:id_nota', requireAuth, AfiliadoController.actualizarNotaEjercicio);
+router.delete('/me/notas-ejercicio/:id_nota', requireAuth, AfiliadoController.eliminarNotaEjercicio);
+
 /**
  * @swagger
  * /afiliados/me:
@@ -665,6 +671,29 @@ router.get('/:id/ciclos', requireAuth, requireStaff, AfiliadoController.getCiclo
 
 /**
  * @swagger
+ * /afiliados/{id}/notas-ejercicio:
+ *   get:
+ *     summary: Listar las notas de ejercicios de un afiliado (staff)
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Lista de notas con nombre del ejercicio
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ */
+router.get('/:id/notas-ejercicio', requireAuth, requireStaff, AfiliadoController.getNotasEjercicioAfiliado);
+
+/**
+ * @swagger
  * /afiliados/ciclos:
  *   post:
  *     summary: Crear un nuevo ciclo (Admin o Entrenador)
@@ -1205,4 +1234,97 @@ router.get('/me/consumo/historial', requireAuth, AfiliadoController.getConsumoHi
  */
 router.get('/me/progreso-ejercicio/historial', requireAuth, AfiliadoController.getProgresoEjercicioHistorial);
 
+/**
+ * @swagger
+ * /afiliados/me/notas-ejercicio:
+ *   post:
+ *     summary: Guardar/actualizar la nota del afiliado sobre un ejercicio (upsert por día)
+ *     description: Crea la nota si no existe para (ejercicio, ciclo, día) y la actualiza si ya existe.
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [id_ejercicio, id_ciclo, nota]
+ *             properties:
+ *               id_ejercicio: { type: integer, example: 1 }
+ *               id_ciclo:     { type: integer, example: 2 }
+ *               nota:         { type: string, example: "Me cuesta el hombro con este ejercicio" }
+ *               fecha_nota:   { type: string, format: date, description: 'Opcional, hoy por defecto' }
+ *     responses:
+ *       201:
+ *         description: Nota guardada correctamente
+ *       400:
+ *         description: Faltan campos o ejercicio/ciclo no existe
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *   get:
+ *     summary: Listar mis notas de ejercicios (opcional filtrar por id_ciclo)
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id_ciclo
+ *         in: query
+ *         required: false
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Lista de notas con nombre del ejercicio
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ */
+/**
+ * @swagger
+ * /afiliados/me/notas-ejercicio/{id_nota}:
+ *   patch:
+ *     summary: Editar una de mis notas (solo la propia)
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id_nota
+ *         in: path
+ *         required: true
+ *         schema: { type: integer }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [nota]
+ *             properties:
+ *               nota: { type: string, example: "Ya no me molesta, mejoré" }
+ *     responses:
+ *       200:
+ *         description: Nota actualizada correctamente
+ *       400:
+ *         description: Falta el campo nota
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       404:
+ *         description: Nota no encontrada
+ *   delete:
+ *     summary: Eliminar una de mis notas (solo la propia)
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id_nota
+ *         in: path
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Nota eliminada correctamente
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       404:
+ *         description: Nota no encontrada
+ */
 module.exports = router;

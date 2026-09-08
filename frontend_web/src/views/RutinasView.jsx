@@ -396,6 +396,7 @@ export default function RutinasView() {
                       <td>{tienePlan ? <span className={s.badgeCiclo}>✅ Activo</span> : <span className={s.badgeSinRutina}>Sin plan</span>}</td>
                       <td>
                         <div className={s.actionBtns}>
+                          <button type="button" className={s.btnOutline} style={{ padding:"0.25rem 0.5rem", fontSize:"0.75rem" }} onClick={() => { setModalAfiliado(a); setModal("historial"); }} title="Historial de ciclos">📜</button>
                           {tienePlan && (
                             <button type="button" className={s.btnOutline} style={{ padding:"0.25rem 0.5rem", fontSize:"0.75rem" }} onClick={() => { setModalAfiliado(a); setModal("verPerfil"); }} title="Ver">👁️</button>
                           )}
@@ -666,6 +667,26 @@ export default function RutinasView() {
       )}
 
       {/* ════════════════════════════════════════════ */}
+      {/* MODAL: HISTORIAL DE CICLOS (editar/eliminar) */}
+      {/* ════════════════════════════════════════════ */}
+      {modal === "historial" && modalAfiliado && (
+        <div className={s.modalOverlay} onClick={closeModal}>
+          <div className={s.modalContent} onClick={(e)=>e.stopPropagation()} style={{ maxWidth:760 }}>
+            <div className={s.modalHeader}>
+              <h5 className={s.modalTitle}>📜 Historial de Ciclos — {nombreCompleto(modalAfiliado)}</h5>
+              <button type="button" className={s.btnOutline} onClick={closeModal}>✕</button>
+            </div>
+            <div className={s.modalBody}>
+              <HistorialCiclos afiliado={modalAfiliado} authAxios={authAxios} onCambio={fetchAfiliados} showToast={showToast} />
+            </div>
+            <div className={s.modalFooter}>
+              <button type="button" className={s.btnOutline} onClick={closeModal}>Cerrar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ════════════════════════════════════════════ */}
       {/* MODAL: VER PERFIL DEL AFILIADO                */}
       {/* ════════════════════════════════════════════ */}
       {modal === "verPerfil" && modalAfiliado && (
@@ -706,24 +727,187 @@ export default function RutinasView() {
   );
 }
 
+// ── Sub-component: Historial de ciclos del afiliado ─────────
+// Permite al staff ver todos los ciclos, editar objetivo/nivel/fechas/días
+// (PATCH /ciclos/:id_ciclo) y eliminarlos (DELETE /ciclos/:id_ciclo).
+function HistorialCiclos({ afiliado, authAxios, onCambio, showToast }) {
+  const [ciclos, setCiclos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [editandoId, setEditandoId] = useState(null);
+  const [form, setForm] = useState(null);
+  const [saving, setSaving] = useState(false);
+
+  const cargar = async () => {
+    setLoading(true);
+    try {
+      const { data } = await authAxios.get(`/afiliados/${getId(afiliado)}/ciclos`);
+      setCiclos(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("[RutinasView] historial ciclos:", err);
+      showToast("Error al cargar el historial de ciclos", "danger");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { cargar(); /* eslint-disable-line react-hooks/exhaustive-deps */ }, [afiliado]);
+
+  const iniciarEdicion = (c) => {
+    setEditandoId(c.id_ciclo);
+    setForm({ fecha_inicio: toDateInput(c.fecha_inicio), fecha_fin: toDateInput(c.fecha_fin),
+      objetivo_fisico: c.objetivo_fisico || "Mantenimiento", nivel_experiencia: c.nivel_experiencia || "Intermedio",
+      disponibilidad_dias: c.disponibilidad_dias ?? 3, activo: Boolean(c.activo) });
+  };
+
+  const guardar = async (c) => {
+    setSaving(true);
+    try {
+      await authAxios.patch(`/ciclos/${c.id_ciclo}`, {
+        fecha_inicio: form.fecha_inicio, fecha_fin: form.fecha_fin,
+        objetivo_fisico: form.objetivo_fisico, nivel_experiencia: form.nivel_experiencia,
+        disponibilidad_dias: Number(form.disponibilidad_dias), activo: form.activo,
+      });
+      showToast("Ciclo actualizado correctamente", "success");
+      setEditandoId(null); setForm(null);
+      await cargar();
+      if (onCambio) onCambio();
+    } catch (err) {
+      console.error("[RutinasView] actualizar ciclo:", err);
+      showToast(err.response?.data?.error || err.message || "Error al actualizar ciclo", "danger");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const eliminar = async (c) => {
+    if (!window.confirm(`¿Eliminar el ciclo ${c.id_ciclo} (${toDateInput(c.fecha_inicio)} → ${toDateInput(c.fecha_fin)})? Se borrarán planes, progreso y registros asociados.`)) return;
+    setSaving(true);
+    try {
+      await authAxios.delete(`/ciclos/${c.id_ciclo}`);
+      showToast("Ciclo eliminado correctamente", "success");
+      await cargar();
+      if (onCambio) onCambio();
+    } catch (err) {
+      console.error("[RutinasView] eliminar ciclo:", err);
+      showToast(err.response?.data?.error || err.message || "Error al eliminar ciclo", "danger");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) return <div className={s.emptyState}><span className="spinner-border spinner-border-sm" /></div>;
+  if (ciclos.length === 0) return <div className={s.emptyState}>Este afiliado no tiene ciclos registrados</div>;
+
+  return (
+    <div>
+      {ciclos.map((c) => (
+        <div key={c.id_ciclo} className={s.afiliadoSection} style={{ marginBottom:12, padding:"0.6rem 0.75rem" }}>
+          {editandoId === c.id_ciclo ? (
+            <div>
+              <div className={s.formRow}>
+                <div className={s.formGroup}>
+                  <label className={s.inlineLabel}>Inicio</label>
+                  <input type="date" className={s.inlineInput} value={form.fecha_inicio} onChange={(e)=>setForm((f)=>({...f, fecha_inicio:e.target.value}))} />
+                </div>
+                <div className={s.formGroup}>
+                  <label className={s.inlineLabel}>Fin</label>
+                  <input type="date" className={s.inlineInput} value={form.fecha_fin} onChange={(e)=>setForm((f)=>({...f, fecha_fin:e.target.value}))} />
+                </div>
+                <div className={s.formGroup} style={{ minWidth:120 }}>
+                  <label className={s.inlineLabel}>Objetivo</label>
+                  <select className={s.inlineSelect} value={form.objetivo_fisico} onChange={(e)=>setForm((f)=>({...f, objetivo_fisico:e.target.value}))}>
+                    {Object.keys(OBJETIVO_ICON).map((o) => <option key={o} value={o}>{OBJETIVO_ICON[o]} {o}</option>)}
+                    <option value="Rehabilitacion">🤕 Rehabilitación</option>
+                  </select>
+                </div>
+                <div className={s.formGroup} style={{ minWidth:110 }}>
+                  <label className={s.inlineLabel}>Nivel</label>
+                  <select className={s.inlineSelect} value={form.nivel_experiencia} onChange={(e)=>setForm((f)=>({...f, nivel_experiencia:e.target.value}))}>
+                    {NIVELES.map((n) => <option key={n} value={n}>{n}</option>)}
+                  </select>
+                </div>
+                <div className={s.formGroup} style={{ minWidth:70 }}>
+                  <label className={s.inlineLabel}>Días/sem</label>
+                  <select className={s.inlineSelect} value={form.disponibilidad_dias} onChange={(e)=>setForm((f)=>({...f, disponibilidad_dias:e.target.value}))}>
+                    {[1,2,3,4,5,6,7].map((d) => <option key={d} value={d}>{d}</option>)}
+                  </select>
+                </div>
+                <div className={s.formGroup} style={{ minWidth:70 }}>
+                  <label className={s.inlineLabel}>Activo</label>
+                  <input type="checkbox" className={s.checkboxDark} checked={form.activo} onChange={(e)=>setForm((f)=>({...f, activo:e.target.checked}))} />
+                </div>
+              </div>
+              <div style={{ display:"flex", gap:6, marginTop:8 }}>
+                <button type="button" className={s.btnConfirmar} style={{ padding:"0.25rem 0.6rem", fontSize:"0.75rem" }} disabled={saving} onClick={() => guardar(c)}>
+                  {saving ? <span className="spinner-border spinner-border-sm" /> : "💾 Guardar"}
+                </button>
+                <button type="button" className={s.btnOutline} style={{ padding:"0.25rem 0.6rem", fontSize:"0.75rem" }} disabled={saving} onClick={() => { setEditandoId(null); setForm(null); }}>Cancelar</button>
+              </div>
+            </div>
+          ) : (
+            <div style={{ display:"flex", alignItems:"center", gap:10, flexWrap:"wrap" }}>
+              <div style={{ fontWeight:600, fontSize:"0.85rem" }}>
+                #{c.id_ciclo} · {toDateInput(c.fecha_inicio)} → {toDateInput(c.fecha_fin)}
+              </div>
+              {c.activo ? <span className={s.badgeCiclo}>✅ Activo</span> : <span className={s.badgeSinRutina}>Inactivo</span>}
+              <span className={s.badgeDark}>{OBJETIVO_ICON[c.objetivo_fisico]||""} {c.objetivo_fisico||"Sin objetivo"}</span>
+              <span className={s.badgeDark}>{c.nivel_experiencia||"—"}</span>
+              <span className={s.badgeDark}>📅 {c.disponibilidad_dias||"—"} días</span>
+              {c.numero_ciclo ? <span className={s.badgeDark}>#{c.numero_ciclo}</span> : null}
+              <div style={{ marginLeft:"auto", display:"flex", gap:6 }}>
+                <button type="button" className={s.btnOutline} style={{ padding:"0.25rem 0.5rem", fontSize:"0.75rem" }} onClick={() => iniciarEdicion(c)} title="Editar">✏️</button>
+                <button type="button" className={s.btnOutlineDanger} style={{ padding:"0.25rem 0.5rem", fontSize:"0.75rem" }} disabled={saving} onClick={() => eliminar(c)} title="Eliminar">🗑️</button>
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ── Sub-component: PlanDisplay ──────────────────────────────
+// Muestra el plan de entrenamiento del afiliado con edición inline
+// de series/repeticiones/peso (PATCH/DELETE ejercicios) y las notas
+// del afiliado por ejercicio (GET /afiliados/:id/notas-ejercicio).
 function PlanDisplay({ afiliado, authAxios }) {
   const [plan, setPlan] = useState(null);
   const [error, setError] = useState(null);
+  const [edit, setEdit] = useState({}); // { [rutina:ejercicio]: { series, repeticiones, peso_kg } }
+  const [savingKey, setSavingKey] = useState(null);
+  const [notas, setNotas] = useState([]);
+  const { showToast } = useToast();
+
+  const cargar = async () => {
+    try {
+      const ciclo = cicloActivo(afiliado);
+      if (!ciclo) { setError("Sin ciclo activo"); return; }
+      const idCiclo = ciclo.id_ciclo ?? ciclo.id;
+      const { data } = await authAxios.get(`/planes/entrenamiento/${idCiclo}`);
+      setPlan(data);
+      setError(null);
+    } catch (err) {
+      console.error("[RutinasView] ver plan:", err);
+      setError("Error al cargar plan de entrenamiento");
+    }
+  };
+
+  useEffect(() => {
+    cargar();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [afiliado]);
+
   useEffect(() => {
     (async () => {
       try {
-        const ciclo = cicloActivo(afiliado);
-        if (!ciclo) { setError("Sin ciclo activo"); return; }
-        const idCiclo = ciclo.id_ciclo ?? ciclo.id;
-        const { data } = await authAxios.get(`/planes/entrenamiento/${idCiclo}`);
-        setPlan(data);
+        const { data } = await authAxios.get(`/afiliados/${getId(afiliado)}/notas-ejercicio`);
+        setNotas(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.error("[RutinasView] ver plan:", err);
-        setError("Error al cargar plan de entrenamiento");
+        console.warn("[RutinasView] notas:", err);
       }
     })();
-  }, [afiliado, authAxios]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [afiliado]);
 
   if (error) return <div className={s.emptyState}>{error}</div>;
   if (!plan) return <div className={s.emptyState}>Cargando plan...</div>;
@@ -731,36 +915,137 @@ function PlanDisplay({ afiliado, authAxios }) {
   const rutinas = plan.rutinas || [];
   if (rutinas.length === 0) return <div className={s.emptyState}>No hay rutinas asignadas en este plan</div>;
 
-  return rutinas.map((rutina, ri) => (
-    <div key={rutina.id_rutina ?? ri} style={{ marginBottom:16 }}>
-      <h5 style={{ color:"#e31c25", fontSize:"0.9rem", margin:"0 0 8px 0", display:"flex", alignItems:"center", gap:6 }}>
-        📅 {DAY_LABELS[(rutina.dia_numero ?? 1) - 1] || `Día ${rutina.dia_numero}`}
-        {rutina.enfoque_muscular ? <span className="badge" style={{ background:"rgba(227, 28, 37, 0.15)", color:"var(--mf-accent)", fontSize:"0.65rem", padding:"0.1rem 0.4rem" }}>{rutina.enfoque_muscular}</span> : null}
-      </h5>
-      {Array.isArray(rutina.ejercicios) && rutina.ejercicios.length > 0 ? (
-        <table className={s.table} style={{ fontSize:"0.8rem" }}>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Ejercicio</th>
-              <th>Series</th>
-              <th>Reps</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rutina.ejercicios.filter(e=>e).map((ej, ei) => (
-              <tr key={ei}>
-                <td style={{ color:"var(--mf-muted)" }}>{ej.orden ?? ei + 1}</td>
-                <td>{ej.nombre_ejercicio || ej.nombre || "—"}</td>
-                <td>{ej.series ?? "—"}</td>
-                <td>{ej.repeticiones ?? "—"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : (
-        <div className={s.emptyState} style={{ margin:0, padding:"0.5rem" }}>Sin ejercicios asignados</div>
-      )}
+  const notasPorEjercicio = (idEjercicio) => notas.filter((n) => String(n.id_ejercicio) === String(idEjercicio));
+
+  const inicioEdicion = (rutina, ej) => {
+    const key = `${rutina.id_rutina}:${ej.id_ejercicio}`;
+    setEdit((prev) => ({ ...prev, [key]: { series: ej.series ?? "", repeticiones: ej.repeticiones ?? "", peso_kg: ej.peso_kg ?? "" } }));
+  };
+
+  const guardarEdicion = async (rutina, ej) => {
+    const key = `${rutina.id_rutina}:${ej.id_ejercicio}`;
+    const payload = { series: Number(edit[key].series), repeticiones: Number(edit[key].repeticiones) };
+    if (edit[key].peso_kg !== "" && edit[key].peso_kg !== null) payload.peso_kg = Number(edit[key].peso_kg);
+    setSavingKey(key);
+    try {
+      await authAxios.patch(`/planes/rutinas/${rutina.id_rutina}/ejercicios/${ej.id_ejercicio}`, payload);
+      showToast("Ejercicio actualizado", "success");
+      setEdit((prev) => { const c = { ...prev }; delete c[key]; return c; });
+      window.dispatchEvent(new Event("rutina-modificada"));
+      await cargar();
+    } catch (err) {
+      console.error("[RutinasView] guardar ejercicio:", err);
+      showToast(err.response?.data?.error || err.message || "Error al actualizar ejercicio", "danger");
+    } finally {
+      setSavingKey(null);
+    }
+  };
+
+  const quitarEjercicio = async (rutina, ej) => {
+    if (!window.confirm(`¿Quitar "${ej.nombre_ejercicio || ej.nombre}" de la rutina?`)) return;
+    setSavingKey(`${rutina.id_rutina}:${ej.id_ejercicio}`);
+    try {
+      await authAxios.delete(`/planes/rutinas/${rutina.id_rutina}/ejercicios/${ej.id_ejercicio}`);
+      showToast("Ejercicio eliminado de la rutina", "success");
+      window.dispatchEvent(new Event("rutina-modificada"));
+      await cargar();
+    } catch (err) {
+      console.error("[RutinasView] quitar ejercicio:", err);
+      showToast(err.response?.data?.error || err.message || "Error al eliminar ejercicio", "danger");
+    } finally {
+      setSavingKey(null);
+    }
+  };
+
+  return (
+    <div>
+      <div style={{ textAlign:"right", marginBottom:8 }}>
+        <button type="button" className={s.btnRefresh} onClick={cargar} title="Recargar">🔄</button>
+      </div>
+      {rutinas.map((rutina, ri) => (
+        <div key={rutina.id_rutina ?? ri} style={{ marginBottom:16 }}>
+          <h5 style={{ color:"#e31c25", fontSize:"0.9rem", margin:"0 0 8px 0", display:"flex", alignItems:"center", gap:6 }}>
+            📅 {DAY_LABELS[(rutina.dia_numero ?? 1) - 1] || `Día ${rutina.dia_numero}`}
+            {rutina.enfoque_muscular ? <span className="badge" style={{ background:"rgba(227, 28, 37, 0.15)", color:"var(--mf-accent)", fontSize:"0.65rem", padding:"0.1rem 0.4rem" }}>{rutina.enfoque_muscular}</span> : null}
+          </h5>
+          {Array.isArray(rutina.ejercicios) && rutina.ejercicios.length > 0 ? (
+            <table className={s.table} style={{ fontSize:"0.8rem" }}>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Ejercicio</th>
+                  <th>Series</th>
+                  <th>Reps</th>
+                  <th>Peso (kg)</th>
+                  <th>Notas del afiliado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rutina.ejercicios.filter(e=>e).map((ej, ei) => {
+                  const key = `${rutina.id_rutina}:${ej.id_ejercicio}`;
+                  const editing = !!edit[key];
+                  const ejNotas = notasPorEjercicio(ej.id_ejercicio);
+                  const guardando = savingKey === key;
+                  return (
+                    <tr key={ei}>
+                      <td style={{ color:"var(--mf-muted)" }}>{ej.orden ?? ei + 1}</td>
+                      <td>
+                        <div style={{ fontWeight:600 }}>{ej.nombre_ejercicio || ej.nombre || "—"}</div>
+                        {ej.instrucciones ? <div className={s.emailText}>{ej.instrucciones}</div> : null}
+                      </td>
+                      {editing ? (
+                        <>
+                          <td><input type="number" min={1} className={s.inlineInput} style={{ width:60 }} value={edit[key].series} onChange={(e)=>setEdit((prev)=>({...prev, [key]: {...prev[key], series: e.target.value}}))} /></td>
+                          <td><input type="number" min={1} className={s.inlineInput} style={{ width:60 }} value={edit[key].repeticiones} onChange={(e)=>setEdit((prev)=>({...prev, [key]: {...prev[key], repeticiones: e.target.value}}))} /></td>
+                          <td><input type="number" min={0} step="0.5" className={s.inlineInput} style={{ width:70 }} value={edit[key].peso_kg} onChange={(e)=>setEdit((prev)=>({...prev, [key]: {...prev[key], peso_kg: e.target.value}}))} /></td>
+                        </>
+                      ) : (
+                        <>
+                          <td>{ej.series ?? "—"}</td>
+                          <td>{ej.repeticiones ?? "—"}</td>
+                          <td>{ej.peso_kg ?? "—"}</td>
+                        </>
+                      )}
+                      <td>
+                        {ejNotas.length === 0 ? (
+                          <span className="text-muted" style={{ fontSize:"0.72rem" }}>Sin notas</span>
+                        ) : (
+                          <div style={{ display:"flex", flexDirection:"column", gap:3 }}>
+                            {ejNotas.map((n) => (
+                              <div key={n.id_nota} className={s.alertDanger} style={{ margin:0, padding:"0.2rem 0.4rem", fontSize:"0.7rem" }}>
+                                {n.nota}
+                                <div className="text-muted" style={{ fontSize:"0.62rem" }}>{toDateInput(n.fecha_nota)}</div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </td>
+                      <td>
+                        {editing ? (
+                          <div className={s.actionBtns}>
+                            <button type="button" className={s.btnConfirmar} style={{ padding:"0.25rem 0.5rem", fontSize:"0.72rem" }} disabled={guardando} onClick={() => guardarEdicion(rutina, ej)}>
+                              {guardando ? <span className="spinner-border spinner-border-sm" /> : "💾"}
+                            </button>
+                            <button type="button" className={s.btnOutline} style={{ padding:"0.25rem 0.5rem", fontSize:"0.72rem" }} disabled={guardando} onClick={() => setEdit((prev)=>{ const c={...prev}; delete c[key]; return c; })}>✖</button>
+                          </div>
+                        ) : (
+                          <div className={s.actionBtns}>
+                            <button type="button" className={s.btnOutline} style={{ padding:"0.25rem 0.5rem", fontSize:"0.72rem" }} onClick={() => inicioEdicion(rutina, ej)} title="Editar serie/reps/peso">✏️</button>
+                            <button type="button" className={s.btnOutlineDanger} style={{ padding:"0.25rem 0.5rem", fontSize:"0.72rem" }} disabled={guardando} onClick={() => quitarEjercicio(rutina, ej)} title="Quitar de la rutina">🗑️</button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          ) : (
+            <div className={s.emptyState} style={{ margin:0, padding:"0.5rem" }}>Sin ejercicios asignados</div>
+          )}
+        </div>
+      ))}
     </div>
-  ));
+  );
 }

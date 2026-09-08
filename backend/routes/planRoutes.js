@@ -309,6 +309,49 @@ router.delete('/rutinas/:id_rutina/ejercicios/:id_ejercicio', requireAuth, requi
 
 /**
  * @swagger
+ * /planes/rutinas/{id_rutina}/ejercicios/{id_ejercicio}:
+ *   patch:
+ *     summary: Actualizar serie/reps/peso/descanso de un ejercicio en la rutina (Admin o Entrenador)
+ *     tags: [Planes]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id_rutina
+ *         in: path
+ *         required: true
+ *         schema: { type: integer }
+ *       - name: id_ejercicio
+ *         in: path
+ *         required: true
+ *         schema: { type: integer }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               series:       { type: integer, minimum: 1 }
+ *               repeticiones: { type: integer, minimum: 1 }
+ *               peso_kg:      { type: number, minimum: 0 }
+ *               descanso_seg: { type: integer, minimum: 0 }
+ *               descripcion:  { type: string, description: Instrucciones del ejercicio (catálogo) }
+ *     responses:
+ *       200:
+ *         description: Ejercicio actualizado correctamente
+ *       400:
+ *         description: Sin campos o valores inválidos
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       404:
+ *         description: Ejercicio no encontrado en esa rutina
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.patch('/rutinas/:id_rutina/ejercicios/:id_ejercicio', requireAuth, requireAdminOrEntrenador, PlanController.updateEjercicio);
+
+/**
+ * @swagger
  * /planes/rutinas/{id_rutina}:
  *   delete:
  *     summary: Eliminar rutina y sus ejercicios asociados (Admin o Entrenador)
@@ -458,5 +501,87 @@ router.post('/nutricional', requireAuth, requireAdminOrEntrenador, PlanControlle
 router.patch('/nutricional/:id', requireAuth, requireAdminOrEntrenador, PlanController.updateNutricional);
 
 router.post('/nutricional/:id_plan/detalle', requireAuth, requireAdminOrEntrenador, PlanController.addAlimento);
+
+/**
+ * @swagger
+ * /planes/nutricional/{id_plan}/detalle/{id_detalle}:
+ *   patch:
+ *     summary: Actualizar cantidad o mover de comida un alimento del plan (Admin o Entrenador)
+ *     tags: [Planes]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id_plan
+ *         in: path
+ *         required: true
+ *         schema: { type: integer }
+ *         description: id_ciclo del plan nutricional
+ *       - name: id_detalle
+ *         in: path
+ *         required: true
+ *         schema: { type: integer }
+ *         description: id_alimento dentro del plan
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               cantidad_gramos: { type: number, example: 150 }
+ *               num_comida:      { type: integer, description: Comida nueva (1-10) }
+ *               num_comida_anterior:
+ *                 type: integer
+ *                 description: Comida actual del alimento (requerido para moverlo)
+ *     responses:
+ *       200:
+ *         description: Detalle nutricional actualizado
+ *       400:
+ *         description: Sin campos o cantidad inválida
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       404:
+ *         description: Alimento no encontrado en ese plan
+ *       409:
+ *         description: El alimento ya está en la comida destino
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.patch('/nutricional/:id_plan/detalle/:id_detalle', requireAuth, requireAdminOrEntrenador, PlanController.updateDetalle);
+
+/**
+ * @swagger
+ * /planes/nutricional/{id_plan}/detalle/{id_detalle}:
+ *   delete:
+ *     summary: Eliminar un alimento del plan nutricional (Admin o Entrenador)
+ *     tags: [Planes]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id_plan
+ *         in: path
+ *         required: true
+ *         schema: { type: integer }
+ *       - name: id_detalle
+ *         in: path
+ *         required: true
+ *         schema: { type: integer }
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               num_comida: { type: integer, description: 'Opcional: borra solo esa comida' }
+ *     responses:
+ *       200:
+ *         description: Alimento eliminado del plan nutricional
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       404:
+ *         description: Alimento no encontrado en ese plan
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.delete('/nutricional/:id_plan/detalle/:id_detalle', requireAuth, requireAdminOrEntrenador, PlanController.removeDetalle);
 
 module.exports = router;

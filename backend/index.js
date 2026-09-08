@@ -56,6 +56,12 @@ esperarBaseDeDatos()
   .then(() => console.log('✅ Migración de nutrientes de consumo verificada'))
   .catch(err => console.error('[MIGRACION-NUTRIENTES-CONSUMO] error:', err.message));
 
+// ── Migración idempotente: tabla NOTA_EJERCICIO (Parte 3) ──
+esperarBaseDeDatos()
+  .then(() => require('./migrations/migracionNotaEjercicio').runMigraciones())
+  .then(() => console.log('✅ Migración de NOTA_EJERCICIO verificada'))
+  .catch(err => console.error('[MIGRACION-NOTA-EJERCICIO] error:', err.message));
+
 // ── Cron: recordatorio de pagos por vencer (cada hora) ──
 const { iniciarCron } = require('./cron/recordatorioPagos');
 iniciarCron();
