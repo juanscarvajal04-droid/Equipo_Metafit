@@ -723,26 +723,31 @@ export default function DietasView() {
 function DietaDisplay({ afiliado, authAxios }) {
   const [plan, setPlan] = useState(null);
   const [error, setError] = useState(null);
-  useEffect(() => {
-    (async () => {
-      try {
-        const ciclo = cicloActivo(afiliado);
-        if (!ciclo) { setError("Sin ciclo activo"); return; }
-        const idCiclo = ciclo.id_ciclo ?? ciclo.id;
-        const { data } = await authAxios.get(`/planes/nutricional/${idCiclo}`);
-        setPlan(data);
-      } catch (err) {
-        console.error("[DietasView] ver plan:", err);
-        setError(err.response?.status === 404 ? "No tiene plan nutricional" : "Error al cargar plan");
-      }
-    })();
-  }, [afiliado, authAxios]);
+
+  const cargar = async () => {
+    try {
+      const ciclo = cicloActivo(afiliado);
+      if (!ciclo) { setError("Sin ciclo activo"); return; }
+      const idCiclo = ciclo.id_ciclo ?? ciclo.id;
+      const { data } = await authAxios.get(`/planes/nutricional/${idCiclo}`);
+      setPlan(data);
+      setError(null);
+    } catch (err) {
+      console.error("[DietasView] ver plan:", err);
+      setError(err.response?.status === 404 ? "No tiene plan nutricional" : "Error al cargar plan");
+    }
+  };
+
+  useEffect(() => { cargar(); /* eslint-disable-line react-hooks/exhaustive-deps */ }, [afiliado]);
 
   if (error) return <div className={s.emptyState}>{error}</div>;
   if (!plan) return <div className={s.emptyState}>Cargando plan...</div>;
 
   return (
     <>
+      <div style={{ textAlign:"right", marginBottom:8 }}>
+        <button type="button" className={s.btnRefresh} onClick={cargar} title="Recargar">🔄</button>
+      </div>
       <div className={s.infoCard} style={{ marginBottom:"1rem" }}>
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
           <div>
@@ -763,7 +768,7 @@ function DietaDisplay({ afiliado, authAxios }) {
       </div>
 
       {Array.isArray(plan.detalle) && plan.detalle.length > 0 ? (
-        <PlanDetalle detalle={plan.detalle} numComidas={plan.num_comidas} />
+        <PlanDetalle detalle={plan.detalle} numComidas={plan.num_comidas} idCiclo={plan.id_ciclo} authAxios={authAxios} onCambio={cargar} />
       ) : (
         <div className={s.emptyState}>Este plan no tiene alimentos asignados</div>
       )}
@@ -771,7 +776,15 @@ function DietaDisplay({ afiliado, authAxios }) {
   );
 }
 
-function PlanDetalle({ detalle, numComidas }) {
+// Edición inline de la cantidad (gramos) de cada alimento del plan.
+// "💾 Guardar" → PATCH /planes/nutricional/:idCiclo/detalle/:id_alimento
+// "🗑️ Quitar"  → DELETE /planes/nutricional/:idCiclo/detalle/:id_alimento
+// Ambos disparan el evento window 'dieta-modificada' y recargan el plan.
+function PlanDetalle({ detalle, numComidas, idCiclo, authAxios, onCambio }) {
+  const { showToast } = useToast();
+  const [edits, setEdits] = useState({});
+  const [savingKey, setSavingKey] = useState(null);
+
   const grouped = {};
   for (const d of detalle) {
     const key = d.num_comida || 1;
@@ -780,18 +793,74 @@ function PlanDetalle({ detalle, numComidas }) {
   }
   const keys = Object.keys(grouped).sort((a, b) => Number(a) - Number(b));
 
+  const clave = (d) => `${d.num_comida || 1}:${d.id_alimento}`;
+
+  const guardar = async (d) => {
+    const key = clave(d);
+    const cantidad = edits[key];
+    if (cantidad === undefined || cantidad === "") return;
+    setSavingKey(key);
+    try {
+      await authAxios.patch(`/planes/nutricional/${idCiclo}/detalle/${d.id_alimento}`, {
+        cantidad_gramos: Number(cantidad),
+        num_comida: Number(d.num_comida),
+        num_comida_anterior: Number(d.num_comida),
+      });
+      showToast("Cantidad actualizada", "success");
+      setEdits((prev) => { const c = { ...prev }; delete c[key]; return c; });
+      window.dispatchEvent(new Event("dieta-modificada"));
+      if (onCambio) onCambio();
+    } catch (err) {
+      console.error("[DietasView] actualizar detalle:", err);
+      showToast(err.response?.data?.error || err.message || "Error al actualizar cantidad", "danger");
+    } finally {
+      setSavingKey(null);
+    }
+  };
+
+  const quitar = async (d) => {
+    const key = clave(d);
+    if (!window.confirm(`¿Quitar "${d.nombre_alimento}" de la comida ${d.num_comida}?`)) return;
+    setSavingKey(key);
+    try {
+      await authAxios.delete(`/planes/nutricional/${idCiclo}/detalle/${d.id_alimento}`, { data: { num_comida: Number(d.num_comida) } });
+      showToast("Alimento eliminado del plan", "success");
+      window.dispatchEvent(new Event("dieta-modificada"));
+      if (onCambio) onCambio();
+    } catch (err) {
+      console.error("[DietasView] quitar detalle:", err);
+      showToast(err.response?.data?.error || err.message || "Error al eliminar alimento", "danger");
+    } finally {
+      setSavingKey(null);
+    }
+  };
+
   return keys.map((key) => (
     <div key={key} className={s.infoCard} style={{ marginBottom:"0.5rem" }}>
       <div style={{ fontWeight:600, fontSize:"0.85rem", marginBottom:"0.25rem", color:"#e31c25" }}>
         🍽️ Comida #{key}
       </div>
       <div style={{ display:"flex", flexDirection:"column", gap:"0.25rem" }}>
-        {grouped[key].map((d, i) => (
-          <div key={i} style={{ display:"flex", justifyContent:"space-between", fontSize:"0.82rem" }}>
-            <span>{d.nombre_alimento || "Alimento"}</span>
-            <span style={{ color:"var(--mf-muted)" }}>{d.cantidad_g || 0}g</span>
-          </div>
-        ))}
+        {grouped[key].map((d, i) => {
+          const k = clave(d);
+          const valor = Object.prototype.hasOwnProperty.call(edits, k) ? edits[k] : (d.cantidad_g ?? "");
+          const guardando = savingKey === k;
+          return (
+            <div key={i} style={{ display:"flex", alignItems:"center", gap:8, fontSize:"0.82rem", flexWrap:"wrap" }}>
+              <span style={{ flex:1, minWidth:140 }}>{d.nombre_alimento || "Alimento"}</span>
+              <input
+                type="number" min={1} step="1" className={s.inlineInput} style={{ width:80 }}
+                value={valor}
+                onChange={(e) => setEdits((prev) => ({ ...prev, [k]: e.target.value }))}
+              />
+              <span style={{ color:"var(--mf-muted)" }}>g</span>
+              <button type="button" className={s.btnConfirmarS} style={{ padding:"0.2rem 0.45rem", fontSize:"0.7rem" }} disabled={guardando || valor === ""} onClick={() => guardar(d)}>
+                {guardando ? <span className="spinner-border spinner-border-sm" /> : "💾 Guardar"}
+              </button>
+              <button type="button" className={s.btnOutlineS} style={{ padding:"0.2rem 0.45rem", fontSize:"0.7rem" }} disabled={guardando} onClick={() => quitar(d)}>🗑️ Quitar</button>
+            </div>
+          );
+        })}
       </div>
     </div>
   ));

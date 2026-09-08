@@ -6,6 +6,7 @@ const CicloModel             = require('../models/cicloModel');
 const CatalogoModel          = require('../models/catalogoModel');
 const SeguimientoDiarioModel = require('../models/seguimientoDiarioModel');
 const UsuarioModel           = require('../models/usuarioModel');
+const NotaEjercicioModel     = require('../models/notaEjercicioModel'); // Parte 3
 
 // FIX 1.3 / ISO 25000: normalizarFecha extraída a utils/fechaUtils.js
 // para que sea testeable sin dependencia de BD.
@@ -33,8 +34,14 @@ const AfiliadoService = {
       fecha_nacimiento: normalizarFecha(datos.fecha_nacimiento),
     };
 
-    const id = await AfiliadoModel.create(datosNormalizados, creatorId);
-    return { id, message: 'Afiliado creado correctamente' };
+    const creado = await AfiliadoModel.create(datosNormalizados, creatorId);
+    return {
+      id: creado.id_usuario,
+      message: 'Afiliado creado correctamente',
+      // Contraseña efectiva (generada por el modelo si el frontend no la envió).
+      // Se usa para el correo de bienvenida y el webhook n8n.
+      password_temporal: creado.password_temporal,
+    };
   },
 
   update: async (id, datos) => {
@@ -183,6 +190,78 @@ const AfiliadoService = {
   },
 
 
+  // Parte 1: CRUD completo de ciclos — PATCH /ciclos/:id_ciclo
+  updateCiclo: async (id_ciclo, datos) => {
+    if (!id_ciclo) throw new Error('id_ciclo requerido');
+
+    // Validar que el ciclo exista (404 si no)
+    const existente = await CicloModel.findById(id_ciclo);
+    if (!existente) {
+      const err = new Error('Ciclo no encontrado');
+      err.code = 'NO_ENCONTRADO';
+      throw err;
+    }
+
+    // Fechas: fecha_fin > fecha_inicio (CHECK chk_ciclo_fechas del schema)
+    const fechaInicio = datos.fecha_inicio !== undefined ? normalizarFecha(datos.fecha_inicio) : existente.fecha_inicio;
+    const fechaFin    = datos.fecha_fin    !== undefined ? normalizarFecha(datos.fecha_fin)    : existente.fecha_fin;
+    if (fechaInicio && fechaFin && new Date(fechaFin) <= new Date(fechaInicio)) {
+      const err = new Error('La fecha de fin debe ser posterior a la fecha de inicio');
+      err.code = 'DATOS_INVALIDOS';
+      throw err;
+    }
+
+    // Rango OBLIGATORIO de disponibilidad_dias (CHECK 1-7)
+    if (datos.disponibilidad_dias !== undefined) {
+      const dias = Number(datos.disponibilidad_dias);
+      if (!Number.isInteger(dias) || dias < 1 || dias > 7) {
+        const err = new Error('disponibilidad_dias debe estar entre 1 y 7');
+        err.code = 'DATOS_INVALIDOS';
+        throw err;
+      }
+      datos.disponibilidad_dias = dias;
+    }
+
+    // ENUMs controlados de CICLO
+    const OBJETIVOS = ['Perdida de grasa', 'Aumento de masa', 'Mantenimiento', 'Rehabilitacion'];
+    const NIVELES   = ['Principiante', 'Intermedio', 'Avanzado'];
+    if (datos.objetivo_fisico && !OBJETIVOS.includes(datos.objetivo_fisico)) {
+      const err = new Error('objetivo_fisico inválido');
+      err.code = 'DATOS_INVALIDOS';
+      throw err;
+    }
+    if (datos.nivel_experiencia && !NIVELES.includes(datos.nivel_experiencia)) {
+      const err = new Error('nivel_experiencia inválido');
+      err.code = 'DATOS_INVALIDOS';
+      throw err;
+    }
+
+    const affected = await CicloModel.update(id_ciclo, {
+      fecha_inicio:                    fechaInicio !== existente.fecha_inicio ? fechaInicio : undefined,
+      fecha_fin:                       fechaFin    !== existente.fecha_fin    ? fechaFin    : undefined,
+      objetivo_fisico:                 datos.objetivo_fisico,
+      nivel_experiencia:               datos.nivel_experiencia,
+      disponibilidad_dias:             datos.disponibilidad_dias,
+      grupo_muscular_prioritario:      datos.grupo_muscular_prioritario,
+      observaciones:                   datos.observaciones,
+      activo:                          datos.activo !== undefined ? (datos.activo ? 1 : 0) : undefined,
+    });
+    return affected > 0;
+  },
+
+  // Parte 1: DELETE /ciclos/:id_ciclo (solo Admin) con borrado en cascada explícito
+  deleteCiclo: async (id_ciclo) => {
+    if (!id_ciclo) throw new Error('id_ciclo requerido');
+    const existente = await CicloModel.findById(id_ciclo);
+    if (!existente) {
+      const err = new Error('Ciclo no encontrado');
+      err.code = 'NO_ENCONTRADO';
+      throw err;
+    }
+    const affected = await CicloModel.remove(id_ciclo);
+    return affected > 0;
+  },
+
   getRestricciones: async (id) => {
     return CatalogoModel.getRestriccionesByAfiliado(id);
   },
@@ -264,6 +343,52 @@ const AfiliadoService = {
     return SeguimientoDiarioModel.getProgresoEjercicioHistorial(
       idUsuario, query.id_ciclo, query.fechaInicio, query.fechaFin
     );
+  },
+
+  // ── PARTE 3: NOTA DEL AFILIADO SOBRE UN EJERCICIO ────────────
+  guardarNotaEjercicio: async (idUsuario, data) => {
+    const { id_ejercicio, id_ciclo } = data;
+    if (!id_ejercicio || !id_ciclo || !data.nota) {
+      throw new Error('id_ejercicio, id_ciclo y nota son requeridos');
+    }
+    const idNota = await NotaEjercicioModel.create({
+      id_usuario:   idUsuario,
+      id_ejercicio: Number(id_ejercicio),
+      id_ciclo:     Number(id_ciclo),
+      nota:         String(data.nota).trim(),
+      fecha_nota:   data.fecha_nota,
+    });
+    return { id_nota: idNota, message: 'Nota guardada correctamente' };
+  },
+
+  getMisNotasEjercicio: async (idUsuario, idCiclo) => {
+    if (idCiclo) return NotaEjercicioModel.findByUsuarioYCiclo(idUsuario, Number(idCiclo));
+    return NotaEjercicioModel.findByUsuario(idUsuario);
+  },
+
+  getNotasEjercicioDeAfiliado: async (idUsuario) => {
+    return NotaEjercicioModel.findByUsuario(idUsuario);
+  },
+
+  actualizarNotaEjercicio: async (idUsuario, idNota, nota) => {
+    if (!nota) throw new Error('nota es requerida');
+    const affected = await NotaEjercicioModel.update(idNota, idUsuario, String(nota).trim());
+    if (affected === 0) {
+      const err = new Error('Nota no encontrada');
+      err.code = 'NO_ENCONTRADO';
+      throw err;
+    }
+    return { message: 'Nota actualizada correctamente' };
+  },
+
+  eliminarNotaEjercicio: async (idUsuario, idNota) => {
+    const affected = await NotaEjercicioModel.remove(idNota, idUsuario);
+    if (affected === 0) {
+      const err = new Error('Nota no encontrada');
+      err.code = 'NO_ENCONTRADO';
+      throw err;
+    }
+    return { message: 'Nota eliminada correctamente' };
   },
 };
 

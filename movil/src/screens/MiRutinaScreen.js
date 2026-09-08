@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
+  TextInput,
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
@@ -19,6 +20,8 @@ import {
   getPlanRutinaDia,
   guardarProgresoEjercicio,
   getProgresoEjercicioHoy,
+  guardarNotaEjercicio,
+  getMisNotasEjercicio,
 } from '../services/api';
 import { seleccionarCicloActivo } from '../utils/cicloUtils';
 import { formatearFechaLegible, capitalizar } from '../utils/formateadores';
@@ -26,8 +29,9 @@ import { formatearFechaLegible, capitalizar } from '../utils/formateadores';
 const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 const EJERCICIO_ROW_H = 58;
 const INSTRUCCIONES_H = 96;
+const NOTA_H = 46;
 
-function DiaCard({ dia, ejercicios, completados, onToggle, expandido, setExpandido, detalleEjercicio, onToggleDetalle, onRegistrar, grupo }) {
+function DiaCard({ dia, ejercicios, completados, onToggle, expandido, setExpandido, detalleEjercicio, onToggleDetalle, onRegistrar, grupo, notas, notaTextos, setNotaTexto, onGuardarNota, guardandoNota }) {
   const completadosCount = ejercicios.filter((e) => completados[e.id_ejercicio]).length;
   const total = ejercicios.length;
   const progress = total > 0 ? completadosCount / total : 0;
@@ -42,7 +46,7 @@ function DiaCard({ dia, ejercicios, completados, onToggle, expandido, setExpandi
   }, [expandido]);
 
   const contentHeight = ejercicios.reduce(
-    (h, ej) => h + EJERCICIO_ROW_H + (detalleEjercicio === ej.id_ejercicio ? INSTRUCCIONES_H : 0),
+    (h, ej) => h + EJERCICIO_ROW_H + (detalleEjercicio === ej.id_ejercicio ? INSTRUCCIONES_H : 0) + NOTA_H,
     0
   );
 
@@ -129,85 +133,133 @@ function DiaCard({ dia, ejercicios, completados, onToggle, expandido, setExpandi
           {ejercicios.map((ej) => {
             const done = completados[ej.id_ejercicio];
             const detalleAbierto = detalleEjercicio === ej.id_ejercicio;
+            const notaActual = notas[ej.id_ejercicio] || '';
+            const borradorNota = Object.prototype.hasOwnProperty.call(notaTextos, ej.id_ejercicio)
+              ? notaTextos[ej.id_ejercicio]
+              : notaActual;
+            const guardandoEsta = guardandoNota === ej.id_ejercicio;
             return (
               <View
                 key={ej.id_ejercicio}
                 style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  paddingVertical: SPACING.sm,
+                  paddingVertical: SPACING.xs,
                   borderBottomWidth: 1,
                   borderBottomColor: COLORS.border,
                 }}
               >
-                <TouchableOpacity
-                  onPress={() => onToggle(ej.id_ejercicio)}
-                  activeOpacity={0.7}
-                  style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
-                >
-                  <LinearGradient
-                    colors={done ? ['#10b981', '#059669'] : GRADIENTS.purpleDark}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <TouchableOpacity
+                    onPress={() => onToggle(ej.id_ejercicio)}
+                    activeOpacity={0.7}
+                    style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
+                  >
+                    <LinearGradient
+                      colors={done ? ['#10b981', '#059669'] : GRADIENTS.purpleDark}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={{
+                        width: 26,
+                        height: 26,
+                        borderRadius: 13,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginRight: SPACING.md,
+                      }}
+                    >
+                      {done && <Ionicons name="checkmark" size={18} color="#fff" />}
+                    </LinearGradient>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{
+                        color: COLORS.text,
+                        fontSize: FONTS.body,
+                        fontWeight: '500',
+                        textDecorationLine: done ? 'line-through' : 'none',
+                        opacity: done ? 0.6 : 1,
+                      }}>
+                        {ej.nombre || `Ejercicio ${ej.id_ejercicio}`}
+                      </Text>
+                      {(ej.series || ej.repeticiones || ej.peso_kg != null || ej.descanso_seg != null) && (
+                        <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.small, marginTop: 1 }}>
+                          {ej.series ? `${ej.series} series` : ''}
+                          {ej.series && ej.repeticiones ? ' × ' : ''}
+                          {ej.repeticiones ? `${ej.repeticiones} reps` : ''}
+                          {ej.peso_kg != null ? ` · ${ej.peso_kg} kg` : ''}
+                          {ej.descanso_seg != null ? ` · ${ej.descanso_seg}s descanso` : ''}
+                        </Text>
+                      )}
+                      {detalleAbierto && (
+                        <View style={{ marginTop: SPACING.sm, paddingTop: SPACING.sm, borderTopWidth: 1, borderTopColor: COLORS.border }}>
+                          <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.small, lineHeight: 18 }}>
+                            {ej.instrucciones || 'Sin instrucciones disponibles para este ejercicio.'}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => onToggleDetalle(ej.id_ejercicio)}
+                    activeOpacity={0.7}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    style={{ padding: SPACING.xs, marginLeft: SPACING.sm }}
+                  >
+                    <Ionicons
+                      name={detalleAbierto ? 'chevron-up-circle-outline' : 'information-circle-outline'}
+                      size={20}
+                      color={COLORS.textSecondary}
+                    />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => onRegistrar(ej)}
+                    activeOpacity={0.7}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    style={{ padding: SPACING.xs, marginLeft: SPACING.xs }}
+                  >
+                    <Ionicons name="add-circle-outline" size={20} color={COLORS.purpleLight} />
+                  </TouchableOpacity>
+                </View>
+
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
+                  <TextInput
                     style={{
-                      width: 26,
-                      height: 26,
-                      borderRadius: 13,
+                      flex: 1,
+                      backgroundColor: COLORS.bg,
+                      borderRadius: BORDER_RADIUS.md,
+                      borderWidth: 1,
+                      borderColor: COLORS.border,
+                      color: COLORS.text,
+                      fontSize: FONTS.xsmall,
+                      paddingHorizontal: SPACING.sm,
+                      paddingVertical: 6,
+                      marginRight: SPACING.sm,
+                    }}
+                    placeholder="💬 Nota para el entrenador…"
+                    placeholderTextColor={COLORS.textSecondary}
+                    value={borradorNota}
+                    onChangeText={(txt) => setNotaTexto(ej.id_ejercicio, txt)}
+                    multiline={false}
+                  />
+                  <TouchableOpacity
+                    onPress={() => onGuardarNota(ej)}
+                    activeOpacity={0.7}
+                    disabled={guardandoEsta}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    style={{
+                      height: 32,
+                      minWidth: 32,
+                      borderRadius: 16,
+                      backgroundColor: COLORS.purpleGlow,
                       justifyContent: 'center',
                       alignItems: 'center',
-                      marginRight: SPACING.md,
+                      paddingHorizontal: SPACING.xs,
                     }}
                   >
-                    {done && <Ionicons name="checkmark" size={18} color="#fff" />}
-                  </LinearGradient>
-                  <View style={{ flex: 1 }}>
-                    <Text style={{
-                      color: COLORS.text,
-                      fontSize: FONTS.body,
-                      fontWeight: '500',
-                      textDecorationLine: done ? 'line-through' : 'none',
-                      opacity: done ? 0.6 : 1,
-                    }}>
-                      {ej.nombre || `Ejercicio ${ej.id_ejercicio}`}
-                    </Text>
-                    {(ej.series || ej.repeticiones || ej.peso_kg != null || ej.descanso_seg != null) && (
-                      <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.small, marginTop: 1 }}>
-                        {ej.series ? `${ej.series} series` : ''}
-                        {ej.series && ej.repeticiones ? ' × ' : ''}
-                        {ej.repeticiones ? `${ej.repeticiones} reps` : ''}
-                        {ej.peso_kg != null ? ` · ${ej.peso_kg} kg` : ''}
-                        {ej.descanso_seg != null ? ` · ${ej.descanso_seg}s descanso` : ''}
-                      </Text>
+                    {guardandoEsta ? (
+                      <ActivityIndicator size="small" color={COLORS.purple} />
+                    ) : (
+                      <Ionicons name="send" size={16} color={COLORS.purpleLight} />
                     )}
-                    {detalleAbierto && (
-                      <View style={{ marginTop: SPACING.sm, paddingTop: SPACING.sm, borderTopWidth: 1, borderTopColor: COLORS.border }}>
-                        <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.small, lineHeight: 18 }}>
-                          {ej.instrucciones || 'Sin instrucciones disponibles para este ejercicio.'}
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => onToggleDetalle(ej.id_ejercicio)}
-                  activeOpacity={0.7}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                  style={{ padding: SPACING.xs, marginLeft: SPACING.sm }}
-                >
-                  <Ionicons
-                    name={detalleAbierto ? 'chevron-up-circle-outline' : 'information-circle-outline'}
-                    size={20}
-                    color={COLORS.textSecondary}
-                  />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => onRegistrar(ej)}
-                  activeOpacity={0.7}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                  style={{ padding: SPACING.xs, marginLeft: SPACING.xs }}
-                >
-                  <Ionicons name="add-circle-outline" size={20} color={COLORS.purpleLight} />
-                </TouchableOpacity>
+                  </TouchableOpacity>
+                </View>
               </View>
             );
           })}
@@ -232,6 +284,10 @@ export default function MiRutinaScreen() {
   const [diaSeleccionado, setDiaSeleccionado] = useState(null);
   const [rutinaDia, setRutinaDia] = useState(null);
   const [error, setError] = useState(null);
+  const [notas, setNotas] = useState({});
+  const [notaTextos, setNotaTextos] = useState({});
+  const [guardandoNota, setGuardandoNota] = useState(null);
+  const [actualizando, setActualizando] = useState(false);
 
   const hoy = new Date().toISOString().slice(0, 10);
   const diaSemana = DAYS[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1];
@@ -294,6 +350,15 @@ export default function MiRutinaScreen() {
           setCompletados(map);
         } catch (_) {}
       }
+
+      // Parte 3: notas del afiliado sobre sus ejercicios (ciclo actual)
+      try {
+        const notaRes = await getMisNotasEjercicio(cicloData.id_ciclo);
+        const notaArr = Array.isArray(notaRes.data) ? notaRes.data : [];
+        const notaMap = {};
+        notaArr.forEach((n) => { if (n.id_ejercicio) notaMap[n.id_ejercicio] = n.nota; });
+        setNotas(notaMap);
+      } catch (_) {}
     } catch (err) {
       setError('Error al cargar la rutina.');
     } finally {
@@ -306,12 +371,42 @@ export default function MiRutinaScreen() {
 
   const onRefresh = () => { setRefreshing(true); fetchData(); };
 
+  const onActualizar = () => {
+    setActualizando(true);
+    fetchData(ciclo).finally(() => setActualizando(false));
+  };
+
   const handleCicloChange = (c) => {
     setShowPicker(false);
     setDiaSeleccionado(null);
     setExpandido(null);
+    setNotaTextos({});
     setLoading(true);
     fetchData(c);
+  };
+
+  const setNotaTexto = (idEjercicio, texto) => {
+    setNotaTextos((prev) => ({ ...prev, [idEjercicio]: texto }));
+  };
+
+  const guardarNota = async (ej) => {
+    if (!ciclo) return;
+    const texto = (notaTextos[ej.id_ejercicio] ?? '').trim();
+    if (!texto) {
+      Alert.alert('Nota vacía', 'Escribí una nota para guardarla.');
+      return;
+    }
+    setGuardandoNota(ej.id_ejercicio);
+    try {
+      await guardarNotaEjercicio({ id_ejercicio: ej.id_ejercicio, id_ciclo: ciclo.id_ciclo, nota: texto });
+      setNotas((prev) => ({ ...prev, [ej.id_ejercicio]: texto }));
+      Alert.alert('Guardado', 'Nota guardada correctamente.');
+    } catch (err) {
+      console.log('nota error', err);
+      Alert.alert('Error', 'No se pudo guardar la nota.');
+    } finally {
+      setGuardandoNota(null);
+    }
   };
 
   const toggleEjercicio = (id) => {
@@ -409,10 +504,34 @@ export default function MiRutinaScreen() {
     <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
       <LinearGradient colors={GRADIENTS.purple} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
         style={{ paddingHorizontal: SPACING.lg, paddingTop: SPACING.xl, paddingBottom: SPACING.lg }}>
-        <Text style={{ color: '#fff', fontSize: FONTS.title, fontWeight: '800' }}>Mi Rutina</Text>
-        <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: FONTS.body, marginTop: 4 }}>
-          {formatearFechaLegible(hoy)} — {diaSemana}
-        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <View>
+            <Text style={{ color: '#fff', fontSize: FONTS.title, fontWeight: '800' }}>Mi Rutina</Text>
+            <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: FONTS.body, marginTop: 4 }}>
+              {formatearFechaLegible(hoy)} — {diaSemana}
+            </Text>
+          </View>
+          <TouchableOpacity
+            onPress={onActualizar}
+            activeOpacity={0.7}
+            disabled={actualizando}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 18,
+              backgroundColor: 'rgba(255,255,255,0.15)',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            {actualizando ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Ionicons name="refresh" size={20} color="#fff" />
+            )}
+          </TouchableOpacity>
+        </View>
 
         <View style={{
           flexDirection: 'row',
@@ -564,6 +683,11 @@ export default function MiRutinaScreen() {
                 onToggleDetalle={toggleDetalle}
                 onRegistrar={openRegistro}
                 grupo={grupoMuscular}
+                notas={notas}
+                notaTextos={notaTextos}
+                setNotaTexto={setNotaTexto}
+                onGuardarNota={guardarNota}
+                guardandoNota={guardandoNota}
               />
             )}
           </ScrollView>

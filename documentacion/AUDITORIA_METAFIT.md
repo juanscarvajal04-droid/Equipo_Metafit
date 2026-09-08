@@ -220,7 +220,7 @@ Auth Stack (sin token)      Root Stack (con token)
 
 1. **[❌] Edición de perfil inexistente** — no hay forma de editar peso, altura, teléfono o email desde la app (el objetivo de la auditoría lo pedía). `MiPerfilScreen` es 100% display. **Tampoco hay endpoint backend** PATCH de perfil afiliado.
 2. **[⚠️] Sin gráficos reales** — la pestaña Progreso usa tarjetas/listas; no hay librería de charts.
-3. **[⚠️] API_URL hardcodeado** (`api.js:8` original = `https://metafit-backend-rr18.onrender.com`). Sin `EXPO_PUBLIC_*`; en un dispositivo físico hay que cambiarlo a la IP LAN (ya se hizo localmente para validación: `http://192.168.0.10:3001`).
+3. **[⚠️] API_URL hardcodeado** (`api.js:8` original = `https://metafit-backend-rr18.onrender.com`). Sin `EXPO_PUBLIC_*`; en un dispositivo físico hay que cambiarlo a la IP LAN (ya se hizo localmente para validación: `http://localhost:3001`).
 4. **[⚠️] Sin guard de rol** — `AppNavigator.js:97` decide por `token`, no por `role`; cualquier rol autenticado entra a las tabs de afiliado (de facto los endpoints son `/afiliados/me`, pero no hay control de acceso explícito).
 5. **[⚠️] `useApi.js` es código muerto** — definido pero ninguna pantalla lo importa.
 6. **[⚠️] `setMode('system')` / modo sistema sin uso** — solo se usa `toggle`.
@@ -330,7 +330,7 @@ Catalogos: 6 restricciones · 25 ejercicios · 26 alimentos· 12 ciclos · 33 ru
 - **Credenciales**: las contraseñas de prueba están documentadas en el seed; si se cambian los hashes hay que re-sincronizar con lo que esperan los validadores.
 - **Seed idempotente pero con datos dinámicos**: re-ejecutar `04_datos_iniciales.sql` en fechas distintas da datos de hoy relativos; puede confundir validaciones entre días.
 - **Backend Render desactualizado**: la instancia `metafit-backend-rr18.onrender.com` aún **no** tiene las rutas FASE 3 (404 verificados) ni el usuario `carlos.demo`. La APK FASE 3 construida apunta a ese backend → validaciones reales fallan hasta desplegar.
-- **`api.js` modificado localmente** (apuntando a `192.168.0.10:3001` para la validación local) **no está commiteado** — si se fuerza un push se llevaría el cambio; el valor correcto de producción es `https://metafit-backend-rr18.onrender.com`.
+- **`api.js` modificado localmente** (apuntando a `http://localhost:3001` para la validación local) **no está commiteado** — si se fuerza un push se llevaría el cambio; el valor correcto de producción es `https://metafit-backend-rr18.onrender.com`.
 - **`docker-compose.yml` modificado localmente** (healthcheck `mysqladmin`→`mariadb-admin`, que no existe en la imagen MariaDB 11.8.9) **no está commiteado** — es un fix necesario para levantar el stack local en esta máquina.
 
 ---
@@ -340,7 +340,7 @@ Catalogos: 6 restricciones · 25 ejercicios · 26 alimentos· 12 ciclos · 33 ru
 Para la validación local (FASE 3 en emulador/celular) se dejó el entorno en este estado, **sin commitear nada**:
 - Docker Desktop activo; stack `db` (MariaDB) + `backend` corriendo en `localhost:3001`, BD con los 5 seeds aplicados (healthcheck corregido a `mariadb-admin`).
 - Verificados en local: login Admin/Entrenador/Afiliado OK, `POST /afiliados/me/registro-ejercicio` → 201, `POST /afiliados/me/consumo-alimento-real` → 201, historiales → 200, restricciones → 200.
-- `movil/src/services/api.js` → `http://192.168.0.10:3001` (solo local, sin commit).
+- `movil/src/services/api.js` → apuntó a `http://localhost:3001` en el emulador (solo local, sin commit; en un celular físico se usa la IP local vía `EXPO_PUBLIC_API_URL`, nunca una IP fija).
 - Se lanzó `npx expo start --lan` para probar con Expo Go en celular (queda pendiente la validación en dispositivo).
 
 **Archivos modificados localmente (no commiteados):** `docker-compose.yml`, `movil/src/services/api.js`.

@@ -168,6 +168,7 @@ export default function MiDietaScreen() {
   const [saving, setSaving] = useState(false);
   const [savingAgua, setSavingAgua] = useState(false);
   const [error, setError] = useState(null);
+  const [actualizando, setActualizando] = useState(false);
 
   const hoy = new Date().toISOString().slice(0, 10);
 
@@ -216,6 +217,11 @@ export default function MiDietaScreen() {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const onRefresh = () => { setRefreshing(true); fetchData(); };
+
+  const onActualizar = () => {
+    setActualizando(true);
+    fetchData(ciclo).finally(() => setActualizando(false));
+  };
 
   const handleCicloChange = (c) => {
     setShowPicker(false);
@@ -300,10 +306,34 @@ export default function MiDietaScreen() {
     <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
       <LinearGradient colors={GRADIENTS.purple} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
         style={{ paddingHorizontal: SPACING.lg, paddingTop: SPACING.xl, paddingBottom: SPACING.lg }}>
-        <Text style={{ color: '#fff', fontSize: FONTS.title, fontWeight: '800' }}>Mi Dieta</Text>
-        <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: FONTS.body, marginTop: 4 }}>
-          {formatearFechaLegible(hoy)}
-        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <View>
+            <Text style={{ color: '#fff', fontSize: FONTS.title, fontWeight: '800' }}>Mi Dieta</Text>
+            <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: FONTS.body, marginTop: 4 }}>
+              {formatearFechaLegible(hoy)}
+            </Text>
+          </View>
+          <TouchableOpacity
+            onPress={onActualizar}
+            activeOpacity={0.7}
+            disabled={actualizando}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 18,
+              backgroundColor: 'rgba(255,255,255,0.15)',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            {actualizando ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Ionicons name="refresh" size={20} color="#fff" />
+            )}
+          </TouchableOpacity>
+        </View>
 
         <View style={{
           backgroundColor: 'rgba(255,255,255,0.1)',

@@ -1303,7 +1303,8 @@ export function AuthProvider({ children }) {
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_URL = 'http://192.168.0.8:3001'; // ← Cambiar a IP local
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'https://metafit-backend-rr18.onrender.com';
+// local (portable): EXPO_PUBLIC_API_URL=http://localhost:3001  — nunca IPs fijas
 const TOKEN_KEY = 'metafit_token';
 const USER_KEY = 'metafit_user';
 

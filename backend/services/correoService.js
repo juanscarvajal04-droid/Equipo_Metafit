@@ -30,7 +30,10 @@ async function enviarCorreo({ destinatario, asunto, html, text }) {
         }),
       });
       const bodyApi = await resApi.json().catch(() => ({}));
-      if (resApi.ok) return true;
+      if (resApi.ok) {
+        console.log('[correoService] Correo enviado vía Brevo:', bodyApi?.messageId || 'ok');
+        return true;
+      }
       console.error('[correoService] Brevo API:', resApi.status, JSON.stringify(bodyApi));
     } catch (errApi) {
       console.error('[correoService] error Brevo API:', errApi.message);

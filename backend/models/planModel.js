@@ -150,6 +150,36 @@ const PlanModel = {
     return r.affectedRows;
   },
 
+  // Parte 2: PATCH /planes/rutinas/:id_rutina/ejercicios/:id_ejercicio
+  // Actualiza la configuración del ejercicio DENTRO de la rutina
+  // (series, repeticiones, peso_kg, descanso_seg). Si el mismo ejercicio
+  // aparece en varias posiciones se actualizan todas las filas (PK real (id_rutina, orden)).
+  updateEjercicioEnRutina: async (id_rutina, id_ejercicio, campos) => {
+    const sets = [];
+    const vals = [];
+    if (campos.series       !== undefined) { sets.push('series=?');       vals.push(campos.series); }
+    if (campos.repeticiones !== undefined) { sets.push('repeticiones=?'); vals.push(campos.repeticiones); }
+    if (campos.peso_kg      !== undefined) { sets.push('peso_kg=?');      vals.push(campos.peso_kg); }
+    if (campos.descanso_seg !== undefined) { sets.push('descanso_seg=?'); vals.push(campos.descanso_seg); }
+    if (!sets.length) return 0;
+    vals.push(id_rutina, id_ejercicio);
+    const [r] = await pool.query(
+      `UPDATE RUTINA_EJERCICIO SET ${sets.join(',')} WHERE id_rutina=? AND id_ejercicio=?`,
+      vals
+    );
+    return r.affectedRows;
+  },
+
+  // Parte 2: la "descripcion" del ejercicio es EJERCICIO.descripcion (catálogo),
+  // opcional en el mismo PATCH para que el entrenador pueda ajustar las instrucciones.
+  updateDescripcionEjercicio: async (id_ejercicio, descripcion) => {
+    const [r] = await pool.query(
+      'UPDATE EJERCICIO SET descripcion = ? WHERE id_ejercicio = ?',
+      [descripcion ?? null, id_ejercicio]
+    );
+    return r.affectedRows;
+  },
+
   deleteRutina: async (id_rutina) => {
     // Transacción: limpia los ejercicios asociados y la rutina (todo o nada)
     const conn = await pool.getConnection();
@@ -225,6 +255,73 @@ const PlanModel = {
       'INSERT INTO DETALLE_NUTRICIONAL (id_ciclo, num_comida, id_alimento, cantidad_g) VALUES (?,?,?,?)',
       [id_ciclo, num_comida, id_alimento, cantidad_g]
     );
+  },
+
+  // Parte 2: PATCH /planes/nutricional/:id_plan/detalle/:id_detalle
+  //  · cantidad_g: UPDATE directo sobre el alimento en el ciclo.
+  //  · num_comida (movida a otra comida): DELETE + INSERT, porque num_comida
+  //    es parte de la PK natural triple. El cliente envía el num_comida ANTERIOR
+  //    (num_comida_anterior) y el nuevo (num_comida) para poder localizar la fila.
+  updateAlimentoEnDetalle: async (id_ciclo, id_alimento, campos) => {
+    if (campos.num_comida !== undefined && campos.num_comida_anterior !== undefined
+        && Number(campos.num_comida) !== Number(campos.num_comida_anterior)) {
+      // Mover fila: borrar en la comida anterior e insertar en la nueva
+      const conn = await pool.getConnection();
+      try {
+        await conn.beginTransaction();
+        const [del] = await conn.query(
+          'DELETE FROM DETALLE_NUTRICIONAL WHERE id_ciclo=? AND num_comida=? AND id_alimento=?',
+          [id_ciclo, campos.num_comida_anterior, id_alimento]
+        );
+        if (!del.affectedRows) return 0;
+        await conn.query(
+          'INSERT INTO DETALLE_NUTRICIONAL (id_ciclo, num_comida, id_alimento, cantidad_g) VALUES (?,?,?,?)',
+          [id_ciclo, campos.num_comida, id_alimento, campos.cantidad_g ?? 100]
+        );
+        await conn.commit();
+        return 1;
+      } catch (err) {
+        await conn.rollback();
+        throw err;
+      } finally {
+        conn.release();
+      }
+    }
+
+    // Update simple de cantidad_g. Si el cliente indica num_comida_anterior se
+    // actualiza SOLO esa comida; sin él, todas las filas del alimento en el ciclo.
+    if (campos.cantidad_g !== undefined) {
+      let params, where;
+      if (campos.num_comida_anterior !== undefined) {
+        where = ' WHERE id_ciclo=? AND num_comida=? AND id_alimento=?';
+        params = [campos.cantidad_g, id_ciclo, campos.num_comida_anterior, id_alimento];
+      } else {
+        where = ' WHERE id_ciclo=? AND id_alimento=?';
+        params = [campos.cantidad_g, id_ciclo, id_alimento];
+      }
+      const [r] = await pool.query(
+        `UPDATE DETALLE_NUTRICIONAL SET cantidad_g=? ${where}`, params
+      );
+      return r.affectedRows;
+    }
+    return 0;
+  },
+
+  // Parte 2: DELETE /planes/nutricional/:id_plan/detalle/:id_detalle
+  // Si se pasa num_comida se borra SOLO esa fila; si no, todas las del alimento.
+  removeAlimentoDeDetalle: async (id_ciclo, id_alimento, num_comida) => {
+    if (num_comida !== undefined) {
+      const [r] = await pool.query(
+        'DELETE FROM DETALLE_NUTRICIONAL WHERE id_ciclo=? AND num_comida=? AND id_alimento=?',
+        [id_ciclo, num_comida, id_alimento]
+      );
+      return r.affectedRows;
+    }
+    const [r] = await pool.query(
+      'DELETE FROM DETALLE_NUTRICIONAL WHERE id_ciclo=? AND id_alimento=?',
+      [id_ciclo, id_alimento]
+    );
+    return r.affectedRows;
   },
 };
 

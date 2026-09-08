@@ -1,40 +1,53 @@
 # APK de MetaFit — App Móvil
 
-La descarga del APK de la app móvil se sirve **directamente desde la build de EAS (Expo)**, no desde un archivo local del repositorio.
+El APK de la app móvil se coloca en esta carpeta para que esté disponible por
+descarga desde la landing page en `/app/metafit.apk` y desde el correo de
+bienvenida (URL `https://metafit-frontend-78x6.onrender.com/app/metafit.apk`).
 
-## Enlace de descarga actual
+## Versión actual
 
-El botón "Descargar APK" de la landing page apunta directamente al artefacto de la última build de EAS:
+- **APK v4 (2026-09-08, EAS Build)**: build ID `aedfabcd-e41f-4557-a539-41ed5f53ec0b`
+  (commit `cdb0681`). Incluye CRUD de ciclos, edición de rutinas/dietas, notas
+  del afiliado, URL de Render en móvil, modo claro/oscuro y notificaciones push.
+  Compilado con EAS Build (profile `preview`) vía Expo SDK 55, firmado con debug
+  key (instalación por "orígenes desconocidos").
+- Tamaño: ~90,5 MB (94,9 MB en disco).
 
-```
-https://expo.dev/artifacts/eas/3mCh0-T8CEI3jK_APZUO6rM6-Al1ryP4kxRezmF-i7k.apk
-```
+## Requisitos
 
-- Tamaño: ~94,9 MB (build de **React Native/Expo**).
-- Se actualiza manualmente editando `frontend_web/src/views/LandingPage.jsx` (y el `manual_apk_movil.md`) con la URL del artefacto de la nueva build.
+- Nombre del archivo: `metafit.apk`
+- Ruta final: `frontend_web/public/app/metafit.apk` (+ copia en `frontend_web/dist/app/metafit.apk`)
+- URL pública: `https://metafit-frontend-78x6.onrender.com/app/metafit.apk`
 
-## Cómo generar y publicar una nueva APK
+## Cómo generar el APK
 
-Build en la nube (recomendado):
+Con EAS Build (nube):
 
 ```bash
 cd movil
-npx eas build --platform android --profile production
+EXPO_TOKEN=<tu_token> npx eas-cli build --platform android --profile preview --non-interactive
+# Descargar el artefacto de https://expo.dev/artifacts/eas/... y copiarlo a:
+cp <descarga>.apk frontend_web/public/app/metafit.apk
 ```
 
-Al terminar, EAS muestra la URL del artefacto (formato `https://expo.dev/artifacts/eas/<id>.apk`).
+Build local (entorno con memoria limitada) vía systemd:
 
-### Pasos para actualizar el enlace
+```bash
+cd movil/android
+systemd-run --collect --unit=metafit-gradle \
+  --working-directory=$PWD bash -c \
+  './gradlew :app:assembleRelease -x lint -x lintVitalAnalyzeRelease \
+   -PreactNativeArchitectures=arm64-v8a \
+   -Dorg.gradle.jvmargs="-Xmx1024m -XX:MaxMetaspaceSize=420m" --max-workers=1'
+# Requiere movil/android/local.properties con sdk.dir=<tu SDK>
+cp movil/android/app/build/outputs/apk/release/app-release.apk frontend_web/public/app/metafit.apk
+cp movil/android/app/build/outputs/apk/release/app-release.apk frontend_web/dist/app/metafit.apk
+```
 
-1. Generar la build con `eas build`.
-2. Copiar la URL del artefacto `*.apk` resultante.
-3. Reemplazar esa URL en:
-   - `frontend_web/src/views/LandingPage.jsx` (atributo `href` del botón de descarga)
-   - `documentacion/manual_apk_movil.md` (sección 8 APK)
-   - Este README (sección "Enlace de descarga actual")
-4. Commitear y esperar el deploy en Render.
+## Nota
 
-## Notas
-
-- El APK ya **no** se copia a `frontend_web/public/app/` ni a `frontend_web/dist/app/`; la descarga sale de Expo, por lo que no hay que subir binarios al repositorio ni al sitio estático.
-- Instalación por "orígenes desconocidos" en el dispositivo (build firmada con debug key).
+Alternativa: la landing page también puede apuntar directamente al artefacto de
+EAS (`https://expo.dev/artifacts/eas/<id>.apk`) en `frontend_web/src/views/LandingPage.jsx`,
+sin subir el binario al repositorio. El enfoque que mantiene el binario en
+`frontend_web/public/app/metafit.apk` es el que usa actualmente el correo de
+bienvenida y permite servir el APK desde el sitio estático.

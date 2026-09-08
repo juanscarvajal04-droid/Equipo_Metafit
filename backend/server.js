@@ -115,6 +115,7 @@ const pagoAdminRoutes = require('./routes/pagoAdminRoutes'); // FASE FINANZAS: a
 const configuracionRoutes = require('./routes/configuracionRoutes');
 const notificacionRoutes = require('./routes/notificacionRoutes');
 const progresoRoutes = require('./routes/progresoRoutes');   // FASE 1: resumen diario + evolución
+const cicloRoutes = require('./routes/cicloRoutes');          // Parte 1: PATCH/DELETE /ciclos/:id_ciclo
 
 // BUG-005: El rate limiter se aplica SOLO al endpoint de login
 app.use('/login', loginLimiter);          // rate limit solo en /login
@@ -129,6 +130,7 @@ app.use('/dashboard', dashboardRoutes);            // GET /dashboard/kpis
 app.use('/configuracion', configuracionRoutes);     // GET|PUT /configuracion/precio-membresia
 app.use('/notificaciones', notificacionRoutes);    // GET /notificaciones
 app.use('/progreso', progresoRoutes);              // FASE 1: GET|PUT /progreso/resumen, /progreso/historial, /progreso/ejercicio/:id/evolucion
+app.use('/ciclos', cicloRoutes);                   // Parte 1: PATCH|DELETE /ciclos/:id_ciclo
 
 // ── Swagger UI — /api-docs y /swagger (alias) ────────────────
 const swaggerSetup = swaggerUi.setup(swaggerSpec, {

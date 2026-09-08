@@ -383,7 +383,9 @@ const AfiliadoModel = {
       );
 
       await conn.commit();
-      return id_usuario;
+      // Se devuelve además la contraseña efectiva (la que se hasheó) para que
+      // el servicio/controlador pueda incluirla en el correo de bienvenida.
+      return { id_usuario, password_temporal: rawPassword };
     } catch (err) {
       await conn.rollback();
       throw err;

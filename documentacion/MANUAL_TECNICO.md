@@ -538,6 +538,47 @@ En GTM hay que crear **4 triggers “Custom Event”** con esos nombres y apunta
 - `backend/services/bienvenidaService.js` + plantilla `backend/templates/bienvenida-afiliado.html` (estilo 600px de marca): credenciales de acceso (correo + contraseña temporal `MF_<doc>@2025` si no se define una).
 - Se dispara fire-and-forget en `afiliadoController.create`; la creación del afiliado nunca depende del correo.
 
+#### Correo de bienvenida automático (v2 — Sport Gym Sede Santa Rosita)
+
+**Flujo:** al crear un afiliado (`POST /afiliados`), `afiliadoController.create` obtiene el resultado del `AfiliadoService.create` y, de forma **fire-and-forget** (nunca bloquea el `201`), dispara dos acciones asíncronas:
+
+1. `bienvenidaService.enviarCorreoBienvenida(detalle, passwordTemporal)` → envía el correo de bienvenida vía Brevo.
+2. `n8nWebhookService.notificarNuevoAfiliado(detalle, passwordTemporal)` → webhook a n8n (Telegram + Google Sheets).
+
+**Contraseña temporal real (2.5):** el modelo `backend/models/afiliadoModel.js` ya genera automáticamente la contraseña `MF_{documento}@2025` (hash bcrypt 12 rondas) cuando el frontend no envía `contrasena`. Esa contraseña **efectiva** ahora se propaga hacia arriba:
+
+- `AfiliadoModel.create` → devuelve `{ id_usuario, password_temporal }`.
+- `AfiliadoService.create` → devuelve `{ id, message, password_temporal }`.
+- `afiliadoController.create` → usa `result.password_temporal` en el correo y el webhook n8n (en lugar de `null`).
+
+Si en algún flujo el backend no genera contraseña, el fallback es `"MetaFit2025!"`.
+
+**Plantilla y placeholders:** `backend/templates/bienvenida-afiliado.html` usa los placeholders:
+
+| Placeholder              | Descripción                                    |
+|--------------------------|------------------------------------------------|
+| `{{NOMBRE}}`             | Nombre completo del afiliado                   |
+| `{{CORREO}}`             | Correo del afiliado (usuario de acceso)        |
+| `{{PASSWORD_TEMPORAL}}`  | Contraseña temporal `MF_{documento}@2025`      |
+| `{{URL_APK}}`            | Enlace de descarga del APK                      |
+
+Contenido del correo: título "¡Bienvenido a Sport Gym Sede Santa Rosita!", bloque de credenciales, botón **"Descargar App"** con la URL del APK, nota "También podés descargar la app desde la web de MetaFit." y footer "Sport Gym Sede Santa Rosita · Sistema de gestión de entrenamientos MetaFit".
+
+- **Asunto:** fijo `Bienvenido a MetaFit — Sport Gym Sede Santa Rosita`.
+- **Remitente:** `"MetaFit" <metafit.sistema@gmail.com>` (verificado en Brevo).
+
+**Variables de entorno:**
+
+| Variable        | Default                                       | Descripción                             |
+|-----------------|-----------------------------------------------|-----------------------------------------|
+| `BREVO_API_KEY` | _(vacío → fallback SMTP)_                     | API key Brevo (enviar vía REST API)      |
+| `SMTP_FROM`     | `metafit.sistema@gmail.com`                   | Remitente verificado en Brevo            |
+| `URL_APK`       | `https://metafit-frontend-78x6.onrender.com/app/metafit.apk` | Enlace de descarga del APK |
+
+Estas variables se plomaron en `docker-compose.yml` (backend) y en `backend/.env` (desarrollo sin Docker). `.env` y `.env` locales están en `.gitignore` (no se suben secretos al repositorio).
+
+**Prueba de validación (Parte 3):** `POST /afiliados` con un afiliado de prueba devolvió `201` y `password_temporal: "MF_1001112223@2025"`, confirmando que la contraseña real generada por el backend se propaga al correo. La plantilla se validó con checks automatizados (título, credenciales, botón APK, URL, footer, sin placeholders viejos).
+
 ### Recordatorio automático de pagos (cron)
 
 - `backend/cron/recordatorioPagos.js` con **node-cron**: `0 * * * *` (cada hora). Consulta pagos `estado='Pagado'` con `fecha_vencimiento` dentro de los próximos **3 días** y envía la plantilla `backend/templates/recordatorio-pago.html`.

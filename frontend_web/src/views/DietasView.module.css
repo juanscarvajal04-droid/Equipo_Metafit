@@ -386,6 +386,44 @@
   cursor: not-allowed;
 }
 
+.btnConfirmarS {
+  background: #22c55e;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+
+.btnConfirmarS:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btnOutlineS {
+  background: transparent;
+  border: 1px solid var(--mf-border);
+  color: var(--mf-text);
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+
+.btnOutlineS:hover {
+  background: rgba(239, 68, 68, 0.08);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.btnOutlineS:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .btnRefresh {
   background: transparent;
   border: 1px solid var(--mf-border);

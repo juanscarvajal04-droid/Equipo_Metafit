@@ -35,7 +35,11 @@ const AfiliadoController = {
       const result = await AfiliadoService.create(req.body, req.user.sub);
       // Correo de bienvenida + webhook n8n (fire-and-forget: nunca bloquea la respuesta)
       if (result?.id) {
-        const passwordTemporal = req.body.contrasena || req.body.password || null;
+        // Contraseña efectiva: la que genera el backend (MF_{documento}@2025)
+        // si el frontend no envía `contrasena`. Fallback documentado.
+        const passwordTemporal = result.password_temporal
+          || req.body.contrasena || req.body.password
+          || 'MetaFit2025!';
         AfiliadoService.getById(result.id)
           .then((detalle) => {
             if (!detalle) return null;
@@ -391,6 +395,69 @@ const AfiliadoController = {
       return res.json(result);
     } catch (err) {
       console.error('[afiliadoController.getProgresoEjercicioHistorial]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
+  // ── PARTE 3: NOTAS DEL AFILIADO SOBRE EJERCICIOS ─────────────
+  crearNotaEjercicio: async (req, res) => {
+    try {
+      const result = await AfiliadoService.guardarNotaEjercicio(req.user.sub, req.body);
+      return res.status(201).json(result);
+    } catch (err) {
+      if (err.message && err.message.includes('requeridos'))
+        return res.status(400).json({ error: err.message });
+      if (err.code === 'ER_NO_REFERENCED_ROW_2')
+        return res.status(400).json({ error: 'El ejercicio o ciclo no existe' });
+      if (err.code === 'ER_CHECK_CONSTRAINT_VIOLATED')
+        return res.status(400).json({ error: 'Datos inválidos para la nota' });
+      console.error('[afiliadoController.crearNotaEjercicio]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
+  getMisNotasEjercicio: async (req, res) => {
+    try {
+      const result = await AfiliadoService.getMisNotasEjercicio(req.user.sub, req.query.id_ciclo);
+      return res.json(result);
+    } catch (err) {
+      console.error('[afiliadoController.getMisNotasEjercicio]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
+  actualizarNotaEjercicio: async (req, res) => {
+    try {
+      const result = await AfiliadoService.actualizarNotaEjercicio(req.user.sub, req.params.id_nota, req.body.nota);
+      return res.json(result);
+    } catch (err) {
+      if (err.message && err.message.includes('nota es requerida'))
+        return res.status(400).json({ error: err.message });
+      if (err.code === 'NO_ENCONTRADO')
+        return res.status(404).json({ error: err.message });
+      console.error('[afiliadoController.actualizarNotaEjercicio]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
+  eliminarNotaEjercicio: async (req, res) => {
+    try {
+      const result = await AfiliadoService.eliminarNotaEjercicio(req.user.sub, req.params.id_nota);
+      return res.json(result);
+    } catch (err) {
+      if (err.code === 'NO_ENCONTRADO')
+        return res.status(404).json({ error: err.message });
+      console.error('[afiliadoController.eliminarNotaEjercicio]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
+  getNotasEjercicioAfiliado: async (req, res) => {
+    try {
+      const result = await AfiliadoService.getNotasEjercicioDeAfiliado(req.params.id);
+      return res.json(result);
+    } catch (err) {
+      console.error('[afiliadoController.getNotasEjercicioAfiliado]', err);
       return res.status(500).json({ error: 'Error interno del servidor' });
     }
   },

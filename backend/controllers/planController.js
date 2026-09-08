@@ -106,12 +106,51 @@ const PlanController = {
     }
   },
 
+  // Parte 2: PATCH /planes/rutinas/:id_rutina/ejercicios/:id_ejercicio
+  // Actualiza series, repeticiones (y opcionalmente peso_kg/descanso_seg) en la
+  // rutina + descripcion del ejercicio en el catálogo.
+  updateEjercicio: async (req, res) => {
+    const { id_rutina, id_ejercicio } = req.params;
+    const { series, repeticiones, descripcion, peso_kg, descanso_seg } = req.body;
+    if (series === undefined && repeticiones === undefined && descripcion === undefined
+        && peso_kg === undefined && descanso_seg === undefined) {
+      return res.status(400).json({ error: 'Envía al menos series, repeticiones, peso_kg, descanso_seg o descripcion' });
+    }
+    try {
+      let affected = 0;
+      if (series !== undefined || repeticiones !== undefined || peso_kg !== undefined || descanso_seg !== undefined) {
+        affected = await PlanModel.updateEjercicioEnRutina(id_rutina, id_ejercicio, {
+          series:       series       !== undefined ? Number(series)       : undefined,
+          repeticiones: repeticiones !== undefined ? Number(repeticiones) : undefined,
+          peso_kg:      peso_kg      !== undefined ? Number(peso_kg)      : undefined,
+          descanso_seg: descanso_seg !== undefined ? Number(descanso_seg) : undefined,
+        });
+      }
+      if (descripcion !== undefined) {
+        await PlanModel.updateDescripcionEjercicio(id_ejercicio, descripcion);
+      }
+      if (affected === 0 && descripcion === undefined) {
+        return res.status(404).json({ error: 'Ejercicio no encontrado en esa rutina' });
+      }
+      res.json({ message: 'Ejercicio actualizado correctamente', affected });
+    } catch (err) {
+      if (err.code === 'ER_CHECK_CONSTRAINT_VIOLATED') {
+        return res.status(400).json({ error: 'series, repeticiones, peso_kg o descanso_seg inválidos' });
+      }
+      console.error('[planController.updateEjercicio]', err);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
   removeEjercicio: async (req, res) => {
     try {
-      await PlanModel.removeEjercicioFromRutina(
+      const affected = await PlanModel.removeEjercicioFromRutina(
         req.params.id_rutina, req.params.id_ejercicio
       );
-      res.json({ message: 'Ejercicio eliminado de la rutina' });
+      if (affected === 0) {
+        return res.status(404).json({ error: 'Ejercicio no encontrado en esa rutina' });
+      }
+      res.json({ message: 'Ejercicio eliminado de la rutina', affected });
     } catch (err) {
       console.error('[planController.removeEjercicio]', err);
       res.status(500).json({ error: 'Error interno del servidor' });
@@ -200,6 +239,53 @@ const PlanController = {
       if (err.code === 'ER_DUP_ENTRY')
         return res.status(400).json({ error: 'Ese alimento ya está en esa comida del plan' });
       console.error('[planController.addAlimento]', err);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
+  // Parte 2: PATCH /planes/nutricional/:id_plan/detalle/:id_detalle
+  //  · cantidad_gramos/cantidad_g → cantidad_g real del schema.
+  //  · num_comida mover fila: requiere num_comida_anterior en el body.
+  updateDetalle: async (req, res) => {
+    const { id_plan, id_detalle } = req.params;
+    const cantidad_g = req.body.cantidad_g !== undefined ? req.body.cantidad_g
+      : (req.body.cantidad_gramos !== undefined ? req.body.cantidad_gramos : undefined);
+    const num_comida = req.body.num_comida;
+    const num_comida_anterior = req.body.num_comida_anterior;
+    if (cantidad_g === undefined && num_comida === undefined) {
+      return res.status(400).json({ error: 'Envía cantidad_gramos y/o num_comida' });
+    }
+    try {
+      const affected = await PlanModel.updateAlimentoEnDetalle(
+        id_plan, id_detalle, { cantidad_g, num_comida, num_comida_anterior }
+      );
+      if (affected === 0) {
+        return res.status(404).json({ error: 'Alimento no encontrado en ese plan' });
+      }
+      res.json({ message: 'Detalle nutricional actualizado', affected });
+    } catch (err) {
+      if (err.code === 'ER_DUP_ENTRY')
+        return res.status(409).json({ error: 'Ese alimento ya está en la comida destino' });
+      if (err.code === 'ER_CHECK_CONSTRAINT_VIOLATED')
+        return res.status(400).json({ error: 'cantidad_g debe ser mayor a 0' });
+      console.error('[planController.updateDetalle]', err);
+      res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
+  // Parte 2: DELETE /planes/nutricional/:id_plan/detalle/:id_detalle
+  removeDetalle: async (req, res) => {
+    const { id_plan, id_detalle } = req.params;
+    try {
+      const affected = await PlanModel.removeAlimentoDeDetalle(
+        id_plan, id_detalle, req.body.num_comida
+      );
+      if (affected === 0) {
+        return res.status(404).json({ error: 'Alimento no encontrado en ese plan' });
+      }
+      res.json({ message: 'Alimento eliminado del plan nutricional', affected });
+    } catch (err) {
+      console.error('[planController.removeDetalle]', err);
       res.status(500).json({ error: 'Error interno del servidor' });
     }
   },
