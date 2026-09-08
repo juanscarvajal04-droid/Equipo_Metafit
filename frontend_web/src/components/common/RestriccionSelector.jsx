@@ -27,7 +27,8 @@ export default function RestriccionSelector({
   const [catalogo, setCatalogo] = useState(null);
   const [selectedId, setSelectedId] = useState("");
 
-  const asignadasIds = restriccionesAsignadas
+  const asignadas = Array.isArray(restriccionesAsignadas) ? restriccionesAsignadas : [];
+  const asignadasIds = asignadas
     .map(getId)
     .filter((v) => v != null);
 
@@ -51,7 +52,7 @@ export default function RestriccionSelector({
 
   const loading = showModal && catalogo === null;
 
-  const disponibles = catalogo.filter(
+  const disponibles = (catalogo || []).filter(
     (r) => !asignadasIds.includes(getId(r))
   );
 
@@ -90,10 +91,10 @@ export default function RestriccionSelector({
   return (
     <div className={styles.wrap}>
       <div className={styles.badges}>
-        {restriccionesAsignadas.length === 0 ? (
+        {asignadas.length === 0 ? (
           <span className={styles.vacio}>Sin restricciones registradas</span>
         ) : (
-          restriccionesAsignadas.map((r) => {
+          asignadas.map((r) => {
             const id = getId(r);
             const nombre = getNombre(r);
             const tipo = r?.tipo || "";
