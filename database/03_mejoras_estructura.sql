@@ -68,6 +68,35 @@ PREPARE stmt FROM @sql_add; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
 
 -- ============================================================================================================================
+-- BLOQUE 1B — AFILIADO.foto (Cloudinary) y USUARIO.push_token (Expo)
+-- Los scripts de runtime backend/migrations/*.js también los crean, pero en
+-- Docker fallaban con ECONNREFUSED si la BD aún no estaba lista al arrancar
+-- (`docker compose down -v && up`). Al declararlos aquí quedan garantizados
+-- desde el primer arranque del contenedor de BD.
+-- ============================================================================================================================
+
+SET @sql_add = IF(
+  NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+               WHERE TABLE_SCHEMA = 'metafit' AND TABLE_NAME = 'AFILIADO'
+                 AND COLUMN_NAME = 'foto'),
+  'ALTER TABLE `AFILIADO`
+     ADD COLUMN `foto` VARCHAR(255) NULL
+     COMMENT ''URL Cloudinary o ruta local de la foto de perfil. Ver backend/migrations/migracionFotos.js'' AFTER `registrado_por`',
+  'SELECT 1');
+PREPARE stmt FROM @sql_add; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @sql_add = IF(
+  NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+               WHERE TABLE_SCHEMA = 'metafit' AND TABLE_NAME = 'USUARIO'
+                 AND COLUMN_NAME = 'push_token'),
+  'ALTER TABLE `USUARIO`
+     ADD COLUMN `push_token` VARCHAR(255) NULL
+     COMMENT ''Expo Push Token del dispositivo movil. Ver backend/migrations/migracionPushToken.js'' AFTER `contrasena`',
+  'SELECT 1');
+PREPARE stmt FROM @sql_add; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+
+-- ============================================================================================================================
 -- BLOQUE 2 — REGISTRO_EJERCICIO: ejecucion REAL de un ejercicio dentro de la rutina
 -- Reemplaza el booleano de PROGRESO_EJERCICIO_DIARIO por datos de volumen (series, reps, peso).
 -- La FK es la PK compuesta real de RUTINA_EJERCICIO: (id_rutina, orden).

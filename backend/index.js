@@ -1,37 +1,58 @@
 // index.js
 // ─── Punto de entrada del servidor MetaFit ────────────────────
 require('dotenv').config();
-require('./config/db');      // Inicia la conexión a MySQL al arrancar
+const pool = require('./config/db');  // Inicia la conexión a MySQL al arrancar
+
+// ── Espera activa: la BD puede estar aún inicializándose al levantar ──
+// En Docker (`docker compose up`) MariaDB arranca en paralelo: si las
+// migraciones corren sin esperar fallan con ECONNREFUSED y las columnas
+// nuevas (p. ej. AFILIADO.foto) no se crean en un volumen recién recreado
+// (`docker compose down -v`). Este helper reintenta hasta que `SELECT 1`
+// responda, sin bloquear el arranque del servidor (es asíncrono).
+async function esperarBaseDeDatos(intentos = 30, cadaMs = 2000) {
+  for (let i = 1; i <= intentos; i += 1) {
+    try {
+      await pool.query('SELECT 1');
+      console.log('[migraciones] Base de datos disponible');
+      return;
+    } catch (err) {
+      if (i === intentos) throw err;
+      console.log(`[migraciones] BD aún no lista (${i}/${intentos}), reintento en ${cadaMs}ms…`);
+      await new Promise((r) => setTimeout(r, cadaMs));
+    }
+  }
+}
 
 // ── Migración automática idempotente: tabla PASSWORD_RESET ────
 // Crea la tabla si no existe en cualquier entorno (local, Docker, Render)
 // sin depender de ejecutar scripts SQL manualmente.
-require('./models/passwordResetModel').ensureTable()
+esperarBaseDeDatos()
+  .then(() => require('./models/passwordResetModel').ensureTable())
   .then(() => console.log('✅ Tabla PASSWORD_RESET verificada/creada'))
   .catch(err => console.error('[PASSWORD_RESET] error creando tabla:', err.message));
 
 // ── Migración idempotente: columna AFILIADO.foto + limpieza de datos temporales ─
 // Corre dentro del VM de Render (MySQL solo socket local, sin acceso externo).
-const { runMigraciones } = require('./migrations/migracionFotos');
-runMigraciones()
+esperarBaseDeDatos()
+  .then(() => require('./migrations/migracionFotos').runMigraciones())
   .then(() => console.log('✅ Migración de fotos verificada'))
   .catch(err => console.error('[MIGRACION-FOTOS] error:', err.message));
 
 // ── Migración idempotente: columna USUARIO.push_token (push notifications) ──
-const { runMigraciones: runMigracionesPush } = require('./migrations/migracionPushToken');
-runMigracionesPush()
+esperarBaseDeDatos()
+  .then(() => require('./migrations/migracionPushToken').runMigraciones())
   .then(() => console.log('✅ Migración de push_token verificada'))
   .catch(err => console.error('[MIGRACION-PUSH] error:', err.message));
 
 // ── Migración idempotente: RUTINA_EJERCICIO.peso_kg + RUTINA_EJERCICIO.descanso_seg (HU43 CA2) ──
-const { runMigraciones: runMigracionesRutinaDetalles } = require('./migrations/migracionRutinaDetalles');
-runMigracionesRutinaDetalles()
+esperarBaseDeDatos()
+  .then(() => require('./migrations/migracionRutinaDetalles').runMigraciones())
   .then(() => console.log('✅ Migración de detalles de rutina verificada'))
   .catch(err => console.error('[MIGRACION-RUTINA-DETALLES] error:', err.message));
 
 // ── Migración idempotente: macronutrientes en CONSUMO_ALIMENTO_REAL (FASE A.2) ──
-const { runMigraciones: runMigracionesNutrientes } = require('./migrations/migracionNutrientesConsumo');
-runMigracionesNutrientes()
+esperarBaseDeDatos()
+  .then(() => require('./migrations/migracionNutrientesConsumo').runMigraciones())
   .then(() => console.log('✅ Migración de nutrientes de consumo verificada'))
   .catch(err => console.error('[MIGRACION-NUTRIENTES-CONSUMO] error:', err.message));
 
