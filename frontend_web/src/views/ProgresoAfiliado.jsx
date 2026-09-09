@@ -16,7 +16,7 @@ export default function ProgresoAfiliado() {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const [estado, setEstado] = useState({ loading: true, error: "", afiliado: null, historial: [] });
+  const [estado, setEstado] = useState({ loading: true, error: "", afiliado: null, historial: [], registros: [] });
 
   useEffect(() => {
     let activo = true;
@@ -28,11 +28,15 @@ export default function ProgresoAfiliado() {
           authAxios.get(`/afiliados/${id}/progreso`),
         ]);
         if (!activo) return;
+        // Compatibilidad: antes el endpoint devolvía solo el array de PROGRESO_FISICO;
+        // ahora devuelve { historial, registros } para incluir las notas del afiliado.
+        const data = progreso.data;
         setEstado({
           loading: false,
           error: "",
           afiliado: perfil,
-          historial: Array.isArray(progreso.data) ? progreso.data : [],
+          historial: Array.isArray(data) ? data : (Array.isArray(data?.historial) ? data.historial : []),
+          registros: Array.isArray(data) ? [] : (Array.isArray(data?.registros) ? data.registros : []),
         });
       } catch (err) {
         if (!activo) return;
@@ -47,8 +51,9 @@ export default function ProgresoAfiliado() {
     return () => { activo = false; };
   }, [id, authAxios]);
 
-  const { loading, error, afiliado, historial } = estado;
+  const { loading, error, afiliado, historial, registros } = estado;
   const ul = ultimoRegistroFisico(historial);
+  const conNotas = (registros || []).filter((r) => typeof r.notas === "string" && r.notas.trim() !== "");
   const ciclo = afiliado?.ciclo_activo || null;
   const restricciones = Array.isArray(afiliado?.restricciones) ? afiliado.restricciones : [];
   const nombre = nombreCompleto(afiliado);
@@ -175,6 +180,37 @@ export default function ProgresoAfiliado() {
                 )}
               </div>
             )}
+
+            <div className={s.infoCard}>
+              <h6 className={s.sectionTitle}>📝 Observaciones del afiliado</h6>
+              {conNotas.length === 0 ? (
+                <div className={s.infoValue} style={{ color: "var(--mf-muted)", fontWeight: 400, fontSize: "0.85rem" }}>
+                  Sin observaciones registradas.
+                </div>
+              ) : (
+                <ul className={s.notasList}>
+                  {conNotas.map((reg) => (
+                    <li key={reg.id_registro} className={s.notaItem}>
+                      <div className={s.notaHead}>
+                        <span className={s.notaEjercicio}>
+                          🏋️ {reg.nombre_ejercicio || "Ejercicio"}
+                        </span>
+                        <span className={s.notaFecha}>
+                          {new Date(reg.fecha).toLocaleDateString("es-CO")}
+                        </span>
+                      </div>
+                      <div className={s.notaTexto}>{reg.notas}</div>
+                      {reg.series != null && (
+                        <div style={{ fontSize: "0.75rem", color: "var(--mf-muted)" }}>
+                          {reg.series}×{reg.repeticiones} reps
+                          {reg.peso_utilizado_kg != null ? ` · ${reg.peso_utilizado_kg} kg` : ""}
+                        </div>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </>
         )}
       </div>

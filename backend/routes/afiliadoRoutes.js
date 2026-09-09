@@ -894,8 +894,8 @@ router.get('/:id/alimentos-disponibles', requireAuth, requireStaff, AfiliadoCont
  * @swagger
  * /afiliados/{id}/progreso:
  *   get:
- *     summary: Historial de progreso físico del afiliado
- *     description: Devuelve todas las mediciones registradas, con IMC calculado, ordenadas por fecha desc.
+ *     summary: Historial de progreso físico del afiliado e incluye las observaciones de sus registros de ejercicio
+ *     description: Devuelve las mediciones registradas (con IMC calculado, ordenadas por fecha desc) junto con los registros de ejercicio que contienen las notas del afiliado.
  *     tags: [Afiliados]
  *     security:
  *       - bearerAuth: []
@@ -903,30 +903,58 @@ router.get('/:id/alimentos-disponibles', requireAuth, requireStaff, AfiliadoCont
  *       - $ref: '#/components/parameters/idParam'
  *     responses:
  *       200:
- *         description: Lista de registros de progreso
+ *         description: Progreso físico + observaciones de ejercicios
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id_ciclo:         { type: integer }
- *                   fecha_registro:   { type: string, format: date }
- *                   peso_kg:          { type: number, example: 75.5 }
- *                   imc:              { type: number, example: 24.8, description: 'Calculado: peso_kg / (estatura_cm/100)²' }
- *                   porcentaje_grasa:
- *                     type: number
- *                     nullable: true
- *                   medida_cintura:
- *                     type: number
- *                     nullable: true
- *                   medida_brazo:
- *                     type: number
- *                     nullable: true
- *                   medida_pierna:
- *                     type: number
- *                     nullable: true
+ *               type: object
+ *               properties:
+ *                 historial:
+ *                   type: array
+ *                   description: Mediciones de PROGRESO_FISICO (peso, IMC, medidas)
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id_ciclo:         { type: integer }
+ *                       fecha_registro:   { type: string, format: date }
+ *                       peso_kg:          { type: number, example: 75.5 }
+ *                       imc:              { type: number, example: 24.8, description: 'Calculado: peso_kg / (estatura_cm/100)²' }
+ *                       porcentaje_grasa:
+ *                         type: number
+ *                         nullable: true
+ *                       medida_cintura:
+ *                         type: number
+ *                         nullable: true
+ *                       medida_brazo:
+ *                         type: number
+ *                         nullable: true
+ *                       medida_pierna:
+ *                         type: number
+ *                         nullable: true
+ *                 registros:
+ *                   type: array
+ *                   description: REGISTRO_EJERCICIO con las notas/observaciones digitales por el afiliado
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id_registro:       { type: integer }
+ *                       id_ciclo:          { type: integer }
+ *                       fecha:             { type: string, format: date }
+ *                       id_rutina:         { type: integer }
+ *                       orden:             { type: integer }
+ *                       series:            { type: integer }
+ *                       repeticiones:      { type: integer }
+ *                       peso_utilizado_kg:
+ *                         type: number
+ *                         nullable: true
+ *                       notas:
+ *                         type: string
+ *                         nullable: true
+ *                         description: Observación escrita por el afiliado
+ *                       id_ejercicio:      { type: integer }
+ *                       nombre_ejercicio:  { type: string }
+ *                       grupo_muscular:    { type: string }
+ *                       volumen:           { type: number }
  *       401:
  *         $ref: '#/components/responses/Unauthorized'
  *       500:

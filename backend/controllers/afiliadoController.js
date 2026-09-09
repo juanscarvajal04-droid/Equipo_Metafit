@@ -3,6 +3,7 @@
 'use strict';
 
 const AfiliadoService = require('../services/afiliadoService');
+const RegistroService = require('../services/registroService');
 const { eliminarFotoAnterior } = require('../middlewares/uploadFoto');
 
 const AfiliadoController = {
@@ -177,8 +178,15 @@ const AfiliadoController = {
 
   getProgreso: async (req, res) => {
     try {
-      const progreso = await AfiliadoService.getProgreso(req.params.id);
-      return res.json(progreso);
+      const id = req.params.id;
+      const [historial, registros] = await Promise.all([
+        AfiliadoService.getProgreso(id),
+        // Incluye las notas (REGISTRO_EJERCICIO.notas) que el afiliado digita.
+        // Para no romper el formato previo (array), se entregan en un objeto:
+        //   { historial: [...], registros: [...] }  → web del entrenador
+        RegistroService.getHistorialEjercicios(id, {}),
+      ]);
+      return res.json({ historial, registros });
     } catch (err) {
       console.error('[afiliadoController.getProgreso]', err);
       return res.status(500).json({ error: 'Error interno del servidor' });

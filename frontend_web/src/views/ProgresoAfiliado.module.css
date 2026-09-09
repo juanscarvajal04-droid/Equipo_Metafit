@@ -147,3 +147,53 @@
   color: var(--mf-text);
   margin: 0 0 12px 0;
 }
+
+.notasList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 10px;
+}
+
+.notaItem {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--mf-border);
+  border-left: 3px solid rgba(25, 135, 84, 0.7);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.notaHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.notaEjercicio {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--mf-text);
+}
+
+.notaFecha {
+  font-size: 0.72rem;
+  color: var(--mf-muted);
+  white-space: nowrap;
+}
+
+.notaTexto {
+  font-size: 0.85rem;
+  color: var(--mf-text, #e8e8f0);
+  line-height: 1.45;
+  font-style: italic;
+}
+
+.notasVacio {
+  font-size: 0.85rem;
+  color: var(--mf-muted);
+  padding: 1rem 0;
+}

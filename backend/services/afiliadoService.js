@@ -11,6 +11,8 @@ const NotaEjercicioModel     = require('../models/notaEjercicioModel'); // Parte
 // FIX 1.3 / ISO 25000: normalizarFecha extraída a utils/fechaUtils.js
 // para que sea testeable sin dependencia de BD.
 const { normalizarFecha } = require('../utils/fechaUtils');
+const { normalizarObjetivoFisico, normalizarNivelExperiencia, OBJETIVOS_VALIDOS, NIVELES_VALIDOS }
+  = require('../utils/objetivoUtils');
 
 
 const AfiliadoService = {
@@ -179,8 +181,8 @@ const AfiliadoService = {
       id_usuario,
       fecha_inicio,
       fecha_fin,
-      objetivo_fisico:            datos.objetivo_fisico,
-      nivel_experiencia:          datos.nivel_experiencia,
+      objetivo_fisico:            normalizarObjetivoFisico(datos.objetivo_fisico),
+      nivel_experiencia:          normalizarNivelExperiencia(datos.nivel_experiencia),
       disponibilidad_dias:        Number(datos.disponibilidad_dias),
       grupo_muscular_prioritario: datos.grupo_muscular_prioritario || null,
       observaciones:              datos.observaciones || null,
@@ -223,14 +225,17 @@ const AfiliadoService = {
     }
 
     // ENUMs controlados de CICLO
-    const OBJETIVOS = ['Perdida de grasa', 'Aumento de masa', 'Mantenimiento', 'Rehabilitacion'];
-    const NIVELES   = ['Principiante', 'Intermedio', 'Avanzado'];
-    if (datos.objetivo_fisico && !OBJETIVOS.includes(datos.objetivo_fisico)) {
+    const OBJETIVOS = OBJETIVOS_VALIDOS;
+    const NIVELES   = NIVELES_VALIDOS;
+    // Acepta tildes: normaliza antes de validar (Pérdida de grasa → Perdida de grasa)
+    const objetivoFisico      = datos.objetivo_fisico      ? normalizarObjetivoFisico(datos.objetivo_fisico)      : datos.objetivo_fisico;
+    const nivelExperiencia    = datos.nivel_experiencia    ? normalizarNivelExperiencia(datos.nivel_experiencia) : datos.nivel_experiencia;
+    if (objetivoFisico && !OBJETIVOS.includes(objetivoFisico)) {
       const err = new Error('objetivo_fisico inválido');
       err.code = 'DATOS_INVALIDOS';
       throw err;
     }
-    if (datos.nivel_experiencia && !NIVELES.includes(datos.nivel_experiencia)) {
+    if (nivelExperiencia && !NIVELES.includes(nivelExperiencia)) {
       const err = new Error('nivel_experiencia inválido');
       err.code = 'DATOS_INVALIDOS';
       throw err;
@@ -239,8 +244,8 @@ const AfiliadoService = {
     const affected = await CicloModel.update(id_ciclo, {
       fecha_inicio:                    fechaInicio !== existente.fecha_inicio ? fechaInicio : undefined,
       fecha_fin:                       fechaFin    !== existente.fecha_fin    ? fechaFin    : undefined,
-      objetivo_fisico:                 datos.objetivo_fisico,
-      nivel_experiencia:               datos.nivel_experiencia,
+      objetivo_fisico:                 objetivoFisico,
+      nivel_experiencia:               nivelExperiencia,
       disponibilidad_dias:             datos.disponibilidad_dias,
       grupo_muscular_prioritario:      datos.grupo_muscular_prioritario,
       observaciones:                   datos.observaciones,
