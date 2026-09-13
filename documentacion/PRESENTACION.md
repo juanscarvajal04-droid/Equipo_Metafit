@@ -12,7 +12,7 @@
 
 **Contenido visual:**
 - Logo / nombre del proyecto
-- Integrantes: Sofia Astudillo, Kevin S. Robayo, Carlos Rodrigues, Juan S. Carvajal
+- Integrantes: Sofia Astudillo, Kevin S. Robayo, Carlos Rodrigues, Juan S. Carvajal isabella caldas
 - Cliente: Sport Gym Sede 80, Bogotá
 - Fecha: Junio 2026
 
