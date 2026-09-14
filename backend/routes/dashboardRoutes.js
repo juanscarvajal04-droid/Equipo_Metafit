@@ -1,4 +1,8 @@
-// routes/dashboardRoutes.js
+// backend/routes/dashboardRoutes.js
+// ─── KPIs del panel principal (rol Administrador) ────────────
+// Router montado en '/dashboard' (ver server.js). Endpoint único de lectura:
+// exige requireAuth + requireAdmin porque los KPIs consolidan información
+// sensible de todo el gimnasio (ingresos, afiliados, staff).
 'use strict';
 
 const express               = require('express');

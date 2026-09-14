@@ -1,3 +1,12 @@
+// frontend_web/src/views/PagosView.jsx
+// ─── Vista Pagos (roles Recepcionista y Admin) ───────────────
+// Tabla de afiliados con estado de membresía (Al día / Por vencer / Vencido /
+// Sin registro), KPIs resumen y dos modales: registrar pago en efectivo
+// (valor fijo $80.000 COP, +30 días) y ver historial de pagos.
+//
+// Qué rol lo usa: Recepcionista y Administrador.
+// API calls (vía authAxios): GET /afiliados (con pagos), POST /afiliados/:id/pagos,
+// GET /afiliados/:id/pagos.
 import { useEffect, useState, useMemo } from "react";
 import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
@@ -5,6 +14,11 @@ import { getId, nombreCompleto, inicial } from "../utils/afiliadoHelpers";
 import { useToast } from "../hooks/useToast";
 import s from "./PagosView.module.css";
 
+/**
+ * Días restantes hasta una fecha de vencimiento (normalizada a medianoche).
+ * @param {string} fechaStr - Fecha ISO (YYYY-MM-DD) del vencimiento.
+ * @returns {number|null} Días pendientes (negativo si ya venció) o null si no hay fecha.
+ */
 const diasRestantes = (fechaStr) => {
   if (!fechaStr) return null;
   const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
@@ -12,14 +26,29 @@ const diasRestantes = (fechaStr) => {
   return Math.round((vence - hoy) / (1000 * 60 * 60 * 24));
 };
 
+/**
+ * Suma N días a una fecha (base = hoy si no se pasa fecha) y la devuelve ISO.
+ * Se usa para previsualizar la nueva fecha de vencimiento al registrar un pago.
+ * @param {string} fechaStr - Fecha base ISO.
+ * @param {number} dias - Días a sumar (30 en el flujo de pago).
+ * @returns {string} Nueva fecha en YYYY-MM-DD.
+ */
 const sumarDias = (fechaStr, dias) => {
   const base = fechaStr ? new Date(fechaStr) : new Date();
   base.setDate(base.getDate() + dias);
   return base.toISOString().split("T")[0];
 };
 
+/** Fecha de hoy en formato ISO local (YYYY-MM-DD). */
 const hoyISO = () => new Date().toISOString().split("T")[0];
 
+/**
+ * Deriva etiqueta, color y fondo de la membresía según los días restantes.
+ * Reglas de negocio: null → "Sin registro"; <0 → "Vencido"; ≤10 → "Por vencer";
+ * resto → "Al día".
+ * @param {number|null} dias - Días restantes calculados.
+ * @returns {{label: string, color: string, bg: string}} Estilos para el badge.
+ */
 const estadoMembresia = (dias) => {
   if (dias === null) return { label: "Sin registro", color: "var(--mf-muted)", bg: "#94a3b818" };
   if (dias < 0) return { label: "Vencido", color: "#e94560", bg: "#e9456018" };
@@ -27,14 +56,35 @@ const estadoMembresia = (dias) => {
   return { label: "Al d\u00eda", color: "#059669", bg: "#05966918" };
 };
 
+/** Extrae la fecha de vencimiento del afiliado (campos alternativos según backend). */
 const fechaVenc = (a) => a?.fecha_vencimiento || a?.ultimo_vencimiento || null;
 
+/** Color determinista del avatar según el nombre (hash simple → tono HSL). */
 const avatarColor = (nombre) => {
   let hash = 0;
   for (let i = 0; i < nombre.length; i++) hash = nombre.charCodeAt(i) + ((hash << 5) - hash);
   return `hsl(${Math.abs(hash) % 360}, 65%, 55%)`;
 };
 
+/**
+ * PagosView — Vista de registro y consulta de pagos de los afiliados.
+ *
+ * Renderiza: header, buscador por nombre, 4 KPIs (total, al día, por vencer,
+ * vencidos), tabla de afiliados con badge de membresía + último pago, modal de
+ * confirmación de pago en efectivo y modal del historial de abonos.
+ *
+ * Estado que maneja: lista de afiliados (con sus pagos embebidos), loading,
+ * búsqueda, el afiliado objetivo del modal de pago (pagoModal), el historial
+ * cargado (historialPagos/histModal) y `saving` durante el registro.
+ *
+ * API calls (vía authAxios): efecto de montaje (GET /afiliados), handlePago
+ * (POST /afiliados/:id/pagos → 30 días + $80.000), handleHistorial
+ * (GET /afiliados/:id/pagos). Tras un pago emite "pago-registrado" para que el
+ * AdminDashboard recalcule sus KPIs sin recargar.
+ *
+ * @param {Object} _props - Componente de ruta sin props externas.
+ * @returns {JSX.Element} Layout de la app con la gestión de pagos.
+ */
 export default function PagosView() {
   const { authAxios } = useAuth();
   const { showToast } = useToast();
@@ -46,6 +96,11 @@ export default function PagosView() {
   const [historialPagos, setHistorialPagos] = useState([]);
   const [saving, setSaving] = useState(false);
 
+  /**
+   * Al montar carga los afiliados con su último pago embebido (el endpoint
+   * GET /afiliados los incluye). Dependencia [authAxios]: solo re-dispara si la
+   * instancia axios cambia (login renovado), no por renders del padre.
+   */
   useEffect(() => {
     (async () => {
       try {
@@ -59,12 +114,21 @@ export default function PagosView() {
     })();
   }, [authAxios]);
 
+  /**
+   * Memoizado: filtra afiliados por nombre sin recalcular en cada render.
+   * Solo cambia cuando cambian afiliados o el término de búsqueda.
+   */
   const filtered = useMemo(() => {
     if (!searchTerm.trim()) return afiliados;
     const q = searchTerm.toLowerCase();
     return afiliados.filter((a) => nombreCompleto(a).toLowerCase().includes(q));
   }, [afiliados, searchTerm]);
 
+  /**
+   * Memoizado: recorre TODOS los afiliados una sola vez y clasifica por estado
+   * de membresía, devolviendo el resumen para los 4 KPIs. Se recalcula solo
+   * cuando cambia la lista (o un nuevo pago la actualiza).
+   */
   const kpiCounts = useMemo(() => {
     let alDia = 0, porVencer = 0, vencido = 0, sinRegistro = 0;
     afiliados.forEach((a) => {
@@ -78,6 +142,14 @@ export default function PagosView() {
     return { total: afiliados.length, alDia, porVencer, vencido, sinRegistro };
   }, [afiliados]);
 
+  /**
+   * Registra el pago del afiliado que está en `pagoModal`.
+   * Flujo completo: 1) valida que haya objetivo; 2) POST /afiliados/:id/pagos
+   * con valor fijo $80.000 COP (el backend suma 30 días a la membresía);
+   * 3) toast de éxito, recarga afiliados, cierra el modal y emite
+   * "pago-registrado" (el dashboard escucha); 4) catch → toast con el mensaje
+   * del backend; 5) finally libera `saving`.
+   */
   const handlePago = async () => {
     if (!pagoModal) return;
     setSaving(true);
@@ -97,6 +169,12 @@ export default function PagosView() {
     }
   };
 
+  /**
+   * Abre el modal de historial del afiliado, cargando antes sus pagos.
+   * GET /afiliados/:id/pagos devuelve la lista ordenada DESC; la guarda en
+   * historialPagos y guarda al afiliado en histModal (para mostrar nombre).
+   * @param {object} afiliado - Fila de la tabla (destino del "ver historial").
+   */
   const handleHistorial = async (afiliado) => {
     try {
       const id = getId(afiliado);
@@ -109,6 +187,8 @@ export default function PagosView() {
     }
   };
 
+  /** Renderiza el badge del estado de membresía según los días restantes.
+   *  (Cada etiqueta tiene su clase CSS asignada en el módulo). */
   const renderBadge = (dias) => {
     const e = estadoMembresia(dias);
     if (e.label === "Al d\u00eda") return <span className={s.badgePagado}>{e.label}</span>;

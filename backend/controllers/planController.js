@@ -1,4 +1,9 @@
-// controllers/planController.js
+// backend/controllers/planController.js
+// ─── Planes de entrenamiento y nutricionales (web staff) ─────
+// Controlador HTTP de los planes: delega en PlanModel y traduce errores SQL
+// a respuestas de negocio. Patrón BUG-010: todos los catch registran el error
+// con console.error (tag del controlador) y devuelven mensaje genérico al
+// cliente; solo se exponen errores específicos (duplicados de PK, checks).
 // Hardened: BUG-010 — todos los catch ahora usan log interno + mensaje genérico al cliente.
 'use strict';
 const PlanModel = require('../models/planModel');
@@ -7,6 +12,15 @@ const { enviarPushAUsuarioDelCiclo } = require('../services/pushService');
 const PlanController = {
 
   // ── PLAN ENTRENAMIENTO ────────────────────────────────────
+  /**
+   * GET /planes/entrenamiento/:id_ciclo — Devuelve el plan de entrenamiento de
+   * un ciclo (rutinas + ejercicios) para la vista de Rutinas. 404 si el ciclo
+   * no tiene plan.
+   *
+   * @param {Object} req - Express request (params.id_ciclo)
+   * @param {Object} res - Express response
+   * @returns {Promise<void>} 200 con el plan completo o 404/500.
+   */
   getEntrenamiento: async (req, res) => {
     try {
       const plan = await PlanModel.getEntrenamientoByCiclo(req.params.id_ciclo);
@@ -18,7 +32,18 @@ const PlanController = {
     }
   },
 
-  // FASE A.3: rutina del día filtrada por su grupo muscular
+  /**
+   * GET /planes/entrenamiento/:id_ciclo/rutina/dia/:dia_numero — FASE A.3:
+   * rutina de un día filtrada por su grupo muscular. Valida primero el rango
+   * 1-7 del día (fuera de rango no es un problema del servidor, es petición
+   * inválida). El grupo muscular opcional `?grupo_muscular=` viaja al modelo.
+   *
+   * @param {Object} req - Express request (params.id_ciclo, params.dia_numero;
+   *                       query.grupo_muscular opcional)
+   * @param {Object} res - Express response
+   * @returns {Promise<void>} 200 con la rutina del día, 400 si día inválido,
+   *                          404 si no hay rutina o 500.
+   */
   getRutinaDiaria: async (req, res) => {
     const diaNumero = parseInt(req.params.dia_numero, 10);
     if (!Number.isInteger(diaNumero) || diaNumero < 1 || diaNumero > 7) {
@@ -38,6 +63,17 @@ const PlanController = {
     }
   },
 
+  /**
+   * POST /planes/entrenamiento — Crea el plan de entrenamiento de un ciclo.
+   * El autor (req.user.sub) se toma del token JWT para la auditoría al
+   * modificado_por. Después de crear, avisa al afiliado del ciclo por push
+   * (fire-and-forget; un error de push no debe fallar el alta). ER_DUP_ENTRY
+   * significa que el ciclo ya tenía plan (PK id_ciclo).
+   *
+   * @param {Object} req - Express request (body.id_ciclo requerido, body.observaciones)
+   * @param {Object} res - Express response
+   * @returns {Promise<void>} 201 con el id, 400 si falta id_ciclo o ya hay plan, o 500.
+   */
   createEntrenamiento: async (req, res) => {
     const { id_ciclo, observaciones } = req.body;
     if (!id_ciclo) return res.status(400).json({ error: 'id_ciclo es requerido' });
@@ -45,6 +81,7 @@ const PlanController = {
       const id = await PlanModel.createEntrenamiento(
         id_ciclo, req.user.sub, observaciones
       );
+      // Notificación push al afiliado del ciclo (no bloquea la respuesta).
       enviarPushAUsuarioDelCiclo(id_ciclo, {
         title: '🏋️ Nueva rutina asignada',
         body: 'Tu entrenador te asignó un plan de entrenamiento. ¡A darle!',
@@ -59,6 +96,14 @@ const PlanController = {
     }
   },
 
+  /**
+   * PATCH /planes/entrenamiento/:id — Actualiza observaciones y autor del plan
+   * de entrenamiento de un ciclo (auditoría con req.user.sub).
+   *
+   * @param {Object} req - Express request (params.id = id_ciclo, body)
+   * @param {Object} res - Express response
+   * @returns {Promise<void>} 200 siempre (el modelo no valida existencia).
+   */
   updateEntrenamiento: async (req, res) => {
     try {
       await PlanModel.updateEntrenamiento(req.params.id, req.body, req.user.sub);
@@ -70,6 +115,15 @@ const PlanController = {
   },
 
   // ── RUTINAS ───────────────────────────────────────────────
+  /**
+   * POST /planes/rutinas — Crea una rutina (día) dentro del plan de un ciclo.
+   * Valida dia_numero 1-7 en el controlador. ER_DUP_ENTRY = ya existe un día
+   * con ese número en el ciclo (la PK real es id_ciclo+dia_numero).
+   *
+   * @param {Object} req - Express request (body.id_ciclo, nombre_rutina, dia_numero)
+   * @param {Object} res - Express response
+   * @returns {Promise<void>} 201 con el id de rutina, 400 por validación o 500.
+   */
   createRutina: async (req, res) => {
     const { id_ciclo, nombre_rutina, enfoque_muscular, dia_numero } = req.body;
     if (!id_ciclo || !nombre_rutina || !dia_numero)
@@ -89,6 +143,16 @@ const PlanController = {
     }
   },
 
+  /**
+   * POST /planes/rutinas/:id_rutina/ejercicios — Agrega un ejercicio a la
+   * rutina del día con sus series/repeticiones y posición (orden). ER_DUP_ENTRY
+   * cubre tanto el ejercicio repetido como el orden ya ocupado.
+   *
+   * @param {Object} req - Express request (params.id_rutina; body.id_ejercicio,
+   *                       series, repeticiones, orden requeridos)
+   * @param {Object} res - Express response
+   * @returns {Promise<void>} 201, 400 (faltan campos o PK duplicada) o 500.
+   */
   addEjercicio: async (req, res) => {
     const { id_ejercicio, series, repeticiones, orden } = req.body;
     if (!id_ejercicio || !series || !repeticiones || !orden)
@@ -106,9 +170,21 @@ const PlanController = {
     }
   },
 
-  // Parte 2: PATCH /planes/rutinas/:id_rutina/ejercicios/:id_ejercicio
-  // Actualiza series, repeticiones (y opcionalmente peso_kg/descanso_seg) en la
-  // rutina + descripcion del ejercicio en el catálogo.
+  /**
+   * PATCH /planes/rutinas/:id_rutina/ejercicios/:id_ejercicio — Parte 2.
+   * Actualiza la configuración del ejercicio (series, repeticiones y
+   * opcionalmente peso_kg/descanso_seg) dentro de la rutina, y si llega
+   * `descripcion` además actualiza el instructivo del ejercicio en el catálogo
+   * (cambio maestro que se refleja en todos los planes). Convierte los números
+   * a Number porque vienen como strings del body. 404 si la fila de la rutina
+   * no existe y no hubo descripcion; ER_CHECK_CONSTRAINT_VIOLATED si algún
+   * valor rompe los CHECKs del schema.
+   *
+   * @param {Object} req - Express request (params.id_rutina, params.id_ejercicio;
+   *                       body.series/repeticiones/peso_kg/descanso_seg/descripcion)
+   * @param {Object} res - Express response
+   * @returns {Promise<void>} 200, 400 (sin campos o CHECK violado) o 404/500.
+   */
   updateEjercicio: async (req, res) => {
     const { id_rutina, id_ejercicio } = req.params;
     const { series, repeticiones, descripcion, peso_kg, descanso_seg } = req.body;
@@ -142,6 +218,14 @@ const PlanController = {
     }
   },
 
+  /**
+   * DELETE /planes/rutinas/:id_rutina/ejercicios/:id_ejercicio — Quita un
+   * ejercicio de la rutina del día. 404 si el ejercicio no estaba en la rutina.
+   *
+   * @param {Object} req - Express request (params.id_rutina, params.id_ejercicio)
+   * @param {Object} res - Express response
+   * @returns {Promise<void>} 200 con filas afectadas, 404 o 500.
+   */
   removeEjercicio: async (req, res) => {
     try {
       const affected = await PlanModel.removeEjercicioFromRutina(
@@ -157,6 +241,14 @@ const PlanController = {
     }
   },
 
+  /**
+   * DELETE /planes/rutinas/:id_rutina — Elimina la rutina + sus ejercicios en
+   * transacción (PlanModel.deleteRutina). 200, aunque no exista (idempotente).
+   *
+   * @param {Object} req - Express request (params.id_rutina)
+   * @param {Object} res - Express response
+   * @returns {Promise<void>} 200 o 500.
+   */
   deleteRutina: async (req, res) => {
     try {
       await PlanModel.deleteRutina(req.params.id_rutina);
@@ -168,6 +260,14 @@ const PlanController = {
   },
 
   // ── PLAN NUTRICIONAL ──────────────────────────────────────
+  /**
+   * GET /planes/nutricional/:id_ciclo — Devuelve el plan nutricional de un
+   * ciclo con el detalle de alimentos por comida. 404 si no tiene plan.
+   *
+   * @param {Object} req - Express request (params.id_ciclo)
+   * @param {Object} res - Express response
+   * @returns {Promise<void>} 200, 404 o 500.
+   */
   getNutricional: async (req, res) => {
     try {
       const plan = await PlanModel.getNutricionalByCiclo(req.params.id_ciclo);
@@ -179,6 +279,18 @@ const PlanController = {
     }
   },
 
+  /**
+   * POST /planes/nutricional — Crea el plan nutricional de un ciclo. Acepta
+   * tanto los nombres de campos nuevos (calorias_objetivo/num_comidas) como
+   * los legacy (calorias_estimadas/num_comidas_diarias) para no romper el
+   * móvil. Autor tomado de req.user.sub; ER_DUP_ENTRY = el ciclo ya tenía plan.
+   * Tras crear, avisa al afiliado por push (fire-and-forget).
+   *
+   * @param {Object} req - Express request (body.id_ciclo, calorias_objetivo,
+   *                       num_comidas requeridos)
+   * @param {Object} res - Express response
+   * @returns {Promise<void>} 201, 400 o 500.
+   */
   createNutricional: async (req, res) => {
     // Acepta tanto nombres nuevos (calorias_objetivo/num_comidas) como legacy
     const id_ciclo          = req.body.id_ciclo;
@@ -192,6 +304,7 @@ const PlanController = {
       const id = await PlanModel.createNutricional(
         id_ciclo, calorias_objetivo, num_comidas, req.user.sub, observaciones
       );
+      // Notificación push al afiliado (no bloquea la respuesta).
       enviarPushAUsuarioDelCiclo(id_ciclo, {
         title: '🥗 Nueva dieta asignada',
         body: 'Tu nutricionista te asignó un plan de alimentación. ¡A comer rico y sano!',
@@ -206,6 +319,15 @@ const PlanController = {
     }
   },
 
+  /**
+   * PATCH /planes/nutricional/:id — Actualiza calorías objetivo, número de
+   * comidas y observaciones. Igual que create, acepta campos legacy; valida
+   * que lleguen las dos métricas obligatorias.
+   *
+   * @param {Object} req - Express request (params.id = id_ciclo; body)
+   * @param {Object} res - Express response
+   * @returns {Promise<void>} 200, 400 o 500.
+   */
   updateNutricional: async (req, res) => {
     const calorias_objetivo = req.body.calorias_objetivo || req.body.calorias_estimadas;
     const num_comidas       = req.body.num_comidas || req.body.num_comidas_diarias;
@@ -223,6 +345,17 @@ const PlanController = {
     }
   },
 
+  /**
+   * POST /planes/nutricional/:id_plan/detalle — Agrega un alimento a una comida
+   * del plan con su peso en gramos. El :id_plan es en realidad el id_ciclo.
+   * Acepta campos legacy (numero_comida/cantidad). ER_DUP_ENTRY = la comida ya
+   * tenía ese alimento (PK natural triple).
+   *
+   * @param {Object} req - Express request (params.id_plan; body.id_alimento,
+   *                       num_comida, cantidad_g requeridos)
+   * @param {Object} res - Express response
+   * @returns {Promise<void>} 201, 400 o 500.
+   */
   addAlimento: async (req, res) => {
     // Acepta tanto nombres nuevos (num_comida/cantidad_g) como legacy
     const id_alimento = req.body.id_alimento;
@@ -243,9 +376,20 @@ const PlanController = {
     }
   },
 
-  // Parte 2: PATCH /planes/nutricional/:id_plan/detalle/:id_detalle
-  //  · cantidad_gramos/cantidad_g → cantidad_g real del schema.
-  //  · num_comida mover fila: requiere num_comida_anterior en el body.
+  /**
+   * PATCH /planes/nutricional/:id_plan/detalle/:id_detalle — Parte 2.
+   * Actualiza un alimento del plan: cambia cantidad_g (campo real del schema;
+   * también acepta cantidad_gramos legacy) y/o MUEVE la fila a otra comida.
+   * Para mover se requiere `num_comida_anterior` en el body: al ser num_comida
+   * parte de la PK, el modelo hace DELETE+INSERT; el 409 se usa cuando el
+   * alimento ya existe en la comida destino (PK duplicada en el INSERT).
+   *
+   * @param {Object} req - Express request (params.id_plan = id_ciclo,
+   *                       params.id_detalle = id_alimento; body.cantidad_g,
+   *                       body.num_comida, body.num_comida_anterior)
+   * @param {Object} res - Express response
+   * @returns {Promise<void>} 200, 400 (sin campos / CHECK), 404, 409 o 500.
+   */
   updateDetalle: async (req, res) => {
     const { id_plan, id_detalle } = req.params;
     const cantidad_g = req.body.cantidad_g !== undefined ? req.body.cantidad_g
@@ -273,7 +417,17 @@ const PlanController = {
     }
   },
 
-  // Parte 2: DELETE /planes/nutricional/:id_plan/detalle/:id_detalle
+  /**
+   * DELETE /planes/nutricional/:id_plan/detalle/:id_detalle — Parte 2. Quita
+   * un alimento del detalle. Si el body trae `num_comida` borra solo esa fila
+   * de la comida; si no, todas las apariciones del alimento en el plan.
+   * 404 si no había ninguna fila que coincidiera.
+   *
+   * @param {Object} req - Express request (params.id_plan = id_ciclo,
+   *                       params.id_detalle = id_alimento; body.num_comida opcional)
+   * @param {Object} res - Express response
+   * @returns {Promise<void>} 200, 404 o 500.
+   */
   removeDetalle: async (req, res) => {
     const { id_plan, id_detalle } = req.params;
     try {

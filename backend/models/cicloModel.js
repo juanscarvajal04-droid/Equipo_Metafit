@@ -1,4 +1,10 @@
 // models/cicloModel.js
+// ─── Consultas SQL de la tabla CICLO ──────────────────────────
+// Un CICLO es un período de entrenamiento del afiliado (con fecha de inicio y
+// fin, objetivo, nivel de experiencia y disponibilidad semanal). Solo puede
+// haber un ciclo ACTIVO por afiliado a la vez: crear uno nuevo cierra los
+// anteriores y la BD valida que las fechas no se solapen.
+//
 // FIX 2: Corregidos nombres de columna para coincidir con el schema real de la tabla CICLO.
 //  - id_afiliado        → id_usuario        (FK a AFILIADO.id_usuario)
 //  - fecha_inicio_ciclo → fecha_inicio       (nombre real en el schema)
@@ -10,6 +16,15 @@ const pool = require('../config/db');
 
 const CicloModel = {
 
+  /**
+   * Lista todos los ciclos (activos e históricos) de un afiliado, ordenados
+   * de más reciente a más antiguo. Calcula el número ordinal de cada ciclo
+   * con una subconsulta (cuántos ciclos anteriores tiene el afiliado) para
+   * mostrarlo como "Ciclo 1", "Ciclo 2", etc. en las vistas.
+   *
+   * @param {number} id_usuario - ID del afiliado
+   * @returns {Promise<Array<Object>>} Lista de ciclos con `numero_ciclo`.
+   */
   findByAfiliado: async (id_usuario) => {
     const [rows] = await pool.query(`
       SELECT c.*,
@@ -27,6 +42,27 @@ const CicloModel = {
   },
 
   // FIX 2: create ahora recibe un objeto con todos los campos requeridos por la tabla CICLO.
+  /**
+   * Crea un ciclo nuevo en transacción. PRIMERO cierra (activo=0) cualquier
+   * ciclo activo previo del mismo afiliado, garantizando la regla de negocio
+   * "un solo ciclo activo por afiliado" de forma atómica (si el INSERT falla,
+   * se revierte el cierre del ciclo anterior). El trigger del schema
+   * `trg_ciclo_no_solapamiento_insert` rechaza además fechas que se crucen.
+   *
+   * @param {Object} datos - Datos del ciclo:
+   *   @param {number} datos.id_usuario
+   *   @param {string} datos.fecha_inicio - Formato YYYY-MM-DD
+   *   @param {string} datos.fecha_fin - Formato YYYY-MM-DD (debe ser > inicio)
+   *   @param {string} datos.objetivo_fisico
+   *   @param {string} datos.nivel_experiencia
+   *   @param {number} datos.disponibilidad_dias - 1 a 7
+   *   @param {string} [datos.grupo_muscular_prioritario]
+   *   @param {string} [datos.observaciones]
+   *   @param {number} datos.registrado_por - ID del staff que crea el ciclo
+   * @returns {Promise<number>} ID (insertId) del ciclo creado.
+   * @throws {Error} Con código ER_CHECK_CONSTRAINT_VIOLATED si no se cumple el
+   *                 CHECK (fecha_fin > fecha_inicio, disponibilidad 1-7).
+   */
   create: async (datos) => {
     const {
       id_usuario,
@@ -76,6 +112,14 @@ const CicloModel = {
     }
   },
 
+  /**
+   * Busca un ciclo por su ID (dato crudo de la tabla, sin enriquecer).
+   * Se usa, entre otros, por el middleware requireOwnCiclo para verificar
+   * propiedad del ciclo antes de operaciones del afiliado.
+   *
+   * @param {number} id_ciclo - ID del ciclo
+   * @returns {Promise<Object|null>} Fila de CICLO o null si no existe.
+   */
   findById: async (id_ciclo) => {
     const [rows] = await pool.query('SELECT * FROM CICLO WHERE id_ciclo = ?', [id_ciclo]);
     return rows[0] || null;
@@ -84,6 +128,21 @@ const CicloModel = {
   // CRUD completo: PATCH /ciclos/:id_ciclo (Parte 1, HU "Ciclos gestionables")
   // Actualiza SOLO los campos enviados. Disponibilidad 1-7, fechas con
   // fecha_fin > fecha_inicio (CHECK real del schema) validadas en el service.
+  /**
+   * Actualiza parcialmente un ciclo (PATCH). Construye dinámicamente el SET
+   * SOLO con los campos presentes en `campos`, y usa un operador `in` para
+   * permitir poner observaciones en null (los demás campos solo se aceptan si
+   * vienen definidos). Las validaciones semánticas (disponibilidad 1-7,
+   * fecha_fin > fecha_inicio) las aplica el service antes de llegar aquí y el
+   * CHECK constraint del schema como última barrera.
+   *
+   * @param {number} id - ID del ciclo a actualizar
+   * @param {Object} campos - Campos soportados: activo, fecha_inicio, fecha_fin,
+   *                          objetivo_fisico, nivel_experiencia,
+   *                          disponibilidad_dias, grupo_muscular_prioritario,
+   *                          observaciones
+   * @returns {Promise<number>} Filas afectadas (0 si no cambió nada).
+   */
   update: async (id, campos) => {
     const sets = [];
     const vals = [];
@@ -106,6 +165,18 @@ const CicloModel = {
   // PROGRESO_FISICO, REGISTRO_EJERCICIO, CONSUMO_ALIMENTO_REAL…) usan
   // ON DELETE RESTRICT o compuestas, así que MySQL rechazaría el DELETE directo.
   // Orden: primero los hijos con FK RESTRICT, luego sus padres.
+  /**
+   * Elimina un ciclo con su historial completo en una transacción. Por las
+   * FKs de las tablas hijas con ON DELETE RESTRICT, MySQL rechazaría un
+   * DELETE directo de CICLO; por eso este método borra primero los hijos
+   * (registros de ejercicio, consumos, planes, progreso, notas y rutinas) en
+   * el orden que exigen las FK compuestas y deja al padre (CICLO) para el
+   * final. Todo es atómico: si algo falla, nada se elimina.
+   *
+   * @param {number} id_ciclo - ID del ciclo a eliminar
+   * @returns {Promise<number>} Filas afectadas del borrado final de CICLO.
+   * @throws {Error} Rollback y relanzamiento si alguna FK rechaza el borrado.
+   */
   remove: async (id_ciclo) => {
     const conn = await pool.getConnection();
     try {

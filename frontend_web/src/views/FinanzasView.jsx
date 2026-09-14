@@ -1,3 +1,12 @@
+// frontend_web/src/views/FinanzasView.jsx
+// ─── Vista Finanzas (rol Administrador) ──────────────────────
+// Panel con KPIs financieros, gráficos (ingresos por mes y recaudación por
+// recepcionista) y los últimos pagos registrados. Filtros por rango de fechas
+// y recepcionista, y exportación del reporte a PDF (jsPDF + autoTable).
+//
+// Qué rol lo usa: SOLO Administrador (GET /pagos/metricas exige requireAdmin).
+// API calls (vía authAxios): GET /pagos/metricas?{filtros},
+// GET /usuarios/recepcionistas.
 import { useCallback, useEffect, useState } from "react";
 import { Bar, Doughnut } from "react-chartjs-2";
 import {
@@ -17,19 +26,25 @@ import styles from "./FinanzasView.module.css";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend, ChartDataLabels);
 
+/** Lee una variable CSS del thema (--mf-surface, --mf-border, etc.). */
 const cssVar = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
+/** Etiquetas cortas de meses para las barras del gráfico. */
 const MONTHS = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+/** Máximo de receptores individuales visibles en el doughnut (resto se agrupa en "Otros"). */
 const MAX_RECEP = 5;
 
+/** Formatea un número como moneda colombiana ($1.234.567). */
 const formatter = (n) => "$" + Number(n).toLocaleString("es-CO");
 
+/** Config de estados de pago para el badge en las cards de últimos pagos. */
 const ESTADO_CONFIG = {
   Pagado:    { icono: "✅", color: "#22c55e" },
   Pendiente: { icono: "⏳", color: "#eab308" },
   Vencido:   { icono: "❌", color: "#ef4444" },
 };
 
+/** Badge con icono y color según estado del pago (solo presentación). */
 const badgeEstado = (e) => {
   const cfg = ESTADO_CONFIG[e] || { icono: "❓", color: "#888" };
   return (
@@ -39,14 +54,35 @@ const badgeEstado = (e) => {
   );
 };
 
+/** Color determinista del avatar según el nombre (hash simple → tono HSL). */
 const avatarColor = (nombre) => {
   let hash = 0;
   for (let i = 0; i < nombre.length; i++) hash = nombre.charCodeAt(i) + ((hash << 5) - hash);
   return `hsl(${Math.abs(hash) % 360}, 65%, 55%)`;
 };
 
+/** Inicial del nombre para los avatares de las cards de pagos. */
 const inicial = (n) => (n || "?").charAt(0).toUpperCase();
 
+/**
+ * FinanzasView — Panel financiero para el administrador.
+ *
+ * Renderiza: cabecera con botón "Exportar a PDF", barra de filtros (rango de
+ * fechas + recepcionista), 5 KPIs (total recaudado, este mes, mes anterior,
+ * promedio mensual, mejor recepcionista), gráfico de barras de ingresos
+ * (últimos 6 meses), doughnut de recaudación por recepcionista y cards con los
+ * últimos pagos registrados.
+ *
+ * Estado que maneja: respuesta de métricas (data), loading, lista de
+ * recepcionistas para el filtro, filtros activos (fechas + id_recepcionista)
+ * y pdfLoading mientras se genera el reporte.
+ *
+ * API calls (vía authAxios): fetchMetricas (GET /pagos/metricas con
+ * query-string opcional) y GET /usuarios/recepcionistas al montar.
+ *
+ * @param {Object} _props - Componente de ruta sin props externas.
+ * @returns {JSX.Element} Layout de la app con el panel de finanzas.
+ */
 export default function FinanzasView() {
   const { authAxios } = useAuth();
   const [data, setData] = useState(null);
@@ -55,6 +91,13 @@ export default function FinanzasView() {
   const [filtros, setFiltros] = useState({ fecha_inicio: "", fecha_fin: "", id_recepcionista: "" });
   const [pdfLoading, setPdfLoading] = useState(false);
 
+  /**
+   * useCallback: consulta las métricas financieras al backend.
+   * Construye el query-string solo con los filtros no vacíos; el endpoint solo
+   * acepta Admin (401). Memoizado con [authAxios] para poder usarse como
+   * dependencia de efectos sin recargarse en cada render.
+   * @param {object} f - Filtros { fecha_inicio, fecha_fin, id_recepcionista }.
+   */
   const fetchMetricas = useCallback(async (f = {}) => {
     setLoading(true);
     try {
@@ -73,6 +116,11 @@ export default function FinanzasView() {
     }
   }, [authAxios]);
 
+  /**
+   * Al montar: carga el listado de recepcionistas para el select del filtro y
+   * dispara la primera carga de métricas sin filtros. Dependencia
+   * [fetchMetricas] (memoizada) → solo se ejecuta una vez por montaje.
+   */
   useEffect(() => {
     (async () => {
       try {
@@ -83,6 +131,12 @@ export default function FinanzasView() {
     fetchMetricas({});
   }, [fetchMetricas]);
 
+  /**
+   * Suscripción a refrescos: cuando otro módulo registra un pago
+   * (evento "pago-registrado") o la pestaña vuelve a estar visible
+   * (visibilitychange), vuelve a traer las métricas sin filtros para mantener
+   * KPIs y gráficos al día. La limpieza quita ambos listeners al desmontar.
+   */
   useEffect(() => {
     const handlePago = () => fetchMetricas({});
     const handleVisibility = () => {
@@ -96,15 +150,26 @@ export default function FinanzasView() {
     };
   }, [fetchMetricas]);
 
+  /** Aplica los filtros del formulario a la consulta de métricas. */
   const handleFiltrar = () => {
     fetchMetricas(filtros);
   };
 
+  /** Limpia los filtros y vuelve a cargar las métricas sin restricciones. */
   const handleLimpiar = () => {
     setFiltros({ fecha_inicio: "", fecha_fin: "", id_recepcionista: "" });
     fetchMetricas({});
   };
 
+  /**
+   * Genera y descarga el reporte financiero en PDF.
+   * Flujo completo: 1) import dinámico de jspdf y jspdf-autotable (code
+   * splitting — se cargan solo al exportar); 2) encabezado con título,
+   * periodo (según filtros) y fecha de generación; 3) tabla autoTable con los
+   * últimos pagos (afiliado, fecha, valor, estado, recepcionista); 4) pie con
+   * total recaudado y conteo; 5) doc.save con nombre fechado. En error solo
+   * loguea; finalmente libera pdfLoading.
+   */
   const exportPDF = async () => {
     if (!data) return;
     setPdfLoading(true);
@@ -177,6 +242,9 @@ export default function FinanzasView() {
     );
   }
 
+  // ── Cálculos derivados para KPIs (comparación mes actual vs anterior) ──
+  // Se buscan las filas del mes/anio actual y anterior en ingresos_por_mes;
+  // si el backend no trae el mes (p. ej. recién iniciado el año) el valor es 0.
   const { ingresos_por_mes, pagos_por_recepcionista, total_recaudado, ultimos_pagos } = data;
 
   const hoy = new Date();
@@ -199,6 +267,8 @@ export default function FinanzasView() {
     : null;
 
   // ── Bar chart: ultimos 6 meses ──
+  // Se invierte la serie (el backend responde cronológico ASC) y se toman los
+  // últimos 6. El mes con mayor recaudo se marca en rojo pleno (brand #e31c25).
   const ultimos6 = ingresos_por_mes.slice().reverse().slice(-6);
   const etiquetasBar = ultimos6.map((r) => `${MONTHS[r.mes - 1]} ${r.anio}`);
   const valoresBar = ultimos6.map((r) => Number(r.total));
@@ -206,6 +276,8 @@ export default function FinanzasView() {
   const bgColorsBar = valoresBar.map((v) => (v === maxVal && maxVal > 0 ? "#e31c25" : "rgba(227, 28, 37, 0.65)"));
   const borderColorsBar = valoresBar.map((v) => (v === maxVal && maxVal > 0 ? "#e31c25" : "rgba(227, 28, 37, 0.35)"));
 
+  // Datos de Chart.js para el Bar. El key en <Bar key={JSON.stringify(...)}>
+  // fuerza el re-montaje cuando cambian los valores.
   const barData = {
     labels: etiquetasBar,
     datasets: [
@@ -220,6 +292,8 @@ export default function FinanzasView() {
     ],
   };
 
+  // Opciones del Bar: tooltip y datalabels con moneda colombiana y colores
+  // tomados de las variables CSS del tema (dark mode incluido).
   const barOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -258,6 +332,9 @@ export default function FinanzasView() {
   };
 
   // ── Doughnut chart: por recepcionista ──
+  // Si hay más de MAX_RECEP receptores, los de menor recaudo se agrupan en
+  // una sola tajada "Otros" sumando total y cantidad de pagos (el backend
+  // ordena por total DESC).
   const coloresDoughnut = ["#e31c25", "#c1121f", "#b71c1c", "#a4161a", "#e31c25", "#c1121f", "#b71c1c", "#a4161a"];
   let doughnutLabels = pagos_por_recepcionista.map((r) => `${r.nombres} ${r.apellidos}`);
   let doughnutValues = pagos_por_recepcionista.map((r) => Number(r.total_recaudado));
@@ -273,8 +350,11 @@ export default function FinanzasView() {
     doughnutBg = coloresDoughnut.slice(0, doughnutLabels.length);
   }
 
+  // Total de la serie: se usa para calcular los porcentajes del tooltip
+  // y de los datalabels (solo se muestran si la tajada > 5%).
   const doughnutTotal = doughnutValues.reduce((a, b) => a + b, 0);
 
+  // Datos de Chart.js para el Doughnut.
   const doughnutData = {
     labels: doughnutLabels,
     datasets: [
@@ -287,6 +367,8 @@ export default function FinanzasView() {
     ],
   };
 
+  // Opciones del Doughnut: leyenda inferior, tooltip con total y %, y
+  // datalabels que solo pintan porcentaje cuando la tajada supera el 5%.
   const doughnutOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -320,6 +402,7 @@ export default function FinanzasView() {
     },
   };
 
+  // Muestra el botón "Limpiar" únicamente si hay algún filtro activo.
   const hayFiltrosActivos = filtros.fecha_inicio || filtros.fecha_fin || filtros.id_recepcionista;
 
   return (

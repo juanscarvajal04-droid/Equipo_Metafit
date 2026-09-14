@@ -1,3 +1,20 @@
+// frontend_web/src/views/AdminDashboard.jsx
+// ─── Vista Dashboard General (rol Administrador) ─────────────
+// Panel principal de la web staff. Muestra los KPIs del gimnasio (afiliados,
+// ciclos, restricciones, ingresos, pagos), la configuración del precio de
+// membresía, gráficas Chart.js (objetivos, evolución, restricciones, niveles)
+// y una tabla de afiliados con búsqueda.
+//
+// Qué rol lo usa: SOLO Administrador (la ruta está protegida con requireAdmin
+// en el frontend; el backend la refuerza con requireAdmin).
+// API calls (vía authAxios):
+//   · fetchKpis()        → GET /dashboard/kpis            (useDashboard)
+//   · fetchAfiliados()   → GET /afiliados                 (useAfiliados)
+//   · cargarPrecio()     → GET /configuracion/precio-membresia
+//   · handleGuardarPrecio() → PUT /configuracion/precio-membresia
+//
+// Estado que maneja: kpis, lista de afiliados, búsqueda de la tabla, y el
+// bloque de precio (precio, editPrecio, nuevoPrecio, guardando).
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AppLayout from "../components/AppLayout";
 import { useAuth } from "../context/AuthContext";
@@ -21,34 +38,73 @@ import styles from "./AdminDashboard.module.css";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, ArcElement, Tooltip, Legend, Filler);
 
+/** Lee el valor de una variable CSS del :root (--mf-*) para darle color a los
+ *  gráficos (texto, bordes, fondos de tooltips) sin repetir colores hardcode. */
 const cssVar = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+// Aplica a TODOS los gráficos de la app el color de texto/borde del tema.
 ChartJS.defaults.color = cssVar("--mf-muted");
 ChartJS.defaults.borderColor = cssVar("--mf-border");
 
+// Helper de identidad de un afiliado: acepta los distintos nombres de id que
+// puede devolver el backend (id_usuario / _id / id).
 const getId          = (doc) => doc.id_usuario ?? doc._id ?? doc.id;
+/** Concatena nombres+apellidos con fallback si faltan. */
 const nombreCompleto = (a)   => [a.nombres, a.apellidos].filter(Boolean).join(" ") || "Sin nombre";
+/** Primera letra del nombre (o del correo) para el avatar por inicial. */
 const inicial        = (a)   => (a.nombres || a.correo || "?")[0].toUpperCase();
+/** Ciclo activo del afiliado (o null si no tiene) tal como lo arma el backend. */
 const cicloActivo    = (a)   => a.ciclo_activo || null;
 
+/** Config visual de cada objetivo físico (ícono + color + fondo) para las
+ *  tarjetas de distribución. Es la paleta de consistencia del dashboard. */
 const OBJETIVO_CONFIG = {
   "Perdida de grasa": { icono: "🔥", color: "#e94560", bg: "#e9456022" },
   "Aumento de masa":  { icono: "💪", color: "#0d6efd", bg: "#0d6efd22" },
   "Mantenimiento":    { icono: "⚖️", color: "#198754", bg: "#19875422" },
 };
 
+/** Nombres de los objetivos (las claves de OBJETIVO_CONFIG), usados para
+ *  recorrerlos en los gráficos y en el conteo por objetivo. */
 const OBJETIVOS = Object.keys(OBJETIVO_CONFIG);
 
+/**
+ * Píldora de estado del afiliado (Activo/Inactivo/Pendiente) con colores por
+ * estado. Renderiza solo presentación; no dispara llamadas a la API.
+ * @param {string} e - Estado textual (se normaliza a minúsculas para el lookup).
+ * @returns {JSX.Element} Badge con el color semántico del estado.
+ */
 const badgeEstado = (e) => {
   const map = { activo: {bg:"rgba(34,197,94,0.15)",color:"#22c55e"}, inactivo: {bg:"rgba(239,68,68,0.15)",color:"#ef4444"}, pendiente: {bg:"rgba(234,179,8,0.15)",color:"#eab308"} };
   const c   = map[(e || "").toLowerCase()] || {bg:"rgba(148,163,184,0.15)",color:cssVar("--mf-muted")};
   return <span className={`${styles.badgeEstado}`} style={{background:c.bg,color:c.color,padding:"0.25rem 0.6rem",borderRadius:"6px"}}>{e || "—"}</span>;
 };
+/** Píldora de nivel del afiliado (Principiante/Intermedio/Avanzado). Solo UI. */
 const badgeNivel = (n) => {
   const map = { principiante: {bg:"rgba(227, 28, 37, 0.15)",color:cssVar("--mf-accent")}, intermedio: {bg:"rgba(59,130,246,0.15)",color:"#60a5fa"}, avanzado: {bg:"rgba(239,68,68,0.15)",color:"#f87171"} };
   const c   = map[(n || "").toLowerCase()] || {bg:"rgba(148,163,184,0.15)",color:cssVar("--mf-muted")};
   return <span className={`${styles.badgeEstado}`} style={{background:c.bg,color:c.color,padding:"0.25rem 0.6rem",borderRadius:"6px"}}>{n || "—"}</span>;
 };
 
+/**
+ * AdminDashboard — Vista principal del panel del Administrador.
+ *
+ * Renderiza: KPIs globales, tarjetas de distribución por objetivo, editor del
+ * precio de membresía, 4 gráficas Chart.js y la tabla de afiliados filtrable.
+ *
+ * Estado que maneja: usa los hooks useDashboard (kpis/loading/error),
+ * useAfiliados (lista/loading/error), useToast (notificaciones) y estado local
+ * para la búsqueda y el bloque de precio.
+ *
+ * API calls: fetchKpis (GET /dashboard/kpis), fetchAfiliados (GET /afiliados),
+ * cargarPrecio (GET /configuracion/precio-membresia), handleGuardarPrecio
+ * (PUT /configuracion/precio-membresia). Además refresca los KPIs y la lista
+ * escuchando eventos window ("pago-registrado", "afiliado-modificado",
+ * "personal-modificado") para que el dashboard se actualice en vivo cuando
+ * otras vistas del staff cambian datos.
+ *
+ * @param {Object} _props - Componente de ruta sin props externas.
+ * @returns {JSX.Element} El layout de la app con el contenido del dashboard.
+ */
 export default function AdminDashboard() {
   const { authAxios } = useAuth();
   const { kpis, loading: loadingKpis, error: errorKpis, fetchKpis } = useDashboard();
@@ -60,6 +116,8 @@ export default function AdminDashboard() {
 
   const [busqueda, setBusqueda] = useState("");
 
+  // KPIs con fallback a la lista de afiliados cuando el endpoint aún no llegó
+  // (así las tarjetas no quedan en 0 un frame al montar).
   const totalAfiliados   = kpis?.total_afiliados   ?? afiliados.length;
   const totalActivos     = kpis?.afiliados_activos  ?? 0;
   const conCicloActivo   = kpis?.ciclos_en_curso    ?? 0;
@@ -69,6 +127,8 @@ export default function AdminDashboard() {
 
   // ── Chart data computations ──────────────────────────────────────────
 
+  // Colores del gráfico de barras por objetivo (amplía OBJETIVO_CONFIG con
+  // sinónimos que puede devolver el backend: "Perder peso", "Ganar masa muscular").
   const objetivoColors = {
     "Perdida de grasa": "#e94560",
     "Perder peso": "#e94560",
@@ -77,6 +137,12 @@ export default function AdminDashboard() {
     Mantenimiento: "#22c55e",
   };
 
+  /**
+   * Datos del gráfico de distribución por objetivo. Si el backend devolvió
+   * kpis.por_objetivo (agrupación oficial en SQL) se usa esa; si no, se calcula
+   * en cliente contando afiliados por objetivo. useMemo: recalcula solo cuando
+   * cambian kpis o la lista de afiliados, no en cada render.
+   */
   const porObjetivo = useMemo(() => {
     if (kpis?.por_objetivo?.length) return kpis.por_objetivo;
     return OBJETIVOS.map((obj) => ({
@@ -85,6 +151,7 @@ export default function AdminDashboard() {
     }));
   }, [kpis, afiliados]);
 
+  /** Config de dataset del <Bar> de objetivos; derivada de porObjetivo. */
   const barObjetivoData = useMemo(() => ({
     labels: porObjetivo.map((o) => o.objetivo),
     datasets: [{
@@ -123,6 +190,12 @@ export default function AdminDashboard() {
     },
   };
 
+  /**
+   * Serie temporal de afiliados por mes para el gráfico de línea: genera los
+   * últimos 6 meses (enero→dic) y cuenta cuántos afiliados se registraron en
+   * cada uno según fecha_registro. useMemo: dependencia [afiliados], se
+   * recalcula solo cuando cambia la lista.
+   */
   const evolucion = useMemo(() => {
     const now = new Date();
     const months = [];
@@ -144,6 +217,7 @@ export default function AdminDashboard() {
     }));
   }, [afiliados]);
 
+  /** Config del dataset del <Line> de evolución; derivada de `evolucion`. */
   const lineData = useMemo(() => ({
     labels: evolucion.map((e) => e.label),
     datasets: [{
@@ -190,6 +264,7 @@ export default function AdminDashboard() {
   };
 
   const sinRestricciones = totalAfiliados - conRestricciones;
+  /** Dataset del <Doughnut> de restricciones (verde con / amarillo sin). */
   const doughnutData = useMemo(() => ({
     labels: ["Sin restricciones", "Con restricciones"],
     datasets: [{
@@ -221,6 +296,9 @@ export default function AdminDashboard() {
     },
   };
 
+  /** Plugin local de Chart.js: dibuja el NÚMERO TOTAL en el centro del donut
+   *  (beforeDraw) con el texto "Total" debajo. Las opciones del gráfico están
+   *  hardcodeadas aquí y no en ChartJS.plugins para no contaminar otros canvas. */
   const centerTextPlugin = {
     id: "centerText",
     beforeDraw(chart) {
@@ -241,6 +319,12 @@ export default function AdminDashboard() {
 
   const niveles = ["Principiante", "Intermedio", "Avanzado"];
   const nivelColors = { Principiante: "#22c55e", Intermedio: "#4b9ecb", Avanzado: "#e31c25" };
+  /**
+   * Conteo de afiliados por nivel de experiencia (barra horizontal "Ciclos
+   * Activos por Nivel"). Se normaliza a minúsculas para el lookup porque el
+   * backend puede devolver variantes de mayúsculas. useMemo dependiente de
+   * [afiliados].
+   */
   const ciclosPorNivel = useMemo(() => {
     const counts = { Principiante: 0, Intermedio: 0, Avanzado: 0 };
     afiliados.forEach((a) => {
@@ -252,6 +336,7 @@ export default function AdminDashboard() {
     return niveles.map((n) => counts[n]);
   }, [afiliados]);
 
+  /** Dataset + opciones de la barra horizontal de niveles (indexAxis: 'y'). */
   const hBarData = useMemo(() => ({
     labels: niveles,
     datasets: [{
@@ -292,17 +377,33 @@ export default function AdminDashboard() {
     },
   };
 
-  // Precio membresia
+  // ── Precio de membresía ──────────────────────────────────────────
+  // Estado del bloque de configuración: valor actual mostrado, modo edición,
+  // input del nuevo precio y bandera de "guardando" para deshabilitar botones.
   const [precio, setPrecio] = useState(80000);
   const [editPrecio, setEditPrecio] = useState(false);
   const [nuevoPrecio, setNuevoPrecio] = useState("");
   const [guardando, setGuardando] = useState(false);
 
+  /**
+   * Carga inicial del dashboard: trae KPIs y la lista de afiliados al montar.
+   * Dependencias [fetchKpis, fetchAfiliados]: ambos callbacks vienen envueltos
+   * en useCallback dentro de sus hooks, así que son estables y el efecto NO se
+   * re-dispara en cada render.
+   */
   useEffect(() => {
     fetchKpis();
     fetchAfiliados();
   }, [fetchKpis, fetchAfiliados]);
 
+  /**
+   * Suscripción a eventos de actualización en vivo del dashboard:
+   *   · window "pago-registrado" / "afiliado-modificado" / "personal-modificado"
+   *     → refresca KPIs y afiliados (otras vistas del staff los emiten).
+   *   · document "visibilitychange" → al volver a la pestaña se refresca para
+   *     no mostrar datos viejos.
+   * El cleanup remueve los listeners al desmontar (evita leaks en SPA).
+   */
   useEffect(() => {
     const refresh = () => { fetchKpis(); fetchAfiliados(); };
     const handleVisibility = () => {
@@ -320,7 +421,13 @@ export default function AdminDashboard() {
     };
   }, [fetchKpis, fetchAfiliados]);
 
-  // Cargar precio desde backend
+  /**
+   * Carga el precio de membresía configurado en el backend.
+   * GET /configuracion/precio-membresia (solo Admin) → si responde con
+   * { valor } actualiza el estado local. Un error no bloquea la vista: se loguea
+   * y se mantiene el valor por defecto (80.000). useCallback por [authAxios]
+   * (instancia estable) para poder usarlo en el useEffect de abajo.
+   */
   const cargarPrecio = useCallback(async () => {
     try {
       const { data } = await authAxios.get("/configuracion/precio-membresia");
@@ -330,10 +437,20 @@ export default function AdminDashboard() {
     }
   }, [authAxios]);
 
+  /** Al montar, carga el precio desde el backend (una sola vez). */
   useEffect(() => {
     cargarPrecio();
   }, [cargarPrecio]);
 
+  /**
+   * Guarda el nuevo precio de membresía.
+   * Flujo completo: 1) valida que sea un entero > 0 (si no, toast de danger);
+   * 2) PUT /configuracion/precio-membresia { valor } con bandera guardando
+   * activa; 3) si OK, actualiza el precio local, cierra el modo edición, muestra
+   * el toast de éxito y refresca los KPIs (el precio incide en las proyecciones);
+   * 4) en error muestra el mensaje del backend (o uno genérico). Siempre limpia
+   * guardando en finally.
+   */
   const handleGuardarPrecio = async () => {
     const val = parseInt(nuevoPrecio, 10);
     if (isNaN(val) || val <= 0) {
@@ -355,6 +472,7 @@ export default function AdminDashboard() {
     }
   };
 
+  /** Filtro de la tabla por nombre, correo u objetivo, según la búsqueda escrita. */
   const filtrados = afiliados.filter((a) => {
     const t = busqueda.toLowerCase();
     return nombreCompleto(a).toLowerCase().includes(t) ||
@@ -365,6 +483,7 @@ export default function AdminDashboard() {
   const precioFormateado = `$${precio.toLocaleString("es-CO")}`;
   const ingresosFormateado = `$${Number(ingresos).toLocaleString("es-CO")}`;
 
+  /** Conteo por objetivo con ícono/color, para las tarjetas de la derecha. */
   const conteoPorObj = OBJETIVOS.map((obj) => ({
     objetivo: obj, cantidad: afiliados.filter((a) => a.objetivo_fisico === obj).length,
     ...OBJETIVO_CONFIG[obj],

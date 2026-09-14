@@ -1,3 +1,14 @@
+// movil/src/screens/LoginScreen.js
+// ─── Login del afiliado (stack PRE-login) ────────────────────
+// Formulario de acceso con correo + contraseña, toggle de visibilidad de la
+// clave, manejo de errores (validación local, error de red y error del server)
+// y botón con spinner mientras autentica. Tras el login exitoso activa las push
+// notifications (activarPushNotifications) y AppNavigator redirige a las tabs
+// automáticamente porque el token ya existe en el contexto.
+//
+// ¿Qué tab le corresponde? Ninguna — pantalla pública pre-login.
+// ¿Qué endpoint /me consume? Ninguno directo: delega en `login` de AuthContext
+// (que llama a /auth/login y persiste token/usuario/rol en AsyncStorage).
 import React, { useState } from 'react';
 import {
   View,
@@ -17,6 +28,27 @@ import { useAuth } from '../context/AuthContext';
 import { activarPushNotifications } from '../services/notifications';
 import { COLORS, GRADIENTS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../theme';
 
+/**
+ * LoginScreen — Pantalla de inicio de sesión del afiliado.
+ *
+ * Estados que maneja:
+ *   • texto: correo, contrasena (con modo seguro de contraseña), showPass.
+ *   • error: mensaje mostrado en un caja roja ⚠️.
+ *   • loading: spinner en el botón; bloquea doble envío (disabled).
+ *
+ * Estados de datos (loading/empty/error):
+ *   • vacío: no aplica — el propio login aporta los datos.
+ *   • error de red (sin err.response): mensaje "Error de conexión...".
+ *   • error del server: muestra err.response.data.error o "Correo o contraseña
+ *     incorrectos". Al loguear, AppNavigator pasa a las tabs sin navegación
+ *     manual (token en contexto).
+ *
+ * Navegación: 'RecuperarPassword' desde el link "¿Olvidaste tu contraseña?".
+ *
+ * @param {object}   props          - Props de pantalla del stack.
+ * @param {object}   props.navigation - Para ir a RecuperarPassword.
+ * @returns {JSX.Element} Formulario de login centrado con card.
+ */
 export default function LoginScreen({ navigation }) {
   const { login } = useAuth();
   const [correo, setCorreo] = useState('');
@@ -25,6 +57,17 @@ export default function LoginScreen({ navigation }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  /**
+   * handleLogin — Envía el formulario de autenticación.
+   * 1. Valida localmente que ambos campos estén completos.
+   * 2. Limpia el error previo y activa el spinner.
+   * 3. Llama login(correo, contrasena) de AuthContext; si OK, activa push.
+   * 4. Separa fallos SIN respuesta (sin internet) de errores del servidor
+   *    (401/403 → usa err.response.data.error o mensaje genérico).
+   * 5. Desactiva el spinner en finally.
+   *
+   * @returns {Promise<void>} Resuelve al terminar el intento de login.
+   */
   const handleLogin = async () => {
     if (!correo.trim() || !contrasena.trim()) {
       setError('Ingresá correo y contraseña');

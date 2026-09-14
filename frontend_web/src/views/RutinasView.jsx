@@ -1,3 +1,19 @@
+// frontend_web/src/views/RutinasView.jsx
+// ─── Vista Planes de Entrenamiento (roles Entrenador/Admin) ──
+// Gestión integral de rutinas: KPIs (afiliados totales / con plan / sin plan /
+// ejercicios en catálogo), tabla de afiliados con su plan activo y modales
+// para: asignar rutina (+reesignar automática), ver catálogo de ejercicios,
+// crear/editar/eliminar ejercicios, historial de ciclos del afiliado y
+// visualización/edición del plan (series/reps/peso por ejercicio).
+//
+// Qué rol lo usa: Entrenador y Administrador.
+// API calls (vía authAxios): GET /afiliados, GET /catalogo/ejercicios,
+// GET /afiliados/:id/ejercicios-disponibles, POST /afiliados/ciclos,
+// GET|POST|PATCH /planes/entrenamiento(/:idCiclo), POST|DELETE /planes/rutinas,
+// POST|DELETE /planes/rutinas/:id/ejercicios, PATCH /catalogo/ejercicios/:id,
+// POST /catalogo/ejercicios, DELETE /catalogo/ejercicios/:id,
+// GET /afiliados/:id/ciclos, GET /afiliados/:id/notas-ejercicio,
+// PATCH|DELETE /ciclos/:id_ciclo.
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -7,23 +23,46 @@ import { useToast } from "../hooks/useToast";
 import { trackEvent } from "../utils/analytics";
 import s from "./RutinasView.module.css";
 
+/** Nombres de los 7 días para desplegables y títulos de rutina. */
 const DAY_LABELS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+/** Convierte el nombre del día a dia_numero (Lunes=1 … Domingo=7). */
 const DIA_SEMANA_MAP = { Lunes:1, Martes:2, "Miércoles":3, Jueves:4, Viernes:5, Sábado:6, Domingo:7 };
+/** Opciones de grupo muscular del formulario de ejercicios. */
 const GRUPOS_MUSCULARES = ["Piernas","Pecho","Espalda","Hombros","Bíceps","Tríceps","Core","Glúteos"];
+/** Opciones de nivel mínimo de un ejercicio. */
 const NIVELES = ["Principiante","Intermedio","Avanzado"];
+/** Colores (fondo/texto) de la badge de nivel según el valor. */
 const NIVEL_COLOR = {
   Principiante:{bg:"#0ea5e922",text:"#0284c7"},
   Intermedio:{bg:"#4b9ecb22",text:"#4b9ecb"},
   Avanzado:{bg:"#ef444422",text:"#dc2626"},
 };
+/** Icono por objetivo físico (usado en tabla y badges). */
 const OBJETIVO_ICON = {"Perdida de grasa":"🔥","Aumento de masa":"💪","Mantenimiento":"⚖️"};
 
+/** Color determinista del avatar según el nombre (hash simple → tono HSL). */
 const avatarColor = (nombre) => {
   let hash = 0;
   for (let i = 0; i < nombre.length; i++) hash = nombre.charCodeAt(i) + ((hash << 5) - hash);
   return `hsl(${Math.abs(hash) % 360}, 65%, 55%)`;
 };
 
+/**
+ * RutinasView — Vista de planes de entrenamiento para staff (Entrenador/Admin).
+ *
+ * Renderiza: header con botones de acción, 4 KPIs, buscador + tabla de
+ * afiliados con su plan activo, y los modales asignar/catálogo/nuevo-editar/
+ * eliminar ejercicio/historial de ciclos/ver plan.
+ *
+ * Estado que maneja (agrupado): lista de afiliados y catálogo de ejercicios,
+ * loading/saving, búsqueda, el modal activo (asignar/catalogo/nuevo/editar/
+ * eliminar/historial/verPerfil), el afiliado/ejercicio objetivo del modal, la
+ * selección de ejercicios para asignar (selectedEjercicios/selectedRutinas),
+ * el formulario de ejercicio (formEj) y el ejercicio a eliminar (deleteEjId).
+ *
+ * @param {Object} _props - Componente de ruta sin props externas.
+ * @returns {JSX.Element} Layout de la app con la gestión de planes.
+ */
 export default function RutinasView() {
   const { user, authAxios } = useAuth();
   const { toast, showToast } = useToast();
@@ -56,6 +95,11 @@ export default function RutinasView() {
   const [deleteEjId, setDeleteEjId] = useState("");
 
   // ── Data fetching ───────────────────────────────────────────
+  /**
+   * useCallback: carga todos los afiliados (GET /afiliados). Memoizado con
+   * [authAxios, showToast] para usarse en el efecto de montaje y en callbacks
+   * posteriores (refresco tras asignar) manteniendo identidad estable.
+   */
   const fetchAfiliados = useCallback(async () => {
     setLoading(true);
     try {
@@ -69,6 +113,11 @@ export default function RutinasView() {
     }
   }, [authAxios, showToast]);
 
+  /**
+   * useCallback: carga el catálogo de ejercicios (GET /catalogo/ejercicios).
+   * Memoizado igual que fetchAfiliados; se re-llama al guardar/eliminar
+   * ejercicios y al abrir el modal del catálogo.
+   */
   const fetchEjercicios = useCallback(async () => {
     try {
       const { data } = await authAxios.get("/catalogo/ejercicios");
@@ -79,9 +128,12 @@ export default function RutinasView() {
     }
   }, [authAxios, showToast]);
 
+  /** Al montar carga afiliados y catálogo en paralelo (una sola vez). */
   useEffect(() => { fetchAfiliados(); fetchEjercicios(); }, [fetchAfiliados, fetchEjercicios]);
 
   // ── Derived data ────────────────────────────────────────────
+  // Filtro por nombre/correo/documento + KPIs: un afiliado "con plan" tiene
+  // ciclo activo con plan_entrenamiento embebido por el backend.
   const filtered = afiliados.filter((a) => {
     if (!search) return true;
     const q = search.toLowerCase();
@@ -93,6 +145,8 @@ export default function RutinasView() {
   const totalEjercicios = catalogoEj.length;
 
   // ── Modal handlers ──────────────────────────────────────────
+  /** Resetea TODO el estado de los modales y los cierra. Bloqueado mientras
+   *  una operación esté guardando. */
   const closeModal = () => {
     if (saving) return;
     setModal(null);
@@ -107,6 +161,7 @@ export default function RutinasView() {
     setDeleteEjId("");
   };
 
+  /** Abre el modal de asignar rutina con el selector de afiliado vacío. */
   const openAsignar = async () => {
     setAsignarAfiliadoId("");
     setAsignarAfiliadoData(null);
@@ -116,6 +171,12 @@ export default function RutinasView() {
     setModal("asignar");
   };
 
+  /**
+   * Al cambiar el afiliado en el modal de asignar: guarda su id y data, y carga
+   * sus ejercicios disponibles (GET /afiliados/:id/ejercicios-disponibles), que
+   * son los del catálogo cuyo nivel_minimo no supera el nivel del afiliado.
+   * @param {Event} e - Evento change del select.
+   */
   const handleAfiliadoSelect = async (e) => {
     const id = e.target.value;
     setAsignarAfiliadoId(id);
@@ -132,20 +193,51 @@ export default function RutinasView() {
     }
   };
 
+  /**
+   * Añade un ejercicio a la selección con valores por defecto
+   * (3 series, 12 reps, día 1). Si ya estaba seleccionado, no hace nada.
+   * @param {object} ej - Ejercicio del catálogo disponible.
+   */
   const addEjercicioToRutina = (ej) => {
     const id = ej.id_ejercicio ?? ej.id;
     if (selectedEjercicios[id]) return;
     setSelectedEjercicios((prev) => ({ ...prev, [id]: { series:3, repeticiones:12, dia_numero:1 } }));
   };
 
+  /**
+   * Actualiza series/repeticiones/día de un ejercicio seleccionado
+   * (escritura inmutable en el objeto anidado).
+   * @param {number|string} id   - Id del ejercicio.
+   * @param {string} field       - "series" | "repeticiones" | "dia_numero".
+   * @param {any} value          - Nuevo valor.
+   */
   const updateEjercicioSel = (id, field, value) => {
     setSelectedEjercicios((prev) => ({ ...prev, [id]: { ...prev[id], [field]: value } }));
   };
 
+  /** Quita un ejercicio de la selección (clonando y borrando la clave). */
   const removeEjercicioSel = (id) => {
     setSelectedEjercicios((prev) => { const c={...prev}; delete c[id]; return c; });
   };
 
+  /**
+   * Asigna (o reasigna) el plan de entrenamiento al afiliado seleccionado.
+   * Flujo completo:
+   * 1) Valida que haya al menos 1 ejercicio y un afiliado.
+   * 2) Determina el id_ciclo: si el afiliado tiene ciclo activo lo REUTILIZA;
+   *    si no, crea uno de 90 días vía POST /afiliados/ciclos con objetivo,
+   *    nivel y disponibilidad del afiliado.
+   * 3) Garantiza que exista el plan de entrenamiento: GET /planes/entrenamiento/
+   *    :idCiclo → si no existe (404) lo crea con POST /planes/entrenamiento.
+   * 4) Mapea rutinas existentes por dia_numero y reconstruye los días
+   *    seleccionados: borra la rutina vieja del día (por eso "resignar" es
+   *    reemplazable) y crea una nueva (POST /planes/rutinas) con nombre
+   *    "Rutina <Día>" y enfoque "Full Body"; luego agrega cada ejercicio
+   *    (POST /planes/rutinas/:id/ejercicios) con orden secuencial.
+   * 5) Toast de éxito + analytics (trackEvent metaFit_rutina_asignada) +
+   *    cierre + refresco de afiliados. Catch → toast de error del backend.
+   * @param {Event} e - Evento submit.
+   */
   const handleAsignar = async (e) => {
     e.preventDefault();
     const idsEjer = Object.keys(selectedEjercicios);
@@ -247,6 +339,13 @@ export default function RutinasView() {
     }
   };
 
+  /**
+   * Crea o actualiza un ejercicio del catálogo según el modo del modal.
+   * Modo "editar": PUT /catalogo/ejercicios/:id (formulario precargado).
+   * Modo "nuevo": POST /catalogo/ejercicios. Toast + cierre + refresco del
+   * catálogo en ambos casos.
+   * @param {Event} e - Evento submit.
+   */
   const handleGuardarEjercicio = async (e) => {
     e.preventDefault();
     if (!formEj.nombre_ejercicio.trim()) { showToast("El nombre es obligatorio", "danger"); return; }
@@ -269,6 +368,11 @@ export default function RutinasView() {
     }
   };
 
+  /**
+   * Elimina un ejercicio del catálogo.
+   * DELETE /catalogo/ejercicios/:id. Si el backend responde 409 (FK), avisa
+   * con un mensaje específico: el ejercicio está en uso en planes activos.
+   */
   const handleEliminarEjercicio = async (e) => {
     e.preventDefault();
     if (!deleteEjId) { showToast("Selecciona un ejercicio", "danger"); return; }
@@ -289,6 +393,7 @@ export default function RutinasView() {
   };
 
   // ── Render helpers ──────────────────────────────────────────
+  /** Badge de nivel con colores del NIVEL_COLOR (solo presentación). */
   const badgeNivel = (nivel) => {
     if (!nivel) return null;
     const cfg = NIVEL_COLOR[nivel] || { bg:"#6b728018", text:"#6b7280" };
@@ -728,8 +833,22 @@ export default function RutinasView() {
 }
 
 // ── Sub-component: Historial de ciclos del afiliado ─────────
-// Permite al staff ver todos los ciclos, editar objetivo/nivel/fechas/días
-// (PATCH /ciclos/:id_ciclo) y eliminarlos (DELETE /ciclos/:id_ciclo).
+/**
+ * HistorialCiclos — Lista los ciclos de un afiliado con edición y borrado
+ * inline. Permite al staff ver todos los ciclos, editar
+ * objetivo/nivel/fechas/días (PATCH /ciclos/:id_ciclo) y eliminarlos
+ * (DELETE /ciclos/:id_ciclo).
+ *
+ * Estado que maneja: ciclos, loading, id del ciclo en edición, formulario
+ * de edición y saving.
+ *
+ * @param {object}   afiliado  - Afiliado cuyo historial se muestra.
+ * @param {object}   authAxios - Instancia axios autenticada del contexto.
+ * @param {Function} onCambio  - Callback del padre (fetchAfiliados) para
+ *                               refrescar la tabla al actualizar/eliminar.
+ * @param {Function} showToast - Fábrica de toasts del hook useToast.
+ * @returns {JSX.Element} Lista de tarjetas de ciclo + acciones.
+ */
 function HistorialCiclos({ afiliado, authAxios, onCambio, showToast }) {
   const [ciclos, setCiclos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -737,6 +856,7 @@ function HistorialCiclos({ afiliado, authAxios, onCambio, showToast }) {
   const [form, setForm] = useState(null);
   const [saving, setSaving] = useState(false);
 
+  /** GET /afiliados/:id/ciclos → lista de ciclos del afiliado. */
   const cargar = async () => {
     setLoading(true);
     try {
@@ -750,8 +870,14 @@ function HistorialCiclos({ afiliado, authAxios, onCambio, showToast }) {
     }
   };
 
+  /** Carga el historial cuando cambia el afiliado objetivo del modal. */
   useEffect(() => { cargar(); /* eslint-disable-line react-hooks/exhaustive-deps */ }, [afiliado]);
 
+  /**
+   * Prepara el formulario de edición con los valores del ciclo (fechas en
+   * formato input date). `activo` se guarda como booleano para el checkbox.
+   * @param {object} c - Ciclo a editar.
+   */
   const iniciarEdicion = (c) => {
     setEditandoId(c.id_ciclo);
     setForm({ fecha_inicio: toDateInput(c.fecha_inicio), fecha_fin: toDateInput(c.fecha_fin),
@@ -759,6 +885,12 @@ function HistorialCiclos({ afiliado, authAxios, onCambio, showToast }) {
       disponibilidad_dias: c.disponibilidad_dias ?? 3, activo: Boolean(c.activo) });
   };
 
+  /**
+   * Guarda los cambios del ciclo en edición. PATCH /ciclos/:id_ciclo con
+   * fecha_inicio/fecha_fin/objetivo/nivel/disponibilidad/activo. Tras el toast
+   * recarga el historial y avisa al padre (onCambio) para refrescar la tabla.
+   * @param {object} c - Ciclo original (lleva el id).
+   */
   const guardar = async (c) => {
     setSaving(true);
     try {
@@ -779,6 +911,11 @@ function HistorialCiclos({ afiliado, authAxios, onCambio, showToast }) {
     }
   };
 
+  /**
+   * Elimina el ciclo (con confirmación del navegador). DELETE /ciclos/:id_ciclo;
+   * el backend borra en cascada planes, progreso y registros asociados.
+   * @param {object} c - Ciclo a eliminar.
+   */
   const eliminar = async (c) => {
     if (!window.confirm(`¿Eliminar el ciclo ${c.id_ciclo} (${toDateInput(c.fecha_inicio)} → ${toDateInput(c.fecha_fin)})? Se borrarán planes, progreso y registros asociados.`)) return;
     setSaving(true);
@@ -867,9 +1004,23 @@ function HistorialCiclos({ afiliado, authAxios, onCambio, showToast }) {
 }
 
 // ── Sub-component: PlanDisplay ──────────────────────────────
-// Muestra el plan de entrenamiento del afiliado con edición inline
-// de series/repeticiones/peso (PATCH/DELETE ejercicios) y las notas
-// del afiliado por ejercicio (GET /afiliados/:id/notas-ejercicio).
+/**
+ * PlanDisplay — Muestra el plan de entrenamiento del afiliado con edición
+ * inline de series/repeticiones/peso por ejercicio y las notas que el
+ * afiliado dejó en cada uno.
+ *
+ * Estado que maneja: plan cargado, error, mapa de ediciones activas
+ * (edit: { "idRutina:idEj": { series, repeticiones, peso_kg } }), clave en
+ * guardado (savingKey) y notas por ejercicio.
+ *
+ * API calls (vía authAxios): GET /planes/entrenamiento/:idCiclo,
+ * GET /afiliados/:id/notas-ejercicio, PATCH /planes/rutinas/:id/ejercicios/:id,
+ * DELETE /planes/rutinas/:id/ejercicios/:id.
+ *
+ * @param {object} afiliado  - Afiliado con ciclo+plan activo embebido.
+ * @param {object} authAxios - Instancia axios autenticada del contexto.
+ * @returns {JSX.Element} Tablas de rutinas por día con acciones de edición.
+ */
 function PlanDisplay({ afiliado, authAxios }) {
   const [plan, setPlan] = useState(null);
   const [error, setError] = useState(null);
@@ -878,6 +1029,7 @@ function PlanDisplay({ afiliado, authAxios }) {
   const [notas, setNotas] = useState([]);
   const { showToast } = useToast();
 
+  /** Carga el plan del ciclo activo (GET /planes/entrenamiento/:idCiclo). */
   const cargar = async () => {
     try {
       const ciclo = cicloActivo(afiliado);
@@ -892,11 +1044,16 @@ function PlanDisplay({ afiliado, authAxios }) {
     }
   };
 
+  /** Carga el plan al montar el modal (o al cambiar de afiliado). */
   useEffect(() => {
     cargar();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [afiliado]);
 
+  /**
+   * Carga las notas que el afiliado escribió por ejercicio
+   * (GET /afiliados/:id/notas-ejercicio); el coach las ve en la tabla.
+   */
   useEffect(() => {
     (async () => {
       try {
@@ -915,13 +1072,28 @@ function PlanDisplay({ afiliado, authAxios }) {
   const rutinas = plan.rutinas || [];
   if (rutinas.length === 0) return <div className={s.emptyState}>No hay rutinas asignadas en este plan</div>;
 
+  /** Notas del afiliado para un ejercicio concreto del plan. */
   const notasPorEjercicio = (idEjercicio) => notas.filter((n) => String(n.id_ejercicio) === String(idEjercicio));
 
+  /**
+   * Activa el modo edición inline de un ejercicio, precargando sus valores
+   * actuales en el mapa `edit` bajo la clave "idRutina:idEjercicio".
+   * @param {object} rutina - Rutina que contiene el ejercicio.
+   * @param {object} ej     - Ejercicio a editar.
+   */
   const inicioEdicion = (rutina, ej) => {
     const key = `${rutina.id_rutina}:${ej.id_ejercicio}`;
     setEdit((prev) => ({ ...prev, [key]: { series: ej.series ?? "", repeticiones: ej.repeticiones ?? "", peso_kg: ej.peso_kg ?? "" } }));
   };
 
+  /**
+   * Persiste la edición inline del ejercicio. PATCH /planes/rutinas/:idRutina/
+   * ejercicios/:idEj con series/repeticiones (peso solo si no está vacío).
+   * Al éxito: toast, cierra la edición, emite "rutina-modificada" (para otros
+   * módulos/dashboard) y recarga el plan.
+   * @param {object} rutina - Rutina contenedora.
+   * @param {object} ej     - Ejercicio editado.
+   */
   const guardarEdicion = async (rutina, ej) => {
     const key = `${rutina.id_rutina}:${ej.id_ejercicio}`;
     const payload = { series: Number(edit[key].series), repeticiones: Number(edit[key].repeticiones) };
@@ -941,6 +1113,13 @@ function PlanDisplay({ afiliado, authAxios }) {
     }
   };
 
+  /**
+   * Quita un ejercicio de la rutina (con confirmación).
+   * DELETE /planes/rutinas/:idRutina/ejercicios/:idEj; emite
+   * "rutina-modificada" y recarga el plan.
+   * @param {object} rutina - Rutina contenedora.
+   * @param {object} ej     - Ejercicio a quitar.
+   */
   const quitarEjercicio = async (rutina, ej) => {
     if (!window.confirm(`¿Quitar "${ej.nombre_ejercicio || ej.nombre}" de la rutina?`)) return;
     setSavingKey(`${rutina.id_rutina}:${ej.id_ejercicio}`);

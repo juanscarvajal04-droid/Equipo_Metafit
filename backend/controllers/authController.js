@@ -1,5 +1,9 @@
 // backend/controllers/authController.js
-// ─── Login con bcrypt + JWT firmado ──────────────────────────
+// ─── Login con bcrypt + JWT firmado + recuperación de contraseña ──
+// Capa HTTP de autenticación: recibe el request, valida la entrada, delega
+// la persistencia en usuarioModel/passwordResetModel y la criptografía en
+// authService, y responde el JWT de sesión.
+//
 // Refactorizado: BUG-001 (validación formato email RFC 5322),
 //               BUG-002 (verificar estado ANTES de bcrypt),
 //               BUG-004 (password > 72 bytes rechazado antes de bcrypt),
@@ -16,10 +20,28 @@ const { signJWT, comparePassword } = require('../middlewares/auth');
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // ─── BUG-004: Límite bcrypt (72 bytes) ────────────────────────
+// Mismo límite que authService: evita que contraseñas más largas se trunquen
+// silenciosamente por el algoritmo bcrypt.
 const MAX_PASSWORD_BYTES = 72;
 
 const AuthController = {
 
+  /**
+   * Inicia sesión: valida credenciales (correo + contraseña) y emite un JWT
+   * de sesión. Flujo de seguridad ordenado deliberadamente:
+   *   1) validación de formato (email RFC 5322 y longitud de contraseña)
+   *      antes de cualquier consulta o hash costoso;
+   *   2) verificación del estado de la cuenta ANTES de bcrypt (BUG-002) para
+   *      que un atacante no pueda distinguir "cuenta inactiva" de "contraseña
+   *      incorrecta" por códigos HTTP distintos;
+   *   3) comparación bcrypt solo si la cuenta está Activa.
+   *
+   * @param {Object} req - Request de Express con body { email, password }
+   * @param {Object} res - Response de Express
+   * @returns {Promise<void>} Responde 200 con { accessToken, user } si es
+   *          válido; 400 (datos/formato inválidos), 401 (credenciales o token
+   *          mal), 403 (cuenta inactiva) o 500 (error interno, sin detalles).
+   */
   login: async (req, res) => {
     const { email, password } = req.body;
 
@@ -54,6 +76,9 @@ const AuthController = {
       if (!match)
         return res.status(401).json({ error: 'Correo o contraseña incorrectos' });
 
+      // Payload mínimo del token: identidad (sub), email y rol. El rol viaja
+      // en el token para que los middlewares de autorización (requireAdmin,
+      // requireStaff, …) no consulten la BD en cada request.
       const token = signJWT({
         sub  : user.id_usuario,
         email: user.correo,
@@ -84,6 +109,20 @@ const AuthController = {
   // respuesta (modo prueba) para que el administrador lo use manualmente.
   // Siempre responde 200 para no revelar si el correo existe.
   // ─────────────────────────────────────────────────────────────
+  /**
+   * Solicita la recuperación de contraseña de un correo. Genera un JWT de
+   * un solo uso (15 min), lo persiste en PASSWORD_RESET (invalidando tokens
+   * anteriores del mismo usuario) e intenta enviarlo por correo (API Brevo
+   * primero, SMTP nodemailer como fallback). MEDIDA ANTI-ENUMERACIÓN: siempre
+   * responde 200 con el mismo mensaje genérico, exista o no el correo; si no
+   * hay servicio de correo configurado, incluye el token en `modoPrueba` para
+   * desarrollo.
+   *
+   * @param {Object} req - Request de Express con body { email }
+   * @param {Object} res - Response de Express
+   * @returns {Promise<void>} Responde 200 siempre (respuesta genérica), o 400
+   *          si el correo es inválido, o 500 si falla la persistencia interna.
+   */
   recuperarPassword: async (req, res) => {
     const { email } = req.body;
 
@@ -123,6 +162,13 @@ const AuthController = {
       const subject = 'Recuperación de contraseña — MetaFit';
       const textoPlano = `Hola ${user.nombres}, recibimos una solicitud para restablecer tu contraseña en MetaFit.\n\nUsá este enlace (válido por 15 minutos):\n${enlaceReset}\n\nSi no la pediste, ignorá este correo.\n\n— MetaFit · Sport Gym Sede 80 · Bogotá, Colombia`;
 
+      /**
+       * Renderiza la plantilla HTML de recuperación reemplazando los
+       * marcadores {{NOMBRE}}, {{ENLACE}} y {{ANIO}}. Si la plantilla no
+       * existe o falla la lectura, devuelve null y el envío usa texto plano.
+       *
+       * @returns {string|null} HTML del correo o null si no pudo leerse.
+       */
       const renderPlantilla = () => {
         try {
           const fs = require('fs');
@@ -140,6 +186,14 @@ const AuthController = {
       };
       const html = renderPlantilla();
 
+      /**
+       * Envía el correo por SMTP clásico (nodemailer). Timeouts explícitos
+       * (15s conexión, 20s socket) evitan que un SMTP lento cuelgue la
+       * respuesta del endpoint.
+       *
+       * @returns {Promise<boolean>} true si el correo se envió; false si no
+       *          hay credenciales SMTP configuradas o falla el envío.
+       */
       const enviarConSmtp = async () => {
         if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) return false;
         const nodemailer = require('nodemailer');
@@ -163,6 +217,9 @@ const AuthController = {
       };
 
       try {
+        // Antes de intentar SMTP se prueba Brevo (funciona sin exponer el
+        // puerto 587, que muchos hosts de nube bloquean). Si Brevo falla o no
+        // está configurado, se intenta el fallback SMTP.
         if (process.env.BREVO_API_KEY) {
           try {
             const resApi = await fetch('https://api.brevo.com/v3/smtp/email', {
@@ -215,6 +272,20 @@ const AuthController = {
   // Hashea la nueva contraseña (bcrypt 12) y marca el token como usado.
   // Usa transacción: si falla el UPDATE de la contraseña, no se marca usado.
   // ─────────────────────────────────────────────────────────────
+  /**
+   * Aplica la nueva contraseña a partir de un token de recuperación.
+   * Cadena de verificación completa: 1) el JWT debe ser válido y de tipo
+   * 'password_reset'; 2) el token debe existir en PASSWORD_RESET como vigente
+   * (no usado y no expirado) y pertenecer al mismo usuario del JWT. La
+   * contraseña se hashea con bcrypt y se actualiza en USUARIO; recién
+   * entonces el token se marca como usado (transacción → un token = un solo
+   * uso, aunque falle el UPDATE no se invalida un token todavía válido).
+   *
+   * @param {Object} req - Request de Express con body { token, nuevaPassword }
+   * @param {Object} res - Response de Express
+   * @returns {Promise<void>} Responde 200 si se actualizó, 400 si el token o
+   *          la contraseña son inválidos, 500 en error interno.
+   */
   resetPassword: async (req, res) => {
     const { token, nuevaPassword } = req.body;
 

@@ -1,3 +1,17 @@
+// frontend_web/src/views/DietasView.jsx
+// ─── Vista Planes Nutricionales (staff Entrenador/Admin) ────
+// Gestión de dietas por afiliado: KPIs (total / con plan / sin plan /
+// alimentos en catálogo), tabla de afiliados con su objetivo y restricciones,
+// y modales para: asignar dieta (+parámetros del plan y selección de
+// alimentos), ver el plan nutricional con edición inline de cantidades,
+// catálogo de alimentos (ver/crear/editar/eliminar).
+//
+// Qué rol lo usa: Entrenador y Administrador.
+// API calls (vía authAxios): GET /afiliados, GET /catalogo/alimentos,
+// GET /afiliados/:id/alimentos-disponibles, POST /afiliados/ciclos,
+// GET|POST|PATCH /planes/nutricional(/:idCiclo),
+// POST|PATCH|DELETE /planes/nutricional/:idCiclo/detalle,
+// POST|PUT|DELETE /catalogo/alimentos(/:id).
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -7,23 +21,42 @@ import { useToast } from "../hooks/useToast";
 import { trackEvent } from "../utils/analytics";
 import s from "./DietasView.module.css";
 
+/** Icono + colores del objetivo para badges y tabla. */
 const OBJETIVO_CONFIG = {
   "Perdida de grasa": { icono:"🔥", color:"#e94560", bg:"#e9456018" },
   "Aumento de masa":  { icono:"💪", color:"#2563eb", bg:"#2563eb18" },
   "Mantenimiento":    { icono:"⚖️", color:"#059669", bg:"#05966918" },
 };
+/** Colores de las badges de restricciones médicas según el tipo. */
 const RESTRICCION_COLOR = {
   "Enfermedad": { bg:"#ef444418", text:"#dc2626" },
   "Alergia":    { bg:"#f9731618", text:"#ea580c" },
   "Lesion":     { bg:"#eab30818", text:"#ca8a04" },
 };
 
+/** Color determinista del avatar según el nombre (hash simple → tono HSL). */
 const avatarColor = (nombre) => {
   let hash = 0;
   for (let i = 0; i < nombre.length; i++) hash = nombre.charCodeAt(i) + ((hash << 5) - hash);
   return `hsl(${Math.abs(hash) % 360}, 65%, 55%)`;
 };
 
+/**
+ * DietasView — Vista de planes nutricionales para staff (Entrenador/Admin).
+ *
+ * Renderiza: header con botones de acción, 4 KPIs, buscador + tabla de
+ * afiliados (objetivo + restricciones + estado del plan) y los modales
+ * asignar/ver plan/catálogo/nuevo-editar/eliminar alimento.
+ *
+ * Estado que maneja (agrupado): afiliados y catálogo de alimentos, loading/
+ * saving, búsqueda, el modal activo, el afiliado/alimento objetivo, la
+ * selección de alimentos para asignar (selectedAlimentos), el formulario del
+ * plan (formPlan), el formulario de alimento (formAlimento) y el alimento a
+ * eliminar (deleteAlimentoId).
+ *
+ * @param {Object} _props - Componente de ruta sin props externas.
+ * @returns {JSX.Element} Layout de la app con la gestión de dietas.
+ */
 export default function DietasView() {
   const { user, authAxios } = useAuth();
   const { toast, showToast } = useToast();
@@ -56,6 +89,10 @@ export default function DietasView() {
   const [deleteAlimentoId, setDeleteAlimentoId] = useState("");
 
   // ── Data fetching ───────────────────────────────────────────
+  /**
+   * useCallback: carga todos los afiliados (GET /afiliados). Memoizado con
+   * [authAxios, showToast] para identidad estable en efectos y refrescos.
+   */
   const fetchAfiliados = useCallback(async () => {
     setLoading(true);
     try {
@@ -69,6 +106,10 @@ export default function DietasView() {
     }
   }, [authAxios, showToast]);
 
+  /**
+   * useCallback: carga el catálogo de alimentos (GET /catalogo/alimentos).
+   * Se re-llama al guardar/eliminar alimentos y al abrir el catálogo.
+   */
   const fetchAlimentos = useCallback(async () => {
     try {
       const { data } = await authAxios.get("/catalogo/alimentos");
@@ -79,9 +120,12 @@ export default function DietasView() {
     }
   }, [authAxios, showToast]);
 
+  /** Al montar carga afiliados y catálogo en paralelo (una sola vez). */
   useEffect(() => { fetchAfiliados(); fetchAlimentos(); }, [fetchAfiliados, fetchAlimentos]);
 
   // ── Derived data ────────────────────────────────────────────
+  // Filtro por nombre/correo + KPIs: "con plan" = ciclo activo con
+  // plan_nutricional embebido por el backend.
   const filtered = afiliados.filter((a) => {
     if (!search) return true;
     const q = search.toLowerCase();
@@ -93,6 +137,7 @@ export default function DietasView() {
   const totalAlimentos = catalogoAlimentos.length;
 
   // ── Modal handlers ──────────────────────────────────────────
+  /** Resetea TODO el estado de los modales y los cierra (bloqueado si guarda). */
   const closeModal = () => {
     if (saving) return;
     setModal(null);
@@ -107,6 +152,12 @@ export default function DietasView() {
     setDeleteAlimentoId("");
   };
 
+  /**
+   * Al cambiar el afiliado en el modal de asignar: guarda su id y data, y carga
+   * sus alimentos disponibles (GET /afiliados/:id/alimentos-disponibles), que
+   * excluyen los que están restringidos al afiliado.
+   * @param {Event} e - Evento change del select.
+   */
   const handleAfiliadoSelect = async (e) => {
     const id = e.target.value;
     setAsignarAfiliadoId(id);
@@ -123,6 +174,11 @@ export default function DietasView() {
     }
   };
 
+  /**
+   * Marca/desmarca un alimento de la selección. Al marcar se inicializa con
+   * 100 g en la comida #1; al desmarcar se elimina del objeto.
+   * @param {number} id - Id del alimento del catálogo.
+   */
   const toggleAlimento = (id) => {
     setSelectedAlimentos((prev) => {
       if (prev[id]) { const c={...prev}; delete c[id]; return c; }
@@ -130,10 +186,30 @@ export default function DietasView() {
     });
   };
 
+  /**
+   * Actualiza cantidad/comida de un alimento seleccionado
+   * (escritura inmutable en el objeto anidado).
+   * @param {number} id    - Id del alimento.
+   * @param {string} field - "cantidad_g" | "num_comida".
+   * @param {any} value    - Nuevo valor.
+   */
   const updateAlimentoSel = (id, field, value) => {
     setSelectedAlimentos((prev) => ({ ...prev, [id]: { ...prev[id], [field]: value } }));
   };
 
+  /**
+   * Asigna (o reasigna) el plan nutricional al afiliado seleccionado.
+   * Flujo completo:
+   * 1) Valida que haya al menos 1 alimento y un afiliado.
+   * 2) Determina el id_ciclo: reutiliza el ciclo activo o crea uno de 30 días
+   *    (POST /afiliados/ciclos) con objetivo/nivel/disponibilidad del afiliado.
+   * 3) Garantiza el plan: GET /planes/nutricional/:idCiclo → PATCH (actualiza
+   *    calorías/nº comidas/observaciones) o POST (crea) si es 404.
+   * 4) Agrega cada alimento seleccionado vía POST /planes/nutricional/:idCiclo/
+   *    detalle con cantidad_g y num_comida.
+   * 5) Toast + analytics (metaFit_dieta_asignada) + cierre + refresco.
+   * @param {Event} e - Evento submit.
+   */
   const handleAsignar = async (e) => {
     e.preventDefault();
     const alimentosIds = Object.keys(selectedAlimentos);
@@ -209,6 +285,13 @@ export default function DietasView() {
     }
   };
 
+  /**
+   * Crea o actualiza un alimento del catálogo según el modo del modal.
+   * Modo "editar": PUT /catalogo/alimentos/:id con valores numéricos
+   * normalizados (NaN → 0). Modo "nuevo": POST /catalogo/alimentos.
+   * Toast + cierre + refresco del catálogo en ambos casos.
+   * @param {Event} e - Evento submit.
+   */
   const handleGuardarAlimento = async (e) => {
     e.preventDefault();
     if (!formAlimento.nombre_alimento.trim()) { showToast("El nombre es obligatorio", "danger"); return; }
@@ -237,6 +320,11 @@ export default function DietasView() {
     }
   };
 
+  /**
+   * Elimina un alimento del catálogo.
+   * DELETE /catalogo/alimentos/:id. 409 (FK) → mensaje específico: el alimento
+   * está en planes activos.
+   */
   const handleEliminarAlimento = async (e) => {
     e.preventDefault();
     if (!deleteAlimentoId) { showToast("Selecciona un alimento", "danger"); return; }
@@ -257,6 +345,13 @@ export default function DietasView() {
   };
 
   // ── Render helpers ──────────────────────────────────────────
+  /**
+   * Normaliza la forma variable de `restricciones` del afiliado (puede llegar
+   * como array de strings, array de objetos, o mapa tipo->bool) a un array de
+   * strings legibles para las badges.
+   * @param {*} rest - Restricciones del afiliado.
+   * @returns {string[]} Lista de restricciones como texto.
+   */
   const formatRestricciones = (rest) => {
     if (!rest) return [];
     if (Array.isArray(rest)) {
@@ -278,6 +373,7 @@ export default function DietasView() {
     return [];
   };
 
+  /** Renderiza las badges de restricciones (o "Ninguna") con sus colores. */
   const restriccionesBadges = (restricciones) => {
     const items = formatRestricciones(restricciones);
     if (items.length === 0) return <span className={s.badgeDark}>Ninguna</span>;
@@ -720,10 +816,22 @@ export default function DietasView() {
 }
 
 // ── Sub-component: DietaDisplay ──────────────────────────────
+/**
+ * DietaDisplay — Muestra el plan nutricional del afiliado (calorías objetivo,
+ * nº de comidas, observaciones) y delega la lista de alimentos por comida a
+ * <PlanDetalle/> con edición inline de cantidades.
+ *
+ * API calls (vía authAxios): GET /planes/nutricional/:idCiclo.
+ *
+ * @param {object} afiliado  - Afiliado con ciclo+plan nutricional activo.
+ * @param {object} authAxios - Instancia axios autenticada del contexto.
+ * @returns {JSX.Element} Tarjeta de info del plan + detalle de comidas.
+ */
 function DietaDisplay({ afiliado, authAxios }) {
   const [plan, setPlan] = useState(null);
   const [error, setError] = useState(null);
 
+  /** Carga el plan del ciclo activo (GET /planes/nutricional/:idCiclo). */
   const cargar = async () => {
     try {
       const ciclo = cicloActivo(afiliado);
@@ -738,6 +846,7 @@ function DietaDisplay({ afiliado, authAxios }) {
     }
   };
 
+  /** Carga el plan al montar el modal (o al cambiar de afiliado). */
   useEffect(() => { cargar(); /* eslint-disable-line react-hooks/exhaustive-deps */ }, [afiliado]);
 
   if (error) return <div className={s.emptyState}>{error}</div>;
@@ -776,15 +885,28 @@ function DietaDisplay({ afiliado, authAxios }) {
   );
 }
 
-// Edición inline de la cantidad (gramos) de cada alimento del plan.
-// "💾 Guardar" → PATCH /planes/nutricional/:idCiclo/detalle/:id_alimento
-// "🗑️ Quitar"  → DELETE /planes/nutricional/:idCiclo/detalle/:id_alimento
-// Ambos disparan el evento window 'dieta-modificada' y recargan el plan.
+/**
+ * PlanDetalle — Lista los alimentos del plan agrupados por comida (#1…N) con
+ * edición inline de la cantidad en gramos.
+ *
+ * "💾 Guardar" → PATCH /planes/nutricional/:idCiclo/detalle/:id_alimento
+ * "🗑️ Quitar"  → DELETE /planes/nutricional/:idCiclo/detalle/:id_alimento
+ * Ambos disparan el evento window 'dieta-modificada' y llaman onCambio()
+ * para que el padre recargue el plan.
+ *
+ * @param {object[]} detalle     - Detalle de alimentos del plan.
+ * @param {number}   numComidas  - Nº de comidas del plan (información).
+ * @param {number}   idCiclo     - Ciclo dueño del plan.
+ * @param {object}   authAxios   - Instancia axios autenticada.
+ * @param {Function} onCambio    - Callback de refresco (cargar del padre).
+ * @returns {JSX.Element[]} Tarjetas "Comida #N" con cada alimento editable.
+ */
 function PlanDetalle({ detalle, numComidas, idCiclo, authAxios, onCambio }) {
   const { showToast } = useToast();
   const [edits, setEdits] = useState({});
   const [savingKey, setSavingKey] = useState(null);
 
+  // Agrupa los alimentos por num_comida preservando el orden del backend.
   const grouped = {};
   for (const d of detalle) {
     const key = d.num_comida || 1;
@@ -793,8 +915,16 @@ function PlanDetalle({ detalle, numComidas, idCiclo, authAxios, onCambio }) {
   }
   const keys = Object.keys(grouped).sort((a, b) => Number(a) - Number(b));
 
+  /** Clave única "nºcomida:id_alimento" para ediciones y savingKey. */
   const clave = (d) => `${d.num_comida || 1}:${d.id_alimento}`;
 
+  /**
+   * Persiste la nueva cantidad de un alimento. PATCH /planes/nutricional/
+   * :idCiclo/detalle/:id_alimento con cantidad_gramos y el nº de comida (se
+   * envía num_comida_anterior para el UPSERT correcto). Toast + cierre de la
+   * edición + evento "dieta-modificada" + refresco del padre.
+   * @param {object} d - Alimento del detalle (lleva id_alimento y num_comida).
+   */
   const guardar = async (d) => {
     const key = clave(d);
     const cantidad = edits[key];
@@ -818,6 +948,11 @@ function PlanDetalle({ detalle, numComidas, idCiclo, authAxios, onCambio }) {
     }
   };
 
+  /**
+   * Quita un alimento del plan (con confirmación). DELETE /planes/nutricional/
+   * :idCiclo/detalle/:id_alimento enviando num_comida en el body.
+   * @param {object} d - Alimento del detalle a quitar.
+   */
   const quitar = async (d) => {
     const key = clave(d);
     if (!window.confirm(`¿Quitar "${d.nombre_alimento}" de la comida ${d.num_comida}?`)) return;

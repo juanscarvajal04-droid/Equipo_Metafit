@@ -1,5 +1,12 @@
-// routes/cicloRoutes.js — Parte 1: CRUD completo de ciclos.
-// Montado en /ciclos desde server.js. PATCH/DELETE /ciclos/:id_ciclo.
+// backend/routes/cicloRoutes.js
+// ─── Ciclos de entrenamiento: actualización y borrado ─────────
+// Router montado en '/ciclos' desde server.js (ver server.js). Contiene SOLO
+// las rutas paramétricas PATCH/DELETE /ciclos/:id_ciclo; el resto del CRUD de
+// ciclos vive dentro de afiliadoRoutes.js (POST /afiliados/:id/ciclos y
+// GET /afiliados/:id/ciclos), donde también se documenta.
+//   · PATCH  /ciclos/:id_ciclo → Admin o Entrenador (updateCiclo).
+//   · DELETE /ciclos/:id_ciclo → Solo Admin (deleteCiclo, borrado en cascada).
+// Mapa de rutas (los bloques @swagger de cada una documentan body y respuestas).
 'use strict';
 
 const express         = require('express');

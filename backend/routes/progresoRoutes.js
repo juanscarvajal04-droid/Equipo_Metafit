@@ -1,6 +1,11 @@
 // backend/routes/progresoRoutes.js
+// ─── Progreso diario del afiliado (resumen | historial | evolución) ──
+// Router montado en '/progreso' (convención del repo: sin prefijo /api).
 // FASE 1: resumen diario, historial por rango y evolución de un ejercicio.
-// Todos usan req.user.sub (el afiliado autenticado) — sin prefijo /api (convención del repo).
+// TODAS las rutas usan req.user.sub (el afiliado autenticado); no reciben id
+// por path: el token delimita qué datos puede leer — nunca se confía en un :id
+// del cliente para delimitar el alcance.
+// Mapa de rutas (los bloques @swagger de cada una documentan params y respuestas).
 'use strict';
 
 const express = require('express');

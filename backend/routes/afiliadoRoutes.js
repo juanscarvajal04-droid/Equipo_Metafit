@@ -1,4 +1,16 @@
 // routes/afiliadoRoutes.js
+// ─── Endpoints de afiliados (CRUD + ciclos + restricciones + progreso) ──
+// Es el router más extenso de la API. Todos los endpoints exigen autenticación
+// (requireAuth) y la mayoría restringe por rol:
+//   · requireStaff              → lecturas de gestión (lista, detalle, ciclos)
+//   · requireAdminOrRecepcionista → altas y actualizaciones de mostrador
+//   · requireAdmin              → borrado físico (irreversible)
+// Los endpoints /me operan sobre el ID del token (req.user.sub), por lo que un
+// afiliado solo puede leer/modificar sus propios datos; los endpoints /:id son
+// para el staff.
+//
+// ORDEN IMPORTANTE: las rutas /me (y '/ciclos', '/progreso') se declaran ANTES
+// de '/:id' para que Express no las atrape como parámetro de ruta.
 'use strict';
 
 const express              = require('express');

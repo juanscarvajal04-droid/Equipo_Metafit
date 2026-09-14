@@ -1,3 +1,19 @@
+// movil/src/screens/MiDietaScreen.js
+// ─── Tab "Dieta" del afiliado ────────────────────────────────
+// Muestra el plan nutricional del ciclo: widget de agua (hasta 8 vasos) con
+// BarraAgua, cards por comida (Desayuno/Almuerzo/etc.) con alimentos y su
+// progreso %, checboxes de "consumido", registrar consumo vía Pantalla
+// RegistroConsumo, y guardado flotante "Guardar Progreso".
+//
+// ¿Qué tab le corresponde? Pestaña "Dieta" — 3ª del bottom tab (MainTabs).
+// ¿Qué endpoints /me consume? getMisCiclos(), getPlanNutricional(id_ciclo),
+//   getAguaHoy(hoy); guarda con guardarAgua(hoy, vasos) y
+//   guardarConsumoAlimento(ciclo, hoy, alimentos).
+// ¿Qué muestra en cada estado?
+//   • loading: spinner púrpura centrado.
+//   • error: "No tenés un ciclo asignado." / "Error al cargar el plan
+//     nutricional." (pantalla con icono alert-circle).
+//   • vacío: sin comidas → "No hay alimentos en tu plan actual."
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
@@ -25,8 +41,20 @@ import { formatearFechaLegible, nombreComida } from '../utils/formateadores';
 import BarraAgua from '../components/common/BarraAgua';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+/** Meta diaria de hidratación: 8 vasos de agua. */
 const MAX_VASOS = 8;
 
+/**
+ * VasoAgua — Un vaso de agua tocable del widget. Se apaga/llena al cambiar el
+ * índice seleccionado (handleAgua). El ancho se calcula para repartir los 8
+ * vasos en la fila (SCREEN_WIDTH menos padding del header).
+ *
+ * @param {object}   props           - Props del componente.
+ * @param {boolean}  props.lleno     - true si el vaso está marcado.
+ * @param {number}   props.index     - Posición del vaso (0..7).
+ * @param {Function} props.onPress   - Callback al tocar (recibe el índice).
+ * @returns {JSX.Element} TouchableOpacity con icono water.
+ */
 function VasoAgua({ lleno, index, onPress }) {
   return (
     <TouchableOpacity onPress={() => onPress(index)} activeOpacity={0.7}
@@ -40,6 +68,19 @@ function VasoAgua({ lleno, index, onPress }) {
   );
 }
 
+/**
+ * ComidaCard — Card de una comida (num_comida) con su progreso de consumo:
+ * header con % (verde al 100%), barra de progreso y cada alimento con:
+ * checkbox de consumido, gramos/kcal, y botón "+" para abrir RegistroConsumo.
+ *
+ * @param {object}   props                 - Props del componente.
+ * @param {string}   props.comidaNombre    - Nombre de la comida (nombreComida).
+ * @param {Array}    props.alimentos       - Alimentos de la comida.
+ * @param {object}   props.consumidos      - {id_alimento: bool}.
+ * @param {Function} props.onToggle        - Marca/desmarca consumido.
+ * @param {Function} props.onRegistrar     - Navega a RegistroConsumo.
+ * @returns {JSX.Element} Card de la comida con lista de alimentos.
+ */
 function ComidaCard({ comidaNombre, alimentos, consumidos, onToggle, onRegistrar }) {
   const total = alimentos.length;
   const hechos = alimentos.filter((a) => consumidos[a.id_alimento]).length;
@@ -155,6 +196,23 @@ function ComidaCard({ comidaNombre, alimentos, consumidos, onToggle, onRegistrar
   );
 }
 
+/**
+ * MiDietaScreen — Tab "Dieta" (bottom tab) del afiliado.
+ *
+ * Flujo de datos (por ciclo): cargan los ciclos /me → ciclo activo (o elegido)
+ * → plan nutricional (getPlanNutricional) + agua de hoy (getAguaHoy, con
+ * fallback defensivo a 0 vasos). El contrato real del backend es
+ * { detalle: [{ num_comida, id_alimento, cantidad_g, nombre_alimento, ... }] }
+ * y se normaliza a alimentos con nombre/cantidad/calorias.
+ *
+ * Estados:
+ *   • loading: spinner púrpura.
+ *   • error: mensaje centrado que oculta la lista y el botón de guardar.
+ *   • vacío: sin comidas → "No hay alimentos en tu plan actual."
+ *   • refresh: RefreshControl púrpura + botón ↻ (actualizando).
+ *
+ * @returns {JSX.Element} Pantalla con widget de agua + cards de comidas.
+ */
 export default function MiDietaScreen() {
   const navigation = useNavigation();
   const [ciclo, setCiclo] = useState(null);
@@ -172,6 +230,16 @@ export default function MiDietaScreen() {
 
   const hoy = new Date().toISOString().slice(0, 10);
 
+  /**
+   * fetchData — Carga el plan nutricional y el agua de hoy de un ciclo.
+   * 1. Ciclos /me y selección del activo (o del pasado como parámetro).
+   * 2. Sin ciclo → error "No tenés un ciclo asignado." y termina.
+   * 3. En paralelo: plan nutricional y agua del día (getAguaHoy con catch →
+   *    0 vasos si falla). Normaliza los alimentos del contrato del backend.
+   *
+   * @param {object|null} [cicloSeleccionado] - Ciclo forzado (selector/actualizar).
+   * @returns {Promise<void>}
+   */
   const fetchData = useCallback(async (cicloSeleccionado) => {
     try {
       setError(null);
@@ -229,6 +297,14 @@ export default function MiDietaScreen() {
     fetchData(c);
   };
 
+  /**
+   * handleAgua — Actualiza el conteo de vasos al tocar un vaso: si se toca el
+   * vaso que ya está marcado como último, baja a ese índice (deselecciona máx);
+   * si no, sube a index+1. Optimista en UI y revierte si guardarAgua falla.
+   *
+   * @param {number} index - Índice del vaso tocado (0..7).
+   * @returns {Promise<void>}
+   */
   const handleAgua = async (index) => {
     const nuevosVasos = index + 1 === agua ? index : index + 1;
     setAgua(nuevosVasos);
@@ -246,6 +322,11 @@ export default function MiDietaScreen() {
     setConsumidos((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  /**
+   * openRegistro — Navega a RegistroConsumo (stack sobre las tabs) con el
+   * contexto del alimento: ciclo, num_comida, id_alimento, nombre y macros por
+   * 100 g (kcal/proteinas/carbs/grasas) para el cálculo del registro.
+   */
   const openRegistro = (al) => {
     navigation.getParent()?.navigate('RegistroConsumo', {
       id_ciclo: ciclo?.id_ciclo,
@@ -261,6 +342,11 @@ export default function MiDietaScreen() {
     });
   };
 
+  /**
+   * handleSave — Persiste el consumo de alimentos del día completo
+   * (guardarConsumoAlimento) con id_alimento, num_comida y booleano consumido.
+   * Spinner en botón flotante (saving) y confirmación/error con Alert.
+   */
   const handleSave = async () => {
     if (!ciclo) return;
     setSaving(true);
@@ -279,6 +365,12 @@ export default function MiDietaScreen() {
     }
   };
 
+  /**
+   * getComidas — Agrupa los alimentos por num_comida y ordena las comidas por
+   * número (1 = Desayuno, 2 = Almuerzo, ... según nombreComida).
+   *
+   * @returns {Array<[string, Array]>} Entradas [numComida, alimentos].
+   */
   const getComidas = () => {
     const grupos = {};
     alimentos.forEach((al) => {

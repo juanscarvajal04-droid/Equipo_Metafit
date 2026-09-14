@@ -1,4 +1,8 @@
-// controllers/catalogoController.js
+// backend/controllers/catalogoController.js
+// ─── Catálogos: ejercicios, alimentos y restricciones ────────
+// Controlador HTTP de los CRUDs maestros usados por el staff (web). Traduce
+// códigos SQL (duplicados, FKs referenciadas, checks) a respuestas de negocio
+// entendibles. Patrón BUG-010: log interno + mensaje genérico al cliente.
 // Hardened: BUG-010 — todos los catch usan log interno + mensaje genérico al cliente.
 'use strict';
 const CatalogoModel = require('../models/catalogoModel');
@@ -6,6 +10,14 @@ const CatalogoModel = require('../models/catalogoModel');
 const CatalogoController = {
 
   // ── EJERCICIOS ────────────────────────────────────────────
+  /**
+   * GET /catalogo/ejercicios — Lista el catálogo de ejercicios con sus
+   * restricciones excluidas (resamblado en el modelo, sin N+1).
+   *
+   * @param {Object} req - Express request
+   * @param {Object} res - Express response
+   * @returns {Promise<void>} 200 con la lista o 500.
+   */
   getAllEjercicios: async (req, res) => {
     try {
       const data = await CatalogoModel.getAllEjercicios();
@@ -16,6 +28,16 @@ const CatalogoController = {
     }
   },
 
+  /**
+   * POST /catalogo/ejercicios — Crea un ejercicio. Valida los tres campos
+   * obligatorios (nombre, grupo muscular y nivel mínimo). ER_DUP_ENTRY por el
+   * nombre único → 400.
+   *
+   * @param {Object} req - Express request (body.nombre_ejercicio, grupo_muscular,
+   *                       nivel_minimo requeridos; descripcion opcional)
+   * @param {Object} res - Express response
+   * @returns {Promise<void>} 201 con el id, 400 o 500.
+   */
   createEjercicio: async (req, res) => {
     const { nombre_ejercicio, grupo_muscular, nivel_minimo } = req.body;
     if (!nombre_ejercicio || !grupo_muscular || !nivel_minimo)
@@ -32,6 +54,14 @@ const CatalogoController = {
   },
 
   // ── ALIMENTOS ─────────────────────────────────────────────
+  /**
+   * GET /catalogo/alimentos — Lista el catálogo de alimentos (lee la VIEW
+   * v_alimento_calorias que ya trae las calorías por 100g calculadas).
+   *
+   * @param {Object} req - Express request
+   * @param {Object} res - Express response
+   * @returns {Promise<void>} 200 con la lista o 500.
+   */
   getAllAlimentos: async (req, res) => {
     try {
       const data = await CatalogoModel.getAllAlimentos();
@@ -42,6 +72,16 @@ const CatalogoController = {
     }
   },
 
+  /**
+   * POST /catalogo/alimentos — Crea un alimento. Usa `== null` (no `!`) porque
+   * 0 ES un macro válido (alimento sin grasa, por ejemplo). ER_DUP_ENTRY por
+   * nombre único → 400.
+   *
+   * @param {Object} req - Express request (body.nombre_alimento, proteinas,
+   *                       carbohidratos, grasas requeridos)
+   * @param {Object} res - Express response
+   * @returns {Promise<void>} 201 con el id, 400 o 500.
+   */
   createAlimento: async (req, res) => {
     const { nombre_alimento, proteinas, carbohidratos, grasas } = req.body;
     if (!nombre_alimento || proteinas == null || carbohidratos == null || grasas == null)
@@ -57,6 +97,15 @@ const CatalogoController = {
     }
   },
 
+  /**
+   * DELETE /catalogo/ejercicios/:id — Elimina un ejercicio del catálogo.
+   * Los códigos ER_ROW_IS_REFERENCED* (FK) se traducen a 409: el ejercicio
+   * está en uso en rutinas activas y no puede borrarse.
+   *
+   * @param {Object} req - Express request (params.id)
+   * @param {Object} res - Express response
+   * @returns {Promise<void>} 200, 404, 409 o 500.
+   */
   deleteEjercicio: async (req, res) => {
     try {
       const affected = await CatalogoModel.deleteEjercicio(req.params.id);
@@ -71,6 +120,16 @@ const CatalogoController = {
     }
   },
 
+  /**
+   * PUT/PATCH /catalogo/ejercicios/:id — Actualiza un ejercicio del catálogo.
+   * `descripcion` opcional (se vacía si el body la manda vacía). 404 si el id
+   * no existe; ER_DUP_ENTRY por nombre en uso → 400.
+   *
+   * @param {Object} req - Express request (params.id; body.nombre_ejercicio,
+   *                       grupo_muscular, nivel_minimo requeridos)
+   * @param {Object} res - Express response
+   * @returns {Promise<void>} 200, 400, 404 o 500.
+   */
   updateEjercicio: async (req, res) => {
     const { nombre_ejercicio, grupo_muscular, nivel_minimo } = req.body;
     if (!nombre_ejercicio || !grupo_muscular || !nivel_minimo)
@@ -88,6 +147,15 @@ const CatalogoController = {
   },
 
   // ── ALIMENTOS ─────────────────────────────────────────────
+  /**
+   * DELETE /catalogo/alimentos/:id — Elimina un alimento del catálogo. Igual
+   * que el de ejercicios, los códigos FK se traducen a 409 (alimento en uso en
+   * planes nutricionales activos).
+   *
+   * @param {Object} req - Express request (params.id)
+   * @param {Object} res - Express response
+   * @returns {Promise<void>} 200, 404, 409 o 500.
+   */
   deleteAlimento: async (req, res) => {
     try {
       const affected = await CatalogoModel.deleteAlimento(req.params.id);
@@ -102,6 +170,15 @@ const CatalogoController = {
     }
   },
 
+  /**
+   * PUT/PATCH /catalogo/alimentos/:id — Actualiza un alimento del catálogo.
+   * Misma validación `== null` que create (el 0 es un macro válido).
+   *
+   * @param {Object} req - Express request (params.id; body.nombre_alimento y
+   *                       macros requeridos)
+   * @param {Object} res - Express response
+   * @returns {Promise<void>} 200, 400, 404 o 500.
+   */
   updateAlimento: async (req, res) => {
     const { nombre_alimento, proteinas, carbohidratos, grasas } = req.body;
     if (!nombre_alimento || proteinas == null || carbohidratos == null || grasas == null)
@@ -119,6 +196,13 @@ const CatalogoController = {
   },
 
   // ── RESTRICCIONES ─────────────────────────────────────────
+  /**
+   * GET /catalogo/restricciones — Lista el catálogo de restricciones médicas.
+   *
+   * @param {Object} req - Express request
+   * @param {Object} res - Express response
+   * @returns {Promise<void>} 200 con la lista o 500.
+   */
   getAllRestricciones: async (req, res) => {
     try {
       const data = await CatalogoModel.getAllRestricciones();
@@ -132,6 +216,16 @@ const CatalogoController = {
   // Valores permitidos por el ENUM del schema (01_estructura.sql)
   TIPOS_RESTRICCION: ['Enfermedad', 'Lesion', 'Alergia', 'Medicamento', 'Otra'],
 
+  /**
+   * POST /catalogo/restricciones — Crea una restricción. Valida además que
+   * `tipo` sea uno de los valores del ENUM del schema (TIPOS_RESTRICCION) para
+   * fallar antes de llegar a la base de datos.
+   *
+   * @param {Object} req - Express request (body.nombre_restriccion, tipo
+   *                       requeridos; efecto_relevante opcional)
+   * @param {Object} res - Express response
+   * @returns {Promise<void>} 201 con el id, 400 o 500.
+   */
   createRestriccion: async (req, res) => {
     const { nombre_restriccion, tipo } = req.body;
     if (!nombre_restriccion || !tipo)
@@ -151,6 +245,15 @@ const CatalogoController = {
     }
   },
 
+  /**
+   * PUT/PATCH /catalogo/restricciones/:id — Actualiza una restricción. Misma
+   * validación de `tipo` contra el ENUM que create.
+   *
+   * @param {Object} req - Express request (params.id; body.nombre_restriccion,
+   *                       tipo requeridos)
+   * @param {Object} res - Express response
+   * @returns {Promise<void>} 200, 400, 404 o 500.
+   */
   updateRestriccion: async (req, res) => {
     const { nombre_restriccion, tipo } = req.body;
     if (!nombre_restriccion || !tipo)
@@ -171,6 +274,15 @@ const CatalogoController = {
     }
   },
 
+  /**
+   * DELETE /catalogo/restricciones/:id — Elimina una restricción. Los códigos
+   * FK se traducen a 409: la restricción está asignada a afiliados, ejercicios
+   * o alimentos y no puede borrarse.
+   *
+   * @param {Object} req - Express request (params.id)
+   * @param {Object} res - Express response
+   * @returns {Promise<void>} 200, 404, 409 o 500.
+   */
   deleteRestriccion: async (req, res) => {
     try {
       const affected = await CatalogoModel.deleteRestriccion(req.params.id);

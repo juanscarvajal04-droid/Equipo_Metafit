@@ -1,4 +1,13 @@
-// routes/planRoutes.js
+// backend/routes/planRoutes.js
+// ─── Rutas de planes de entrenamiento y nutricionales ────────
+// Router montado en '/planes' (ver server.js). Middleware base requerido para
+// TODAS las rutas: requireAuth (token JWT válido). Sobre la base:
+//   · Lecturas por ciclo → requireOwnCiclo (Staff o el afiliado dueño del ciclo;
+//     es lo que permite al MÓVIL del afiliado ver su propio plan).
+//   · Mutaciones → requireAdminOrEntrenador (solo Admin/Entrenador crean planes).
+// Un plus de seguridad: aunque web y móvil comparten estos endpoints, el móvil
+// nunca puede editar planes porque requireOwnCiclo no concede escritura.
+// Mapa de rutas (los bloques @swagger de cada una documentan body y respuestas).
 'use strict';
 
 const express         = require('express');
@@ -196,6 +205,7 @@ router.patch('/entrenamiento/:id', requireAuth, requireAdminOrEntrenador, PlanCo
 // ─────────────────────────────────────────────────────────────
 // RUTINAS
 // ─────────────────────────────────────────────────────────────
+// Todas las rutas de rutinas/ejercicios son mutaciones → requireAdminOrEntrenador.
 
 /**
  * @swagger
@@ -500,6 +510,10 @@ router.post('/nutricional', requireAuth, requireAdminOrEntrenador, PlanControlle
  */
 router.patch('/nutricional/:id', requireAuth, requireAdminOrEntrenador, PlanController.updateNutricional);
 
+// Nota de ordenamiento: PATCH /nutricional/:id y POST /nutricional/:id_plan/detalle
+// conviven sin conflicto porque son métodos distintos (PATCH no matchea POST y el
+// path de detalle tiene un segmento extra). Ambos endpoints reciben el id_ciclo
+// como parámetro de ruta (:id / :id_plan).
 router.post('/nutricional/:id_plan/detalle', requireAuth, requireAdminOrEntrenador, PlanController.addAlimento);
 
 /**
