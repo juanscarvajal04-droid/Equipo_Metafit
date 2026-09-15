@@ -1,3 +1,13 @@
+// movil/src/navigation/AppNavigator.js
+// ─── Navegación raíz de la app móvil (login <-> tabs) ────────
+// Decide QUÉ stack mostrar según el estado de autenticación:
+//   • loading (restaurando sesión desde AsyncStorage) → LoadingScreen
+//   • sin token (visitante)     → stack público: Landing / Login / RecuperarPassword
+//   • con token (afiliado)      → RootStack + MainTabs (Perfil/Rutina/Dieta/Progreso)
+//
+// Por qué ese orden importa: si la app decidiera el stack ANTES de leer
+// AsyncStorage, un afiliado con sesión vería el Login por un instante (flash).
+// El gate `loading` evita ese parpadeo y el flash es imposible.
 import React from 'react';
 import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
@@ -22,6 +32,7 @@ import { COLORS, FONTS } from '../theme';
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
+/** Pantalla de carga inicial: spinner mientras el auth restaura la sesión. */
 function LoadingScreen() {
   return (
     <View style={styles.loading}>
@@ -30,6 +41,7 @@ function LoadingScreen() {
   );
 }
 
+/** Iconos de Ionicons por pestaña (focused/unfocused para el estado visual). */
 const TAB_ICONS = {
   Perfil: { focused: 'person', unfocused: 'person-outline' },
   Rutina: { focused: 'barbell', unfocused: 'barbell-outline' },
@@ -37,9 +49,13 @@ const TAB_ICONS = {
   Progreso: { focused: 'stats-chart', unfocused: 'stats-chart-outline' },
 };
 
-// Stack raíz que envuelve las tabs: permite abrir pantallas de registro
-// (RegistroEjercicio/RegistroConsumo) y de edición del perfil (EditarPerfil)
-// encima del área logeada.
+/**
+ * RootStack — Stack logeado: MainTabs base + pantallas full-screen que se
+ * abren ENCIMA de las tabs (registro de ejercicio, registro de consumo y
+ * edición de perfil). headerShown false: cada pantalla dibuja su propia barra.
+ *
+ * @returns {JSX.Element} Navegador de stack del área autenticada.
+ */
 function RootStack() {
   return (
     <Stack.Navigator key="root-stack" screenOptions={{ headerShown: false }}>
@@ -51,6 +67,13 @@ function RootStack() {
   );
 }
 
+/**
+ * MainTabs — Barra inferior (bottom tab) del afiliado con 4 pestañas:
+ * Perfil, Rutina, Dieta, Progreso. Estilo dark con tinte activo púrpura claro
+ * (COLORS.purpleLight) e inactivo muted; iconos Ionicons por TAB_ICONS.
+ *
+ * @returns {JSX.Element} Tab.Navigator con las 4 pantallas del afiliado.
+ */
 function MainTabs() {
   return (
     <Tab.Navigator
@@ -85,6 +108,22 @@ function MainTabs() {
   );
 }
 
+/**
+ * AppNavigator — Navegador raíz que controla el flujo según la sesión.
+ *
+ * Flujo condicional (en este orden):
+ *  1) SI `loading` (restaurando desde AsyncStorage) → LoadingScreen: evita el
+ *     flash de Login y es requisito porque la restauración es asíncrona.
+ *  2) SI `token` → RootStack (tabs + modales de registro/edición).
+ *  3) SI NO hay token → stack público (Landing → Login/RecuperarPassword).
+ *
+ * Además força el remontaje del NavigationContainer con `key` al cambiar de
+ * tema (isDark): al re-crearse el árbol, todas las pantallas re-leen la paleta
+ * ya aplicada por ThemeContext sin necesidad de invalidarla 		manualmente.
+ *
+ * @param {Object} _props - Sin props externas (usa useAuth + useTheme).
+ * @returns {JSX.Element} NavigationContainer con el stack correcto.
+ */
 export default function AppNavigator() {
   const { token, loading } = useAuth();
   const { isDark } = useTheme();
@@ -110,6 +149,7 @@ export default function AppNavigator() {
   );
 }
 
+/** Estilos base: pantalla de carga centrada sobre el fondo global. */
 const styles = StyleSheet.create({
   loading: {
     flex: 1,

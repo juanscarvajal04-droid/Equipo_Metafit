@@ -1,9 +1,20 @@
+// frontend_web/src/components/Header.jsx
+// ─── Header sticky (todos los roles autenticados) ────────────
+// Barra superior dentro de la columna derecha del AppLayout: breadcrumb
+// (sistema → sección → página actual), fecha en español, botón de tema
+// (claro/oscuro), campana de notificaciones con popover (polling cada 60s) y
+// perfil del usuario (avatar + nombre + rol).
+//
+// Qué rol lo usa: los tres roles; el breadcrumb se deriva de la ruta activa.
+// API calls (vía authAxios): GET /notificaciones cada 60s (y al montar).
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getTheme, toggleTheme } from "../utils/theme.js";
 import styles from "./Header.module.css";
 
+// Metadatos de cada ruta para el breadcrumb: label de la página actual,
+// icono y "sección padre" (el backend consulta notificaciones con su ruta).
 const ROUTE_META = {
   "/dashboard": { label: "Panel de Control",        icon: "📊", parent: null },
   "/finanzas":  { label: "Panel de Finanzas",       icon: "💰", parent: "Administración" },
@@ -14,12 +25,16 @@ const ROUTE_META = {
   "/personal":  { label: "Gestión de Personal",       icon: "🛡️", parent: "Administración" },
 };
 
+// Color por rol: coincide con ROLE_GRADIENT de la sidebar y el theme web,
+// para que avatar/breadcrumb léan el mismo código de color del RBAC.
 const ROLE_COLOR = {
   Administrador: "#e31c25",
   Recepcionista: "#2563eb",
   Entrenador:    "#059669",
 };
 
+/** Fecha completa de hoy en formato largo español ("domingo, 13 de
+ *  septiembre de 2026"); se usa en el bloque de fecha del header. */
 const fechaElegante = () =>
   new Date().toLocaleDateString("es-CO", {
     weekday: "long",
@@ -28,6 +43,7 @@ const fechaElegante = () =>
     year: "numeric",
   });
 
+/** Icono de campana inline (SVG) — sin dependencia de librerías de iconos. */
 function BellIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -38,12 +54,34 @@ function BellIcon() {
   );
 }
 
+/**
+ * Header — Barra superior del AppLayout con breadcrumb, fecha, tema,
+ * notificaciones y perfil.
+ *
+ * Renderiza: breadcrumb derivado de la ruta activa (ROUTE_META), fecha
+ * capitalizada, botón de tema (úsese getTheme/toggleTheme), campana con badge
+ * de total y popover con las notificaciones (grupos pendientes + nav si tienen
+ * ruta), y el bloque de avatar/nombre/rol del usuario.
+ *
+ * Estado que maneja: lista de grupos de notificaciones, apertura del popover,
+ * tema actual y referencias (dropdownRef para click-outside, pollingRef para
+ * limpiar el intervalo).
+ *
+ * API calls (vía authAxios): cargarNotificaciones → GET /notificaciones al
+ * montar y luego cada 60 segundos (polling). Si llega un 401 por sesión
+ * expirada, detiene el polling.
+ *
+ * @param {Object} _props - Sin props externas (usa contexto y router).
+ * @returns {JSX.Element} <header> con la barra superior.
+ */
 export default function Header() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { user, authAxios } = useAuth();
 
+  /** Metadatos de la ruta actual (fallback genérico "MetaFit"). */
   const meta  = ROUTE_META[pathname] || { label: "MetaFit", icon: "💪", parent: null };
+  /** Color del rol para avatar/breadcrumb (fallback gris neutro). */
   const color = ROLE_COLOR[user?.role] || "#6c757d";
   const fecha = fechaElegante();
   const fechaCap = fecha.charAt(0).toUpperCase() + fecha.slice(1);
@@ -54,9 +92,16 @@ export default function Header() {
   const dropdownRef = useRef(null);
   const pollingRef = useRef(null);
 
+  /** Suma de pendientes de todos los grupos (para la badge de la campana). */
   const totalNotificaciones = notificaciones.reduce((sum, n) => sum + n.cantidad, 0);
   const hayNotificaciones = totalNotificaciones > 0;
 
+  /**
+   * useCallback: consulta los grupos de notificaciones (GET /notificaciones).
+   * El endpoint agrupa por tipo (membresías por vencer/vencidas, metas) y
+   * devuelve mensaje, icono, cantidad y una ruta opcional a la que navegar.
+   * Si la sesión expiró (401) se cancela el polling para no repetir errores.
+   */
   const cargarNotificaciones = useCallback(async () => {
     try {
       const { data } = await authAxios.get("/notificaciones");
@@ -69,6 +114,10 @@ export default function Header() {
     }
   }, [authAxios]);
 
+  /**
+   * Monta el polling de notificaciones: carga inmediata y luego cada 60 s.
+   * El cleanup (al desmontar) limpia el intervalo para evitar fugas de timers.
+   */
   useEffect(() => {
     cargarNotificaciones();
     pollingRef.current = setInterval(cargarNotificaciones, 60000);
@@ -77,6 +126,10 @@ export default function Header() {
     };
   }, [cargarNotificaciones]);
 
+  /**
+   * Cierra el popover al hacer click fuera de la campana (dropdownRef).
+   * Listener global mousedown con cleanup al desmontar.
+   */
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -87,6 +140,11 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  /**
+   * Maneja el click en un grupo de notificaciones: cierra el popover y, si la
+   * notificación tiene `ruta`, navega a ella (p. ej. /pagos para membresías).
+   * @param {string|undefined} ruta - Ruta destino de la notificación.
+   */
   const handleNotificacionClick = (ruta) => {
     setDropdownOpen(false);
     if (ruta) navigate(ruta);

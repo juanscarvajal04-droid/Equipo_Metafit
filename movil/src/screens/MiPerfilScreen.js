@@ -1,3 +1,19 @@
+// movil/src/screens/MiPerfilScreen.js
+// ─── Tab "Perfil" del afiliado ───────────────────────────────
+// Muestra los datos personales + estado físico del afiliado: avatar con foto
+// (o iniciales), rol, información personal, ciclo activo (equivalente al
+// "Historial" del web), historial de ciclos, restricciones alimenticias y
+// botón de Cerrar Sesión. Incluye pull-to-refresh, subir foto, y acceso a
+// 'EditarPerfil'. Al volver a la pantalla (focus) re-fetcha los datos.
+//
+// ¿Qué tab le corresponde? Pestaña "Perfil" — 1ª del bottom tab (MainTabs).
+// ¿Qué endpoints /me consume? getMiPerfil(), getMisCiclos(), getMisRestricciones()
+//   (todos /me) + api.post('/afiliados/me/foto') para subir el avatar.
+// ¿Qué muestra en cada estado?
+//   • loading: spinner púrpura centrado.
+//   • error: Alert "No se pudo cargar el perfil" (fetch falla).
+//   • vacío parcial: sin ciclo → card "No tienes un ciclo asignado"; sin
+//     historial → se oculta la sección; sin restricciones → se oculta.
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
@@ -24,6 +40,17 @@ import { formatearFechaLegible, formatearPeso, formatearAltura, formatearNumero,
 import BadgeRestriccion from '../components/common/BadgeRestriccion';
 import ResumenCiclo from '../components/historial/ResumenCiclo';
 
+/**
+ * Avatar — Imagen redonda del perfil o iniciales sobre gradiente púrpura.
+ * Las fotos que vienen del backend con ruta relativa se completan con API_URL
+ * (las absolutas se usan tal cual). Si no hay foto, muestra hasta 2 iniciales.
+ *
+ * @param {object}  props              - Props del componente.
+ * @param {string}  props.nombre       - Nombre del afiliado (para iniciales).
+ * @param {string}  [props.foto]       - Ruta/URL de la foto (o null/undefined).
+ * @param {number}  [props.size=80]    - Diámetro del avatar en px.
+ * @returns {JSX.Element} Image o LinearGradient circular.
+ */
 function Avatar({ nombre, foto, size = 80 }) {
   const initials = (nombre || 'U')
     .split(' ')
@@ -69,6 +96,14 @@ function Avatar({ nombre, foto, size = 80 }) {
   );
 }
 
+/**
+ * Badge — Etiqueta de rol con gradiente acorde (mismos colores de ROLE_GRADIENT
+ * del web). Roles no reconocidos caen en el estilo por defecto 'AFILIADO'.
+ *
+ * @param {object}  props         - Props del componente.
+ * @param {string}  [props.role]  - Nombre del rol del usuario.
+ * @returns {JSX.Element} Chip con el nombre del rol.
+ */
 function Badge({ role }) {
   const cfg = {
     ADMINISTRADOR: { label: 'Admin', colors: GRADIENTS.admin },
@@ -86,6 +121,15 @@ function Badge({ role }) {
   );
 }
 
+/**
+ * InfoRow — Fila de dato (icono + etiqueta + valor) dentro de una SectionCard.
+ *
+ * @param {object}  props          - Props del componente.
+ * @param {string}  props.icon     - Nombre del icono Ionicons.
+ * @param {string}  props.label    - Texto de la etiqueta (secundario).
+ * @param {string}  props.value    - Valor mostrado (primario).
+ * @returns {JSX.Element} Fila con icono circular púrpura.
+ */
 function InfoRow({ icon, label, value }) {
   return (
     <View style={{
@@ -116,6 +160,15 @@ function InfoRow({ icon, label, value }) {
   );
 }
 
+/**
+ * SectionCard — Card reutilizable con título e icono de sección y contenido.
+ *
+ * @param {object}   props            - Props del componente.
+ * @param {string}   props.title      - Título de la sección.
+ * @param {string}   props.icon       - Icono Ionicons del encabezado.
+ * @param {React.ReactNode} props.children - Contenido de la card.
+ * @returns {JSX.Element} Card sombreada con encabezado.
+ */
 function SectionCard({ title, icon, children }) {
   return (
     <View style={{
@@ -134,6 +187,29 @@ function SectionCard({ title, icon, children }) {
   );
 }
 
+/**
+ * MiPerfilScreen — Tab "Perfil" (bottom tab) del afiliado.
+ *
+ * Carga en paralelo (Promise.all): perfil (/afiliados/me), ciclos del usuario
+ * (/afiliados/me/ciclos) y restricciones (/afiliados/me/restricciones). El
+ * IMC se toma del progreso físico del ciclo activo o se calcula con
+ * calcularIMC(peso, altura): peso y altura iguales al web (kg y cm).
+ *
+ * Cabecera animada: colapsa con el scroll (260→160 px); botón toggle de tema
+ * (useTheme) y avatar tocable que abre la galería para subir foto (multipart).
+ *
+ * Estados:
+ *   • loading: spinner púrpura centrado.
+ *   • error de fetch: Alert "No se pudo cargar el perfil.".
+ *   • vacío: sin ciclo → card "No tienes un ciclo asignado..."; sin historial
+ *     o sin restricciones → sección oculta.
+ *   • refresh: RefreshControl púrpura; refetch en cada focus para reflejar
+ *     cambios hechos en EditarPerfil.
+ *
+ * @param {object}   props          - Props de pantalla del tab.
+ * @param {object}   props.navigation - Para EditarPerfil y logout.
+ * @returns {JSX.Element} ScrollView con header + secciones del perfil.
+ */
 export default function MiPerfilScreen({ navigation }) {
   const { logout } = useAuth();
   const [perfil, setPerfil] = useState(null);
@@ -144,6 +220,12 @@ export default function MiPerfilScreen({ navigation }) {
   const [refreshing, setRefreshing] = useState(false);
   const scrollY = useState(() => new Animated.Value(0))[0];
 
+  /**
+   * fetchData — Carga el perfil, ciclos y restricciones en paralelo.
+   * Los ciclos definen el ciclo activo (seleccionarCicloActivo) que alimenta
+   * la sección "Estado Físico". Cualquier error ≠ network muestra un Alert.
+   * En finally apaga los 2 indicadores (loading inicial y refreshing).
+   */
   const fetchData = useCallback(async () => {
     try {
       const [perfilRes, ciclosRes, restricRes] = await Promise.all([
@@ -176,12 +258,21 @@ export default function MiPerfilScreen({ navigation }) {
 
   const onRefresh = () => { setRefreshing(true); fetchData(); };
 
+  /**
+   * handleLogout — Cierra la sesión vía AuthContext. AppNavigator redirige al
+   * stack público automáticamente al quedar sin token y limpia AsyncStorage.
+   */
   const handleLogout = async () => {
     try {
       await logout();
     } catch (_) {}
   };
 
+  /**
+   * handlePhoto — Pide permiso de galería, selecciona una imagen y la sube a
+   * /afiliados/me/foto como multipart (FormData con uri/fileName/mimeType).
+   * Al éxito refresca el perfil (onRefresh); cualquier error lanza un Alert.
+   */
   const handlePhoto = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {

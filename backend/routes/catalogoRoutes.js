@@ -1,4 +1,10 @@
-// routes/catalogoRoutes.js
+// backend/routes/catalogoRoutes.js
+// ─── Catálogos: ejercicios, alimentos y restricciones ────────
+// Router montado en '/catalogo' (ver server.js). Lecturas (GET) con
+// requireAuth (cualquier sesión válida); escrituras y borrados con
+// requireAdminOrEntrenador, EXCEPTO las restricciones médicas del catálogo,
+// que solo las gestiona requireAdmin (cambian el ficha médica del afiliado).
+// Mapa de rutas (los bloques @swagger de cada una documentan body y respuestas).
 'use strict';
 
 const express             = require('express');

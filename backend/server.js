@@ -1,5 +1,10 @@
 // server.js
 // ─── Configuración de Express y registro de rutas ─────────────
+// Punto de entrada de la API: aplica middlewares de seguridad globales
+// (CORS, Helmet, límite de body), validación de Content-Type, rate limiting
+// del login, sirve archivos estáticos, monta todos los routers y define el
+// manejador global de errores y el health check.
+//
 // Refactorizado: BUG-003 (validación Content-Type en POST/PUT/PATCH),
 //               BUG-005 (rate limiting en /login con express-rate-limit),
 //               BUG-010 (error handler global ya no filtra stack traces — mantenido)
@@ -24,6 +29,9 @@ const { verificarCredenciales } = require('./config/cloudinary');
 // Whitelist de orígenes: en desarrollo acepta localhost en cualquier puerto,
 // en producción usa la whitelist de CORS_ORIGINS.
 // Solicitudes sin Origin (móvil, curl, Postman) siempre pasan.
+//
+// DECISIÓN: se permite cualquier puerto de localhost en desarrollo para que
+// Vite (5173/5174/5175), Expo (8081) y otras herramientas no rompan por CORS.
 const DEFAULT_CORS_ORIGIN = [
   'http://localhost:5173',
   'http://127.0.0.1:5173',
@@ -36,6 +44,12 @@ const DEFAULT_CORS_ORIGIN = [
   'https://metafit-frontend-78x6.onrender.com',
 ].join(',');
 
+/**
+ * Resuelve los orígenes CORS permitidos: toma CORS_ORIGINS (producción) o la
+ * lista por defecto (desarrollo), la separa por comas y descarta vacíos.
+ *
+ * @returns {string[]} Lista de orígenes permitidos.
+ */
 const corsOrigins = () =>
   (process.env.CORS_ORIGINS || DEFAULT_CORS_ORIGIN)
     .split(',')
@@ -44,6 +58,7 @@ const corsOrigins = () =>
 
 app.use(cors({
   origin(origin, callback) {
+    // Requests sin Origin (app móvil, curl, Postman) siempre se aceptan.
     if (!origin) return callback(null, true);
     const allowed = corsOrigins();
     if (allowed.includes('*') || allowed.includes(origin)) {
@@ -62,6 +77,9 @@ app.use(cors({
 app.use(helmet({ contentSecurityPolicy: false }));
 
 // ── Límite de tamaño de body (evita DoS por payloads enormes) ─
+// 50kb cubre holgadamente payloads de afiliados, planes y progreso; un límite
+// mayor permitiría a un atacante saturar la memoria del proceso con JSONs
+// gigantes.
 app.use(express.json({ limit: '50kb' }));
 app.use(express.urlencoded({ extended: true, limit: '50kb' }));
 
@@ -104,6 +122,9 @@ const loginLimiter = rateLimit({
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ── Rutas ──────────────────────────────────────────────────────
+// Cada router agrupa endpoints de un dominio (auth, usuarios, afiliados…).
+// La separación en módulos mantiene server.js como simple "pegamento" y hace
+// que cada dominio se pruebe y evolucione de forma independiente.
 const authRoutes = require('./routes/authRoutes');
 const usuarioRoutes = require('./routes/usuarioRoutes');
 const afiliadoRoutes = require('./routes/afiliadoRoutes');
@@ -133,6 +154,9 @@ app.use('/progreso', progresoRoutes);              // FASE 1: GET|PUT /progreso/
 app.use('/ciclos', cicloRoutes);                   // Parte 1: PATCH|DELETE /ciclos/:id_ciclo
 
 // ── Swagger UI — /api-docs y /swagger (alias) ────────────────
+// La spec se genera desde los comentarios @swagger de cada router
+// (ver config/swagger.js). persistAuthorization recuerda el token entre
+// recargas para probar endpoints autenticados sin re-login.
 const swaggerSetup = swaggerUi.setup(swaggerSpec, {
   customSiteTitle: 'MetaFit API Docs',
   swaggerOptions: {
@@ -152,6 +176,9 @@ app.get('/api-docs.json', (req, res) => {
 });
 
 // ── Health check ───────────────────────────────────────────────
+// Usado por el orquestador de despliegue (Render/Railway) para saber si la
+// app está viva. Reporta también si MySQL responde: 'ok' si conecta y
+// 'degraded' si la BD cae (el proceso sigue vivo para reintentar).
 app.get('/health', async (req, res) => {
   try {
     const pool = require('./config/db');
@@ -169,6 +196,9 @@ app.use((req, res) => {
 });
 
 // ── Manejo global de errores ───────────────────────────────────
+// Última barrera: captura cualquier error no manejado por los controllers y
+// traduce los casos conocidos (CORS, JWT malformado, JSON roto, multer) a
+// códigos HTTP adecuados. Nunca filtra el stack trace al cliente (BUG-010).
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   // Log completo solo en servidor, NUNCA al cliente (BUG-010)
@@ -209,4 +239,5 @@ app.use((err, req, res, next) => {
 // Verificación asíncrona de Cloudinary (no bloquea el arranque)
 verificarCredenciales();
 
+// App de Express lista para ser montada por index.js (o el listener del host).
 module.exports = app;

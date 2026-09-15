@@ -1,6 +1,10 @@
 // backend/models/afiliadoModel.js
 // ─── Consultas SQL de AFILIADO — SIN N+1 queries ─────────────
 //
+// Capa de acceso a datos de AFILIADO (perfil extendido del usuario con rol
+// 'Afiliado': datos personales, foto, estado de afiliación y vínculo con
+// USUARIO para sus datos de login).
+//
 // Antes: findAll() hacía 1 query principal + N*3 queries por afiliado
 //        (restricciones, ciclo activo, planes) → cuellos de botella graves.
 //
@@ -20,10 +24,27 @@ const AfiliadoModel = {
   // findAll — resuelto en 4 queries totales (antes: 1 + N*3)
   // BUG-012: Soporta paginación via { page, limit }
   // ─────────────────────────────────────────────────────────
+  /**
+   * Lista afiliados con su perfil completo (restricciones, ciclo activo con
+   * planes y última medición de progreso) en 4 queries planas + reensamblado
+   * en JS. La estrategia de 4 queries independientes evita el problema N+1
+   * que tenía la versión anterior y mantiene el tiempo de respuesta
+   * independiente de la cantidad de afiliados.
+   *
+   * @param {Object} [opciones] - Opciones de paginación
+   * @param {number} [opciones.page=1] - Página a devolver (empieza en 1)
+   * @param {number} [opciones.limit=50] - Máximo de registros por página
+   * @returns {Promise<Array<Object>>} Lista de afiliados enriquecidos con:
+   *   restricciones, ciclo_activo (con numero_ciclo y planes) y campos
+   *   deportivos promovidos al nivel raíz. Vacía si no hay resultados.
+   */
   findAll: async ({ page = 1, limit = 50 } = {}) => {
     const offset = (page - 1) * limit;
 
-    // Query 1: afiliados paginados + nombre de quien los registró
+    // Query 1: afiliados paginados + nombre de quien los registró.
+    // Une AFILIADO con USUARIO (datos de login) y con USUARIO de nuevo
+    // (LEFT JOIN) para resolver el nombre de `registrado_por` sin una segunda
+    // consulta. LEFT JOIN por si el registrador fue eliminado.
     const [afiliados] = await pool.query(`
       SELECT
         a.id_usuario,
@@ -53,9 +74,13 @@ const AfiliadoModel = {
 
     if (!afiliados.length) return [];
 
+    // Colección de IDs obtenidos en la página (se usa en las siguientes
+    // queries, que traen los datos relacionados de TODOS a la vez).
     const ids = afiliados.map(a => a.id_usuario);
 
-    // Query 2: todas las restricciones de todos los afiliados en un solo JOIN
+    // Query 2: todas las restricciones de todos los afiliados en un solo JOIN.
+    // Une la tabla puente AFILIADO_RESTRICCION con RESTRICCION para obtener
+    // el detalle (nombre, tipo, efecto) de una sola vez, filtrando por IN (?).
     const [restricciones] = await pool.query(`
       SELECT
         ar.id_usuario,
@@ -68,7 +93,10 @@ const AfiliadoModel = {
       WHERE ar.id_usuario IN (?)
     `, [ids]);
 
-    // Query 3: ciclo activo de cada afiliado (máximo 1 por afiliado)
+    // Query 3: ciclo activo de cada afiliado (máximo 1 por afiliado).
+    // Un ciclo activo (activo=1) se enriquece con su número ordinal calculado
+    // con una subconsulta (cuántos ciclos anteriores tiene) y con los planes
+    // de entrenamiento/nutricional mediante LEFT JOIN (puede no existir aún).
     const [ciclos] = await pool.query(`
       SELECT
         c.id_ciclo,
@@ -98,7 +126,11 @@ const AfiliadoModel = {
       WHERE c.id_usuario IN (?) AND c.activo = 1
     `, [ids]);
 
-    // Query 4: último progreso físico por ciclo activo
+    // Query 4: último progreso físico por ciclo activo.
+    // Trae la medición más reciente de PROGRESO_FISICO por ciclo usando la
+    // subconsulta MAX(fecha_registro) agrupada por id_ciclo (el patrón de
+    // "último registro por grupo"). El IMC se calcula en SQL con la fórmula
+    // peso / (estatura/100)².
     const cicloIds = ciclos.map(c => c.id_ciclo);
     let progreso = [];
     if (cicloIds.length) {
@@ -126,6 +158,8 @@ const AfiliadoModel = {
     }
 
     // ── Reensamblar en JS usando Maps (O(n)) ─────────────────
+    // Se indexan los tres conjuntos por su llave natural para poder juntarlos
+    // con cada afiliado en un único recorrido (sin bucles anidados).
     const restrMap    = new Map();   // id_usuario → [restricciones]
     const cicloMap    = new Map();   // id_usuario → ciclo
     const progresoMap = new Map();   // id_ciclo   → ultima_medicion
@@ -137,10 +171,14 @@ const AfiliadoModel = {
     for (const c of ciclos)   cicloMap.set(c.id_usuario, c);
     for (const p of progreso) progresoMap.set(p.id_ciclo, p);
 
+    // Mapeo final: cada afiliado se combina con sus dependencias indexadas.
     return afiliados.map(af => {
       const raw = cicloMap.get(af.id_usuario);
       const ciclo = raw
         ? (() => {
+            // Normaliza los planes anidados al shape que espera el frontend:
+            // el plan de entrenamiento solo existe si plan_entrenamiento_id
+            // llegó (si no, el LEFT JOIN devolvió NULL).
             const planEntrenamiento = raw.plan_entrenamiento_id
               ? { observaciones: raw.plan_observaciones }
               : null;
@@ -188,6 +226,16 @@ const AfiliadoModel = {
   // ─────────────────────────────────────────────────────────
   // findById — detalle completo de 1 afiliado
   // ─────────────────────────────────────────────────────────
+  /**
+   * Obtiene el detalle completo de UN afiliado: perfil, restricciones y
+   * ciclo activo con todos sus planes, rutinas y progreso. Para un solo
+   * registro, hacer varias queries está justificado (a diferencia de
+   * findAll, donde se evita el N+1).
+   *
+   * @param {number} id - ID del afiliado (PK de USUARIO/AFILIADO)
+   * @returns {Promise<Object|null>} Afiliado enriquecido con `restricciones`
+   *                                 y `ciclo_activo`, o null si no existe.
+   */
   findById: async (id) => {
     const [rows] = await pool.query(`
       SELECT
@@ -223,6 +271,17 @@ const AfiliadoModel = {
   // ─────────────────────────────────────────────────────────
   // _getCicloActivo — solo para findById (detalle individual)
   // ─────────────────────────────────────────────────────────
+  /**
+   * Helper interno (solo llamado desde findById) que arma el ciclo activo
+   * completo de un afiliado: plan de entrenamiento con sus rutinas y
+   * ejercicios, plan nutricional con su detalle de alimentos, y el historial
+   * completo de progreso físico. Es la estructura que usa la app móvil para
+   * renderizar la rutina y la dieta del día.
+   *
+   * @param {number} id_usuario - ID del afiliado
+   * @returns {Promise<Object|null>} Objeto ciclo enriquecido, o null si no
+   *                                 tiene ningún ciclo activo.
+   */
   _getCicloActivo: async (id_usuario) => {
     const [ciclos] = await pool.query(`
       SELECT c.*,
@@ -243,6 +302,10 @@ const AfiliadoModel = {
       'SELECT * FROM PLAN_ENTRENAMIENTO WHERE id_ciclo = ?', [ciclo.id_ciclo]
     );
     if (pe.length) {
+      // Une RUTINA con RUTINA_EJERCICIO (ejercicios por rutina) y EJERCICIO
+      // (datos del ejercicio: nombre, grupo muscular). JSON_ARRAYAGG agrupa
+      // todos los ejercicios de cada rutina en un solo array JSON preservando
+      // el orden de los días (ORDER BY r.dia_numero).
       const [rutinas] = await pool.query(`
         SELECT r.*,
           JSON_ARRAYAGG(
@@ -263,7 +326,10 @@ const AfiliadoModel = {
         GROUP BY r.id_rutina
         ORDER BY r.dia_numero
       `, [ciclo.id_ciclo]);
-      // Parsear ejercicios (JSON_ARRAYAGG devuelve string con typeCast)
+      // Parsear ejercicios (JSON_ARRAYAGG devuelve string con typeCast).
+      // El LEFT JOIN puede generar entradas con id_ejercicio null si una
+      // rutina no tiene ejercicios cargados (se filtran). Se ordena por
+      // `orden` porque es el orden real de ejecución dentro del entrenamiento.
       rutinas.forEach(r => {
         if (typeof r.ejercicios === 'string') {
           r.ejercicios = JSON.parse(r.ejercicios);
@@ -282,6 +348,10 @@ const AfiliadoModel = {
       'SELECT * FROM PLAN_NUTRICIONAL WHERE id_ciclo = ?', [ciclo.id_ciclo]
     );
     if (pn.length) {
+      // Detalle de alimentos por comida: une DETALLE_NUTRICIONAL con
+      // ALIMENTO y calcula las calorías por 100 g con la fórmula de Atwater
+      // (proteínas*4 + carbohidratos*4 + grasas*9) — la misma referencia que
+      // usa el registro de consumo real para estimar lo ingerido.
       const [detalle] = await pool.query(`
         SELECT dn.num_comida, dn.id_alimento, dn.cantidad_g,
                al.nombre_alimento, al.proteinas, al.carbohidratos, al.grasas,
@@ -291,6 +361,8 @@ const AfiliadoModel = {
         WHERE dn.id_ciclo = ?
         ORDER BY dn.num_comida
       `, [ciclo.id_ciclo]);
+      // Se exponen con alias amigables (calorias_estimadas, num_comidas_diarias)
+      // porque así los espera la app móvil en el resumen del día.
       ciclo.plan_nutricional = {
         ...pn[0],
         calorias_estimadas: pn[0].calorias_objetivo,
@@ -322,6 +394,24 @@ const AfiliadoModel = {
   //          La contraseña es OBLIGATORIA. Si no se provee, se lanza
   //          un error claro que el controller convierte en 400.
   // ─────────────────────────────────────────────────────────
+  /**
+   * Crea un afiliado nuevo en una ÚNICA transacción: inserta la cuenta de
+   * login en USUARIO (rol='Afiliado', estado='Activo') y su perfil en
+   * AFILIADO. La transacción garantiza que si falla el segundo INSERT, el
+   * primero se revierte y no quedan usuarios huérfanos sin perfil.
+   *
+   * REGLA DE NEGOCIO (BUG-008): la contraseña ya no es fija. Si el frontend
+   * no envía una, se genera una temporal derivada del documento
+   * ('MF_{documento}@2025') que el admin debe comunicar al afiliado —
+   * se devuelve en la respuesta para reenviarla por correo de bienvenida.
+   *
+   * @param {Object} datos - Datos del afiliado (nombre, documento, etc.)
+   * @param {number} registrado_por - ID del usuario staff que crea al afiliado
+   * @returns {Promise<{id_usuario: number, password_temporal: string}>} ID del
+   *          afiliado creado y la contraseña efectiva (la que se hasheó).
+   * @throws {Error} Si el INSERT falla (ej. documento duplicado), la
+   *                 transacción hace rollback y se relanza el error.
+   */
   create: async (datos, registrado_por) => {
     const {
       nombres, apellidos, correo, contrasena,
@@ -397,6 +487,18 @@ const AfiliadoModel = {
   // ─────────────────────────────────────────────────────────
   // update — actualiza AFILIADO y campos de USUARIO en transacción
   // ─────────────────────────────────────────────────────────
+  /**
+   * Actualiza parcialmente un afiliado (staff): modifica columnas de AFILIADO
+   * y/o de USUARIO en una sola transacción. Los campos se restringen a dos
+   * whitelists (una por tabla) para impedir la inyección de columnas
+   * arbitrarias en el SET. El mapeo `estado`→`estado_afiliacion` mantiene
+   * compatibilidad con el nombre que usa el frontend.
+   *
+   * @param {number} id - ID del afiliado (PK compartida USUARIO/AFILIADO)
+   * @param {Object} campos - Campos a actualizar (se ignoran los no permitidos)
+   * @returns {Promise<number>} Número de filas afectadas (0 si nada cambió).
+   * @throws {Error} Si algún UPDATE falla, rollback de toda la operación.
+   */
   update: async (id, campos) => {
     // Campos permitidos en la tabla AFILIADO
     const permitidosAfiliado = [
@@ -471,6 +573,20 @@ const AfiliadoModel = {
   //                                        upsert con fecha de hoy).
   //   El IMC NO se almacena: se recalcula en getMeData.
   // ─────────────────────────────────────────────────────────
+  /**
+   * Actualiza el perfil del PROPIO afiliado usando el ID del token JWT
+   * (no puede tocar datos de otro usuario). Además de los campos de
+   * AFILIADO/USUARIO, admite `peso_kg`: se guarda como medición de
+   * PROGRESO_FISICO de hoy con upsert (ON DUPLICATE KEY) en el ciclo activo,
+   * de modo que pesar cada día crea/actualiza el registro diario en vez de
+   * duplicar. El IMC nunca se almacena; se recalcula en getMeData.
+   *
+   * @param {number} id - ID del afiliado autenticado (req.user.sub)
+   * @param {Object} campos - telefono, direccion, estatura_cm, correo y/o peso_kg
+   * @returns {Promise<boolean>} true si se aplicó algún cambio.
+   * @throws {Error} err.code='SIN_CICLO_ACTIVO' si se envía peso sin un ciclo
+   *                 activo; el controller traduce a 400.
+   */
   updateMe: async (id, campos) => {
     const permitidosAfiliado = ['telefono', 'direccion', 'estatura_cm'];
     const permitidosUsuario  = ['correo'];
@@ -501,6 +617,8 @@ const AfiliadoModel = {
       let affected = 0;
 
       if (setsAfiliado.length) {
+        // Sello de auditoría: fecha_ultima_modificacion se auto-actualiza solo
+        // cuando cambian datos de AFILIADO.
         setsAfiliado.push('fecha_ultima_modificacion = NOW()');
         const [r] = await conn.query(
           `UPDATE AFILIADO SET ${setsAfiliado.join(',')} WHERE id_usuario=?`,
@@ -528,6 +646,8 @@ const AfiliadoModel = {
           err.code = 'SIN_CICLO_ACTIVO';
           throw err;
         }
+        // Upsert: si el afiliado ya pesó hoy, se actualiza en vez de insertar
+        // una fila nueva (la PK compuesta es id_ciclo + fecha_registro).
         await conn.query(
           `INSERT INTO PROGRESO_FISICO (id_ciclo, fecha_registro, peso_kg, registrado_por)
            VALUES (?, CURDATE(), ?, ?)
@@ -550,6 +670,15 @@ const AfiliadoModel = {
   // getMeData — datos ligeros del perfil autenticado para
   //             recalcular IMC (peso + estatura) tras updateMe.
   // ─────────────────────────────────────────────────────────
+  /**
+   * Devuelve datos ligeros del afiliado autenticado (teléfono, estatura,
+   * correo, estado y el último peso registrado) para que el controller pueda
+   * recalcular y responder el IMC tras un updateMe — el IMC no se persiste.
+   *
+   * @param {number} id - ID del afiliado
+   * @returns {Promise<Object|null>} Datos del perfil (incluye peso_kg del
+   *                                 último registro del ciclo activo) o null.
+   */
   getMeData: async (id) => {
     const [rows] = await pool.query(`
       SELECT
@@ -576,6 +705,12 @@ const AfiliadoModel = {
   // ─────────────────────────────────────────────────────────
   // getFoto / setFoto — ruta de la foto de perfil (AFILIADO.foto)
   // ─────────────────────────────────────────────────────────
+  /**
+   * Obtiene la ruta/URL de la foto de perfil almacenada en AFILIADO.foto.
+   *
+   * @param {number} id - ID del afiliado
+   * @returns {Promise<string|null>} Ruta de la foto o null si no tiene.
+   */
   getFoto: async (id) => {
     const [rows] = await pool.query(
       'SELECT foto FROM AFILIADO WHERE id_usuario = ?', [id]
@@ -583,6 +718,14 @@ const AfiliadoModel = {
     return rows.length ? rows[0].foto : null;
   },
 
+  /**
+   * Persiste la ruta/URL de la foto de perfil del afiliado.
+   *
+   * @param {number} id - ID del afiliado
+   * @param {string} foto - Ruta relativa (/uploads/...) o URL absoluta
+   *                        (Cloudinary) de la imagen
+   * @returns {Promise<boolean>} true si actualizó al menos una fila.
+   */
   setFoto: async (id, foto) => {
     const [r] = await pool.query(
       'UPDATE AFILIADO SET foto = ? WHERE id_usuario = ?', [foto, id]
@@ -590,6 +733,19 @@ const AfiliadoModel = {
     return r.affectedRows > 0;
   },
 
+  /**
+   * Elimina un afiliado y su cuenta de login en una transacción.
+   * SECUENCIA: primero AFILIADO, luego USUARIO (evita queda de usuario
+   * huérfano). Si el afiliado tiene datos asociados (ciclos, planes,
+   * progreso), las FKs con ON DELETE RESTRICT lanzan ER_ROW_IS_REFERENCED_2,
+   * se hace rollback y el controller responde 400 — el borrado físico solo es
+   * posible para afiliados sin historial.
+   *
+   * @param {number} id - ID del afiliado
+   * @returns {Promise<number>} Número de filas eliminadas (0 si no existía).
+   * @throws {Error} Con código ER_ROW_IS_REFERENCED_2 si el afiliado tiene
+   *                 registros asociados por FK RESTRICT.
+   */
   delete: async (id) => {
     // ⚠️ Transacción: elimina AFILIADO y su USUARIO base.
     // Si el afiliado tiene datos asociados (ciclos, planes, progreso), las FK

@@ -1,4 +1,8 @@
 // routes/authRoutes.js
+// ─── Endpoints públicos de autenticación ────────────────────
+// Montado en '/' por server.js: POST /login, POST /auth/recuperar-password y
+// POST /auth/reset-password. No requieren token (son el punto de entrada al
+// sistema y el flujo de restauración de acceso).
 'use strict';
 
 const express        = require('express');
@@ -7,13 +11,16 @@ const rateLimit      = require('express-rate-limit');
 const AuthController = require('../controllers/authController');
 
 // ── Rate limit para recuperación de contraseña (anti-spam de correos) ─
+// Regla de negocio de seguridad: cada IP solo puede pedir 5 recuperaciones
+// cada 15 min. Sin este límite, un atacante podría disparar miles de correos
+// de spam hacia un inbox o agotar el servicio de email del gimnasio.
 const recuperarLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 5,
+  windowMs: 15 * 60 * 1000,   // ventana de 15 minutos
+  max: 5,                     // máx. 5 solicitudes por IP en la ventana
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Demasiadas solicitudes de recuperación. Intenta en 15 minutos.' },
-  skipSuccessfulRequests: false,
+  skipSuccessfulRequests: false,   // también cuentan las exitosas (no importa si el correo existía)
 });
 
 /** @swagger

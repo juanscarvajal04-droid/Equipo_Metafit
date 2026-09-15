@@ -1,3 +1,22 @@
+// movil/src/screens/MiRutinaScreen.js
+// ─── Tab "Rutina" del afiliado ───────────────────────────────
+// El afiliado ve su plan de entrenamiento del ciclo: cards por día de la
+// semana con ejercicios (series/reps/kg/descanso/instrucciones), puede
+// marcar completado, escribir notas al entrenador y registrar series vía
+// Pantalla RegistroEjercicio. Incluye selector de ciclo si hay varios,
+// filtro del día por grupo muscular (endpoint rutina del día, FASE A.3) y
+// barra flotante "Guardar Progreso".
+//
+// ¿Qué tab le corresponde? Pestaña "Rutina" — 2ª del bottom tab (MainTabs).
+// ¿Qué endpoints /me consume? getMisCiclos(), getPlanEntrenamiento(id_ciclo),
+//   getPlanRutinaDia(ciclo, dia_numero), getProgresoEjercicioHoy(ciclo, hoy),
+//   getMisNotasEjercicio(ciclo); guarda con guardarProgresoEjercicio() y
+//   guardarNotaEjercicio().
+// ¿Qué muestra en cada estado?
+//   • loading: spinner púrpura centrado.
+//   • error: pantalla centrada "No tenés un ciclo asignado." / "Error al
+//     cargar la rutina." (con icono alert-circle).
+//   • vacío: sin días → "No hay ejercicios en tu plan actual."
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
@@ -26,11 +45,41 @@ import {
 import { seleccionarCicloActivo } from '../utils/cicloUtils';
 import { formatearFechaLegible, capitalizar } from '../utils/formateadores';
 
+/** Días de la semana en español (índice 0 = Lunes). */
 const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+/** Alto de una fila de ejercicio (para la altura calculada de la card). */
 const EJERCICIO_ROW_H = 58;
+/** Alto bloqueado de las instrucciones al expandir un ejercicio. */
 const INSTRUCCIONES_H = 96;
+/** Alto de la fila de nota por ejercicio. */
 const NOTA_H = 46;
 
+/**
+ * DiaCard — Card expandible de un día de entrenamiento con su progreso.
+ * Al expandirse muestra cada ejercicio con: checkbox circular (toggle de
+ * completado), series×reps·kg·descanso, instrucciones desplegables, botón de
+ * registrar (añade serie en RegistroEjercicio) e input de nota al entrenador
+ * con botón de envío. La animación usa Animated.timing (250 ms) con altura
+ * calculada a partir de la lista de ejercicios.
+ *
+ * @param {object}     props                        - Props del componente.
+ * @param {string}     props.dia                    - Nombre del día visible.
+ * @param {Array}      props.ejercicios             - Ejercicios de ese día.
+ * @param {object}     props.completados            - {id_ejercicio: bool}.
+ * @param {Function}   props.onToggle               - Marca/desmarca completado.
+ * @param {string|null} props.expandido             - Día actualmente expandido.
+ * @param {Function}   props.setExpandido           - Cambia el día expandido.
+ * @param {string|null} props.detalleEjercicio      - Ejercicio con instrucciones abiertas.
+ * @param {Function}   props.onToggleDetalle        - Abre/cierra instrucciones.
+ * @param {Function}   props.onRegistrar            - Navega a RegistroEjercicio.
+ * @param {string}     [props.grupo]                - Grupo muscular (chip).
+ * @param {object}     props.notas                  - Notas guardadas {id: texto}.
+ * @param {object}     props.notaTextos             - Borradores sin guardar.
+ * @param {Function}   props.setNotaTexto           - Actualiza un borrador.
+ * @param {Function}   props.onGuardarNota          - Envía la nota del ejercicio.
+ * @param {string|null} props.guardandoNota         - Ejercicio en envío (spinner).
+ * @returns {JSX.Element} Card plegable con ejercicios del día.
+ */
 function DiaCard({ dia, ejercicios, completados, onToggle, expandido, setExpandido, detalleEjercicio, onToggleDetalle, onRegistrar, grupo, notas, notaTextos, setNotaTexto, onGuardarNota, guardandoNota }) {
   const completadosCount = ejercicios.filter((e) => completados[e.id_ejercicio]).length;
   const total = ejercicios.length;
@@ -269,6 +318,25 @@ function DiaCard({ dia, ejercicios, completados, onToggle, expandido, setExpandi
   );
 }
 
+/**
+ * MiRutinaScreen — Tab "Rutina" (bottom tab) del afiliado.
+ *
+ * Flujo de datos (todo por ciclo): cargan ciclos del usuario → se toma el
+ * ciclo activo (seleccionarCicloActivo) o el que elija el afiliado → se
+ * obtiene el plan de entrenamiento (getPlanEntrenamiento), el progreso de hoy
+ * (getProgresoEjercicioHoy) y las notas guardadas (getMisNotasEjercicio).
+ * Además carga la rutina del día filtrada por grupo muscular
+ * (getPlanRutinaDia, FASE A.3): si el día no tiene rutina asignada, el
+ * fallback es el plan completo del día.
+ *
+ * Estados:
+ *   • loading: spinner púrpura (fetchData inicial).
+ *   • error: mensaje centrado (sin ciclo / error de carga) que oculta todo.
+ *   • vacío: sin días → "No hay ejercicios en tu plan actual."
+ *   • refresh: RefreshControl púrpura + botón ↻ en el header (actualizando).
+ *
+ * @returns {JSX.Element} Pantalla con header degradado, tabs de días y guardado.
+ */
 export default function MiRutinaScreen() {
   const navigation = useNavigation();
   const [ciclo, setCiclo] = useState(null);
@@ -295,6 +363,15 @@ export default function MiRutinaScreen() {
 
   // Rutina del día filtrada por su grupo muscular (endpoint FASE A.3).
   // Si el endpoint falla (día sin rutina), se cae al plan completo.
+  /**
+   * loadRutinaDia — Carga la rutina del día (grupo muscular asignado por el
+   * entrenador) para un ciclo y número de día. Si el endpoint falla, deja
+   * rutinaDia en null → la pantalla usa el plan completo como fallback.
+   *
+   * @param {number|string} cicloId     - ID del ciclo seleccionado.
+   * @param {number}        diaNumero   - Número de día (1..7).
+   * @returns {Promise<void>}
+   */
   const loadRutinaDia = useCallback(async (cicloId, diaNumero) => {
     setRutinaDia(null);
     if (!cicloId || !diaNumero) return;
@@ -306,6 +383,18 @@ export default function MiRutinaScreen() {
     }
   }, []);
 
+  /**
+   * fetchData — Carga toda la información de la rutina de un ciclo.
+   * 1. Obtiene los ciclos del usuario /me y selecciona el activo (o el dado).
+   * 2. Sin ciclo → error "No tenés un ciclo asignado." y termina.
+   * 3. Plan de entrenamiento: aplana rutinas → ejercicios con id_rutina,
+   *    nombre y día (contrato real del backend: { rutinas: [...] }).
+   * 4. Dispara loadRutinaDia para hoy y carga progreso del día + notas.
+   * Cada sub-fetch secundario (progreso/notas) es defensivo: falla silenciosa.
+   *
+   * @param {object|null} [cicloSeleccionado] - Ciclo forzado (selector/actualizar).
+   * @returns {Promise<void>}
+   */
   const fetchData = useCallback(async (cicloSeleccionado) => {
     try {
       setError(null);
@@ -376,6 +465,10 @@ export default function MiRutinaScreen() {
     fetchData(ciclo).finally(() => setActualizando(false));
   };
 
+  /**
+   * handleCicloChange — Cambia el ciclo activo desde el selector: cierra el
+   * picker, resetea la UI del día (día/expandido/borradores) y re-fetcha.
+   */
   const handleCicloChange = (c) => {
     setShowPicker(false);
     setDiaSeleccionado(null);
@@ -389,6 +482,11 @@ export default function MiRutinaScreen() {
     setNotaTextos((prev) => ({ ...prev, [idEjercicio]: texto }));
   };
 
+  /**
+   * guardarNota — Guarda la nota del ejercicio (guardarNotaEjercicio).
+   * Valida texto no vacío, muestra spinner por ejercicio (guardandoNota),
+   * actualiza el mapa de notas y avisa con Alert al éxito/error.
+   */
   const guardarNota = async (ej) => {
     if (!ciclo) return;
     const texto = (notaTextos[ej.id_ejercicio] ?? '').trim();
@@ -417,6 +515,10 @@ export default function MiRutinaScreen() {
     setDetalleEjercicio((prev) => (prev === id ? null : id));
   };
 
+  /**
+   * openRegistro — Navega a RegistroEjercicio (stack sobre las tabs) con el
+   * contexto del ejercicio: ciclo, rutina, orden y nombre. El "+" de la card.
+   */
   const openRegistro = (ej) => {
     navigation.getParent()?.navigate('RegistroEjercicio', {
       id_ciclo: ciclo?.id_ciclo,
@@ -435,6 +537,11 @@ export default function MiRutinaScreen() {
     if (ciclo?.id_ciclo && diaNumero) loadRutinaDia(ciclo.id_ciclo, diaNumero);
   };
 
+  /**
+   * handleSave — Persiste el progreso del día completo (guardarProgresoEjercicio)
+   * con el mapa de completados actual (solo id_ejercicio + booleano). Spinner en
+   * el botón flotante (saving) y confirmación/error con Alert.
+   */
   const handleSave = async () => {
     if (!ciclo) return;
     setSaving(true);
@@ -453,6 +560,12 @@ export default function MiRutinaScreen() {
     }
   };
 
+  /**
+   * getDiasData — Agrupa los ejercicios del plan por día y los ordena por
+   * día_numero (los sin número van al final).
+   *
+   * @returns {Array<[string, Array]>} Entradas [nombreDia, ejercicios].
+   */
   const getDiasData = () => {
     const days = {};
     ejercicios.forEach((ej) => {

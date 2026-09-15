@@ -1,3 +1,9 @@
+// frontend_web/src/components/ProtectedRoute.jsx
+// ─── Guarda de rutas con RBAC (componente de layout de ruta) ──
+// Envuelve rutas privadas en el Router: espera a que el auth esté resuelto,
+// valida token + usuario y comprueba que el rol esté en allowedRoles antes de
+// renderizar <Outlet/>. Sin API calls: decisión 100% en cliente sobre el
+// estado del AuthContext + fallback a localStorage.
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 

@@ -1,3 +1,12 @@
+// frontend_web/src/components/Sidebar.jsx
+// ─── Sidebar de navegación lateral (todos los roles autenticados) ──
+// Layout fijo a la izquierda: logo, perfil del usuario (avatar + badge de rol),
+// menú principal según el RBAC del rol (NAV_OPERATIVO), sección exclusiva de
+// Administrador (Gestión de Personal + Restricciones) y botón de cerrar sesión.
+//
+// Qué rol lo usa: los tres (Administrador, Recepcionista, Entrenador); los
+// enlaces visibles cambian según `user.role`.
+// Sin API calls: solo consume el estado de autenticación (useAuth) y navega.
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import styles from "./Sidebar.module.css";
@@ -28,40 +37,70 @@ const NAV_OPERATIVO = {
   ],
 };
 
-// Link exclusivo del Administrador
+/** Links exclusivos del Administrador (sección "Administración" de la barra). */
 const NAV_ADMIN_EXCLUSIVO = [
   { to: "/personal", icon: "🛡️", label: "Gestión de Personal" },
   { to: "/admin/restricciones", icon: "🚫", label: "Restricciones" },
 ];
 
-/** Paleta de colores por rol — permanecen inline por ser dinámicos */
+/** Paleta de colores por rol — permanecen inline por ser dinámicos
+ *  (gradiente del avatar y de las badges). Equivale al ROLE_COLOR del Header
+ *  y a los colores del theme web. */
 const ROLE_GRADIENT = {
   Administrador: "linear-gradient(135deg,#e31c25,#b71c1c)",
   Recepcionista: "linear-gradient(135deg,#2563eb,#0891b2)",
   Entrenador:    "linear-gradient(135deg,#059669,#0d9488)",
 };
 
+/** Icono del badge del rol en el perfil de la sidebar. */
 const ROLE_ICON = {
   Administrador: "👑",
   Recepcionista: "🗂️",
   Entrenador:    "🏆",
 };
 
+/** Etiqueta legible del rol para el badge. */
 const ROLE_LABEL = {
   Administrador: "Administrador",
   Recepcionista: "Recepcionista",
   Entrenador:    "Entrenador",
 };
 
+/**
+ * Sidebar — Barra lateral de navegación dentro de AppLayout.
+ *
+ * Renderiza el logo, el perfil del usuario (email + avatar con gradiente del
+ * rol + badge con icono/label del rol), los enlaces de navegación según
+ * `NAV_OPERATIVO[role]`, la subsección de administración solo para Admin y el
+ * botón "Cerrar sesión".
+ *
+ * Estado que maneja: ninguno propio; deriva rol, links, gradiente e isAdmin
+ * desde `user` del AuthContext en cada render.
+ *
+ * API calls: ninguna directa (logout() del contexto no toca la API; solo
+ * limpia token/user en memoria + localStorage y regresa a "/").
+ *
+ * @param {Object} _props - Sin props externas (usa el contexto).
+ * @returns {JSX.Element} <aside> con la navegación del rol.
+ */
 export default function Sidebar() {
   const { user, logout } = useAuth();
   const navigate         = useNavigate();
 
+  /** Rol del usuario logueado; fallback "Recepcionista" (mínimo privilegio). */
   const role     = user?.role || "Recepcionista";
+  /** Enlaces del rol actual según la config RBAC. */
   const links    = NAV_OPERATIVO[role] || [];
+  /** Gradiente del rol para el avatar (fallback color brand si no mapea). */
   const gradient = ROLE_GRADIENT[role] || "#e31c25";
+  /** Solo el Administrador ve la sección de administración. */
   const isAdmin  = role === "Administrador";
 
+  /**
+   * Cierra la sesión y navega a la raíz. logout() limpia el estado del contexto
+   * y localStorage (metafit_token/user/role); la navegación a "/" lleva al
+   * Login (el registro de "/" → Login). No requiere llamada API.
+   */
   const handleLogout = () => { logout(); navigate("/"); };
 
   return (

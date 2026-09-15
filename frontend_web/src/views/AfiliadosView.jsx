@@ -1,3 +1,13 @@
+// frontend_web/src/views/AfiliadosView.jsx
+// ─── Vista Afiliados (web staff) ─────────────────────────────
+// Tabla de afiliados con búsqueda + 3 modales: ver detalle (con pestañas por
+// rol), editar (con foto) y crear nuevo (con restricciones del catálogo).
+//
+// Qué rol lo usa: Admin (gestión completa), Recepcionista (registro/consulta)
+// y Entrenador (seguimiento). Las pestañas del detalle (TABS_POR_ROL) y los
+// permisos de restricciones se derivan del rol del token.
+// API calls (vía authAxios): GET/POST/PATCH/DELETE /afiliados[/:id] y
+// sub-endpoints (**/foto**, **/restricciones**, **/progreso**).
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -9,17 +19,20 @@ import { API_BASE_URL } from "../services/api";
 import RestriccionSelector from "../components/common/RestriccionSelector";
 import s from "./AfiliadosView.module.css";
 
+// Opciones de los formularios (selects de crear/editar).
 const ESTADOS = ["Activo", "Inactivo", "Suspendido"];
 const NIVELES = ["Principiante", "Intermedio", "Avanzado"];
 const OBJETIVOS = ["Pérdida de grasa", "Aumento de masa", "Mantenimiento"];
 const SEXOS = ["Masculino", "Femenino", "Otro"];
 
+// Qué pestañas ve cada rol dentro del modal de detalle del afiliado.
 const TABS_POR_ROL = {
   Administrador: ["Estado de Cuenta", "Progreso Físico", "Ciclo Activo"],
   Recepcionista: ["Estado de Cuenta"],
   Entrenador: ["Progreso Físico", "Ciclo Activo"],
 };
 
+// Valores por defecto tanto del formulario de crear como del de editar.
 const FORM_VACIO = {
   nombres: "",
   apellidos: "",
@@ -38,6 +51,7 @@ const FORM_VACIO = {
   restricciones_medicas: "",
 };
 
+/** Badge de estado del afiliado (Activo/Inactivo/Suspendido) con estilo por clase CSS. Solo UI. */
 const badgeEstado = (estado) => {
   const cls =
     estado === "Activo"
@@ -50,17 +64,38 @@ const badgeEstado = (estado) => {
   return <span className={cls}>{estado}</span>;
 };
 
+/** Hash de string → color HSL determinístico para los avatares por inicial. */
 const avatarColor = (nombre) => {
   let hash = 0;
   for (let i = 0; i < nombre.length; i++) hash = nombre.charCodeAt(i) + ((hash << 5) - hash);
   return `hsl(${Math.abs(hash) % 360}, 65%, 55%)`;
 };
 
+/**
+ * Normaliza la URL de la foto. El backend guarda rutas relativas bajo /uploads;
+ * si la foto ya es una URL absoluta (http...) se devuelve tal cual.
+ * @param {string} foto - Ruta de foto (relativa o absoluta) o null.
+ * @returns {string|null} URL lista para usar en <img>, o null si no hay foto.
+ */
 const fotoUrl = (foto) => {
   if (!foto || typeof foto !== "string") return null;
   return foto.startsWith("http") ? foto : `${API_BASE_URL}${foto}`;
 };
 
+/**
+ * AvatarFoto — Muestra la foto del afiliado en un círculo; si no hay foto,
+ * renderiza un avatar con la inicial sobre un color hash. Si la imagen falla al
+ * cargar (onError) se oculta y queda el fallback... en este caso el <img> se
+ * esconde y se muestra la inicial porque al fallar no hay <div> detrás; el
+ * `display:none` del onError basta para no romper el layout de la tabla.
+ *
+ * @param {object} props
+ * @param {string} props.nombre - Nombre completo para la inicial y el alt.
+ * @param {string|null} props.foto - URL o ruta de foto.
+ * @param {number} [props.size=32] - Tamaño en px.
+ * @param {object} [props.style] - Estilos que se propagan al elemento.
+ * @returns {JSX.Element} <img> circular o <div> con la inicial.
+ */
 const AvatarFoto = ({ nombre, foto, size = 32, style }) => {
   const safeNombre = nombre || "";
   const url = fotoUrl(foto);
@@ -82,11 +117,38 @@ const AvatarFoto = ({ nombre, foto, size = 32, style }) => {
   );
 };
 
+/**
+ * AfiliadosView — Vista principal de gestión de afiliados.
+ *
+ * Renderiza: tabla de afiliados (con avatar, objetivos, estado, acciones por
+ * rol y búsqueda por nombre/correo/documento) y los modales de detalle,
+ * edición y alta de afiliados.
+ *
+ * Estado que maneja: lista de afiliados, loading, búsqueda, saving, foto a
+ * subir (fotoFile/fotoPreview), el afiliado en detalle/edición, la apertura del
+ * modal de crear, la pestaña activa del detalle, los formularios de crear/
+ * editar y las restricciones seleccionadas durante el registro.
+ *
+ * API calls (vía authAxios):
+ *   · fetchAfiliados        → GET /afiliados
+ *   · abrirDetalle          → GET /afiliados/:id
+ *   · guardarEdicion        → PATCH /afiliados/:id (+ POST /foto si cambió)
+ *   · handleCrear           → POST /afiliados (+ POST /foto, + POST restricciones)
+ *   · handleEliminar        → DELETE /afiliados/:id
+ *
+ * Integración extra: dispara el evento window "afiliado-modificado" tras
+ * crear/editar/eliminar para que el AdminDashboard se refresque en vivo, y
+ * registra eventos de analytics (trackEvent) en las acciones clave.
+ *
+ * @param {Object} _props - Componente de ruta sin props externas.
+ * @returns {JSX.Element} Layout de la app con la vista de afiliados.
+ */
 export default function AfiliadosView() {
   const { user, authAxios } = useAuth();
   const navigate = useNavigate();
   const { toast, showToast } = useToast();
 
+  // ── Estado de la lista, búsqueda y operaciones en curso ──
   const [afiliados, setAfiliados] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -94,18 +156,26 @@ export default function AfiliadosView() {
   const [fotoFile, setFotoFile] = useState(null);
   const [fotoPreview, setFotoPreview] = useState(null);
 
+  // ── Estado de los modales ──
   const [detalleAfiliado, setDetalleAfiliado] = useState(null);
   const [editandoAfiliado, setEditandoAfiliado] = useState(null);
   const [creandoAbierto, setCreandoAbierto] = useState(false);
 
+  // ── Estado de los formularios ──
   const [tabActivo, setTabActivo] = useState(0);
   const [formEdit, setFormEdit] = useState(FORM_VACIO);
   const [formCrear, setFormCrear] = useState(FORM_VACIO);
   const [restriccionesSeleccionadas, setRestriccionesSeleccionadas] = useState([]);
 
+  // Los permisos y pestañas se derivan del rol del token (con fallback a
+  // Recepcionista por si el rol llega vacío).
   const role = user?.role || "Recepcionista";
   const tabsDisponibles = TABS_POR_ROL[role] || TABS_POR_ROL.Recepcionista;
 
+  /**
+   * Carga la lista de afiliados desde el backend. Errores se loguean y se
+   * deja la lista vacía (la vista no se rompe); siempre limpia loading.
+   */
   const fetchAfiliados = async () => {
     setLoading(true);
     try {
@@ -119,10 +189,18 @@ export default function AfiliadosView() {
     }
   };
 
+  /** Al montar la vista, carga la lista de afiliados una sola vez. Las
+   *  actualizaciones posteriores se hacen manualmente tras cada mutación. */
   useEffect(() => {
     fetchAfiliados();
   }, []);
 
+  /**
+   * Cleanup de la URL del objeto (blob:) usada como preview de foto. En React,
+   * si no se revoca, el blob queda en memoria del navegador (memory leak por
+   * cada foto seleccionada). Se ejecuta cuando cambia fotoPreview (nueva foto)
+   * y al desmontar.
+   */
   useEffect(() => {
     return () => {
       if (fotoPreview && fotoPreview.startsWith("blob:")) {
@@ -131,6 +209,7 @@ export default function AfiliadosView() {
     };
   }, [fotoPreview]);
 
+  /** Filtra afiliados por nombre, correo o documento según el texto buscado. */
   const afiliadosFiltrados = afiliados.filter((a) => {
     if (!search) return true;
     const q = search.toLowerCase();
@@ -140,6 +219,12 @@ export default function AfiliadosView() {
     return nombre.includes(q) || email.includes(q) || doc.includes(q);
   });
 
+  /**
+   * Abre el modal de detalle: GET /afiliados/:id y guarda la ficha completa en
+   * detalleAfiliado, reseteando la pestaña activa a la primera. Con errores
+   * muestra toast de danger.
+   * @param {object} a - Fila de la tabla (ficha parcial).
+   */
   const abrirDetalle = async (a) => {
     try {
       const id = getId(a);
@@ -156,6 +241,11 @@ export default function AfiliadosView() {
     }
   };
 
+  /**
+   * Prepara el modal de edición: vuelca los datos de la fila al formulario
+   * (formEdit), normalizando fechas ISO → YYYY-MM-DD para el <input type="date">.
+   * @param {object} a - Afiliado a editar.
+   */
   const abrirEdicion = (a) => {
     setEditandoAfiliado(a);
     setFotoFile(null);
@@ -179,12 +269,28 @@ export default function AfiliadosView() {
     });
   };
 
+  /**
+   * Sube la foto de un afiliado (multipart). El backend la guarda bajo /uploads
+   * y devuelve la ruta que pasa a ser la nueva `foto` en futuras lecturas.
+   * @param {number} id - ID del afiliado.
+   * @param {File} file - Archivo de imagen seleccionado.
+   */
   const subirFoto = async (id, file) => {
     const fd = new FormData();
     fd.append("foto", file);
     await authAxios.post(`/afiliados/${id}/foto`, fd);
   };
 
+  /**
+   * Guarda los cambios de edición.
+   * Flujo completo: 1) previene el submit nativo y bloquea doble envío con
+   * saving; 2) PATCH /afiliados/:id con formEdit; 3) si hay foto nueva, la
+   * sube aparte (un fallo de foto no revierte el PATCH — se loguea y sigue);
+   * 4) toast de éxito, cierra el modal, limpia foto, refresca la lista y
+   * emite "afiliado-modificado" para el dashboard; 5) catch → toast con el
+   * error del backend; finally → libera saving.
+   * @param {Event} e - Evento submit del form.
+   */
   const guardarEdicion = async (e) => {
     e.preventDefault();
     if (saving) return;
@@ -218,6 +324,18 @@ export default function AfiliadosView() {
     }
   };
 
+  /**
+   * Crea un afiliado nuevo.
+   * Flujo completo: 1) previene submit y bloquea doble envío; 2) arma el
+   * payload normalizando tipos (estatura_cm a float, disponibilidad a int) y
+   * renombra estado → estado_afiliacion (campo del schema backend); 3)
+   * POST /afiliados; 4) si hay foto, la sube con el id recién creado; 5) si
+   * hay restricciones seleccionadas en el registro, las asigna una a una con
+   * POST /afiliados/:id/restricciones (patrón crear → asignar); 6) toast +
+   * trackEvent de analytics + cierra y limpia el formulario + refresca la
+   * lista + emite "afiliado-modificado".
+   * @param {Event} e - Evento submit del form.
+   */
   const handleCrear = async (e) => {
     e.preventDefault();
     if (saving) return;
@@ -265,6 +383,15 @@ export default function AfiliadosView() {
     }
   };
 
+  /**
+   * Elimina un afiliado.
+   * Flujo completo: 1) confirmación del navegador (window.confirm) — sin
+   * confirmación no se hace nada; 2) DELETE /afiliados/:id (solo Admin); 3)
+   * toast de éxito + refresco de la lista + evento "afiliado-modificado" para
+   * el dashboard; 4) catch → toast con el error del backend (incluye el 400
+   * de FK constraint activo, p. ej. afiliado con pagos/ciclos).
+   * @param {object} a - Afiliado a eliminar.
+   */
   const handleEliminar = async (a) => {
     const nombre = nombreCompleto(a);
     if (!window.confirm(`¿Eliminar a ${nombre}?`)) return;
@@ -285,11 +412,18 @@ export default function AfiliadosView() {
     }
   };
 
+  // Solo Admin y Recepcionista pueden dar de alta afiliados en mostrador.
   const puedeCrear = role === "Administrador" || role === "Recepcionista";
 
   // ── Restricciones médicas durante el REGISTRO (estado local) ────────────
   // La Recepcionista selecciona del catálogo al crear el afiliado; las
   // restricciones se asignan en el backend tras crear (POST /afiliados → id).
+  /**
+   * Agrega una restricción a la selección TEMPORAL del registro (solo se
+   * materializa en el backend después de crear el afiliado). Evita duplicados
+   * comparando el id normalizado (id_restriccion ?? id).
+   * @param {object} restriccion - Ítem del catálogo de restricciones.
+   */
   const handleAddRestriccionTemporal = (restriccion) => {
     const rid = restriccion?.id_restriccion ?? restriccion?.id;
     setRestriccionesSeleccionadas((prev) =>
@@ -299,12 +433,14 @@ export default function AfiliadosView() {
     );
   };
 
+  /** Quita una restricción de la selección temporal del registro. */
   const handleRemoveRestriccionTemporal = (restriccionId) => {
     setRestriccionesSeleccionadas((prev) =>
       prev.filter((r) => (r?.id_restriccion ?? r?.id) !== restriccionId)
     );
   };
 
+  /** Abre el modal de nuevo afiliado con formulario y foto limpios. */
   const abrirNuevo = () => {
     setFormCrear(FORM_VACIO);
     setFotoFile(null);
@@ -313,6 +449,7 @@ export default function AfiliadosView() {
     setCreandoAbierto(true);
   };
 
+  /** Cierra el modal de nuevo afiliado (bloqueado mientras guarda). */
   const cerrarNuevo = () => {
     if (saving) return;
     setCreandoAbierto(false);
@@ -326,6 +463,13 @@ export default function AfiliadosView() {
   const puedeEditarRestricciones =
     role === "Administrador" || role === "Entrenador";
 
+  /**
+   * Asigna una restricción al afiliado del detalle.
+   * POST /afiliados/:id/restricciones { id_restriccion } → toast de éxito,
+   * trackEvent de analytics y recarga del detalle SIN cerrar el modal para
+   * refrescar los badges.
+   * @param {number} restriccionId - ID de la restricción del catálogo.
+   */
   const handleAddRestriccion = async (restriccionId) => {
     try {
       const id = getId(detalleAfiliado);
@@ -341,6 +485,12 @@ export default function AfiliadosView() {
     }
   };
 
+  /**
+   * Quita una restricción del afiliado del detalle.
+   * DELETE /afiliados/:id/restricciones/:idRestriccion → toast + trackEvent y
+   * recarga del detalle en fresco.
+   * @param {number} restriccionId - ID de la restricción a quitar.
+   */
   const handleRemoveRestriccion = async (restriccionId) => {
     try {
       const id = getId(detalleAfiliado);
@@ -354,7 +504,10 @@ export default function AfiliadosView() {
     }
   };
 
-  // Recarga el detalle SIN cerrar el modal (refresca los badges tras add/remove)
+  /**
+   * Recarga el detalle SIN cerrar el modal (refresca los badges tras add/remove).
+   * @param {number} id - ID del afiliado en detalle.
+   */
   const abrirDetalleAFresco = async (id) => {
     try {
       const { data } = await authAxios.get(`/afiliados/${id}`);

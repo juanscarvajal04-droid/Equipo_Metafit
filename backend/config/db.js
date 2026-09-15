@@ -1,9 +1,21 @@
 // config/db.js
 // ─── Pool de conexiones MySQL (mysql2/promise) ─────────────────
-// Soporta DATABASE_URL (Railway) o variables DB_* individuales.
-// Refactorizado: elimina fallbacks || que enmascaran variables de entorno
-// no definidas. Si una variable critica falta, el proceso falla con mensaje
-// claro en lugar de conectar con credenciales equivocadas.
+//
+// DECISIÓN DE ARQUITECTURA: se usa un POOL de conexiones en lugar de una
+// conexión única porque Express atiende múltiples requests simultáneos y cada
+// uno necesita su propia conexión a MySQL. mysql2 reutiliza conexiones libres
+// del pool y crea nuevas si la demanda sube, evitando el overhead de abrir una
+// conexión TCP en cada query y los estados muertos de una sola conexión.
+//
+// Soporta dos formas de configuración:
+//   1) DATABASE_URL (estilo Railway/Heroku, p.ej. mysql://user:pass@host:3306/db)
+//   2) Variables DB_* individuales (DB_HOST, DB_PORT, DB_USER, ...)
+// También soporta conexión por socket Unix (DB_SOCKET) para entornos que no
+// exponen MySQL por TCP (por ejemplo Cloud Run con Cloud SQL).
+//
+// DECISIÓN: se eliminan los fallbacks `||` que enmascaraban variables de
+// entorno no definidas. Si una variable crítica falta, el proceso falla con un
+// mensaje claro en lugar de conectarse con credenciales equivocadas o vacías.
 'use strict';
 
 const mysql = require('mysql2/promise');
@@ -44,12 +56,25 @@ if (!process.env.DB_SOCKET && !process.env.DATABASE_URL) {
 
 // ── Creación del pool (soporta socket Unix) ────────────────────
 const poolConfig = {
+  // waitForConnections: si el límite se alcanzó, las queries esperan en cola
+  // en lugar de fallar, lo que mantiene la API disponible bajo picos de carga.
   waitForConnections: true,
+  // connectionLimit: 10 es suficiente para este volumen de tráfico; un número
+  // demasiado alto saturaría MySQL con conexiones idle (cada una consume
+  // memoria del servidor de BD).
   connectionLimit   : 10,
+  // queueLimit: 0 = cola ilimitada. No rechazamos queries por saturación
+  // momentánea; preferimos encolarlas brevemente antes que responder 500.
   queueLimit        : 0,
   authPlugins       : undefined,
+  // keepAlive evita que MySQL cierre conexiones inactivas del pool cuando hay
+  // quiet periods, lo que causaba "Connection lost: server closed the connection".
   enableKeepAlive   : true,
   keepAliveInitialDelay: 10000,
+  // typeCast para columnas JSON: mysql2 devuelve por defecto un string JSON.
+  // Mantenerlo como string (en lugar de objeto) evita que los clientes reciban
+  // dobles serializaciones y permite que el tipo original se decida en la capa
+  // que consume el dato (service/controller).
   typeCast: function (field, next) {
     if (field.type === 'JSON') {
       const val = field.string('utf8');
@@ -71,6 +96,9 @@ poolConfig.password = DB_PASSWORD;
 poolConfig.database = DB_NAME;
 
 if (DB_SSL === 'true' || DB_SSL === '1') {
+  // rejectUnauthorized: false se usa porque los CA públicos de Railway/RDS no
+  // siempre están en la tienda de certificados del runtime; así se encripta el
+  // tráfico sin romper el handshake TLS.
   poolConfig.ssl = { rejectUnauthorized: false };
   console.log('[db.js] SSL habilitado para la conexión MySQL (rejectUnauthorized: false)');
 }
@@ -78,7 +106,10 @@ if (DB_SSL === 'true' || DB_SSL === '1') {
 const pool = mysql.createPool(poolConfig);
 
 // ── Prueba de conexión al iniciar ─────────────────────────────
-// Falla rápido y explícito si la BD no está disponible
+// Falla rápido y explícito si la BD no está disponible.
+// DECISIÓN: el servidor NO aborta si la BD está caída (el log lo reporta);
+// así la app puede arrancar en entornos de despliegue donde MySQL tarda en
+// estar listo y /health reporta estado "degraded" hasta que reconecte.
 pool.getConnection()
   .then(conn => {
     const loc = process.env.DB_SOCKET ? `socket: ${process.env.DB_SOCKET}` : `host: ${DB_HOST}`;
@@ -90,4 +121,6 @@ pool.getConnection()
     console.error('[db.js] El servidor iniciará sin BD. Corregí DATABASE_URL o las variables DB_* para la conexión.');
   });
 
+// Pool de conexiones compartido: todos los modelos (usuarioModel, afiliadoModel, …)
+// lo importan y ejecutan sus queries sobre pool.query(…) o pool.getConnection().
 module.exports = pool;

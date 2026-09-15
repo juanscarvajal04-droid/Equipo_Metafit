@@ -1,4 +1,12 @@
-// routes/usuarioRoutes.js
+// backend/routes/usuarioRoutes.js
+// ─── Gestión del personal (Usuarios) ─────────────────────────
+// Router montado en '/usuarios' (ver server.js). Es la sección "Personal" de
+// la web: CRUD de Admins/Recepcionistas/Entrenadores. TODAS las rutas exigen
+// requireAuth + requireAdmin, salvo PUT /me/push-token que cualquier usuario
+// autenticado usa para registrar su token de notificaciones push.
+// REGLA DE ORDENAMIENTO: las rutas fijas (/recepcionistas, /me/push-token)
+// se declaran ANTES de las paramétricas (/:id), o Express interpretaría
+// "recepcionistas" como un :id. Los @swagger de cada endpoint documentan body.
 'use strict';
 
 const express            = require('express');

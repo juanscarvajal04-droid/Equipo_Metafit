@@ -1,3 +1,19 @@
+// movil/src/screens/MiProgresoScreen.js
+// ─── Tab "Progreso" del afiliado ─────────────────────────────
+// Tablero de evolución: stats (peso actual, cambio vs anterior, nº de
+// registros), volumen total y kcal (de los registros REALES), gráficos de
+// peso/volumen/cumplimiento, último registro + historial (hasta 5 o "ver
+// completo"), y secciones de ejercicios completados, consumo de agua,
+// consumo de alimentos y registros de ejercicios/consumos (últimos 10 c/u).
+//
+// ¿Qué tab le corresponde? Pestaña "Progreso" — 4ª del bottom tab (MainTabs).
+// ¿Qué endpoints /me consume? getMiProgreso(), getAguaHistorial(),
+//   getConsumoHistorial(), getProgresoEjercicioHistorial() + los "reales" de
+//   registroService (getHistorialEjerciciosReales/getHistorialConsumosReales).
+// ¿Qué muestra en cada estado?
+//   • loading: spinner púrpura centrado.
+//   • error: "Error al cargar el progreso." con icono alert-circle.
+//   • vacío: sin fichas → "Aún no hay registros de progreso."
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
@@ -21,6 +37,17 @@ import GraficoCumplimiento from '../components/graficos/GraficoCumplimiento';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
+/**
+ * ProgressStatCard — Card de estadística resumida (icono + label + valor).
+ * El fondo del icono usa el color al 20% (`${color}20` = rgba hex + alpha).
+ *
+ * @param {object}  props          - Props del componente.
+ * @param {string}  props.icon     - Icono Ionicons.
+ * @param {string}  props.label    - Texto debajo del valor.
+ * @param {string}  props.value    - Valor principal (bold).
+ * @param {string}  props.color    - Color del tema (purpleLight/check/warning...).
+ * @returns {JSX.Element} Card con estadística.
+ */
 function ProgressStatCard({ icon, label, value, color }) {
   return (
     <View style={{
@@ -51,6 +78,16 @@ function ProgressStatCard({ icon, label, value, color }) {
   );
 }
 
+/**
+ * ProgresoItem — Fila de una ficha de progreso físico (peso/IMC/grasa/musculo/
+ * cintura). La última se resalta: card degradada púrpura + chip "ÚLTIMO".
+ * Normaliza nombres de campos distintos según vengan del backend.
+ *
+ * @param {object}  props           - Props del componente.
+ * @param {object}  props.item      - Ficha de progreso.
+ * @param {boolean} [props.isLatest=false] - Si es la ficha más reciente.
+ * @returns {JSX.Element} Card del registro (o resaltada si es la última).
+ */
 function ProgresoItem({ item, isLatest }) {
   const fecha = formatearFechaLegible(item.fecha || item.created_at);
   const peso = item.peso ?? '-';
@@ -147,6 +184,25 @@ function ProgresoItem({ item, isLatest }) {
   );
 }
 
+/**
+ * MiProgresoScreen — Tab "Progreso" (bottom tab) del afiliado.
+ *
+ * Carga 6 fuentes con Promise.allSettled (ninguna falla rompe el resto):
+ * fichas de progreso físico (/me/progreso), historial de agua y consumo
+ * (/me/historial-*), progreso de ejercicios por día, y registros REALES de
+ * ejercicios y consumos (registroService). Las métricas de volumen/kg y kcal
+ * derivan de los registros reales; el cumplimiento de días de graficos.
+ *
+ * Estados:
+ *   • loading: spinner púrpura.
+ *   • error: "Error al cargar el progreso." (icono alert-circle).
+ *   • vacío: sin fichas → "Aún no hay registros de progreso.".
+ *   • refresh: RefreshControl púrpura.
+ *   • historial: muestra hasta 5 fichas y botón "Ver historial completo"
+ *     (hasMore) alterna mostrar todo (showAll).
+ *
+ * @returns {JSX.Element} Tablero con stats, gráficos e historial.
+ */
 export default function MiProgresoScreen() {
   const [progreso, setProgreso] = useState([]);
   const [aguaHistorial, setAguaHistorial] = useState([]);
@@ -159,6 +215,13 @@ export default function MiProgresoScreen() {
   const [showAll, setShowAll] = useState(false);
   const [error, setError] = useState(null);
 
+  /**
+   * fetchData — Carga en paralelo las 6 fuentes del tablero con Promise.allSettled:
+   * progreso físico, agua, consumo, ejercicios del día y registros reales
+   * (ejercicios + consumos). Cada fuente se vacía por separado si su promise
+   * rechaza (estado 'rejected') → secciones ocultas sin romper la pantalla.
+   * Solo un fallo total cae en el error general "Error al cargar el progreso.".
+   */
   const fetchData = useCallback(async () => {
     try {
       setError(null);

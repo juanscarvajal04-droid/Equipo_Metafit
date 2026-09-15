@@ -1,3 +1,13 @@
+// movil/src/screens/LandingScreen.js
+// ─── Landing pública (stack PRE-login) ───────────────────────
+// Pantalla de bienvenida: hero con CTA "Ingresar al Sistema", KPIs de la sede,
+// funciones del sistema, "cómo funciona" en 3 pasos, sección de la sede y CTA
+// final + footer. Tiene navegación SOLO a Login (navigation.navigate('Login')).
+//
+// ¿Qué tab le corresponde? Ninguna: NO está en el bottom tab; se muestra solo
+// cuando N0 hay token (stack público en AppNavigator).
+// ¿Qué endpoint /me consume? Ninguno — el contenido es 100% estático
+// (KPIS/FEATURES/STEPS/SEDE_STATS); por eso no tiene estados loading/vacio/error.
 import React from 'react';
 import {
   View,
@@ -11,6 +21,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, GRADIENTS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../theme';
 
+/** KPIs de la sede mostrados en la landing (datos estáticos de marketing). */
 const KPIS = [
   { valor: '1,200+', label: 'Afiliados activos',        icono: '👥' },
   { valor: '500+',   label: 'Planes nutricionales',      icono: '🥗' },
@@ -18,6 +29,10 @@ const KPIS = [
   { valor: '98%',    label: 'Satisfacción',              icono: '⭐' },
 ];
 
+/**
+ * Funciones destacadas del sistema. Cada una usa un gradiente distinto
+ * (rojo/verde/azul/púrpura) para diferenciar visualmente los módulos.
+ */
 const FEATURES = [
   {
     icon: '🏋️',
@@ -45,18 +60,35 @@ const FEATURES = [
   },
 ];
 
+/** Pasos de incorporación: cómo un usuario pasa de la sede a la app. */
 const STEPS = [
   { num: '1', icon: '📍', text: 'Visitanos en Sport Gym Sede 80',         sub: 'Conocé nuestras instalaciones de élite' },
   { num: '2', icon: '👩‍💼', text: 'La recepcionista crea tu perfil',        sub: 'Te registramos en el sistema' },
   { num: '3', icon: '📱', text: 'Accedé a tu plan desde cualquier lugar', sub: 'Seguí tu entrenamiento y dieta en la app' },
 ];
 
+/** Datos estáticos de la sede (área, horario y ubicación). */
 const SEDE_STATS = [
   { valor: '3,500 m²',    label: 'Área total' },
   { valor: '6 AM – 10 PM', label: 'Horario' },
   { valor: 'Cra 80 c/68',  label: 'Ubicación' },
 ];
 
+/**
+ * LandingScreen — Pantalla de bienvenida del stack público (sin sesión).
+ *
+ * Renderiza el scroll completo: hero con CTA de login, grid de KPIs, cards de
+ * funciones (con gradiente por módulo), pasos de "cómo funciona", sección de
+ * la sede con estadísticas, CTA "¿Ya sos miembro?" y footer con contacto.
+ *
+ * Estado que maneja: ninguno (contenido estático).
+ * API calls: ninguna (no consume /me ni ningún endpoint).
+ * Navegación: 'Login' (dos CTAs idénticos en hero y final).
+ *
+ * @param {object}   props          - Props de pantalla del stack.
+ * @param {object}   props.navigation - Objeto de navegación (para ir a Login).
+ * @returns {JSX.Element} ScrollView con toda la landing.
+ */
 export default function LandingScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.safeArea}>

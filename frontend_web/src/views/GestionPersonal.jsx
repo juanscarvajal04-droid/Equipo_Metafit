@@ -1,3 +1,14 @@
+// frontend_web/src/views/GestionPersonal.jsx
+// ─── Vista Gestión de Personal (rol Administrador) ───────────
+// Tabla del personal (Admins/Recepcionistas/Entrenadores) con búsqueda y dos
+// modales: crear/editar empleado (ModalPersonal) y confirmación de borrado.
+//
+// Qué rol lo usa: SOLO Administrador (todos los endpoints exigen requireAdmin).
+// API calls (vía authAxios): GET /usuarios, POST /usuarios, PATCH /usuarios/:id,
+// DELETE /usuarios/:id.
+//
+// Detalle de seguridad: el botón eliminar se deshabilita para la propia cuenta
+// (currentUserId) y el backend lo vuelve a validar (auto-eliminación → 400).
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
@@ -6,9 +17,12 @@ import { useToast } from "../hooks/useToast";
 import s from "./GestionPersonal.module.css";
 
 // ─── Constants ───────────────────────────────────────────────
+/** Opciones de los selects del formulario (rol y estado de alta). */
 const ROLES = ["Admin", "Recepcionista", "Entrenador"];
 const ESTADOS = ["Activo", "Inactivo", "Pendiente"];
 
+// El backend puede devolver rol/estado en minúsculas (o con variantes); estos
+// mapas normalizan el valor a la etiqueta canónica para los badges y selects.
 const ROL_MAP = {
   admin: "Admin",
   recepcionista: "Recepcionista",
@@ -21,6 +35,7 @@ const ESTADO_MAP = {
   pendiente: "Pendiente",
 };
 
+/** Badge de rol con color por clase CSS. Solo presentación. */
 function badgeRol(rol) {
   const key = (rol || "").toLowerCase();
   const cls = key === "admin" ? s.badgeAdmin
@@ -30,6 +45,7 @@ function badgeRol(rol) {
   return <span className={cls}>{ROL_MAP[key] || rol || "—"}</span>;
 }
 
+/** Badge de estado del empleado. Solo presentación. */
 function badgeEstado(estado) {
   const key = (estado || "").toLowerCase();
   const cls = key === "activo" ? s.badgeActivo
@@ -39,6 +55,8 @@ function badgeEstado(estado) {
   return <span className={cls}>{ESTADO_MAP[key] || estado || "—"}</span>;
 }
 
+/** Formulario vacío para los modales de crear/editar (se clona al abrirlos,
+ *  por eso se usa spread { ...INITIAL_FORM } y no la referencia directa). */
 const INITIAL_FORM = {
   nombres: "",
   apellidos: "",
@@ -48,6 +66,25 @@ const INITIAL_FORM = {
   estado: "Activo",
 };
 
+/**
+ * GestionPersonal — Vista de administración del personal del gimnasio.
+ *
+ * Renderiza: header con botón "Nuevo empleado", buscador, tabla de empleados
+ * (con badges de rol/estado y acciones por fila) y los modales de alta/edición
+ * y de confirmación de borrado.
+ *
+ * Estado que maneja: lista de personal, loading/error, búsqueda, tipo de modal
+ * abierto (create/edit), empleado en edición, formulario, saving y el objetivo
+ * de borrado (deleteTarget).
+ *
+ * API calls (vía authAxios): fetchPersonal (GET /usuarios), handleCrear
+ * (POST /usuarios), handleEditar (PATCH /usuarios/:id), handleDelete
+ * (DELETE /usuarios/:id). Tras cada mutación emite el evento window
+ * "personal-modificado" para que el AdminDashboard refresque sus KPIs.
+ *
+ * @param {Object} _props - Componente de ruta sin props externas.
+ * @returns {JSX.Element} Layout de la app con la gestión del personal.
+ */
 export default function GestionPersonal() {
   const { user, authAxios } = useAuth();
   const { toast, showToast } = useToast();
@@ -64,6 +101,11 @@ export default function GestionPersonal() {
 
   const [deleteTarget, setDeleteTarget] = useState(null);
 
+  /**
+   * Carga la lista completa del personal. GET /usuarios (Admin). El error del
+   * backend se guarda en `error` para mostrarlo en la vista; siempre se
+   * libera `loading` en finally.
+   */
   const fetchPersonal = async () => {
     setLoading(true);
     setError(null);
@@ -77,16 +119,24 @@ export default function GestionPersonal() {
     }
   };
 
+  /** Al montar la vista carga el personal una sola vez. */
   useEffect(() => {
     fetchPersonal();
   }, []);
 
+  /** Abre el modal en modo "create" con el formulario vacío. */
   const openCreate = () => {
     setFormData({ ...INITIAL_FORM });
     setEditingUser(null);
     setModalType("create");
   };
 
+  /**
+   * Abre el modal en modo "edit" volcando los datos del empleado al
+   * formulario. La contraseña se deja vacía a propósito (dejar vacío =
+   * mantener la actual); el rol/estado se normalizan con sus mapas.
+   * @param {object} emp - Fila de empleado de la tabla.
+   */
   const openEdit = (emp) => {
     setFormData({
       nombres: emp.nombres || "",
@@ -100,6 +150,7 @@ export default function GestionPersonal() {
     setModalType("edit");
   };
 
+  /** Cierra el modal (bloqueado mientras guarda para no perder la operación). */
   const closeModal = () => {
     if (saving) return;
     setModalType(null);
@@ -107,6 +158,15 @@ export default function GestionPersonal() {
     setFormData({ ...INITIAL_FORM });
   };
 
+  /**
+   * Crea un empleado nuevo.
+   * Flujo completo: 1) valida en cliente que correo y contraseña no estén
+   * vacíos (toast de danger si no); 2) POST /usuarios con formData (el backend
+   * hashea la contraseña con bcrypt); 3) toast de éxito, cierra el modal,
+   * refresca la lista y emite "personal-modificado"; 4) catch → toast con el
+   * error del backend (correo duplicado, etc.).
+   * @param {Event} e - Evento submit.
+   */
   const handleCrear = async (e) => {
     e.preventDefault();
     if (!formData.email.trim()) {
@@ -132,6 +192,14 @@ export default function GestionPersonal() {
     }
   };
 
+  /**
+   * Actualiza un empleado.
+   * Flujo completo: 1) valida el correo; 2) arma el payload y ELIMINA el campo
+   * password si quedó vacío (el backend usa `?` solo para campos enviados); 3)
+   * PATCH /usuarios/:id; 4) toast + cierre + refresco + evento
+   * "personal-modificado"; 5) catch → toast con el error del backend.
+   * @param {Event} e - Evento submit.
+   */
   const handleEditar = async (e) => {
     e.preventDefault();
     if (!formData.email.trim()) {
@@ -155,6 +223,12 @@ export default function GestionPersonal() {
     }
   };
 
+  /**
+   * Elimina el empleado objetivo del modal de confirmación.
+   * DELETE /usuarios/:id. El backend bloquea la auto-eliminación (400) y los
+   * empleados con registros asociados (FK). Toast de éxito/error y refresco
+   * + evento "personal-modificado" en caso de éxito.
+   */
   const handleDelete = async () => {
     if (!deleteTarget) return;
     setSaving(true);
@@ -172,9 +246,11 @@ export default function GestionPersonal() {
     }
   };
 
+  /** Concatena nombres+apellidos con fallback. */
   const nombreCompleto = (emp) =>
     [emp.nombres, emp.apellidos].filter(Boolean).join(" ") || "Sin nombre";
 
+  /** Filtra el personal por nombre, correo o rol. */
   const filtrados = personal.filter((p) => {
     const t = searchTerm.toLowerCase();
     return (
@@ -184,6 +260,7 @@ export default function GestionPersonal() {
     );
   });
 
+  // Id del usuario logueado: se usa para deshabilitar el borrado propio.
   const currentUserId = getId(user);
 
   return (
@@ -369,10 +446,32 @@ export default function GestionPersonal() {
 }
 
 // ─── ModalPersonal ────────────────────────────────────────────
+/**
+ * Modal de creación/edición de un empleado. Renderiza el formulario con los
+ * campos nombres, apellidos, correo, contraseña (con toggle mostrar/ocultar),
+ * rol y estado. NO hace llamadas API: es un componente controlado que recibe
+ * formData + setFormData y deleja el submit al padre (handleCrear/handleEditar)
+ * vía la prop `onSubmit`.
+ *
+ * Props controladas desde GestionPersonal (passthrough de estado del padre):
+ * @param {string}  type       - "create" | "edit" (cambia título y validaciones).
+ * @param {object}  formData   - Valor actual del formulario.
+ * @param {Function} setFormData - setter del formulario (handleChange lo usa).
+ * @param {Function} onSubmit  - callback de submit (crear o editar).
+ * @param {Function} onClose   - cierra el modal.
+ * @param {boolean} saving     - deshabilita botones/cierre mientras guarda.
+ * @returns {JSX.Element} Overlay + tarjeta de formulario.
+ */
 function ModalPersonal({ type, formData, setFormData, onSubmit, onClose, saving }) {
+  /** Estado local: visibilidad de la contraseña (toggle 👁️/🙈). */
   const [showPassword, setShowPassword] = useState(false);
   const isEdit = type === "edit";
 
+  /**
+   * Handler genérico de cambios en inputs/selects. Por el atributo `name` del
+   * campo, actualiza solo esa clave de formData preservando el resto.
+   * @param {Event} e - Evento change del input/select.
+   */
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
