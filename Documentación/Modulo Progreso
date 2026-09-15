@@ -1,0 +1,192 @@
+# 📊 MÓDULO DE PROGRESO — METAFIT
+
+> **Propósito:** seguimiento y evolución del avance físico y de actividad del afiliado
+> (peso, medidas, IMC, ejecución de ejercicios, consumo nutricional, agua y resumen diario).
+> **Alcance:** Web (Admin/Entrenador) ↔ API ↔ Base de datos ↔ Móvil (Afiliado).
+> **Fecha:** 2026-09-14 · Basado en el código real del repo.
+
+---
+
+## 1. VISIÓN GENERAL
+
+El módulo de **Progreso** responde a la pregunta **"¿cómo está evolucionando el afiliado?"**.
+Combina dos capas:
+
+1. **Progreso físico registrado por el Entrenador** (peso, % grasa, medidas, IMC) →
+   tabla `PROGRESO_FISICO`.
+2. **Actividad diaria registrada por el Afiliado en el móvil** (ejercicios realizados,
+   consumo de alimentos real, agua, energía/ánimo) → tablas `REGISTRO_EJERCICIO`,
+   `CONSUMO_ALIMENTO_REAL`, `REGISTRO_AGUA`, agregadas en `PROGRESO_DIARIO`.
+
+| Actor | Cómo participa | Dónde |
+|---|---|---|
+| Entrenador / Admin | Registra mediciones físicas y consulta el historial del afiliado | Web (`ProgresoAfiliado.jsx`) |
+| Afiliado | Registra su día y consulta su propia evolución | Móvil (`MiProgresoScreen.js`) |
+| Backend | Expone endpoints, valida, calcula y sincroniza agregados | `progresoRoutes`, `afiliadoRoutes`, `registroService` |
+| BD | Almacena físico, diario, ejecución real y consumo real | 8 tablas + 2 vistas relacionadas |
+
+---
+
+## 2. MODELO DE DATOS
+
+### 2.1 Tablas
+
+| Tabla | Qué guarda | PK / unicidad | Fuente de datos |
+|---|---|---|---|
+| `PROGRESO_FISICO` | Mediciones del entrenador: peso, % grasa, cintura/brazo/pierna, observaciones | `(id_ciclo, fecha_registro)` | Web `POST /afiliados/progreso` |
+| `PROGRESO_EJERCICIO_DIARIO` | Booleano `completado` por ejercicio por día | `uk (usuario, ciclo, ejercicio, fecha)` | Móvil (toggle) |
+| `REGISTRO_EJERCICIO` | **Ejecución real**: series, reps, peso usado, notas | `uk (usuario, ciclo, rutina, orden, fecha)` | Móvil `POST /afiliados/me/registro-ejercicio` |
+| `CONSUMO_ALIMENTO_DIARIO` | Booleano `consumido` por alimento del plan | `uk (usuario, ciclo, alimento, comida, fecha)` | Móvil (toggle) |
+| `CONSUMO_ALIMENTO_REAL` | **Consumo real** en gramos + calorías y macros (Atwater) | `uk (usuario, ciclo, comida, alimento, fecha)` | Móvil `POST /afiliados/me/consumo-alimento-real` |
+| `REGISTRO_AGUA` | Vasos de agua por día | `uk (usuario, fecha)` | Móvil `POST /afiliados/me/agua` |
+| `PROGRESO_DIARIO` | **Resumen del día** (1 fila por día): calorías, agua, ejercicios, energía, ánimo, duración, observaciones | `uk (usuario, fecha)` | Calculado (upsert) al registrar ejercicios/consumos |
+| `NOTA_EJERCICIO` | Nota del afiliado sobre un ejercicio (feedback visible al staff) | `uk (usuario, ejercicio, ciclo, fecha)` | Móvil / Web (`/me/notas-ejercicio`) |
+
+> Ubicación real: `database/01_estructura.sql` (PROGRESO_FISICO, NOTA_EJERCICIO),
+> `database/02_migracion_movil.sql` (PROGRESO_EJERCICIO_DIARIO, REGISTRO_AGUA, CONSUMO_ALIMENTO_DIARIO),
+> `database/03_mejoras_estructura.sql` (REGISTRO_EJERCICIO, CONSUMO_ALIMENTO_REAL, PROGRESO_DIARIO).
+
+### 2.2 Vistas derivadas
+
+| Vista | Qué calcula |
+|---|---|
+| `v_ultimo_progreso` | Última medición por ciclo + **IMC** (`peso/estatura²`) + clasificación OMS (Bajo/Normal/Sobrepeso/Obesidad) — `01_estructura.sql:547` |
+| `v_ciclo_activo_afiliado` | Ciclo activo con `porcentaje_avance` y `dias_restantes` — `01_estructura.sql:521` |
+| `v_alimento_calorias` | Calorías por 100 g con fórmula de Atwater — `01_estructura.sql:485` |
+
+### 2.3 Cálculos del módulo
+
+| Cálculo | Fórmula | Dónde |
+|---|---|---|
+| IMC | `peso_kg / POW(estatura_cm/100, 2)` | Vista `v_ultimo_progreso` |
+| Calorías consumidas | `(P×4)+(C×4)+(G×9) × cantidad_g/100` (Atwater) | `CONSUMO_ALIMENTO_REAL` en el INSERT (`03_mejoras_estructura.sql:148`) |
+| Volumen de ejercicio | `series × repeticiones × peso_utilizado_kg` | Móvil (`MiProgresoScreen`) y evoluciones del backend |
+| Resumen diario | Agregación sobre `REGISTRO_EJERCICIO` + `CONSUMO_ALIMENTO_REAL` + `REGISTRO_AGUA` | `ProgresoDiarioModel.sincronizar` (UPSERT idempotente) |
+
+---
+
+## 3. ENDPOINTS DEL MÓDULO
+
+Montados en `/progreso`, `/afiliados/me/...` y `/afiliados/:id/...` (ver `server.js:124,132`).
+
+### 3.1 Para el afiliado autenticado (móvil)
+
+| Método | Ruta | Rol | Descripción |
+|---|---|---|---|
+| GET | `/progreso/resumen?fecha=` | Afiliado | Resumen del día (default hoy). Recalcula agregados y devuelve la fila de `PROGRESO_DIARIO` |
+| PUT | `/progreso/resumen` | Afiliado | Guarda energía (1–5), ánimo, observaciones y duración del día |
+| GET | `/progreso/historial?fechaInicio&fechaFin` | Afiliado | Historial de resúmenes diarios (máx. 90 días) |
+| GET | `/progreso/ejercicio/:idEjercicio/evolucion` | Afiliado | Evolución de cargas de un ejercicio (fecha, series, reps, peso, volumen) |
+| GET | `/afiliados/me/progreso` | Afiliado | Historial físico propio (peso/IMC/medidas) |
+| POST | `/afiliados/me/registro-ejercicio` | Afiliado | Registrar ejecución real (transacción + resumen diario) |
+| GET | `/afiliados/me/registro-ejercicio/historial` | Afiliado | Historial de ejecuciones reales |
+| POST | `/afiliados/me/consumo-alimento-real` | Afiliado | Registrar consumo real en gramos (+calorías/macros) |
+| GET | `/afiliados/me/consumo-alimento-real/historial` | Afiliado | Historial de consumos reales |
+| POST | `/afiliados/me/agua` | Afiliado | Guardar vasos de agua del día |
+| GET | `/afiliados/me/agua/:fecha` · `/afiliados/me/agua/historial` | Afiliado | Consultar agua |
+| POST | `/afiliados/me/progreso-ejercicio` | Afiliado | Toggle completado/no completado por ejercicio |
+| GET | `/afiliados/me/progreso-ejercicio/:idCiclo/:fecha` · `/.../historial` | Afiliado | Consultar completados |
+| POST | `/afiliados/me/consumo-alimento` · GET `/afiliados/me/consumo/historial` | Afiliado | Toggle consumo / historial plan |
+| POST/GET/PATCH/DELETE | `/afiliados/me/notas-ejercicio(...)` | Afiliado | CRUD de notas por ejercicio/día |
+
+### 3.2 Para staff (web: Admin/Entrenador)
+
+| Método | Ruta | Rol | Descripción |
+|---|---|---|---|
+| GET | `/afiliados/:id` | Admin/Entrenador | Perfil completo + `ciclo_activo` + `progreso_fisico` + restricciones |
+| GET | `/afiliados/:id/progreso` | Admin/Entrenador | Historial físico del afiliado (peso, IMC, medidas) |
+| POST | `/afiliados/progreso` | Admin/Entrenador | Registrar/actualizar medición física (IMC calculado en backend) |
+| GET | `/afiliados/:id/ejercicios-disponibles` | Admin/Entrenador | Catálogo filtrado por restricciones (para planear) |
+| GET | `/afiliados/:id/notas-ejercicio` | Admin/Entrenador | Notas del afiliado sobre sus ejercicios |
+| GET | `/ciclos/:id_ciclo` + PATCH/DELETE | Admin/Entrenador (PATCH) · Admin (DELETE) | Gestión del ciclo (no del progreso, pero lo enmarca) |
+
+---
+
+## 4. PANTALLAS Y FLUJOS
+
+### 4.1 Web — `ProgresoAfiliado.jsx` (ruta `/afiliados/:id` → tab/vista Progreso)
+
+- Carga en paralelo `fetchAfiliado(id)` y `GET /afiliados/:id/progreso` (`ProgresoAfiliado.jsx:26-28`).
+- Muestra: datos del afiliado, ciclo activo, restricciones, **última medición** (peso/IMC/grasa)
+  y **diferencia de peso** entre la primera y la última medición (`:55-57`).
+- **Gráficos** con `react-chartjs-2`:
+  - `ProgresoPesoChart.jsx` → línea de **peso + IMC** en el tiempo.
+  - `ProgresoVolumenChart.jsx` → línea de **% grasa + medidas de cintura, brazo y pierna**.
+- Datos preparados por `progresoService.calcularEvolucion()` (orden cronológico asc). `progresoService.js:62-80`.
+
+### 4.2 Móvil — `MiProgresoScreen.js` (pestaña "Mi Progreso")
+
+- **fetchData** dispara 6 consultas en paralelo (`Promise.allSettled`, `:165-171`): progreso físico,
+  agua, consumo del plan, ejercicios completados, **registros reales de ejercicio** y **consumos reales**.
+- Renderiza:
+  - Tarjeta "último registro" (`ProgresoItem`) con peso, IMC, grasa, masa muscular y medidas (`:54-...`).
+  - Diferencia de peso vs registro anterior (`~/Simbolo peso`, `:206-210`).
+  - **Volumen total** acumulado = Σ `series×reps×peso` de los registros reales (`:210`).
+  - Historial de ciclos (en `MiPerfilScreen.js`) y listas de agua/consumo/completados.
+- Refresco manual (pull-to-refresh) — sin tiempo real (ver limitaciones).
+
+### 4.3 Flujo principal: "registrar un entrenamiento"
+
+```
+Móvil MiRutinaScreen
+  → POST /afiliados/me/registro-ejercicio  (series, reps, peso_utilizado_kg, notas)
+      registroService.registerEjercicio  [backend/services/registroService.js:43]
+        ├─ Valida datos + ciclo pertenece al usuario (verificarCicloDe)
+        ├─ Transacción:
+        │   ├─ INSERT REGISTRO_EJERCICIO
+        │   └─ PROGRESO_DIARIO.sincronizar()  → recalcula calorías/agua/ejercicios del día (UPSERT)
+        └─ COMMIT
+```
+
+### 4.4 Flujo principal: "consultar progreso del afiliado (Entrenador)"
+
+```
+Web ProgresoAfiliado.jsx
+  → GET /afiliados/:id/progreso   (historial PROGRESO_FISICO, orden DESC)
+  → progresoService.calcularEvolucion() → datos para ProgresoPesoChart / ProgresoVolumenChart
+  → ultimoRegistroFisico(historial)     → tarjetas de resumen
+```
+
+---
+
+## 5. SEGURIDAD Y RBAC
+
+| Endpoint | Middleware |
+|---|---|
+| `/progreso/*`, `/afiliados/me/*` | `requireAuth` (solo el afiliado autenticado, vía `req.user.sub` — no recibe id por parámetro) |
+| `/afiliados/:id/progreso`, `/afiliados/progreso` | `requireStaff` / `requireAdminOrEntrenador` |
+| `/ciclos/:id` PATCH | `requireAdminOrEntrenador` |
+| `/ciclos/:id` DELETE | `requireAdmin` |
+
+**Principio clave:** los endpoints `/progreso/*` y `/afiliados/me/*` resuelven SIEMPRE contra el
+usuario autenticado (`req.user.sub`), nunca contra un id recibido por query/body — ver nóta en
+`progresoService.js:10-16` y `progresoController.js`.
+
+---
+
+## 6. LIMITACIONES Y PENDIENTES CONOCIDOS
+
+| # | Limitación | Impacto | Recomendación |
+|---|---|---|---|
+| 1 | `PROGRESO_EJERCICIO_DIARIO` y `CONSUMO_ALIMENTO_DIARIO` guardan solo **booleanos** (legacy). Las tablas "REAL" son el dato fino | Doble fuente; riesgo de confusión | Migrar los toggles a las tablas "REAL" o deprecar los booleanos |
+| 2 | El **Entrenador no ve la actividad diaria** (ejercicios/agua/consumo del día) en web; solo mediciones físicas | Half del módulo invisible para staff | Endpoint de resumen diario por afiliado (`/afiliados/:id/resumen-diario`) + vista |
+| 3 | Sin tiempo real: el móvil actualiza con pull-to-refresh | Datos no frescos entre plataformas | Polling 30–60 s o push (infra ya existe: `notifications.js`) |
+| 4 | Gaps del informe `flujos_completos_metafit.md` (F2/F4): web solo ve pesos, sin volumen por ejercicio ni rachas | Cumplimiento 65% | Gráfico de volumen en web, drill-down por ciclo |
+| 5 | `PROGRESO_FISICO` solo lo registra el Entrenador (no el afiliado) | El afiliado no auto-registra peso | Opcional: self-service de mediciones |
+
+---
+
+## 7. ARCHIVOS CLAVE
+
+| Capa | Archivo |
+|---|---|
+| Rutas | `backend/routes/progresoRoutes.js` · `backend/routes/afiliadoRoutes.js` (parte progreso) |
+| Controlador | `backend/controllers/progresoController.js` · `backend/controllers/afiliadoController.js` (getMiProgreso/getProgreso/createProgreso) |
+| Servicios | `backend/services/registroService.js` (transacciones) · `backend/services/afiliadoService.js` |
+| Modelo diario | `backend/models/progresoDiarioModel.js` (UPSERT `sincronizar`) + `registroEjercicioModel.js`, `consumoAlimentoRealModel.js` |
+| Web | `frontend_web/src/views/ProgresoAfiliado.jsx` · `frontend_web/src/components/graficos/ProgresoPesoChart.jsx` · `ProgresoVolumenChart.jsx` · `frontend_web/src/services/progresoService.js` |
+| Móvil | `movil/src/screens/MiProgresoScreen.js` · `movil/src/services/registroService.js` · `movil/src/services/api.js` |
+| BD | `01_estructura.sql` · `02_migracion_movil.sql` · `03_mejoras_estructura.sql` |
+
+---
+*MetaFit Inc. · Sport Gym Sede 80 · Bogotá, Colombia*
