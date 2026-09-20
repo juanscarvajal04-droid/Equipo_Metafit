@@ -166,7 +166,7 @@ usuario autenticado (`req.user.sub`), nunca contra un id recibido por query/body
 
 ## 6. LIMITACIONES Y PENDIENTES CONOCIDOS
 
-| # | Limitación | Impacto | Recomendación |
+| # | Limitación | Impacto | Recomendacion|
 |---|---|---|---|
 | 1 | `PROGRESO_EJERCICIO_DIARIO` y `CONSUMO_ALIMENTO_DIARIO` guardan solo **booleanos** (legacy). Las tablas "REAL" son el dato fino | Doble fuente; riesgo de confusión | Migrar los toggles a las tablas "REAL" o deprecar los booleanos |
 | 2 | El **Entrenador no ve la actividad diaria** (ejercicios/agua/consumo del día) en web; solo mediciones físicas | Half del módulo invisible para staff | Endpoint de resumen diario por afiliado (`/afiliados/:id/resumen-diario`) + vista |
