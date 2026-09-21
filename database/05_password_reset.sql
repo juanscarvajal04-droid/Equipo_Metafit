@@ -11,7 +11,7 @@
 USE `metafit`;
 
 CREATE TABLE IF NOT EXISTS `PASSWORD_RESET` (
-  `id`         INT          NOT NULL AUTO_INCREMENT,
+  `id`         INT         NOT NULL AUTO_INCREMENT,
   `usuario_id` INT          NOT NULL,
   `token`      VARCHAR(512) NOT NULL,
   `expiracion` DATETIME     NOT NULL,
