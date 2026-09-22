@@ -5,6 +5,7 @@ import styles from "./Sidebar.module.css";
 // ── Configuración de navegación por rol ───────────────────────────────────────
 // Cada rol tiene exactamente los links que le corresponden según el RBAC.
 // 'Administrador' es el único con acceso a /personal (Gestión de Personal).
+// 'Restricciones' (catálogo) está disponible para TODO el staff (los 3 roles).
 const NAV_OPERATIVO = {
   // ADMINISTRADOR — módulos completos + personal exclusivo
   Administrador: [
@@ -13,25 +14,28 @@ const NAV_OPERATIVO = {
     { to: "/afiliados", icon: "👥", label: "Afiliados" },
     { to: "/rutinas",   icon: "🏋️", label: "Rutinas"   },
     { to: "/dietas",    icon: "🥗", label: "Dietas"    },
+    { to: "/restricciones", icon: "🚫", label: "Restricciones" },
   ],
-  // RECEPCIONISTA — gestión de afiliados (CRUD) + pagos, sin acceso a personal
+  // RECEPCIONISTA — gestión de afiliados (CRUD) + pagos + restricciones, sin acceso a personal
   Recepcionista: [
     { to: "/afiliados", icon: "👥", label: "Gestión de Afiliados" },
     { to: "/pagos",     icon: "💳", label: "Pagos"                },
+    { to: "/restricciones", icon: "🚫", label: "Restricciones"    },
   ],
-  // ENTRENADOR — rutinas y dietas (CRUD), afiliados solo lectura
+  // ENTRENADOR — rutinas y dietas (CRUD), afiliados solo lectura + restricciones
   // El orden refleja su home: /rutinas es la primera pantalla al hacer login
   Entrenador: [
     { to: "/rutinas",   icon: "🏋️", label: "Planes de Entreno"  },
     { to: "/dietas",    icon: "🥗", label: "Dietas"             },
     { to: "/afiliados", icon: "👁️", label: "Afiliados (Ver)"    },
+    { to: "/restricciones", icon: "🚫", label: "Restricciones"  },
   ],
 };
 
-// Link exclusivo del Administrador
+// Link exclusivo del Administrador (Restricciones ya está en NAV_OPERATIVO:
+// disponible para todo el staff).
 const NAV_ADMIN_EXCLUSIVO = [
   { to: "/personal", icon: "🛡️", label: "Gestión de Personal" },
-  { to: "/admin/restricciones", icon: "🚫", label: "Restricciones" },
 ];
 
 /** Paleta de colores por rol — permanecen inline por ser dinámicos */

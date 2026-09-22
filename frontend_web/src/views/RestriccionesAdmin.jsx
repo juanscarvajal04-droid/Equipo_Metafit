@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import AppLayout from "../components/AppLayout";
 import { useToast } from "../hooks/useToast";
+import { useAuth } from "../context/AuthContext";
 import { useApi } from "../hooks/useApi";
 import { useMutation } from "../hooks/useMutation";
 import {
@@ -25,6 +26,13 @@ const TIPO_CLASS = {
 
 export default function RestriccionesAdmin() {
   const { toast, showToast } = useToast();
+  const { user } = useAuth();
+
+  // RBAC del catálogo de restricciones:
+  // - Administrador  → crear, editar, ELIMINAR
+  // - Recepcionista  → crear, editar (sin eliminar)
+  // - Entrenador     → crear, editar (sin eliminar)
+  const puedeEliminar = user?.role === "Administrador";
 
   const {
     data: restricciones,
@@ -194,14 +202,16 @@ export default function RestriccionesAdmin() {
                             <button type="button" className={s.btnIcon} title="Editar" onClick={() => abrirEditar(r)}>
                               ✏️
                             </button>
-                            <button
-                              type="button"
-                              className={`${s.btnIcon} ${s.btnIconDanger}`}
-                              title="Eliminar"
-                              onClick={() => confirmarEliminar(r)}
-                            >
-                              🗑️
-                            </button>
+                            {puedeEliminar && (
+                              <button
+                                type="button"
+                                className={`${s.btnIcon} ${s.btnIconDanger}`}
+                                title="Eliminar"
+                                onClick={() => confirmarEliminar(r)}
+                              >
+                                🗑️
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>

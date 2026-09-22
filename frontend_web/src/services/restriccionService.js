@@ -12,8 +12,9 @@
 //   PUT/PATCH → { message }
 //   DELETE → { message }
 //
-// NOTA: el CRUD del catálogo (create/update/delete) está restringido
-// al rol Administrador en el backend (requireAdmin).
+// NOTA: el CRUD del catálogo (create/update) está disponible para TODO el staff
+// (requireStaff: Administrador, Recepcionista, Entrenador). Solo DELETE exige
+// rol Administrador (requireAdmin).
 // ============================================================
 
 import api from "./api";
@@ -43,7 +44,7 @@ export const FORM_RESTRICCION_VACIO = {
   efecto_relevante: "",
 };
 
-// ── 2. CATÁLOGO (CRUD, solo Administrador) ───────────────────
+// ── 2. CATÁLOGO (CRUD, todo el staff / DELETE solo Admin) ────
 
 /**
  * Obtiene el catálogo completo de restricciones.
@@ -56,7 +57,7 @@ export const fetchRestricciones = async () => {
 };
 
 /**
- * Crea una restricción en el catálogo (solo Administrador).
+ * Crea una restricción en el catálogo (staff: Administrador, Recepcionista, Entrenador).
  * @param {{ nombre_restriccion: string, tipo: string, efecto_relevante?: string }} payload
  * @returns {Promise<{ id: number, message: string }>}
  */
@@ -66,7 +67,7 @@ export const crearRestriccion = async (payload) => {
 };
 
 /**
- * Actualiza una restricción del catálogo (solo Administrador).
+ * Actualiza una restricción del catálogo (staff: Administrador, Recepcionista, Entrenador).
  * @param {number|string} id
  * @param {{ nombre_restriccion: string, tipo: string, efecto_relevante?: string }} payload
  * @returns {Promise<{ message: string }>}
@@ -78,7 +79,8 @@ export const actualizarRestriccion = async (id, payload) => {
 
 /**
  * Elimina una restricción del catálogo (solo Administrador).
- * Fallará con 409 si está referenciada por afiliados/ejercicios/alimentos.
+ * Fallará con 403 para Recepcionista/Entrenador y con 409 si está
+ * referenciada por afiliados/ejercicios/alimentos.
  * @param {number|string} id
  * @returns {Promise<{ message: string }>}
  */

@@ -31,6 +31,7 @@ const FinanzasView     = lazy(() => import("./views/FinanzasView"));
  *  Administrador  → /dashboard  /afiliados  /rutinas  /dietas  /personal (EXCLUSIVO)
  *  Recepcionista  → /afiliados (CRUD)  /pagos   |  lectura interna en afiliados
  *  Entrenador     → /rutinas (home)  /dietas  /afiliados (solo lectura)
+ *  TODO EL STAFF  → /restricciones (Admin: CRUD completo · Recepcionista/Entrenador: crear/editar)
  *
  *  Regla: intentar acceder a una ruta no permitida redirige al home del rol.
  *  *      → /login (ruta desconocida sin sesión)
@@ -102,8 +103,6 @@ export default function App() {
               <Route path="/personal" element={<GestionPersonal />} />
               {/* 💰 Panel de Finanzas — Solo Administrador */}
               <Route path="/finanzas" element={<FinanzasView />} />
-              {/* 🛡️ Catálogo de Restricciones Médicas — Solo Administrador */}
-              <Route path="/admin/restricciones" element={<RestriccionesAdmin />} />
             </Route>
 
             {/* ══════════════════════════════════════════════════════════════
@@ -129,11 +128,15 @@ export default function App() {
             </Route>
 
             {/* ══════════════════════════════════════════════════════════════
-                TODOS LOS ROLES — afiliados
-                (permisos de edición/borrado por rol gestionados en AfiliadosView)
+                TODOS LOS ROLES — afiliados + restricciones
+                (permisos de edición/borrado por rol gestionados en cada vista)
+                ✅ RestriccionesAdmin: Catálogo de Restricciones Médicas para
+                   TODO el staff (Admin: crear/editar/eliminar ·
+                   Recepcionista y Entrenador: crear/editar)
             ══════════════════════════════════════════════════════════════ */}
             <Route element={<ProtectedRoute allowedRoles={ALL_ROLES} />}>
               <Route path="/afiliados" element={<AfiliadosView />} />
+              <Route path="/restricciones" element={<RestriccionesAdmin />} />
             </Route>
 
             {/* ── Cualquier ruta desconocida → login ── */}

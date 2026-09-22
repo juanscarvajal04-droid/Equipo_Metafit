@@ -4,7 +4,7 @@
 const express             = require('express');
 const router              = express.Router();
 const CatalogoController  = require('../controllers/catalogoController');
-const { requireAuth, requireAdmin, requireAdminOrEntrenador } = require('../middlewares/auth');
+const { requireAuth, requireAdmin, requireAdminOrEntrenador, requireStaff } = require('../middlewares/auth');
 
 /**
  * @swagger
@@ -358,7 +358,8 @@ router.get('/restricciones', requireAuth, CatalogoController.getAllRestricciones
  * @swagger
  * /catalogo/restricciones:
  *   post:
- *     summary: Crear restricción médica en el catálogo (solo Administrador)
+ *     summary: Crear restricción médica en el catálogo (staff: Admin, Recepcionista o Entrenador)
+ *     description: Disponible para todo el staff. Solo el Administrador puede eliminar.
  *     tags: [Catálogos]
  *     security:
  *       - bearerAuth: []
@@ -392,13 +393,14 @@ router.get('/restricciones', requireAuth, CatalogoController.getAllRestricciones
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.post('/restricciones', requireAuth, requireAdmin, CatalogoController.createRestriccion);
+router.post('/restricciones', requireAuth, requireStaff, CatalogoController.createRestriccion);
 
 /**
  * @swagger
  * /catalogo/restricciones/{id}:
  *   put:
- *     summary: Actualizar restricción del catálogo (solo Administrador)
+ *     summary: Actualizar restricción del catálogo (staff: Admin, Recepcionista o Entrenador)
+ *     description: Disponible para todo el staff. Solo el Administrador puede eliminar.
  *     tags: [Catálogos]
  *     security:
  *       - bearerAuth: []
@@ -438,7 +440,7 @@ router.post('/restricciones', requireAuth, requireAdmin, CatalogoController.crea
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
-router.put('/restricciones/:id', requireAuth, requireAdmin, CatalogoController.updateRestriccion);
+router.put('/restricciones/:id', requireAuth, requireStaff, CatalogoController.updateRestriccion);
 
 /**
  * @swagger
