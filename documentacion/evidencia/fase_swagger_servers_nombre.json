@@ -1,0 +1,53 @@
+{
+  "titulo": "Swagger: servers prod+local y nombre 'Sport Gym Sede Santa Rosita' — verificación completa",
+  "timestamp": "2026-09-22T14:30:00Z",
+  "cambios": [
+    "backend/config/swagger.js: servers reordenados — 1) https://metafit-backend-rr18.onrender.com 'Servidor de producción (Render)', 2) http://localhost:3001 'Servidor de desarrollo (local)' (prod primero; se eliminó la dependencia de API_BASE_URL en la primera URL).",
+    "backend/config/swagger.js: info.description corregida a 'Sport Gym Sede Santa Rosita (Bogotá, 2025)'.",
+    "Renombrado global case-sensitive 'Sede 80' -> 'Sede Santa Rosita' (74 reemplazos en 32 archivos: backend controllers/services/templates/cron, database/01_estructura.sql, frontend_web (Footer, PublicLayout, LandingPage, Login, RecuperarPassword, ResetPassword, index.html), movil (LoginScreen, LandingScreen, RecuperarPasswordScreen), n8n/flujos, README.md, toda la documentación).",
+    "Preservados a propósito: ids internos/anchors 'sede80', URL Instagram 'sportgymsede80', handle '@sportgymsede80', dirección 'Calle 80 11-22' (no es el nombre de la sede).",
+    "documentacion/swagger.json (dump del spec): servers reordenados igual que swagger.js y nombre actualizado.",
+    "frontend_web/public/api-docs/index.html (NUEVO): redirect estático hacia https://metafit-backend-rr18.onrender.com/api-docs — elimina el 404 anterior en la SPA estática."
+  ],
+  "commits": [
+    { "hash": "7c7c8ab", "mensaje": "Swagger: servers prod+local en el orden correcto y nombre 'Sport Gym Sede Santa Rosita' en todo el proyecto", "archivos": 34 },
+    { "hash": "27cf2c9", "mensaje": "Frontend: redirect /api-docs hacia la documentación del backend (evita 404 en SPA estática)" }
+  ],
+  "deploys": [
+    { "servicio": "backend", "id": "dep-dap8ped9pp6c739079d0", "status": "live", "commit": "7c7c8ab", "terminado": "2026-09-22T14:13:28Z" },
+    { "servicio": "frontend (static site, autoDeploy)", "id": "dep-dap904ijnfac73bkbmtg", "status": "live", "commit": "27cf2c9", "terminado": "2026-09-22T14:26:58Z" }
+  ],
+  "verificacion_prod": {
+    "backend /api-docs": { "status": 200, "html": true },
+    "backend /api-docs.json": {
+      "status": 200,
+      "servers": [
+        { "url": "https://metafit-backend-rr18.onrender.com", "description": "Servidor de producción (Render)" },
+        { "url": "http://localhost:3001", "description": "Servidor de desarrollo (local)" }
+      ],
+      "desc_santa_rosita": true,
+      "desc_sede80_restante": false
+    },
+    "backend preflight OPTIONS /health (Origin backend)": { "status": 204, "acao": "https://metafit-backend-rr18.onrender.com" },
+    "frontend /api-docs": { "status": 200, "meta-refresh": true, "apunta_al_backend": true },
+    "frontend /api-docs/": { "status": 200, "meta-refresh": true, "apunta_al_backend": true }
+  },
+  "verificacion_local": {
+    "backend /api-docs.json": {
+      "status": 200,
+      "servers": [
+        { "url": "https://metafit-backend-rr18.onrender.com", "description": "Servidor de producción (Render)" },
+        { "url": "http://localhost:3001", "description": "Servidor de desarrollo (local)" }
+      ],
+      "desc_santa_rosita": true,
+      "desc_sede80_restante": false
+    },
+    "reconstruccion": "docker compose up -d --build backend -> Container metafit_backend Started"
+  },
+  "checks_extra": [
+    "No quedan ocurrencias de 'Sede 80' en el repo (grep global = 0).",
+    "JSONs de n8n siguen siendo válidos tras el renombrado.",
+    "Los ids/anchors 'sede80' y URLs de Instagram lowercase quedaron intactos (navegación interna y enlaces externos no se rompen)."
+  ],
+  "conclusion": "Swagger corregido en ambos entornos: el dropdown 'Servers' muestra las 2 opciones (prod + local), el nombre del gimnasio es 'Sport Gym Sede Santa Rosita' en todo el proyecto, y https://metafit-frontend-78x6.onrender.com/api-docs ya no da 404 (redirige a la documentación del backend)."
+}
