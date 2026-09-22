@@ -510,7 +510,8 @@
   justify-content: center;
   background: rgba(0, 0, 0, 0.7);
   z-index: 1050;
-  padding: 1rem;
+  overflow-y: auto;
+  padding: 24px;
 }
 
 .modalContent {
@@ -520,8 +521,17 @@
   max-width: 750px;
   width: 95%;
   max-height: 90vh;
-  overflow-y: auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   box-shadow: var(--mf-shadow-modal);
+}
+
+.modalContent > form {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .modalHeader {
@@ -530,6 +540,7 @@
   align-items: center;
   padding: 1rem 1.25rem;
   border-bottom: 1px solid var(--mf-border);
+  flex-shrink: 0;
 }
 
 .modalTitle {
@@ -541,6 +552,9 @@
 
 .modalBody {
   padding: 1.25rem;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .modalFooter {
@@ -549,6 +563,15 @@
   gap: 0.5rem;
   padding: 1rem 1.25rem;
   border-top: 1px solid var(--mf-border);
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .modalOverlay { padding: 12px; }
+  .modalContent { max-height: 95vh; }
+}
+@media (min-width: 641px) and (max-width: 1024px) {
+  .modalOverlay { padding: 16px; }
 }
 
 /* ── Afiliado Section ─────────────────────────────── */

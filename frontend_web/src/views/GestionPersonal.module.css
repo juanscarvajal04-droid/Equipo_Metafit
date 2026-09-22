@@ -40,12 +40,21 @@
 .btnIconDelete:disabled { opacity: 0.3; cursor: not-allowed; }
 
 /* Modal */
-.modalOverlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.7); z-index: 1050; overflow-y: auto; padding: 1rem; }
-.modalContent { background: var(--mf-surface); border: 1px solid var(--mf-border); border-radius: 14px; width: 100%; max-width: 600px; box-shadow: var(--mf-shadow-modal); }
-.modalHeader { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 1px solid var(--mf-border); }
+.modalOverlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.7); z-index: 1050; overflow-y: auto; padding: 24px; }
+.modalContent { background: var(--mf-surface); border: 1px solid var(--mf-border); border-radius: 14px; width: 100%; max-width: 600px; box-shadow: var(--mf-shadow-modal); display: flex; flex-direction: column; max-height: 90vh; overflow: hidden; }
+.modalContent > form { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
+.modalHeader { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 1px solid var(--mf-border); flex-shrink: 0; }
 .modalTitle { color: var(--mf-text); font-size: 1rem; font-weight: 700; margin: 0; }
-.modalBody { padding: 1.25rem; color: var(--mf-text); }
-.modalFooter { display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem; padding: 0.75rem 1.25rem; border-top: 1px solid var(--mf-border); }
+.modalBody { padding: 1.25rem; color: var(--mf-text); flex: 1 1 auto; overflow-y: auto; min-height: 0; }
+.modalFooter { display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem; padding: 0.75rem 1.25rem; border-top: 1px solid var(--mf-border); flex-shrink: 0; }
+
+@media (max-width: 640px) {
+  .modalOverlay { padding: 12px; }
+  .modalContent { max-height: 95vh; }
+}
+@media (min-width: 641px) and (max-width: 1024px) {
+  .modalOverlay { padding: 16px; }
+}
 
 /* Form */
 .labelText { color: var(--mf-muted); font-size: 0.78rem; font-weight: 600; margin-bottom: 0.25rem; display: block; }
