@@ -84,10 +84,8 @@ Adminer (que corre en un servicio aparte).
 
 ## Despliegue del servicio
 
-- **Repo**: `https://github.com/render-examples/adminer` (rama `main`) — imagen Adminer oficial.
+- **Repo**: `https://github.com/juanscarvajal04-droid/adminer` (rama `main`) — imagen Adminer oficial.
 - **Tipo**: Web Service · Docker (`Dockerfile` del repo) · plan `free` · región `oregon`.
 - **Auto-deploy**: activado.
-- **Nota**: se intentó forkear el repo a la cuenta del proyecto, pero el token de GitHub provisto
-  fue rechazado por la API (HTTP 401 "Bad credentials"), por lo que el servicio apunta al repo
-  público original. Si se quiere usar un fork propio, crearlo en GitHub y desde el Dashboard de
-  Render cambiar el repo del servicio (`Services → metafit-adminer → Settings → Repo`).
+- **Origen del repo**: el servicio apunta al **fork propio** del proyecto
+  (`juanscarvajal04-droid/adminer`), creado desde `render-examples/adminer`.
