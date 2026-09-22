@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -14,11 +14,14 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { activarPushNotifications } from '../services/notifications';
 import { COLORS, GRADIENTS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../theme';
 
 export default function LoginScreen({ navigation }) {
   const { login } = useAuth();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(), [theme]);
   const [correo, setCorreo] = useState('');
   const [contrasena, setContrasena] = useState('');
   const [showPass, setShowPass] = useState(false);
@@ -142,7 +145,7 @@ export default function LoginScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = () => StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: COLORS.bg,

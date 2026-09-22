@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS, GRADIENTS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../theme';
+import { useTheme } from '../context/ThemeContext';
 import useMutation from '../hooks/useMutation';
 import { registrarConsumoReal } from '../services/registroService';
 import { formatearNumero } from '../utils/formateadores';
@@ -42,6 +43,8 @@ function Nutriente({ label, valor, unidad, color }) {
 
 export default function RegistroConsumoScreen({ navigation, route }) {
   const { id_ciclo, num_comida, id_alimento, nombre, macrosPor100g } = route.params || {};
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(), [theme]);
 
   const [cantidad, setCantidad] = useState('');
   const [resultado, setResultado] = useState(null);
@@ -181,7 +184,7 @@ export default function RegistroConsumoScreen({ navigation, route }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = () => StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: COLORS.bg,

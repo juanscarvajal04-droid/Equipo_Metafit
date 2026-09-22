@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 import { formatearFechaLegible } from '../../utils/formateadores';
 
 // Resumen compacto de un ciclo (historial de ciclos del afiliado).
 // Usa SOLO los campos que devuelve GET /afiliados/me/ciclos:
 // numero_ciclo, objetivo_fisico, fecha_inicio/fin, disponibilidad_dias, activo.
 export default function ResumenCiclo({ ciclo }) {
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(), [theme]);
   if (!ciclo) return null;
 
   const numero = Number(ciclo.numero_ciclo) || Number(ciclo.id_ciclo) || 0;
@@ -58,7 +61,7 @@ export default function ResumenCiclo({ ciclo }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = () => StyleSheet.create({
   card: {
     backgroundColor: COLORS.bgCard,
     borderRadius: BORDER_RADIUS.lg,

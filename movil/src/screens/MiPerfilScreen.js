@@ -136,6 +136,7 @@ function SectionCard({ title, icon, children }) {
 
 export default function MiPerfilScreen({ navigation }) {
   const { logout } = useAuth();
+  const { isDark, toggle } = useTheme();
   const [perfil, setPerfil] = useState(null);
   const [ciclo, setCiclo] = useState(null);
   const [ciclos, setCiclos] = useState([]);
@@ -240,8 +241,6 @@ export default function MiPerfilScreen({ navigation }) {
     outputRange: [260, 160],
     extrapolate: 'clamp',
   });
-
-  const { isDark, toggle } = useTheme();
 
   return (
     <View style={{ flex: 1, backgroundColor: COLORS.bg }}>

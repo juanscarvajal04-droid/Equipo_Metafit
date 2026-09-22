@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function StatsCard({ icon, label, value, color = COLORS.purple }) {
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(), [theme]);
   return (
     <View style={styles.card}>
       <View style={[styles.iconWrap, { backgroundColor: `${color}26` }]}>
@@ -17,7 +20,7 @@ export default function StatsCard({ icon, label, value, color = COLORS.purple })
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = () => StyleSheet.create({
   card: {
     flex: 1,
     backgroundColor: COLORS.bgCard,

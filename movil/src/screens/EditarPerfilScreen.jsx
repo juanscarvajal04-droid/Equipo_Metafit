@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS, GRADIENTS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../theme';
+import { useTheme } from '../context/ThemeContext';
 import useApi from '../hooks/useApi';
 import useMutation from '../hooks/useMutation';
 import { getPerfil, actualizarPerfil } from '../services/perfilService';
@@ -24,6 +25,8 @@ const RE_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function EditarPerfilScreen({ navigation }) {
   const { data: perfil, loading: loadingPerfil } = useApi(getPerfil);
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(), [theme]);
 
   const pesoFuente = perfil?.ciclo_activo?.progreso_fisico?.[0]?.peso_kg;
   const [peso, setPeso] = useState('');
@@ -188,7 +191,7 @@ export default function EditarPerfilScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = () => StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: COLORS.bg,

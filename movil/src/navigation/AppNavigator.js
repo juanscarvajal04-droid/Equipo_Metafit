@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -23,6 +23,8 @@ const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function LoadingScreen() {
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(), [theme]);
   return (
     <View style={styles.loading}>
       <ActivityIndicator size="large" color={COLORS.purple} />
@@ -110,7 +112,7 @@ export default function AppNavigator() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = () => StyleSheet.create({
   loading: {
     flex: 1,
     justifyContent: 'center',

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, GRADIENTS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../theme';
+import { useTheme } from '../context/ThemeContext';
 
 const KPIS = [
   { valor: '1,200+', label: 'Afiliados activos',        icono: '👥' },
@@ -58,6 +59,8 @@ const SEDE_STATS = [
 ];
 
 export default function LandingScreen({ navigation }) {
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(), [theme]);
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" backgroundColor="#0a0a0f" />
@@ -234,7 +237,7 @@ export default function LandingScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = () => StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: COLORS.bg,
@@ -283,12 +286,12 @@ const styles = StyleSheet.create({
   heroTitle: {
     fontSize: 44,
     fontWeight: '800',
-    color: COLORS.text,
+    color: '#ffffff',
     letterSpacing: 2,
   },
   heroSubtitle: {
     fontSize: FONTS.subtitle,
-    color: COLORS.textSecondary,
+    color: 'rgba(255,255,255,0.7)',
     marginTop: SPACING.xs,
     fontWeight: '500',
   },
@@ -301,7 +304,7 @@ const styles = StyleSheet.create({
   },
   heroDesc: {
     fontSize: FONTS.small,
-    color: COLORS.textMuted,
+    color: 'rgba(255,255,255,0.6)',
     marginTop: SPACING.md,
     textAlign: 'center',
     lineHeight: 20,
@@ -317,7 +320,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   heroCtaText: {
-    color: COLORS.text,
+    color: '#ffffff',
     fontSize: FONTS.body,
     fontWeight: '700',
     letterSpacing: 0.5,
@@ -559,7 +562,7 @@ const styles = StyleSheet.create({
     ...SHADOWS.card,
   },
   ctaButtonText: {
-    color: COLORS.text,
+    color: '#ffffff',
     fontSize: FONTS.body,
     fontWeight: '700',
     letterSpacing: 0.5,

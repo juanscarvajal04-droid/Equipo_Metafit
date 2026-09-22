@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -14,9 +14,12 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, GRADIENTS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../theme';
+import { useTheme } from '../context/ThemeContext';
 import { solicitarRecuperacion, resetPasswordRequest } from '../services/api';
 
 export default function RecuperarPasswordScreen({ navigation }) {
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(), [theme]);
   const [email, setEmail] = useState('');
   const [token, setToken] = useState('');
   const [tokenInfo, setTokenInfo] = useState('');
@@ -202,7 +205,7 @@ export default function RecuperarPasswordScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = () => StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: COLORS.bg,

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS, GRADIENTS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../theme';
+import { useTheme } from '../context/ThemeContext';
 import useMutation from '../hooks/useMutation';
 import { registrarEjercicioReal } from '../services/registroService';
 
@@ -25,6 +26,8 @@ const fechaLocal = () => {
 
 export default function RegistroEjercicioScreen({ navigation, route }) {
   const { id_ciclo, id_rutina, orden, nombre, nombre_rutina } = route.params || {};
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(), [theme]);
 
   const [series, setSeries] = useState('');
   const [repeticiones, setRepeticiones] = useState('');
@@ -148,7 +151,7 @@ export default function RegistroEjercicioScreen({ navigation, route }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = () => StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: COLORS.bg,
