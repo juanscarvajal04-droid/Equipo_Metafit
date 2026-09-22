@@ -116,6 +116,7 @@ Todos los documentos se encuentran en la carpeta [`documentacion/`](./documentac
 | `documentacion/QA_REPORT.md` | Reporte de aseguramiento de calidad |
 | `documentacion/AUDITORIA_FINAL.md` | Auditoría final del proyecto |
 | `documentacion/UPTIME_ROBOT.md` | Monitoreo 24/7 con UptimeRobot (config manual) |
+| `documentacion/adminer.md` | Adminer en Render: acceso gráfico a la BD (`https://metafit-adminer.onrender.com`) |
 | `documentacion/GUION_VIDEO_DEMO.md` | Guion del video demo (3–5 min, 3 roles) |
 
 ## 🚀 Mejoras "1000/10" (últimas fases)
