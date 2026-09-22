@@ -93,7 +93,7 @@ export default function RecuperarPasswordScreen({ navigation }) {
           <View style={styles.logoSection}>
             <Text style={styles.logo}>🔑</Text>
             <Text style={styles.title}>Recuperar Contraseña</Text>
-            <Text style={styles.subtitle}>MetaFit · Sport Gym Sede 80</Text>
+            <Text style={styles.subtitle}>MetaFit · Sport Gym Sede Santa Rosita</Text>
           </View>
 
           <View style={styles.card}>

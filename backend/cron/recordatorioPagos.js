@@ -65,9 +65,9 @@ const textoPlano = (pago) => [
   `Este es un recordatorio de MetaFit: tu mensualidad vence el ${fechaLegible(pago.fecha_vencimiento)}.`,
   `Valor: ${formatearCOP(pago.valor_pagado)}`,
   ``,
-  `Pasa por la recepción de Sport Gym Sede 80 para renovar tu plan.`,
+  `Pasa por la recepción de Sport Gym Sede Santa Rosita para renovar tu plan.`,
   ``,
-  `MetaFit · Sport Gym Sede 80 · Bogotá, Colombia`,
+  `MetaFit · Sport Gym Sede Santa Rosita · Bogotá, Colombia`,
 ].join('\n');
 
 /** Marca que se le recordó hoy a este pago (tabla PAGO_RECORDATORIO). */

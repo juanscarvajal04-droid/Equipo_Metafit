@@ -1,6 +1,6 @@
 # 🧠 MetaFit — Segundo Cerebro
 
-> **Sistema de Gestión Deportiva** para *Sport Gym Sede 80* — Bogotá, Colombia
+> **Sistema de Gestión Deportiva** para *Sport Gym Sede Santa Rosita* — Bogotá, Colombia
 > Líder técnico: Juan Sebastian Carvajal | Versión 2.0
 
 ---

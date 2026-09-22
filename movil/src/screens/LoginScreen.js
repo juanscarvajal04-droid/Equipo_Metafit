@@ -67,7 +67,7 @@ export default function LoginScreen({ navigation }) {
           <View style={styles.logoSection}>
             <Text style={styles.logo}>💪</Text>
             <Text style={styles.title}>MetaFit</Text>
-            <Text style={styles.subtitle}>Sport Gym Sede 80</Text>
+            <Text style={styles.subtitle}>Sport Gym Sede Santa Rosita</Text>
           </View>
 
           <View style={styles.card}>
@@ -138,7 +138,7 @@ export default function LoginScreen({ navigation }) {
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.footer}>MetaFit v1.0 · 2026 · Sport Gym Sede 80</Text>
+          <Text style={styles.footer}>MetaFit v1.0 · 2026 · Sport Gym Sede Santa Rosita</Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

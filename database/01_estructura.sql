@@ -3,10 +3,10 @@
 -- "Disenar, Normalizar e Implementar un Esquema de Base de Datos Relacional en Tercera Forma Normal
 --  para Gestionar Afiliados, Ciclos de Entrenamiento y Planes Nutricionales del Sistema MetaFit
 --  Aplicando Patrones de Herencia de Entidades, Indices de Rendimiento e Integridad Referencial
---  como Soporte Tecnologico al Gimnasio Sport Gym Sede 80, Bogota, 2025."
+--  como Soporte Tecnologico al Gimnasio Sport Gym Sede Santa Rosita, Bogota, 2025."
 -- ============================================================================================================================
 -- Proyecto      : MetaFit - Sistema de Gestion Deportiva
--- Cliente       : Sport Gym Sede 80, Bogota, Colombia
+-- Cliente       : Sport Gym Sede Santa Rosita, Bogota, Colombia
 -- Equipo        : Sofia Astudillo - Kevin S. Robayo - Carlos Rodrigues - Juan S. Carvajal
 -- Version       : 4.0 - Arquitectura de Produccion (Migrado desde NoSQL)
 -- Motor         : MySQL 8.0+ (InnoDB, utf8mb4)

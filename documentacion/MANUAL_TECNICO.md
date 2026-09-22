@@ -6,7 +6,7 @@
 | **Versión** | 2.0.0 |
 | **Fecha** | Junio 2026 |
 | **Equipo** | Sofia Astudillo, Kevin S. Robayo, Carlos Rodrigues, Juan S. Carvajal |
-| **Cliente** | Sport Gym Sede 80 — Bogotá, Colombia |
+| **Cliente** | Sport Gym Sede Santa Rosita — Bogotá, Colombia |
 
 ---
 

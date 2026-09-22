@@ -231,7 +231,7 @@ export default function Login() {
 
           {/* ── Footer del card ── */}
           <div className={styles.cardFooter}>
-            MetaFit v1.0 &nbsp;·&nbsp; {new Date().getFullYear()} &nbsp;·&nbsp; Sport Gym Sede 80
+            MetaFit v1.0 &nbsp;·&nbsp; {new Date().getFullYear()} &nbsp;·&nbsp; Sport Gym Sede Santa Rosita
           </div>
         </div>
       </div>

@@ -241,4 +241,4 @@ documentacion/brain/
 ```
 
 ---
-*MetaFit Inc. · Sport Gym Sede 80 · Bogotá, Colombia*
+*MetaFit Inc. · Sport Gym Sede Santa Rosita · Bogotá, Colombia*

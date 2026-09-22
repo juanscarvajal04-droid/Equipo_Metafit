@@ -64,14 +64,14 @@ const textoPlano = (datosPago, datosAfiliado) => {
     `Correo: ${datosAfiliado.correo || '—'}`,
     `Teléfono: ${datosAfiliado.telefono || '—'}`,
     ``,
-    `Concepto: Mensualidad Sport Gym Sede 80`,
+    `Concepto: Mensualidad Sport Gym Sede Santa Rosita`,
     `Método de pago: ${datosPago.metodo_pago || 'Efectivo'}`,
     `Fecha del pago: ${fechaLegible(datosPago.fecha_pago)}`,
     `Valor pagado: ${formatearCOP(datosPago.valor_pagado)}`,
     `Estado del pago: ${datosPago.estado || 'Pagado'}`,
     ``,
     `Gracias por tu mensualidad.`,
-    `MetaFit · Sport Gym Sede 80 · Calle 80 11-22, Bogotá, Colombia`,
+    `MetaFit · Sport Gym Sede Santa Rosita · Calle 80 11-22, Bogotá, Colombia`,
   ].join('\n');
 };
 

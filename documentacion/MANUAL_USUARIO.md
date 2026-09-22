@@ -2,13 +2,13 @@
 
 **Versión:** 2.0.0  
 **Fecha:** Junio 2026  
-**Cliente:** Sport Gym Sede 80 — Bogotá, Colombia
+**Cliente:** Sport Gym Sede Santa Rosita — Bogotá, Colombia
 
 ---
 
 ## 2.2 Introducción
 
-**MetaFit** es un sistema de gestión deportiva integral diseñado para el gimnasio **Sport Gym Sede 80**. Permite administrar afiliados, personal, rutinas de entrenamiento, planes nutricionales, pagos, finanzas y progreso físico desde una plataforma web y una aplicación móvil.
+**MetaFit** es un sistema de gestión deportiva integral diseñado para el gimnasio **Sport Gym Sede Santa Rosita**. Permite administrar afiliados, personal, rutinas de entrenamiento, planes nutricionales, pagos, finanzas y progreso físico desde una plataforma web y una aplicación móvil.
 
 **¿Para quién es este manual?**
 - **Administradores** del gimnasio
@@ -383,7 +383,7 @@ La pantalla de bienvenida incluye las siguientes secciones (desplazar hacia abaj
 2. **KPIs**: Estadísticas del gimnasio (afiliados activos, planes nutricionales, entrenadores, satisfacción)
 3. **Funciones**: Tarjetas con las principales características (Rutinas, Dietas, Progreso, Seguridad)
 4. **Cómo funciona**: 3 pasos para empezar (visitar el gym, crear perfil, acceder desde la app)
-5. **Sede**: Información de Sport Gym Sede 80 (área, horario, ubicación)
+5. **Sede**: Información de Sport Gym Sede Santa Rosita (área, horario, ubicación)
 6. **CTA Final**: "¿Ya sos miembro?" con botón de inicio de sesión
 
 ### Iniciar Sesión

@@ -6,7 +6,7 @@
 
 **Versión del documento:** 1.0  
 **Fecha:** Julio 2026  
-**Proyecto:** MetaFit — Sport Gym Sede 80  
+**Proyecto:** MetaFit — Sport Gym Sede Santa Rosita  
 **Plataforma objetivo:** Android (APK)  
 **Herramienta principal:** Expo Application Services (EAS)
 
@@ -51,7 +51,7 @@ Un APK contiene:
 
 ### 1.2 ¿Por qué MetaFit necesita un APK descargable desde la web?
 
-MetaFit es una aplicación que permite a los afiliados de Sport Gym Sede 80 acceder a sus rutinas de entrenamiento, planes nutricionales, y seguimiento de progreso desde su teléfono Android.
+MetaFit es una aplicación que permite a los afiliados de Sport Gym Sede Santa Rosita acceder a sus rutinas de entrenamiento, planes nutricionales, y seguimiento de progreso desde su teléfono Android.
 
 La razón principal por la que necesitamos un APK descargable desde la web (en vez de publicarlo en Google Play Store) es que MetaFit está en una etapa de desarrollo y pruebas. Publicar en Google Play Store requiere:
 
@@ -1687,5 +1687,5 @@ gunzip metafit.apk.gz
 ---
 
 > **Fin del manual.**  
-> Este documento fue generado en julio de 2026 como parte de la documentación técnica del proyecto MetaFit — Sport Gym Sede 80.  
+> Este documento fue generado en julio de 2026 como parte de la documentación técnica del proyecto MetaFit — Sport Gym Sede Santa Rosita.  
 > Para preguntas o actualizaciones, contacta al equipo de desarrollo.

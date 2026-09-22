@@ -1,6 +1,6 @@
 # 📋 Visión General del Proyecto
 
-> MetaFit v2.0 — Sistema de gestión deportiva para **Sport Gym Sede 80**
+> MetaFit v2.0 — Sistema de gestión deportiva para **Sport Gym Sede Santa Rosita**
 
 ---
 
@@ -12,7 +12,7 @@ Sistema integral de administración de gimnasio que gestiona afiliados, planes d
 
 ## 🏢 Contexto
 
-- **Cliente:** Sport Gym Sede 80 — Bogotá, Colombia
+- **Cliente:** Sport Gym Sede Santa Rosita — Bogotá, Colombia
 - **Líder técnico:** Juan Sebastian Carvajal
 - **Equipo:** Equipo Metafit (SENA)
 - **Versión actual:** 2.0

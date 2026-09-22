@@ -13,7 +13,7 @@ app móvil y extras 1000/10: modo claro/oscuro, push, analítica, monitoreo).
 
 ## ESCENA 1 — Introducción (0:00–0:30)
 
-🎙️: "MetaFit es el sistema de gestión de Sport Gym Sede 80: afiliados, pagos, rutinas y dietas en un
+🎙️: "MetaFit es el sistema de gestión de Sport Gym Sede Santa Rosita: afiliados, pagos, rutinas y dietas en un
 solo lugar. Te mostramos el flujo completo en 3 minutos."
 
 Pantalla: Landing page (logo + hero). Zoom al botón "Descargar APK".

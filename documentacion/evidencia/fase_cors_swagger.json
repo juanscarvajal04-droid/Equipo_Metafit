@@ -1,0 +1,34 @@
+{
+  "titulo": "Fix CORS Swagger UI — verificación local y producción",
+  "timestamp": "2026-09-22T13:43:00Z",
+  "causa": "La whitelist CORS no incluía el propio dominio del backend; Swagger UI (Origin = mismo backend) era rechazado con 'CORS no permitido para este origen'",
+  "cambios": {
+    "backend/server.js": "DEFAULT_CORS_ORIGIN ahora incluye http://localhost:3001, http://127.0.0.1:3001 y https://metafit-backend-rr18.onrender.com (además del frontend prod y puertos dev)",
+    ".env local": "CORS_ORIGINS ampliado con la lista completa (incluidos localhost:3001 y backend prod)",
+    "Render CORS_ORIGINS": "https://metafit-backend-rr18.onrender.com,https://metafit-frontend-78x6.onrender.com,http://localhost:5173,http://127.0.0.1:5173,http://localhost:8081,http://127.0.0.1:8081,http://localhost:3001,http://127.0.0.1:3001 (PUT env-vars HTTP 200, 20 vars preservadas)",
+    "commit": "f224cc8 Fix CORS: permitir orígenes del propio backend (Swagger local y prod) en server.js",
+    "push": "046e254..f224cc8 main -> main (OK)",
+    "deployRender": { "id": "dep-dap89u13jptc739ud5lg", "status": "live", "commit": "f224cc83d17f0971cbf9ea1d9c4cfee531c54b0d", "finishedAt": "2026-09-22T13:41:25Z", "trigger": "api (clear cache)" }
+  },
+  "local": {
+    "base": "http://localhost:3001",
+    "reconstruccion": "docker compose up -d --build backend -> Container metafit_backend Started",
+    "health": { "status": 200, "db": "MySQL conectado" },
+    "pruebas": [
+      { "paso": "preflight OPTIONS /afiliados (Origin localhost:3001)", "status": 204, "acao": "http://localhost:3001", "acam": "GET,POST,PUT,DELETE,PATCH,OPTIONS" },
+      { "paso": "GET /afiliados Try it out (Origin localhost:3001)", "status": 200, "acao": "http://localhost:3001", "total": 8 },
+      { "paso": "GET /swagger/ (UI HTML)", "status": 200, "acao": "http://localhost:3001" }
+    ]
+  },
+  "produccion": {
+    "base": "https://metafit-backend-rr18.onrender.com",
+    "pruebas": [
+      { "paso": "preflight OPTIONS /health (Origin backend)", "status": 204, "acao": "https://metafit-backend-rr18.onrender.com", "acam": "GET,POST,PUT,DELETE,PATCH,OPTIONS" },
+      { "paso": "GET /health (Origin backend)", "status": 200, "acao": "https://metafit-backend-rr18.onrender.com", "db": "MySQL conectado" },
+      { "paso": "GET /api-docs (UI HTML)", "status": 200, "acao": "https://metafit-backend-rr18.onrender.com" },
+      { "paso": "GET /afiliados Try it out (Origin backend)", "status": 200, "acao": "https://metafit-backend-rr18.onrender.com", "total": 9 }
+    ],
+    "nota": "GET /api-docs/swagger.json responde HTML (swagger-ui-express incrusta la spec en el HTML; no requiere fetch externo). El header Access-Control-Allow-Origin se devolvió correctamente en todos los endpoints con Origin del backend."
+  },
+  "conclusion": "CORS Swagger corregido y verificado en AMBOS entornos: preflight 204 + endpoints 200 con Access-Control-Allow-Origin = origen solicitante (localhost:3001 local, backend prod en producción)."
+}

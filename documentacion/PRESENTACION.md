@@ -1,23 +1,23 @@
 # PRESENTACIÓN — MetaFit (Guion de Sustentación)
 
 **Duración estimada:** 15-20 minutos  
-**Audiencia:** Jurado académico, cliente (Sport Gym Sede 80)
+**Audiencia:** Jurado académico, cliente (Sport Gym Sede Santa Rosita)
 
 ---
 
 ## Diapositiva 1 — Portada (1 min)
 
 **Título:** MetaFit — Sistema de Gestión Deportiva  
-**Subtítulo:** Automatización integral para Sport Gym Sede 80
+**Subtítulo:** Automatización integral para Sport Gym Sede Santa Rosita
 
 **Contenido visual:**
 - Logo / nombre del proyecto
 - Integrantes: Sofia Astudillo, Kevin S. Robayo, Carlos Rodrigues, Juan S. Carvajal isabella caldas
-- Cliente: Sport Gym Sede 80, Bogotá
+- Cliente: Sport Gym Sede Santa Rosita, Bogotá
 - Fecha: Junio 2026
 
 **Guion:**
-> "Buenos días. Somos el equipo MetaFit y hoy les presentamos nuestro sistema de gestión deportiva integral desarrollado para el gimnasio Sport Gym Sede 80 de Bogotá."
+> "Buenos días. Somos el equipo MetaFit y hoy les presentamos nuestro sistema de gestión deportiva integral desarrollado para el gimnasio Sport Gym Sede Santa Rosita de Bogotá."
 
 ---
 
@@ -35,7 +35,7 @@
   - 🔄 Duplicación de esfuerzos entre recepción y entrenadores
 
 **Guion:**
-> "Sport Gym Sede 80 manejaba sus 200+ afiliados en planillas de Excel y cuadernos físicos. Los entrenadores asignaban rutinas genéricas sin considerar lesiones. No existía un sistema de alertas de vencimiento de membresías. Y los afiliados no tenían forma de consultar su progreso sin ir al gimnasio."
+> "Sport Gym Sede Santa Rosita manejaba sus 200+ afiliados en planillas de Excel y cuadernos físicos. Los entrenadores asignaban rutinas genéricas sin considerar lesiones. No existía un sistema de alertas de vencimiento de membresías. Y los afiliados no tenían forma de consultar su progreso sin ir al gimnasio."
 
 ---
 
@@ -289,8 +289,8 @@
 **Contenido visual:**
 - MetaFit logo
 - "¿Preguntas?"
-- Contacto: Sport Gym Sede 80 — Bogotá
+- Contacto: Sport Gym Sede Santa Rosita — Bogotá
 - Repositorio: [URL del proyecto]
 
 **Guion:**
-> "MetaFit transforma la gestión de Sport Gym Sede 80. Reemplazamos hojas de cálculo por un sistema integral, rutinas genéricas por planes personalizados con filtrado inteligente, y la falta de información por métricas en tiempo real. Estamos orgullosos del resultado y abiertos a sus preguntas. Muchas gracias."
+> "MetaFit transforma la gestión de Sport Gym Sede Santa Rosita. Reemplazamos hojas de cálculo por un sistema integral, rutinas genéricas por planes personalizados con filtrado inteligente, y la falta de información por métricas en tiempo real. Estamos orgullosos del resultado y abiertos a sus preguntas. Muchas gracias."

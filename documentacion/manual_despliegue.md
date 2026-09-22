@@ -3,7 +3,7 @@
 ## De localhost a la nube: la guía definitiva
 
 **Autores:** Juan S. Carvajal, Sofia Astudillo, Kevin S. Robayo, Carlos Rodrigues  
-**Proyecto:** MetaFit — Sistema de Gestión Deportiva para Sport Gym Sede 80  
+**Proyecto:** MetaFit — Sistema de Gestión Deportiva para Sport Gym Sede Santa Rosita  
 **Versión del manual:** 1.0 — Julio 2026  
 **Repositorio:** https://github.com/juanscarvajal04-droid/Equipo_Metafit  
 **Rama principal:** `feature/juan-carvajal`

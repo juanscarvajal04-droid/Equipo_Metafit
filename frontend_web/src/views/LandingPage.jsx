@@ -16,7 +16,7 @@ const scrollTo = (id) =>
 /* ── Nav links con su ancla ─────────────────────────────────────────────────── */
 const NAV_LINKS = [
   { label: "Funciones",          id: "funciones" },
-  { label: "Sport Gym Sede 80",  id: "sede80"    },
+  { label: "Sport Gym Sede Santa Rosita",  id: "sede80"    },
   { label: "Sobre Nosotros",     id: "nosotros"  },
 ];
 
@@ -100,7 +100,7 @@ function ModalTerminos({ onClose }) {
           <div>
             <h5 className={s.modalHeaderTitle}>📋 Términos y Condiciones</h5>
             <small className={s.modalHeaderSub}>
-              MetaFit — Sport Gym Sede 80 · Versión 1.0 · Abril 2026
+              MetaFit — Sport Gym Sede Santa Rosita · Versión 1.0 · Abril 2026
             </small>
           </div>
           <button onClick={onClose} className={s.modalCloseBtn}>✕</button>
@@ -109,7 +109,7 @@ function ModalTerminos({ onClose }) {
           {[
             { num: "1", titulo: "🔒 Privacidad de Datos", color: "#e31c25", texto: "MetaFit recopila únicamente los datos necesarios para la gestión de membresías, historial de entrenamiento y planes nutricionales. Esta información es tratada conforme a la Ley 1581 de 2012 (Habeas Data). Los datos personales no serán compartidos con terceros sin autorización expresa del titular." },
             { num: "2", titulo: "🏋️ Uso de Instalaciones", color: "#2563eb", texto: "El acceso a las instalaciones está restringido a afiliados con membresía activa. El uso de equipos debe realizarse de manera responsable. Cualquier daño intencional resultará en la suspensión temporal o definitiva de la membresía." },
-            { num: "3", titulo: "⚕️ Responsabilidad en Salud", color: RED, texto: "Sport Gym Sede 80 no asume responsabilidad por lesiones derivadas del uso inadecuado de equipos o la omisión de información médica. Se recomienda chequeo médico previo al inicio de cualquier programa. Las rutinas y planes nutricionales son orientativos y no reemplazan el diagnóstico médico profesional." },
+            { num: "3", titulo: "⚕️ Responsabilidad en Salud", color: RED, texto: "Sport Gym Sede Santa Rosita no asume responsabilidad por lesiones derivadas del uso inadecuado de equipos o la omisión de información médica. Se recomienda chequeo médico previo al inicio de cualquier programa. Las rutinas y planes nutricionales son orientativos y no reemplazan el diagnóstico médico profesional." },
           ].map(sec => (
             <div key={sec.num} className={s.modalSection}>
               <div className={s.modalSectionHeader}>
@@ -178,7 +178,7 @@ export default function LandingPage() {
           <span className={s.logoIcon}>💪</span>
           <div>
             <div className={s.logoTitle}>MetaFit</div>
-            <div className={s.logoSub}>Sport Gym Sede 80</div>
+            <div className={s.logoSub}>Sport Gym Sede Santa Rosita</div>
           </div>
         </div>
 
@@ -237,7 +237,7 @@ export default function LandingPage() {
 
           <p className={`${s.heroSubtitle} ${s.animate} ${s.animateD3}`}>
             MetaFit es el sistema de gestión avanzado para{" "}
-            <strong className={s.heroHighlight}>Sport Gym Sede 80</strong>.
+            <strong className={s.heroHighlight}>Sport Gym Sede Santa Rosita</strong>.
             Rutinas, dietas y seguimiento de membresías en un solo lugar.
           </p>
 
@@ -359,7 +359,7 @@ export default function LandingPage() {
       </section>
 
       {/* ════════════════════════════════════════════════════════════════════
-          SPORT GYM SEDE 80 (id="sede80")
+          SPORT GYM SEDE SANTA ROSITA (id="sede80")
       ════════════════════════════════════════════════════════════════════ */}
       <section id="sede80" className={s.sectionSede}>
         {/* Fondo decorativo */}
@@ -375,7 +375,7 @@ export default function LandingPage() {
                 <span className={s.sedeTitleAccent}>Templo</span>
               </h2>
               <p className={s.sedeDesc}>
-                <strong className={s.sedeDescAccent}>Sport Gym Sede 80</strong> es la sede principal de nuestra cadena en Bogotá.
+                <strong className={s.sedeDescAccent}>Sport Gym Sede Santa Rosita</strong> es la sede principal de nuestra cadena en Bogotá.
                 Contamos con el equipamiento más completo de la ciudad: zonas de peso libre, cardio de alta gama,
                 piscina semiolímpica y salones especializados de funcional, boxeo y spinning.
               </p>
@@ -442,7 +442,7 @@ export default function LandingPage() {
           </h2>
 
           <p className={s.nosotrosDesc}>
-            MetaFit nació de una necesidad real: <strong>digitalizar la pasión por el deporte</strong> en Sport Gym Sede 80.
+            MetaFit nació de una necesidad real: <strong>digitalizar la pasión por el deporte</strong> en Sport Gym Sede Santa Rosita.
             Los procesos manuales, las planillas en papel y la falta de seguimiento eran el obstáculo entre nuestros entrenadores y el máximo rendimiento de cada afiliado.
           </p>
           <p className={s.nosotrosDesc2}>
@@ -546,7 +546,7 @@ export default function LandingPage() {
               <div className={s.appPhoneScreen}>
                 <div className={s.appPhoneLogo}>💪</div>
                 <div className={s.appPhoneTitle}>MetaFit</div>
-                <div className={s.appPhoneSub}>Sport Gym Sede 80</div>
+                <div className={s.appPhoneSub}>Sport Gym Sede Santa Rosita</div>
                 <div className={s.appPhoneDivider} />
                 <div className={s.appPhoneFeature}>🏋️ Rutinas</div>
                 <div className={s.appPhoneFeature}>🥗 Dietas</div>
@@ -568,7 +568,7 @@ export default function LandingPage() {
         <span className={s.footerCopy}>
           © {new Date().getFullYear()}{" "}
           <strong className={s.footerCopyBold}>MetaFit</strong>
-          {" | "}Desarrollado para Sport Gym Sede 80
+          {" | "}Desarrollado para Sport Gym Sede Santa Rosita
         </span>
         <div className={s.footerLinks}>
           <button className={s.footerLink} onClick={() => setShowTerminos(true)}>

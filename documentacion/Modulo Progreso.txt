@@ -189,4 +189,4 @@ usuario autenticado (`req.user.sub`), nunca contra un id recibido por query/body
 | BD | `01_estructura.sql` · `02_migracion_movil.sql` · `03_mejoras_estructura.sql` |
 
 ---
-*MetaFit Inc. · Sport Gym Sede 80 · Bogotá, Colombia*
+*MetaFit Inc. · Sport Gym Sede Santa Rosita · Bogotá, Colombia*

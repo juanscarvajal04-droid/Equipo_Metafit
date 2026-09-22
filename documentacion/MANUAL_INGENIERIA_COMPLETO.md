@@ -1,7 +1,7 @@
 # MANUAL DE INGENIERÍA — MetaFit v2.0
 
 > Sistema de Gestión Deportiva  
-> **Sport Gym Sede 80** — Bogotá, Colombia  
+> **Sport Gym Sede Santa Rosita** — Bogotá, Colombia  
 > Versión: 2.0 — Fecha: Junio 2026
 
 ---
@@ -33,7 +33,7 @@
 |---|---|
 | Nombre del proyecto | MetaFit — Sistema de Gestión Deportiva |
 | Versión | 2.0 |
-| Cliente | Sport Gym Sede 80 (Bogotá, Colombia) |
+| Cliente | Sport Gym Sede Santa Rosita (Bogotá, Colombia) |
 | Equipo de desarrollo | Juan Sebastián Carvajal |
 | Rol | Líder técnico / Desarrollador full-stack |
 | Fecha de finalización | Junio 2026 |
@@ -56,7 +56,7 @@ Cada sección incluye fragmentos de código real extraídos del código fuente, 
 
 # 2. INTRODUCCIÓN Y CONTEXTO
 
-## 2.1. El cliente: Sport Gym Sede 80
+## 2.1. El cliente: Sport Gym Sede Santa Rosita
 
 Sport Gym es una cadena de gimnasios colombiana con sede principal en la carrera 80 con calle 68 de Bogotá. Sus instalaciones incluyen:
 
@@ -148,7 +148,7 @@ Accede desde su celular a perfil personal, rutina diaria, plan nutricional e his
 
 ### Objetivo general
 
-Desarrollar un sistema de información integral para la gestión deportiva de Sport Gym Sede 80, automatizando el registro de afiliados, asignación de planes personalizados, control de pagos y aplicación móvil para consulta.
+Desarrollar un sistema de información integral para la gestión deportiva de Sport Gym Sede Santa Rosita, automatizando el registro de afiliados, asignación de planes personalizados, control de pagos y aplicación móvil para consulta.
 
 ### Objetivos específicos
 
@@ -1750,7 +1750,7 @@ mysql -h localhost -P 3307 -u root -pAdmin123! metafit
 
 ## 12.1. Resumen del proyecto
 
-MetaFit es un sistema de gestión deportiva completo que resuelve los problemas de registro manual, falta de métricas, planes genéricos y ausencia de app móvil en Sport Gym Sede 80. El sistema consta de:
+MetaFit es un sistema de gestión deportiva completo que resuelve los problemas de registro manual, falta de métricas, planes genéricos y ausencia de app móvil en Sport Gym Sede Santa Rosita. El sistema consta de:
 
 - **Backend API REST** con 55+ endpoints, autenticación JWT + bcrypt, RBAC con 4 roles, rate limiting, CORS y helmet
 - **Frontend Web** con React 19 + Vite, dashboard con KPIs y Chart.js, CRUD completo por rol, interfaz oscura responsive

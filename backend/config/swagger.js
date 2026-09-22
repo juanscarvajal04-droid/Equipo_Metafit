@@ -14,7 +14,7 @@ const options = {
 ## MetaFit — Sistema de Gestión Deportiva
 
 API REST para la gestión de afiliados, ciclos de entrenamiento,
-planes nutricionales y personal del gimnasio Sport Gym Sede 80 (Bogotá, 2025).
+planes nutricionales y personal del gimnasio Sport Gym Sede Santa Rosita (Bogotá, 2025).
 
 ### Autenticación
 Todos los endpoints protegidos requieren un **Bearer Token JWT**.
@@ -31,12 +31,12 @@ Todos los endpoints protegidos requieren un **Bearer Token JWT**.
     },
     servers: [
       {
-        url: process.env.API_BASE_URL || 'http://localhost:3001',
-        description: 'Servidor de desarrollo (local)',
-      },
-      {
         url: 'https://metafit-backend-rr18.onrender.com',
         description: 'Servidor de producción (Render)',
+      },
+      {
+        url: 'http://localhost:3001',
+        description: 'Servidor de desarrollo (local)',
       },
     ],
     // ── Tags globales (orden de los módulos en la UI) ────────

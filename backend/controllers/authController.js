@@ -121,7 +121,7 @@ const AuthController = {
       let correoEnviado = false;
       const enlaceReset = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/#/reset-password/${token}`;
       const subject = 'Recuperación de contraseña — MetaFit';
-      const textoPlano = `Hola ${user.nombres}, recibimos una solicitud para restablecer tu contraseña en MetaFit.\n\nUsá este enlace (válido por 15 minutos):\n${enlaceReset}\n\nSi no la pediste, ignorá este correo.\n\n— MetaFit · Sport Gym Sede 80 · Bogotá, Colombia`;
+      const textoPlano = `Hola ${user.nombres}, recibimos una solicitud para restablecer tu contraseña en MetaFit.\n\nUsá este enlace (válido por 15 minutos):\n${enlaceReset}\n\nSi no la pediste, ignorá este correo.\n\n— MetaFit · Sport Gym Sede Santa Rosita · Bogotá, Colombia`;
 
       const renderPlantilla = () => {
         try {

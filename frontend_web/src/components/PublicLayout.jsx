@@ -19,7 +19,7 @@ function ModalTerminos({ onClose }) {
   const secciones = [
     { n: "1", t: "🔒 Privacidad de Datos",       c: "#e31c25", p: "MetaFit recopila únicamente los datos necesarios para la gestión de membresías e historial de entrenamiento, conforme a la Ley 1581 de 2012 (Habeas Data). Los datos no serán compartidos con terceros sin autorización." },
     { n: "2", t: "🏋️ Uso de Instalaciones",      c: "#2563eb", p: "El acceso está restringido a afiliados con membresía activa. El uso inadecuado de equipos puede resultar en suspensión de membresía. Los horarios y normas pueden actualizarse sin previo aviso." },
-    { n: "3", t: "⚕️ Responsabilidad en Salud",  c: RED,       p: "Sport Gym Sede 80 no asume responsabilidad por lesiones derivadas del uso inadecuado de equipos. Se recomienda chequeo médico previo. Las rutinas y dietas son orientativas y no reemplazan el diagnóstico médico." },
+    { n: "3", t: "⚕️ Responsabilidad en Salud",  c: RED,       p: "Sport Gym Sede Santa Rosita no asume responsabilidad por lesiones derivadas del uso inadecuado de equipos. Se recomienda chequeo médico previo. Las rutinas y dietas son orientativas y no reemplazan el diagnóstico médico." },
   ];
 
   return (
@@ -28,7 +28,7 @@ function ModalTerminos({ onClose }) {
         <div className={styles.modalHeader}>
           <div>
             <h5 className={styles.modalTitle}>📋 Términos y Condiciones</h5>
-            <small className={styles.modalSub}>MetaFit — Sport Gym Sede 80 · v1.0</small>
+            <small className={styles.modalSub}>MetaFit — Sport Gym Sede Santa Rosita · v1.0</small>
           </div>
           <button className={styles.modalCloseBtn} onClick={onClose}>✕</button>
         </div>
@@ -97,7 +97,7 @@ export default function PublicLayout({ children }) {
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
               }}>MetaFit</div>
-              <div className={styles.logoTagline}>Sport Gym Sede 80</div>
+              <div className={styles.logoTagline}>Sport Gym Sede Santa Rosita</div>
             </div>
           </Link>
 
@@ -114,7 +114,7 @@ export default function PublicLayout({ children }) {
         <span className={styles.footerCopy}>
           © {new Date().getFullYear()}{" "}
           <strong className={styles.footerCopyBrand}>MetaFit</strong>
-          {" | "}Desarrollado para Sport Gym Sede 80
+          {" | "}Desarrollado para Sport Gym Sede Santa Rosita
         </span>
         <div className={styles.footerLinks}>
           <button className={styles.footerLink} onClick={() => setShowTerminos(true)}>

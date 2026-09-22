@@ -21,7 +21,7 @@ function ModalTerminos({ onClose }) {
           <div>
             <h5 className={styles.modalHeaderTitle}>📋 Términos y Condiciones</h5>
             <small className={styles.modalHeaderSub}>
-              MetaFit — Sport Gym Sede 80 · Versión 1.0 · Abril 2026
+              MetaFit — Sport Gym Sede Santa Rosita · Versión 1.0 · Abril 2026
             </small>
           </div>
           <button className={styles.modalCloseBtn} onClick={onClose}>✕</button>
@@ -35,13 +35,13 @@ function ModalTerminos({ onClose }) {
               parrafos: [
                 "MetaFit recopila únicamente los datos necesarios para la gestión de membresías, historial de entrenamiento y planes nutricionales de cada afiliado. Esta información es tratada conforme a la Ley 1581 de 2012 (Habeas Data) y el Decreto 1377 de 2013 de Colombia.",
                 "Los datos personales (nombre, documento, correo, teléfono) son usados exclusivamente para la operación interna del gimnasio y no serán compartidos con terceros sin autorización expresa del titular.",
-                "El afiliado tiene derecho a conocer, actualizar, rectificar o solicitar la eliminación de sus datos en cualquier momento, contactando a la administración de Sport Gym Sede 80.",
+                "El afiliado tiene derecho a conocer, actualizar, rectificar o solicitar la eliminación de sus datos en cualquier momento, contactando a la administración de Sport Gym Sede Santa Rosita.",
               ],
             },
             {
               num: "2", titulo: "🏋️ Uso de Instalaciones", color: "#2563eb",
               parrafos: [
-                "El acceso a las instalaciones de Sport Gym Sede 80 está restringido exclusivamente a afiliados con membresía activa y al día en sus pagos. El sistema MetaFit valida automáticamente el estado de membresía al momento del ingreso.",
+                "El acceso a las instalaciones de Sport Gym Sede Santa Rosita está restringido exclusivamente a afiliados con membresía activa y al día en sus pagos. El sistema MetaFit valida automáticamente el estado de membresía al momento del ingreso.",
                 "El uso de los equipos debe realizarse de manera responsable. Cualquier daño intencional o uso inadecuado resultará en la suspensión temporal o definitiva de la membresía, a criterio de la administración.",
                 "Los horarios de atención, clases grupales y uso de áreas específicas (sauna, zona cardio, peso libre) están sujetos a disponibilidad y a las normas internas del gimnasio, las cuales pueden ser actualizadas sin previo aviso.",
               ],
@@ -49,7 +49,7 @@ function ModalTerminos({ onClose }) {
             {
               num: "3", titulo: "⚕️ Responsabilidad en Salud", color: "#059669",
               parrafos: [
-                "Sport Gym Sede 80 no asume responsabilidad por lesiones derivadas del uso inadecuado de los equipos, el incumplimiento de las indicaciones de los entrenadores o la omisión de información médica relevante al momento de la inscripción.",
+                "Sport Gym Sede Santa Rosita no asume responsabilidad por lesiones derivadas del uso inadecuado de los equipos, el incumplimiento de las indicaciones de los entrenadores o la omisión de información médica relevante al momento de la inscripción.",
                 "Se recomienda a todos los afiliados realizarse un chequeo médico previo al inicio de cualquier programa de entrenamiento, especialmente si padecen condiciones como hipertensión, diabetes, problemas cardiovasculares o lesiones musculoesqueléticas.",
                 "Las rutinas y planes nutricionales asignados a través del sistema MetaFit son orientativos y no reemplazan el diagnóstico o tratamiento médico profesional.",
               ],
@@ -107,7 +107,7 @@ export default function Footer() {
           © {year}{" "}
           <strong className={styles.copyrightBrand}>MetaFit</strong>
           {" · "}
-          <span className={styles.copyrightSub}>Sport Gym Sede 80</span>
+          <span className={styles.copyrightSub}>Sport Gym Sede Santa Rosita</span>
         </span>
 
         {/* Centro: Términos y Condiciones */}

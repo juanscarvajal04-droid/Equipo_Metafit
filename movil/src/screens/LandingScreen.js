@@ -47,7 +47,7 @@ const FEATURES = [
 ];
 
 const STEPS = [
-  { num: '1', icon: '📍', text: 'Visitanos en Sport Gym Sede 80',         sub: 'Conocé nuestras instalaciones de élite' },
+  { num: '1', icon: '📍', text: 'Visitanos en Sport Gym Sede Santa Rosita',         sub: 'Conocé nuestras instalaciones de élite' },
   { num: '2', icon: '👩‍💼', text: 'La recepcionista crea tu perfil',        sub: 'Te registramos en el sistema' },
   { num: '3', icon: '📱', text: 'Accedé a tu plan desde cualquier lugar', sub: 'Seguí tu entrenamiento y dieta en la app' },
 ];
@@ -72,7 +72,7 @@ export default function LandingScreen({ navigation }) {
             <Text style={styles.heroBadge}>🔴 Sistema de Gestión Deportiva v1.0</Text>
             <Text style={styles.heroLogo}>💪</Text>
             <Text style={styles.heroTitle}>MetaFit</Text>
-            <Text style={styles.heroSubtitle}>Sport Gym Sede 80</Text>
+            <Text style={styles.heroSubtitle}>Sport Gym Sede Santa Rosita</Text>
             <Text style={styles.heroTagline}>"Transforma tu cuerpo, transforma tu vida"</Text>
             <Text style={styles.heroDesc}>
               El sistema de gestión avanzado para potenciar tu rendimiento.{'\n'}
@@ -180,7 +180,7 @@ export default function LandingScreen({ navigation }) {
           </View>
 
           <Text style={styles.sedeDesc}>
-            <Text style={styles.sedeDescAccent}>Sport Gym Sede 80</Text> es la sede principal
+            <Text style={styles.sedeDescAccent}>Sport Gym Sede Santa Rosita</Text> es la sede principal
             de nuestra cadena en Bogotá. Equipamiento Technogym y Life Fitness de última generación,
             piscina semiolímpica y salones de funcional, boxeo y spinning.
           </Text>
@@ -224,7 +224,7 @@ export default function LandingScreen({ navigation }) {
         {/* ═══════ FOOTER ═══════ */}
         <View style={styles.footer}>
           <Text style={styles.footerCopy}>
-            © 2026 <Text style={styles.footerCopyBold}>MetaFit</Text> · Sport Gym Sede 80
+            © 2026 <Text style={styles.footerCopyBold}>MetaFit</Text> · Sport Gym Sede Santa Rosita
           </Text>
           <Text style={styles.footerLocation}>Bogotá, Colombia</Text>
           <View style={styles.footerContact}>
