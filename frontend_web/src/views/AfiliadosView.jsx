@@ -242,8 +242,12 @@ export default function AfiliadosView() {
       if (data?.id && restriccionesSeleccionadas.length > 0) {
         for (const r of restriccionesSeleccionadas) {
           const rid = r?.id_restriccion ?? r?.id;
-          if (rid != null) {
+          if (rid == null) continue;
+          try {
             await authAxios.post(`/afiliados/${data.id}/restricciones`, { id_restriccion: rid });
+          } catch (restrErr) {
+            // No abortar la creación: el afiliado ya existe; loguear y seguir.
+            console.error(`[AfiliadosView] asignar restricción ${rid}:`, restrErr?.response?.data || restrErr);
           }
         }
       }

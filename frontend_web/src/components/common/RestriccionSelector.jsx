@@ -61,7 +61,11 @@ export default function RestriccionSelector({
     try {
       if (isRegistration) {
         // Modo registro: el estado lo maneja el padre (se asigna al guardar)
-        const restriccion = catalogo.find((r) => getId(r) === selectedId);
+        // BUG-FIX: selectedId llega como string (e.target.value del <select>)
+        // mientras getId(r) devuelve number (id_restriccion INT de MySQL).
+        // Sin coercion ambas promesas `===` falla y el find devuelve undefined,
+        // por lo que la restricción nunca se agregaba a la lista ni se guardaba.
+        const restriccion = catalogo.find((r) => String(getId(r)) === String(selectedId));
         if (restriccion) onAdd(restriccion);
         setSelectedId("");
         setShowModal(false);
