@@ -94,7 +94,7 @@ router.get('/entrenamiento/:id_ciclo', requireAuth, requireOwnCiclo, PlanControl
  *         name: grupo_muscular
  *         required: false
  *         schema: { type: string }
- *         description: Grupo muscular por el que filtrar (default: enfoque_muscular del día)
+ *         description: 'Grupo muscular por el que filtrar (default: enfoque_muscular del día)'
  *     responses:
  *       200:
  *         description: Rutina del día con ejercicios filtrados
@@ -487,6 +487,56 @@ router.post('/nutricional', requireAuth, requireAdminOrEntrenador, PlanControlle
  *         description: Alimento añadido al plan nutricional
  *       400:
  *         description: Alimento ya existe en esa comida del plan
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+/** @swagger
+ * /planes/nutricional/{id}:
+ *   patch:
+ *     summary: Actualizar plan nutricional de un ciclo (Admin o Entrenador)
+ *     description: >
+ *       Actualiza las propiedades generales del plan nutricional:
+ *       calorías objetivo, número de comidas y observaciones.
+ *     tags: [Planes]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema: { type: integer }
+ *         description: id_ciclo del plan nutricional
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               calorias_objetivo:
+ *                 type: number
+ *                 example: 2400.0
+ *                 description: 'Rango: 500–10000 kcal'
+ *               num_comidas:
+ *                 type: integer
+ *                 example: 5
+ *                 description: 'Rango: 1–10 comidas/día'
+ *               observaciones:
+ *                 type: string
+ *                 nullable: true
+ *     responses:
+ *       200:
+ *         description: Plan nutricional actualizado correctamente
+ *       400:
+ *         description: Sin campos válidos o valores fuera de rango
  *         content:
  *           application/json:
  *             schema:

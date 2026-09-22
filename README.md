@@ -91,12 +91,29 @@ Se proporcionan **dos** colecciones Postman (dentro de [`postman/`](./postman)):
 2. Selecciona el entorno `MetaFit Environment`
 3. Ejecuta primero el login — el token JWT se guarda automáticamente
 
+## 📖 Documentación interactiva de la API (Swagger)
+
+[![Swagger](https://img.shields.io/badge/Swagger-OpenAPI%203.0%20%7C%2091%20endpoints-85EA2D?style=for-the-badge&logo=swagger&logoColor=white)](https://metafit-backend-rr18.onrender.com/api-docs)
+
+Todos los **91 endpoints** del backend están documentados con anotaciones `@swagger` (OpenAPI 3.0)
+y son probables directamente desde la UI de Swagger:
+
+| Entorno | URL |
+|---|---|
+| 🌐 Producción | https://metafit-backend-rr18.onrender.com/api-docs |
+| 🐳 Local (Docker) | http://localhost:3001/api-docs |
+| 📄 Spec JSON versionada | `documentacion/swagger.json` |
+
+1. Abre la URL y haz clic en **Authorize** (candado).
+2. Ejecuta `POST /login` para obtener el token JWT.
+3. Pega `Bearer <token>` y prueba cualquier endpoint protegido.
+
 ## 📊 ISO 25000 — Cumplimiento
 
 | Característica | Estado |
 |----------------|--------|
 | Mantenibilidad | ✅ Código modular MVC (controller → service → model) |
-| Funcionalidad  | ✅ 30+ endpoints documentados con Swagger |
+| Funcionalidad  | ✅ **91 endpoints** documentados con Swagger (OpenAPI 3.0) |
 | Confiabilidad  | ✅ Manejo de errores con try-catch + códigos HTTP |
 | Seguridad      | ✅ JWT + bcrypt (12 rondas) + rutas protegidas |
 | Capacidad de prueba | ✅ 16 tests (integración + unitarios) pasando |
@@ -121,6 +138,7 @@ Todos los documentos se encuentran en la carpeta [`documentacion/`](./documentac
 | `documentacion/seguridad.md` | Rotación de credenciales y medidas de seguridad vigentes |
 | `documentacion/verificacion_final.md` | Verificación E2E de producción completada el 22-sep-2026 |
 | `documentacion/GUION_VIDEO_DEMO.md` | Guion del video demo (3–5 min, 3 roles) |
+| `documentacion/swagger.json` | Spec OpenAPI 3.0 exportada de producción (91 endpoints) |
 
 ## 🚀 Mejoras "1000/10" (últimas fases)
 

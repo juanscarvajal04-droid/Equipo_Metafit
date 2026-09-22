@@ -86,7 +86,89 @@ router.get('/ejercicios', requireAuth, CatalogoController.getAllEjercicios);
  *         $ref: '#/components/responses/InternalError'
  */
 router.post('/ejercicios', requireAuth, requireAdminOrEntrenador, CatalogoController.createEjercicio);
+
+/** @swagger
+ * /catalogo/ejercicios/{id}:
+ *   put:
+ *     summary: Actualizar ejercicio del catálogo (Admin o Entrenador)
+ *     description: Reemplaza los datos del ejercicio indicado. El nombre debe ser único.
+ *     tags: [Catálogos]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema: { type: integer }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Ejercicio'
+ *     responses:
+ *       200:
+ *         description: Ejercicio actualizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message: { type: string, example: 'Ejercicio actualizado' }
+ *       400:
+ *         description: Nombre duplicado o campos faltantes
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
 router.put('/ejercicios/:id', requireAuth, requireAdminOrEntrenador, CatalogoController.updateEjercicio);
+
+/** @swagger
+ * /catalogo/ejercicios/{id}:
+ *   delete:
+ *     summary: Eliminar ejercicio del catálogo (Admin o Entrenador)
+ *     description: Fallará con 409 si el ejercicio está en uso en rutinas activas.
+ *     tags: [Catálogos]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Ejercicio eliminado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message: { type: string, example: 'Ejercicio eliminado' }
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *       409:
+ *         description: Ejercicio en uso en rutinas activas
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
 router.delete('/ejercicios/:id', requireAuth, requireAdminOrEntrenador, CatalogoController.deleteEjercicio);
 
 /**
@@ -163,7 +245,89 @@ router.get('/alimentos', requireAuth, CatalogoController.getAllAlimentos);
  *         $ref: '#/components/responses/InternalError'
  */
 router.post('/alimentos', requireAuth, requireAdminOrEntrenador, CatalogoController.createAlimento);
+
+/** @swagger
+ * /catalogo/alimentos/{id}:
+ *   put:
+ *     summary: Actualizar alimento del catálogo (Admin o Entrenador)
+ *     description: Reemplaza los datos del alimento indicado (nombre y macros). El nombre debe ser único.
+ *     tags: [Catálogos]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema: { type: integer }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Alimento'
+ *     responses:
+ *       200:
+ *         description: Alimento actualizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message: { type: string, example: 'Alimento actualizado' }
+ *       400:
+ *         description: Nombre duplicado o macros faltantes
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
 router.put('/alimentos/:id', requireAuth, requireAdminOrEntrenador, CatalogoController.updateAlimento);
+
+/** @swagger
+ * /catalogo/alimentos/{id}:
+ *   delete:
+ *     summary: Eliminar alimento del catálogo (Admin o Entrenador)
+ *     description: Fallará con 409 si el alimento está en uso en planes nutricionales activos.
+ *     tags: [Catálogos]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Alimento eliminado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message: { type: string, example: 'Alimento eliminado' }
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *       409:
+ *         description: Alimento en uso en planes nutricionales
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
 router.delete('/alimentos/:id', requireAuth, requireAdminOrEntrenador, CatalogoController.deleteAlimento);
 
 /**

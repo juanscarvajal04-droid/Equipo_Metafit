@@ -32,8 +32,26 @@ Todos los endpoints protegidos requieren un **Bearer Token JWT**.
     servers: [
       {
         url: process.env.API_BASE_URL || 'http://localhost:3001',
-        description: 'Servidor de desarrollo',
+        description: 'Servidor de desarrollo (local)',
       },
+      {
+        url: 'https://metafit-backend-rr18.onrender.com',
+        description: 'Servidor de producción (Render)',
+      },
+    ],
+    // ── Tags globales (orden de los módulos en la UI) ────────
+    tags: [
+      { name: 'Autenticación', description: 'Login y recuperación de contraseña' },
+      { name: 'Usuarios (Personal)', description: 'Gestión del personal del gimnasio' },
+      { name: 'Afiliados', description: 'CRUD de afiliados, ciclos, restricciones y progreso' },
+      { name: 'Ciclos', description: 'Actualizar y eliminar ciclos de entrenamiento' },
+      { name: 'Planes', description: 'Planes de entrenamiento y nutricionales por ciclo' },
+      { name: 'Pagos', description: 'Pagos de membresía y métricas financieras' },
+      { name: 'Dashboard', description: 'KPIs y métricas del gimnasio (solo Admin)' },
+      { name: 'Notificaciones', description: 'Notificaciones contextuales por rol' },
+      { name: 'Catálogos', description: 'Ejercicios, alimentos y restricciones médicas' },
+      { name: 'Configuración', description: 'Parámetros del sistema editables por Admin' },
+      { name: 'Progreso', description: 'Progreso diario, historial y evolución del afiliado' },
     ],
     // ── Esquema de seguridad JWT (bearerAuth) ─────────────────
     components: {
@@ -162,6 +180,141 @@ Todos los endpoints protegidos requieren un **Bearer Token JWT**.
             efecto_relevante:  { type: 'string',  nullable: true },
           },
         },
+        Ejercicio: {
+          type: 'object',
+          required: ['nombre_ejercicio', 'grupo_muscular', 'nivel_minimo'],
+          properties: {
+            id_ejercicio:     { type: 'integer', example: 1 },
+            nombre_ejercicio: { type: 'string',  example: 'Sentadilla Búlgara' },
+            grupo_muscular:   { type: 'string',  enum: ['Piernas', 'Pecho', 'Espalda', 'Hombros', 'Biceps', 'Triceps', 'Core', 'Gluteos'] },
+            nivel_minimo:     { type: 'string',  enum: ['Principiante', 'Intermedio', 'Avanzado'] },
+            descripcion:      { type: 'string',  nullable: true, example: 'Posición de zancada con pierna trasera elevada' },
+          },
+        },
+        Alimento: {
+          type: 'object',
+          required: ['nombre_alimento', 'proteinas', 'carbohidratos', 'grasas'],
+          properties: {
+            id_alimento:       { type: 'integer', example: 1 },
+            nombre_alimento:   { type: 'string',  example: 'Pechuga de pollo' },
+            proteinas:         { type: 'number',  example: 31.0, description: 'g por cada 100 g' },
+            carbohidratos:     { type: 'number',  example: 0.0,  description: 'g por cada 100 g' },
+            grasas:            { type: 'number',  example: 3.6,  description: 'g por cada 100 g' },
+            calorias_por_100g: { type: 'number',  example: 158.0, description: 'Calculado con la fórmula Atwater (view v_alimento_calorias)' },
+          },
+        },
+        PlanEntrenamiento: {
+          type: 'object',
+          properties: {
+            id_ciclo:      { type: 'integer', example: 1 },
+            observaciones: { type: 'string', nullable: true },
+            rutinas: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/Rutina' },
+            },
+          },
+        },
+        PlanNutricional: {
+          type: 'object',
+          properties: {
+            id_ciclo:          { type: 'integer', example: 1 },
+            calorias_objetivo: { type: 'number', example: 2200.0, description: 'Meta diaria en kcal (500–10000)' },
+            num_comidas:       { type: 'integer', example: 5, description: 'Comidas al día (1–10)' },
+            observaciones:     { type: 'string', nullable: true },
+            detalle: {
+              type: 'array',
+              description: 'Alimentos por comida del plan',
+              items: { $ref: '#/components/schemas/DetalleNutricional' },
+            },
+          },
+        },
+        DetalleNutricional: {
+          type: 'object',
+          properties: {
+            id_ciclo:        { type: 'integer', example: 1 },
+            num_comida:      { type: 'integer', example: 2 },
+            id_alimento:     { type: 'integer', example: 3 },
+            nombre_alimento: { type: 'string',  example: 'Arroz blanco' },
+            cantidad_g:      { type: 'number',  example: 200.0 },
+          },
+        },
+        Rutina: {
+          type: 'object',
+          properties: {
+            id_rutina:        { type: 'integer', example: 1 },
+            id_ciclo:         { type: 'integer', example: 1 },
+            nombre_rutina:    { type: 'string',  example: 'Día de Piernas' },
+            enfoque_muscular: { type: 'string',  enum: ['Piernas', 'Pecho', 'Espalda', 'Hombros', 'Biceps', 'Triceps', 'Core', 'Gluteos', 'Full Body', 'Empuje', 'Jale'] },
+            dia_numero:       { type: 'integer', minimum: 1, maximum: 7, description: '1=Lunes … 7=Domingo' },
+            ejercicios: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/RutinaEjercicio' },
+            },
+          },
+        },
+        RutinaEjercicio: {
+          type: 'object',
+          properties: {
+            id_rutina:        { type: 'integer', example: 1 },
+            orden:            { type: 'integer', example: 1 },
+            id_ejercicio:     { type: 'integer', example: 5 },
+            nombre_ejercicio: { type: 'string',  example: 'Sentadilla Búlgara' },
+            series:           { type: 'integer', example: 4 },
+            repeticiones:     { type: 'integer', example: 12 },
+            peso_kg:          { type: 'number', example: 20.0, nullable: true },
+            descanso_seg:     { type: 'integer', example: 90, nullable: true },
+          },
+        },
+        Pago: {
+          type: 'object',
+          properties: {
+            id_pago:           { type: 'integer', example: 1 },
+            id_usuario:        { type: 'integer', example: 10 },
+            fecha_pago:        { type: 'string',  format: 'date', example: '2025-01-15' },
+            valor_pagado:      { type: 'number',  example: 80000.0 },
+            estado:            { type: 'string',  enum: ['Pagado', 'Vencido', 'Pendiente'] },
+            fecha_vencimiento: { type: 'string',  format: 'date', example: '2025-02-14' },
+            observaciones:     { type: 'string', nullable: true },
+            registrado_por:    { type: 'integer', nullable: true, description: 'id_usuario de quien registró el pago' },
+            fecha_creacion:    { type: 'string',  format: 'date-time' },
+            nombres_afiliado:  { type: 'string', description: 'Solo en respuestas con JOIN', example: 'Juan' },
+            apellidos_afiliado:{ type: 'string', description: 'Solo en respuestas con JOIN', example: 'Pérez' },
+          },
+        },
+        PagoCreate: {
+          type: 'object',
+          required: ['fecha_pago', 'valor_pagado'],
+          properties: {
+            fecha_pago:        { type: 'string', format: 'date', example: '2025-01-15' },
+            valor_pagado:      { type: 'number', example: 80000, minimum: 0 },
+            estado:            { type: 'string', enum: ['Pagado', 'Vencido', 'Pendiente'], default: 'Pagado' },
+            fecha_vencimiento: { type: 'string', format: 'date', description: 'Opcional; si se omite se calcula fecha_pago + 30 días' },
+            observaciones:     { type: 'string', nullable: true },
+            metodo_pago:       { type: 'string', example: 'Efectivo', description: 'Usado para la factura por correo' },
+          },
+        },
+        NotaEjercicio: {
+          type: 'object',
+          properties: {
+            id_nota:         { type: 'integer', example: 1 },
+            id_usuario:      { type: 'integer', example: 10 },
+            id_ejercicio:    { type: 'integer', example: 5 },
+            id_ciclo:        { type: 'integer', example: 2 },
+            nota:            { type: 'string', nullable: true, example: 'Me cuesta el hombro con este ejercicio' },
+            fecha_nota:      { type: 'string', format: 'date' },
+            nombre_ejercicio:{ type: 'string', description: 'Solo en respuestas con JOIN' },
+          },
+        },
+        Notificacion: {
+          type: 'object',
+          properties: {
+            tipo:     { type: 'string', example: 'membresias_por_vencer' },
+            mensaje:  { type: 'string', example: 'Membresías por vencer esta semana' },
+            cantidad: { type: 'integer', example: 7 },
+            icono:    { type: 'string', example: '💳' },
+            ruta:     { type: 'string', example: '/pagos' },
+          },
+        },
         DashboardKPIs: {
           type: 'object',
           properties: {
@@ -228,9 +381,11 @@ Todos los endpoints protegidos requieren un **Bearer Token JWT**.
     './routes/catalogoRoutes.js',
     './routes/dashboardRoutes.js',
     './routes/pagoRoutes.js',
+    './routes/pagoAdminRoutes.js',
     './routes/configuracionRoutes.js',
     './routes/notificacionRoutes.js',
     './routes/progresoRoutes.js',
+    './routes/cicloRoutes.js',
   ],
 };
 

@@ -36,8 +36,76 @@ const { requireAuth, requireAdmin } = require('../middlewares/auth');
  *         $ref: '#/components/responses/InternalError'
  */
 router.get('/', requireAuth, requireAdmin, UsuarioController.getAll);
+/** @swagger
+ * /usuarios/me/push-token:
+ *   put:
+ *     summary: Guardar mi push token (usuario autenticado)
+ *     description: >
+ *       Registra el token de notificaciones push (Expo) del usuario autenticado.
+ *       Usa el id del JWT (req.user.sub), no requiere parámetros en la URL.
+ *     tags: [Usuarios (Personal)]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [push_token]
+ *             properties:
+ *               push_token:
+ *                 type: string
+ *                 example: ExponentPushToken[abc123xyz]
+ *                 description: Token de Expo Push Notifications
+ *     responses:
+ *       200:
+ *         description: Push token registrado correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message: { type: string, example: 'Push token registrado' }
+ *       400:
+ *         description: push_token faltante o vacío
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               error: push_token es requerido
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
 router.put('/me/push-token', requireAuth, UsuarioController.guardarPushToken);
 
+/** @swagger
+ * /usuarios/recepcionistas:
+ *   get:
+ *     summary: Listar recepcionistas (solo Administrador)
+ *     description: Devuelve el listado de usuarios con rol Recepcionista.
+ *     tags: [Usuarios (Personal)]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de recepcionistas
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Usuario'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
 router.get('/recepcionistas', requireAuth, requireAdmin, UsuarioController.getRecepcionistas);
 
 /**

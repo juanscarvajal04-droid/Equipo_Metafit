@@ -30,7 +30,7 @@ const { requireAuth } = require('../middlewares/auth');
  *       - in: query
  *         name: fecha
  *         schema: { type: string, format: date }
- *         description: Fecha del resumen (YYYY-MM-DD). Default: hoy.
+ *         description: 'Fecha del resumen (YYYY-MM-DD). Default: hoy.'
  *     responses:
  *       200:
  *         description: Resumen diario del afiliado
