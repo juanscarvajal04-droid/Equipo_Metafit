@@ -48,37 +48,29 @@ para probar Adminer hoy:
 
 ---
 
-## Conexión a la BD de producción — ⚠️ situación real
+## Conexión a la BD de producción (VPS Oracle + Dokploy) — ✅ funciona
 
-En Render **no existe un servicio de base de datos externo** ni una "Internal Database URL"
-con formato `mysql://root:PASSWORD@HOST:3306/metafit`. Render no ofrece MySQL/MariaDB
-administrado, y en este proyecto **MariaDB corre embebido dentro del contenedor del backend**:
+La BD de producción fue **migrada a MySQL 8** en el VPS de Oracle Cloud, administrado por
+Dokploy. Desde Adminer se entra directo:
 
-- El `Dockerfile` raíz instala MariaDB dentro de la imagen (`apk add mariadb mariadb-client`).
-- `backend/start.sh` levanta `mariadbd` escuchando **únicamente en un socket local**
-  (`/run/mysqld/mysqld.sock`) y aplica los scripts SQL de `database/`; nunca escucha en
-  `0.0.0.0:3306` hacia afuera.
-- Env vars reales del backend en Render:
+| Campo | Valor |
+|---|---|
+| Sistema | `MySQL` |
+| Servidor | `141.148.94.173` |
+| Puerto | `3306` |
+| Usuario | `metafit` |
+| Contraseña | `Admin123!` |
+| Base de datos | `metafit` |
 
-  | Variable | Valor |
-  |---|---|
-  | `DB_HOST` | `localhost` |
-  | `DB_PORT` | `3306` |
-  | `DB_USER` | `root` |
-  | `DB_PASSWORD` | `ignored` (el arranque autentica por socket local, sin password) |
-  | `DB_SOCKET` | `/run/mysqld/mysqld.sock` |
-  | `DB_NAME` | `metafit` |
+> ⚠️ El VPS debe permitir el tráfico entrante en el puerto 3306 (Security List de Oracle / UFW) —
+> ya está habilitado y verificado con `SELECT 1`.
 
-Como Render expone **un único puerto por Web Service**, la BD embebida no es alcanzable desde
-Adminer (que corre en un servicio aparte).
+### Nota histórica
 
-### Opciones para ver la BD de producción con Adminer
-
-1. **Mover la BD a un MySQL/MariaDB administrado** (p.ej. Railway, Aiven, PlanetScale, o un
-   contenedor MariaDB con disco persistente en Render) y configurar el backend con `DB_HOST`,
-   `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` apuntando a él. Luego Adminer conecta con la
-   Internal Database URL correspondiente (formato `mysql://usuario:pass@host:3306/metafit`).
-2. **Usar Adminer con la BD de desarrollo** (tabla de arriba), que ya funciona sin cambios.
+Antes, la BD de producción corría **embebida dentro del contenedor del backend de Render**
+(MariaDB escuchando solo por socket `/run/mysqld/mysqld.sock`, sin puerto externo), y por eso
+Adminer no podía alcanzarla. Eso quedó resuelto con la migración al VPS.
+Detalles en [`infraestructura_vps.md`](./infraestructura_vps.md).
 
 ---
 

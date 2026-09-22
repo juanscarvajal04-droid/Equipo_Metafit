@@ -117,6 +117,7 @@ Todos los documentos se encuentran en la carpeta [`documentacion/`](./documentac
 | `documentacion/AUDITORIA_FINAL.md` | Auditoría final del proyecto |
 | `documentacion/UPTIME_ROBOT.md` | Monitoreo 24/7 con UptimeRobot (config manual) |
 | `documentacion/adminer.md` | Adminer en Render: acceso gráfico a la BD (`https://metafit-adminer.onrender.com`) |
+| `documentacion/infraestructura_vps.md` | BD de producción migrada a Oracle VPS + Dokploy (MySQL 8, 141.148.94.173:3306) |
 | `documentacion/GUION_VIDEO_DEMO.md` | Guion del video demo (3–5 min, 3 roles) |
 
 ## 🚀 Mejoras "1000/10" (últimas fases)

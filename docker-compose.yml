@@ -158,6 +158,27 @@ services:
     networks:
       - metafit_net
 
+  # ──────────────────────────────────────────────────────────
+  # SERVICIO 6 (SOLO DOCUMENTACIÓN): BD remota en Oracle VPS + Dokploy
+  # Este servicio NO se levanta con `docker compose up`:
+  # está en el profile "documentation-only" como referencia.
+  # La BD REAL de producción ya vive en el VPS Oracle
+  #   http://141.148.94.173:3000 (Dokploy) · MySQL 8 en 141.148.94.173:3306
+  # Para ver la config equivalente en Dokploy revisá
+  #   documentacion/infraestructura_vps.md
+  # ──────────────────────────────────────────────────────────
+  dokploy-db-remote:
+    image: mysql:8.0
+    container_name: metafit_db_remote_docs
+    environment:
+      MYSQL_ROOT_PASSWORD: Admin123!
+      MYSQL_DATABASE: metafit
+      MYSQL_USER: metafit
+      MYSQL_PASSWORD: Admin123!
+    # Este servicio NO se levanta, es solo documentación.
+    # La BD real está en Oracle VPS: 141.148.94.173:3306
+    profiles: ["documentation-only"]
+
 # ──────────────────────────────────────────────────────────
 # VOLUMES y NETWORKS
 # ──────────────────────────────────────────────────────────
