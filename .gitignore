@@ -3,3 +3,12 @@
 *.env.local
 *.env.*.local
 node_modules/
+
+# Backups de base de datos (pueden contener datos sensibles)
+metafit_backup*.sql
+*.sql.gz
+*.dump
+
+# Configuración local de Obsidian (workspace, plugins, etc.)
+documentacion/brain/.obsidian/
+**/.obsidian/
