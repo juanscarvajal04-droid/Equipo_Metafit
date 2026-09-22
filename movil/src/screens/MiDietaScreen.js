@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -23,6 +23,7 @@ import {
 import { seleccionarCicloActivo } from '../utils/cicloUtils';
 import { formatearFechaLegible, nombreComida } from '../utils/formateadores';
 import BarraAgua from '../components/common/BarraAgua';
+import useAutoRefresh from '../hooks/useAutoRefresh';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const MAX_VASOS = 8;
@@ -169,10 +170,11 @@ export default function MiDietaScreen() {
   const [savingAgua, setSavingAgua] = useState(false);
   const [error, setError] = useState(null);
   const [actualizando, setActualizando] = useState(false);
+  const cicloIdRef = useRef(null);
 
   const hoy = new Date().toISOString().slice(0, 10);
 
-  const fetchData = useCallback(async (cicloSeleccionado) => {
+  const fetchData = useCallback(async (cicloSeleccionado, opts = {}) => {
     try {
       setError(null);
       const ciclosRes = await getMisCiclos();
@@ -186,6 +188,8 @@ export default function MiDietaScreen() {
         return;
       }
       setCiclo(cicloData);
+      const cicloCambio = cicloIdRef.current !== cicloData.id_ciclo;
+      if (cicloCambio) cicloIdRef.current = cicloData.id_ciclo;
 
       const [planRes, aguaRes] = await Promise.all([
         getPlanNutricional(cicloData.id_ciclo),
@@ -205,7 +209,7 @@ export default function MiDietaScreen() {
       setAgua(aguaRes.data?.vasos ?? 0);
 
       const ids = Array.isArray(planData) ? planData.map((a) => a.id_alimento) : [];
-      setConsumidos({});
+      if (cicloCambio || !opts.silent) setConsumidos({});
     } catch (err) {
       setError('Error al cargar el plan nutricional.');
     } finally {
@@ -215,6 +219,9 @@ export default function MiDietaScreen() {
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  // Sincronización tiempo real: polling 10s (silencioso, conserva consumo marcado)
+  useAutoRefresh(() => fetchData(undefined, { silent: true }), 10000);
 
   const onRefresh = () => { setRefreshing(true); fetchData(); };
 

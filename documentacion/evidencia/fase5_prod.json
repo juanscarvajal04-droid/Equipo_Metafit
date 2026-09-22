@@ -1,0 +1,627 @@
+{
+  "fase": 5,
+  "titulo": "Producción Render — CRUD + foto + correo + persistencia",
+  "timestamp": "2026-09-22T11:12:48.106Z",
+  "base": "https://metafit-backend-rr18.onrender.com",
+  "pasos": [
+    {
+      "etiqueta": "5.1 health backend",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 412,
+      "body": {
+        "status": "ok",
+        "db": "MySQL conectado",
+        "timestamp": "2026-09-22T11:12:41.512Z"
+      }
+    },
+    {
+      "etiqueta": "5.2 login admin prod",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 2525,
+      "body": {
+        "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiY2FybG9zQG1ldGFmaXQuY29tIiwicm9sZSI6IkFkbWluaXN0cmFkb3IiLCJpYXQiOjE3OTAwNzU1NjQsImV4cCI6MTc5MDEwNDM2NH0.yFOUns4f6X_fEjgibPpQUqs5FhUocTNYMHO8U5SNhJg",
+        "user": {
+          "id": 1,
+          "email": "carlos@metafit.com",
+          "role": "Administrador",
+          "nombres": "Carlos",
+          "apellidos": "Ramírez"
+        }
+      }
+    },
+    {
+      "etiqueta": "5.3 crear afiliado PROD",
+      "ok": true,
+      "status": 201,
+      "esperado": 201,
+      "ms": 2691,
+      "body": {
+        "id": 208,
+        "message": "Afiliado creado correctamente",
+        "password_temporal": "ProdQA2025!"
+      }
+    },
+    {
+      "etiqueta": "5.4 leer afiliado PROD",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 392,
+      "body": {
+        "id_usuario": 208,
+        "nombres": "ProdQA",
+        "apellidos": "Check571044",
+        "correo": "metafit.sistema@gmail.com",
+        "estado": "Activo",
+        "documento": "88571044",
+        "fecha_nacimiento": "1993-03-15T00:00:00.000Z",
+        "edad": 33,
+        "sexo": "Masculino",
+        "telefono": "3101112222",
+        "direccion": "Prueba prod Fase5",
+        "estatura_cm": "178.00",
+        "estado_afiliacion": "Activo",
+        "foto": null,
+        "fecha_registro": "2026-09-22T00:00:00.000Z",
+        "fecha_ultima_modificacion": null,
+        "registrado_por": 1,
+        "restricciones": [],
+        "ciclo_activo": null
+      }
+    },
+    {
+      "etiqueta": "5.5 subir foto afiliado PROD (Cloudinary)",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 1260,
+      "body": {
+        "message": "Foto de perfil actualizada",
+        "foto": "https://res.cloudinary.com/llaq9vyl/image/upload/v1790075567/metafit/afiliados/tdo6mazxazs6sw4rtjbp.png",
+        "url": "https://res.cloudinary.com/llaq9vyl/image/upload/v1790075567/metafit/afiliados/tdo6mazxazs6sw4rtjbp.png"
+      }
+    },
+    {
+      "etiqueta": "5.6 obtener lista afiliados (Admin)",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 499,
+      "body": [
+        {
+          "id_usuario": 9,
+          "nombres": "Sofía",
+          "apellidos": "Castro",
+          "correo": "sofia@gmail.com",
+          "estado": "Activo",
+          "fecha_registro_sistema": "2024-04-01T08:00:00.000Z",
+          "documento": "1004567890",
+          "fecha_nacimiento": "2000-01-30T00:00:00.000Z",
+          "edad": 26,
+          "sexo": "Femenino",
+          "telefono": "3034567890",
+          "direccion": "Bogotá, Calle 25 # 12-5",
+          "estatura_cm": "158.50",
+          "estado_afiliacion": "Activo",
+          "foto": null,
+          "fecha_registro_afiliado": "2024-04-01T00:00:00.000Z",
+          "registrado_por": 5,
+          "registrado_por_nombre": "Pedro",
+          "restricciones": [],
+          "ciclo_activo": {
+            "id_ciclo": 8,
+            "id_usuario": 9,
+            "fecha_inicio": "2024-07-01T00:00:00.000Z",
+            "fecha_fin": "2024-09-30T00:00:00.000Z",
+            "activo": 1,
+            "objetivo_fisico": "Perdida de grasa",
+            "nivel_experiencia": "Principiante",
+            "disponibilidad_dias": 4,
+            "grupo_muscular_prioritario": null,
+            "observaciones": null,
+            "numero_ciclo": 2,
+            "plan_entrenamiento": {
+              "observaciones": null
+            },
+            "plan_nutricional": {
+              "calorias_estimadas": "1750.00",
+              "num_comidas_diarias": 4,
+              "observaciones": null
+            },
+            "ultimo_progreso": {
+              "id_ciclo": 8,
+              "fecha_registro": "2024-08-01T00:00:00.000Z",
+              "peso_kg": "59.20",
+              "porcentaje_grasa": "23.70",
+              "medida_cintura": "73.90",
+              "medida_brazo": "27.00",
+              "medida_pierna": "52.60",
+              "imc": 23.56
+            }
+          },
+          "objetivo_fisico": "Perdida de grasa",
+          "nivel_experiencia": "Principiante",
+          "disponibilidad_semanal_dias": 4,
+          "grupo_muscular_prioritario": null
+        },
+        {
+          "id_usuario": 208,
+          "nombres": "ProdQA",
+          "apellidos": "Check571044",
+          "correo": "metafit.sistema@gmail.com",
+          "estado": "Activo",
+          "fecha_registro_sistema": "2026-09-22T11:12:46.000Z",
+          "documento": "88571044",
+          "fecha_nacimiento": "1993-03-15T00:00:00.000Z",
+          "edad": 33,
+          "sexo": "Masculino",
+          "telefono": "3101112222",
+          "direccion": "Prueba prod Fase5",
+          "estatura_cm": "178.00",
+          "estado_afiliacion": "Activo",
+          "foto": "https://res.cloudinary.com/llaq9vyl/image/upload/v1790075567/metafit/afiliados/tdo6mazxazs6sw4rtjbp.png",
+          "fecha_registro_afiliado": "2026-09-22T00:00:00.000Z",
+          "registrado_por": 1,
+          "registrado_por_nombre": "Carlos",
+          "restricciones": [],
+          "ciclo_activo": null,
+          "objetivo_fisico": null,
+          "nivel_experiencia": null,
+          "disponibilidad_semanal_dias": null,
+          "grupo_muscular_prioritario": null
+        },
+        {
+          "id_usuario": 100,
+          "nombres": "Carlos",
+          "apellidos": "Demo",
+          "correo": "carlos.demo@test.com",
+          "estado": "Activo",
+          "fecha_registro_sistema": "2026-06-01T08:00:00.000Z",
+          "documento": "999888777",
+          "fecha_nacimiento": "1992-08-15T00:00:00.000Z",
+          "edad": 34,
+          "sexo": "Masculino",
+          "telefono": "3009998887",
+          "direccion": "Carrera 7 # 72-41, Bogotá",
+          "estatura_cm": "170.00",
+          "estado_afiliacion": "Activo",
+          "foto": null,
+          "fecha_registro_afiliado": "2026-06-01T00:00:00.000Z",
+          "registrado_por": 4,
+          "registrado_por_nombre": "María",
+          "restricciones": [
+            {
+              "id_usuario": 100,
+              "id_restriccion": 2,
+              "nombre_restriccion": "Hipertension arterial",
+              "tipo": "Enfermedad",
+              "efecto_relevante": "Controlar frecuencia cardiaca durante el ejercicio"
+            },
+            {
+              "id_usuario": 100,
+              "id_restriccion": 5,
+              "nombre_restriccion": "Intolerancia a lactosa",
+              "tipo": "Alergia",
+              "efecto_relevante": null
+            }
+          ],
+          "ciclo_activo": {
+            "id_ciclo": 100,
+            "id_usuario": 100,
+            "fecha_inicio": "2026-06-01T00:00:00.000Z",
+            "fecha_fin": "2026-08-31T00:00:00.000Z",
+            "activo": 1,
+            "objetivo_fisico": "Perdida de grasa",
+            "nivel_experiencia": "Intermedio",
+            "disponibilidad_dias": 4,
+            "grupo_muscular_prioritario": "Pecho",
+            "observaciones": "Ciclo de prueba generado por datos demo",
+            "numero_ciclo": 1,
+            "plan_entrenamiento": {
+              "observaciones": "Plan demo — 3 días/semana"
+            },
+            "plan_nutricional": {
+              "calorias_estimadas": "2200.00",
+              "num_comidas_diarias": 4,
+              "observaciones": "Plan nutricional demo — déficit calórico moderado"
+            },
+            "ultimo_progreso": null
+          },
+          "objetivo_fisico": "Perdida de grasa",
+          "nivel_experiencia": "Intermedio",
+          "disponibilidad_semanal_dias": 4,
+          "grupo_muscular_prioritario": "Pecho"
+        },
+        {
+          "id_usuario": 8,
+          "nombres": "Luis",
+          "apellidos": "Herrera",
+          "correo": "luis@gmail.com",
+          "estado": "Activo",
+          "fecha_registro_sistema": "2024-01-15T08:00:00.000Z",
+          "documento": "1003456789",
+          "fecha_nacimiento": "1988-11-05T00:00:00.000Z",
+          "edad": 37,
+          "sexo": "Masculino",
+          "telefono": "3023456789",
+          "direccion": "Bogotá, Av 20 # 3-10",
+          "estatura_cm": "180.00",
+          "estado_afiliacion": "Activo",
+          "foto": null,
+          "fecha_registro_afiliado": "2024-01-15T00:00:00.000Z",
+          "registrado_por": 5,
+          "registrado_por_nombre": "Pedro",
+          "restricciones": [
+            {
+              "id_usuario": 8,
+              "id_restriccion": 1,
+              "nombre_restriccion": "Diabetes tipo 2",
+              "tipo": "Enfermedad",
+              "efecto_relevante": "Evitar ejercicio de alta intensidad sin supervision"
+            },
+            {
+              "id_usuario": 8,
+              "id_restriccion": 6,
+              "nombre_restriccion": "Metformina",
+              "tipo": "Medicamento",
+              "efecto_relevante": "Puede causar hipoglucemia en ejercicio intenso"
+            }
+          ],
+          "ciclo_activo": {
+            "id_ciclo": 6,
+            "id_usuario": 8,
+            "fecha_inicio": "2024-03-30T00:00:00.000Z",
+            "fecha_fin": "2024-06-13T00:00:00.000Z",
+            "activo": 1,
+            "objetivo_fisico": "Mantenimiento",
+            "nivel_experiencia": "Avanzado",
+            "disponibilidad_dias": 6,
+            "grupo_muscular_prioritario": "Espalda",
+            "observaciones": null,
+            "numero_ciclo": 2,
+            "plan_entrenamiento": {
+              "observaciones": null
+            },
+            "plan_nutricional": {
+              "calorias_estimadas": "2050.11",
+              "num_comidas_diarias": 3,
+              "observaciones": null
+            },
+            "ultimo_progreso": {
+              "id_ciclo": 6,
+              "fecha_registro": "2024-05-12T00:00:00.000Z",
+              "peso_kg": "56.77",
+              "porcentaje_grasa": "17.84",
+              "medida_cintura": "68.55",
+              "medida_brazo": "40.40",
+              "medida_pierna": "56.06",
+              "imc": 17.52
+            }
+          },
+          "objetivo_fisico": "Mantenimiento",
+          "nivel_experiencia": "Avanzado",
+          "disponibilidad_semanal_dias": 6,
+          "grupo_muscular_prioritario": "Espalda"
+        },
+        {
+          "id_usuario": 6,
+          "nombres": "Juan",
+          "apellidos": "Martínez",
+          "correo": "juan@gmail.com",
+          "estado": "Activo",
+          "fecha_registro_sistema": "2024-01-08T08:00:00.000Z",
+          "documento": "1001234567",
+          "fecha_nacimiento": "1990-03-15T00:00:00.000Z",
+          "edad": 36,
+          "sexo": "Masculino",
+          "telefono": "3001234567",
+          "direccion": "Bogotá, Calle 10 # 5-20",
+          "estatura_cm": "175.50",
+          "estado_afiliacion": "Activo",
+          "foto": null,
+          "fecha_registro_afiliado": "2024-01-08T00:00:00.000Z",
+          "registrado_por": 4,
+          "registrado_por_nombre": "María",
+          "restricciones": [
+            {
+              "id_usuario": 6,
+              "id_restriccion": 2,
+              "nombre_restriccion": "Hipertension arterial",
+              "tipo": "Enfermedad",
+              "efecto_relevante": "Controlar frecuencia cardiaca durante el ejercicio"
+            }
+          ],
+          "ciclo_activo": {
+            "id_ciclo": 2,
+            "id_usuario": 6,
+            "fecha_inicio": "2024-04-04T00:00:00.000Z",
+            "fecha_fin": "2024-05-31T00:00:00.000Z",
+            "activo": 1,
+            "objetivo_fisico": "Perdida de grasa",
+            "nivel_experiencia": "Intermedio",
+            "disponibilidad_dias": 3,
+            "grupo_muscular_prioritario": "Pecho",
+            "observaciones": null,
+            "numero_ciclo": 2,
+            "plan_entrenamiento": {
+              "observaciones": null
+            },
+            "plan_nutricional": {
+              "calorias_estimadas": "1899.56",
+              "num_comidas_diarias": 4,
+              "observaciones": null
+            },
+            "ultimo_progreso": {
+              "id_ciclo": 2,
+              "fecha_registro": "2024-04-27T00:00:00.000Z",
+              "peso_kg": "80.92",
+              "porcentaje_grasa": "17.40",
+              "medida_cintura": "100.23",
+              "medida_brazo": "43.16",
+              "medida_pierna": "67.70",
+              "imc": 26.27
+            }
+          },
+          "objetivo_fisico": "Perdida de grasa",
+          "nivel_experiencia": "Intermedio",
+          "disponibilidad_semanal_dias": 3,
+          "grupo_muscular_prioritario": "Pecho"
+        },
+        {
+          "id_usuario": 200,
+          "nombres": "Diana",
+          "apellidos": "Peña",
+          "correo": "diana@gmail.com",
+          "estado": "Activo",
+          "fecha_registro_sistema": "2026-08-01T08:00:00.000Z",
+          "documento": "1002003001",
+          "fecha_nacimiento": "1994-04-12T00:00:00.000Z",
+          "edad": 32,
+          "sexo": "Femenino",
+          "telefono": "3012345001",
+          "direccion": "Bogotá, Calle 30 # 8-15",
+          "estatura_cm": "165.00",
+          "estado_afiliacion": "Activo",
+          "foto": null,
+          "fecha_registro_afiliado": "2026-08-01T00:00:00.000Z",
+          "registrado_por": 4,
+          "registrado_por_nombre": "María",
+          "restricciones": [],
+          "ciclo_activo": {
+            "id_ciclo": 200,
+            "id_usuario": 200,
+            "fecha_inicio": "2026-08-01T00:00:00.000Z",
+            "fecha_fin": "2026-10-31T00:00:00.000Z",
+            "activo": 1,
+            "objetivo_fisico": "Perdida de grasa",
+            "nivel_experiencia": "Principiante",
+            "disponibilidad_dias": 3,
+            "grupo_muscular_prioritario": "Pecho",
+            "observaciones": null,
+            "numero_ciclo": 1,
+            "plan_entrenamiento": {
+              "observaciones": "Plan 3 dias/semana"
+            },
+            "plan_nutricional": {
+              "calorias_estimadas": "2250.00",
+              "num_comidas_diarias": 4,
+              "observaciones": "Deficit calórico moderado"
+            },
+            "ultimo_progreso": null
+          },
+          "objetivo_fisico": "Perdida de grasa",
+          "nivel_experiencia": "Principiante",
+          "disponibilidad_semanal_dias": 3,
+          "grupo_muscular_prioritario": "Pecho"
+        },
+        {
+          "id_usuario": 7,
+          "nombres": "Ana",
+          "apellidos": "Rodríguez",
+          "correo": "ana@gmail.com",
+          "estado": "Activo",
+          "fecha_registro_sistema": "2024-02-01T08:00:00.000Z",
+          "documento": "1002345678",
+          "fecha_nacimiento": "1995-07-22T00:00:00.000Z",
+          "edad": 31,
+          "sexo": "Femenino",
+          "telefono": "3012345678",
+          "direccion": "Bogotá, Carrera 15 # 8-30",
+          "estatura_cm": "162.00",
+          "estado_afiliacion": "Activo",
+          "foto": null,
+          "fecha_registro_afiliado": "2024-02-01T00:00:00.000Z",
+          "registrado_por": 4,
+          "registrado_por_nombre": "María",
+          "restricciones": [
+            {
+              "id_usuario": 7,
+              "id_restriccion": 5,
+              "nombre_restriccion": "Intolerancia a lactosa",
+              "tipo": "Alergia",
+              "efecto_relevante": null
+            }
+          ],
+          "ciclo_activo": {
+            "id_ciclo": 4,
+            "id_usuario": 7,
+            "fecha_inicio": "2024-04-22T00:00:00.000Z",
+            "fecha_fin": "2024-07-16T00:00:00.000Z",
+            "activo": 1,
+            "objetivo_fisico": "Aumento de masa",
+            "nivel_experiencia": "Intermedio",
+            "disponibilidad_dias": 5,
+            "grupo_muscular_prioritario": "Gluteos",
+            "observaciones": null,
+            "numero_ciclo": 2,
+            "plan_entrenamiento": {
+              "observaciones": null
+            },
+            "plan_nutricional": {
+              "calorias_estimadas": "3012.07",
+              "num_comidas_diarias": 4,
+              "observaciones": null
+            },
+            "ultimo_progreso": {
+              "id_ciclo": 4,
+              "fecha_registro": "2024-04-22T00:00:00.000Z",
+              "peso_kg": "73.66",
+              "porcentaje_grasa": "14.42",
+              "medida_cintura": "86.87",
+              "medida_brazo": "27.48",
+              "medida_pierna": "54.16",
+              "imc": 28.07
+            }
+          },
+          "objetivo_fisico": "Aumento de masa",
+          "nivel_experiencia": "Intermedio",
+          "disponibilidad_semanal_dias": 5,
+          "grupo_muscular_prioritario": "Gluteos"
+        },
+        {
+          "id_usuario": 201,
+          "nombres": "Miguel",
+          "apellidos": "Rojas",
+          "correo": "miguel@gmail.com",
+          "estado": "Activo",
+          "fecha_registro_sistema": "2026-08-05T08:00:00.000Z",
+          "documento": "1002003002",
+          "fecha_nacimiento": "1991-09-18T00:00:00.000Z",
+          "edad": 35,
+          "sexo": "Masculino",
+          "telefono": "3012345002",
+          "direccion": "Bogotá, Carrera 50 # 12-3",
+          "estatura_cm": "178.00",
+          "estado_afiliacion": "Activo",
+          "foto": null,
+          "fecha_registro_afiliado": "2026-08-05T00:00:00.000Z",
+          "registrado_por": 4,
+          "registrado_por_nombre": "María",
+          "restricciones": [],
+          "ciclo_activo": {
+            "id_ciclo": 201,
+            "id_usuario": 201,
+            "fecha_inicio": "2026-08-05T00:00:00.000Z",
+            "fecha_fin": "2026-11-05T00:00:00.000Z",
+            "activo": 1,
+            "objetivo_fisico": "Aumento de masa",
+            "nivel_experiencia": "Intermedio",
+            "disponibilidad_dias": 4,
+            "grupo_muscular_prioritario": "Gluteos",
+            "observaciones": "Enfoque en tren inferior",
+            "numero_ciclo": 1,
+            "plan_entrenamiento": {
+              "observaciones": "Plan 4 dias/semana"
+            },
+            "plan_nutricional": {
+              "calorias_estimadas": "2700.00",
+              "num_comidas_diarias": 5,
+              "observaciones": "Superavit para aumento de masa"
+            },
+            "ultimo_progreso": null
+          },
+          "objetivo_fisico": "Aumento de masa",
+          "nivel_experiencia": "Intermedio",
+          "disponibilidad_semanal_dias": 4,
+          "grupo_muscular_prioritario": "Gluteos"
+        },
+        {
+          "id_usuario": 202,
+          "nombres": "Camila",
+          "apellidos": "Vargas",
+          "correo": "camila@gmail.com",
+          "estado": "Activo",
+          "fecha_registro_sistema": "2026-08-10T08:00:00.000Z",
+          "documento": "1002003003",
+          "fecha_nacimiento": "1987-02-25T00:00:00.000Z",
+          "edad": 39,
+          "sexo": "Masculino",
+          "telefono": "3012345003",
+          "direccion": "Bogotá, Av Boyacá # 98-5",
+          "estatura_cm": "183.00",
+          "estado_afiliacion": "Activo",
+          "foto": null,
+          "fecha_registro_afiliado": "2026-08-10T00:00:00.000Z",
+          "registrado_por": 4,
+          "registrado_por_nombre": "María",
+          "restricciones": [],
+          "ciclo_activo": {
+            "id_ciclo": 202,
+            "id_usuario": 202,
+            "fecha_inicio": "2026-08-10T00:00:00.000Z",
+            "fecha_fin": "2026-10-10T00:00:00.000Z",
+            "activo": 1,
+            "objetivo_fisico": "Mantenimiento",
+            "nivel_experiencia": "Avanzado",
+            "disponibilidad_dias": 2,
+            "grupo_muscular_prioritario": "Espalda",
+            "observaciones": "Mantenimiento 2 dias/semana",
+            "numero_ciclo": 1,
+            "plan_entrenamiento": {
+              "observaciones": "Plan 2 dias/semana"
+            },
+            "plan_nutricional": {
+              "calorias_estimadas": "2000.00",
+              "num_comidas_diarias": 3,
+              "observaciones": "Mantenimiento"
+            },
+            "ultimo_progreso": null
+          },
+          "objetivo_fisico": "Mantenimiento",
+          "nivel_experiencia": "Avanzado",
+          "disponibilidad_semanal_dias": 2,
+          "grupo_muscular_prioritario": "Espalda"
+        }
+      ]
+    },
+    {
+      "etiqueta": "5.7 registrar pago PROD (factura Brevo)",
+      "ok": true,
+      "status": 201,
+      "esperado": 201,
+      "ms": 269,
+      "body": {
+        "id": 44,
+        "fecha_vencimiento": "2026-10-22",
+        "message": "Pago registrado correctamente"
+      }
+    },
+    {
+      "etiqueta": "5.8 borrar afiliado PROD temporal (integridad)",
+      "ok": true,
+      "status": 400,
+      "esperado": [
+        200,
+        204,
+        400
+      ],
+      "ms": 387,
+      "body": {
+        "error": "No se puede eliminar: el afiliado tiene datos asociados"
+      }
+    }
+  ],
+  "errores": [],
+  "fotoUrl": "https://res.cloudinary.com/llaq9vyl/image/upload/v1790075567/metafit/afiliados/tdo6mazxazs6sw4rtjbp.png",
+  "cloudinary": {
+    "host": "res.cloudinary.com (CLOUDINARY_PROBADO)",
+    "cloud_name": "llaq9vyl"
+  },
+  "afiliado": {
+    "id": 208,
+    "documento": "88571044",
+    "password_temporal": "ProdQA2025!"
+  },
+  "pago": 44,
+  "brevoApiKeyProd": "seteada (sufijo ...tVdV)",
+  "nota": "El correo de bienvenida y la factura se disparan por Brevo (fire-and-forget); la confirmación de entrega se valida contra eventos Brevo en el script de la Fase 8 con la key de producción.",
+  "resumen": {
+    "total": 8,
+    "ok": 8,
+    "fallo": 0
+  }
+}

@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
 import { getId, nombreCompleto, inicial, cicloActivo } from "../utils/afiliadoHelpers";
 import { useToast } from "../hooks/useToast";
+import useAutoRefresh from "../hooks/useAutoRefresh";
 import { trackEvent } from "../utils/analytics";
 import s from "./DietasView.module.css";
 
@@ -56,8 +57,8 @@ export default function DietasView() {
   const [deleteAlimentoId, setDeleteAlimentoId] = useState("");
 
   // ── Data fetching ───────────────────────────────────────────
-  const fetchAfiliados = useCallback(async () => {
-    setLoading(true);
+  const fetchAfiliados = useCallback(async (opts = {}) => {
+    if (!opts.silent) setLoading(true);
     try {
       const { data } = await authAxios.get("/afiliados");
       setAfiliados(Array.isArray(data) ? data : []);
@@ -65,21 +66,24 @@ export default function DietasView() {
       console.error("[DietasView]", err);
       showToast("Error al cargar afiliados", "danger");
     } finally {
-      setLoading(false);
+      if (!opts.silent) setLoading(false);
     }
   }, [authAxios, showToast]);
 
-  const fetchAlimentos = useCallback(async () => {
+  const fetchAlimentos = useCallback(async (opts = {}) => {
     try {
       const { data } = await authAxios.get("/catalogo/alimentos");
       setCatalogoAlimentos(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("[DietasView] catálogo:", err);
-      showToast("Error al cargar catálogo de alimentos", "danger");
+      if (!opts.silent) showToast("Error al cargar catálogo de alimentos", "danger");
     }
   }, [authAxios, showToast]);
 
   useEffect(() => { fetchAfiliados(); fetchAlimentos(); }, [fetchAfiliados, fetchAlimentos]);
+
+  // Sincronización tiempo real: polling 10s + refetch al recobrar foco/visibilidad
+  useAutoRefresh(() => { fetchAfiliados({ silent: true }); fetchAlimentos({ silent: true }); }, 10000);
 
   // ── Derived data ────────────────────────────────────────────
   const filtered = afiliados.filter((a) => {

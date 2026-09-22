@@ -25,6 +25,7 @@ import {
 } from '../services/api';
 import { seleccionarCicloActivo } from '../utils/cicloUtils';
 import { formatearFechaLegible, capitalizar } from '../utils/formateadores';
+import useAutoRefresh from '../hooks/useAutoRefresh';
 
 const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 const EJERCICIO_ROW_H = 58;
@@ -288,6 +289,7 @@ export default function MiRutinaScreen() {
   const [notaTextos, setNotaTextos] = useState({});
   const [guardandoNota, setGuardandoNota] = useState(null);
   const [actualizando, setActualizando] = useState(false);
+  const cicloIdRef = useRef(null);
 
   const hoy = new Date().toISOString().slice(0, 10);
   const diaSemana = DAYS[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1];
@@ -306,7 +308,7 @@ export default function MiRutinaScreen() {
     }
   }, []);
 
-  const fetchData = useCallback(async (cicloSeleccionado) => {
+  const fetchData = useCallback(async (cicloSeleccionado, opts = {}) => {
     try {
       setError(null);
       const ciclosRes = await getMisCiclos();
@@ -320,6 +322,8 @@ export default function MiRutinaScreen() {
         return;
       }
       setCiclo(cicloData);
+      const cicloCambio = cicloIdRef.current !== cicloData.id_ciclo;
+      if (cicloCambio) cicloIdRef.current = cicloData.id_ciclo;
 
       const planRes = await getPlanEntrenamiento(cicloData.id_ciclo);
       // Contrato real del backend: { rutinas: [{ nombre_rutina, dia_numero, ejercicios: [...] }] }
@@ -334,9 +338,10 @@ export default function MiRutinaScreen() {
         }))
       );
       setEjercicios(ejerciciosPlan);
-      setDiaSeleccionado(null);
-
-      loadRutinaDia(cicloData.id_ciclo, diaNumeroHoy);
+      if (cicloCambio || !opts.silent) {
+        setDiaSeleccionado(null);
+        loadRutinaDia(cicloData.id_ciclo, diaNumeroHoy);
+      }
 
       const ids = ejerciciosPlan.map((e) => e.id_ejercicio);
       if (ids.length > 0) {
@@ -368,6 +373,9 @@ export default function MiRutinaScreen() {
   }, [loadRutinaDia, diaNumeroHoy]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  // Sincronización tiempo real: polling 10s (silencioso, conserva día seleccionado)
+  useAutoRefresh(() => fetchData(undefined, { silent: true }), 10000);
 
   const onRefresh = () => { setRefreshing(true); fetchData(); };
 

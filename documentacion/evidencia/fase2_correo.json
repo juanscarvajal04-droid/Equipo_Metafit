@@ -1,0 +1,50 @@
+{
+  "fase": 2,
+  "timestamp": "2026-09-22T05:39:08.572Z",
+  "login": {
+    "status": 200,
+    "body": {
+      "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiY2FybG9zQG1ldGFmaXQuY29tIiwicm9sZSI6IkFkbWluaXN0cmFkb3IiLCJpYXQiOjE3OTAwNTU1NDgsImV4cCI6MTc5MDA4NDM0OH0.HsoEbDVhPKs-vuKNeGHVG-TpM4iYh_ZMSNZwP3BJzfk",
+      "user": {
+        "id": 1,
+        "email": "carlos@metafit.com",
+        "role": "Administrador",
+        "nombres": "Carlos",
+        "apellidos": "Ramírez"
+      }
+    }
+  },
+  "crearAfiliado": {
+    "status": 201,
+    "body": {
+      "id": 205,
+      "message": "Afiliado creado correctamente",
+      "password_temporal": "MF_999888779@2025"
+    }
+  },
+  "passwordTemporal": "MF_999888779@2025",
+  "brevoEventos": {
+    "status": 200,
+    "eventos": [
+      {
+        "email": "prueba.restricciones.1790037869283@test.com",
+        "date": "2026-09-21T19:44:31.000-05:00",
+        "messageId": "<202609220044.38943482942@smtp-relay.mailin.fr>",
+        "event": "softBounces",
+        "subject": "Bienvenido a MetaFit — Sport Gym Sede Santa Rosita",
+        "from": "metafit.sistema@11854809.brevosend.com",
+        "reason": "connection timeout",
+        "ip": "77.32.148.26"
+      },
+      {
+        "email": "prueba.restricciones.1790037869283@test.com",
+        "date": "2026-09-21T19:44:30.790-05:00",
+        "messageId": "<202609220044.38943482942@smtp-relay.mailin.fr>",
+        "event": "requests",
+        "subject": "Bienvenido a MetaFit — Sport Gym Sede Santa Rosita",
+        "from": "metafit.sistema@11854809.brevosend.com",
+        "ip": "77.32.148.26"
+      }
+    ]
+  }
+}

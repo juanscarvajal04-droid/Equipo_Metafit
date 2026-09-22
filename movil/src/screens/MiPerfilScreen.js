@@ -23,6 +23,7 @@ import { seleccionarCicloActivo, esCicloActivo } from '../utils/cicloUtils';
 import { formatearFechaLegible, formatearPeso, formatearAltura, formatearNumero, calcularIMC } from '../utils/formateadores';
 import BadgeRestriccion from '../components/common/BadgeRestriccion';
 import ResumenCiclo from '../components/historial/ResumenCiclo';
+import useAutoRefresh from '../hooks/useAutoRefresh';
 
 function Avatar({ nombre, foto, size = 80 }) {
   const initials = (nombre || 'U')
@@ -165,6 +166,9 @@ export default function MiPerfilScreen({ navigation }) {
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  // Sincronización tiempo real: polling 10s (foto, teléfono y ciclo siempre frescos)
+  useAutoRefresh(fetchData, 10000);
 
   // Refetch al volver del editor de perfil (EditarPerfil).
   useEffect(() => {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
@@ -7,6 +7,7 @@ import ProgresoPesoChart from "../components/graficos/ProgresoPesoChart";
 import ProgresoVolumenChart from "../components/graficos/ProgresoVolumenChart";
 import { TIPO_ICONO } from "../services/restriccionService";
 import { fetchAfiliado, ultimoRegistroFisico } from "../services/progresoService";
+import useAutoRefresh from "../hooks/useAutoRefresh";
 import s from "./ProgresoAfiliado.module.css";
 
 const nombreCompleto = (a) => [a?.nombres, a?.apellidos].filter(Boolean).join(" ") || "Sin nombre";
@@ -18,38 +19,44 @@ export default function ProgresoAfiliado() {
 
   const [estado, setEstado] = useState({ loading: true, error: "", afiliado: null, historial: [], registros: [] });
 
+  const activoRef = useRef(true);
   useEffect(() => {
-    let activo = true;
+    activoRef.current = true;
+    return () => { activoRef.current = false; };
+  }, []);
 
-    (async () => {
-      try {
-        const [perfil, progreso] = await Promise.all([
-          fetchAfiliado(id),
-          authAxios.get(`/afiliados/${id}/progreso`),
-        ]);
-        if (!activo) return;
-        // Compatibilidad: antes el endpoint devolvía solo el array de PROGRESO_FISICO;
-        // ahora devuelve { historial, registros } para incluir las notas del afiliado.
-        const data = progreso.data;
-        setEstado({
-          loading: false,
-          error: "",
-          afiliado: perfil,
-          historial: Array.isArray(data) ? data : (Array.isArray(data?.historial) ? data.historial : []),
-          registros: Array.isArray(data) ? [] : (Array.isArray(data?.registros) ? data.registros : []),
-        });
-      } catch (err) {
-        if (!activo) return;
-        setEstado((st) => ({
-          ...st,
-          loading: false,
-          error: err.response?.data?.error || err.message || "Error al cargar el progreso",
-        }));
-      }
-    })();
-
-    return () => { activo = false; };
+  const cargar = useCallback(async (opts = {}) => {
+    if (!opts.silent) setEstado((st) => ({ ...st, loading: true, error: "" }));
+    try {
+      const [perfil, progreso] = await Promise.all([
+        fetchAfiliado(id),
+        authAxios.get(`/afiliados/${id}/progreso`),
+      ]);
+      if (!activoRef.current) return;
+      // Compatibilidad: antes el endpoint devolvía solo el array de PROGRESO_FISICO;
+      // ahora devuelve { historial, registros } para incluir las notas del afiliado.
+      const data = progreso.data;
+      setEstado({
+        loading: false,
+        error: "",
+        afiliado: perfil,
+        historial: Array.isArray(data) ? data : (Array.isArray(data?.historial) ? data.historial : []),
+        registros: Array.isArray(data) ? [] : (Array.isArray(data?.registros) ? data.registros : []),
+      });
+    } catch (err) {
+      if (!activoRef.current) return;
+      setEstado((st) => ({
+        ...st,
+        loading: false,
+        error: err.response?.data?.error || err.message || "Error al cargar el progreso",
+      }));
+    }
   }, [id, authAxios]);
+
+  useEffect(() => { cargar(); }, [cargar]);
+
+  // Sincronización tiempo real: polling 10s + refetch al recobrar foco/visibilidad
+  useAutoRefresh(() => cargar({ silent: true }), 10000);
 
   const { loading, error, afiliado, historial, registros } = estado;
   const ul = ultimoRegistroFisico(historial);

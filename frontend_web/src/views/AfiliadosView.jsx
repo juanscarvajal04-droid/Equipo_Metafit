@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
 import { getId, nombreCompleto } from "../utils/afiliadoHelpers";
 import { useToast } from "../hooks/useToast";
+import useAutoRefresh from "../hooks/useAutoRefresh";
 import { trackEvent } from "../utils/analytics";
 import { API_BASE_URL } from "../services/api";
 import RestriccionSelector from "../components/common/RestriccionSelector";
@@ -106,8 +107,8 @@ export default function AfiliadosView() {
   const role = user?.role || "Recepcionista";
   const tabsDisponibles = TABS_POR_ROL[role] || TABS_POR_ROL.Recepcionista;
 
-  const fetchAfiliados = async () => {
-    setLoading(true);
+  const fetchAfiliados = async (opts = {}) => {
+    if (!opts.silent) setLoading(true);
     try {
       const { data } = await authAxios.get("/afiliados");
       setAfiliados(Array.isArray(data) ? data : []);
@@ -115,13 +116,16 @@ export default function AfiliadosView() {
       console.error("[AfiliadosView] fetchAfiliados:", err?.response?.data || err);
       setAfiliados([]);
     } finally {
-      setLoading(false);
+      if (!opts.silent) setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchAfiliados();
   }, []);
+
+  // Sincronización tiempo real: polling 10s + refetch al recobrar foco/visibilidad
+  useAutoRefresh(() => fetchAfiliados({ silent: true }), 10000);
 
   useEffect(() => {
     return () => {

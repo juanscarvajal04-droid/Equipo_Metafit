@@ -18,6 +18,7 @@ import StatsCard from '../components/common/StatsCard';
 import GraficoPeso from '../components/graficos/GraficoPeso';
 import GraficoVolumen from '../components/graficos/GraficoVolumen';
 import GraficoCumplimiento from '../components/graficos/GraficoCumplimiento';
+import useAutoRefresh from '../hooks/useAutoRefresh';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -186,6 +187,9 @@ export default function MiProgresoScreen() {
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  // Sincronización tiempo real: polling 10s (progreso/agua/consumo siempre frescos)
+  useAutoRefresh(fetchData, 10000);
 
   const onRefresh = () => { setRefreshing(true); fetchData(); };
 

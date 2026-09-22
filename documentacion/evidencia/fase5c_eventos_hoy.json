@@ -1,0 +1,270 @@
+{
+  "fase": "5c",
+  "timestamp": "2026-09-22T11:14:45.613Z",
+  "status": 200,
+  "eventosHoy": [
+    {
+      "email": "crud.505931@metafit.test",
+      "event": "softBounces",
+      "date": "2026-09-22T06:01:04.000-05:00",
+      "messageId": "<202609221055.35230390086@smtp-relay.mailin.fr>",
+      "subject": "Factura de pago - MetaFit - CRUD Test505931",
+      "reason": "Unable to find MX of domain metafit.test"
+    },
+    {
+      "email": "crud.465787@metafit.test",
+      "event": "softBounces",
+      "date": "2026-09-22T06:01:04.000-05:00",
+      "messageId": "<202609221054.53095025409@smtp-relay.mailin.fr>",
+      "subject": "Factura de pago - MetaFit - CRUD Test465787",
+      "reason": "Unable to find MX of domain metafit.test"
+    },
+    {
+      "email": "tmpdel.505931@metafit.test",
+      "event": "softBounces",
+      "date": "2026-09-22T06:01:04.000-05:00",
+      "messageId": "<202609221055.63812280462@smtp-relay.mailin.fr>",
+      "subject": "Bienvenido a MetaFit — Sport Gym Sede Santa Rosita",
+      "reason": "Unable to find MX of domain metafit.test"
+    },
+    {
+      "email": "crud.360474@metafit.test",
+      "event": "softBounces",
+      "date": "2026-09-22T06:01:04.000-05:00",
+      "messageId": "<202609221052.43143848993@smtp-relay.mailin.fr>",
+      "subject": "Bienvenido a MetaFit — Sport Gym Sede Santa Rosita",
+      "reason": "Unable to find MX of domain metafit.test"
+    },
+    {
+      "email": "crud.360474@metafit.test",
+      "event": "softBounces",
+      "date": "2026-09-22T06:01:04.000-05:00",
+      "messageId": "<202609221052.57062679267@smtp-relay.mailin.fr>",
+      "subject": "Factura de pago - MetaFit - CRUD Test360474",
+      "reason": "Unable to find MX of domain metafit.test"
+    },
+    {
+      "email": "tmpdel.360474@metafit.test",
+      "event": "softBounces",
+      "date": "2026-09-22T06:01:04.000-05:00",
+      "messageId": "<202609221052.13199812613@smtp-relay.mailin.fr>",
+      "subject": "Bienvenido a MetaFit — Sport Gym Sede Santa Rosita",
+      "reason": "Unable to find MX of domain metafit.test"
+    },
+    {
+      "email": "crud.258842@metafit.test",
+      "event": "softBounces",
+      "date": "2026-09-22T06:01:04.000-05:00",
+      "messageId": "<202609221050.50258175079@smtp-relay.mailin.fr>",
+      "subject": "Factura de pago - MetaFit - CRUD Test258842",
+      "reason": "Unable to find MX of domain metafit.test"
+    },
+    {
+      "email": "crud.258842@metafit.test",
+      "event": "softBounces",
+      "date": "2026-09-22T06:01:04.000-05:00",
+      "messageId": "<202609221050.62771441782@smtp-relay.mailin.fr>",
+      "subject": "Bienvenido a MetaFit — Sport Gym Sede Santa Rosita",
+      "reason": "Unable to find MX of domain metafit.test"
+    },
+    {
+      "email": "crud.465787@metafit.test",
+      "event": "softBounces",
+      "date": "2026-09-22T06:01:04.000-05:00",
+      "messageId": "<202609221054.69808046426@smtp-relay.mailin.fr>",
+      "subject": "Bienvenido a MetaFit — Sport Gym Sede Santa Rosita",
+      "reason": "Unable to find MX of domain metafit.test"
+    },
+    {
+      "email": "crud.505931@metafit.test",
+      "event": "softBounces",
+      "date": "2026-09-22T06:01:04.000-05:00",
+      "messageId": "<202609221055.93902351094@smtp-relay.mailin.fr>",
+      "subject": "Bienvenido a MetaFit — Sport Gym Sede Santa Rosita",
+      "reason": "Unable to find MX of domain metafit.test"
+    },
+    {
+      "email": "tmpdel.465787@metafit.test",
+      "event": "softBounces",
+      "date": "2026-09-22T06:01:04.000-05:00",
+      "messageId": "<202609221054.93409214456@smtp-relay.mailin.fr>",
+      "subject": "Bienvenido a MetaFit — Sport Gym Sede Santa Rosita",
+      "reason": "Unable to find MX of domain metafit.test"
+    },
+    {
+      "email": "tmpdel.505931@metafit.test",
+      "event": "requests",
+      "date": "2026-09-22T05:55:00.990-05:00",
+      "messageId": "<202609221055.63812280462@smtp-relay.mailin.fr>",
+      "subject": "Bienvenido a MetaFit — Sport Gym Sede Santa Rosita",
+      "reason": null
+    },
+    {
+      "email": "crud.505931@metafit.test",
+      "event": "requests",
+      "date": "2026-09-22T05:55:00.786-05:00",
+      "messageId": "<202609221055.35230390086@smtp-relay.mailin.fr>",
+      "subject": "Factura de pago - MetaFit - CRUD Test505931",
+      "reason": null
+    },
+    {
+      "email": "crud.505931@metafit.test",
+      "event": "requests",
+      "date": "2026-09-22T05:55:00.478-05:00",
+      "messageId": "<202609221055.93902351094@smtp-relay.mailin.fr>",
+      "subject": "Bienvenido a MetaFit — Sport Gym Sede Santa Rosita",
+      "reason": null
+    },
+    {
+      "email": "tmpdel.465787@metafit.test",
+      "event": "requests",
+      "date": "2026-09-22T05:54:21.326-05:00",
+      "messageId": "<202609221054.93409214456@smtp-relay.mailin.fr>",
+      "subject": "Bienvenido a MetaFit — Sport Gym Sede Santa Rosita",
+      "reason": null
+    },
+    {
+      "email": "crud.465787@metafit.test",
+      "event": "requests",
+      "date": "2026-09-22T05:54:21.022-05:00",
+      "messageId": "<202609221054.53095025409@smtp-relay.mailin.fr>",
+      "subject": "Factura de pago - MetaFit - CRUD Test465787",
+      "reason": null
+    },
+    {
+      "email": "crud.465787@metafit.test",
+      "event": "requests",
+      "date": "2026-09-22T05:54:20.501-05:00",
+      "messageId": "<202609221054.69808046426@smtp-relay.mailin.fr>",
+      "subject": "Bienvenido a MetaFit — Sport Gym Sede Santa Rosita",
+      "reason": null
+    },
+    {
+      "email": "tmpdel.360474@metafit.test",
+      "event": "requests",
+      "date": "2026-09-22T05:52:35.463-05:00",
+      "messageId": "<202609221052.13199812613@smtp-relay.mailin.fr>",
+      "subject": "Bienvenido a MetaFit — Sport Gym Sede Santa Rosita",
+      "reason": null
+    },
+    {
+      "email": "crud.360474@metafit.test",
+      "event": "requests",
+      "date": "2026-09-22T05:52:35.307-05:00",
+      "messageId": "<202609221052.57062679267@smtp-relay.mailin.fr>",
+      "subject": "Factura de pago - MetaFit - CRUD Test360474",
+      "reason": null
+    },
+    {
+      "email": "crud.360474@metafit.test",
+      "event": "requests",
+      "date": "2026-09-22T05:52:34.863-05:00",
+      "messageId": "<202609221052.43143848993@smtp-relay.mailin.fr>",
+      "subject": "Bienvenido a MetaFit — Sport Gym Sede Santa Rosita",
+      "reason": null
+    },
+    {
+      "email": "crud.258842@metafit.test",
+      "event": "requests",
+      "date": "2026-09-22T05:50:54.011-05:00",
+      "messageId": "<202609221050.50258175079@smtp-relay.mailin.fr>",
+      "subject": "Factura de pago - MetaFit - CRUD Test258842",
+      "reason": null
+    },
+    {
+      "email": "crud.258842@metafit.test",
+      "event": "requests",
+      "date": "2026-09-22T05:50:53.787-05:00",
+      "messageId": "<202609221050.62771441782@smtp-relay.mailin.fr>",
+      "subject": "Bienvenido a MetaFit — Sport Gym Sede Santa Rosita",
+      "reason": null
+    },
+    {
+      "email": "metafit.sistema@gmail.com",
+      "event": "opened",
+      "date": "2026-09-22T00:39:34.418-05:00",
+      "messageId": "<202609220539.26923163355@smtp-relay.mailin.fr>",
+      "subject": "Bienvenido a MetaFit — Sport Gym Sede Santa Rosita",
+      "reason": null
+    },
+    {
+      "email": "metafit.sistema@gmail.com",
+      "event": "opened",
+      "date": "2026-09-22T00:39:19.385-05:00",
+      "messageId": "<202609220539.26923163355@smtp-relay.mailin.fr>",
+      "subject": "Bienvenido a MetaFit — Sport Gym Sede Santa Rosita",
+      "reason": null
+    },
+    {
+      "email": "metafit.sistema@gmail.com",
+      "event": "delivered",
+      "date": "2026-09-22T00:39:08.000-05:00",
+      "messageId": "<202609220539.26923163355@smtp-relay.mailin.fr>",
+      "subject": "Bienvenido a MetaFit — Sport Gym Sede Santa Rosita",
+      "reason": null
+    },
+    {
+      "email": "metafit.sistema@gmail.com",
+      "event": "requests",
+      "date": "2026-09-22T00:39:06.971-05:00",
+      "messageId": "<202609220539.26923163355@smtp-relay.mailin.fr>",
+      "subject": "Bienvenido a MetaFit — Sport Gym Sede Santa Rosita",
+      "reason": null
+    },
+    {
+      "email": "prueba.restricciones.1790037869283@test.com",
+      "event": "softBounces",
+      "date": "2026-09-21T19:44:31.000-05:00",
+      "messageId": "<202609220044.38943482942@smtp-relay.mailin.fr>",
+      "subject": "Bienvenido a MetaFit — Sport Gym Sede Santa Rosita",
+      "reason": "connection timeout"
+    },
+    {
+      "email": "prueba.restricciones.1790037869283@test.com",
+      "event": "requests",
+      "date": "2026-09-21T19:44:30.790-05:00",
+      "messageId": "<202609220044.38943482942@smtp-relay.mailin.fr>",
+      "subject": "Bienvenido a MetaFit — Sport Gym Sede Santa Rosita",
+      "reason": null
+    }
+  ],
+  "resumenPorEmail": {
+    "crud.505931@metafit.test": {
+      "softBounces": 2,
+      "requests": 2
+    },
+    "crud.465787@metafit.test": {
+      "softBounces": 2,
+      "requests": 2
+    },
+    "tmpdel.505931@metafit.test": {
+      "softBounces": 1,
+      "requests": 1
+    },
+    "crud.360474@metafit.test": {
+      "softBounces": 2,
+      "requests": 2
+    },
+    "tmpdel.360474@metafit.test": {
+      "softBounces": 1,
+      "requests": 1
+    },
+    "crud.258842@metafit.test": {
+      "softBounces": 2,
+      "requests": 2
+    },
+    "tmpdel.465787@metafit.test": {
+      "softBounces": 1,
+      "requests": 1
+    },
+    "metafit.sistema@gmail.com": {
+      "opened": 2,
+      "delivered": 1,
+      "requests": 1
+    },
+    "prueba.restricciones.1790037869283@test.com": {
+      "softBounces": 1,
+      "requests": 1
+    }
+  }
+}

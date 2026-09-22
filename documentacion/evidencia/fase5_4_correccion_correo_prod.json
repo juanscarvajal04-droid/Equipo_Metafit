@@ -1,0 +1,26 @@
+{
+  "fase": "5.4",
+  "titulo": "Corrección validada — correo desde PRODUCCIÓN con BREVO_API_KEY válida",
+  "timestamp": "2026-09-22T11:31:30Z",
+  "hallazgo": "la BREVO_API_KEY de Render estaba revocada (401 en Brevo); falló incluso el fallback SMTP (modoPrueba:true en recuperar-password antes del fix)",
+  "correccion": {
+    "metodo": "PUT /v1/services/srv-d9ieq2rtqb8s738q2180/env-vars (reemplazo completo, body = array {key,value})",
+    "antes": "xkeysib-68d74...b659c-8vZffL3Yg6JtVRdV (401 revocada — REDACTADA)",
+    "despues": "xkeysib-68d74...b659c-gtX5Hoe9BrJVGLLC (200 OK, misma cuenta MetaFit Sistema, plan free — REDACTADA)",
+    "deploy": { "id": "dep-dap6c2o0cd8s73btlog0", "status": "live", "commit": "f7b95ead4fe0dc2737a3d777809968d6e20eff22", "finishedAt": "2026-09-22T11:28:43.580572Z" }
+  },
+  "pruebaPostFix": {
+    "endpoint": "POST https://metafit-backend-rr18.onrender.com/auth/recuperar-password",
+    "body": { "email": "metafit.sistema@gmail.com" },
+    "respuesta": 200,
+    "latenciaMs": 1588,
+    "modoPrueba": false,
+    "nota": "Antes del fix respondía con modeoPrueba:true + token en el body (correo NO enviado); después solo el mensaje genérico (correo enviado)"
+  },
+  "eventosBrevo": [
+    { "date": "2026-09-22T06:31:04.763-05:00", "event": "requests", "email": "metafit.sistema@gmail.com", "subject": "Recuperación de contraseña — MetaFit" },
+    { "date": "2026-09-22T06:31:05.000-05:00", "event": "delivered", "email": "metafit.sistema@gmail.com", "subject": "Recuperación de contraseña — MetaFit" }
+  ],
+  "conclusion": "El pipeline de correo de producción (Brevo API REST v3) quedó restaurado y verificado de extremo a extremo: request HTTP -> API Brevo -> delivered en eventos de la cuenta.",
+  "pendiente": "En Fase 8 se revalidarán bienvenida y factura desde prod y se corroborará opened si se abre el correo."
+}

@@ -1,0 +1,2696 @@
+{
+  "fase": 4,
+  "titulo": "CRUD integral local (4.1–4.6)",
+  "timestamp": "2026-09-22T10:55:04.629Z",
+  "base": "http://localhost:3001",
+  "resultados": [
+    {
+      "etiqueta": "login:admin",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 399,
+      "body": {
+        "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiY2FybG9zQG1ldGFmaXQuY29tIiwicm9sZSI6IkFkbWluaXN0cmFkb3IiLCJpYXQiOjE3OTAwNzQ1MDUsImV4cCI6MTc5MDEwMzMwNX0.WNz3y-2l3zNShEDBlSjJ0tC-FWOppEO5t89IWUTkURo",
+        "user": {
+          "id": 1,
+          "email": "carlos@metafit.com",
+          "role": "Administrador",
+          "nombres": "Carlos",
+          "apellidos": "Ramírez"
+        }
+      }
+    },
+    {
+      "etiqueta": "login:recepcionista",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 307,
+      "body": {
+        "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjQsImVtYWlsIjoibWFyaWFAbWV0YWZpdC5jb20iLCJyb2xlIjoiUmVjZXBjaW9uaXN0YSIsImlhdCI6MTc5MDA3NDUwNSwiZXhwIjoxNzkwMTAzMzA1fQ.NAkrB17LLYctg3M5sMSNnchYuxluq8D6zdaz90gFnNo",
+        "user": {
+          "id": 4,
+          "email": "maria@metafit.com",
+          "role": "Recepcionista",
+          "nombres": "María",
+          "apellidos": "López"
+        }
+      }
+    },
+    {
+      "etiqueta": "login:entrenador",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 298,
+      "body": {
+        "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoibGF1cmFAbWV0YWZpdC5jb20iLCJyb2xlIjoiRW50cmVuYWRvciIsImlhdCI6MTc5MDA3NDUwNSwiZXhwIjoxNzkwMTAzMzA1fQ.mhrDsxWfimShEmIemgpeUAf61PIrzZx_lnN4RhgusRI",
+        "user": {
+          "id": 2,
+          "email": "laura@metafit.com",
+          "role": "Entrenador",
+          "nombres": "Laura",
+          "apellidos": "Gómez"
+        }
+      }
+    },
+    {
+      "etiqueta": "login:afiliado",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 297,
+      "body": {
+        "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjYsImVtYWlsIjoianVhbkBnbWFpbC5jb20iLCJyb2xlIjoiQWZpbGlhZG8iLCJpYXQiOjE3OTAwNzQ1MDUsImV4cCI6MTc5MDEwMzMwNX0.BmEy45ibR01ZLl89VJMVjkrvtJxVS9XZ7_YGypzw7Xw",
+        "user": {
+          "id": 6,
+          "email": "juan@gmail.com",
+          "role": "Afiliado",
+          "nombres": "Juan",
+          "apellidos": "Martínez"
+        }
+      }
+    },
+    {
+      "etiqueta": "4.1a crear afiliado (Recepcionista)",
+      "ok": true,
+      "status": 201,
+      "esperado": 201,
+      "ms": 304,
+      "body": {
+        "id": 214,
+        "message": "Afiliado creado correctamente",
+        "password_temporal": "CrudTest2025!"
+      }
+    },
+    {
+      "etiqueta": "4.1b leer afiliado por id",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 16,
+      "body": {
+        "id_usuario": 214,
+        "nombres": "CRUD",
+        "apellidos": "Test505931",
+        "correo": "crud.505931@metafit.test",
+        "estado": "Activo",
+        "documento": "33505931",
+        "fecha_nacimiento": "1992-05-20T00:00:00.000Z",
+        "edad": 34,
+        "sexo": "Femenino",
+        "telefono": "3201002003",
+        "direccion": "Calle CRUD 44",
+        "estatura_cm": "168.00",
+        "estado_afiliacion": "Activo",
+        "foto": null,
+        "fecha_registro": "2026-09-22T00:00:00.000Z",
+        "fecha_ultima_modificacion": null,
+        "registrado_por": 4,
+        "restricciones": [],
+        "ciclo_activo": null
+      }
+    },
+    {
+      "etiqueta": "4.1c actualizar afiliado (PATCH telefono)",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 12,
+      "body": {
+        "message": "Afiliado actualizado correctamente"
+      }
+    },
+    {
+      "etiqueta": "4.1d listar afiliados (Admin)",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 19,
+      "body": [
+        {
+          "id_usuario": 9,
+          "nombres": "Sofía",
+          "apellidos": "Castro",
+          "correo": "sofia@gmail.com",
+          "estado": "Activo",
+          "fecha_registro_sistema": "2024-04-01T08:00:00.000Z",
+          "documento": "1004567890",
+          "fecha_nacimiento": "2000-01-30T00:00:00.000Z",
+          "edad": 26,
+          "sexo": "Femenino",
+          "telefono": "3034567890",
+          "direccion": "Bogotá, Calle 25 # 12-5",
+          "estatura_cm": "158.50",
+          "estado_afiliacion": "Activo",
+          "foto": null,
+          "fecha_registro_afiliado": "2024-04-01T00:00:00.000Z",
+          "registrado_por": 5,
+          "registrado_por_nombre": "Pedro",
+          "restricciones": [],
+          "ciclo_activo": {
+            "id_ciclo": 8,
+            "id_usuario": 9,
+            "fecha_inicio": "2024-07-01T00:00:00.000Z",
+            "fecha_fin": "2024-09-30T00:00:00.000Z",
+            "activo": 1,
+            "objetivo_fisico": "Perdida de grasa",
+            "nivel_experiencia": "Principiante",
+            "disponibilidad_dias": 4,
+            "grupo_muscular_prioritario": null,
+            "observaciones": null,
+            "numero_ciclo": 2,
+            "plan_entrenamiento": {
+              "observaciones": null
+            },
+            "plan_nutricional": {
+              "calorias_estimadas": "1750.00",
+              "num_comidas_diarias": 4,
+              "observaciones": null
+            },
+            "ultimo_progreso": {
+              "id_ciclo": 8,
+              "fecha_registro": "2024-08-01T00:00:00.000Z",
+              "peso_kg": "59.20",
+              "porcentaje_grasa": "23.70",
+              "medida_cintura": "73.90",
+              "medida_brazo": "27.00",
+              "medida_pierna": "52.60",
+              "imc": 23.56
+            }
+          },
+          "objetivo_fisico": "Perdida de grasa",
+          "nivel_experiencia": "Principiante",
+          "disponibilidad_semanal_dias": 4,
+          "grupo_muscular_prioritario": null
+        },
+        {
+          "id_usuario": 100,
+          "nombres": "Carlos",
+          "apellidos": "Demo",
+          "correo": "carlos.demo@test.com",
+          "estado": "Activo",
+          "fecha_registro_sistema": "2026-06-01T08:00:00.000Z",
+          "documento": "999888777",
+          "fecha_nacimiento": "1992-08-15T00:00:00.000Z",
+          "edad": 34,
+          "sexo": "Masculino",
+          "telefono": "3009998887",
+          "direccion": "Carrera 7 # 72-41, Bogotá",
+          "estatura_cm": "170.00",
+          "estado_afiliacion": "Activo",
+          "foto": null,
+          "fecha_registro_afiliado": "2026-06-01T00:00:00.000Z",
+          "registrado_por": 4,
+          "registrado_por_nombre": "María",
+          "restricciones": [
+            {
+              "id_usuario": 100,
+              "id_restriccion": 2,
+              "nombre_restriccion": "Hipertension arterial",
+              "tipo": "Enfermedad",
+              "efecto_relevante": "Controlar frecuencia cardiaca durante el ejercicio"
+            },
+            {
+              "id_usuario": 100,
+              "id_restriccion": 5,
+              "nombre_restriccion": "Intolerancia a lactosa",
+              "tipo": "Alergia",
+              "efecto_relevante": null
+            }
+          ],
+          "ciclo_activo": {
+            "id_ciclo": 100,
+            "id_usuario": 100,
+            "fecha_inicio": "2026-06-01T00:00:00.000Z",
+            "fecha_fin": "2026-08-31T00:00:00.000Z",
+            "activo": 1,
+            "objetivo_fisico": "Perdida de grasa",
+            "nivel_experiencia": "Intermedio",
+            "disponibilidad_dias": 4,
+            "grupo_muscular_prioritario": "Pecho",
+            "observaciones": "Ciclo de prueba generado por datos demo",
+            "numero_ciclo": 1,
+            "plan_entrenamiento": {
+              "observaciones": "Plan demo — 3 días/semana"
+            },
+            "plan_nutricional": {
+              "calorias_estimadas": "2200.00",
+              "num_comidas_diarias": 4,
+              "observaciones": "Plan nutricional demo — déficit calórico moderado"
+            },
+            "ultimo_progreso": null
+          },
+          "objetivo_fisico": "Perdida de grasa",
+          "nivel_experiencia": "Intermedio",
+          "disponibilidad_semanal_dias": 4,
+          "grupo_muscular_prioritario": "Pecho"
+        },
+        {
+          "id_usuario": 8,
+          "nombres": "Luis",
+          "apellidos": "Herrera",
+          "correo": "luis@gmail.com",
+          "estado": "Activo",
+          "fecha_registro_sistema": "2024-01-15T08:00:00.000Z",
+          "documento": "1003456789",
+          "fecha_nacimiento": "1988-11-05T00:00:00.000Z",
+          "edad": 37,
+          "sexo": "Masculino",
+          "telefono": "3023456789",
+          "direccion": "Bogotá, Av 20 # 3-10",
+          "estatura_cm": "180.00",
+          "estado_afiliacion": "Activo",
+          "foto": null,
+          "fecha_registro_afiliado": "2024-01-15T00:00:00.000Z",
+          "registrado_por": 5,
+          "registrado_por_nombre": "Pedro",
+          "restricciones": [
+            {
+              "id_usuario": 8,
+              "id_restriccion": 1,
+              "nombre_restriccion": "Diabetes tipo 2",
+              "tipo": "Enfermedad",
+              "efecto_relevante": "Evitar ejercicio de alta intensidad sin supervision"
+            },
+            {
+              "id_usuario": 8,
+              "id_restriccion": 6,
+              "nombre_restriccion": "Metformina",
+              "tipo": "Medicamento",
+              "efecto_relevante": "Puede causar hipoglucemia en ejercicio intenso"
+            }
+          ],
+          "ciclo_activo": {
+            "id_ciclo": 6,
+            "id_usuario": 8,
+            "fecha_inicio": "2024-03-30T00:00:00.000Z",
+            "fecha_fin": "2024-06-13T00:00:00.000Z",
+            "activo": 1,
+            "objetivo_fisico": "Mantenimiento",
+            "nivel_experiencia": "Avanzado",
+            "disponibilidad_dias": 6,
+            "grupo_muscular_prioritario": "Espalda",
+            "observaciones": null,
+            "numero_ciclo": 2,
+            "plan_entrenamiento": {
+              "observaciones": null
+            },
+            "plan_nutricional": {
+              "calorias_estimadas": "2050.11",
+              "num_comidas_diarias": 3,
+              "observaciones": null
+            },
+            "ultimo_progreso": {
+              "id_ciclo": 6,
+              "fecha_registro": "2024-05-12T00:00:00.000Z",
+              "peso_kg": "56.77",
+              "porcentaje_grasa": "17.84",
+              "medida_cintura": "68.55",
+              "medida_brazo": "40.40",
+              "medida_pierna": "56.06",
+              "imc": 17.52
+            }
+          },
+          "objetivo_fisico": "Mantenimiento",
+          "nivel_experiencia": "Avanzado",
+          "disponibilidad_semanal_dias": 6,
+          "grupo_muscular_prioritario": "Espalda"
+        },
+        {
+          "id_usuario": 6,
+          "nombres": "Juan",
+          "apellidos": "Martínez",
+          "correo": "juan@gmail.com",
+          "estado": "Activo",
+          "fecha_registro_sistema": "2024-01-08T08:00:00.000Z",
+          "documento": "1001234567",
+          "fecha_nacimiento": "1990-03-15T00:00:00.000Z",
+          "edad": 36,
+          "sexo": "Masculino",
+          "telefono": "3001234567",
+          "direccion": "Bogotá, Calle 10 # 5-20",
+          "estatura_cm": "175.50",
+          "estado_afiliacion": "Activo",
+          "foto": null,
+          "fecha_registro_afiliado": "2024-01-08T00:00:00.000Z",
+          "registrado_por": 4,
+          "registrado_por_nombre": "María",
+          "restricciones": [
+            {
+              "id_usuario": 6,
+              "id_restriccion": 2,
+              "nombre_restriccion": "Hipertension arterial",
+              "tipo": "Enfermedad",
+              "efecto_relevante": "Controlar frecuencia cardiaca durante el ejercicio"
+            }
+          ],
+          "ciclo_activo": {
+            "id_ciclo": 2,
+            "id_usuario": 6,
+            "fecha_inicio": "2024-04-04T00:00:00.000Z",
+            "fecha_fin": "2024-05-31T00:00:00.000Z",
+            "activo": 1,
+            "objetivo_fisico": "Perdida de grasa",
+            "nivel_experiencia": "Intermedio",
+            "disponibilidad_dias": 3,
+            "grupo_muscular_prioritario": "Pecho",
+            "observaciones": null,
+            "numero_ciclo": 2,
+            "plan_entrenamiento": {
+              "observaciones": null
+            },
+            "plan_nutricional": {
+              "calorias_estimadas": "1899.56",
+              "num_comidas_diarias": 4,
+              "observaciones": null
+            },
+            "ultimo_progreso": {
+              "id_ciclo": 2,
+              "fecha_registro": "2024-04-27T00:00:00.000Z",
+              "peso_kg": "80.92",
+              "porcentaje_grasa": "17.40",
+              "medida_cintura": "100.23",
+              "medida_brazo": "43.16",
+              "medida_pierna": "67.70",
+              "imc": 26.27
+            }
+          },
+          "objetivo_fisico": "Perdida de grasa",
+          "nivel_experiencia": "Intermedio",
+          "disponibilidad_semanal_dias": 3,
+          "grupo_muscular_prioritario": "Pecho"
+        },
+        {
+          "id_usuario": 200,
+          "nombres": "Diana",
+          "apellidos": "Peña",
+          "correo": "diana@gmail.com",
+          "estado": "Activo",
+          "fecha_registro_sistema": "2026-08-01T08:00:00.000Z",
+          "documento": "1002003001",
+          "fecha_nacimiento": "1994-04-12T00:00:00.000Z",
+          "edad": 32,
+          "sexo": "Femenino",
+          "telefono": "3012345001",
+          "direccion": "Bogotá, Calle 30 # 8-15",
+          "estatura_cm": "165.00",
+          "estado_afiliacion": "Activo",
+          "foto": null,
+          "fecha_registro_afiliado": "2026-08-01T00:00:00.000Z",
+          "registrado_por": 4,
+          "registrado_por_nombre": "María",
+          "restricciones": [],
+          "ciclo_activo": {
+            "id_ciclo": 200,
+            "id_usuario": 200,
+            "fecha_inicio": "2026-08-01T00:00:00.000Z",
+            "fecha_fin": "2026-10-31T00:00:00.000Z",
+            "activo": 1,
+            "objetivo_fisico": "Perdida de grasa",
+            "nivel_experiencia": "Principiante",
+            "disponibilidad_dias": 3,
+            "grupo_muscular_prioritario": "Pecho",
+            "observaciones": null,
+            "numero_ciclo": 1,
+            "plan_entrenamiento": {
+              "observaciones": "Plan 3 dias/semana"
+            },
+            "plan_nutricional": {
+              "calorias_estimadas": "2250.00",
+              "num_comidas_diarias": 4,
+              "observaciones": "Deficit calórico moderado"
+            },
+            "ultimo_progreso": null
+          },
+          "objetivo_fisico": "Perdida de grasa",
+          "nivel_experiencia": "Principiante",
+          "disponibilidad_semanal_dias": 3,
+          "grupo_muscular_prioritario": "Pecho"
+        },
+        {
+          "id_usuario": 7,
+          "nombres": "Ana",
+          "apellidos": "Rodríguez",
+          "correo": "ana@gmail.com",
+          "estado": "Activo",
+          "fecha_registro_sistema": "2024-02-01T08:00:00.000Z",
+          "documento": "1002345678",
+          "fecha_nacimiento": "1995-07-22T00:00:00.000Z",
+          "edad": 31,
+          "sexo": "Femenino",
+          "telefono": "3012345678",
+          "direccion": "Bogotá, Carrera 15 # 8-30",
+          "estatura_cm": "162.00",
+          "estado_afiliacion": "Activo",
+          "foto": null,
+          "fecha_registro_afiliado": "2024-02-01T00:00:00.000Z",
+          "registrado_por": 4,
+          "registrado_por_nombre": "María",
+          "restricciones": [
+            {
+              "id_usuario": 7,
+              "id_restriccion": 5,
+              "nombre_restriccion": "Intolerancia a lactosa",
+              "tipo": "Alergia",
+              "efecto_relevante": null
+            }
+          ],
+          "ciclo_activo": {
+            "id_ciclo": 4,
+            "id_usuario": 7,
+            "fecha_inicio": "2024-04-22T00:00:00.000Z",
+            "fecha_fin": "2024-07-16T00:00:00.000Z",
+            "activo": 1,
+            "objetivo_fisico": "Aumento de masa",
+            "nivel_experiencia": "Intermedio",
+            "disponibilidad_dias": 5,
+            "grupo_muscular_prioritario": "Gluteos",
+            "observaciones": null,
+            "numero_ciclo": 2,
+            "plan_entrenamiento": {
+              "observaciones": null
+            },
+            "plan_nutricional": {
+              "calorias_estimadas": "3012.07",
+              "num_comidas_diarias": 4,
+              "observaciones": null
+            },
+            "ultimo_progreso": {
+              "id_ciclo": 4,
+              "fecha_registro": "2024-04-22T00:00:00.000Z",
+              "peso_kg": "73.66",
+              "porcentaje_grasa": "14.42",
+              "medida_cintura": "86.87",
+              "medida_brazo": "27.48",
+              "medida_pierna": "54.16",
+              "imc": 28.07
+            }
+          },
+          "objetivo_fisico": "Aumento de masa",
+          "nivel_experiencia": "Intermedio",
+          "disponibilidad_semanal_dias": 5,
+          "grupo_muscular_prioritario": "Gluteos"
+        },
+        {
+          "id_usuario": 201,
+          "nombres": "Miguel",
+          "apellidos": "Rojas",
+          "correo": "miguel@gmail.com",
+          "estado": "Activo",
+          "fecha_registro_sistema": "2026-08-05T08:00:00.000Z",
+          "documento": "1002003002",
+          "fecha_nacimiento": "1991-09-18T00:00:00.000Z",
+          "edad": 35,
+          "sexo": "Masculino",
+          "telefono": "3012345002",
+          "direccion": "Bogotá, Carrera 50 # 12-3",
+          "estatura_cm": "178.00",
+          "estado_afiliacion": "Activo",
+          "foto": null,
+          "fecha_registro_afiliado": "2026-08-05T00:00:00.000Z",
+          "registrado_por": 4,
+          "registrado_por_nombre": "María",
+          "restricciones": [],
+          "ciclo_activo": {
+            "id_ciclo": 201,
+            "id_usuario": 201,
+            "fecha_inicio": "2026-08-05T00:00:00.000Z",
+            "fecha_fin": "2026-11-05T00:00:00.000Z",
+            "activo": 1,
+            "objetivo_fisico": "Aumento de masa",
+            "nivel_experiencia": "Intermedio",
+            "disponibilidad_dias": 4,
+            "grupo_muscular_prioritario": "Gluteos",
+            "observaciones": "Enfoque en tren inferior",
+            "numero_ciclo": 1,
+            "plan_entrenamiento": {
+              "observaciones": "Plan 4 dias/semana"
+            },
+            "plan_nutricional": {
+              "calorias_estimadas": "2700.00",
+              "num_comidas_diarias": 5,
+              "observaciones": "Superavit para aumento de masa"
+            },
+            "ultimo_progreso": null
+          },
+          "objetivo_fisico": "Aumento de masa",
+          "nivel_experiencia": "Intermedio",
+          "disponibilidad_semanal_dias": 4,
+          "grupo_muscular_prioritario": "Gluteos"
+        },
+        {
+          "id_usuario": 205,
+          "nombres": "Test",
+          "apellidos": "SMTP Local",
+          "correo": "metafit.sistema@gmail.com",
+          "estado": "Activo",
+          "fecha_registro_sistema": "2026-09-22T05:39:09.000Z",
+          "documento": "999888779",
+          "fecha_nacimiento": "1990-01-01T00:00:00.000Z",
+          "edad": 36,
+          "sexo": "Masculino",
+          "telefono": "3001234567",
+          "direccion": "Calle Test 123",
+          "estatura_cm": "175.00",
+          "estado_afiliacion": "Activo",
+          "foto": null,
+          "fecha_registro_afiliado": "2026-09-22T00:00:00.000Z",
+          "registrado_por": 1,
+          "registrado_por_nombre": "Carlos",
+          "restricciones": [],
+          "ciclo_activo": null,
+          "objetivo_fisico": null,
+          "nivel_experiencia": null,
+          "disponibilidad_semanal_dias": null,
+          "grupo_muscular_prioritario": null
+        },
+        {
+          "id_usuario": 208,
+          "nombres": "CRUD",
+          "apellidos": "Test360474",
+          "correo": "crud.360474@metafit.test",
+          "estado": "Activo",
+          "fecha_registro_sistema": "2026-09-22T10:52:40.000Z",
+          "documento": "33360474",
+          "fecha_nacimiento": "1992-05-20T00:00:00.000Z",
+          "edad": 34,
+          "sexo": "Femenino",
+          "telefono": "3201002099",
+          "direccion": "Calle CRUD 44 (mod)",
+          "estatura_cm": "168.00",
+          "estado_afiliacion": "Activo",
+          "foto": null,
+          "fecha_registro_afiliado": "2026-09-22T00:00:00.000Z",
+          "registrado_por": 4,
+          "registrado_por_nombre": "María",
+          "restricciones": [],
+          "ciclo_activo": null,
+          "objetivo_fisico": null,
+          "nivel_experiencia": null,
+          "disponibilidad_semanal_dias": null,
+          "grupo_muscular_prioritario": null
+        },
+        {
+          "id_usuario": 214,
+          "nombres": "CRUD",
+          "apellidos": "Test505931",
+          "correo": "crud.505931@metafit.test",
+          "estado": "Activo",
+          "fecha_registro_sistema": "2026-09-22T10:55:06.000Z",
+          "documento": "33505931",
+          "fecha_nacimiento": "1992-05-20T00:00:00.000Z",
+          "edad": 34,
+          "sexo": "Femenino",
+          "telefono": "3201002099",
+          "direccion": "Calle CRUD 44 (mod)",
+          "estatura_cm": "168.00",
+          "estado_afiliacion": "Activo",
+          "foto": null,
+          "fecha_registro_afiliado": "2026-09-22T00:00:00.000Z",
+          "registrado_por": 4,
+          "registrado_por_nombre": "María",
+          "restricciones": [],
+          "ciclo_activo": null,
+          "objetivo_fisico": null,
+          "nivel_experiencia": null,
+          "disponibilidad_semanal_dias": null,
+          "grupo_muscular_prioritario": null
+        },
+        {
+          "id_usuario": 202,
+          "nombres": "Camila",
+          "apellidos": "Vargas",
+          "correo": "camila@gmail.com",
+          "estado": "Activo",
+          "fecha_registro_sistema": "2026-08-10T08:00:00.000Z",
+          "documento": "1002003003",
+          "fecha_nacimiento": "1987-02-25T00:00:00.000Z",
+          "edad": 39,
+          "sexo": "Masculino",
+          "telefono": "3012345003",
+          "direccion": "Bogotá, Av Boyacá # 98-5",
+          "estatura_cm": "183.00",
+          "estado_afiliacion": "Activo",
+          "foto": null,
+          "fecha_registro_afiliado": "2026-08-10T00:00:00.000Z",
+          "registrado_por": 4,
+          "registrado_por_nombre": "María",
+          "restricciones": [],
+          "ciclo_activo": {
+            "id_ciclo": 202,
+            "id_usuario": 202,
+            "fecha_inicio": "2026-08-10T00:00:00.000Z",
+            "fecha_fin": "2026-10-10T00:00:00.000Z",
+            "activo": 1,
+            "objetivo_fisico": "Mantenimiento",
+            "nivel_experiencia": "Avanzado",
+            "disponibilidad_dias": 2,
+            "grupo_muscular_prioritario": "Espalda",
+            "observaciones": "Mantenimiento 2 dias/semana",
+            "numero_ciclo": 1,
+            "plan_entrenamiento": {
+              "observaciones": "Plan 2 dias/semana"
+            },
+            "plan_nutricional": {
+              "calorias_estimadas": "2000.00",
+              "num_comidas_diarias": 3,
+              "observaciones": "Mantenimiento"
+            },
+            "ultimo_progreso": null
+          },
+          "objetivo_fisico": "Mantenimiento",
+          "nivel_experiencia": "Avanzado",
+          "disponibilidad_semanal_dias": 2,
+          "grupo_muscular_prioritario": "Espalda"
+        }
+      ]
+    },
+    {
+      "etiqueta": "4.1e RBAC negativo: Entrenador NO crea afiliado",
+      "ok": true,
+      "status": 403,
+      "esperado": 403,
+      "ms": 6,
+      "body": {
+        "error": "Acceso denegado: se requiere rol Administrador o Recepcionista"
+      }
+    },
+    {
+      "etiqueta": "4.2a crear usuario (Admin)",
+      "ok": true,
+      "status": 201,
+      "esperado": 201,
+      "ms": 304,
+      "body": {
+        "id": 215,
+        "id_usuario": 215,
+        "correo": "usu.505931@metafit.test",
+        "email": "usu.505931@metafit.test",
+        "rol": "Recepcionista",
+        "role": "Recepcionista",
+        "nombres": "Uso",
+        "apellidos": "Crud505931",
+        "estado": "Pendiente",
+        "fecha_registro": "2026-09-22T10:55:06.000Z"
+      }
+    },
+    {
+      "etiqueta": "4.2b leer usuario por id (Admin)",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 7,
+      "body": {
+        "id": 215,
+        "id_usuario": 215,
+        "correo": "usu.505931@metafit.test",
+        "email": "usu.505931@metafit.test",
+        "rol": "Recepcionista",
+        "role": "Recepcionista",
+        "nombres": "Uso",
+        "apellidos": "Crud505931",
+        "estado": "Pendiente",
+        "fecha_registro": "2026-09-22T10:55:06.000Z"
+      }
+    },
+    {
+      "etiqueta": "4.2c actualizar usuario (Admin)",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 10,
+      "body": {
+        "id": 215,
+        "id_usuario": 215,
+        "correo": "usu.505931@metafit.test",
+        "email": "usu.505931@metafit.test",
+        "rol": "Recepcionista",
+        "role": "Recepcionista",
+        "nombres": "Uso",
+        "apellidos": "Crud505931Mod",
+        "estado": "Pendiente",
+        "fecha_registro": "2026-09-22T10:55:06.000Z"
+      }
+    },
+    {
+      "etiqueta": "4.2d borrar usuario (Admin)",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 15,
+      "body": {
+        "message": "Usuario eliminado correctamente"
+      }
+    },
+    {
+      "etiqueta": "4.2e listar recepcionistas (Admin)",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 6,
+      "body": [
+        {
+          "id": 4,
+          "id_usuario": 4,
+          "correo": "maria@metafit.com",
+          "email": "maria@metafit.com",
+          "rol": "Recepcionista",
+          "role": "Recepcionista",
+          "nombres": "María",
+          "apellidos": "López",
+          "estado": "Activo",
+          "fecha_registro": "2024-01-01T08:00:00.000Z"
+        }
+      ]
+    },
+    {
+      "etiqueta": "4.2f RBAC negativo: Recepcionista NO crea usuario",
+      "ok": true,
+      "status": 403,
+      "esperado": 403,
+      "ms": 4,
+      "body": {
+        "error": "Acceso denegado: se requiere rol Administrador"
+      }
+    },
+    {
+      "etiqueta": "4.3a crear ciclo (Entrenador)",
+      "ok": true,
+      "status": 201,
+      "esperado": 201,
+      "ms": 10,
+      "body": {
+        "id_ciclo": 205,
+        "message": "Ciclo creado correctamente"
+      }
+    },
+    {
+      "etiqueta": "4.3b listar ciclos del afiliado",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 5,
+      "body": [
+        {
+          "id_ciclo": 205,
+          "id_usuario": 214,
+          "fecha_inicio": "2026-09-01T00:00:00.000Z",
+          "fecha_fin": "2026-12-01T00:00:00.000Z",
+          "activo": 1,
+          "objetivo_fisico": "Perdida de grasa",
+          "grupo_muscular_prioritario": "Piernas",
+          "nivel_experiencia": "Intermedio",
+          "disponibilidad_dias": 4,
+          "observaciones": "Ciclo creado en verificación Fase 4",
+          "fecha_creacion": "2026-09-22T10:55:06.000Z",
+          "registrado_por": 2,
+          "numero_ciclo": 1
+        }
+      ]
+    },
+    {
+      "etiqueta": "4.3c actualizar ciclo (PATCH observaciones)",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 7,
+      "body": {
+        "message": "Ciclo actualizado correctamente"
+      }
+    },
+    {
+      "etiqueta": "4.3d RBAC negativo: Recepcionista NO edita ciclo",
+      "ok": true,
+      "status": 403,
+      "esperado": 403,
+      "ms": 5,
+      "body": {
+        "error": "Acceso denegado: se requiere rol Administrador o Entrenador"
+      }
+    },
+    {
+      "etiqueta": "4.3e crear progreso físico (Entrenador)",
+      "ok": true,
+      "status": 201,
+      "esperado": 201,
+      "ms": 7,
+      "body": {
+        "message": "Progreso registrado correctamente"
+      }
+    },
+    {
+      "etiqueta": "4.3f RBAC negativo: Recepcionista NO crea progreso",
+      "ok": true,
+      "status": 403,
+      "esperado": 403,
+      "ms": 5,
+      "body": {
+        "error": "Acceso denegado: se requiere rol Administrador o Entrenador"
+      }
+    },
+    {
+      "etiqueta": "4.3g borrar ciclo (Admin)",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 26,
+      "body": {
+        "message": "Ciclo eliminado correctamente"
+      }
+    },
+    {
+      "etiqueta": "4.3h RBAC negativo: Entrenador NO borra ciclo",
+      "ok": true,
+      "status": 403,
+      "esperado": 403,
+      "ms": 5,
+      "body": {
+        "error": "Acceso denegado: se requiere rol Administrador"
+      }
+    },
+    {
+      "etiqueta": "4.4a crear restricción (Entrenador)",
+      "ok": true,
+      "status": 201,
+      "esperado": 201,
+      "ms": 9,
+      "body": {
+        "id": 13,
+        "message": "Restricción creada"
+      }
+    },
+    {
+      "etiqueta": "4.4b listar catálogo restricciones",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 6,
+      "body": [
+        {
+          "id_restriccion": 1,
+          "nombre_restriccion": "Diabetes tipo 2",
+          "tipo": "Enfermedad",
+          "efecto_relevante": "Evitar ejercicio de alta intensidad sin supervision"
+        },
+        {
+          "id_restriccion": 2,
+          "nombre_restriccion": "Hipertension arterial",
+          "tipo": "Enfermedad",
+          "efecto_relevante": "Controlar frecuencia cardiaca durante el ejercicio"
+        },
+        {
+          "id_restriccion": 3,
+          "nombre_restriccion": "Lesion rodilla derecha",
+          "tipo": "Lesion",
+          "efecto_relevante": null
+        },
+        {
+          "id_restriccion": 4,
+          "nombre_restriccion": "Alergia al gluten",
+          "tipo": "Alergia",
+          "efecto_relevante": null
+        },
+        {
+          "id_restriccion": 5,
+          "nombre_restriccion": "Intolerancia a lactosa",
+          "tipo": "Alergia",
+          "efecto_relevante": null
+        },
+        {
+          "id_restriccion": 13,
+          "nombre_restriccion": "RestRiccion505931",
+          "tipo": "Alergia",
+          "efecto_relevante": null
+        },
+        {
+          "id_restriccion": 6,
+          "nombre_restriccion": "Metformina",
+          "tipo": "Medicamento",
+          "efecto_relevante": "Puede causar hipoglucemia en ejercicio intenso"
+        }
+      ]
+    },
+    {
+      "etiqueta": "4.4c asignar restricción a afiliado (Recepcionista)",
+      "ok": true,
+      "status": 201,
+      "esperado": 201,
+      "ms": 8,
+      "body": {
+        "message": "Restricción asignada"
+      }
+    },
+    {
+      "etiqueta": "4.4d leer restricciones del afiliado",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 6,
+      "body": [
+        {
+          "id_restriccion": 13,
+          "nombre_restriccion": "RestRiccion505931",
+          "tipo": "Alergia",
+          "efecto_relevante": null
+        }
+      ]
+    },
+    {
+      "etiqueta": "4.4e RBAC negativo: Afiliado NO asigna restricciones",
+      "ok": true,
+      "status": 403,
+      "esperado": 403,
+      "ms": 4,
+      "body": {
+        "error": "Acceso denegado: se requiere rol de staff"
+      }
+    },
+    {
+      "etiqueta": "4.4f quitar restricción del afiliado",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 9,
+      "body": {
+        "message": "Restricción removida"
+      }
+    },
+    {
+      "etiqueta": "4.5a registrar pago (Recepcionista)",
+      "ok": true,
+      "status": 201,
+      "esperado": 201,
+      "ms": 7,
+      "body": {
+        "id": 46,
+        "fecha_vencimiento": "2026-10-20",
+        "message": "Pago registrado correctamente"
+      }
+    },
+    {
+      "etiqueta": "4.5b listar pagos del afiliado",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 4,
+      "body": [
+        {
+          "id_pago": 46,
+          "id_usuario": 214,
+          "fecha_pago": "2026-09-20T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2026-10-20T00:00:00.000Z",
+          "observaciones": null,
+          "registrado_por": 4,
+          "fecha_creacion": "2026-09-22T10:55:06.000Z"
+        }
+      ]
+    },
+    {
+      "etiqueta": "4.5c listar todos los pagos (Admin)",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 14,
+      "body": [
+        {
+          "id_pago": 44,
+          "id_usuario": 208,
+          "nombres_afiliado": "CRUD",
+          "apellidos_afiliado": "Test360474",
+          "fecha_pago": "2026-09-20T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2026-10-20T00:00:00.000Z",
+          "observaciones": null,
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 46,
+          "id_usuario": 214,
+          "nombres_afiliado": "CRUD",
+          "apellidos_afiliado": "Test505931",
+          "fecha_pago": "2026-09-20T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2026-10-20T00:00:00.000Z",
+          "observaciones": null,
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 33,
+          "id_usuario": 8,
+          "nombres_afiliado": "Luis",
+          "apellidos_afiliado": "Herrera",
+          "fecha_pago": "2026-05-15T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2026-06-15T00:00:00.000Z",
+          "observaciones": "Pago mensual mayo",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 12,
+          "id_usuario": 6,
+          "nombres_afiliado": "Juan",
+          "apellidos_afiliado": "Martínez",
+          "fecha_pago": "2026-05-10T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2026-06-10T00:00:00.000Z",
+          "observaciones": "Pago mensual mayo",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 23,
+          "id_usuario": 7,
+          "nombres_afiliado": "Ana",
+          "apellidos_afiliado": "Rodríguez",
+          "fecha_pago": "2026-05-05T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2026-06-05T00:00:00.000Z",
+          "observaciones": "Pago mensual mayo",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 42,
+          "id_usuario": 9,
+          "nombres_afiliado": "Sofía",
+          "apellidos_afiliado": "Castro",
+          "fecha_pago": "2026-05-01T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2026-06-01T00:00:00.000Z",
+          "observaciones": "Pago mensual mayo",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 32,
+          "id_usuario": 8,
+          "nombres_afiliado": "Luis",
+          "apellidos_afiliado": "Herrera",
+          "fecha_pago": "2026-04-15T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2026-05-15T00:00:00.000Z",
+          "observaciones": "Pago mensual abril",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 11,
+          "id_usuario": 6,
+          "nombres_afiliado": "Juan",
+          "apellidos_afiliado": "Martínez",
+          "fecha_pago": "2026-04-10T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2026-05-10T00:00:00.000Z",
+          "observaciones": "Pago mensual abril",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 22,
+          "id_usuario": 7,
+          "nombres_afiliado": "Ana",
+          "apellidos_afiliado": "Rodríguez",
+          "fecha_pago": "2026-04-05T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2026-05-05T00:00:00.000Z",
+          "observaciones": "Pago mensual abril",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 41,
+          "id_usuario": 9,
+          "nombres_afiliado": "Sofía",
+          "apellidos_afiliado": "Castro",
+          "fecha_pago": "2026-04-01T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2026-05-01T00:00:00.000Z",
+          "observaciones": "Pago mensual abril",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 31,
+          "id_usuario": 8,
+          "nombres_afiliado": "Luis",
+          "apellidos_afiliado": "Herrera",
+          "fecha_pago": "2026-03-15T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2026-04-15T00:00:00.000Z",
+          "observaciones": "Pago mensual marzo",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 10,
+          "id_usuario": 6,
+          "nombres_afiliado": "Juan",
+          "apellidos_afiliado": "Martínez",
+          "fecha_pago": "2026-03-10T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2026-04-10T00:00:00.000Z",
+          "observaciones": "Pago mensual marzo",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 21,
+          "id_usuario": 7,
+          "nombres_afiliado": "Ana",
+          "apellidos_afiliado": "Rodríguez",
+          "fecha_pago": "2026-03-05T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2026-04-05T00:00:00.000Z",
+          "observaciones": "Pago mensual marzo",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 40,
+          "id_usuario": 9,
+          "nombres_afiliado": "Sofía",
+          "apellidos_afiliado": "Castro",
+          "fecha_pago": "2026-03-01T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2026-04-01T00:00:00.000Z",
+          "observaciones": "Pago mensual marzo",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 30,
+          "id_usuario": 8,
+          "nombres_afiliado": "Luis",
+          "apellidos_afiliado": "Herrera",
+          "fecha_pago": "2026-02-15T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2026-03-15T00:00:00.000Z",
+          "observaciones": "Pago mensual febrero",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 9,
+          "id_usuario": 6,
+          "nombres_afiliado": "Juan",
+          "apellidos_afiliado": "Martínez",
+          "fecha_pago": "2026-02-10T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2026-03-10T00:00:00.000Z",
+          "observaciones": "Pago mensual febrero",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 20,
+          "id_usuario": 7,
+          "nombres_afiliado": "Ana",
+          "apellidos_afiliado": "Rodríguez",
+          "fecha_pago": "2026-02-05T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2026-03-05T00:00:00.000Z",
+          "observaciones": "Pago mensual febrero",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 39,
+          "id_usuario": 9,
+          "nombres_afiliado": "Sofía",
+          "apellidos_afiliado": "Castro",
+          "fecha_pago": "2026-02-01T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2026-03-01T00:00:00.000Z",
+          "observaciones": "Pago mensual febrero",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 29,
+          "id_usuario": 8,
+          "nombres_afiliado": "Luis",
+          "apellidos_afiliado": "Herrera",
+          "fecha_pago": "2026-01-20T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2026-02-20T00:00:00.000Z",
+          "observaciones": "Pago atrasado de enero",
+          "nombres_recepcionista": "Carlos",
+          "apellidos_recepcionista": "Ramírez"
+        },
+        {
+          "id_pago": 8,
+          "id_usuario": 6,
+          "nombres_afiliado": "Juan",
+          "apellidos_afiliado": "Martínez",
+          "fecha_pago": "2026-01-10T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2026-02-10T00:00:00.000Z",
+          "observaciones": "Pago mensual enero",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 19,
+          "id_usuario": 7,
+          "nombres_afiliado": "Ana",
+          "apellidos_afiliado": "Rodríguez",
+          "fecha_pago": "2026-01-05T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2026-02-05T00:00:00.000Z",
+          "observaciones": "Pago mensual enero",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 38,
+          "id_usuario": 9,
+          "nombres_afiliado": "Sofía",
+          "apellidos_afiliado": "Castro",
+          "fecha_pago": "2026-01-01T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2026-02-01T00:00:00.000Z",
+          "observaciones": "Pago mensual enero",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 28,
+          "id_usuario": 8,
+          "nombres_afiliado": "Luis",
+          "apellidos_afiliado": "Herrera",
+          "fecha_pago": "2025-12-15T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Vencido",
+          "fecha_vencimiento": "2026-01-15T00:00:00.000Z",
+          "observaciones": "Se venció, no pagó diciembre a tiempo",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 7,
+          "id_usuario": 6,
+          "nombres_afiliado": "Juan",
+          "apellidos_afiliado": "Martínez",
+          "fecha_pago": "2025-12-10T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2026-01-10T00:00:00.000Z",
+          "observaciones": "Pago mensual diciembre",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 18,
+          "id_usuario": 7,
+          "nombres_afiliado": "Ana",
+          "apellidos_afiliado": "Rodríguez",
+          "fecha_pago": "2025-12-05T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2026-01-05T00:00:00.000Z",
+          "observaciones": "Pago mensual diciembre",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 37,
+          "id_usuario": 9,
+          "nombres_afiliado": "Sofía",
+          "apellidos_afiliado": "Castro",
+          "fecha_pago": "2025-12-01T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2026-01-01T00:00:00.000Z",
+          "observaciones": "Pago mensual diciembre",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 27,
+          "id_usuario": 8,
+          "nombres_afiliado": "Luis",
+          "apellidos_afiliado": "Herrera",
+          "fecha_pago": "2025-11-15T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2025-12-15T00:00:00.000Z",
+          "observaciones": "Pago mensual noviembre",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 6,
+          "id_usuario": 6,
+          "nombres_afiliado": "Juan",
+          "apellidos_afiliado": "Martínez",
+          "fecha_pago": "2025-11-10T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2025-12-10T00:00:00.000Z",
+          "observaciones": "Pago mensual noviembre",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 17,
+          "id_usuario": 7,
+          "nombres_afiliado": "Ana",
+          "apellidos_afiliado": "Rodríguez",
+          "fecha_pago": "2025-11-05T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2025-12-05T00:00:00.000Z",
+          "observaciones": "Pago mensual noviembre",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 36,
+          "id_usuario": 9,
+          "nombres_afiliado": "Sofía",
+          "apellidos_afiliado": "Castro",
+          "fecha_pago": "2025-11-01T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2025-12-01T00:00:00.000Z",
+          "observaciones": "Pago mensual noviembre",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 26,
+          "id_usuario": 8,
+          "nombres_afiliado": "Luis",
+          "apellidos_afiliado": "Herrera",
+          "fecha_pago": "2025-10-15T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2025-11-15T00:00:00.000Z",
+          "observaciones": "Pago mensual octubre",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 5,
+          "id_usuario": 6,
+          "nombres_afiliado": "Juan",
+          "apellidos_afiliado": "Martínez",
+          "fecha_pago": "2025-10-10T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2025-11-10T00:00:00.000Z",
+          "observaciones": "Pago mensual octubre",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 16,
+          "id_usuario": 7,
+          "nombres_afiliado": "Ana",
+          "apellidos_afiliado": "Rodríguez",
+          "fecha_pago": "2025-10-05T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2025-11-05T00:00:00.000Z",
+          "observaciones": "Pago mensual octubre",
+          "nombres_recepcionista": "Carlos",
+          "apellidos_recepcionista": "Ramírez"
+        },
+        {
+          "id_pago": 35,
+          "id_usuario": 9,
+          "nombres_afiliado": "Sofía",
+          "apellidos_afiliado": "Castro",
+          "fecha_pago": "2025-10-01T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2025-11-01T00:00:00.000Z",
+          "observaciones": "Pago mensual octubre",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 25,
+          "id_usuario": 8,
+          "nombres_afiliado": "Luis",
+          "apellidos_afiliado": "Herrera",
+          "fecha_pago": "2025-09-15T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2025-10-15T00:00:00.000Z",
+          "observaciones": "Pago mensual septiembre",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 4,
+          "id_usuario": 6,
+          "nombres_afiliado": "Juan",
+          "apellidos_afiliado": "Martínez",
+          "fecha_pago": "2025-09-10T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2025-10-10T00:00:00.000Z",
+          "observaciones": "Pago mensual septiembre",
+          "nombres_recepcionista": "Carlos",
+          "apellidos_recepcionista": "Ramírez"
+        },
+        {
+          "id_pago": 15,
+          "id_usuario": 7,
+          "nombres_afiliado": "Ana",
+          "apellidos_afiliado": "Rodríguez",
+          "fecha_pago": "2025-09-05T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2025-10-05T00:00:00.000Z",
+          "observaciones": "Pago mensual septiembre",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 34,
+          "id_usuario": 9,
+          "nombres_afiliado": "Sofía",
+          "apellidos_afiliado": "Castro",
+          "fecha_pago": "2025-09-01T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2025-10-01T00:00:00.000Z",
+          "observaciones": "Pago mensual septiembre",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 24,
+          "id_usuario": 8,
+          "nombres_afiliado": "Luis",
+          "apellidos_afiliado": "Herrera",
+          "fecha_pago": "2025-08-15T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2025-09-15T00:00:00.000Z",
+          "observaciones": "Pago mensual agosto",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 3,
+          "id_usuario": 6,
+          "nombres_afiliado": "Juan",
+          "apellidos_afiliado": "Martínez",
+          "fecha_pago": "2025-08-10T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2025-09-10T00:00:00.000Z",
+          "observaciones": "Pago mensual agosto",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 14,
+          "id_usuario": 7,
+          "nombres_afiliado": "Ana",
+          "apellidos_afiliado": "Rodríguez",
+          "fecha_pago": "2025-08-05T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2025-09-05T00:00:00.000Z",
+          "observaciones": "Pago mensual agosto",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 2,
+          "id_usuario": 6,
+          "nombres_afiliado": "Juan",
+          "apellidos_afiliado": "Martínez",
+          "fecha_pago": "2025-07-10T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2025-08-10T00:00:00.000Z",
+          "observaciones": "Pago mensual julio",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 13,
+          "id_usuario": 7,
+          "nombres_afiliado": "Ana",
+          "apellidos_afiliado": "Rodríguez",
+          "fecha_pago": "2025-07-05T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2025-08-05T00:00:00.000Z",
+          "observaciones": "Pago mensual julio",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        },
+        {
+          "id_pago": 1,
+          "id_usuario": 6,
+          "nombres_afiliado": "Juan",
+          "apellidos_afiliado": "Martínez",
+          "fecha_pago": "2025-06-10T00:00:00.000Z",
+          "valor_pagado": "80000.00",
+          "estado": "Pagado",
+          "fecha_vencimiento": "2025-07-10T00:00:00.000Z",
+          "observaciones": "Pago mensual junio",
+          "nombres_recepcionista": "María",
+          "apellidos_recepcionista": "López"
+        }
+      ]
+    },
+    {
+      "etiqueta": "4.5d métricas financieras (Admin)",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 12,
+      "body": {
+        "ingresos_por_mes": [
+          {
+            "mes": 9,
+            "anio": 2026,
+            "total": "160000.00"
+          },
+          {
+            "mes": 5,
+            "anio": 2026,
+            "total": "320000.00"
+          },
+          {
+            "mes": 4,
+            "anio": 2026,
+            "total": "320000.00"
+          },
+          {
+            "mes": 3,
+            "anio": 2026,
+            "total": "320000.00"
+          },
+          {
+            "mes": 2,
+            "anio": 2026,
+            "total": "320000.00"
+          },
+          {
+            "mes": 1,
+            "anio": 2026,
+            "total": "320000.00"
+          },
+          {
+            "mes": 12,
+            "anio": 2025,
+            "total": "320000.00"
+          },
+          {
+            "mes": 11,
+            "anio": 2025,
+            "total": "320000.00"
+          },
+          {
+            "mes": 10,
+            "anio": 2025,
+            "total": "320000.00"
+          },
+          {
+            "mes": 9,
+            "anio": 2025,
+            "total": "320000.00"
+          },
+          {
+            "mes": 8,
+            "anio": 2025,
+            "total": "240000.00"
+          },
+          {
+            "mes": 7,
+            "anio": 2025,
+            "total": "160000.00"
+          },
+          {
+            "mes": 6,
+            "anio": 2025,
+            "total": "80000.00"
+          }
+        ],
+        "pagos_por_recepcionista": [
+          {
+            "id_usuario": 4,
+            "nombres": "María",
+            "apellidos": "López",
+            "total_recaudado": "3280000.00",
+            "cantidad_pagos": 41
+          }
+        ],
+        "total_recaudado": 3520000,
+        "ultimos_pagos": [
+          {
+            "id_pago": 46,
+            "id_usuario": 214,
+            "nombres_afiliado": "CRUD",
+            "apellidos_afiliado": "Test505931",
+            "fecha_pago": "2026-09-20T00:00:00.000Z",
+            "valor_pagado": "80000.00",
+            "estado": "Pagado",
+            "fecha_vencimiento": "2026-10-20T00:00:00.000Z",
+            "observaciones": null,
+            "nombres_recepcionista": "María",
+            "apellidos_recepcionista": "López"
+          },
+          {
+            "id_pago": 44,
+            "id_usuario": 208,
+            "nombres_afiliado": "CRUD",
+            "apellidos_afiliado": "Test360474",
+            "fecha_pago": "2026-09-20T00:00:00.000Z",
+            "valor_pagado": "80000.00",
+            "estado": "Pagado",
+            "fecha_vencimiento": "2026-10-20T00:00:00.000Z",
+            "observaciones": null,
+            "nombres_recepcionista": "María",
+            "apellidos_recepcionista": "López"
+          },
+          {
+            "id_pago": 33,
+            "id_usuario": 8,
+            "nombres_afiliado": "Luis",
+            "apellidos_afiliado": "Herrera",
+            "fecha_pago": "2026-05-15T00:00:00.000Z",
+            "valor_pagado": "80000.00",
+            "estado": "Pagado",
+            "fecha_vencimiento": "2026-06-15T00:00:00.000Z",
+            "observaciones": "Pago mensual mayo",
+            "nombres_recepcionista": "María",
+            "apellidos_recepcionista": "López"
+          },
+          {
+            "id_pago": 12,
+            "id_usuario": 6,
+            "nombres_afiliado": "Juan",
+            "apellidos_afiliado": "Martínez",
+            "fecha_pago": "2026-05-10T00:00:00.000Z",
+            "valor_pagado": "80000.00",
+            "estado": "Pagado",
+            "fecha_vencimiento": "2026-06-10T00:00:00.000Z",
+            "observaciones": "Pago mensual mayo",
+            "nombres_recepcionista": "María",
+            "apellidos_recepcionista": "López"
+          },
+          {
+            "id_pago": 23,
+            "id_usuario": 7,
+            "nombres_afiliado": "Ana",
+            "apellidos_afiliado": "Rodríguez",
+            "fecha_pago": "2026-05-05T00:00:00.000Z",
+            "valor_pagado": "80000.00",
+            "estado": "Pagado",
+            "fecha_vencimiento": "2026-06-05T00:00:00.000Z",
+            "observaciones": "Pago mensual mayo",
+            "nombres_recepcionista": "María",
+            "apellidos_recepcionista": "López"
+          },
+          {
+            "id_pago": 42,
+            "id_usuario": 9,
+            "nombres_afiliado": "Sofía",
+            "apellidos_afiliado": "Castro",
+            "fecha_pago": "2026-05-01T00:00:00.000Z",
+            "valor_pagado": "80000.00",
+            "estado": "Pagado",
+            "fecha_vencimiento": "2026-06-01T00:00:00.000Z",
+            "observaciones": "Pago mensual mayo",
+            "nombres_recepcionista": "María",
+            "apellidos_recepcionista": "López"
+          },
+          {
+            "id_pago": 32,
+            "id_usuario": 8,
+            "nombres_afiliado": "Luis",
+            "apellidos_afiliado": "Herrera",
+            "fecha_pago": "2026-04-15T00:00:00.000Z",
+            "valor_pagado": "80000.00",
+            "estado": "Pagado",
+            "fecha_vencimiento": "2026-05-15T00:00:00.000Z",
+            "observaciones": "Pago mensual abril",
+            "nombres_recepcionista": "María",
+            "apellidos_recepcionista": "López"
+          },
+          {
+            "id_pago": 11,
+            "id_usuario": 6,
+            "nombres_afiliado": "Juan",
+            "apellidos_afiliado": "Martínez",
+            "fecha_pago": "2026-04-10T00:00:00.000Z",
+            "valor_pagado": "80000.00",
+            "estado": "Pagado",
+            "fecha_vencimiento": "2026-05-10T00:00:00.000Z",
+            "observaciones": "Pago mensual abril",
+            "nombres_recepcionista": "María",
+            "apellidos_recepcionista": "López"
+          },
+          {
+            "id_pago": 22,
+            "id_usuario": 7,
+            "nombres_afiliado": "Ana",
+            "apellidos_afiliado": "Rodríguez",
+            "fecha_pago": "2026-04-05T00:00:00.000Z",
+            "valor_pagado": "80000.00",
+            "estado": "Pagado",
+            "fecha_vencimiento": "2026-05-05T00:00:00.000Z",
+            "observaciones": "Pago mensual abril",
+            "nombres_recepcionista": "María",
+            "apellidos_recepcionista": "López"
+          },
+          {
+            "id_pago": 41,
+            "id_usuario": 9,
+            "nombres_afiliado": "Sofía",
+            "apellidos_afiliado": "Castro",
+            "fecha_pago": "2026-04-01T00:00:00.000Z",
+            "valor_pagado": "80000.00",
+            "estado": "Pagado",
+            "fecha_vencimiento": "2026-05-01T00:00:00.000Z",
+            "observaciones": "Pago mensual abril",
+            "nombres_recepcionista": "María",
+            "apellidos_recepcionista": "López"
+          }
+        ]
+      }
+    },
+    {
+      "etiqueta": "4.5e RBAC negativo: Afiliado NO ve pagos globales",
+      "ok": true,
+      "status": 403,
+      "esperado": 403,
+      "ms": 4,
+      "body": {
+        "error": "Acceso denegado: se requiere rol Administrador"
+      }
+    },
+    {
+      "etiqueta": "4.5f RBAC negativo: Entrenador NO registra pagos",
+      "ok": true,
+      "status": 403,
+      "esperado": 403,
+      "ms": 8,
+      "body": {
+        "error": "Acceso denegado: se requiere rol Administrador o Recepcionista"
+      }
+    },
+    {
+      "etiqueta": "4.6a obtener ciclos del afiliado (/me/ciclos)",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 7,
+      "body": [
+        {
+          "id_ciclo": 2,
+          "id_usuario": 6,
+          "fecha_inicio": "2024-04-04T00:00:00.000Z",
+          "fecha_fin": "2024-05-31T00:00:00.000Z",
+          "activo": 1,
+          "objetivo_fisico": "Perdida de grasa",
+          "grupo_muscular_prioritario": "Pecho",
+          "nivel_experiencia": "Intermedio",
+          "disponibilidad_dias": 3,
+          "observaciones": null,
+          "fecha_creacion": "2024-04-04T08:00:00.000Z",
+          "registrado_por": 2,
+          "numero_ciclo": 2
+        },
+        {
+          "id_ciclo": 1,
+          "id_usuario": 6,
+          "fecha_inicio": "2024-01-08T00:00:00.000Z",
+          "fecha_fin": "2024-03-17T00:00:00.000Z",
+          "activo": 0,
+          "objetivo_fisico": "Perdida de grasa",
+          "grupo_muscular_prioritario": "Pecho",
+          "nivel_experiencia": "Intermedio",
+          "disponibilidad_dias": 3,
+          "observaciones": null,
+          "fecha_creacion": "2024-01-08T08:00:00.000Z",
+          "registrado_por": 2,
+          "numero_ciclo": 1
+        }
+      ]
+    },
+    {
+      "etiqueta": "4.6b ejercicios disponibles del afiliado",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 7,
+      "body": [
+        {
+          "id_ejercicio": 13,
+          "nombre_ejercicio": "Sentadilla bulgara",
+          "grupo_muscular": "Piernas",
+          "nivel_minimo": "Avanzado",
+          "descripcion": null
+        },
+        {
+          "id_ejercicio": 9,
+          "nombre_ejercicio": "Zancadas",
+          "grupo_muscular": "Piernas",
+          "nivel_minimo": "Intermedio",
+          "descripcion": "De pie, da un paso largo hacia adelante y baja hasta que ambas rodillas formen 90 grados. Empuja con el pie delantero para volver y alterna las piernas."
+        },
+        {
+          "id_ejercicio": 12,
+          "nombre_ejercicio": "Press inclinado",
+          "grupo_muscular": "Pecho",
+          "nivel_minimo": "Intermedio",
+          "descripcion": null
+        },
+        {
+          "id_ejercicio": 8,
+          "nombre_ejercicio": "Dominadas",
+          "grupo_muscular": "Espalda",
+          "nivel_minimo": "Avanzado",
+          "descripcion": null
+        },
+        {
+          "id_ejercicio": 11,
+          "nombre_ejercicio": "Remo con barra",
+          "grupo_muscular": "Espalda",
+          "nivel_minimo": "Intermedio",
+          "descripcion": null
+        },
+        {
+          "id_ejercicio": 20,
+          "nombre_ejercicio": "Remo con mancuerna",
+          "grupo_muscular": "Espalda",
+          "nivel_minimo": "Intermedio",
+          "descripcion": null
+        },
+        {
+          "id_ejercicio": 15,
+          "nombre_ejercicio": "Curl martillo",
+          "grupo_muscular": "Biceps",
+          "nivel_minimo": "Intermedio",
+          "descripcion": null
+        },
+        {
+          "id_ejercicio": 16,
+          "nombre_ejercicio": "Fondos en paralelas",
+          "grupo_muscular": "Triceps",
+          "nivel_minimo": "Avanzado",
+          "descripcion": null
+        },
+        {
+          "id_ejercicio": 23,
+          "nombre_ejercicio": "Crunch con polea",
+          "grupo_muscular": "Core",
+          "nivel_minimo": "Intermedio",
+          "descripcion": null
+        },
+        {
+          "id_ejercicio": 7,
+          "nombre_ejercicio": "Hip thrust",
+          "grupo_muscular": "Gluteos",
+          "nivel_minimo": "Intermedio",
+          "descripcion": "Recuéstate boca arriba con la espalda apoyada en el banco y la barra o disco sobre la cadera. Empuja con la cadera hacia arriba apretando los glúteos y baja con control."
+        },
+        {
+          "id_ejercicio": 17,
+          "nombre_ejercicio": "Peso muerto rumano",
+          "grupo_muscular": "Gluteos",
+          "nivel_minimo": "Intermedio",
+          "descripcion": null
+        }
+      ]
+    },
+    {
+      "etiqueta": "4.6c alimentos disponibles del afiliado",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 9,
+      "body": [
+        {
+          "id_alimento": 15,
+          "nombre_alimento": "Aguacate",
+          "proteinas": "2.00",
+          "carbohidratos": "9.00",
+          "grasas": "15.00",
+          "calorias_por_100g": "179.00"
+        },
+        {
+          "id_alimento": 8,
+          "nombre_alimento": "Almendras",
+          "proteinas": "21.00",
+          "carbohidratos": "22.00",
+          "grasas": "50.00",
+          "calorias_por_100g": "622.00"
+        },
+        {
+          "id_alimento": 2,
+          "nombre_alimento": "Arroz blanco",
+          "proteinas": "2.70",
+          "carbohidratos": "28.00",
+          "grasas": "0.30",
+          "calorias_por_100g": "125.50"
+        },
+        {
+          "id_alimento": 20,
+          "nombre_alimento": "Arroz integral",
+          "proteinas": "2.60",
+          "carbohidratos": "23.00",
+          "grasas": "0.90",
+          "calorias_por_100g": "110.50"
+        },
+        {
+          "id_alimento": 6,
+          "nombre_alimento": "Atun en agua",
+          "proteinas": "29.00",
+          "carbohidratos": "0.00",
+          "grasas": "0.50",
+          "calorias_por_100g": "120.50"
+        },
+        {
+          "id_alimento": 4,
+          "nombre_alimento": "Avena",
+          "proteinas": "17.00",
+          "carbohidratos": "66.00",
+          "grasas": "7.00",
+          "calorias_por_100g": "395.00"
+        },
+        {
+          "id_alimento": 7,
+          "nombre_alimento": "Batata",
+          "proteinas": "1.60",
+          "carbohidratos": "20.00",
+          "grasas": "0.10",
+          "calorias_por_100g": "87.30"
+        },
+        {
+          "id_alimento": 5,
+          "nombre_alimento": "Brocoli",
+          "proteinas": "2.80",
+          "carbohidratos": "7.00",
+          "grasas": "0.40",
+          "calorias_por_100g": "42.80"
+        },
+        {
+          "id_alimento": 22,
+          "nombre_alimento": "Chia",
+          "proteinas": "16.50",
+          "carbohidratos": "42.10",
+          "grasas": "30.70",
+          "calorias_por_100g": "510.70"
+        },
+        {
+          "id_alimento": 13,
+          "nombre_alimento": "Espinacas",
+          "proteinas": "2.90",
+          "carbohidratos": "3.60",
+          "grasas": "0.40",
+          "calorias_por_100g": "29.60"
+        },
+        {
+          "id_alimento": 23,
+          "nombre_alimento": "Garbanzos",
+          "proteinas": "8.90",
+          "carbohidratos": "27.40",
+          "grasas": "2.60",
+          "calorias_por_100g": "168.60"
+        },
+        {
+          "id_alimento": 3,
+          "nombre_alimento": "Huevo entero",
+          "proteinas": "13.00",
+          "carbohidratos": "1.10",
+          "grasas": "11.00",
+          "calorias_por_100g": "155.40"
+        },
+        {
+          "id_alimento": 26,
+          "nombre_alimento": "Hummus",
+          "proteinas": "7.90",
+          "carbohidratos": "14.30",
+          "grasas": "9.60",
+          "calorias_por_100g": "175.20"
+        },
+        {
+          "id_alimento": 9,
+          "nombre_alimento": "Leche deslactosada",
+          "proteinas": "3.40",
+          "carbohidratos": "4.80",
+          "grasas": "3.60",
+          "calorias_por_100g": "65.20"
+        },
+        {
+          "id_alimento": 16,
+          "nombre_alimento": "Lentejas",
+          "proteinas": "9.00",
+          "carbohidratos": "20.00",
+          "grasas": "0.40",
+          "calorias_por_100g": "119.60"
+        },
+        {
+          "id_alimento": 25,
+          "nombre_alimento": "Mango",
+          "proteinas": "0.80",
+          "carbohidratos": "15.00",
+          "grasas": "0.40",
+          "calorias_por_100g": "66.80"
+        },
+        {
+          "id_alimento": 14,
+          "nombre_alimento": "Papa",
+          "proteinas": "2.00",
+          "carbohidratos": "17.00",
+          "grasas": "0.10",
+          "calorias_por_100g": "76.90"
+        },
+        {
+          "id_alimento": 17,
+          "nombre_alimento": "Pechuga de pavo",
+          "proteinas": "22.00",
+          "carbohidratos": "0.00",
+          "grasas": "1.00",
+          "calorias_por_100g": "97.00"
+        },
+        {
+          "id_alimento": 1,
+          "nombre_alimento": "Pechuga de pollo",
+          "proteinas": "31.00",
+          "carbohidratos": "0.00",
+          "grasas": "3.60",
+          "calorias_por_100g": "156.40"
+        },
+        {
+          "id_alimento": 24,
+          "nombre_alimento": "Pimiento",
+          "proteinas": "0.99",
+          "carbohidratos": "6.00",
+          "grasas": "0.30",
+          "calorias_por_100g": "30.66"
+        },
+        {
+          "id_alimento": 19,
+          "nombre_alimento": "Platano",
+          "proteinas": "1.10",
+          "carbohidratos": "23.00",
+          "grasas": "0.30",
+          "calorias_por_100g": "99.10"
+        },
+        {
+          "id_alimento": 18,
+          "nombre_alimento": "Queso cottage",
+          "proteinas": "11.00",
+          "carbohidratos": "3.40",
+          "grasas": "4.30",
+          "calorias_por_100g": "96.30"
+        },
+        {
+          "id_alimento": 10,
+          "nombre_alimento": "Quinoa",
+          "proteinas": "14.00",
+          "carbohidratos": "64.00",
+          "grasas": "6.00",
+          "calorias_por_100g": "366.00"
+        },
+        {
+          "id_alimento": 11,
+          "nombre_alimento": "Salmon",
+          "proteinas": "20.00",
+          "carbohidratos": "0.00",
+          "grasas": "13.00",
+          "calorias_por_100g": "197.00"
+        },
+        {
+          "id_alimento": 21,
+          "nombre_alimento": "Tilapia",
+          "proteinas": "20.00",
+          "carbohidratos": "0.00",
+          "grasas": "1.00",
+          "calorias_por_100g": "89.00"
+        },
+        {
+          "id_alimento": 12,
+          "nombre_alimento": "Yogur griego",
+          "proteinas": "10.00",
+          "carbohidratos": "3.60",
+          "grasas": "5.00",
+          "calorias_por_100g": "99.40"
+        }
+      ]
+    },
+    {
+      "etiqueta": "4.6d guardar progreso de ejercicio (/me/progreso-ejercicio)",
+      "ok": true,
+      "status": 201,
+      "esperado": 201,
+      "ms": 11,
+      "body": {
+        "message": "Progreso guardado correctamente"
+      }
+    },
+    {
+      "etiqueta": "4.6e leer progreso de ejercicio por fecha",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 5,
+      "body": {
+        "ejercicios": [
+          {
+            "id_ejercicio": 13,
+            "completado": 1
+          }
+        ]
+      }
+    },
+    {
+      "etiqueta": "4.6f registrar agua (/me/agua)",
+      "ok": true,
+      "status": 201,
+      "esperado": 201,
+      "ms": 5,
+      "body": {
+        "message": "Agua registrada correctamente"
+      }
+    },
+    {
+      "etiqueta": "4.6g leer agua del día",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 7,
+      "body": {
+        "vasos": 8
+      }
+    },
+    {
+      "etiqueta": "4.6h guardar consumo de alimento del plan (/me/consumo-alimento)",
+      "ok": true,
+      "status": 201,
+      "esperado": 201,
+      "ms": 8,
+      "body": {
+        "message": "Consumo guardado correctamente"
+      }
+    },
+    {
+      "etiqueta": "4.6i leer plan entrenamiento del ciclo (/me)",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 12,
+      "body": {
+        "id_ciclo": 2,
+        "modificado_por": null,
+        "observaciones": null,
+        "rutinas": [
+          {
+            "id_rutina": 4,
+            "nombre_rutina": "Día 1 — Pecho y Tríceps",
+            "enfoque_muscular": "Pecho",
+            "dia_numero": 1,
+            "ejercicios": [
+              {
+                "orden": 1,
+                "id_ejercicio": 6,
+                "nombre_ejercicio": "Extension de triceps",
+                "grupo_muscular": "Triceps",
+                "series": 4,
+                "repeticiones": 15,
+                "peso_kg": null,
+                "descanso_seg": null,
+                "instrucciones": "De pie o sentado, extiende los codos llevando las mancuernas o polea hacia abajo hasta bloquear los brazos. Vuelve a la posición inicial con control."
+              },
+              {
+                "orden": 2,
+                "id_ejercicio": 5,
+                "nombre_ejercicio": "Curl de biceps",
+                "grupo_muscular": "Biceps",
+                "series": 5,
+                "repeticiones": 12,
+                "peso_kg": null,
+                "descanso_seg": null,
+                "instrucciones": "De pie, con los codos pegados al torso, flexiona los codos levantando las mancuernas hacia los hombros. Baja con control sin balancear el torso."
+              },
+              {
+                "orden": 3,
+                "id_ejercicio": 7,
+                "nombre_ejercicio": "Hip thrust",
+                "grupo_muscular": "Gluteos",
+                "series": 3,
+                "repeticiones": 8,
+                "peso_kg": null,
+                "descanso_seg": null,
+                "instrucciones": "Recuéstate boca arriba con la espalda apoyada en el banco y la barra o disco sobre la cadera. Empuja con la cadera hacia arriba apretando los glúteos y baja con control."
+              }
+            ]
+          },
+          {
+            "id_rutina": 5,
+            "nombre_rutina": "Día 2 — Espalda y Bíceps",
+            "enfoque_muscular": "Espalda",
+            "dia_numero": 4,
+            "ejercicios": [
+              {
+                "orden": 1,
+                "id_ejercicio": 2,
+                "nombre_ejercicio": "Press de banca",
+                "grupo_muscular": "Pecho",
+                "series": 4,
+                "repeticiones": 10,
+                "peso_kg": null,
+                "descanso_seg": null,
+                "instrucciones": "Acuéstate en el banco con los pies firmes en el suelo. Baja la barra hasta el pecho con control y empújala hacia arriba hasta extender los brazos, sin bloquear los codos."
+              },
+              {
+                "orden": 2,
+                "id_ejercicio": 5,
+                "nombre_ejercicio": "Curl de biceps",
+                "grupo_muscular": "Biceps",
+                "series": 3,
+                "repeticiones": 9,
+                "peso_kg": null,
+                "descanso_seg": null,
+                "instrucciones": "De pie, con los codos pegados al torso, flexiona los codos levantando las mancuernas hacia los hombros. Baja con control sin balancear el torso."
+              },
+              {
+                "orden": 3,
+                "id_ejercicio": 1,
+                "nombre_ejercicio": "Sentadilla",
+                "grupo_muscular": "Piernas",
+                "series": 4,
+                "repeticiones": 12,
+                "peso_kg": null,
+                "descanso_seg": null,
+                "instrucciones": "Colócate con los pies al ancho de los hombros y la espalda neutra. Baja flexionando rodillas y cadera como si fueras a sentarte, manteniendo el pecho arriba. Empuja con todo el pie para volver a la posición inicial."
+              },
+              {
+                "orden": 4,
+                "id_ejercicio": 9,
+                "nombre_ejercicio": "Zancadas",
+                "grupo_muscular": "Piernas",
+                "series": 3,
+                "repeticiones": 14,
+                "peso_kg": null,
+                "descanso_seg": null,
+                "instrucciones": "De pie, da un paso largo hacia adelante y baja hasta que ambas rodillas formen 90 grados. Empuja con el pie delantero para volver y alterna las piernas."
+              }
+            ]
+          },
+          {
+            "id_rutina": 6,
+            "nombre_rutina": "Día 3 — Piernas y Glúteos",
+            "enfoque_muscular": "Piernas",
+            "dia_numero": 7,
+            "ejercicios": [
+              {
+                "orden": 1,
+                "id_ejercicio": 7,
+                "nombre_ejercicio": "Hip thrust",
+                "grupo_muscular": "Gluteos",
+                "series": 3,
+                "repeticiones": 13,
+                "peso_kg": null,
+                "descanso_seg": null,
+                "instrucciones": "Recuéstate boca arriba con la espalda apoyada en el banco y la barra o disco sobre la cadera. Empuja con la cadera hacia arriba apretando los glúteos y baja con control."
+              },
+              {
+                "orden": 2,
+                "id_ejercicio": 1,
+                "nombre_ejercicio": "Sentadilla",
+                "grupo_muscular": "Piernas",
+                "series": 5,
+                "repeticiones": 8,
+                "peso_kg": null,
+                "descanso_seg": null,
+                "instrucciones": "Colócate con los pies al ancho de los hombros y la espalda neutra. Baja flexionando rodillas y cadera como si fueras a sentarte, manteniendo el pecho arriba. Empuja con todo el pie para volver a la posición inicial."
+              },
+              {
+                "orden": 3,
+                "id_ejercicio": 6,
+                "nombre_ejercicio": "Extension de triceps",
+                "grupo_muscular": "Triceps",
+                "series": 5,
+                "repeticiones": 15,
+                "peso_kg": null,
+                "descanso_seg": null,
+                "instrucciones": "De pie o sentado, extiende los codos llevando las mancuernas o polea hacia abajo hasta bloquear los brazos. Vuelve a la posición inicial con control."
+              },
+              {
+                "orden": 4,
+                "id_ejercicio": 2,
+                "nombre_ejercicio": "Press de banca",
+                "grupo_muscular": "Pecho",
+                "series": 5,
+                "repeticiones": 11,
+                "peso_kg": null,
+                "descanso_seg": null,
+                "instrucciones": "Acuéstate en el banco con los pies firmes en el suelo. Baja la barra hasta el pecho con control y empújala hacia arriba hasta extender los brazos, sin bloquear los codos."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "etiqueta": "4.6j registrar ejecución real de ejercicio",
+      "ok": true,
+      "status": 201,
+      "esperado": 201,
+      "ms": 28,
+      "body": {
+        "message": "Ejercicio registrado correctamente",
+        "id_registro": 14,
+        "resumen": {
+          "id_progreso_diario": 9,
+          "id_usuario": 6,
+          "fecha": "2026-09-22T00:00:00.000Z",
+          "calorias_consumidas": "0.00",
+          "agua_vasos": 8,
+          "ejercicios_realizados": 1,
+          "duracion_minutos": null,
+          "nivel_energia": null,
+          "estado_animo": null,
+          "observaciones": null,
+          "created_at": "2026-09-22T10:55:06.000Z",
+          "updated_at": "2026-09-22T10:55:06.000Z"
+        }
+      }
+    },
+    {
+      "etiqueta": "4.6k leer plan nutricional del ciclo (/me)",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 18,
+      "body": {
+        "id_ciclo": 2,
+        "calorias_objetivo": "1899.56",
+        "num_comidas": 4,
+        "modificado_por": null,
+        "observaciones": null,
+        "detalle": [
+          {
+            "num_comida": 1,
+            "id_alimento": 4,
+            "cantidad_g": "99.00",
+            "nombre_alimento": "Avena",
+            "proteinas": "17.00",
+            "carbohidratos": "66.00",
+            "grasas": "7.00",
+            "calorias_por_100g": "395.00"
+          },
+          {
+            "num_comida": 2,
+            "id_alimento": 5,
+            "cantidad_g": "171.00",
+            "nombre_alimento": "Brocoli",
+            "proteinas": "2.80",
+            "carbohidratos": "7.00",
+            "grasas": "0.40",
+            "calorias_por_100g": "42.80"
+          },
+          {
+            "num_comida": 3,
+            "id_alimento": 4,
+            "cantidad_g": "211.00",
+            "nombre_alimento": "Avena",
+            "proteinas": "17.00",
+            "carbohidratos": "66.00",
+            "grasas": "7.00",
+            "calorias_por_100g": "395.00"
+          },
+          {
+            "num_comida": 3,
+            "id_alimento": 3,
+            "cantidad_g": "219.00",
+            "nombre_alimento": "Huevo entero",
+            "proteinas": "13.00",
+            "carbohidratos": "1.10",
+            "grasas": "11.00",
+            "calorias_por_100g": "155.40"
+          },
+          {
+            "num_comida": 3,
+            "id_alimento": 10,
+            "cantidad_g": "192.00",
+            "nombre_alimento": "Quinoa",
+            "proteinas": "14.00",
+            "carbohidratos": "64.00",
+            "grasas": "6.00",
+            "calorias_por_100g": "366.00"
+          },
+          {
+            "num_comida": 4,
+            "id_alimento": 5,
+            "cantidad_g": "94.00",
+            "nombre_alimento": "Brocoli",
+            "proteinas": "2.80",
+            "carbohidratos": "7.00",
+            "grasas": "0.40",
+            "calorias_por_100g": "42.80"
+          },
+          {
+            "num_comida": 4,
+            "id_alimento": 1,
+            "cantidad_g": "177.00",
+            "nombre_alimento": "Pechuga de pollo",
+            "proteinas": "31.00",
+            "carbohidratos": "0.00",
+            "grasas": "3.60",
+            "calorias_por_100g": "156.40"
+          },
+          {
+            "num_comida": 4,
+            "id_alimento": 10,
+            "cantidad_g": "98.00",
+            "nombre_alimento": "Quinoa",
+            "proteinas": "14.00",
+            "carbohidratos": "64.00",
+            "grasas": "6.00",
+            "calorias_por_100g": "366.00"
+          }
+        ]
+      }
+    },
+    {
+      "etiqueta": "4.6l registrar consumo real de alimento",
+      "ok": true,
+      "status": 201,
+      "esperado": 201,
+      "ms": 19,
+      "body": {
+        "message": "Consumo de alimento registrado correctamente",
+        "id_consumo": 27,
+        "calorias_consumidas": "592.50",
+        "proteinas_consumidas": "25.50",
+        "carbohidratos_consumidos": "99.00",
+        "grasas_consumidas": "10.50",
+        "resumen": {
+          "id_progreso_diario": 9,
+          "id_usuario": 6,
+          "fecha": "2026-09-22T00:00:00.000Z",
+          "calorias_consumidas": "592.50",
+          "agua_vasos": 8,
+          "ejercicios_realizados": 1,
+          "duracion_minutos": null,
+          "nivel_energia": null,
+          "estado_animo": null,
+          "observaciones": null,
+          "created_at": "2026-09-22T10:55:06.000Z",
+          "updated_at": "2026-09-22T10:55:06.000Z"
+        }
+      }
+    },
+    {
+      "etiqueta": "4.6m crear nota del afiliado sobre ejercicio",
+      "ok": true,
+      "status": 201,
+      "esperado": 201,
+      "ms": 7,
+      "body": {
+        "id_nota": 3,
+        "message": "Nota guardada correctamente"
+      }
+    },
+    {
+      "etiqueta": "4.6n leer notas del afiliado",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 5,
+      "body": [
+        {
+          "id_nota": 3,
+          "id_usuario": 6,
+          "id_ejercicio": 13,
+          "id_ciclo": 2,
+          "nota": "Me costo la ultima serie",
+          "fecha_nota": "2026-09-22T00:00:00.000Z",
+          "nombre_ejercicio": "Sentadilla bulgara"
+        }
+      ]
+    },
+    {
+      "etiqueta": "4.6o historial agua",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 6,
+      "body": {
+        "vasos": 0
+      }
+    },
+    {
+      "etiqueta": "4.6p historial consumo diario",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 4,
+      "body": [
+        {
+          "fecha": "2026-09-22T00:00:00.000Z",
+          "id_ciclo": 2,
+          "id_alimento": 15,
+          "num_comida": 1,
+          "consumido": 1,
+          "nombre_alimento": "Aguacate"
+        }
+      ]
+    },
+    {
+      "etiqueta": "4.6q historial progreso ejercicios",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 6,
+      "body": [
+        {
+          "fecha": "2026-09-22T00:00:00.000Z",
+          "id_ejercicio": 13,
+          "completado": 1,
+          "nombre_ejercicio": "Sentadilla bulgara"
+        }
+      ]
+    },
+    {
+      "etiqueta": "4.6r historial registro real ejercicios",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 5,
+      "body": [
+        {
+          "id_registro": 14,
+          "id_ciclo": 2,
+          "fecha": "2026-09-22T00:00:00.000Z",
+          "id_rutina": 4,
+          "orden": 1,
+          "series": 3,
+          "repeticiones": 12,
+          "peso_utilizado_kg": "30.00",
+          "notas": "Verificación Fase 4",
+          "id_ejercicio": 6,
+          "nombre_ejercicio": "Extension de triceps",
+          "grupo_muscular": "Triceps",
+          "volumen": "1080.00"
+        }
+      ]
+    },
+    {
+      "etiqueta": "4.6s historial consumo real alimentos",
+      "ok": true,
+      "status": 200,
+      "esperado": 200,
+      "ms": 5,
+      "body": [
+        {
+          "id_consumo": 27,
+          "id_ciclo": 2,
+          "num_comida": 1,
+          "fecha": "2026-09-22T00:00:00.000Z",
+          "cantidad_g_consumida": "150.00",
+          "calorias_consumidas": "592.50",
+          "proteinas_consumidas": "25.50",
+          "carbohidratos_consumidos": "99.00",
+          "grasas_consumidas": "10.50",
+          "id_alimento": 4,
+          "nombre_alimento": "Avena"
+        }
+      ]
+    },
+    {
+      "etiqueta": "4.1f borrar afiliado con datos asociados → integridad (400 esperado)",
+      "ok": true,
+      "status": 400,
+      "esperado": 400,
+      "ms": 9,
+      "body": {
+        "error": "No se puede eliminar: el afiliado tiene datos asociados"
+      }
+    },
+    {
+      "etiqueta": "4.1g.1 crear afiliado limpio (Recepcionista)",
+      "ok": true,
+      "status": 201,
+      "esperado": 201,
+      "ms": 351,
+      "body": {
+        "id": 216,
+        "message": "Afiliado creado correctamente",
+        "password_temporal": "TmpDel2025!"
+      }
+    },
+    {
+      "etiqueta": "4.1g.2 borrar afiliado limpio (Admin)",
+      "ok": true,
+      "status": 200,
+      "esperado": [
+        200,
+        204
+      ],
+      "ms": 25,
+      "body": {
+        "message": "Afiliado eliminado correctamente"
+      }
+    }
+  ],
+  "errores": [],
+  "resumen": {
+    "total": 57,
+    "ok": 57,
+    "fallo": 0
+  }
+}
