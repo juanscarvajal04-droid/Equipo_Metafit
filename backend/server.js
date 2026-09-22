@@ -39,6 +39,7 @@ const DEFAULT_CORS_ORIGIN = [
   'http://127.0.0.1:8081',
   'http://localhost:3001',
   'http://127.0.0.1:3001',
+  'https://metafit-backend-rr18.onrender.com',
   'https://metafit-frontend-78x6.onrender.com',
 ].join(',');
 
