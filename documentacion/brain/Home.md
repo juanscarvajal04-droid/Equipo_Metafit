@@ -30,6 +30,11 @@
 - `../manual_despliegue.md` — Guía completa de despliegue (Render, Railway, Brevo, Cloudinary, CI/CD)
 - `../n8n.md` — Automatización n8n: webhooks, credenciales, troubleshooting
 
+### ☁️ Infraestructura
+- [[VPS Oracle Cloud]] — Instancia Always Free, SSH, puertos, troubleshooting
+- [[Dokploy]] — PaaS auto-alojado (panel y MySQL de producción)
+- [[Arquitectura VPS]] — Diagrama de cómo se integra el VPS con Render
+
 ### 🐛 Bugs y Soluciones
 - [[Historial de bugs]] — Bugs documentados y cómo se resolvieron
 - [[Lecciones aprendidas]] — Mejores prácticas descubiertas
@@ -47,6 +52,7 @@
 
 ### 🔗 Enlaces
 - [[Enlaces útiles]] — URLs, repositorios, herramientas
+- `../infraestructura_vps.md` — Detalle de la BD remota en Oracle VPS + Dokploy
 
 ---
 

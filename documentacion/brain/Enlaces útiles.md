@@ -14,6 +14,16 @@
 
 ---
 
+## ☁️ VPS / Infraestructura
+
+| Recurso | URL |
+|---|---|
+| **Dokploy** | http://141.148.94.173:3000 |
+| **VPS IP (Oracle Cloud)** | 141.148.94.173 |
+| **Adminer (BD prod)** | https://metafit-adminer.onrender.com |
+
+---
+
 ## 💻 Desarrollo Local
 
 | Servicio | URL | Puerto |
@@ -85,3 +95,6 @@
 - [[Visión general]]
 - [[Render]]
 - [[Railway]]
+- [[VPS Oracle Cloud]]
+- [[Dokploy]]
+- [[Arquitectura VPS]]

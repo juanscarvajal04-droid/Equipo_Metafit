@@ -203,3 +203,40 @@ networks:
 # phpMyAdmin (auditoría visual de la DB)
 # http://localhost:8080
 # Usuario: root  |  Contraseña: la definida en DB_PASSWORD del .env
+
+# ============================================================
+# RUTAS Y ENLACES DEL PROYECTO
+# ============================================================
+#
+# ── DESARROLLO LOCAL ────────────────────────────────────────
+# Backend (Swagger):     http://localhost:3001/api-docs
+# Backend (Health):      http://localhost:3001/health
+# Frontend web:          http://localhost:5173/
+# phpMyAdmin local:      http://localhost:8080
+# App móvil (Expo):      http://localhost:8081/
+# n8n local:             http://localhost:5678
+#
+# ── PRODUCCIÓN ──────────────────────────────────────────────
+# Backend:               https://metafit-backend-rr18.onrender.com
+# Backend (Health):      https://metafit-backend-rr18.onrender.com/health
+# Frontend web:          https://metafit-frontend-78x6.onrender.com
+# APK descarga:          https://metafit-frontend-78x6.onrender.com/app/metafit.apk
+# Adminer (ver BD prod): https://metafit-adminer.onrender.com
+#
+# ── VPS ORACLE CLOUD ────────────────────────────────────────
+# Dokploy panel:         http://141.148.94.173:3000
+# MySQL VPS:             141.148.94.173:3306
+# SSH VPS:               ssh -i <llave.key> opc@141.148.94.173
+# CloudBeaver (futuro):  http://141.148.94.173:8978
+#
+# ── CREDENCIALES DE ACCESO ──────────────────────────────────
+# MySQL VPS:             user=metafit / pass=Admin123! / db=metafit
+# Adminer:               mismo user/pass del MySQL VPS
+# Dokploy panel:         email configurado por el usuario
+#
+# ── SERVICIOS EXTERNOS ──────────────────────────────────────
+# Cloudinary cloud:      llaq9vyl
+# Brevo (correos):       API + SMTP relay
+# GitHub repo:           https://github.com/juanscarvajal04-droid/Equipo_Metafit
+#
+# ============================================================
