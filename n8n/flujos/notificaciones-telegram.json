@@ -12,7 +12,10 @@
       "name": "Webhook Nuevo Afiliado",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
-      "position": [240, 200]
+      "position": [
+        240,
+        200
+      ]
     },
     {
       "parameters": {
@@ -25,7 +28,10 @@
       "name": "Webhook Pago Registrado",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
-      "position": [240, 420]
+      "position": [
+        240,
+        420
+      ]
     },
     {
       "parameters": {
@@ -38,7 +44,10 @@
       "name": "Webhook Rutina Asignada",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
-      "position": [240, 640]
+      "position": [
+        240,
+        640
+      ]
     },
     {
       "parameters": {
@@ -48,7 +57,10 @@
       "name": "Formato Afiliado",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [500, 200]
+      "position": [
+        500,
+        200
+      ]
     },
     {
       "parameters": {
@@ -58,7 +70,10 @@
       "name": "Formato Pago",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [500, 420]
+      "position": [
+        500,
+        420
+      ]
     },
     {
       "parameters": {
@@ -68,7 +83,10 @@
       "name": "Formato Rutina",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [500, 640]
+      "position": [
+        500,
+        640
+      ]
     },
     {
       "parameters": {
@@ -83,7 +101,10 @@
       "name": "Enviar a Telegram",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1,
-      "position": [760, 420],
+      "position": [
+        760,
+        420
+      ],
       "credentials": {
         "telegramApi": {
           "id": "CONFIGURAR_EN_N8N",
@@ -95,32 +116,68 @@
   "connections": {
     "Webhook Nuevo Afiliado": {
       "main": [
-        [{ "node": "Formato Afiliado", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Formato Afiliado",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Webhook Pago Registrado": {
       "main": [
-        [{ "node": "Formato Pago", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Formato Pago",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Webhook Rutina Asignada": {
       "main": [
-        [{ "node": "Formato Rutina", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Formato Rutina",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Formato Afiliado": {
       "main": [
-        [{ "node": "Enviar a Telegram", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Enviar a Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Formato Pago": {
       "main": [
-        [{ "node": "Enviar a Telegram", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Enviar a Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Formato Rutina": {
       "main": [
-        [{ "node": "Enviar a Telegram", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Enviar a Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     }
   },
@@ -129,7 +186,12 @@
     "executionOrder": "v1"
   },
   "tags": [
-    { "name": "MetaFit" },
-    { "name": "Telegram" }
-  ]
+    {
+      "name": "MetaFit"
+    },
+    {
+      "name": "Telegram"
+    }
+  ],
+  "id": "9ee1017c-838d-4688-b2d8-53b57b1e2e78"
 }

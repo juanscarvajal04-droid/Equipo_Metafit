@@ -236,3 +236,112 @@ Detectado con `fase5b_correo_prod.js` y `fase5b_probe.js`:
 | Entrega real de correo desde prod | ✅ `requests → delivered` |
 
 <!-- FASE 6 en adelante se agrega a medida que se ejecuta -->
+
+## FASE 6 — Sincronización tiempo real en producción ✅
+
+- Commit `b1dbb92` (polling `useAutoRefresh` web+móvil) pusheado a `main` (push-protection de GitHub bloqueó la key Brevo NO redactada → corregida y re-pusheada OK).
+- Deploy frontend Render `dep-dap6gfjatf1s73bh4fqg` → **live** (terminó 11:37:16Z, commit `b1dbb92`).
+- Verificación estructural del bundle servido en `https://metafit-frontend-78x6.onrender.com`:
+  - Entry `/assets/index-D47QPJek.js` referencia el chunk `assets/useAutoRefresh-Chtyz9tB.js`.
+  - Chunk de polling (678 bytes) contiene `setInterval`, `focus` y `visibilitychange`; el default de 10 000 ms aparece minificado como `1e4`.
+  - Vistas con polling en prod: AfiliadosView, RutinasView, DietasView, ProgresoAfiliado (todas llaman al chunk).
+- Evidencia: `documentacion/evidencia/fase6_sync_prod.json`.
+- Pendiente registrado en Fase 3.3–3.7: la prueba visual multi-navegador (medición de polling cada 10 s en red) queda diferida; la evidencia de código+bundle es estructural.
+
+## FASE 7 — Matriz RBAC (91 endpoints) ✅
+
+### 7.1 Matriz generada del código real (`fase7_matriz_rbac.js` → `evidencia/fase7_matriz_rbac.json`)
+
+| Permiso exigido | Endpoints |
+|---|---|
+| Público (sin token) | 3 (`POST /login`, `POST /auth/recuperar-password`, `POST /auth/reset-password`) |
+| Solo autenticado (`requireAuth`) | 33 (perfil `/me`, catálogo lectura, notificaciones, progreso resumen, push-token…) |
+| `Administrador` | 14 (usuarios CRUD, `GET /pagos`, `GET /dashboard/kpis`, `DELETE /afiliados/:id`, `DELETE /catalogo/restricciones/:id`…) |
+| `Administrador | Entrenador` | 21 (ciclos, progreso, catálogo escribir, notas…) |
+| `Administrador | Recepcionista` | 4 (crear/editar afiliado, subir foto…) |
+| Staff (`Administrador | Entrenador | Recepcionista`) | 13 (listar afiliados, restricciones de afiliado…) |
+| `Administrador | Entrenador | Afiliado (dueño del ciclo)` | 3 (`requireOwnCiclo`: PATCH/DELETE ciclo + progreso-ejercicio) |
+| **Total** | **91** |
+
+### 7.2 Validación de la matriz contra el backend real (`fase7_validacion_rbac.js` → `evidencia/fase7_validacion_rbac.json`)
+
+- 14 casos representativos (uno por cada nivel de permiso + públicos) × 4 roles (Admin, Recepcionista, Entrenador, Afiliado) = **56 peticiones reales** contra `http://localhost:3001`.
+- Criterio: rol permitido → responde algo distinto de 401/403; rol NO permitido → 403 (o 401).
+- Resultado: **56/56 consistentes, 0 desviaciones** → la matriz refleja el comportamiento real del servidor.
+
+<!-- FASE 8 en adelante se agrega a medida que se ejecuta -->
+
+## FASE 8 — Verificación de APIs en producción ✅
+
+Script `fase8_apis_prod.js` → `documentacion/evidencia/fase8_apis_prod.json` (13 llamadas reales a prod):
+
+| Endpoint | Resultado | Latencia |
+|---|---|---|
+| `/health` | ✅ 200 | 408 ms |
+| `/api-docs/swagger.json` | ✅ 200 | 167 ms |
+| `POST /login` | ✅ 200 | 2544 ms (cold) |
+| `GET /afiliados` (staff) | ✅ 200 | 505 ms |
+| `GET /usuarios` (admin) | ✅ 200 | 259 ms |
+| `GET /pagos` (admin) | ✅ 200 | 240 ms |
+| `GET /dashboard/kpis` (admin) | ✅ 200 | 313 ms |
+| `GET /catalogo/ejercicios` | ✅ 200 | 312 ms |
+| `GET /catalogo/alimentos` | ✅ 200 | 256 ms |
+| `GET /notificaciones/` | ✅ 200 | 386 ms |
+| `GET /configuracion/precio-membresia` | ✅ 200 | 253 ms |
+| `GET /afiliados` (sin token) | ✅ 401 (seguridad) | 191 ms |
+| `GET /afiliados/999999` | ✅ 404 (no existe) | 233 ms |
+
+**Total: 13/13 ✅ — promedio 467 ms, máx 2544 ms** (login cold). Swagger servido en prod confirmado.
+
+## FASE 9 — Integraciones externas 🔄
+
+| Integración | Estado | Evidencia |
+|---|---|---|
+| **Cloudinary** (fotos perfiles) | ✅ Probado en prod | URL real `https://res.cloudinary.com/llaq9vyl/...` (Fase 5.2, `fase5_prod.json`) |
+| **Brevo** (correos) | ✅ Restaurado y verificado en prod | `requests → delivered` tras corregir la key revocada (Fase 5.4, `fase5_4_*.json`) |
+| **GTM / analytics** | ⚠️ Placeholder en prod | HTML contiene comentario `?? REEMPLAZAR GTM-K6JZS4MG` — el container ID se usa tal cual, falta confirmar el ID real en tagmanager |
+| **n8n** (facturas, Telegram, Google Sheets) | ⚠️ **Infra arriba pero flujos NO importados** | n8n healthz 200 y contenedor `metafit_n8n` Up; BD (`/home/node/.n8n/database.sqlite`) tiene **0 workflows, 0 webhooks, 0 ejecuciones**: solo 1 usuario admin. `POST /webhook/factura-pago` → **404**. Los 4 flujos existen en `n8n/flujos/*.json` pero faltan importarse en la UI/API. El backend ya los dispara (`n8nWebhookService.js`, fire-and-forget), pero n8n responde 404 → la automatización documentada en `documentacion/n8n.md` **no está operativa aún** |
+
+**Acción requerida (pendiente):** importar y activar los 4 workflows (`factura-pago`, `recordatorio-pago`, `notificaciones-telegram`, `google-sheets-registro`) en la UI de n8n (http://localhost:5678, admin/Admin123!) y re-validar `POST /webhook/factura-pago`.
+
+## FASE 10 — Carga y estrés (en curso)
+
+> Script de carga/estrés en ejecución — pendiente completar.
+
+<!-- FASE 11 en adelante se agrega a medida que se ejecuta -->
+
+---
+
+# PAUSA - 2026-09-22 - Retomar desde acá
+
+- **Fecha/hora pausa:** 2026-09-22 ~11:50 hora local (Colombia, UTC-5); sesión simulada de verificación integral QA.
+- **Estado REAL de las fases** (más avanzado que los puntos 3-4 del encargo; se documenta con precisión):
+  - ✅ Completadas: **1**, **2**, **4** (57/57 CRUD), **5.1** (health prod), **5.2** (CRUD prod 8/8 + foto Cloudinary), **5.3+5.4** (fix key Brevo aplicado, deploy `dep-dap6c2o0cd8s73btlog0` **live**, correo prod verificado `requests→delivered`), **6** (polling tiempo real en PROD verificado en bundle), **7** (matriz RBAC 91 endpoints generada + validación 56/56 contra backend), **8** (13/13 APIs prod, avg 467 ms), y **9 parcial** (Cloudinary ✅, Brevo ✅, GTM placeholder ⚠️, n8n: import de `factura-pago.json` **exitoso** recién hecho).
+  - 🔄 En curso: **Fase 9 — n8n** falta importar `recordatorio-pago.json`, `notificaciones-telegram.json`, `google-sheets-registro.json`, activar workflows y re-validar `POST /webhook/factura-pago` (ahora los JSON tienen `id` añadido; volver a `for` de import o UI n8n admin/Admin123!).
+  - ⏳ Pendientes: **10** (carga/estrés — script NO empezado), **11** (documentación final), **12** (informe final con la línea "Hermano, verificación completa terminada. MetaFit está [listo / no listo] para sustentar.").
+
+## Archivos creados/modificados en esta sesión (resumen)
+
+- Hooks de sincronización tiempo real (nuevos, commiteados): `frontend_web/src/hooks/useAutoRefresh.js`, `movil/src/hooks/useAutoRefresh.js` (polling 10 s: `setInterval` + refetch en `focus`/`visibilitychange` web; `AppState.active` móvil; flag `runningRef` anti-solapamiento).
+- Vistas web con polling: `AfiliadosView.jsx`, `RutinasView.jsx`, `DietasView.jsx`, `ProgresoAfiliado.jsx`.
+- Pantallas móvil con polling: `MiRutinaScreen.js`, `MiDietaScreen.js`, `MiPerfilScreen.js`, `MiProgresoScreen.js` (con `ciloIdRef`/`{silent:true}`).
+- Documento maestro: `documentacion/verificacion_persistencia.md` (Fases 1–9 con esta sección de pausa).
+- Evidencias: `documentacion/evidencia/fase2_correo.json`, `fase4_crud.json`, `fase4_verify_bd.txt`, `fase5_prod.json`, `fase5b_correo_prod.json`, `fase5c_eventos_hoy.json`, `fase5_4_correccion_correo_prod.json` (claves redactadas), `fase6_sync_prod.json`, `fase7_matriz_rbac.json`, `fase7_validacion_rbac.json`, `fase8_apis_prod.json`.
+- Scripts reutilizables (fuera del repo, en `C:\Users\HOLA\AppData\Local\Temp\opencode\swtest\`): `fase4_crud.js`, `fase5_prod.js`, `fase5b_correo_prod.js`, `fase5c_eventos.js`, `fase7_matriz_rbac.js`, `fase7_validacion_rbac.js`, `fase8_apis_prod.js`, `n8n_add_ids.js`.
+- Repo n8n: modificados `n8n/flujos/*.json` — se les añadió campo `id` (UUID) que exigía `n8n import:workflow`.
+
+## Problemas pendientes / blockers
+
+1. **n8n**: solo `factura-pago.json` importado hasta ahora; faltan 3 flujos + activación + re-testeo del webhook (404 antes por falta de workflows).
+2. **GTM**: placeholder `?? REEMPLAZAR GTM-K6JZS4MG` todavía en el HTML de prod (falta confirmar container ID real).
+3. **Fase 3.3–3.7** (pruebas visuales multi-navegador del polling): **diferidas**; la evidencia de código+bundle de prod es estructural.
+4. **Fase 10/11/12**: sin empezar.
+5. Push inicial fue bloqueado por secret-scanning de GitHub (key Brevo completa en JSON) → redactada y re-pusheada OK.
+
+## Próximo paso EXACTO al retomar
+
+1. Terminar **Fase 9 n8n**: importar los 3 flujos restantes (`docker cp` + `docker exec metafit_n8n n8n import:workflow --input=/tmp/flujos/<archivo>.json`), activarlos desde UI n8n (http://localhost:5678, admin/Admin123!) y verificar `POST http://localhost:5678/webhook/factura-pago` → 200.
+2. **Fase 10**: script de carga/estrés contra prod y local (login + endpoints pesados, medir latencia/errores).
+3. **Fase 11**: completar documentación (pasar a ✅ lo verificado de 5-9, dejar ⚠️ n8n/GTM).
+4. **Fase 12**: informe final por fases con la línea exacta de cierre.
+5. Commit+push de esta pausa y de los flujos n8n.

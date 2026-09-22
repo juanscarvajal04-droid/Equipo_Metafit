@@ -12,7 +12,10 @@
       "name": "Webhook Afiliado",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
-      "position": [240, 200]
+      "position": [
+        240,
+        200
+      ]
     },
     {
       "parameters": {
@@ -25,7 +28,10 @@
       "name": "Webhook Pago",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
-      "position": [240, 420]
+      "position": [
+        240,
+        420
+      ]
     },
     {
       "parameters": {
@@ -35,7 +41,10 @@
       "name": "Formato Afiliado",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [500, 200]
+      "position": [
+        500,
+        200
+      ]
     },
     {
       "parameters": {
@@ -45,13 +54,24 @@
       "name": "Formato Pago",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [500, 420]
+      "position": [
+        500,
+        420
+      ]
     },
     {
       "parameters": {
         "operation": "append",
-        "documentId": { "__rl": true, "mode": "list", "value": "CONFIGURAR_ID_DE_GOOGLE_SHEET" },
-        "sheetName": { "__rl": true, "mode": "list", "value": "Afiliados" },
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "CONFIGURAR_ID_DE_GOOGLE_SHEET"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "Afiliados"
+        },
         "columns": {
           "mappingMode": "defineBelow",
           "value": "={{ JSON.stringify($json) }}"
@@ -62,7 +82,10 @@
       "name": "Sheet: Afiliados",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4,
-      "position": [760, 200],
+      "position": [
+        760,
+        200
+      ],
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "CONFIGURAR_EN_N8N",
@@ -73,8 +96,16 @@
     {
       "parameters": {
         "operation": "append",
-        "documentId": { "__rl": true, "mode": "list", "value": "CONFIGURAR_ID_DE_GOOGLE_SHEET" },
-        "sheetName": { "__rl": true, "mode": "list", "value": "Pagos" },
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "CONFIGURAR_ID_DE_GOOGLE_SHEET"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "Pagos"
+        },
         "columns": {
           "mappingMode": "defineBelow",
           "value": "={{ JSON.stringify($json) }}"
@@ -85,7 +116,10 @@
       "name": "Sheet: Pagos",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4,
-      "position": [760, 420],
+      "position": [
+        760,
+        420
+      ],
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "CONFIGURAR_EN_N8N",
@@ -97,22 +131,46 @@
   "connections": {
     "Webhook Afiliado": {
       "main": [
-        [{ "node": "Formato Afiliado", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Formato Afiliado",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Webhook Pago": {
       "main": [
-        [{ "node": "Formato Pago", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Formato Pago",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Formato Afiliado": {
       "main": [
-        [{ "node": "Sheet: Afiliados", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Sheet: Afiliados",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Formato Pago": {
       "main": [
-        [{ "node": "Sheet: Pagos", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Sheet: Pagos",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     }
   },
@@ -121,7 +179,12 @@
     "executionOrder": "v1"
   },
   "tags": [
-    { "name": "MetaFit" },
-    { "name": "Google Sheets" }
-  ]
+    {
+      "name": "MetaFit"
+    },
+    {
+      "name": "Google Sheets"
+    }
+  ],
+  "id": "918add91-8d48-43c2-adfa-8ca7074e1764"
 }

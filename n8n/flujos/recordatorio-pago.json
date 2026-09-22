@@ -16,7 +16,10 @@
       "name": "Cada día 8:00 AM",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1,
-      "position": [240, 300]
+      "position": [
+        240,
+        300
+      ]
     },
     {
       "parameters": {
@@ -28,7 +31,10 @@
       "name": "Buscar Pagos por Vencer",
       "type": "n8n-nodes-base.mySql",
       "typeVersion": 2,
-      "position": [460, 300],
+      "position": [
+        460,
+        300
+      ],
       "credentials": {
         "mySql": {
           "id": "CONFIGURAR_EN_N8N",
@@ -44,7 +50,10 @@
       "name": "Formatear Recordatorios",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [680, 300]
+      "position": [
+        680,
+        300
+      ]
     },
     {
       "parameters": {
@@ -61,7 +70,10 @@
       "name": "¿Hay pagos?",
       "type": "n8n-nodes-base.filter",
       "typeVersion": 1,
-      "position": [900, 300]
+      "position": [
+        900,
+        300
+      ]
     },
     {
       "parameters": {
@@ -78,7 +90,10 @@
       "name": "Correo Recordatorio",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [1120, 200],
+      "position": [
+        1120,
+        200
+      ],
       "credentials": {
         "httpHeaderAuth": {
           "id": "CONFIGURAR_EN_N8N",
@@ -90,22 +105,46 @@
   "connections": {
     "Cada día 8:00 AM": {
       "main": [
-        [{ "node": "Buscar Pagos por Vencer", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Buscar Pagos por Vencer",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Buscar Pagos por Vencer": {
       "main": [
-        [{ "node": "Formatear Recordatorios", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Formatear Recordatorios",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Formatear Recordatorios": {
       "main": [
-        [{ "node": "¿Hay pagos?", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "¿Hay pagos?",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "¿Hay pagos?": {
       "main": [
-        [{ "node": "Correo Recordatorio", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Correo Recordatorio",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     }
   },
@@ -114,7 +153,12 @@
     "executionOrder": "v1"
   },
   "tags": [
-    { "name": "MetaFit" },
-    { "name": "Recordatorios" }
-  ]
+    {
+      "name": "MetaFit"
+    },
+    {
+      "name": "Recordatorios"
+    }
+  ],
+  "id": "260c72cc-608a-45c6-a860-281792f6bbad"
 }

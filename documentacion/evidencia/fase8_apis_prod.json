@@ -1,0 +1,152 @@
+{
+  "fase": 8,
+  "titulo": "Endpoints API — prod (Render)",
+  "timestamp": "2026-09-22T11:44:30.489Z",
+  "base": "https://metafit-backend-rr18.onrender.com",
+  "resultados": [
+    {
+      "nombre": "health",
+      "method": "GET",
+      "path": "/health",
+      "status": 200,
+      "esperado": 200,
+      "ok": true,
+      "ms": 408,
+      "resumen": "{\"status\":\"ok\",\"db\":\"MySQL conectado\",\"timestamp\":\"2026-09-22T11:44:23.568Z\"}"
+    },
+    {
+      "nombre": "api-docs (swagger JSON)",
+      "method": "GET",
+      "path": "/api-docs/swagger.json",
+      "status": 200,
+      "esperado": [
+        200,
+        404
+      ],
+      "ok": true,
+      "ms": 167,
+      "resumen": "{\"raw\":\"\\n<!-- HTML for static distribution bundle build -->\\n<!DOCTYPE html>\\n<html lang=\\\"en\\\">\\n<head>\\n  <meta charset=\\\"UTF-8\\\">\\n  \\n\"}"
+    },
+    {
+      "nombre": "login admin",
+      "method": "POST",
+      "path": "/login",
+      "status": 200,
+      "esperado": 200,
+      "ok": true,
+      "ms": 2544,
+      "resumen": "{\"accessToken\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiY2FybG9zQG1ldGFmaXQuY29tIiwicm9sZSI6IkFkbWluaXN0cmFkb3IiLCJpYXQiOjE3OTAwNzc0NjYsImV"
+    },
+    {
+      "nombre": "GET /afiliados (staff)",
+      "method": "GET",
+      "path": "/afiliados",
+      "status": 200,
+      "esperado": 200,
+      "ok": true,
+      "ms": 505,
+      "resumen": "[{\"id_usuario\":9,\"nombres\":\"Sofía\",\"apellidos\":\"Castro\",\"correo\":\"sofia@gmail.com\",\"estado\":\"Activo\",\"fecha_registro_sistema\":\"2024-04-01T08:00:00.000Z\",\"docume"
+    },
+    {
+      "nombre": "GET /usuarios (admin)",
+      "method": "GET",
+      "path": "/usuarios",
+      "status": 200,
+      "esperado": 200,
+      "ok": true,
+      "ms": 259,
+      "resumen": "[{\"id\":1,\"id_usuario\":1,\"correo\":\"carlos@metafit.com\",\"email\":\"carlos@metafit.com\",\"rol\":\"Administrador\",\"role\":\"Administrador\",\"nombres\":\"Carlos\",\"apellidos\":\""
+    },
+    {
+      "nombre": "GET /pagos (admin)",
+      "method": "GET",
+      "path": "/pagos",
+      "status": 200,
+      "esperado": 200,
+      "ok": true,
+      "ms": 240,
+      "resumen": "[{\"id_pago\":44,\"id_usuario\":208,\"nombres_afiliado\":\"ProdQA\",\"apellidos_afiliado\":\"Check571044\",\"fecha_pago\":\"2026-09-22T00:00:00.000Z\",\"valor_pagado\":\"80000.00\""
+    },
+    {
+      "nombre": "GET /dashboard/kpis (admin)",
+      "method": "GET",
+      "path": "/dashboard/kpis",
+      "status": 200,
+      "esperado": 200,
+      "ok": true,
+      "ms": 313,
+      "resumen": "{\"total_afiliados\":9,\"afiliados_activos\":9,\"afiliados_inactivos\":0,\"entrenadores\":2,\"recepcionistas\":2,\"ciclos_en_curso\":8,\"con_restricciones\":4,\"pagos_registra"
+    },
+    {
+      "nombre": "GET /catalogo/ejercicios (auth)",
+      "method": "GET",
+      "path": "/catalogo/ejercicios",
+      "status": 200,
+      "esperado": 200,
+      "ok": true,
+      "ms": 312,
+      "resumen": "[{\"id_ejercicio\":1,\"nombre_ejercicio\":\"Sentadilla\",\"grupo_muscular\":\"Piernas\",\"descripcion\":\"Colócate con los pies al ancho de los hombros y la espalda neutra. "
+    },
+    {
+      "nombre": "GET /catalogo/alimentos (auth)",
+      "method": "GET",
+      "path": "/catalogo/alimentos",
+      "status": 200,
+      "esperado": 200,
+      "ok": true,
+      "ms": 256,
+      "resumen": "[{\"id_alimento\":15,\"nombre_alimento\":\"Aguacate\",\"proteinas\":\"2.00\",\"carbohidratos\":\"9.00\",\"grasas\":\"15.00\",\"calorias_por_100g\":\"179.00\"},{\"id_alimento\":8,\"nombr"
+    },
+    {
+      "nombre": "GET /notificaciones (auth)",
+      "method": "GET",
+      "path": "/notificaciones/",
+      "status": 200,
+      "esperado": 200,
+      "ok": true,
+      "ms": 386,
+      "resumen": "[{\"tipo\":\"membresias_por_vencer\",\"mensaje\":\"Membresías por vencer esta semana\",\"cantidad\":0,\"icono\":\"💳\",\"ruta\":\"/pagos\"},{\"tipo\":\"nuevos_afiliados\",\"mensaje\":\""
+    },
+    {
+      "nombre": "GET /configuracion/precio-membresia (auth?)",
+      "method": "GET",
+      "path": "/configuracion/precio-membresia",
+      "status": 200,
+      "esperado": [
+        200,
+        401,
+        403
+      ],
+      "ok": true,
+      "ms": 253,
+      "resumen": "{\"clave\":\"precio_membresia\",\"valor\":80000}"
+    },
+    {
+      "nombre": "sin token -> 401",
+      "method": "GET",
+      "path": "/afiliados",
+      "status": 401,
+      "esperado": 401,
+      "ok": true,
+      "ms": 191,
+      "resumen": "{\"error\":\"Token requerido\"}"
+    },
+    {
+      "nombre": "afiliado inexistente -> 404",
+      "method": "GET",
+      "path": "/afiliados/999999",
+      "status": 404,
+      "esperado": 404,
+      "ok": true,
+      "ms": 233,
+      "resumen": "{\"error\":\"Afiliado no encontrado\"}"
+    }
+  ],
+  "resumen": {
+    "total": 13,
+    "ok": 13,
+    "fallo": 0,
+    "latenciaPromedioMs": 467,
+    "latenciaMaxMs": 2544
+  }
+}

@@ -1,0 +1,744 @@
+{
+  "generado": "2026-09-22T11:39:00.704Z",
+  "resumen": {
+    "total": 91,
+    "porRol": {
+      "Administrador, Entrenador, Recepcionista": 13,
+      "auth": 36,
+      "Administrador, Recepcionista": 4,
+      "Administrador": 14,
+      "Administrador, Entrenador": 21,
+      "Administrador, Entrenador, Afiliado": 3
+    }
+  },
+  "endpoints": [
+    {
+      "id": "E1",
+      "metodo": "GET",
+      "ruta": "/afiliados/",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth, requireStaff",
+      "rol": "Administrador, Entrenador, Recepcionista"
+    },
+    {
+      "id": "E2",
+      "metodo": "GET",
+      "ruta": "/afiliados/me",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth",
+      "rol": "auth"
+    },
+    {
+      "id": "E3",
+      "metodo": "POST",
+      "ruta": "/afiliados/me/notas-ejercicio",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth",
+      "rol": "auth"
+    },
+    {
+      "id": "E4",
+      "metodo": "GET",
+      "ruta": "/afiliados/me/notas-ejercicio",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth",
+      "rol": "auth"
+    },
+    {
+      "id": "E5",
+      "metodo": "PATCH",
+      "ruta": "/afiliados/me/notas-ejercicio/:id_nota",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth",
+      "rol": "auth"
+    },
+    {
+      "id": "E6",
+      "metodo": "DELETE",
+      "ruta": "/afiliados/me/notas-ejercicio/:id_nota",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth",
+      "rol": "auth"
+    },
+    {
+      "id": "E7",
+      "metodo": "PATCH",
+      "ruta": "/afiliados/me",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth",
+      "rol": "auth"
+    },
+    {
+      "id": "E8",
+      "metodo": "GET",
+      "ruta": "/afiliados/me/ciclos",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth",
+      "rol": "auth"
+    },
+    {
+      "id": "E9",
+      "metodo": "GET",
+      "ruta": "/afiliados/me/progreso",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth",
+      "rol": "auth"
+    },
+    {
+      "id": "E10",
+      "metodo": "GET",
+      "ruta": "/afiliados/me/restricciones",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth",
+      "rol": "auth"
+    },
+    {
+      "id": "E11",
+      "metodo": "GET",
+      "ruta": "/afiliados/me/ejercicios-disponibles",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth",
+      "rol": "auth"
+    },
+    {
+      "id": "E12",
+      "metodo": "GET",
+      "ruta": "/afiliados/me/alimentos-disponibles",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth",
+      "rol": "auth"
+    },
+    {
+      "id": "E13",
+      "metodo": "POST",
+      "ruta": "/afiliados/me/registro-ejercicio",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth",
+      "rol": "auth"
+    },
+    {
+      "id": "E14",
+      "metodo": "GET",
+      "ruta": "/afiliados/me/registro-ejercicio/historial",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth",
+      "rol": "auth"
+    },
+    {
+      "id": "E15",
+      "metodo": "POST",
+      "ruta": "/afiliados/me/consumo-alimento-real",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth",
+      "rol": "auth"
+    },
+    {
+      "id": "E16",
+      "metodo": "GET",
+      "ruta": "/afiliados/me/consumo-alimento-real/historial",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth",
+      "rol": "auth"
+    },
+    {
+      "id": "E17",
+      "metodo": "GET",
+      "ruta": "/afiliados/:id",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth, requireStaff",
+      "rol": "Administrador, Entrenador, Recepcionista"
+    },
+    {
+      "id": "E18",
+      "metodo": "POST",
+      "ruta": "/afiliados/",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth, requireAdminOrRecepcionista",
+      "rol": "Administrador, Recepcionista"
+    },
+    {
+      "id": "E19",
+      "metodo": "PATCH",
+      "ruta": "/afiliados/:id",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth, requireAdminOrRecepcionista",
+      "rol": "Administrador, Recepcionista"
+    },
+    {
+      "id": "E20",
+      "metodo": "DELETE",
+      "ruta": "/afiliados/:id",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth, requireAdmin",
+      "rol": "Administrador"
+    },
+    {
+      "id": "E21",
+      "metodo": "POST",
+      "ruta": "/afiliados/me/foto",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth",
+      "rol": "auth"
+    },
+    {
+      "id": "E22",
+      "metodo": "POST",
+      "ruta": "/afiliados/:id/foto",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth, requireAdminOrRecepcionista",
+      "rol": "Administrador, Recepcionista"
+    },
+    {
+      "id": "E23",
+      "metodo": "GET",
+      "ruta": "/afiliados/:id/ciclos",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth, requireStaff",
+      "rol": "Administrador, Entrenador, Recepcionista"
+    },
+    {
+      "id": "E24",
+      "metodo": "GET",
+      "ruta": "/afiliados/:id/notas-ejercicio",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth, requireStaff",
+      "rol": "Administrador, Entrenador, Recepcionista"
+    },
+    {
+      "id": "E25",
+      "metodo": "POST",
+      "ruta": "/afiliados/ciclos",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth, requireAdminOrEntrenador",
+      "rol": "Administrador, Entrenador"
+    },
+    {
+      "id": "E26",
+      "metodo": "GET",
+      "ruta": "/afiliados/:id/restricciones",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth, requireStaff",
+      "rol": "Administrador, Entrenador, Recepcionista"
+    },
+    {
+      "id": "E27",
+      "metodo": "POST",
+      "ruta": "/afiliados/:id/restricciones",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth, requireStaff",
+      "rol": "Administrador, Entrenador, Recepcionista"
+    },
+    {
+      "id": "E28",
+      "metodo": "DELETE",
+      "ruta": "/afiliados/:id/restricciones/:id_restriccion",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth, requireStaff",
+      "rol": "Administrador, Entrenador, Recepcionista"
+    },
+    {
+      "id": "E29",
+      "metodo": "GET",
+      "ruta": "/afiliados/:id/ejercicios-disponibles",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth, requireStaff",
+      "rol": "Administrador, Entrenador, Recepcionista"
+    },
+    {
+      "id": "E30",
+      "metodo": "GET",
+      "ruta": "/afiliados/:id/alimentos-disponibles",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth, requireStaff",
+      "rol": "Administrador, Entrenador, Recepcionista"
+    },
+    {
+      "id": "E31",
+      "metodo": "GET",
+      "ruta": "/afiliados/:id/progreso",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth, requireStaff",
+      "rol": "Administrador, Entrenador, Recepcionista"
+    },
+    {
+      "id": "E32",
+      "metodo": "POST",
+      "ruta": "/afiliados/progreso",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth, requireAdminOrEntrenador",
+      "rol": "Administrador, Entrenador"
+    },
+    {
+      "id": "E33",
+      "metodo": "POST",
+      "ruta": "/afiliados/me/progreso-ejercicio",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth",
+      "rol": "auth"
+    },
+    {
+      "id": "E34",
+      "metodo": "GET",
+      "ruta": "/afiliados/me/progreso-ejercicio/:idCiclo/:fecha",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth",
+      "rol": "auth"
+    },
+    {
+      "id": "E35",
+      "metodo": "POST",
+      "ruta": "/afiliados/me/agua",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth",
+      "rol": "auth"
+    },
+    {
+      "id": "E36",
+      "metodo": "GET",
+      "ruta": "/afiliados/me/agua/:fecha",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth",
+      "rol": "auth"
+    },
+    {
+      "id": "E37",
+      "metodo": "POST",
+      "ruta": "/afiliados/me/consumo-alimento",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth",
+      "rol": "auth"
+    },
+    {
+      "id": "E38",
+      "metodo": "GET",
+      "ruta": "/afiliados/me/agua/historial",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth",
+      "rol": "auth"
+    },
+    {
+      "id": "E39",
+      "metodo": "GET",
+      "ruta": "/afiliados/me/consumo/historial",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth",
+      "rol": "auth"
+    },
+    {
+      "id": "E40",
+      "metodo": "GET",
+      "ruta": "/afiliados/me/progreso-ejercicio/historial",
+      "archivo": "afiliadoRoutes.js",
+      "middlewares": "requireAuth",
+      "rol": "auth"
+    },
+    {
+      "id": "E41",
+      "metodo": "POST",
+      "ruta": "/login",
+      "archivo": "authRoutes.js",
+      "middlewares": "—",
+      "rol": "auth"
+    },
+    {
+      "id": "E42",
+      "metodo": "POST",
+      "ruta": "/auth/recuperar-password",
+      "archivo": "authRoutes.js",
+      "middlewares": "—",
+      "rol": "auth"
+    },
+    {
+      "id": "E43",
+      "metodo": "POST",
+      "ruta": "/auth/reset-password",
+      "archivo": "authRoutes.js",
+      "middlewares": "—",
+      "rol": "auth"
+    },
+    {
+      "id": "E44",
+      "metodo": "GET",
+      "ruta": "/catalogo/ejercicios",
+      "archivo": "catalogoRoutes.js",
+      "middlewares": "requireAuth",
+      "rol": "auth"
+    },
+    {
+      "id": "E45",
+      "metodo": "POST",
+      "ruta": "/catalogo/ejercicios",
+      "archivo": "catalogoRoutes.js",
+      "middlewares": "requireAuth, requireAdminOrEntrenador",
+      "rol": "Administrador, Entrenador"
+    },
+    {
+      "id": "E46",
+      "metodo": "PUT",
+      "ruta": "/catalogo/ejercicios/:id",
+      "archivo": "catalogoRoutes.js",
+      "middlewares": "requireAuth, requireAdminOrEntrenador",
+      "rol": "Administrador, Entrenador"
+    },
+    {
+      "id": "E47",
+      "metodo": "DELETE",
+      "ruta": "/catalogo/ejercicios/:id",
+      "archivo": "catalogoRoutes.js",
+      "middlewares": "requireAuth, requireAdminOrEntrenador",
+      "rol": "Administrador, Entrenador"
+    },
+    {
+      "id": "E48",
+      "metodo": "GET",
+      "ruta": "/catalogo/alimentos",
+      "archivo": "catalogoRoutes.js",
+      "middlewares": "requireAuth",
+      "rol": "auth"
+    },
+    {
+      "id": "E49",
+      "metodo": "POST",
+      "ruta": "/catalogo/alimentos",
+      "archivo": "catalogoRoutes.js",
+      "middlewares": "requireAuth, requireAdminOrEntrenador",
+      "rol": "Administrador, Entrenador"
+    },
+    {
+      "id": "E50",
+      "metodo": "PUT",
+      "ruta": "/catalogo/alimentos/:id",
+      "archivo": "catalogoRoutes.js",
+      "middlewares": "requireAuth, requireAdminOrEntrenador",
+      "rol": "Administrador, Entrenador"
+    },
+    {
+      "id": "E51",
+      "metodo": "DELETE",
+      "ruta": "/catalogo/alimentos/:id",
+      "archivo": "catalogoRoutes.js",
+      "middlewares": "requireAuth, requireAdminOrEntrenador",
+      "rol": "Administrador, Entrenador"
+    },
+    {
+      "id": "E52",
+      "metodo": "GET",
+      "ruta": "/catalogo/restricciones",
+      "archivo": "catalogoRoutes.js",
+      "middlewares": "requireAuth",
+      "rol": "auth"
+    },
+    {
+      "id": "E53",
+      "metodo": "POST",
+      "ruta": "/catalogo/restricciones",
+      "archivo": "catalogoRoutes.js",
+      "middlewares": "requireAuth, requireStaff",
+      "rol": "Administrador, Entrenador, Recepcionista"
+    },
+    {
+      "id": "E54",
+      "metodo": "PUT",
+      "ruta": "/catalogo/restricciones/:id",
+      "archivo": "catalogoRoutes.js",
+      "middlewares": "requireAuth, requireStaff",
+      "rol": "Administrador, Entrenador, Recepcionista"
+    },
+    {
+      "id": "E55",
+      "metodo": "DELETE",
+      "ruta": "/catalogo/restricciones/:id",
+      "archivo": "catalogoRoutes.js",
+      "middlewares": "requireAuth, requireAdmin",
+      "rol": "Administrador"
+    },
+    {
+      "id": "E56",
+      "metodo": "PATCH",
+      "ruta": "/ciclos/:id_ciclo",
+      "archivo": "cicloRoutes.js",
+      "middlewares": "requireAuth, requireAdminOrEntrenador",
+      "rol": "Administrador, Entrenador"
+    },
+    {
+      "id": "E57",
+      "metodo": "DELETE",
+      "ruta": "/ciclos/:id_ciclo",
+      "archivo": "cicloRoutes.js",
+      "middlewares": "requireAuth, requireAdmin",
+      "rol": "Administrador"
+    },
+    {
+      "id": "E58",
+      "metodo": "GET",
+      "ruta": "/configuracion/precio-membresia",
+      "archivo": "configuracionRoutes.js",
+      "middlewares": "requireAuth, requireAdmin",
+      "rol": "Administrador"
+    },
+    {
+      "id": "E59",
+      "metodo": "PUT",
+      "ruta": "/configuracion/precio-membresia",
+      "archivo": "configuracionRoutes.js",
+      "middlewares": "requireAuth, requireAdmin",
+      "rol": "Administrador"
+    },
+    {
+      "id": "E60",
+      "metodo": "GET",
+      "ruta": "/dashboard/kpis",
+      "archivo": "dashboardRoutes.js",
+      "middlewares": "requireAuth, requireAdmin",
+      "rol": "Administrador"
+    },
+    {
+      "id": "E61",
+      "metodo": "GET",
+      "ruta": "/notificaciones/",
+      "archivo": "notificacionRoutes.js",
+      "middlewares": "requireAuth",
+      "rol": "auth"
+    },
+    {
+      "id": "E62",
+      "metodo": "GET",
+      "ruta": "/pagos/",
+      "archivo": "pagoAdminRoutes.js",
+      "middlewares": "requireAuth, requireAdmin",
+      "rol": "Administrador"
+    },
+    {
+      "id": "E63",
+      "metodo": "GET",
+      "ruta": "/pagos/metricas",
+      "archivo": "pagoAdminRoutes.js",
+      "middlewares": "requireAuth, requireAdmin",
+      "rol": "Administrador"
+    },
+    {
+      "id": "E64",
+      "metodo": "GET",
+      "ruta": "/pagos/:id/pagos",
+      "archivo": "pagoRoutes.js",
+      "middlewares": "requireAuth, requireStaff",
+      "rol": "Administrador, Entrenador, Recepcionista"
+    },
+    {
+      "id": "E65",
+      "metodo": "POST",
+      "ruta": "/pagos/:id/pagos",
+      "archivo": "pagoRoutes.js",
+      "middlewares": "requireAuth, requireAdminOrRecepcionista",
+      "rol": "Administrador, Recepcionista"
+    },
+    {
+      "id": "E66",
+      "metodo": "GET",
+      "ruta": "/planes/entrenamiento/:id_ciclo",
+      "archivo": "planRoutes.js",
+      "middlewares": "requireAuth, requireOwnCiclo",
+      "rol": "Administrador, Entrenador, Afiliado"
+    },
+    {
+      "id": "E67",
+      "metodo": "GET",
+      "ruta": "/planes/entrenamiento/:id_ciclo/rutina/:dia_numero",
+      "archivo": "planRoutes.js",
+      "middlewares": "requireAuth, requireOwnCiclo",
+      "rol": "Administrador, Entrenador, Afiliado"
+    },
+    {
+      "id": "E68",
+      "metodo": "POST",
+      "ruta": "/planes/entrenamiento",
+      "archivo": "planRoutes.js",
+      "middlewares": "requireAuth, requireAdminOrEntrenador",
+      "rol": "Administrador, Entrenador"
+    },
+    {
+      "id": "E69",
+      "metodo": "PATCH",
+      "ruta": "/planes/entrenamiento/:id",
+      "archivo": "planRoutes.js",
+      "middlewares": "requireAuth, requireAdminOrEntrenador",
+      "rol": "Administrador, Entrenador"
+    },
+    {
+      "id": "E70",
+      "metodo": "POST",
+      "ruta": "/planes/rutinas",
+      "archivo": "planRoutes.js",
+      "middlewares": "requireAuth, requireAdminOrEntrenador",
+      "rol": "Administrador, Entrenador"
+    },
+    {
+      "id": "E71",
+      "metodo": "POST",
+      "ruta": "/planes/rutinas/:id_rutina/ejercicios",
+      "archivo": "planRoutes.js",
+      "middlewares": "requireAuth, requireAdminOrEntrenador",
+      "rol": "Administrador, Entrenador"
+    },
+    {
+      "id": "E72",
+      "metodo": "DELETE",
+      "ruta": "/planes/rutinas/:id_rutina/ejercicios/:id_ejercicio",
+      "archivo": "planRoutes.js",
+      "middlewares": "requireAuth, requireAdminOrEntrenador",
+      "rol": "Administrador, Entrenador"
+    },
+    {
+      "id": "E73",
+      "metodo": "PATCH",
+      "ruta": "/planes/rutinas/:id_rutina/ejercicios/:id_ejercicio",
+      "archivo": "planRoutes.js",
+      "middlewares": "requireAuth, requireAdminOrEntrenador",
+      "rol": "Administrador, Entrenador"
+    },
+    {
+      "id": "E74",
+      "metodo": "DELETE",
+      "ruta": "/planes/rutinas/:id_rutina",
+      "archivo": "planRoutes.js",
+      "middlewares": "requireAuth, requireAdminOrEntrenador",
+      "rol": "Administrador, Entrenador"
+    },
+    {
+      "id": "E75",
+      "metodo": "GET",
+      "ruta": "/planes/nutricional/:id_ciclo",
+      "archivo": "planRoutes.js",
+      "middlewares": "requireAuth, requireOwnCiclo",
+      "rol": "Administrador, Entrenador, Afiliado"
+    },
+    {
+      "id": "E76",
+      "metodo": "POST",
+      "ruta": "/planes/nutricional",
+      "archivo": "planRoutes.js",
+      "middlewares": "requireAuth, requireAdminOrEntrenador",
+      "rol": "Administrador, Entrenador"
+    },
+    {
+      "id": "E77",
+      "metodo": "PATCH",
+      "ruta": "/planes/nutricional/:id",
+      "archivo": "planRoutes.js",
+      "middlewares": "requireAuth, requireAdminOrEntrenador",
+      "rol": "Administrador, Entrenador"
+    },
+    {
+      "id": "E78",
+      "metodo": "POST",
+      "ruta": "/planes/nutricional/:id_plan/detalle",
+      "archivo": "planRoutes.js",
+      "middlewares": "requireAuth, requireAdminOrEntrenador",
+      "rol": "Administrador, Entrenador"
+    },
+    {
+      "id": "E79",
+      "metodo": "PATCH",
+      "ruta": "/planes/nutricional/:id_plan/detalle/:id_detalle",
+      "archivo": "planRoutes.js",
+      "middlewares": "requireAuth, requireAdminOrEntrenador",
+      "rol": "Administrador, Entrenador"
+    },
+    {
+      "id": "E80",
+      "metodo": "DELETE",
+      "ruta": "/planes/nutricional/:id_plan/detalle/:id_detalle",
+      "archivo": "planRoutes.js",
+      "middlewares": "requireAuth, requireAdminOrEntrenador",
+      "rol": "Administrador, Entrenador"
+    },
+    {
+      "id": "E81",
+      "metodo": "GET",
+      "ruta": "/progreso/resumen",
+      "archivo": "progresoRoutes.js",
+      "middlewares": "requireAuth",
+      "rol": "auth"
+    },
+    {
+      "id": "E82",
+      "metodo": "PUT",
+      "ruta": "/progreso/resumen",
+      "archivo": "progresoRoutes.js",
+      "middlewares": "requireAuth",
+      "rol": "auth"
+    },
+    {
+      "id": "E83",
+      "metodo": "GET",
+      "ruta": "/progreso/historial",
+      "archivo": "progresoRoutes.js",
+      "middlewares": "requireAuth",
+      "rol": "auth"
+    },
+    {
+      "id": "E84",
+      "metodo": "GET",
+      "ruta": "/progreso/ejercicio/:idEjercicio/evolucion",
+      "archivo": "progresoRoutes.js",
+      "middlewares": "requireAuth",
+      "rol": "auth"
+    },
+    {
+      "id": "E85",
+      "metodo": "GET",
+      "ruta": "/usuarios/",
+      "archivo": "usuarioRoutes.js",
+      "middlewares": "requireAuth, requireAdmin",
+      "rol": "Administrador"
+    },
+    {
+      "id": "E86",
+      "metodo": "PUT",
+      "ruta": "/usuarios/me/push-token",
+      "archivo": "usuarioRoutes.js",
+      "middlewares": "requireAuth",
+      "rol": "auth"
+    },
+    {
+      "id": "E87",
+      "metodo": "GET",
+      "ruta": "/usuarios/recepcionistas",
+      "archivo": "usuarioRoutes.js",
+      "middlewares": "requireAuth, requireAdmin",
+      "rol": "Administrador"
+    },
+    {
+      "id": "E88",
+      "metodo": "GET",
+      "ruta": "/usuarios/:id",
+      "archivo": "usuarioRoutes.js",
+      "middlewares": "requireAuth, requireAdmin",
+      "rol": "Administrador"
+    },
+    {
+      "id": "E89",
+      "metodo": "POST",
+      "ruta": "/usuarios/",
+      "archivo": "usuarioRoutes.js",
+      "middlewares": "requireAuth, requireAdmin",
+      "rol": "Administrador"
+    },
+    {
+      "id": "E90",
+      "metodo": "PATCH",
+      "ruta": "/usuarios/:id",
+      "archivo": "usuarioRoutes.js",
+      "middlewares": "requireAuth, requireAdmin",
+      "rol": "Administrador"
+    },
+    {
+      "id": "E91",
+      "metodo": "DELETE",
+      "ruta": "/usuarios/:id",
+      "archivo": "usuarioRoutes.js",
+      "middlewares": "requireAuth, requireAdmin",
+      "rol": "Administrador"
+    }
+  ]
+}

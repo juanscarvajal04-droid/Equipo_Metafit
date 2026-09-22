@@ -1,0 +1,35 @@
+{
+  "fase": 6,
+  "titulo": "Sincronización tiempo real — verificación en PRODUCCIÓN (frontend Render)",
+  "timestamp": "2026-09-22T11:44:00Z",
+  "deploy": {
+    "id": "dep-dap6gfjatf1s73bh4fqg",
+    "commit": "b1dbb92859cbe74ac9b749a8c3c0fe862198e91f",
+    "mensaje": "Verificación QA: polling tiempo real (useAutoRefresh) web+móvil, doc Fases 1-5 y evidencia",
+    "status": "live",
+    "finishedAt": "2026-09-22T11:37:16.670816Z",
+    "trigger": "api"
+  },
+  "frontend": "https://metafit-frontend-78x6.onrender.com/",
+  "entry": "/assets/index-D47QPJek.js",
+  "chunkPolling": "/assets/useAutoRefresh-Chtyz9tB.js",
+  "verificacionBundle": {
+    "setInterval": true,
+    "focus": true,
+    "visibilitychange": true,
+    "intervaloDefaultMs": 10000,
+    "notaMinificacion": "En el bundle minificado el default 10000 aparece como 1e4",
+    "chunksVistas": ["AfiliadosView-DyBO-kFG.js", "DietasView", "RutinasView", "ProgresoAfiliado"]
+  },
+  "hooksImplementados": {
+    "web": ["frontend_web/src/hooks/useAutoRefresh.js"],
+    "movil": ["movil/src/hooks/useAutoRefresh.js"],
+    "vistasWebConPolling": ["AfiliadosView", "RutinasView", "DietasView", "ProgresoAfiliado"],
+    "pantallasMovilConPolling": ["MiRutinaScreen", "MiDietaScreen", "MiPerfilScreen", "MiProgresoScreen"],
+    "refetchAlEnfocar": {
+      "web": "window focus + visibilitychange",
+      "movil": "AppState change -> active"
+    }
+  },
+  "conclusion": "El código de sincronización tiempo real (polling 10s + refetch al enfocar) está desplegado y servido en producción. La prueba visual multi-navegador permanece como tarea diferida registrada en Fase 3.3–3.7; la evidencia del bundle de producción es estructural y verificable."
+}

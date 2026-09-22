@@ -12,7 +12,10 @@
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
-      "position": [240, 300]
+      "position": [
+        240,
+        300
+      ]
     },
     {
       "parameters": {
@@ -22,7 +25,10 @@
       "name": "Formatear Mensaje",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [460, 300]
+      "position": [
+        460,
+        300
+      ]
     },
     {
       "parameters": {
@@ -39,7 +45,10 @@
       "name": "Enviar Correo Brevo",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [680, 200],
+      "position": [
+        680,
+        200
+      ],
       "credentials": {
         "httpHeaderAuth": {
           "id": "CONFIGURAR_EN_N8N",
@@ -57,20 +66,37 @@
       "name": "Respond OK",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [900, 300]
+      "position": [
+        900,
+        300
+      ]
     }
   ],
   "connections": {
     "Webhook": {
       "main": [
-        [{ "node": "Formatear Mensaje", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Formatear Mensaje",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Formatear Mensaje": {
       "main": [
         [
-          { "node": "Enviar Correo Brevo", "type": "main", "index": 0 },
-          { "node": "Respond OK", "type": "main", "index": 0 }
+          {
+            "node": "Enviar Correo Brevo",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Respond OK",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     }
@@ -80,7 +106,12 @@
     "executionOrder": "v1"
   },
   "tags": [
-    { "name": "MetaFit" },
-    { "name": "Pagos" }
-  ]
+    {
+      "name": "MetaFit"
+    },
+    {
+      "name": "Pagos"
+    }
+  ],
+  "id": "d5d4cbc7-0217-42a5-a91e-2a0e643b46be"
 }
