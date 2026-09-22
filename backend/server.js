@@ -17,6 +17,12 @@ const app = express();
 
 const IS_PROD = process.env.NODE_ENV === 'production';
 
+// ── Trust proxy ──────────────────────────────────────────────
+// Confiar en el proxy de Render para identificar correctamente la IP del cliente.
+// Sin esto, express-rate-limit cuenta todas las peticiones bajo la IP del proxy
+// de Render (share universal de presupuesto entre todos los usuarios).
+app.set('trust proxy', 1);
+
 // ── Cloudinary: verifica credenciales una sola vez al arrancar ─
 const { verificarCredenciales } = require('./config/cloudinary');
 
