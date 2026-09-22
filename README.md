@@ -118,6 +118,8 @@ Todos los documentos se encuentran en la carpeta [`documentacion/`](./documentac
 | `documentacion/UPTIME_ROBOT.md` | Monitoreo 24/7 con UptimeRobot (config manual) |
 | `documentacion/adminer.md` | Adminer en Render: acceso gráfico a la BD (`https://metafit-adminer.onrender.com`) |
 | `documentacion/infraestructura_vps.md` | BD de producción migrada a Oracle VPS + Dokploy (MySQL 8, 141.148.94.173:3306) |
+| `documentacion/seguridad.md` | Rotación de credenciales y medidas de seguridad vigentes |
+| `documentacion/verificacion_final.md` | Verificación E2E de producción completada el 22-sep-2026 |
 | `documentacion/GUION_VIDEO_DEMO.md` | Guion del video demo (3–5 min, 3 roles) |
 
 ## 🚀 Mejoras "1000/10" (últimas fases)
@@ -134,7 +136,8 @@ Todos los documentos se encuentran en la carpeta [`documentacion/`](./documentac
 | UptimeRobot | ⏳ Guía lista (`documentacion/UPTIME_ROBOT.md`), monitores manuales |
 | Cloudinary | ✅ Con fallback a disco (activa con 3 env vars) |
 | Storybook | ✅ 5 historias (Badge, Button, Card, Modal, Avatar) tema oscuro |
-| n8n (automatizaciones) | ✅ 4 flujos: pagos, recordatorios, Telegram, Google Sheets |
+| n8n (automatizaciones) | ✅ 4 flujos: pagos, recordatorios, Telegram, Google Sheets **— corren en local (`localhost:5678`), no en el VPS** |
+| Verificación E2E prod | ✅ Documentada en `documentacion/verificacion_final.md` (CORS 403, Cloudinary 200, BD limpia 13/8) |
 
 ---
 
@@ -148,6 +151,44 @@ El backend usa una **whitelist de orígenes** — solo permite conexiones desde:
 | Producción | `metafit-frontend-78x6.onrender.com` + los de desarrollo |
 
 Configurable vía `CORS_ORIGINS` en `.env` o en Render. Solicitudes sin `Origin` (móvil, curl, Postman) siempre pasan.
+
+---
+
+## 🏗️ Arquitectura de producción (verificada 22-sep-2026)
+
+```text
+                        ┌─────────────────────────────────────────────────────────┐
+   Usuarios web/móvil   │                        Render                      │
+ ──────────────►        │  ┌──────────────────────┐        ┌─────────────────────┐ │
+                        │  │ metafit-frontend     │  CORS  │ metafit-backend     │ │
+                        │  │ :5173 / :8081        │ ─────► │ /health 200         │ │
+                        │  └──────────────────────┘  whitelist │ DB externa VPS   │ │
+                        │  ┌──────────────────────┐        └──────────┬──────────┘ │
+                        │  │ metafit-adminer      │                    │            │
+                        │  │ (prefill VPS :3306)  │                    ▼            │
+                        └──┴──────────────────────┴────────────────────┼───────────┘
+                                                          ┌───────────┴───────────┐
+                                                          │ Oracle VPS (Dokploy)  │
+                                                          │ MySQL 8 `metafit`     │
+                                                          │ 141.148.94.173:3306   │
+                                                          └───────────┬───────────┘
+                                                                      │
+                       Integraciones:                                │
+   ┌──────────────────┬──────────────────┬─────────────────────┬─────┴─────────┐
+   │ Cloudinary       │ Brevo (SMTP 235) │ GTM-K6JZS4MG        │ n8n (LOCAL)   │
+   │ fotos de          │ correo bienvenida│ analítica web      │ localhost:5678│
+   │ afiliados 200     │ (API 401 → SMTP) │                     │ Telegram/GS   │
+   └──────────────────┴──────────────────┴─────────────────────┴───────────────┘
+```
+
+**Puntos clave del estado actual:**
+- Backend y frontend en Render; **BD de producción = MySQL 8 en el VPS** (no embebida).
+- **Cloudinary** sube y sirve fotos (HTTP 200 verificado).
+- **CORS** en lista blanca: orígenes ajenos → 403.
+- **Brevo**: la API key está obsoleta (401) y el flujo de correos funciona por **SMTP relay (AUTH OK)**.
+- **n8n** con sus 4 flujos corre **solo en la PC local**; en producción los webhooks a `n8n:5678`
+  no existen (pendiente exponerlo si se quiere en prod).
+- Detalle de rotación de credenciales en `documentacion/seguridad.md`.
 
 ---
 

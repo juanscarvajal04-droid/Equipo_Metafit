@@ -65,6 +65,13 @@ Dokploy. Desde Adminer se entra directo:
 > ⚠️ El VPS debe permitir el tráfico entrante en el puerto 3306 (Security List de Oracle / UFW) —
 > ya está habilitado y verificado con `SELECT 1`.
 
+### Campo "Servidor" ya viene prefijado (verificado 22-sep-2026)
+
+El servicio de Render tiene la variable de entorno **`ADMINER_DEFAULT_SERVER=141.148.94.173:3306`**
+(seteada y desplegada — deploy `dep-daovmlmgekts73f8fu8g` live). Al abrir la pantalla de login,
+el campo **Servidor** ya aparece con `141.148.94.173:3306`; solo se deben escribir usuario
+(`metafit`), contraseña (`Admin123!`) y base (`metafit`).
+
 ### Nota histórica
 
 Antes, la BD de producción corría **embebida dentro del contenedor del backend de Render**
