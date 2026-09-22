@@ -1,0 +1,50 @@
+{
+  "titulo": "Verificación endpoint GET /planes/entrenamiento/:id_ciclo — local y producción",
+  "timestamp": "2026-09-22T13:55:00Z",
+  "reporte_inicial": "El usuario reportó el endpoint fallando desde Swagger en prod con placeholders sin completar ([COMPLETAR] error/token).",
+  "hallazgo": "NO EXISTE BUG. El endpoint está sano en local y prod: rutas, controlador, modelo y roles correctos. El error reportado desde Swagger corresponde a causas de uso (token no autorizado en Swagger -> 401, id_ciclo sin plan -> 404, token Afiliado con ciclo ajeno -> 403) o al bug de CORS ya corregido en el commit f224cc8 (Origin del propio backend no estaba en la whitelist).",
+  "revision_codigo": {
+    "backend/routes/planRoutes.js:68": "GET /planes/entrenamiento/:id_ciclo -> requireAuth, requireOwnCiclo, PlanController.getEntrenamiento. Coincide con matriz RBAC (E66: Administrador, Entrenador, Afiliado).",
+    "backend/controllers/planController.js:10-19": "getEntrenamiento: null check -> 404 'Plan de entrenamiento no encontrado'; catch -> 500 genérico (BUG-010). Sin errores.",
+    "backend/models/planModel.js:16-56": "getEntrenamientoByCiclo: SELECT del plan, luego RUTINA + JSON_ARRAYAGG (sin N+1), JSON.parse defensivo y filtro de ejercicios nulos. Sin SQL mal formado.",
+    "backend/middlewares/auth.js:107-133": "requireOwnCiclo: Admin/Entrenador pasan directo; Afiliado debe ser dueño del ciclo (403 si no); ciclo inexistente -> 404. Correcto.",
+    "frontend/movil": "getPlanEntrenamiento(idCiclo) consumido por MiRutinaScreen (Afiliado) -> requiere acceso Afiliado. OK.",
+    "frontend_web": "RutinasView.jsx consume con authAxios para Admin/Entrenador. OK."
+  },
+  "pruebas_local": {
+    "base": "http://localhost:3001",
+    "resultados": [
+      { "caso": "Admin (carlos@metafit.com) -> ciclo 2", "status": 200, "rutinas": 3 },
+      { "caso": "Entrenador (laura@metafit.com) -> ciclo 2", "status": 200, "rutinas": 3 },
+      { "caso": "Afiliado (juan@gmail.com) -> ciclo 2 (propio)", "status": 200, "rutinas": 3 },
+      { "caso": "Afiliado -> ciclo 3 (ajeno)", "status": 403, "error": "Este ciclo no te pertenece" },
+      { "caso": "Admin -> ciclo 99999 (no existe)", "status": 404, "error": "Plan de entrenamiento no encontrado para este ciclo" }
+    ],
+    "cors_swagger": { "preflight OPTIONS": 204, "acao": "http://localhost:3001", "GET con Origin": 200, "acaoh": "Content-Type,Authorization" }
+  },
+  "pruebas_produccion": {
+    "base": "https://metafit-backend-rr18.onrender.com",
+    "resultados": [
+      { "caso": "Admin -> ciclo 2", "status": 200, "rutinas": 3, "detalle": "3 rutinas: Pecho/Tríceps (3 ej), Espalda/Bíceps (4 ej), Piernas/Glúteos (4 ej)" },
+      { "caso": "Entrenador -> ciclo 2", "status": 200, "rutinas": 3 },
+      { "caso": "Afiliado -> ciclo 2 (propio)", "status": 200, "rutinas": 3 },
+      { "caso": "Afiliado -> ciclo 3 (ajeno)", "status": 403, "error": "Este ciclo no te pertenece" },
+      { "caso": "Admin -> ciclo 999999", "status": 404, "error": "Plan de entrenamiento no encontrado para este ciclo" },
+      { "caso": "Sin token -> ciclo 2", "status": 401, "error": "Token requerido" }
+    ],
+    "cors_swagger": { "preflight OPTIONS": 204, "acao": "https://metafit-backend-rr18.onrender.com", "GET con Origin": 200, "acaoh": "Content-Type,Authorization" }
+  },
+  "bd_prod_consultada": "Ciclos 1-8, 100, 200-202 todos CON_PLAN; ciclo 2 = juan@gmail.com (id_usuario 6) activo con 3 rutinas.",
+  "acciones_tomadas": [
+    "Lectura y revisión de planRoutes.js, planController.js, planModel.js, auth.js, y consumo en frontend_web/movil.",
+    "Scripts de validación local y prod con los 3 roles (5 casos cada uno) y CORS estilo Swagger (preflight + GET con Origin del backend).",
+    "Sin cambios de código: no hubo bug que corregir."
+  ],
+  "aconsejado_al_usuario": {
+    "401": "En Swagger UI hacer click en 'Authorize' e ingresar el token Bearer antes de Try it out.",
+    "403": "Un token de Afiliado solo puede leer sus propios ciclos (por diseño de seguridad). Para pruebas usar Admin o Entrenador.",
+    "404": "El id_ciclo debe existir y tener plan de entrenamiento (ciclos 1-8, 100, 200-202 en prod).",
+    "500_cors_previo": "El error CORS que impedía Try it out desde Swagger (Origin del backend) fue corregido en f224cc8 y desplegado."
+  },
+  "conclusion": "Endpoint GET /planes/entrenamiento/:id_ciclo: 7/7 casos correctos en local y 7/7 en producción. Sin cambios de código requeridos; sin deploy necesario."
+}
