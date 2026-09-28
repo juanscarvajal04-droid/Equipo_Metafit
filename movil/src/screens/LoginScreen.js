@@ -40,10 +40,25 @@ export default function LoginScreen({ navigation }) {
       activarPushNotifications();
     } catch (err) {
       if (!err.response) {
-        setError('Error de conexión. Verificá tu conexión a internet e intentá de nuevo.');
+        setError('No se pudo conectar al servidor. Verificá tu conexión.');
       } else {
-        const msg = err.response?.data?.error || 'Correo o contraseña incorrectos';
-        setError(msg);
+        switch (err.response.status) {
+          case 401:
+            setError('Correo o contraseña incorrectos.');
+            break;
+          case 403:
+            setError('Tu cuenta no está activa. Contactá a la recepción.');
+            break;
+          case 429:
+            setError('Demasiados intentos. Esperá 15 minutos e intentá de nuevo.');
+            break;
+          default:
+            if (err.response.status >= 500) {
+              setError('Error del servidor. Intentá más tarde.');
+            } else {
+              setError('Ocurrió un error inesperado. Intentá de nuevo.');
+            }
+        }
       }
     } finally {
       setLoading(false);

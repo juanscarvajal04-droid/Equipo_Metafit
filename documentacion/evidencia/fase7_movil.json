@@ -1,0 +1,67 @@
+{
+  "fase": 7,
+  "descripcion": "App móvil Expo en modo web — verificación de login y flujo cross-app",
+  "fecha": "2026-09-27T00:00:00.000Z",
+  "resumen": {
+    "7.1_config_api": "OK",
+    "7.2_expo_web": "OK (npx expo start --web en http://localhost:8081)",
+    "7.3_login_afiliado": "OK (juan@gmail.com → 4 tabs)",
+    "7.4_cross_app": "OK (Recepcionista en web :5173 creó afiliado → login exitoso en Expo web)",
+    "7.6_evidencia": "guardada"
+  },
+  "7_1_config_api": {
+    "archivo": "movil/src/services/api.js",
+    "regla_platform_os": "Platform.OS === 'web' ? (EXPO_PUBLIC_API_URL || 'http://localhost:3001') : 'https://metafit-backend-rr18.onrender.com'",
+    "verificacion": "Platform.OS === 'web' presente en líneas 12-14 — Expo web apunta al backend local :3001; Android/iOS apunta a producción Render.",
+    "origen_datos": "Los datos mostrados en el perfil (peso, altura, ciclos, restricciones) provienen de la BD local Docker (mysql metafit_db), confirmando que Expo web consulta localhost:3001."
+  },
+  "7_2_expo_web": {
+    "comando": "cd movil && npx expo start --web",
+    "url": "http://localhost:8081",
+    "http_status": 200,
+    "app_cargada": "Landing MetaFit (título 'Landing'), bundle web compilado por Metro correctamente"
+  },
+  "7_3_login_afiliado": {
+    "usuario": "juan@gmail.com",
+    "resultado": "LOGIN OK",
+    "pantalla": "Perfil con 4 tabs visibles: Perfil, Rutina, Dieta, Progreso",
+    "datos_cargados_desde_bd_local": {
+      "nombre": "Juan Martínez",
+      "edad": "36 años",
+      "peso": "80.92 kg",
+      "altura": "175.5 cm",
+      "ciclo_activo": "Ciclo 2 (04/04/2024 → 31/05/2024)",
+      "objetivo": "Perdida de grasa",
+      "restriccion": "Hipertension arterial — Controlar frecuencia cardiaca durante el ejercicio"
+    }
+  },
+  "7_4_cross_app": {
+    "paso_1_web_recepcionista": {
+      "app": "Web local :5173",
+      "usuario": "maria@metafit.com (Recepcionista)",
+      "accion": "Login y creación de afiliado vía UI ('➕ Nuevo afiliado')",
+      "afiliado_creado": {
+        "nombres": "Test",
+        "apellidos": "Móvil",
+        "correo": "testmovil@demo.com",
+        "documento": "1090876543",
+        "telefono": "3201234567",
+        "estado": "Activo"
+      },
+      "toast_ui": "Afiliado creado correctamente"
+    },
+    "paso_2_verificacion_bd": {
+      "metodo": "mysql en contenedor metafit_db (misma BD que phpMyAdmin :8080)",
+      "fila_encontrada": "id_usuario=206, Test Móvil, testmovil@demo.com, rol=Afiliado, estado=Activo, documento=1090876543, fecha_registro=2026-09-28"
+    },
+    "paso_3_login_expo_web": {
+      "usuario": "testmovil@demo.com",
+      "contrasena": "MF_1090876543@2025 (generada: MF_{documento}@2025)",
+      "resultado": "LOGIN OK",
+      "pantalla": "Perfil 'TM Test Movil' con 4 tabs: Perfil, Rutina, Dieta, Progreso",
+      "datos_cargados": { "edad": "27 años", "altura": "172 cm", "correo": "testmovil@demo.com", "ciclo": "Sin ciclo asignado (esperado para afiliado recién creado)" }
+    },
+    "conclusion": "El afiliado creado en la web (Recepcionista) queda disponible en la misma BD local y el login móvil web lo reconoce de inmediato: flujo cross-app completo (creación web → persistencia → consumo móvil)."
+  },
+  "7_5_diagnostico": "Sin fallos de login. El único detalle no funcional: warnings de desarrollo de React Native Web (shadow* deprecado, expo-notifications en web) — no afectan el flujo."
+}

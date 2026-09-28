@@ -158,7 +158,24 @@ export default function MiPerfilScreen({ navigation }) {
       setCiclo(seleccionarCicloActivo(ciclosRes.data));
       setRestricciones(restricRes.data || []);
     } catch (err) {
-      Alert.alert('Error', 'No se pudo cargar el perfil.');
+      if (!err.response) {
+        Alert.alert('Sin conexión', 'Sin conexión. Verificá tu red.');
+      } else {
+        switch (err.response.status) {
+          case 401:
+            // El interceptor ya maneja esto: cierra sesión automáticamente.
+            break;
+          case 403:
+            Alert.alert('Acceso denegado', 'No tenés permiso para ver estos datos.');
+            break;
+          default:
+            if (err.response.status >= 500) {
+              Alert.alert('Error', 'Error al cargar los datos. Intentá más tarde.');
+            } else {
+              Alert.alert('Error', 'No se pudieron cargar los datos.');
+            }
+        }
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);

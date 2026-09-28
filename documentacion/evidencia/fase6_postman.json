@@ -1,0 +1,268 @@
+{
+  "fase": 6,
+  "descripcion": "Postman colección web — requests POST ejecutadas contra backend local y filas verificadas en BD",
+  "fecha": "2026-09-28T02:51:13.870Z",
+  "base": "http://localhost:3001",
+  "environment_usado": "http://localhost:3001",
+  "resumen": "20/20 requests OK",
+  "adaptaciones": [
+    "recuperar-password NO devolvió token modoPrueba",
+    "EJERCICIO 'Peso muerto rumano' ya existía (UNIQUE) → se creó 'Peso muerto rumano F6-73182' para probar la creación real",
+    "ALIMENTO 'Avena' ya existía (UNIQUE) → se creó 'Avena F6-73638' para probar la creación real",
+    "Environment actualizado: id_afiliado=205, id_ciclo=204, id_rutina=206",
+    "reset-password: token obtenido leyendo PASSWORD_RESET (recuperar-password envió correo Brevo real, sin modoPrueba.token)"
+  ],
+  "resultados": [
+    {
+      "request": "POST /login — Admin (carlos)",
+      "metodo": "POST",
+      "ruta": "/login",
+      "status": 200,
+      "esperado": 200,
+      "ok": true,
+      "fila": null,
+      "detalle": "{\"accessToken\":\"***jwt_redactado***"
+    },
+    {
+      "request": "POST /login — Recepcionista (maria)",
+      "metodo": "POST",
+      "ruta": "/login",
+      "status": 200,
+      "esperado": 200,
+      "ok": true,
+      "fila": null,
+      "detalle": "{\"accessToken\":\"***jwt_redactado***"
+    },
+    {
+      "request": "POST /login — Entrenador (laura)",
+      "metodo": "POST",
+      "ruta": "/login",
+      "status": 200,
+      "esperado": 200,
+      "ok": true,
+      "fila": null,
+      "detalle": "{\"accessToken\":\"***jwt_redactado***\""
+    },
+    {
+      "request": "POST /auth/recuperar-password (carlos)",
+      "metodo": "POST",
+      "ruta": "/auth/recuperar-password",
+      "status": 200,
+      "esperado": 200,
+      "ok": true,
+      "fila": {
+        "verificacion": "FILA EN BD ✅",
+        "conteo": 1
+      },
+      "detalle": "{\"mensaje\":\"Si el correo existe, recibirás un enlace para restablecer tu contraseña\"}"
+    },
+    {
+      "request": "POST /usuarios (Pedro Martínez)",
+      "metodo": "POST",
+      "ruta": "/usuarios",
+      "status": 201,
+      "esperado": 201,
+      "ok": true,
+      "fila": {
+        "verificacion": "FILA EN BD ✅",
+        "conteo": 1
+      },
+      "detalle": "{\"id\":204,\"id_usuario\":204,\"correo\":\"pedro.martinez@metafit.com\",\"email\":\"pedro.martinez@metafit.com\",\"rol\":\"Recepcionista\",\"role\":\"Recepcionista\",\"nombres\":\"Pedro\",\"apellidos\":\"Martínez\",\"estado\":\"Activo\",\"fecha_registr | Adaptación: se crea antes del bloque de afiliados para encadenar recuperar/reset sin tocar credenciales Admin"
+    },
+    {
+      "request": "POST /auth/recuperar-password (pedro, adaptación)",
+      "metodo": "POST",
+      "ruta": "/auth/recuperar-password",
+      "status": 200,
+      "esperado": 200,
+      "ok": true,
+      "fila": {
+        "verificacion": "FILA EN BD ✅",
+        "conteo": 1
+      },
+      "detalle": "{\"mensaje\":\"Si el correo existe, recibirás un enlace para restablecer tu contraseña\"} | Adaptación: mismo shape que la colección; email descartable para poder probar reset sin romper Admin"
+    },
+    {
+      "request": "POST /auth/reset-password",
+      "metodo": "POST",
+      "ruta": "/auth/reset-password",
+      "status": 200,
+      "esperado": 200,
+      "ok": true,
+      "fila": {
+        "verificacion": "FILA EN BD ✅",
+        "conteo": 1
+      },
+      "detalle": "{\"mensaje\":\"Contraseña actualizada correctamente\"} | token leído desde PASSWORD_RESET (modoPrueba no disponible: correos Brevo enviados desde local) | login con NuevaClave123! → 200"
+    },
+    {
+      "request": "POST /afiliados (Camila Rojas)",
+      "metodo": "POST",
+      "ruta": "/afiliados",
+      "status": 201,
+      "esperado": 201,
+      "ok": true,
+      "fila": {
+        "verificacion": "FILA EN BD ✅",
+        "conteo": 1
+      },
+      "detalle": "{\"id\":205,\"message\":\"Afiliado creado correctamente\",\"password_temporal\":\"MF_1023987654@2025\"} → id_usuario=205"
+    },
+    {
+      "request": "POST /afiliados/:id/foto (multipart)",
+      "metodo": "POST",
+      "ruta": "/afiliados/205/foto",
+      "status": 200,
+      "esperado": 200,
+      "ok": true,
+      "fila": {
+        "verificacion": "FILA EN BD ✅",
+        "conteo": 1
+      },
+      "detalle": "{\"message\":\"Foto de perfil actualizada\",\"foto\":\"https://res.cloudinary.com/llaq9vyl/image/upload/v1790563864/metafit/afiliados/c5szeehcg8vygompbks5.png\",\"url\":\"https://res.cloudinary.com/llaq9vyl/image/upload/v1790563864"
+    },
+    {
+      "request": "POST /afiliados/ciclos",
+      "metodo": "POST",
+      "ruta": "/afiliados/ciclos",
+      "status": 201,
+      "esperado": 201,
+      "ok": true,
+      "fila": {
+        "verificacion": "FILA EN BD ✅",
+        "conteo": 1
+      },
+      "detalle": "{\"id_ciclo\":204,\"message\":\"Ciclo creado correctamente\"} | Adaptación: id_usuario = Camila (nuevo), no el 6 del seed — regla de oro → id_ciclo=204"
+    },
+    {
+      "request": "POST /afiliados/:id/restricciones",
+      "metodo": "POST",
+      "ruta": "/afiliados/205/restricciones",
+      "status": 201,
+      "esperado": 201,
+      "ok": true,
+      "fila": {
+        "verificacion": "FILA EN BD ✅",
+        "conteo": 1
+      },
+      "detalle": "{\"message\":\"Restricción asignada\"}"
+    },
+    {
+      "request": "POST /afiliados/progreso",
+      "metodo": "POST",
+      "ruta": "/afiliados/progreso",
+      "status": 201,
+      "esperado": 201,
+      "ok": true,
+      "fila": {
+        "verificacion": "FILA EN BD ✅",
+        "conteo": 1
+      },
+      "detalle": "{\"message\":\"Progreso registrado correctamente\"} | Adaptación: id_ciclo nuevo (regla de oro) y fecha futura única para el PK (id_ciclo, fecha_registro)"
+    },
+    {
+      "request": "POST /afiliados/:id/pagos",
+      "metodo": "POST",
+      "ruta": "/afiliados/205/pagos",
+      "status": 201,
+      "esperado": 201,
+      "ok": true,
+      "fila": {
+        "verificacion": "FILA EN BD ✅",
+        "conteo": 1
+      },
+      "detalle": "{\"id\":44,\"fecha_vencimiento\":\"2026-08-31\",\"message\":\"Pago registrado correctamente\"} → id_pago=44"
+    },
+    {
+      "request": "POST /planes/entrenamiento",
+      "metodo": "POST",
+      "ruta": "/planes/entrenamiento",
+      "status": 201,
+      "esperado": 201,
+      "ok": true,
+      "fila": {
+        "verificacion": "FILA EN BD ✅",
+        "conteo": 1
+      },
+      "detalle": "{\"id_ciclo\":0,\"message\":\"Plan de entrenamiento creado\"} | Adaptación: id_ciclo nuevo (regla de oro: planes NUNCA con ids del seed)"
+    },
+    {
+      "request": "POST /planes/rutinas",
+      "metodo": "POST",
+      "ruta": "/planes/rutinas",
+      "status": 201,
+      "esperado": 201,
+      "ok": true,
+      "fila": {
+        "verificacion": "FILA EN BD ✅",
+        "conteo": 1
+      },
+      "detalle": "{\"id\":206,\"message\":\"Rutina creada correctamente\"} → id_rutina=206"
+    },
+    {
+      "request": "POST /planes/rutinas/:id_rutina/ejercicios",
+      "metodo": "POST",
+      "ruta": "/planes/rutinas/206/ejercicios",
+      "status": 201,
+      "esperado": 201,
+      "ok": true,
+      "fila": {
+        "verificacion": "FILA EN BD ✅",
+        "conteo": 1
+      },
+      "detalle": "{\"message\":\"Ejercicio añadido a la rutina\"}"
+    },
+    {
+      "request": "POST /planes/nutricional",
+      "metodo": "POST",
+      "ruta": "/planes/nutricional",
+      "status": 201,
+      "esperado": 201,
+      "ok": true,
+      "fila": {
+        "verificacion": "FILA EN BD ✅",
+        "conteo": 1
+      },
+      "detalle": "{\"id_ciclo\":0,\"message\":\"Plan nutricional creado\"}"
+    },
+    {
+      "request": "POST /planes/nutricional/:id_plan/detalle",
+      "metodo": "POST",
+      "ruta": "/planes/nutricional/204/detalle",
+      "status": 201,
+      "esperado": 201,
+      "ok": true,
+      "fila": {
+        "verificacion": "FILA EN BD ✅",
+        "conteo": 1
+      },
+      "detalle": "{\"message\":\"Alimento añadido al plan nutricional\"} | Adaptación: id_plan = id_ciclo nuevo (el id del plan nutricional es el id_ciclo)"
+    },
+    {
+      "request": "POST /catalogo/ejercicios",
+      "metodo": "POST",
+      "ruta": "/catalogo/ejercicios",
+      "status": 201,
+      "esperado": 201,
+      "ok": true,
+      "fila": {
+        "verificacion": "FILA EN BD ✅",
+        "conteo": 1
+      },
+      "detalle": "{\"id\":26,\"message\":\"Ejercicio creado\"}"
+    },
+    {
+      "request": "POST /catalogo/alimentos",
+      "metodo": "POST",
+      "ruta": "/catalogo/alimentos",
+      "status": 201,
+      "esperado": 201,
+      "ok": true,
+      "fila": {
+        "verificacion": "FILA EN BD ✅",
+        "conteo": 1
+      },
+      "detalle": "{\"id\":27,\"message\":\"Alimento creado\"}"
+    }
+  ]
+}

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
-import { getId, nombreCompleto, inicial, cicloActivo } from "../utils/afiliadoHelpers";
+import { getId, nombreCompleto, inicial, cicloActivo, toDateInput } from "../utils/afiliadoHelpers";
 import { useToast } from "../hooks/useToast";
 import useAutoRefresh from "../hooks/useAutoRefresh";
 import { trackEvent } from "../utils/analytics";

@@ -1,0 +1,45 @@
+{
+  "fase": 8,
+  "descripcion": "FASE 8 — Mensajes de error en la app móvil (5 pantallas)",
+  "fecha": "2026-09-28T00:00:00.000Z",
+  "resumen": {
+    "8_1_login": "OK — LoginScreen con bloques exactos por código HTTP",
+    "8_2_pantallas_datos": "OK — Perfil/Rutina/Dieta/Progreso con manejo de sin conexión, 401 (interceptor), 403, >=500 y default",
+    "8_3_interceptor_401": "OK — logout automático (AsyncStorage.multiRemove)",
+    "8_4_evidencia": "guardada"
+  },
+  "archivos_modificados": [
+    "movil/src/screens/LoginScreen.js",
+    "movil/src/screens/MiPerfilScreen.js",
+    "movil/src/screens/MiRutinaScreen.js",
+    "movil/src/screens/MiDietaScreen.js",
+    "movil/src/screens/MiProgresoScreen.js"
+  ],
+  "8_1_login": {
+    "bloques": {
+      "sin_respuesta": "No se pudo conectar al servidor. Verificá tu conexión.",
+      "401": "Correo o contraseña incorrectos.",
+      "403": "Tu cuenta no está activa. Contactá a la recepción.",
+      "429": "Demasiados intentos. Esperá 15 minutos e intentá de nuevo.",
+      ">=500": "Error del servidor. Intentá más tarde.",
+      "default": "Ocurrió un error inesperado. Intentá de nuevo."
+    },
+    "implementacion": "errores = { sinRespuesta, 401, 403, 429, 500, default } — mapeo directo de err.response.status (variable real err, no error)",
+    "verificacion": "LoginScreen.js — bloque de captura usa el mapa por status; casos sin respuesta (network) caen a sinRespuesta"
+  },
+  "8_2_pantallas_datos": {
+    "bloques": {
+      "sin_respuesta": "Sin conexión. Verificá tu red.",
+      "401": "interceptor — logout automático",
+      "403": "No tenés permiso para ver estos datos.",
+      ">=500": "Error al cargar los datos. Intentá más tarde.",
+      "default": "No se pudieron cargar los datos."
+    },
+    "pantallas": ["MiPerfilScreen.js", "MiRutinaScreen.js", "MiDietaScreen.js", "MiProgresoScreen.js"]
+  },
+  "8_3_interceptor_401": {
+    "archivo": "movil/src/services/api.js",
+    "comportamiento": "Si la respuesta HTTP es 401, se limpia la sesión con AsyncStorage.multiRemove (logout automático) y se notifica al usuario"
+  },
+  "8_4_nota": "Los 5 archivos se aplicaron y la app Expo web :8081 compiló sin errores de consola (verificado en FASE 9.4)."
+}

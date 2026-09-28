@@ -140,7 +140,10 @@ app.use('/progreso', progresoRoutes);              // FASE 1: GET|PUT /progreso/
 app.use('/ciclos', cicloRoutes);                   // Parte 1: PATCH|DELETE /ciclos/:id_ciclo
 
 // ── Swagger UI — /api-docs y /swagger (alias) ────────────────
-const swaggerSetup = swaggerUi.setup(swaggerSpec, {
+// El spec se entrega de forma DINÁMICA por petición (req.swaggerDoc):
+// el dropdown "Servers" queda seleccionado por defecto en el backend
+// correcto según el host (localhost → local; Render → producción).
+const swaggerUiOptions = {
   customSiteTitle: 'MetaFit API Docs',
   swaggerOptions: {
     persistAuthorization: true,
@@ -148,14 +151,26 @@ const swaggerSetup = swaggerUi.setup(swaggerSpec, {
     filter: true,
     tryItOutEnabled: true,
   },
-});
-app.use('/api-docs', swaggerUi.serve, swaggerSetup);
-app.use('/swagger', swaggerUi.serve, swaggerSetup);  // alias amigable
+};
+
+function swaggerDynamicSpec(req, res, next) {
+  const host = req.get('host') || '';
+  req.swaggerDoc = (typeof swaggerSpec.specForHost === 'function')
+    ? swaggerSpec.specForHost(host)
+    : swaggerSpec;
+  next();
+}
+
+const swaggerDynamicAssets = swaggerUi.serveFiles(swaggerSpec, swaggerUiOptions);
+app.use('/api-docs', swaggerDynamicSpec, swaggerDynamicAssets, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
+app.use('/swagger', swaggerDynamicSpec, swaggerDynamicAssets, swaggerUi.setup(swaggerSpec, swaggerUiOptions));  // alias amigable
 
 // Endpoint que sirve el JSON crudo de la spec (para Postman, etc.)
+// También dinámico: orden de servers acorde al host de la petición.
 app.get('/api-docs.json', (req, res) => {
   res.setHeader('Content-Type', 'application/json');
-  res.send(swaggerSpec);
+  const host = req.get('host') || '';
+  res.send(typeof swaggerSpec.specForHost === 'function' ? swaggerSpec.specForHost(host) : swaggerSpec);
 });
 
 // ── Health check ───────────────────────────────────────────────

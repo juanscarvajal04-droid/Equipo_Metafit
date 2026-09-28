@@ -1,0 +1,23 @@
+{
+  "fase": 10,
+  "descripcion": "FASE 10 — Documentación final (entornos + demo sustentación + README)",
+  "fecha": "2026-09-28T00:00:00.000Z",
+  "resumen": {
+    "10_1_entornos_md": "OK — creado documentacion/entornos.md",
+    "10_2_demo_sustentacion_md": "OK — creado documentacion/demo_sustentacion.md",
+    "10_3_readme": "OK — tabla de entornos agregada en sección principal + docs nuevos en índice"
+  },
+  "10_1_entornos_md": {
+    "archivo": "documentacion/entornos.md",
+    "secciones": ["⚠️ Regla fundamental (LOCAL→phpMyAdmin / PROD→Adminer, nunca mezclar)", "Variables de entorno por archivo (.env, .env.example, frontend_web/.env.development, app móvil)", "Cómo arrancar local (docker compose up -d --build)", "Cómo resetear la BD local (docker compose down -v && docker compose up -d --build)", "Troubleshooting (5 errores más comunes)"]
+  },
+  "10_2_demo_sustentacion_md": {
+    "archivo": "documentacion/demo_sustentacion.md",
+    "secciones": ["Antes de empezar (4 checks)", "Demo 1 — Crear afiliado (Recepcionista)", "Demo 2 — Asignar plan (Entrenador)", "Demo 3 — Vista del afiliado (App móvil)", "Demo 4 — Swagger API", "Frase clave para el instructor"]
+  },
+  "10_3_readme": {
+    "archivo": "README.md",
+    "cambio": "Sección '🧭 Entornos' con tabla: | Entorno | Frontend | Backend | BD | (Local :5173/:3001/Docker MySQL — Producción metafit-frontend/metafit-backend/VPS Oracle)",
+    "docs_nuevos_en_indice": ["documentacion/entornos.md", "documentacion/demo_sustentacion.md"]
+  }
+}

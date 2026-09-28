@@ -1,11 +1,17 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 
 const TOKEN_KEY = 'metafit_token';
 const USER_KEY  = 'metafit_user';
 const ROLE_KEY  = 'metafit_role';
 
-const API_URL = 'https://metafit-backend-rr18.onrender.com';
+// ── Entorno según la plataforma ─────────────────────────────────────────
+// Platform.OS === 'web'      -> Expo corriendo en navegador (dev local) -> localhost:3001
+// Cualquier otro OS (android/ios) -> APK real -> backend de producción (Render)
+const API_URL = Platform.OS === 'web'
+  ? (process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001')
+  : 'https://metafit-backend-rr18.onrender.com';
 
 const api = axios.create({
   baseURL: API_URL,

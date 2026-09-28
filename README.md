@@ -7,6 +7,20 @@ Bienvenido a la rama de trabajo de la dirección del proyecto. Esta sección es 
 
 ---
 
+## 🧭 Entornos
+
+> **Regla de oro:** los datos de LOCAL solo se ven en **phpMyAdmin**
+> (`localhost:8080`); los datos de PRODUCCIÓN solo se ven en **Adminer**
+> (`https://metafit-adminer.onrender.com`). Son BDs separadas, nunca mezclar.
+> Detalle completo en [`documentacion/entornos.md`](./documentacion/entornos.md).
+
+| Entorno    | Frontend                  | Backend                           | BD                 |
+|------------|---------------------------|-----------------------------------|--------------------|
+| Local      | http://localhost:5173     | http://localhost:3001             | Docker MySQL (MariaDB 11, phpMyAdmin :8080) |
+| Producción | https://metafit-frontend-78x6.onrender.com | https://metafit-backend-rr18.onrender.com | VPS Oracle (MySQL 8, Adminer) |
+
+---
+
 ## 📋 Instalación local (sin Docker)
 
 ```bash
@@ -42,6 +56,20 @@ docker compose ps
 ```
 
 Los scripts SQL de [`database/`](./database) se ejecutan automáticamente al iniciar MariaDB por primera vez. El orden lexicográfico coincide con las dependencias: `01_estructura → 02_migracion_movil → 03_mejoras_estructura → 04_datos_iniciales → 05_password_reset` (detalles en [`database/README.md`](./database/README.md)).
+
+## 🔄 Reset de base de datos local
+
+```bash
+docker compose down -v
+docker compose up -d --build
+# Esto recrea la BD desde cero con el seed completo.
+# Los datos de prueba quedan listos en ~30 segundos.
+```
+
+> `down -v` borra el volumen `metafit_db_data`; al volver a levantar, MariaDB
+> re-ejecuta todos los `.sql` de `database/` en orden (01 → 02 → 03 → 04 → 05)
+> y deja la BD poblada con usuarios, ciclos, planes, pagos y restricciones de
+> prueba (Admin `carlos@metafit.com / Admin123!`).
 
 ## 🔌 Puertos
 
@@ -137,6 +165,8 @@ Todos los documentos se encuentran en la carpeta [`documentacion/`](./documentac
 | `documentacion/infraestructura_vps.md` | BD de producción migrada a Oracle VPS + Dokploy (MySQL 8, 141.148.94.173:3306) |
 | `documentacion/seguridad.md` | Rotación de credenciales y medidas de seguridad vigentes |
 | `documentacion/verificacion_final.md` | Verificación E2E de producción completada el 22-sep-2026 |
+| `documentacion/entornos.md` | Entornos LOCAL/PROD: variables por archivo, arranque, reset y troubleshooting |
+| `documentacion/demo_sustentacion.md` | Checklist paso a paso para la sustentación (4 demos) |
 | `documentacion/GUION_VIDEO_DEMO.md` | Guion del video demo (3–5 min, 3 roles) |
 | `documentacion/swagger.json` | Spec OpenAPI 3.0 exportada de producción (91 endpoints) |
 

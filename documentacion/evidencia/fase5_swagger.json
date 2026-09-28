@@ -1,0 +1,219 @@
+{
+  "fase": 5,
+  "descripcion": "Swagger endpoints contra backend local (Docker :3001)",
+  "fecha": "2026-09-28T02:40:28.514Z",
+  "base": "http://localhost:3001",
+  "resumen": "19/19 pasos OK",
+  "resultados": [
+    {
+      "paso": "POST /login (Admin)",
+      "metodo": "POST",
+      "ruta": "/login",
+      "status": 200,
+      "esperado": 200,
+      "ok": true,
+      "detalle": "{\"accessToken\":\"***jwt_redactado***"
+    },
+    {
+      "paso": "POST /login (credenciales incorrectas)",
+      "metodo": "POST",
+      "ruta": "/login",
+      "status": 401,
+      "esperado": 401,
+      "ok": true,
+      "detalle": "{\"error\":\"Correo o contraseña incorrectos\"}"
+    },
+    {
+      "paso": "GET /afiliados",
+      "metodo": "GET",
+      "ruta": "/afiliados?page=1&limit=50",
+      "status": 200,
+      "esperado": 200,
+      "ok": true,
+      "detalle": "lista con 8 afiliados (seed debe tener 4+)"
+    },
+    {
+      "paso": "POST /afiliados (nuevo)",
+      "metodo": "POST",
+      "ruta": "/afiliados",
+      "status": 201,
+      "esperado": 201,
+      "ok": true,
+      "detalle": "creado id=203"
+    },
+    {
+      "paso": "GET /afiliados/{id_nuevo}",
+      "metodo": "GET",
+      "ruta": "/afiliados/203",
+      "status": 200,
+      "esperado": 200,
+      "ok": true,
+      "detalle": "{\"id_usuario\":203,\"nombres\":\"Test F5\",\"apellidos\":\"Swagger\",\"correo\":\"f5.swagger.227687@demo.com\",\"estado\":\"Activo\",\"documento\":\"10227687\",\"fecha_nacimiento\":\"1998-02-20T00:00:00.000Z\",\"edad\":28,\"sexo"
+    },
+    {
+      "paso": "PATCH /afiliados/{id_nuevo}",
+      "metodo": "PATCH",
+      "ruta": "/afiliados/203",
+      "status": 200,
+      "esperado": 200,
+      "ok": true,
+      "detalle": "{\"message\":\"Afiliado actualizado correctamente\"}"
+    },
+    {
+      "paso": "POST /afiliados/ciclos (id_nuevo)",
+      "metodo": "POST",
+      "ruta": "/afiliados/ciclos",
+      "status": 201,
+      "esperado": 201,
+      "ok": true,
+      "detalle": "ciclo nuevo id=203"
+    },
+    {
+      "paso": "GET /afiliados/{id_nuevo}/ciclos",
+      "metodo": "GET",
+      "ruta": "/afiliados/203/ciclos",
+      "status": 200,
+      "esperado": 200,
+      "ok": true,
+      "detalle": "[{\"id_ciclo\":203,\"id_usuario\":203,\"fecha_inicio\":\"2026-10-01T00:00:00.000Z\",\"fecha_fin\":\"2026-12-31T00:00:00.000Z\",\"activo\":1,\"objetivo_fisico\":\"Aumento de masa\",\"grupo_muscular_prioritario\":\"Pecho\",\""
+    },
+    {
+      "paso": "GET /catalogo/ejercicios",
+      "metodo": "GET",
+      "ruta": "/catalogo/ejercicios",
+      "status": 200,
+      "esperado": 200,
+      "ok": true,
+      "detalle": "ejercicios: 25"
+    },
+    {
+      "paso": "GET /catalogo/alimentos",
+      "metodo": "GET",
+      "ruta": "/catalogo/alimentos",
+      "status": 200,
+      "esperado": 200,
+      "ok": true,
+      "detalle": "alimentos: 26"
+    },
+    {
+      "paso": "GET /catalogo/restricciones",
+      "metodo": "GET",
+      "ruta": "/catalogo/restricciones",
+      "status": 200,
+      "esperado": 200,
+      "ok": true,
+      "detalle": "restricciones: 6"
+    },
+    {
+      "paso": "GET /planes/entrenamiento/{id_ciclo_nuevo} (sin plan)",
+      "metodo": "GET",
+      "ruta": "/planes/entrenamiento/203",
+      "status": 404,
+      "esperado": [
+        200,
+        404
+      ],
+      "ok": true,
+      "detalle": "200 → 'Plan de entrenamiento no encontrado para este ciclo'"
+    },
+    {
+      "paso": "POST /planes/entrenamiento (id_ciclo_nuevo)",
+      "metodo": "POST",
+      "ruta": "/planes/entrenamiento",
+      "status": 201,
+      "esperado": 201,
+      "ok": true,
+      "detalle": "{\"id_ciclo\":0,\"message\":\"Plan de entrenamiento creado\"}"
+    },
+    {
+      "paso": "GET /planes/entrenamiento/{id_ciclo_nuevo} (con plan)",
+      "metodo": "GET",
+      "ruta": "/planes/entrenamiento/203",
+      "status": 200,
+      "esperado": 200,
+      "ok": true,
+      "detalle": "plan con 0 rutinas, obs='Plan creado Swagger-F5'"
+    },
+    {
+      "paso": "GET /pagos",
+      "metodo": "GET",
+      "ruta": "/pagos",
+      "status": 200,
+      "esperado": 200,
+      "ok": true,
+      "detalle": "pagos: 42"
+    },
+    {
+      "paso": "POST /afiliados/{id_nuevo}/pagos",
+      "metodo": "POST",
+      "ruta": "/afiliados/203/pagos",
+      "status": 201,
+      "esperado": 201,
+      "ok": true,
+      "detalle": "pago id=43 vencimiento=2026-10-27"
+    },
+    {
+      "paso": "GET /pagos/metricas",
+      "metodo": "GET",
+      "ruta": "/pagos/metricas",
+      "status": 200,
+      "esperado": 200,
+      "ok": true,
+      "detalle": "{\"ingresos_por_mes\":[{\"mes\":9,\"anio\":2026,\"total\":\"80000.00\"},{\"mes\":5,\"anio\":2026,\"total\":\"320000.00\"},{\"mes\":4,\"anio\":2026,\"total\":\"320000.00\"},{\"mes\":3,\"anio\":2026,\"total\":\"320000.00\"},{\"mes\":2,\"an"
+    },
+    {
+      "paso": "GET /dashboard/kpis",
+      "metodo": "GET",
+      "ruta": "/dashboard/kpis",
+      "status": 200,
+      "esperado": 200,
+      "ok": true,
+      "detalle": "{\"total_afiliados\":9,\"afiliados_activos\":9,\"afiliados_inactivos\":0,\"entrenadores\":2,\"recepcionistas\":2,\"ciclos_en_curso\":9,\"con_restricciones\":4,\"pagos_registrados\":43,\"ingresos\":\"3440000.00\",\"proximo"
+    },
+    {
+      "paso": "DELETE /afiliados/{id_nuevo}",
+      "metodo": "DELETE",
+      "ruta": "/afiliados/203",
+      "status": 400,
+      "esperado": [
+        200,
+        400,
+        409
+      ],
+      "ok": true,
+      "detalle": "undefined → 'No se puede eliminar: el afiliado tiene datos asociados' (tiene datos asociados: ciclo+plan+pago — esperado)"
+    }
+  ],
+  "ui_check": {
+    "swagger_ui": {
+      "url": "http://localhost:3001/api-docs/",
+      "titulo": "MetaFit API Docs",
+      "endpoints_renderizados": 89
+    },
+    "servers_dropdown": {
+      "antes_del_fix": {
+        "seleccionado": "https://metafit-backend-rr18.onrender.com",
+        "detalle": "PROD por defecto (no cumplía FASE 5.2)"
+      },
+      "despues_del_fix": {
+        "seleccionado": "http://localhost:3001",
+        "opciones": [
+          "http://localhost:3001 - Servidor de desarrollo (local)",
+          "https://metafit-backend-rr18.onrender.com - Servidor de producción (Render)"
+        ]
+      }
+    },
+    "fix_aplicado": {
+      "archivos": [
+        "backend/config/swagger.js",
+        "backend/server.js"
+      ],
+      "descripcion": "Spec de OpenAPI dinámico por host: localhost → local primero; otro host → PROD primero (specForHost + req.swaggerDoc + swaggerUi.serveFiles).",
+      "prod_verificado": "https://metafit-backend-rr18.onrender.com/api-docs.json mantiene PROD primero (no regresión)."
+    },
+    "authorize_ui": {
+      "estado": "bearerAuth (http, Bearer) → Authorized → Value: ****** (valor enmascarado persistido). Mecanismo Authorize funcional.",
+      "prueba_real_token": "19/19 endpoints respondieron 2xx/4xx esperados con Bearer token de Admin (carlos@metafit.com)."
+    }
+  }
+}

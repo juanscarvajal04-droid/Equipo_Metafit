@@ -4,6 +4,20 @@
 
 const swaggerJsdoc = require('swagger-jsdoc');
 
+// Servidores disponibles. El orden de la lista determina cuál queda
+// SELECCIONADO por defecto en el dropdown "Servers" de Swagger UI.
+// specForHost() lo reordena según el host de la petición:
+//   - Host local (localhost/127.0.0.1) → seleccionado el backend local.
+//   - Cualquier otro host (p. ej. Render) → seleccionado el backend de producción.
+const SERVER_PROD = {
+  url: 'https://metafit-backend-rr18.onrender.com',
+  description: 'Servidor de producción (Render)',
+};
+const SERVER_LOCAL = {
+  url: 'http://localhost:3001',
+  description: 'Servidor de desarrollo (local)',
+};
+
 const options = {
   definition: {
     openapi: '3.0.0',
@@ -29,16 +43,7 @@ Todos los endpoints protegidos requieren un **Bearer Token JWT**.
         name: 'MIT',
       },
     },
-    servers: [
-      {
-        url: 'https://metafit-backend-rr18.onrender.com',
-        description: 'Servidor de producción (Render)',
-      },
-      {
-        url: 'http://localhost:3001',
-        description: 'Servidor de desarrollo (local)',
-      },
-    ],
+    servers: [SERVER_PROD, SERVER_LOCAL],
     // ── Tags globales (orden de los módulos en la UI) ────────
     tags: [
       { name: 'Autenticación', description: 'Login y recuperación de contraseña' },
@@ -391,4 +396,19 @@ Todos los endpoints protegidos requieren un **Bearer Token JWT**.
 
 const swaggerSpec = swaggerJsdoc(options);
 
+/**
+ * Devuelve una copia del spec con la lista de `servers` ordenada según el host
+ * de la petición, para que Swagger UI seleccione por defecto el backend correcto:
+ *   - localhost/127.0.0.1/::1 → http://localhost:3001 (desarrollo local)
+ *   - cualquier otro host      → https://metafit-backend-rr18.onrender.com (producción)
+ */
+function specForHost(host = '') {
+  const hostname = String(host || '').split(':')[0].toLowerCase();
+  const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
+  return Object.assign({}, swaggerSpec, {
+    servers: isLocal ? [SERVER_LOCAL, SERVER_PROD] : [SERVER_PROD, SERVER_LOCAL],
+  });
+}
+
 module.exports = swaggerSpec;
+module.exports.specForHost = specForHost;

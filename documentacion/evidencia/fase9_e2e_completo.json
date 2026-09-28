@@ -1,0 +1,75 @@
+{
+  "fase": 9,
+  "descripcion": "FASE 9 — Prueba E2E completa (web + móvil + BD local)",
+  "fecha": "2026-09-28T00:00:00.000Z",
+  "resumen": {
+    "9_1_login_3_roles": "OK — Admin→/#/dashboard, Recepcionista→/#/afiliados, Entrenador→/#/rutinas",
+    "9_2_crear_afiliado": "OK — 'Demo Sustentación' (demo.sust@test.com) creado vía UI recepcionista + correo Brevo + webhook n8n (404 esperado, FASE sin n8n)",
+    "9_3_plan_entrenador": "OK — ciclo editado a Aumento de masa (oct 2026) + rutina 2 ejercicios + plan nutricional 3 comidas",
+    "9_4_app_movil": "OK — Expo web :8081 login demo → 4 tabs (Perfil/Rutina/Dieta/Progreso)",
+    "9_5_kpis_admin": "OK — Dashboard refleja afiliado nuevo (12 afiliados, 12 activos, 11 ciclos)",
+    "9_6_nota_adminer": "OK — documentado en documentacion/entornos.md (LOCAL→phpMyAdmin, PROD→Adminer, BDs separadas)",
+    "9_7_fix_bug": "OK — RutinasView.jsx: agregado toDateInput al import de utils/afiliadoHelpers (arregla ReferenceError en HistorialCiclos)"
+  },
+  "9_1_login_roles": {
+    "administrador": { "correo": "carlos@metafit.com", "ruta": "/#/dashboard", "rol": "Administrador" },
+    "recepcionista": { "correo": "maria@metafit.com", "ruta": "/#/afiliados", "rol": "Recepcionista" },
+    "entrenador": { "correo": "laura@metafit.com", "ruta": "/#/rutinas", "rol": "Entrenador" }
+  },
+  "9_2_crear_afiliado": {
+    "nombres": "Demo Sustentación",
+    "correo": "demo.sust@test.com",
+    "contrasena": "MF_9999999@2025",
+    "bd_local": {
+      "usuario_id": 207,
+      "rol": "Afiliado",
+      "estado": "Activo",
+      "documento": "9999999",
+      "telefono": "3009999999",
+      "direccion": "Calle 80 11-22",
+      "fecha_nacimiento": "1999-05-10"
+    },
+    "correo_bienvenida_brevo": "enviado (202609280310.17629947877)",
+    "webhook_nuevo_afiliado": "404 en esta sesión — se activa con n8n local (localhost:5678) según documentacion/n8n.md"
+  },
+  "9_3_plan_entrenador": {
+    "ciclo_205": {
+      "id_usuario": 207,
+      "objetivo_fisico": "Aumento de masa",
+      "nivel_experiencia": "Principiante",
+      "disponibilidad_dias": 3,
+      "fecha_inicio": "2026-10-01",
+      "fecha_fin": "2026-10-31",
+      "activo": 1,
+      "metodo": "HistorialCiclos (modo edición) → PATCH /ciclos/205 — toast 'Ciclo actualizado correctamente'"
+    },
+    "plan_entrenamiento": { "id_ciclo": 205, "modificado_por": 2, "rutina_id": 207, "nombre_rutina": "Rutina Lunes", "grupo": "Full Body día 1", "ejercicios": [ { "id_ejercicio": 1, "nombre": "Sentadilla", "series": 3, "repeticiones": 12 }, { "id_ejercicio": 13, "nombre": "Sentadilla bulgara", "series": 3, "repeticiones": 12 } ] },
+    "plan_nutricional_205": {
+      "calorias_objetivo": "2000.00",
+      "num_comidas": 3,
+      "modificado_por": 2,
+      "detalle": [
+        { "num_comida": 1, "alimento": "Aguacate", "cantidad_g": "150.00" },
+        { "num_comida": 2, "alimento": "Arroz blanco", "cantidad_g": "150.00" },
+        { "num_comida": 3, "alimento": "Pechuga de pollo", "cantidad_g": "150.00" }
+      ]
+    },
+    "verificacion_bd": "Tablas CICLO, PLAN_ENTRENAMIENTO, RUTINA, RUTINA_EJERCICIO, PLAN_NUTRICIONAL y DETALLE_NUTRICIONAL consultadas en contenedor metafit_db (la misma BD que muestra phpMyAdmin :8080)"
+  },
+  "9_4_app_movil": {
+    "url": "http://localhost:8081",
+    "login": "demo.sust@test.com / MF_9999999@2025 → LOGIN OK",
+    "perfil": { "nombre": "Demo Sustentación", "ciclo": "Ciclo 1", "objetivo": "Aumento de masa", "fechas": "01/10/2026 → 31/10/2026", "dias": "3/semana", "estado": "Activo" },
+    "rutina": { "nombre": "Rutina Lunes", "progreso": "0/2 ejercicios", "ejercicios": ["Sentadilla 3×12", "Sentadilla bulgara 3×12"] },
+    "dieta": { "desayuno": "Aguacate 150g · 179 kcal", "almuerzo": "Arroz blanco 150g · 125.50 kcal", "cena": "Pechuga de pollo 150g · 156.40 kcal" },
+    "progreso": "Aún no hay registros de progreso (vacío = normal para afiliado nuevo)",
+    "screenshot": "documentacion/evidencia/fase9_movil_perfil.png"
+  },
+  "9_5_kpis_admin": {
+    "dashboard": "/#/dashboard",
+    "kpis": { "total_afiliados": 12, "activos": 12, "ciclos_en_curso": 11, "con_restricciones": 5, "ingresos": "$3.440.000", "pagos": 43 },
+    "fila_demo": "Demo Sustentación — 💪 Aumento de masa — Principiante — Ciclo 1 — Activo (visible en listado del dashboard)",
+    "screenshot_web": "documentacion/evidencia/fase9_web_rutinas.png"
+  },
+  "9_6_nota_adminer": "LOCAL → phpMyAdmin (localhost:8080). PRODUCCIÓN → Adminer (https://metafit-adminer.onrender.com). Son BDs separadas. Regla documentada en documentacion/entornos.md como ⚠️ Regla fundamental."
+}

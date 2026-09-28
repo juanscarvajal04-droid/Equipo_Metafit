@@ -178,8 +178,25 @@ export default function MiProgresoScreen() {
       setEjercicioHistorial(ejercRes.status === 'fulfilled' ? (ejercRes.value.data || []) : []);
       setRegistrosEjercicio(realEjercRes.status === 'fulfilled' ? (realEjercRes.value.data || []) : []);
       setRegistrosConsumo(realConsumoRes.status === 'fulfilled' ? (realConsumoRes.value.data || []) : []);
-    } catch (_) {
-      setError('Error al cargar el progreso.');
+    } catch (err) {
+      if (!err.response) {
+        setError('Sin conexión. Verificá tu red.');
+      } else {
+        switch (err.response.status) {
+          case 401:
+            // El interceptor ya maneja esto: cierra sesión automáticamente.
+            break;
+          case 403:
+            setError('No tenés permiso para ver estos datos.');
+            break;
+          default:
+            if (err.response.status >= 500) {
+              setError('Error al cargar los datos. Intentá más tarde.');
+            } else {
+              setError('No se pudieron cargar los datos.');
+            }
+        }
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);

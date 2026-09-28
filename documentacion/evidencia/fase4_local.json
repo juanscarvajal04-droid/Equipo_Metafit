@@ -1,0 +1,69 @@
+{
+  "titulo": "FASE 4 — Verificación de conectividad completa (LOCAL Docker)",
+  "timestamp": "2026-09-28T02:40:00Z",
+  "contexto": {
+    "finalidad": "Probar que LOCAL usa SOLO la BD Docker (host=db) y que backend+frontend+phpMyAdmin comparten el MISMO mundo, sin mezclar con la BD VPS (141.148.94.173).",
+    "reset": "docker compose down -v && docker compose up -d --build (volumen metafit_db_data borrado y recreado)"
+  },
+  "4_1_contenedores": [
+    { "container": "metafit_db", "status": "Up (healthy)" },
+    { "container": "metafit_backend", "status": "Up" },
+    { "container": "metafit_frontend", "status": "Up" },
+    { "container": "metafit_phpmyadmin", "status": "Up" },
+    { "container": "metafit_n8n", "status": "Up" }
+  ],
+  "4_2_backend_a_bd_docker": {
+    "metodo": "docker exec metafit_backend node (mysql2 dentro del contenedor, host=db)",
+    "usuarios_en_bd_docker": 13,
+    "detalle_usuarios": [
+      { "id": 1, "correo": "carlos@metafit.com", "rol": "Administrador", "estado": "Activo" },
+      { "id": 2, "correo": "laura@metafit.com", "rol": "Entrenador", "estado": "Activo" },
+      { "id": 3, "correo": "andres@metafit.com", "rol": "Entrenador", "estado": "Activo" },
+      { "id": 4, "correo": "maria@metafit.com", "rol": "Recepcionista", "estado": "Activo" },
+      { "id": 5, "correo": "pedro@metafit.com", "rol": "Recepcionista", "estado": "Pendiente" },
+      { "id": 6, "correo": "juan@gmail.com", "rol": "Afiliado", "estado": "Activo" },
+      { "id": 7, "correo": "ana@gmail.com", "rol": "Afiliado", "estado": "Activo" },
+      { "id": 8, "correo": "luis@gmail.com", "rol": "Afiliado", "estado": "Activo" },
+      { "id": 9, "correo": "sofia@gmail.com", "rol": "Afiliado", "estado": "Activo" },
+      { "id": 100, "correo": "carlos.demo@test.com", "rol": "Afiliado", "estado": "Activo" },
+      { "id": 200, "correo": "diana@gmail.com", "rol": "Afiliado", "estado": "Activo" },
+      { "id": 201, "correo": "miguel@gmail.com", "rol": "Afiliado", "estado": "Activo" },
+      { "id": 202, "correo": "camila@gmail.com", "rol": "Afiliado", "estado": "Activo" }
+    ],
+    "conteos_seed": {
+      "ciclos_activos": 8,
+      "planes_entrenamiento": 12,
+      "planes_nutricionales": 12,
+      "pagos": 42,
+      "afiliado_restricciones": 6
+    }
+  },
+  "4_3_phpmyadmin": {
+    "metodo": "HEAD http://localhost:8080 (phpMyAdmin apunta a PMA_HOST=db, la MISMA BD docker)",
+    "status": 200,
+    "db_que_muestra": "metafit (contenedor metafit_db) — misma que ve el backend"
+  },
+  "4_4_health_y_login": {
+    "health": { "status": 200, "body": "{\"status\":\"ok\",\"db\":\"MySQL conectado\"}" },
+    "login_admin": {
+      "method": "POST /login {email: carlos@metafit.com, password: Admin123!}",
+      "status": 200,
+      "accessToken": "presente (JWT)",
+      "user": { "id": 1, "email": "carlos@metafit.com", "role": "Administrador" }
+    },
+    "login_afiliado": {
+      "method": "POST /login {email: juan@gmail.com, password: MetaFit2025!}",
+      "status": 200,
+      "accessToken": "presente (JWT)"
+    },
+    "nota_campos": "El endpoint espera email/password (no correo/contrasena) según la validación actual de authController.js."
+  },
+  "4_5_frontend": {
+    "metodo": "HEAD http://localhost:5173 + fetch del módulo /src/services/api.js (transformado por Vite)",
+    "status": 200,
+    "vite_env_in_container": "VITE_API_URL=http://localhost:3001 (printenv dentro de metafit_frontend)",
+    "fragmento_base_url": "const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';",
+    "apunta_local": true
+  },
+  "conclusion": "LOCAL verificado: backend → BD Docker (13 usuarios del seed), phpMyAdmin ve la misma BD Docker, /health y /login OK, frontend usa VITE_API_URL=http://localhost:3001. Ningún servicio local apunta a la BD VPS. Aplicará solo cuando el usuario lo apruebe: commits de configuración unificada (FASE 2) + seed verificado (FASE 3)."
+}

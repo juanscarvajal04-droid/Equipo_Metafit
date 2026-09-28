@@ -211,7 +211,24 @@ export default function MiDietaScreen() {
       const ids = Array.isArray(planData) ? planData.map((a) => a.id_alimento) : [];
       if (cicloCambio || !opts.silent) setConsumidos({});
     } catch (err) {
-      setError('Error al cargar el plan nutricional.');
+      if (!err.response) {
+        setError('Sin conexión. Verificá tu red.');
+      } else {
+        switch (err.response.status) {
+          case 401:
+            // El interceptor ya maneja esto: cierra sesión automáticamente.
+            break;
+          case 403:
+            setError('No tenés permiso para ver estos datos.');
+            break;
+          default:
+            if (err.response.status >= 500) {
+              setError('Error al cargar los datos. Intentá más tarde.');
+            } else {
+              setError('No se pudieron cargar los datos.');
+            }
+        }
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
