@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Bar, Doughnut } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -49,6 +50,7 @@ const inicial = (n) => (n || "?").charAt(0).toUpperCase();
 
 export default function FinanzasView() {
   const { authAxios } = useAuth();
+  const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [recepcionistas, setRecepcionistas] = useState([]);
@@ -337,17 +339,25 @@ export default function FinanzasView() {
               solo Administrador
             </p>
           </div>
-          <button type="button"
-            className={styles.pdfBtn}
-            onClick={exportPDF}
-            disabled={pdfLoading}
-          >
-            {pdfLoading ? (
-              <span className="spinner-border spinner-border-sm" />
-            ) : (
-              <><span className={styles.pdfIcon}>📄</span> Exportar a PDF</>
-            )}
-          </button>
+          <div className="d-flex gap-2 align-items-center flex-wrap">
+            <button type="button"
+              className={styles.btnPagos}
+              onClick={() => navigate("/pagos")}
+            >
+              💳 Ir a Gestión de Pagos
+            </button>
+            <button type="button"
+              className={styles.pdfBtn}
+              onClick={exportPDF}
+              disabled={pdfLoading}
+            >
+              {pdfLoading ? (
+                <span className="spinner-border spinner-border-sm" />
+              ) : (
+                <><span className={styles.pdfIcon}>📄</span> Exportar a PDF</>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* ── Barra de filtros ── */}

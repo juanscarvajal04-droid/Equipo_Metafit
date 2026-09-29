@@ -46,11 +46,19 @@
 .kpiCardBody {
   padding: 1rem 1.25rem;
   background: transparent;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-align: center;
 }
 
 .kpiValor {
   font-weight: 700;
-  line-height: 1;
+  line-height: 1.2;
+  font-size: 1.35rem;
 }
 
 .kpiLabel {

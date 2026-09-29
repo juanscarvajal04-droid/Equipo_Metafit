@@ -65,6 +65,7 @@ export default function ProgresoPesoChart({ historial = [] }) {
       tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y}` } },
     },
     scales: {
+      x: { ticks: { maxRotation: 45, minRotation: 0 } },
       y: { title: { display: true, text: "Peso (kg)" } },
       yImc: { position: "right", grid: { drawOnChartArea: false }, title: { display: true, text: "IMC" } },
     },

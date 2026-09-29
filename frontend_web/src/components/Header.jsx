@@ -57,6 +57,32 @@ export default function Header() {
   const totalNotificaciones = notificaciones.reduce((sum, n) => sum + n.cantidad, 0);
   const hayNotificaciones = totalNotificaciones > 0;
 
+  // ── Notificaciones leídas (localStorage por usuario) ─────────────────────
+  // Guarda { ts, total } de la última vez que se abrió el dropdown. El badge
+  // desaparece temporalmente y vuelve si pasó 1 hora o si el contador cambió.
+  const vistasKey = `notif_vistas_${user?.id ?? user?.email ?? "anon"}`;
+  const [vistoData, setVistoData] = useState(null);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(vistasKey);
+      if (raw) setVistoData(JSON.parse(raw));
+    } catch (_) { /* storage no disponible */ }
+  }, [vistasKey]);
+
+  const leidasRecientemente = vistoData != null && Date.now() - vistoData.ts < 3600000;
+  const contadorCambio = vistoData != null && vistoData.total !== totalNotificaciones;
+  const badgeVisible = hayNotificaciones && (vistoData == null || contadorCambio || Date.now() - vistoData.ts >= 3600000);
+
+  const abrirDropdown = () => {
+    if (!dropdownOpen) {
+      const nuevo = { ts: Date.now(), total: totalNotificaciones };
+      try { localStorage.setItem(vistasKey, JSON.stringify(nuevo)); } catch (_) {}
+      setVistoData(nuevo);
+    }
+    setDropdownOpen((prev) => !prev);
+  };
+
   const cargarNotificaciones = useCallback(async () => {
     try {
       const { data } = await authAxios.get("/notificaciones");
@@ -144,10 +170,10 @@ export default function Header() {
             id="btn-notificaciones"
             title="Notificaciones"
             className={styles.bellButton}
-            onClick={() => setDropdownOpen((prev) => !prev)}
+            onClick={abrirDropdown}
           >
             <BellIcon />
-            {hayNotificaciones && (
+            {badgeVisible && (
               <span className={styles.bellBadge}>{totalNotificaciones}</span>
             )}
             {!hayNotificaciones && <span className={styles.bellDot} />}
@@ -170,7 +196,7 @@ export default function Header() {
                     return (
                       <div
                         key={n.tipo}
-                        className={`${styles.dropdownItem} ${clickable ? styles.dropdownItemClickable : ""}`}
+                        className={`${styles.dropdownItem} ${clickable ? styles.dropdownItemClickable : ""} ${leidasRecientemente ? styles.dropdownItemVisto : ""}`}
                         onClick={() => handleNotificacionClick(n.ruta)}
                         role={clickable ? "button" : undefined}
                         tabIndex={clickable ? 0 : undefined}

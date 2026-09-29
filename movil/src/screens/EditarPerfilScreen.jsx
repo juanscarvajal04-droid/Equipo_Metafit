@@ -21,8 +21,6 @@ import useMutation from '../hooks/useMutation';
 import { getPerfil, actualizarPerfil } from '../services/perfilService';
 import { calcularIMC, formatearPeso, formatearAltura, formatearNumero } from '../utils/formateadores';
 
-const RE_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 export default function EditarPerfilScreen({ navigation }) {
   const { data: perfil, loading: loadingPerfil } = useApi(getPerfil);
   const { theme } = useTheme();
@@ -32,7 +30,7 @@ export default function EditarPerfilScreen({ navigation }) {
   const [peso, setPeso] = useState('');
   const [altura, setAltura] = useState('');
   const [telefono, setTelefono] = useState('');
-  const [correo, setCorreo] = useState('');
+  const [direccion, setDireccion] = useState('');
   const [prefill, setPrefill] = useState(false);
 
   useEffect(() => {
@@ -40,7 +38,7 @@ export default function EditarPerfilScreen({ navigation }) {
     setPeso(pesoFuente != null ? String(pesoFuente) : '');
     setAltura(perfil.estatura_cm != null ? String(perfil.estatura_cm) : '');
     setTelefono(perfil.telefono || '');
-    setCorreo(perfil.correo || '');
+    setDireccion(perfil.direccion || '');
     setPrefill(true);
   }, [perfil, prefill, pesoFuente]);
 
@@ -71,16 +69,12 @@ export default function EditarPerfilScreen({ navigation }) {
       Alert.alert('Altura inválida', 'Ingresá tu altura entre 1 y 300 cm.');
       return;
     }
-    if (correo.trim() && !RE_EMAIL.test(correo.trim())) {
-      Alert.alert('Correo inválido', 'Ingresá un correo electrónico válido.');
-      return;
-    }
 
     execute({
+      telefono: telefono.trim() || undefined,
+      direccion: direccion.trim() || undefined,
       peso_kg: p,
       estatura_cm: a,
-      telefono: telefono.trim() || undefined,
-      correo: correo.trim() || undefined,
     });
   };
 
@@ -152,15 +146,14 @@ export default function EditarPerfilScreen({ navigation }) {
               keyboardType="phone-pad"
             />
 
-            <Text style={styles.subtitle}>Correo electrónico — opcional</Text>
+            <Text style={styles.subtitle}>Dirección — opcional</Text>
             <TextInput
               style={styles.input}
-              placeholder="Ej: nombre@correo.com"
+              placeholder="Ej: Calle 80 # 11-22"
               placeholderTextColor={COLORS.textMuted}
-              value={correo}
-              onChangeText={setCorreo}
-              keyboardType="email-address"
-              autoCapitalize="none"
+              value={direccion}
+              onChangeText={setDireccion}
+              maxLength={100}
               autoCorrect={false}
             />
 

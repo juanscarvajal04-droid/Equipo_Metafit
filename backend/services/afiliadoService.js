@@ -64,9 +64,10 @@ const AfiliadoService = {
       : (datos.altura_cm !== undefined ? datos.altura_cm : datos.talla);
     const telefono   = datos.telefono;
     const correo     = datos.correo;
+    const direccion  = datos.direccion;
 
     if (pesoKg === undefined && estaturaCm === undefined
-        && telefono === undefined && correo === undefined) {
+        && telefono === undefined && correo === undefined && direccion === undefined) {
       const err = new Error('No hay campos para actualizar. Envía peso, talla, telefono o correo.');
       err.code = 'DATOS_INVALIDOS';
       throw err;
@@ -95,6 +96,12 @@ const AfiliadoService = {
       throw err;
     }
 
+    if (direccion !== undefined && String(direccion).length > 100) {
+      const err = new Error('La dirección no puede superar 100 caracteres');
+      err.code = 'DATOS_INVALIDOS';
+      throw err;
+    }
+
     let correoNormalizado;
     if (correo !== undefined) {
       correoNormalizado = String(correo).trim().toLowerCase();
@@ -118,6 +125,7 @@ const AfiliadoService = {
       estatura_cm: estaturaCm !== undefined ? Number(estaturaCm) : undefined,
       correo:      correoNormalizado,
       peso_kg:     pesoKg !== undefined ? Number(pesoKg) : undefined,
+      direccion:   direccion !== undefined ? String(direccion).trim() : undefined,
     });
 
     if (!act) {
@@ -142,6 +150,7 @@ const AfiliadoService = {
         estatura_cm: perfil?.estatura_cm ?? null,
         correo:      perfil?.correo      ?? null,
         peso_kg:     perfil?.peso_kg     ?? null,
+        direccion:   direccion !== undefined ? String(direccion).trim() : null,
       },
     };
   },

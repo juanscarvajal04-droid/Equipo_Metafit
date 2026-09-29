@@ -188,6 +188,8 @@ export default function ProgresoAfiliado() {
               </div>
             )}
 
+            <div className={s.sectionDivider} />
+
             <div className={s.infoCard}>
               <h6 className={s.sectionTitle}>📝 Observaciones del afiliado</h6>
               {conNotas.length === 0 ? (

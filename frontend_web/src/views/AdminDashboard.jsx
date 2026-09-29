@@ -402,16 +402,14 @@ export default function AdminDashboard() {
           ].map((kpi) => (
             <div key={kpi.label} className="col-6 col-md-4 col-lg-2">
               <div className={`h-100 ${styles.kpiCard}`}>
-                <div className={`d-flex align-items-center gap-3 ${styles.kpiCardBody}`}>
+                <div className={`d-flex flex-column align-items-center justify-content-center text-center ${styles.kpiCardBody}`}>
                   <div className={styles.kpiIconWrap} style={{ background: kpi.color + "22" }}>
                     {kpi.icono}
                   </div>
-                  <div>
-                    <div className={styles.kpiValor} style={{ color: kpi.color, fontSize: kpi.label === "Ingresos" ? "1rem" : "1.5rem" }}>
-                      {loading ? <span className={`spinner-border spinner-border-sm ${styles.spinnerBrand}`} /> : kpi.valor}
-                    </div>
-                    <small className={styles.kpiLabel}>{kpi.label}</small>
+                  <div className={styles.kpiValor} style={{ color: kpi.color }}>
+                    {loading ? <span className={`spinner-border spinner-border-sm ${styles.spinnerBrand}`} /> : kpi.valor}
                   </div>
+                  <small className={styles.kpiLabel}>{kpi.label}</small>
                 </div>
               </div>
             </div>

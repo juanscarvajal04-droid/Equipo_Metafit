@@ -50,7 +50,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
   gap: 16px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .chartCard {
@@ -58,6 +58,12 @@
   border: 1px solid var(--mf-border);
   border-radius: 14px;
   padding: 1rem 1.1rem;
+}
+
+.sectionDivider {
+  height: 1px;
+  background: var(--mf-border);
+  margin: 24px 0;
 }
 
 .chartTitle {

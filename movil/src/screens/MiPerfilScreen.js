@@ -9,6 +9,7 @@ import {
   Animated,
   RefreshControl,
   Image,
+  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
@@ -215,11 +216,19 @@ export default function MiPerfilScreen({ navigation }) {
 
     const asset = result.assets[0];
     const fd = new FormData();
-    fd.append('foto', {
-      uri: asset.uri,
-      name: asset.fileName || 'foto.jpg',
-      type: asset.mimeType || 'image/jpeg',
-    });
+    if (Platform.OS === 'web') {
+      // En web (Expo/react-native-web) FormData exige un File/Blob real:
+      // el objeto { uri, name, type } de React Native llega vacío y el
+      // backend responde 400 "Debe enviar una imagen".
+      const blob = await (await fetch(asset.uri)).blob();
+      fd.append('foto', new File([blob], asset.fileName || 'foto.jpg', { type: asset.mimeType || 'image/jpeg' }));
+    } else {
+      fd.append('foto', {
+        uri: asset.uri,
+        name: asset.fileName || 'foto.jpg',
+        type: asset.mimeType || 'image/jpeg',
+      });
+    }
     try {
       await api.post('/afiliados/me/foto', fd, {
         headers: { 'Content-Type': 'multipart/form-data' },

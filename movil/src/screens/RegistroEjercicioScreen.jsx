@@ -36,11 +36,24 @@ export default function RegistroEjercicioScreen({ navigation, route }) {
 
   const { execute, loading } = useMutation(registrarEjercicioReal, {
     onSuccess: () => {
-      Alert.alert('Registrado', 'Ejercicio guardado correctamente.', [
+      Alert.alert('✅ Ejercicio registrado', 'Ejercicio guardado correctamente.', [
         { text: 'OK', onPress: () => navigation.goBack() },
       ]);
     },
-    onError: (_err, msg) => Alert.alert('Error', msg),
+    onError: (err, msg) => {
+      const status = err?.response?.status;
+      let m;
+      if (status === 409) {
+        m = 'Ya registraste este ejercicio hoy. Volvé mañana.';
+      } else if (!err?.response) {
+        m = 'Sin conexión. Verificá tu red.';
+      } else if (status >= 500) {
+        m = 'Error del servidor. Intentá más tarde.';
+      } else {
+        m = msg || 'No se pudo guardar. Intentá de nuevo.';
+      }
+      Alert.alert('Error', m);
+    },
   });
 
   const handleSubmit = () => {

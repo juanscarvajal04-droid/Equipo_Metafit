@@ -250,6 +250,15 @@
   border-bottom: none;
 }
 
+/* Notificaciones leídas recientemente (< 1 h): atenuadas en el dropdown */
+.dropdownItemVisto {
+  opacity: 0.55;
+}
+
+.dropdownItemVisto:hover {
+  opacity: 1;
+}
+
 .dropdownIcon {
   font-size: 1.1rem;
   flex-shrink: 0;

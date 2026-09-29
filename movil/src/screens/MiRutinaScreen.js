@@ -418,17 +418,22 @@ export default function MiRutinaScreen() {
     if (!ciclo) return;
     const texto = (notaTextos[ej.id_ejercicio] ?? '').trim();
     if (!texto) {
-      Alert.alert('Nota vacía', 'Escribí una nota para guardarla.');
+      Alert.alert('Nota vacía', 'Escribí una nota antes de enviar');
       return;
     }
     setGuardandoNota(ej.id_ejercicio);
     try {
-      await guardarNotaEjercicio({ id_ejercicio: ej.id_ejercicio, id_ciclo: ciclo.id_ciclo, nota: texto });
+      await guardarNotaEjercicio({
+        id_ejercicio: ej.id_ejercicio,
+        id_ciclo: ciclo.id_ciclo,
+        nota: texto,
+        fecha_nota: hoy,
+      });
       setNotas((prev) => ({ ...prev, [ej.id_ejercicio]: texto }));
-      Alert.alert('Guardado', 'Nota guardada correctamente.');
+      Alert.alert('✅ Nota enviada al entrenador');
     } catch (err) {
       console.log('nota error', err);
-      Alert.alert('Error', 'No se pudo guardar la nota.');
+      Alert.alert('Error', 'No se pudo enviar la nota. Intentá de nuevo.');
     } finally {
       setGuardandoNota(null);
     }
@@ -469,10 +474,10 @@ export default function MiRutinaScreen() {
         completado: !!completados[e.id_ejercicio],
       }));
       await guardarProgresoEjercicio(ciclo.id_ciclo, hoy, ejerciciosArr);
-      Alert.alert('Guardado', 'Progreso de rutina guardado correctamente.');
+      Alert.alert('✅ Progreso guardado', 'Tu progreso de rutina fue guardado.');
     } catch (err) {
       console.log('save error', err);
-      Alert.alert('Error', 'No se pudo guardar el progreso.');
+      Alert.alert('❌ No se pudo guardar', 'Verificá tu conexión e intentá de nuevo.');
     } finally {
       setSaving(false);
     }

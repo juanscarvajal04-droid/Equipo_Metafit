@@ -182,34 +182,33 @@ export default function MiDietaScreen() {
       setCiclos(allCiclos);
 
       const cicloData = cicloSeleccionado || seleccionarCicloActivo(allCiclos);
-      if (!cicloData) {
-        setError('No tenés un ciclo asignado.');
-        setLoading(false);
-        return;
-      }
-      setCiclo(cicloData);
-      const cicloCambio = cicloIdRef.current !== cicloData.id_ciclo;
-      if (cicloCambio) cicloIdRef.current = cicloData.id_ciclo;
+      setCiclo(cicloData || null);
+      const cicloCambio = cicloIdRef.current !== (cicloData?.id_ciclo ?? null);
+      cicloIdRef.current = cicloData?.id_ciclo ?? null;
 
-      const [planRes, aguaRes] = await Promise.all([
-        getPlanNutricional(cicloData.id_ciclo),
-        getAguaHoy(hoy).catch(() => ({ data: { vasos: 0 } })),
-      ]);
-
-      // Contrato real del backend: { detalle: [{ num_comida, id_alimento, cantidad_g, nombre_alimento, ... }] }
-      const planData = planRes.data?.detalle || planRes.data?.alimentos || planRes.data?.plan || [];
-      const alimentosPlan = (Array.isArray(planData) ? planData : []).map((a) => ({
-        ...a,
-        nombre: a.nombre_alimento || a.nombre,
-        cantidad: a.cantidad_g ?? a.cantidad,
-        calorias: a.calorias_por_100g ?? a.calorias,
-      }));
-      setAlimentos(alimentosPlan);
-
+      // El agua no requiere ciclo activo: se carga siempre (vacía si no hay registros).
+      const aguaRes = await getAguaHoy(hoy).catch(() => ({ data: { vasos: 0 } }));
       setAgua(aguaRes.data?.vasos ?? 0);
 
-      const ids = Array.isArray(planData) ? planData.map((a) => a.id_alimento) : [];
-      if (cicloCambio || !opts.silent) setConsumidos({});
+      if (cicloData) {
+        const planRes = await getPlanNutricional(cicloData.id_ciclo);
+
+        // Contrato real del backend: { detalle: [{ num_comida, id_alimento, cantidad_g, nombre_alimento, ... }] }
+        const planData = planRes.data?.detalle || planRes.data?.alimentos || planRes.data?.plan || [];
+        const alimentosPlan = (Array.isArray(planData) ? planData : []).map((a) => ({
+          ...a,
+          nombre: a.nombre_alimento || a.nombre,
+          cantidad: a.cantidad_g ?? a.cantidad,
+          calorias: a.calorias_por_100g ?? a.calorias,
+        }));
+        setAlimentos(alimentosPlan);
+        if (cicloCambio || !opts.silent) setConsumidos({});
+      } else {
+        // Sin ciclo activo: plan vacío, pero la pantalla sigue disponible
+        // (solo el módulo de agua muestra el aviso y queda deshabilitado).
+        setAlimentos([]);
+        setConsumidos({});
+      }
     } catch (err) {
       if (!err.response) {
         setError('Sin conexión. Verificá tu red.');
@@ -295,9 +294,9 @@ export default function MiDietaScreen() {
         consumido: !!consumidos[a.id_alimento],
       }));
       await guardarConsumoAlimento(ciclo.id_ciclo, hoy, alimentosArr);
-      Alert.alert('Guardado', 'Consumo de alimentos guardado.');
+      Alert.alert('✅ Progreso guardado', 'Tu consumo de alimentos fue guardado.');
     } catch (_) {
-      Alert.alert('Error', 'No se pudo guardar el consumo.');
+      Alert.alert('❌ No se pudo guardar', 'Verificá tu conexión e intentá de nuevo.');
     } finally {
       setSaving(false);
     }
@@ -372,11 +371,22 @@ export default function MiDietaScreen() {
             </Text>
           </View>
 
-          <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
-            {Array.from({ length: MAX_VASOS }, (_, i) => (
-              <VasoAgua key={i} index={i} lleno={i < agua} onPress={handleAgua} />
-            ))}
-          </View>
+          {!ciclo ? (
+            <View style={{ paddingVertical: SPACING.xs }}>
+              <Text style={{ color: '#fff', fontSize: FONTS.small, textAlign: 'center' }}>
+                Para registrar agua necesitás un ciclo activo.
+              </Text>
+              <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: FONTS.xsmall, textAlign: 'center', marginTop: 4 }}>
+                Pedile a tu entrenador que te asigne uno.
+              </Text>
+            </View>
+          ) : (
+            <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+              {Array.from({ length: MAX_VASOS }, (_, i) => (
+                <VasoAgua key={i} index={i} lleno={i < agua} onPress={handleAgua} />
+              ))}
+            </View>
+          )}
 
           <BarraAgua actual={agua} meta={MAX_VASOS} />
         </View>

@@ -80,7 +80,10 @@ export default function ProgresoVolumenChart({ historial = [] }) {
     responsive: true,
     maintainAspectRatio: false,
     plugins: { legend: { position: "bottom" } },
-    scales: { y: { title: { display: true, text: "Medidas" } } },
+    scales: {
+      x: { ticks: { maxRotation: 45, minRotation: 0 } },
+      y: { title: { display: true, text: "Medidas" } },
+    },
   };
 
   return (
