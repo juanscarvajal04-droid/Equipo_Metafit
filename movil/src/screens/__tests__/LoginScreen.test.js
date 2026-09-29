@@ -60,7 +60,7 @@ describe('<LoginScreen />', () => {
 
   test('muestra el mensaje del backend si el login falla', async () => {
     mockLogin.mockRejectedValueOnce({
-      response: { data: { error: 'Correo o contraseña incorrectos' } },
+      response: { status: 401 },
     });
 
     const { getByPlaceholderText, getByText } = render(
@@ -72,7 +72,7 @@ describe('<LoginScreen />', () => {
     fireEvent.press(getByText('Ingresar al Sistema →'));
 
     await waitFor(() =>
-      expect(getByText('⚠️ Correo o contraseña incorrectos')).toBeTruthy()
+      expect(getByText('⚠️ Correo o contraseña incorrectos.')).toBeTruthy()
     );
   });
 });
