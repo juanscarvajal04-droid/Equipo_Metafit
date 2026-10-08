@@ -1,4 +1,4 @@
-# GUION DE VIDEO DEMO — MetaFit (3 a 5 minutos)
+?# GUION DE VIDEO DEMO — MetaFit (3 a 5 minutos)
 
 Objetivo: mostrar el valor real del sistema (Gestión de afiliados, pagos, entrenamiento, nutrición,
 app móvil y extras 1000/10: modo claro/oscuro, push, analítica, monitoreo).
