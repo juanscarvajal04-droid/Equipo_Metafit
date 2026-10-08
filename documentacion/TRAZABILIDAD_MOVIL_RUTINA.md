@@ -8,7 +8,7 @@
 
 > Regla de verificación aplicada: cada archivo, función, endpoint y línea citado fue leído/verificado directamente en el código. Nada se asumió. Todo lo que no existe o difiere de la idea "clásica" se marca explícitamente con **[NOTA]**.
 
------
+---
 
 ## 1. Estructura de carpetas REAL (verificada)
 
