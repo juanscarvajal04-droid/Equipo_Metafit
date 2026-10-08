@@ -3,7 +3,7 @@
 **Versión:** 1.0  
 **Propósito:** Diagramas de arquitectura, componentes, navegación, base de datos y flujos del sistema MetaFit.
 
----
+----
 
 ## 3.1 Diagrama de Arquitectura General
 
