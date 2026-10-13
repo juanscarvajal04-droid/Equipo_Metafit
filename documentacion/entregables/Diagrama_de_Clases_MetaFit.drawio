@@ -1,0 +1,402 @@
+<mxfile host="app.diagrams.net" modified="2026-10-13T00:00:00.000Z" agent="opencode" version="24.7.17" type="device">
+  <diagram name="Nucleo de gestion" id="p1">
+    <mxGraphModel dx="1400" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="p1t" value="Diagrama de Clases - MetaFit | Núcleo de gestión (Usuarios, Afiliados, Ciclos y Planes) | UML 2.4.1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=15;fontStyle=1;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="40" y="8" width="1200" height="24" as="geometry"/>
+        </mxCell>
+        <mxCell id="Usuario" value="&lt;b&gt;Usuario&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;- id_usuario: int&lt;br&gt;- nombres: String&lt;br&gt;- apellidos: String&lt;br&gt;- correo: String&lt;br&gt;- contrasena: String&lt;br&gt;- rol: Rol&lt;br&gt;- estado: Estado&lt;br&gt;- fecha_registro: Date&lt;br&gt;- push_token: String&lt;hr size=&quot;1&quot;&gt;+ iniciarSesion(): Sesion&lt;br&gt;+ cerrarSesion(): void&lt;br&gt;+ recuperarContrasena(): void&lt;br&gt;+ esAdmin(): boolean" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="60" width="250" height="245.000000" as="geometry"/>
+        </mxCell>
+        <mxCell id="Afiliado" value="&lt;b&gt;Afiliado&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;- documento: String&lt;br&gt;- fecha_nacimiento: Date&lt;br&gt;- sexo: Sexo&lt;br&gt;- telefono: String&lt;br&gt;- direccion: String&lt;br&gt;- estatura_cm: int&lt;br&gt;- estado_afiliacion: Estado&lt;br&gt;- objetivo_fisico: String&lt;br&gt;- nivel_experiencia: Nivel&lt;br&gt;- disponibilidad_semanal_dias: int&lt;br&gt;- foto: String&lt;hr size=&quot;1&quot;&gt;+ actualizarPerfil(): void&lt;br&gt;+ calcularEdad(): int&lt;br&gt;+ asignarRestriccion(r): void" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="380" width="250" height="260.000000" as="geometry"/>
+        </mxCell>
+        <mxCell id="Restriccion" value="&lt;b&gt;Restriccion&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;- id_restriccion: int&lt;br&gt;- nombre_restriccion: String&lt;br&gt;- tipo: String&lt;br&gt;- efecto_relevante: String&lt;hr size=&quot;1&quot;&gt;+ getEjerciciosExcluidos(): List&lt;br&gt;+ getAlimentosExcluidos(): List" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="720" width="250" height="140.000000" as="geometry"/>
+        </mxCell>
+        <mxCell id="Ciclo" value="&lt;b&gt;Ciclo&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;- id_ciclo: int&lt;br&gt;- id_usuario: int&lt;br&gt;- fecha_inicio: Date&lt;br&gt;- fecha_fin: Date&lt;br&gt;- activo: boolean&lt;br&gt;- objetivo_fisico: String&lt;br&gt;- grupo_muscular_prioritario: String&lt;br&gt;- nivel_experiencia: Nivel&lt;br&gt;- disponibilidad_dias: int&lt;br&gt;- observaciones: String&lt;br&gt;- fecha_creacion: Date&lt;hr size=&quot;1&quot;&gt;+ activar(): void&lt;br&gt;+ finalizar(): void&lt;br&gt;+ generarPlanes(): void&lt;br&gt;+ estaVigente(): boolean" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="350" y="60" width="250" height="275.000000" as="geometry"/>
+        </mxCell>
+        <mxCell id="PlanEntrenamiento" value="&lt;b&gt;PlanEntrenamiento&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;- id_ciclo: int&lt;br&gt;- modificado_por: int&lt;br&gt;- observaciones: String&lt;hr size=&quot;1&quot;&gt;+ agregarRutina(r): void&lt;br&gt;+ getRutinas(): List" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="350" y="380" width="250" height="125.000000" as="geometry"/>
+        </mxCell>
+        <mxCell id="PlanNutricional" value="&lt;b&gt;PlanNutricional&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;- id_ciclo: int&lt;br&gt;- calorias_objetivo: int&lt;br&gt;- num_comidas: int&lt;br&gt;- modificado_por: int&lt;br&gt;- observaciones: String&lt;hr size=&quot;1&quot;&gt;+ agregarDetalle(d): void&lt;br&gt;+ calcularMacros(): Macro" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="660" y="60" width="250" height="155.000000" as="geometry"/>
+        </mxCell>
+        <mxCell id="Rutina" value="&lt;b&gt;Rutina&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;- id_rutina: int&lt;br&gt;- id_ciclo: int&lt;br&gt;- nombre_rutina: String&lt;br&gt;- enfoque_muscular: String&lt;br&gt;- dia_numero: int&lt;hr size=&quot;1&quot;&gt;+ agregarEjercicio(e): void&lt;br&gt;+ getDuracionEstimada(): int" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="350" y="640" width="250" height="155.000000" as="geometry"/>
+        </mxCell>
+        <mxCell id="RutinaEjercicio" value="&lt;b&gt;RutinaEjercicio&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;- id_rutina: int&lt;br&gt;- orden: int&lt;br&gt;- id_ejercicio: int&lt;br&gt;- series: int&lt;br&gt;- repeticiones: int&lt;br&gt;- peso_kg: float&lt;br&gt;- descanso_seg: int&lt;hr size=&quot;1&quot;&gt;+ getVolumen(): float" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="350" y="940" width="250" height="170.000000" as="geometry"/>
+        </mxCell>
+        <mxCell id="Ejercicio" value="&lt;b&gt;Ejercicio&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;- id_ejercicio: int&lt;br&gt;- nombre_ejercicio: String&lt;br&gt;- grupo_muscular: String&lt;br&gt;- descripcion: String&lt;br&gt;- nivel_minimo: Nivel&lt;hr size=&quot;1&quot;&gt;+ esAptoNivel(nivel): boolean&lt;br&gt;+ getRestricciones(): List" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="660" y="380" width="250" height="155.000000" as="geometry"/>
+        </mxCell>
+        <mxCell id="DetalleNutricional" value="&lt;b&gt;DetalleNutricional&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;- id_ciclo: int&lt;br&gt;- num_comida: int&lt;br&gt;- id_alimento: int&lt;br&gt;- cantidad_g: float&lt;hr size=&quot;1&quot;&gt;+ calcularAporte(): Macro" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="660" y="660" width="250" height="125.000000" as="geometry"/>
+        </mxCell>
+        <mxCell id="Alimento" value="&lt;b&gt;Alimento&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;- id_alimento: int&lt;br&gt;- nombre_alimento: String&lt;br&gt;- proteinas: float&lt;br&gt;- carbohidratos: float&lt;br&gt;- grasas: float&lt;hr size=&quot;1&quot;&gt;+ getMacros(): Macro&lt;br&gt;+ getRestricciones(): List" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="970" y="380" width="250" height="155.000000" as="geometry"/>
+        </mxCell>
+        <mxCell id="Configuracion" value="&lt;b&gt;Configuracion&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;- clave: String  (PK)&lt;br&gt;- valor: String&lt;hr size=&quot;1&quot;&gt;+ getValor(clave): String" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="970" y="660" width="250" height="95.000000" as="geometry"/>
+        </mxCell>
+        <mxCell id="e1" value="" style="endArrow=block;endFill=0;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="Afiliado" target="Usuario">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e2" value="tiene" style="endArrow=open;endFill=0;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="Usuario" target="Ciclo">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e2_s" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e2">
+          <mxGeometry x="-0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e2_t" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e2">
+          <mxGeometry x="0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e3" value="define" style="endArrow=diamondThin;endFill=1;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="Ciclo" target="PlanEntrenamiento">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e3_s" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e3">
+          <mxGeometry x="-0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e3_t" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e3">
+          <mxGeometry x="0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e4" value="define" style="endArrow=diamondThin;endFill=1;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="Ciclo" target="PlanNutricional">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e4_s" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e4">
+          <mxGeometry x="-0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e4_t" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e4">
+          <mxGeometry x="0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e5" value="contiene" style="endArrow=diamondThin;endFill=1;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="PlanEntrenamiento" target="Rutina">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e5_s" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e5">
+          <mxGeometry x="-0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e5_t" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e5">
+          <mxGeometry x="0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e6" value="incluye" style="endArrow=diamondThin;endFill=1;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="Rutina" target="RutinaEjercicio">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e6_s" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e6">
+          <mxGeometry x="-0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e6_t" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e6">
+          <mxGeometry x="0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e7" value="referencia" style="endArrow=open;endFill=0;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="RutinaEjercicio" target="Ejercicio">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e7_s" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e7">
+          <mxGeometry x="-0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e7_t" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e7">
+          <mxGeometry x="0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e8" value="detalla" style="endArrow=diamondThin;endFill=1;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="PlanNutricional" target="DetalleNutricional">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e8_s" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e8">
+          <mxGeometry x="-0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e8_t" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e8">
+          <mxGeometry x="0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e9" value="usa" style="endArrow=open;endFill=0;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="DetalleNutricional" target="Alimento">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e9_s" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e9">
+          <mxGeometry x="-0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e9_t" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e9">
+          <mxGeometry x="0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e10" value="padece" style="endArrow=open;endFill=0;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="Afiliado" target="Restriccion">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e10_s" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e10">
+          <mxGeometry x="-0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e10_t" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e10">
+          <mxGeometry x="0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e11" value="excluye" style="endArrow=open;endFill=0;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="Ejercicio" target="Restriccion">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e11_s" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e11">
+          <mxGeometry x="-0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e11_t" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e11">
+          <mxGeometry x="0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e12" value="excluye" style="endArrow=open;endFill=0;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="Alimento" target="Restriccion">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e12_s" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e12">
+          <mxGeometry x="-0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e12_t" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e12">
+          <mxGeometry x="0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="leg" value="Notación UML 2.4.1
+
+Generalización: Afiliado hereda de Usuario.
+Composición (rombo lleno): el todo controla la parte.
+Asociación (flecha abierta): referencia entre clases.
+Multiplicidad: se indica en cada extremo (1, 0..*, etc.).
+Compartimentos: nombre / atributos / métodos.
+Las relaciones N:M usan tablas puente:
+  AFILIADO_RESTRICCION,
+  EJERCICIO_RESTRICCION_EXCLUIDA,
+  ALIMENTO_RESTRICCION_EXCLUIDA." style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;size=18;align=left;verticalAlign=top;spacingLeft=4;spacingTop=4;fontSize=11;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="970" y="60" width="300" height="220" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="Seguimiento y bienestar" id="p2">
+    <mxGraphModel dx="1400" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="p2t" value="Diagrama de Clases - MetaFit | Seguimiento y Bienestar (Progreso, Consumo y Registros)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=15;fontStyle=1;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="40" y="8" width="1300" height="24" as="geometry"/>
+        </mxCell>
+        <mxCell id="U2" value="&lt;b&gt;Usuario&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;- id_usuario: int&lt;br&gt;- nombres: String&lt;br&gt;- rol: Rol&lt;hr size=&quot;1&quot;&gt;+ esAfiliado(): boolean" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="60" width="250" height="110.000000" as="geometry"/>
+        </mxCell>
+        <mxCell id="C2" value="&lt;b&gt;Ciclo&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;- id_ciclo: int&lt;br&gt;- fecha_inicio: Date&lt;br&gt;- activo: boolean&lt;hr size=&quot;1&quot;&gt;+ estaVigente(): boolean" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="320" y="60" width="250" height="110.000000" as="geometry"/>
+        </mxCell>
+        <mxCell id="E2" value="&lt;b&gt;Ejercicio&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;- id_ejercicio: int&lt;br&gt;- nombre_ejercicio: String&lt;hr size=&quot;1&quot;&gt;+ getMacros(): Macro" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="300" width="250" height="95.000000" as="geometry"/>
+        </mxCell>
+        <mxCell id="R2" value="&lt;b&gt;Rutina&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;- id_rutina: int&lt;br&gt;- nombre_rutina: String&lt;hr size=&quot;1&quot;&gt;+ getEjercicios(): List" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="320" y="300" width="250" height="95.000000" as="geometry"/>
+        </mxCell>
+        <mxCell id="Al2" value="&lt;b&gt;Alimento&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;- id_alimento: int&lt;br&gt;- nombre_alimento: String&lt;hr size=&quot;1&quot;&gt;+ getMacros(): Macro" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="600" y="60" width="250" height="95.000000" as="geometry"/>
+        </mxCell>
+        <mxCell id="ProgresoFisico" value="&lt;b&gt;ProgresoFisico&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;- id_ciclo: int&lt;br&gt;- fecha_registro: Date&lt;br&gt;- peso_kg: float&lt;br&gt;- porcentaje_grasa: float&lt;br&gt;- medida_cintura: float&lt;br&gt;- medida_brazo: float&lt;br&gt;- medida_pierna: float&lt;br&gt;- observaciones: String&lt;br&gt;- registrado_por: int&lt;hr size=&quot;1&quot;&gt;+ calcularIMC(): float&lt;br&gt;+ compararCon(anterior): Delta" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="600" y="300" width="250" height="215.000000" as="geometry"/>
+        </mxCell>
+        <mxCell id="ProgresoEjercicioDiario" value="&lt;b&gt;ProgresoEjercicioDiario&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;- id_progreso: int&lt;br&gt;- id_usuario: int&lt;br&gt;- id_ciclo: int&lt;br&gt;- id_ejercicio: int&lt;br&gt;- fecha: Date&lt;br&gt;- completado: boolean&lt;br&gt;- created_at: Date&lt;hr size=&quot;1&quot;&gt;+ marcarCompletado(): void" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="900" y="300" width="250" height="170.000000" as="geometry"/>
+        </mxCell>
+        <mxCell id="NotaEjercicio" value="&lt;b&gt;NotaEjercicio&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;- id_nota: int&lt;br&gt;- id_usuario: int&lt;br&gt;- id_ejercicio: int&lt;br&gt;- id_ciclo: int&lt;br&gt;- nota: String&lt;br&gt;- fecha_nota: Date&lt;hr size=&quot;1&quot;&gt;+ editarNota(t): void" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="600" y="620" width="250" height="155.000000" as="geometry"/>
+        </mxCell>
+        <mxCell id="RegistroAgua" value="&lt;b&gt;RegistroAgua&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;- id_agua: int&lt;br&gt;- id_usuario: int&lt;br&gt;- fecha: Date&lt;br&gt;- vasos: int&lt;br&gt;- updated_at: Date&lt;hr size=&quot;1&quot;&gt;+ agregarVaso(n): void&lt;br&gt;+ getMetaDiaria(): int" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="900" y="620" width="250" height="155.000000" as="geometry"/>
+        </mxCell>
+        <mxCell id="ConsumoAlimentoDiario" value="&lt;b&gt;ConsumoAlimentoDiario&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;- id_consumo: int&lt;br&gt;- id_usuario: int&lt;br&gt;- id_ciclo: int&lt;br&gt;- id_alimento: int&lt;br&gt;- num_comida: int&lt;br&gt;- fecha: Date&lt;br&gt;- consumido: boolean&lt;hr size=&quot;1&quot;&gt;+ marcarConsumido(): void" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="300" width="250" height="170.000000" as="geometry"/>
+        </mxCell>
+        <mxCell id="RegistroEjercicio" value="&lt;b&gt;RegistroEjercicio&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;- id_registro: int&lt;br&gt;- id_usuario: int&lt;br&gt;- id_ciclo: int&lt;br&gt;- id_rutina: int&lt;br&gt;- orden: int&lt;br&gt;- fecha: Date&lt;br&gt;- series: int&lt;br&gt;- repeticiones: int&lt;br&gt;- peso_utilizado_kg: float&lt;hr size=&quot;1&quot;&gt;+ calcularVolumen(): float" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="620" width="250" height="200.000000" as="geometry"/>
+        </mxCell>
+        <mxCell id="ConsumoAlimentoReal" value="&lt;b&gt;ConsumoAlimentoReal&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;- id_consumo: int&lt;br&gt;- id_usuario: int&lt;br&gt;- id_ciclo: int&lt;br&gt;- num_comida: int&lt;br&gt;- id_alimento: int&lt;br&gt;- fecha: Date&lt;br&gt;- cantidad_g_consumida: float&lt;br&gt;- calorias_consumidas: float&lt;br&gt;- proteinas_consumidas: float&lt;br&gt;- carbohidratos_consumidos: float&lt;br&gt;- grasas_consumidos: float&lt;hr size=&quot;1&quot;&gt;+ calcularMacrosReales(): Macro" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="1500" y="300" width="250" height="230.000000" as="geometry"/>
+        </mxCell>
+        <mxCell id="ProgresoDiario" value="&lt;b&gt;ProgresoDiario&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;- id_progreso_diario: int&lt;br&gt;- id_usuario: int&lt;br&gt;- fecha: Date&lt;br&gt;- calorias_consumidas: float&lt;br&gt;- agua_vasos: int&lt;br&gt;- ejercicios_realizados: int&lt;br&gt;- duracion_minutos: int&lt;br&gt;- nivel_energia: int&lt;br&gt;- estado_animo: String&lt;hr size=&quot;1&quot;&gt;+ consolidarDia(): void&lt;br&gt;+ calcularCumplimiento(): float" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="1500" y="620" width="250" height="215.000000" as="geometry"/>
+        </mxCell>
+        <mxCell id="e13" value="registra" style="endArrow=open;endFill=0;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="ProgresoFisico" target="C2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e13_s" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e13">
+          <mxGeometry x="-0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e13_t" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e13">
+          <mxGeometry x="0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e14" value="" style="endArrow=open;endFill=0;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="ProgresoEjercicioDiario" target="U2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e14_s" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e14">
+          <mxGeometry x="-0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e14_t" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e14">
+          <mxGeometry x="0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e15" value="" style="endArrow=open;endFill=0;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="ProgresoEjercicioDiario" target="E2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e15_s" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e15">
+          <mxGeometry x="-0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e15_t" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e15">
+          <mxGeometry x="0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e16" value="escribe" style="endArrow=open;endFill=0;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="NotaEjercicio" target="U2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e16_s" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e16">
+          <mxGeometry x="-0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e16_t" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e16">
+          <mxGeometry x="0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e17" value="" style="endArrow=open;endFill=0;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="NotaEjercicio" target="E2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e17_s" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e17">
+          <mxGeometry x="-0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e17_t" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e17">
+          <mxGeometry x="0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e18" value="registra" style="endArrow=open;endFill=0;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="RegistroAgua" target="U2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e18_s" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e18">
+          <mxGeometry x="-0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e18_t" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e18">
+          <mxGeometry x="0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e19" value="" style="endArrow=open;endFill=0;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="ConsumoAlimentoDiario" target="Al2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e19_s" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e19">
+          <mxGeometry x="-0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e19_t" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e19">
+          <mxGeometry x="0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e20" value="consume" style="endArrow=open;endFill=0;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="ConsumoAlimentoReal" target="Al2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e20_s" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e20">
+          <mxGeometry x="-0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e20_t" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e20">
+          <mxGeometry x="0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e21" value="" style="endArrow=open;endFill=0;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="RegistroEjercicio" target="R2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e21_s" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e21">
+          <mxGeometry x="-0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e21_t" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e21">
+          <mxGeometry x="0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e22" value="" style="endArrow=open;endFill=0;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="ProgresoDiario" target="U2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e22_s" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e22">
+          <mxGeometry x="-0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e22_t" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e22">
+          <mxGeometry x="0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e23" value="" style="endArrow=open;endFill=0;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="RegistroEjercicio" target="C2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e23_s" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e23">
+          <mxGeometry x="-0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e23_t" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e23">
+          <mxGeometry x="0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e24" value="" style="endArrow=open;endFill=0;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="ConsumoAlimentoReal" target="C2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e24_s" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e24">
+          <mxGeometry x="-0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e24_t" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e24">
+          <mxGeometry x="0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e25" value="" style="endArrow=open;endFill=0;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="ProgresoFisico" target="U2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e25_s" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e25">
+          <mxGeometry x="-0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e25_t" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e25">
+          <mxGeometry x="0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e26" value="" style="endArrow=open;endFill=0;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="ProgresoDiario" target="C2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e26_s" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e26">
+          <mxGeometry x="-0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e26_t" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e26">
+          <mxGeometry x="0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name="Autenticacion y pagos" id="p3">
+    <mxGraphModel dx="1400" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="p3t" value="Diagrama de Clases - MetaFit | Autenticación, Seguridad y Pagos" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=15;fontStyle=1;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="40" y="8" width="1300" height="24" as="geometry"/>
+        </mxCell>
+        <mxCell id="U3" value="&lt;b&gt;Usuario&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;- id_usuario: int&lt;br&gt;- correo: String&lt;br&gt;- contrasena: String&lt;br&gt;- rol: Rol&lt;br&gt;- estado: Estado&lt;br&gt;- push_token: String&lt;hr size=&quot;1&quot;&gt;+ iniciarSesion(): Sesion&lt;br&gt;+ cerrarSesion(): void" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="60" width="250" height="170.000000" as="geometry"/>
+        </mxCell>
+        <mxCell id="PasswordReset" value="&lt;b&gt;PasswordReset&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;- id: int&lt;br&gt;- usuario_id: int&lt;br&gt;- token: String&lt;br&gt;- expiracion: Date&lt;br&gt;- usado: boolean&lt;br&gt;- creado: Date&lt;hr size=&quot;1&quot;&gt;+ esValido(): boolean&lt;br&gt;+ marcarUsado(): void" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="400" y="60" width="250" height="170.000000" as="geometry"/>
+        </mxCell>
+        <mxCell id="Pago" value="&lt;b&gt;Pago&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;- id_pago: int&lt;br&gt;- id_usuario: int&lt;br&gt;- fecha_pago: Date&lt;br&gt;- valor_pagado: float&lt;br&gt;- estado: EstadoPago&lt;br&gt;- fecha_vencimiento: Date&lt;br&gt;- observaciones: String&lt;br&gt;- registrado_por: int&lt;br&gt;- fecha_creacion: Date&lt;hr size=&quot;1&quot;&gt;+ estaVencido(): boolean&lt;br&gt;+ generarRecordatorio(): PagoRecordatorio" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="340" width="250" height="215.000000" as="geometry"/>
+        </mxCell>
+        <mxCell id="PagoRecordatorio" value="&lt;b&gt;PagoRecordatorio&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;- id_pago: int&lt;br&gt;- fecha_envio: Date&lt;hr size=&quot;1&quot;&gt;+ enviar(): void" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="400" y="340" width="250" height="95.000000" as="geometry"/>
+        </mxCell>
+        <mxCell id="Notificacion" value="&lt;b&gt;Notificacion&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;- id: int&lt;br&gt;- destino: String&lt;br&gt;- mensaje: String&lt;br&gt;- fecha: Date&lt;hr size=&quot;1&quot;&gt;+ enviarPush(): void&lt;br&gt;+ enviarCorreo(): void" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="400" y="620" width="250" height="140.000000" as="geometry"/>
+        </mxCell>
+        <mxCell id="Configuracion" value="&lt;b&gt;Configuracion&lt;/b&gt;&lt;hr size=&quot;1&quot;&gt;- clave: String  (PK)&lt;br&gt;- valor: String&lt;hr size=&quot;1&quot;&gt;+ getValor(clave): String&lt;br&gt;+ setValor(clave, v): void" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;shadow=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="620" width="250" height="110.000000" as="geometry"/>
+        </mxCell>
+        <mxCell id="e27" value="pertenece" style="endArrow=open;endFill=0;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="PasswordReset" target="U3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e27_s" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e27">
+          <mxGeometry x="-0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e27_t" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e27">
+          <mxGeometry x="0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e28" value="paga" style="endArrow=open;endFill=0;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="Pago" target="U3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e28_s" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e28">
+          <mxGeometry x="-0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e28_t" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e28">
+          <mxGeometry x="0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e29" value="avisa" style="endArrow=diamondThin;endFill=1;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="PagoRecordatorio" target="Pago">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e29_s" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e29">
+          <mxGeometry x="-0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e29_t" value="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;" vertex="1" connectable="0" parent="e29">
+          <mxGeometry x="0.82" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>
+        </mxCell>
+        <mxCell id="e30" value="usa" style="endArrow=open;endFill=0;dashed=1;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="Notificacion" target="U3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e31" value="usa" style="endArrow=open;endFill=0;dashed=1;html=1;edgeStyle=orthogonalEdgeStyle;rounded=0;" edge="1" parent="1" source="Notificacion" target="PagoRecordatorio">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -65,6 +65,10 @@
 > **Abrir los `.drawio`:** en [app.diagrams.net](https://app.diagrams.net) (✓ File → Open From → Device), en la app de escritorio draw.io (File → Open), o en VS Code con la extensión **"Draw.io Integration"** (hediet) abriendo el archivo directamente. Los archivos tienen varias **páginas** (pestañas) en la parte inferior.
 | `documentacion/entregables/Diagrama_de_Despliegue_MetaFit.drawio` | Diagrama de despliegue |
 | `documentacion/entregables/Manual_de_Instalacion_MetaFit.docx` | Guía de instalación, despliegue y compilación del APK |
+| `documentacion/entregables/Diagrama_de_Clases_MetaFit.drawio` | Diagrama de clases UML 2.4.1 (núcleo, seguimiento, autenticación y pagos) |
+| `documentacion/entregables/Normalizacion_Modelo_Relacional_MetaFit.xlsx` | Normalización del modelo relacional (0FN → 1FN → 2FN → 3FN) |
+| `documentacion/entregables/Fichas_Tecnicas_MetaFit.docx` | Fichas técnicas de hardware y software (especificaciones, tipo de adquisición y costos) |
+| `documentacion/entregables/Estimacion_de_Costos_MetaFit.xlsx` | Estimación de costos, comparativo de proveedores y presupuesto por fases (≤ $30.000.000 COP) |
 
 ---
 

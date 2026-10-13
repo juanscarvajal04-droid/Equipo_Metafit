@@ -111,6 +111,10 @@ Todos los documentos se encuentran en la carpeta [`documentacion/`](./documentac
 | `documentacion/entregables/Manual_de_Instalacion_MetaFit.docx` | Instalación local/Docker, despliegue en producción y compilación del APK |
 | `documentacion/entregables/Manual_Tecnico_MetaFit.docx` | Manual técnico completo: arquitectura, endpoints, módulos, BD, seguridad e implementación |
 | `documentacion/entregables/Manual_de_Usuario_MetaFit.docx` | Guías paso a paso para cada rol del sistema |
+| `documentacion/entregables/Diagrama_de_Clases_MetaFit.drawio` | Diagrama de clases UML 2.4.1 (núcleo, seguimiento, autenticación y pagos) |
+| `documentacion/entregables/Normalizacion_Modelo_Relacional_MetaFit.xlsx` | Normalización del modelo relacional (0FN → 1FN → 2FN → 3FN) |
+| `documentacion/entregables/Fichas_Tecnicas_MetaFit.docx` | Fichas técnicas de hardware y software (especificaciones, tipo de adquisición y costos) |
+| `documentacion/entregables/Estimacion_de_Costos_MetaFit.xlsx` | Estimación de costos, comparativo de proveedores y presupuesto por fases (≤ $30.000.000 COP) |
 | `documentacion/MANUAL_POSTMAN.md` | Guía para probar la API con Postman desde cero |
 | `documentacion/DIAGRAMAS.md` | Diagramas de arquitectura, componentes, navegación, BD y flujos |
 | `documentacion/INFORME_CALIDAD_QA_ISO25010.md` | Pruebas, QA por fases e ISO/IEC 25010 |

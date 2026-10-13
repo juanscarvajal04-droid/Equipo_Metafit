@@ -38,6 +38,10 @@
 - `../entregables/Manual_Tecnico_MetaFit.docx` — Arquitectura, seguridad, endpoints, BD e implementación
 - `../entregables/Manual_de_Usuario_MetaFit.docx` — Guías por rol (Admin, Entrenador, Recepcionista, Afiliado)
 - `../entregables/Manual_de_Instalacion_MetaFit.docx` — Instalación local, Docker, producción y APK
+- `../entregables/Diagrama_de_Clases_MetaFit.drawio` — Diagrama de clases UML 2.4.1
+- `../entregables/Normalizacion_Modelo_Relacional_MetaFit.xlsx` — Normalización 0FN → 3FN
+- `../entregables/Fichas_Tecnicas_MetaFit.docx` — Fichas técnicas de hardware y software
+- `../entregables/Estimacion_de_Costos_MetaFit.xlsx` — Costos, proveedores y fases (≤ $30M COP)
 - `../MANUAL_POSTMAN.md` — Colecciones y uso de la API
 
 ### 🎨 Diseño
