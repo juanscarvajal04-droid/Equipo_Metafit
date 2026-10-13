@@ -30,7 +30,7 @@
 
 | Recurso | URL |
 |---|---|
-| GitHub | https://github.com/sebas-carva07/Equipo_Metafit |
+| GitHub | https://github.com/juanscarvajal04-droid/Equipo_Metafit |
 
 ---
 
@@ -56,12 +56,14 @@
 | `documentacion/MANUAL_USUARIO.md` | Guías por rol |
 | `documentacion/MANUAL_POSTMAN.md` | Colecciones API |
 | `documentacion/DIAGRAMAS.md` | Diagramas de arquitectura |
-| `documentacion/PRESENTACION.md` | Guion de sustentación |
-| `documentacion/QA_REPORT.md` | Reporte de QA |
-| `documentacion/AUDITORIA_FINAL.md` | Auditoría final |
+| `documentacion/entregables/Presentación Metafit.pptx` | Presentación del proyecto |
+| `documentacion/INFORME_CALIDAD_QA_ISO25010.md` | Pruebas, QA e ISO 25010 |
+| `documentacion/AUDITORIA_METAFIT.md` | Auditoría funcional |
 | `documentacion/UPTIME_ROBOT.md` | Config monitoreo |
-| `documentacion/GUION_VIDEO_DEMO.md` | Guion video demo |
-| `documentacion/manual_despliegue.md` | Guía de despliegue |
+| `documentacion/entregables/` | Entregables: Historias de Usuario (.docx), Casos de Uso Extendidos (.docx), Casos de Uso UML (.drawio), Diagrama de Procesos BPMN (.drawio), Mockups/Wireframes (.drawio), Diagrama de Despliegue (.drawio), Modelo Entidad-Relación (.mwb), Diccionario de Datos (.html) |
+
+> **Abrir los `.drawio`:** en [app.diagrams.net](https://app.diagrams.net) (✓ File → Open From → Device), en la app de escritorio draw.io (File → Open), o en VS Code con la extensión **"Draw.io Integration"** (hediet) abriendo el archivo directamente. Los archivos tienen varias **páginas** (pestañas) en la parte inferior.
+| `documentacion/entregables/Diagrama_de_Despliegue_MetaFit.drawio` | Diagrama de despliegue |
 | `documentacion/manual_apk_movil.md` | Guía compilación APK |
 
 ---

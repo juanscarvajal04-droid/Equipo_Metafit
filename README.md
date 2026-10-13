@@ -113,8 +113,8 @@ Todos los documentos se encuentran en la carpeta [`documentacion/`](./documentac
 | `documentacion/MANUAL_POSTMAN.md` | Guía para probar la API con Postman desde cero |
 | `documentacion/DIAGRAMAS.md` | Diagramas de arquitectura, componentes, navegación, BD y flujos |
 | `documentacion/PRESENTACION.md` | Guion de sustentación (15-20 min) con diapositivas |
-| `documentacion/QA_REPORT.md` | Reporte de aseguramiento de calidad |
-| `documentacion/AUDITORIA_FINAL.md` | Auditoría final del proyecto |
+| `documentacion/INFORME_CALIDAD_QA_ISO25010.md` | Pruebas, QA por fases e ISO/IEC 25010 |
+| `documentacion/AUDITORIA_METAFIT.md` | Auditoría funcional del proyecto |
 | `documentacion/UPTIME_ROBOT.md` | Monitoreo 24/7 con UptimeRobot (config manual) |
 | `documentacion/GUION_VIDEO_DEMO.md` | Guion del video demo (3–5 min, 3 roles) |
 

@@ -46,7 +46,7 @@
                              │ SQL
                              ▼
   ┌─────────────────────────────────────────────────────────────────┐
-  │               MySQL 8.0 — metafit (17 tablas)                   │
+  │               MySQL 8.0 — metafit (26 tablas)                   │
   │  localhost:3306                                                 │
   │  ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌───────────┐       │
   │  │ USUARIO   │ │ AFILIADO  │ │  CICLO    │ │  PAGO     │       │
@@ -57,7 +57,7 @@
   │  │ CONFIGUR. │ │NOTIFICAC. │ │ PROGRESO  │                     │
   │  └───────────┘ └───────────┘ └───────────┘                     │
   │                                                                  │
-  │  5 Vistas · 1 Trigger · 15 Índices · 18 FK (RESTRICT/CASCADE)  │
+  │  5 Vistas · 0 Triggers · 32 Índices · 40 FK (RESTRICT/CASCADE) │
   └─────────────────────────────────────────────────────────────────┘
 
   ┌─────────────────────────────────────────────────────────────────┐
@@ -77,7 +77,7 @@
 
 1. **Frontend Web (React + Vite + Bootstrap 5)** — Interfaz de escritorio para Administración, Recepción y Entrenadores. Consume la API REST via axios. Renderizado del lado del cliente con React Router v7. Incluye Header con notificaciones en tiempo real.
 2. **Backend API (Node.js + Express)** — API REST con patrón MVC. Procesa peticiones, aplica middlewares de seguridad, orquesta lógica de negocio y accede a la base de datos.
-3. **Base de Datos (MySQL 8.0)** — Almacenamiento relacional normalizado en 3FN. 17 tablas, 5 vistas, 1 trigger.
+3. **Base de Datos (MySQL 8.0)** — Almacenamiento relacional normalizado en 3FN. 26 tablas, 5 vistas, 0 triggers, 40 claves foráneas.
 4. **App Móvil (React Native + Expo SDK 55)** — Aplicación nativa para afiliados. Landing page informativa, consulta de perfil, rutinas, dietas y progreso. Autenticación con JWT + AsyncStorage.
 
 ### Stack Tecnológico Completo
@@ -158,24 +158,29 @@ Equipo_Metafit/
 │   └── package.json
 │
 ├── database/                         # Base de Datos (MySQL)
-│   ├── 01_schema.sql                 # Schema completo (17 tablas)
-│   ├── 02_seed.sql                   # Datos de seed
-│   └── 03_datos_demo.sql             # Datos demo opcionales
+│   ├── 01_estructura.sql             # Esquema (18 tablas + 5 vistas)
+│   ├── 02_migracion_movil.sql        # 3 tablas de la app móvil
+│   ├── 03_mejoras_estructura.sql     # 3 tablas + columnas ALTER TABLE
+│   ├── 04_datos_iniciales.sql        # Datos iniciales (INSERT/UPDATE)
+│   ├── 05_password_reset.sql         # Tabla PASSWORD_RESET
+│   └── README.md                     # Léame de la base de datos
 │
-├── documentacion/                    # Documentación técnica
+├── documentacion/                    # Documentación técnica (32 archivos)
 │   ├── MANUAL_TECNICO.md             # ← Este archivo
+│   ├── MANUAL_INGENIERIA_COMPLETO.md # Entregables de ingeniería
 │   ├── MANUAL_USUARIO.md             # Manual de usuario
-│   ├── AUDITORIA_FINAL.md            # Auditoría completa
-│   ├── DIAGRAMAS.md                  # Diagramas
-│   ├── QA_REPORT.md                  # Reporte QA (51 pruebas)
-│   ├── PRESENTACION.md               # Guion de sustentación
-│   └── MANUAL_POSTMAN.md             # Uso de colecciones Postman
+│   ├── API_REST_METAFIT.md           # Catálogo de los 91 endpoints
+│   ├── INFORME_CALIDAD_QA_ISO25010.md# Pruebas e ISO/IEC 25010
+│   ├── entregables/                  # Entregables (.docx, .drawio, .mwb, .html)
+│   └── DIAGRAMAS.md                  # Diagramas
+│
+├── postman/                          # Colecciones Postman
+│   ├── MetaFit_API_Web.postman_collection.json
+│   └── MetaFit_API_Movil.postman_collection.json
 │
 ├── docker-compose.yml                # Orquestación Docker
 ├── .env                              # Variables de entorno
 ├── README.md                         # Documentación general
-├── MetaFit_API_Web.postman_collection.json
-├── MetaFit_API_Movil.postman_collection.json
 └── .gitignore
 ```
 
@@ -188,9 +193,10 @@ Equipo_Metafit/
 | `backend/services/` | Lógica de negocio pura, desacoplada de Express |
 | `backend/models/` | Queries SQL a la base de datos |
 | `frontend_web/` | Interfaz web responsive con roles RBAC |
-| `movil/` | App nativa para afiliados con Landing + 4 tabs |
-| `database/` | Schema SQL, seed data, datos demo |
-| `documentacion/` | Manuales técnico, usuario, QA, postman, diagramas |
+| `movil/` | App nativa para afiliados: 10 pantallas |
+| `database/` | 26 tablas y 5 vistas en 5 scripts SQL |
+| `documentacion/` | Manuales, auditorías, diagramas y entregables |
+| `postman/` | Colecciones Postman de web y móvil |
 | `docker-compose.yml` | Orquestación de 4 servicios |
 
 ---

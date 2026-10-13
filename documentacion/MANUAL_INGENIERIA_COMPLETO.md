@@ -226,13 +226,13 @@ Se utilizó Git Flow con ramas `main` (producción) y `develop` (desarrollo), m�
   │                            ▼       CAPA DE DATOS                 │
   │  ┌──────────────────────────────────────────────────────────┐    │
   │  │              BASE DE DATOS MySQL 8.0                      │    │
-  │  │              17 tablas · 5 vistas · 1 trigger             │    │
+  │  │              26 tablas · 5 vistas · 0 triggers            │    │
   │  │  Tablas: USUARIO, AFILIADO, CICLO, PLAN_ENTRENAMIENTO,   │    │
   │  │  PLAN_NUTRICIONAL, RUTINA, RUTINA_EJERCICIO, EJERCICIO,  │    │
   │  │  ALIMENTO, RESTRICCION, AFILIADO_RESTRICCION,            │    │
   │  │  EJERCICIO_RESTRICCION_EXCLUIDA, ALIMENTO_RESTRICCION_   │    │
   │  │  EXCLUIDA, DETALLE_NUTRICIONAL, PROGRESO_FISICO, PAGO,   │    │
-  │  │  CONFIGURACION                                           │    │
+  │  │  CONFIGURACION (+9 en 02, 03, 05 y cron)                 │    │
   │  └──────────────────────────────────────────────────────────┘    │
   └─────────────────────────────────────────────────────────────────┘
 ```
@@ -1432,27 +1432,49 @@ USUARIO (super-tipo)
     PK clave, valor
 ```
 
-## 7.2. Las 17 tablas
+## 7.2. Las 26 tablas
+
+> **Corrección de conteo.** Este apartado enumeraba 17 tablas porque reflejaba únicamente
+> `database/01_estructura.sql`. El esquema completo tiene **25 tablas declaradas** en
+> `database/*.sql` (18 en `01_estructura.sql`, 3 en `02_migracion_movil.sql`, 3 en
+> `03_mejoras_estructura.sql` y 1 en `05_password_reset.sql`) más **`PAGO_RECORDATORIO`**,
+> que se crea en tiempo de ejecución desde `backend/cron/recordatorioPagos.js:77`.
+> **Total: 26 tablas y 5 vistas.** No existe ningún trigger (ver detalle en
+> `entregables/Diccionario_de_Datos_MetaFit.html`).
 
 | # | Tabla | Tipo | PK | FKs |
 |---|---|---|---|---|
 | 1 | USUARIO | Maestra | id_usuario | - |
-| 2 | AFILIADO | Sub-tipo | id_usuario → USUARIO, registrado_por → USUARIO |
-| 3 | RESTRICCION | Catálogo | id_restriccion | - |
-| 4 | EJERCICIO | Catálogo | id_ejercicio | - |
-| 5 | ALIMENTO | Catálogo | id_alimento | - |
+| 2 | AFILIADO | Sub-tipo | id_usuario →' USUARIO, registrado_por →' USUARIO |
+| 3 | RESTRICCION | Catǭlogo | id_restriccion | - |
+| 4 | EJERCICIO | Catǭlogo | id_ejercicio | - |
+| 5 | ALIMENTO | Catǭlogo | id_alimento | - |
 | 6 | AFILIADO_RESTRICCION | Pivot | (id_usuario, id_restriccion) | USUARIO, RESTRICCION |
 | 7 | EJERCICIO_RESTRICCION_EXCLUIDA | Pivot | (id_ejercicio, id_restriccion) | EJERCICIO, RESTRICCION |
 | 8 | ALIMENTO_RESTRICCION_EXCLUIDA | Pivot | (id_alimento, id_restriccion) | ALIMENTO, RESTRICCION |
-| 9 | CICLO | Operacional | id_ciclo | id_usuario → USUARIO |
-| 10 | PLAN_ENTRENAMIENTO | Operacional | id_ciclo → CICLO | creado_por → USUARIO |
-| 11 | PLAN_NUTRICIONAL | Operacional | id_ciclo → CICLO | creado_por → USUARIO |
-| 12 | RUTINA | Operacional | id_rutina | id_ciclo → CICLO |
-| 13 | RUTINA_EJERCICIO | Pivot | (id_rutina, id_ejercicio) | RUTINA, EJERCICIO |
-| 14 | DETALLE_NUTRICIONAL | Operacional | id_detalle | id_plan → PLAN_NUTRICIONAL, id_alimento → ALIMENTO |
-| 15 | PROGRESO_FISICO | Histórico | id_progreso | id_ciclo → CICLO |
-| 16 | PAGO | Operacional | id_pago | id_usuario → USUARIO, registrado_por → USUARIO |
+| 9 | CICLO | Operacional | id_ciclo | id_usuario →' USUARIO |
+| 10 | PLAN_ENTRENAMIENTO | Operacional | id_plan →' CICLO | creado_por →' USUARIO |
+| 11 | PLAN_NUTRICIONAL | Operacional | id_plan →' CICLO | creado_por →' USUARIO |
+| 12 | RUTINA | Operacional | id_rutina | id_ciclo →' CICLO |
+| 13 | RUTINA_EJERCICIO | Pivot | (id_rutina, orden) | RUTINA, EJERCICIO |
+| 14 | DETALLE_NUTRICIONAL | Operacional | id_detalle | id_plan →' PLAN_NUTRICIONAL, id_alimento →' ALIMENTO |
+| 15 | PROGRESO_FISICO | Histǭrico | id_progreso | id_ciclo →' CICLO |
+| 16 | PAGO | Operacional | id_pago | id_usuario →' USUARIO, registrado_por →' USUARIO |
 | 17 | CONFIGURACION | Maestra | clave | - |
+| 18 | NOTA_EJERCICIO | Histǭrico | id_nota | id_rutina_ejercicio →' RUTINA_EJERCICIO |
+| 19 | PROGRESO_EJERCICIO_DIARIO | Histǭrico | id_progreso | id_ciclo, id_ejercicio |
+| 20 | REGISTRO_AGUA | Histǭrico | id_agua | id_ciclo →' CICLO |
+| 21 | CONSUMO_ALIMENTO_DIARIO | Histǭrico | id_consumo | id_plan, id_detalle_nutricional |
+| 22 | REGISTRO_EJERCICIO | Hecho | id_registro | id_rutina_ejercicio, id_ejercicio |
+| 23 | CONSUMO_ALIMENTO_REAL | Hecho | id_consumo | id_detalle_nutricional, id_alimento |
+| 24 | PROGRESO_DIARIO | Histǭrico | id_diario | id_ciclo →' CICLO |
+| 25 | PASSWORD_RESET | Maestra | id_reset | id_usuario →' USUARIO |
+| 26 | PAGO_RECORDATORIO | Operacional | (id_usuario, anio, mes) | id_usuario →' USUARIO |
+
+**Fichas completas por columna, tipo, nulabilidad, índice y restricción:** ver
+`entregables/Diccionario_de_Datos_MetaFit.html`. El modelo relacional completo
+(con notación pata de gallo) está en
+`entregables/Modelo_Entidad_Relacion_MetaFit.mwb`.
 
 ## 7.3. Vistas (5)
 
@@ -1754,8 +1776,8 @@ MetaFit es un sistema de gestión deportiva completo que resuelve los problemas 
 
 - **Backend API REST** con 55+ endpoints, autenticación JWT + bcrypt, RBAC con 4 roles, rate limiting, CORS y helmet
 - **Frontend Web** con React 19 + Vite, dashboard con KPIs y Chart.js, CRUD completo por rol, interfaz oscura responsive
-- **App Móvil** con React Native + Expo SDK 55, 6 pantallas, navegación stack + tabs, tema oscuro con gradientes
-- **Base de Datos MySQL 8.0** con 17 tablas, 5 vistas, 1 trigger, normalización 3FN, patrón de herencia USUARIO→AFILIADO
+- **App Móvil** con React Native + Expo SDK 55, 10 pantallas, navegación stack + tabs, tema oscuro con gradientes
+- **Base de Datos MySQL 8.0** con 26 tablas, 5 vistas, 0 triggers, normalización 3FN, patrón de herencia USUARIO→AFILIADO
 - **Infraestructura Docker** con 4 servicios orquestados
 
 ## 12.2. Logros alcanzados

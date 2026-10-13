@@ -30,7 +30,7 @@
 - [x] Finanzas admin (ingresos por mes, métricas por recepcionista)
 - [x] GA4 + Google Tag Manager
 - [x] Storybook (5 historias: Badge, Button, Card, Modal, Avatar)
-- [x] 74 tests verdes (30 FE + 25 BE + 19 Móvil)
+- [x] 133 de 134 tests verdes (69 BE + 30 FE + 35 Móvil)
 - [x] CI/CD con GitHub Actions
 - [x] Despliegue en Render (BE) + Railway (DB)
 

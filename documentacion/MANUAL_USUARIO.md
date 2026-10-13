@@ -6,6 +6,9 @@
 
 ---
 
+> **Nota sobre capturas.** Cada procedimiento incluye un marcador `![...]` que indica **qué pantalla capturar y con qué nombre de archivo** (carpeta `capturas/manual_usuario/`). Mientras no se adjunten las capturas definitivas, los marcadores sirven de guía; ver la **Guía de captura** en la sección 2.11.
+
+
 ## 2.2 Introducción
 
 **MetaFit** es un sistema de gestión deportiva integral diseñado para el gimnasio **Sport Gym Sede 80**. Permite administrar afiliados, personal, rutinas de entrenamiento, planes nutricionales, pagos, finanzas y progreso físico desde una plataforma web y una aplicación móvil.
@@ -59,6 +62,10 @@
 
 ### Iniciar Sesión
 
+![Captura 2.4.1 — Iniciar Sesión](capturas/manual_usuario/2_4_1_iniciar_sesion.png)
+
+> 📸 **Captura 2.4.1:** pantalla de *Iniciar Sesión*. Guardar en `capturas/manual_usuario/2_4_1_iniciar_sesion.png`.
+
 1. Abrir el navegador en `http://localhost:5173`
 2. Hacer clic en **"Iniciar Sesión"** en la página principal
 3. Seleccionar **"Administrador"** en el selector de rol
@@ -68,6 +75,10 @@
 5. Hacer clic en **"Ingresar al Sistema"**
 
 ### Ver Dashboard y KPIs
+
+![Captura 2.4.2 — Ver Dashboard y KPIs](capturas/manual_usuario/2_4_2_ver_dashboard_y_kpis.png)
+
+> 📸 **Captura 2.4.2:** pantalla de *Ver Dashboard y KPIs*. Guardar en `capturas/manual_usuario/2_4_2_ver_dashboard_y_kpis.png`.
 
 1. Al iniciar sesión, será redirigido al Dashboard
 2. Verá las siguientes métricas:
@@ -81,6 +92,10 @@
 
 ### Cambiar Precio de Membresía
 
+![Captura 2.4.3 — Cambiar Precio de Membresía](capturas/manual_usuario/2_4_3_cambiar_precio_de_membresia.png)
+
+> 📸 **Captura 2.4.3:** pantalla de *Cambiar Precio de Membresía*. Guardar en `capturas/manual_usuario/2_4_3_cambiar_precio_de_membresia.png`.
+
 1. Ir al **Dashboard**
 2. En la sección "Precio de Membresía" (parte superior), verá el valor actual
 3. Hacer clic en **"Editar"** (icono de lápiz)
@@ -92,6 +107,10 @@
 
 ### Ver Panel de Finanzas
 
+![Captura 2.4.4 — Ver Panel de Finanzas](capturas/manual_usuario/2_4_4_ver_panel_de_finanzas.png)
+
+> 📸 **Captura 2.4.4:** pantalla de *Ver Panel de Finanzas*. Guardar en `capturas/manual_usuario/2_4_4_ver_panel_de_finanzas.png`.
+
 1. En el menú lateral, hacer clic en **"Finanzas"**
 2. Verá los siguientes indicadores:
    - **KPIs**: Total recaudado, recaudado este mes, mes anterior, promedio mensual, mejor recepcionista
@@ -102,6 +121,10 @@
 
 ### Exportar Reporte Financiero a PDF
 
+![Captura 2.4.5 — Exportar Reporte Financiero a PDF](capturas/manual_usuario/2_4_5_exportar_reporte_financiero_a_pdf.png)
+
+> 📸 **Captura 2.4.5:** pantalla de *Exportar Reporte Financiero a PDF*. Guardar en `capturas/manual_usuario/2_4_5_exportar_reporte_financiero_a_pdf.png`.
+
 1. En el **Panel de Finanzas**, hacer clic en el botón **"Descargar PDF"**
 2. El sistema genera automáticamente un PDF con:
    - Período del reporte (según filtros aplicados)
@@ -111,6 +134,10 @@
 3. El PDF se descarga automáticamente en el navegador
 
 ### Interpretar Notificaciones
+
+![Captura 2.4.6 — Interpretar Notificaciones](capturas/manual_usuario/2_4_6_interpretar_notificaciones.png)
+
+> 📸 **Captura 2.4.6:** pantalla de *Interpretar Notificaciones*. Guardar en `capturas/manual_usuario/2_4_6_interpretar_notificaciones.png`.
 
 1. En el **Header** (barra superior), verá un icono de **campana 🔔**
 2. Si hay un número rojo (badge), significa que hay notificaciones pendientes
@@ -126,6 +153,10 @@
 
 ### Gestionar Personal (Crear Empleado)
 
+![Captura 2.4.7 — Gestionar Personal (Crear Empleado)](capturas/manual_usuario/2_4_7_gestionar_personal_crear_empleado.png)
+
+> 📸 **Captura 2.4.7:** pantalla de *Gestionar Personal (Crear Empleado)*. Guardar en `capturas/manual_usuario/2_4_7_gestionar_personal_crear_empleado.png`.
+
 1. En el menú lateral, hacer clic en **"Gestión de Personal"**
 2. Hacer clic en **"Nuevo Empleado"**
 3. Completar los campos:
@@ -138,6 +169,10 @@
 
 ### Gestionar Personal (Editar/Eliminar)
 
+![Captura 2.4.8 — Gestionar Personal (Editar/Eliminar)](capturas/manual_usuario/2_4_8_gestionar_personal_editar_eliminar.png)
+
+> 📸 **Captura 2.4.8:** pantalla de *Gestionar Personal (Editar/Eliminar)*. Guardar en `capturas/manual_usuario/2_4_8_gestionar_personal_editar_eliminar.png`.
+
 - **Editar**: Clic en el icono de lápiz → modificar campos → Guardar
 - **Cambiar estado**: Clic en el badge de estado (Activo/Inactivo/Pendiente) para alternar
 - **Eliminar**: Clic en el icono de papelera → confirmar
@@ -149,6 +184,10 @@
 
 ### Iniciar Sesión
 
+![Captura 2.5.1 — Iniciar Sesión](capturas/manual_usuario/2_5_1_iniciar_sesion.png)
+
+> 📸 **Captura 2.5.1:** pantalla de *Iniciar Sesión*. Guardar en `capturas/manual_usuario/2_5_1_iniciar_sesion.png`.
+
 1. Abrir el navegador en `http://localhost:5173`
 2. Hacer clic en **"Iniciar Sesión"**
 3. Seleccionar **"Recepcionista"**
@@ -158,6 +197,10 @@
 5. Hacer clic en **"Ingresar al Sistema"**
 
 ### Crear un Nuevo Afiliado
+
+![Captura 2.5.2 — Crear un Nuevo Afiliado](capturas/manual_usuario/2_5_2_crear_un_nuevo_afiliado.png)
+
+> 📸 **Captura 2.5.2:** pantalla de *Crear un Nuevo Afiliado*. Guardar en `capturas/manual_usuario/2_5_2_crear_un_nuevo_afiliado.png`.
 
 1. En el menú lateral, hacer clic en **"Afiliados"**
 2. Hacer clic en **"Nuevo Afiliado"** (botón superior derecho)
@@ -175,6 +218,10 @@
 
 ### Editar Datos de Afiliado
 
+![Captura 2.5.3 — Editar Datos de Afiliado](capturas/manual_usuario/2_5_3_editar_datos_de_afiliado.png)
+
+> 📸 **Captura 2.5.3:** pantalla de *Editar Datos de Afiliado*. Guardar en `capturas/manual_usuario/2_5_3_editar_datos_de_afiliado.png`.
+
 1. En la tabla de afiliados, hacer clic en **"Ver"** (icono de ojo) del afiliado deseado
 2. Se abrirá un modal con pestañas:
    - **Estado de Cuenta**: Información general, estado de afiliación y último pago
@@ -183,6 +230,10 @@
 3. Para editar campos: el recepcionista ve la pestaña por defecto con opción de editar
 
 ### Cambiar Estado de Afiliación
+
+![Captura 2.5.4 — Cambiar Estado de Afiliación](capturas/manual_usuario/2_5_4_cambiar_estado_de_afiliacion.png)
+
+> 📸 **Captura 2.5.4:** pantalla de *Cambiar Estado de Afiliación*. Guardar en `capturas/manual_usuario/2_5_4_cambiar_estado_de_afiliacion.png`.
 
 1. En la tabla de afiliados, localizar al afiliado
 2. Hacer clic en el badge de estado (Activo/Inactivo/Suspendido)
@@ -193,6 +244,10 @@
    - **Suspendido**: Bloqueado temporalmente
 
 ### Registrar Pagos
+
+![Captura 2.5.5 — Registrar Pagos](capturas/manual_usuario/2_5_5_registrar_pagos.png)
+
+> 📸 **Captura 2.5.5:** pantalla de *Registrar Pagos*. Guardar en `capturas/manual_usuario/2_5_5_registrar_pagos.png`.
 
 1. En el menú lateral, hacer clic en **"Pagos"**
 2. En la tabla de afiliados, localizar al afiliado
@@ -218,6 +273,10 @@
 
 ### Interpretar Notificaciones
 
+![Captura 2.5.6 — Interpretar Notificaciones](capturas/manual_usuario/2_5_6_interpretar_notificaciones.png)
+
+> 📸 **Captura 2.5.6:** pantalla de *Interpretar Notificaciones*. Guardar en `capturas/manual_usuario/2_5_6_interpretar_notificaciones.png`.
+
 1. En el **Header** (barra superior), verá un icono de **campana 🔔**
 2. Si hay un número rojo (badge), significa que hay notificaciones pendientes
 3. Las notificaciones para Recepcionista incluyen:
@@ -231,6 +290,10 @@
 
 ### Iniciar Sesión
 
+![Captura 2.6.1 — Iniciar Sesión](capturas/manual_usuario/2_6_1_iniciar_sesion.png)
+
+> 📸 **Captura 2.6.1:** pantalla de *Iniciar Sesión*. Guardar en `capturas/manual_usuario/2_6_1_iniciar_sesion.png`.
+
 1. Abrir el navegador en `http://localhost:5173`
 2. Hacer clic en **"Iniciar Sesión"**
 3. Seleccionar **"Entrenador"**
@@ -241,12 +304,20 @@
 
 ### Seleccionar un Afiliado
 
+![Captura 2.6.2 — Seleccionar un Afiliado](capturas/manual_usuario/2_6_2_seleccionar_un_afiliado.png)
+
+> 📸 **Captura 2.6.2:** pantalla de *Seleccionar un Afiliado*. Guardar en `capturas/manual_usuario/2_6_2_seleccionar_un_afiliado.png`.
+
 1. En el menú lateral, hacer clic en **"Afiliados"**
 2. Usar la barra de búsqueda para encontrar al afiliado
 3. Hacer clic en **"Ver"** para ver su información completa
 4. El entrenador puede ver: datos personales, restricciones médicas, ciclo activo
 
 ### Ver Restricciones Médicas
+
+![Captura 2.6.3 — Ver Restricciones Médicas](capturas/manual_usuario/2_6_3_ver_restricciones_medicas.png)
+
+> 📸 **Captura 2.6.3:** pantalla de *Ver Restricciones Médicas*. Guardar en `capturas/manual_usuario/2_6_3_ver_restricciones_medicas.png`.
 
 1. En la vista del afiliado, ir a la pestaña **"Ciclo Activo"**
 2. Las restricciones médicas se muestran con:
@@ -257,6 +328,10 @@
 
 ### Ver el Catálogo de Ejercicios
 
+![Captura 2.6.4 — Ver el Catálogo de Ejercicios](capturas/manual_usuario/2_6_4_ver_el_catalogo_de_ejercicios.png)
+
+> 📸 **Captura 2.6.4:** pantalla de *Ver el Catálogo de Ejercicios*. Guardar en `capturas/manual_usuario/2_6_4_ver_el_catalogo_de_ejercicios.png`.
+
 1. En el menú lateral, hacer clic en **"Rutinas"**
 2. En la parte superior, verá el KPI con la cantidad de ejercicios en el catálogo
 3. Hacer clic en **"Ver Catálogo"**
@@ -266,6 +341,10 @@
 5. Puede buscar ejercicios por nombre
 
 ### Agregar un Nuevo Ejercicio
+
+![Captura 2.6.5 — Agregar un Nuevo Ejercicio](capturas/manual_usuario/2_6_5_agregar_un_nuevo_ejercicio.png)
+
+> 📸 **Captura 2.6.5:** pantalla de *Agregar un Nuevo Ejercicio*. Guardar en `capturas/manual_usuario/2_6_5_agregar_un_nuevo_ejercicio.png`.
 
 1. En el modal **"Ver Catálogo"** de la pantalla de Rutinas, hacer clic en **"Nuevo Ejercicio"**
 2. Completar el formulario:
@@ -278,11 +357,19 @@
 
 ### Editar un Ejercicio
 
+![Captura 2.6.6 — Editar un Ejercicio](capturas/manual_usuario/2_6_6_editar_un_ejercicio.png)
+
+> 📸 **Captura 2.6.6:** pantalla de *Editar un Ejercicio*. Guardar en `capturas/manual_usuario/2_6_6_editar_un_ejercicio.png`.
+
 1. En el modal **"Ver Catálogo"**, hacer clic en el icono de **lápiz (✏️)** del ejercicio
 2. Modificar los campos necesarios
 3. Hacer clic en **"Guardar"**
 
 ### Eliminar un Ejercicio
+
+![Captura 2.6.7 — Eliminar un Ejercicio](capturas/manual_usuario/2_6_7_eliminar_un_ejercicio.png)
+
+> 📸 **Captura 2.6.7:** pantalla de *Eliminar un Ejercicio*. Guardar en `capturas/manual_usuario/2_6_7_eliminar_un_ejercicio.png`.
 
 1. En el modal **"Ver Catálogo"**, hacer clic en el icono de **papelera (🗑️)** del ejercicio
 2. Si el ejercicio no está siendo usado en ninguna rutina activa, se eliminará inmediatamente
@@ -292,6 +379,10 @@
 
 ### Ver el Catálogo de Alimentos
 
+![Captura 2.6.8 — Ver el Catálogo de Alimentos](capturas/manual_usuario/2_6_8_ver_el_catalogo_de_alimentos.png)
+
+> 📸 **Captura 2.6.8:** pantalla de *Ver el Catálogo de Alimentos*. Guardar en `capturas/manual_usuario/2_6_8_ver_el_catalogo_de_alimentos.png`.
+
 1. En el menú lateral, hacer clic en **"Dietas"**
 2. En la parte superior, verá el KPI con la cantidad de alimentos en el catálogo
 3. Hacer clic en **"Ver Catálogo"**
@@ -300,6 +391,10 @@
    - Botones de editar (✏️) y eliminar (🗑️)
 
 ### Agregar un Nuevo Alimento
+
+![Captura 2.6.9 — Agregar un Nuevo Alimento](capturas/manual_usuario/2_6_9_agregar_un_nuevo_alimento.png)
+
+> 📸 **Captura 2.6.9:** pantalla de *Agregar un Nuevo Alimento*. Guardar en `capturas/manual_usuario/2_6_9_agregar_un_nuevo_alimento.png`.
 
 1. En el modal **"Ver Catálogo"** de la pantalla de Dietas, hacer clic en **"Nuevo Alimento"**
 2. Completar el formulario:
@@ -312,17 +407,29 @@
 
 ### Editar un Alimento
 
+![Captura 2.6.10 — Editar un Alimento](capturas/manual_usuario/2_6_10_editar_un_alimento.png)
+
+> 📸 **Captura 2.6.10:** pantalla de *Editar un Alimento*. Guardar en `capturas/manual_usuario/2_6_10_editar_un_alimento.png`.
+
 1. En el modal **"Ver Catálogo"**, hacer clic en el icono de **lápiz (✏️)** del alimento
 2. Modificar los campos necesarios
 3. Hacer clic en **"Guardar"**
 
 ### Eliminar un Alimento
 
+![Captura 2.6.11 — Eliminar un Alimento](capturas/manual_usuario/2_6_11_eliminar_un_alimento.png)
+
+> 📸 **Captura 2.6.11:** pantalla de *Eliminar un Alimento*. Guardar en `capturas/manual_usuario/2_6_11_eliminar_un_alimento.png`.
+
 1. En el modal **"Ver Catálogo"**, hacer clic en el icono de **papelera (🗑️)** del alimento
 2. Si el alimento no está siendo usado en ningún plan nutricional activo, se eliminará
 3. Si está siendo usado, el sistema mostrará un error y deberá reasignar los planes primero
 
 ### Asignar Rutina Personalizada
+
+![Captura 2.6.12 — Asignar Rutina Personalizada](capturas/manual_usuario/2_6_12_asignar_rutina_personalizada.png)
+
+> 📸 **Captura 2.6.12:** pantalla de *Asignar Rutina Personalizada*. Guardar en `capturas/manual_usuario/2_6_12_asignar_rutina_personalizada.png`.
 
 1. En el menú lateral, hacer clic en **"Rutinas"**
 2. Encontrar al afiliado en la tabla (los que no tienen rutina aparecen primero)
@@ -342,6 +449,10 @@
 
 ### Asignar Plan Nutricional
 
+![Captura 2.6.13 — Asignar Plan Nutricional](capturas/manual_usuario/2_6_13_asignar_plan_nutricional.png)
+
+> 📸 **Captura 2.6.13:** pantalla de *Asignar Plan Nutricional*. Guardar en `capturas/manual_usuario/2_6_13_asignar_plan_nutricional.png`.
+
 1. En el menú lateral, hacer clic en **"Dietas"**
 2. Encontrar al afiliado en la tabla
 3. Hacer clic en **"Asignar Dieta"**
@@ -359,6 +470,10 @@
 
 ### Interpretar Notificaciones
 
+![Captura 2.6.14 — Interpretar Notificaciones](capturas/manual_usuario/2_6_14_interpretar_notificaciones.png)
+
+> 📸 **Captura 2.6.14:** pantalla de *Interpretar Notificaciones*. Guardar en `capturas/manual_usuario/2_6_14_interpretar_notificaciones.png`.
+
 1. En el **Header** (barra superior), verá un icono de **campana 🔔**
 2. Las notificaciones para Entrenador incluyen:
    - **Afiliados sin ciclo activo** → Redirige a `/rutinas` para asignar rutina
@@ -371,11 +486,19 @@
 
 ### Abrir la App
 
+![Captura 2.7.1 — Abrir la App](capturas/manual_usuario/2_7_1_abrir_la_app.png)
+
+> 📸 **Captura 2.7.1:** pantalla de *Abrir la App*. Guardar en `capturas/manual_usuario/2_7_1_abrir_la_app.png`.
+
 1. Asegurarse de tener instalado **Expo Go** en el dispositivo
 2. Escanear el QR generado por `npx expo start` en la terminal
 3. La app muestra la **Landing Page** con información del gimnasio
 
 ### Navegar por la Landing Page
+
+![Captura 2.7.2 — Navegar por la Landing Page](capturas/manual_usuario/2_7_2_navegar_por_la_landing_page.png)
+
+> 📸 **Captura 2.7.2:** pantalla de *Navegar por la Landing Page*. Guardar en `capturas/manual_usuario/2_7_2_navegar_por_la_landing_page.png`.
 
 La pantalla de bienvenida incluye las siguientes secciones (desplazar hacia abajo):
 
@@ -388,6 +511,10 @@ La pantalla de bienvenida incluye las siguientes secciones (desplazar hacia abaj
 
 ### Iniciar Sesión
 
+![Captura 2.7.3 — Iniciar Sesión](capturas/manual_usuario/2_7_3_iniciar_sesion.png)
+
+> 📸 **Captura 2.7.3:** pantalla de *Iniciar Sesión*. Guardar en `capturas/manual_usuario/2_7_3_iniciar_sesion.png`.
+
 1. En la pantalla de bienvenida, hacer clic en **"Ingresar al Sistema"** o **"Iniciar Sesión"**
 2. Ingresar credenciales:
    - **Correo:** El proporcionado al registrarse (ej: `juan@gmail.com`)
@@ -397,6 +524,10 @@ La pantalla de bienvenida incluye las siguientes secciones (desplazar hacia abaj
 5. Si las credenciales son incorrectas, verá: *"Correo o contraseña incorrectos"*
 
 ### Ver Perfil Personal
+
+![Captura 2.7.4 — Ver Perfil Personal](capturas/manual_usuario/2_7_4_ver_perfil_personal.png)
+
+> 📸 **Captura 2.7.4:** pantalla de *Ver Perfil Personal*. Guardar en `capturas/manual_usuario/2_7_4_ver_perfil_personal.png`.
 
 1. Pestaña **"Perfil"** (icono 👤)
 2. Verá:
@@ -409,6 +540,10 @@ La pantalla de bienvenida incluye las siguientes secciones (desplazar hacia abaj
 
 ### Consultar Rutina Asignada
 
+![Captura 2.7.5 — Consultar Rutina Asignada](capturas/manual_usuario/2_7_5_consultar_rutina_asignada.png)
+
+> 📸 **Captura 2.7.5:** pantalla de *Consultar Rutina Asignada*. Guardar en `capturas/manual_usuario/2_7_5_consultar_rutina_asignada.png`.
+
 1. Pestaña **"Rutina"** (icono 💪)
 2. Verá:
    - Resumen del ciclo activo: objetivo físico, fechas de inicio y fin
@@ -419,6 +554,10 @@ La pantalla de bienvenida incluye las siguientes secciones (desplazar hacia abaj
 
 ### Consultar Plan Nutricional
 
+![Captura 2.7.6 — Consultar Plan Nutricional](capturas/manual_usuario/2_7_6_consultar_plan_nutricional.png)
+
+> 📸 **Captura 2.7.6:** pantalla de *Consultar Plan Nutricional*. Guardar en `capturas/manual_usuario/2_7_6_consultar_plan_nutricional.png`.
+
 1. Pestaña **"Dieta"** (icono 🥗)
 2. Verá:
    - Resumen del plan: calorías objetivo, número de comidas por día
@@ -428,6 +567,10 @@ La pantalla de bienvenida incluye las siguientes secciones (desplazar hacia abaj
 4. Si no tiene plan asignado, verá: *"Sin plan nutricional"*
 
 ### Ver Historial de Progreso Físico
+
+![Captura 2.7.7 — Ver Historial de Progreso Físico](capturas/manual_usuario/2_7_7_ver_historial_de_progreso_fisico.png)
+
+> 📸 **Captura 2.7.7:** pantalla de *Ver Historial de Progreso Físico*. Guardar en `capturas/manual_usuario/2_7_7_ver_historial_de_progreso_fisico.png`.
 
 1. Pestaña **"Progreso"** (icono 📊)
 2. Verá una lista cronológica de mediciones (de la más reciente a la más antigua)
@@ -555,3 +698,25 @@ Sí. Al iniciar sesión en la app se pide permiso para notificaciones. Cuando tu
 ### ¿Dónde se guardan mis datos?
 
 Las fotos de perfil, tus planes y tu historial se sincronizan con el servidor de MetaFit. Foto de perfil: súbela desde el portal web o desde la app (Perfil → tocar la foto → galería). El sistema cuida que solo se acepten imágenes de hasta 5 MB.
+
+---
+
+## 2.11 Guía de captura de pantallazos
+
+Las capturas se guardan en `documentacion/capturas/manual_usuario/` con el nombre indicado en cada marcador
+(`<sección>_<paso>_<slug>.png`, p. ej. `2_4_1_iniciar_sesion.png`). Recomendaciones:
+
+| Aspecto | Recomendación |
+|---|---|
+| Web | Ventana de escritorio, ancho ≥ 1440 px; capturar la pantalla completa del navegador (sin barras del sistema si es posible). |
+| Móvil | Emulador o dispositivo con resolución 1080×(1920-2400); usar la app con un usuario de prueba por rol. |
+| Formato | PNG; recortar solo la app (evitar datos personales reales; usar los usuarios demo del manual). |
+| Tema | Capturar en modo claro (por defecto) y, si aplica, una versión en modo oscuro marcada como "(oscuro)". |
+| Nombres | Respetar el nombre indicado en cada marcador para que las imágenes enlacen automáticamente. |
+
+**Usuarios demo para las capturas:** Administrador `carlos@metafit.com` / `Admin123!` · Recepcionista `maria@metafit.com` / `Maria123!` · Entrenador `laura@metafit.com` / `Laura123!` · Afiliado (móvil) un afiliado con ciclo, rutina y dieta asignados.
+
+**Checklist por rol:** (2.4) login, dashboard, cambio de precio, finanzas, exportar PDF, notificaciones, crear/editar personal.
+(2.5) login, crear afiliado, editar/ver, cambiar estado, registrar pago, notificaciones.
+(2.6) login, seleccionar afiliado, restricciones, catálogo/CRUD de ejercicios, catálogo/CRUD de alimentos, asignar rutina, asignar dieta, notificaciones.
+(2.7) landing, login, perfil, rutina, dieta, progreso.

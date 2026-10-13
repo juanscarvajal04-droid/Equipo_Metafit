@@ -12,7 +12,7 @@
 |---------|--------|
 | Repositorio | ✅ Limpio, 1 commit sin push (docs: README APK) |
 | Contenedores locales | ✅ 5/5 Up (db, backend, frontend, phpmyadmin, n8n) |
-| Base de datos | ✅ 29 tablas + 5 vistas, columnas nuevas confirmadas |
+| Base de datos | ✅ 26 tablas + 5 vistas, columnas nuevas confirmadas |
 | Persistencia de datos | ✅ Editar, crear, foto y ejercicio todo persiste |
 | Coherencia web↔móvil↔BD | ✅ Cambios en web se ven en móvil y viceversa |
 | Producción (Render) | ✅ Backend 200, Frontend 200, Login OK, env vars OK |
@@ -56,7 +56,7 @@ Todos los servicios respondiendo 200 en sus puertos asignados.
 
 ## 4. BASE DE DATOS
 
-### 4.1 Tablas existentes (29 + 5 vistas)
+### 4.1 Tablas existentes (26 + 5 vistas)
 
 ```
 AFILIADO                    ALIMENTO                         ALIMENTO_RESTRICCION_EXCLUIDA

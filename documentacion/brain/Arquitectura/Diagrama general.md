@@ -46,7 +46,7 @@
 ┌──────────────────────────────────────────────────────────┐
 │              BASE DE DATOS (MySQL 8.0)                    │
 │  Deploy: Railway (cloud) / Docker local                   │
-│  17 tablas + 5 vistas | Triggers | FK RESTRICT            │
+│  26 tablas + 5 vistas | 0 triggers | FK RESTRICT         │
 │  Migraciones JS idempotentes al arrancar                  │
 └──────────────────────────────────────────────────────────┘
 

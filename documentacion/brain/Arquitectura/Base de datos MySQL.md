@@ -1,6 +1,6 @@
 # 🗄️ Base de Datos MySQL
 
-> MySQL 8.0 — 17 tablas + 5 vistas — Sin ORM (mysql2/promise nativo)
+> MySQL 8.0 — 26 tablas + 5 vistas — Sin ORM (mysql2/promise nativo)
 
 ---
 

@@ -47,7 +47,7 @@ Sistema integral de administración de gimnasio que gestiona afiliados, planes d
 - **Backend:** Render.com (Docker)
 - **BD:** Railway (MySQL)
 - **Móvil:** EAS (Expo Application Services)
-- **CI/CD:** GitHub Actions (74 tests)
+- **CI/CD:** GitHub Actions (133 de 134 tests)
 
 ---
 

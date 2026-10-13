@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diccionario de Datos - MetaFit</title>
+<style>
+  :root { --accent:#0b6efd; --bg:#f7f9fc; --line:#d9e2ec; --head:#eef4fb; }
+  * { box-sizing: border-box; }
+  body { font-family: Segoe UI, Roboto, Arial, sans-serif; margin:0; color:#1f2933; background:var(--bg); }
+  header { background:linear-gradient(135deg,#0b3d91,#0b6efd); color:#fff; padding:34px 40px; }
+  header h1 { margin:0 0 6px; font-size:28px; }
+  header p { margin:0; opacity:.92; }
+  main { max-width:1200px; margin:0 auto; padding:28px 40px 80px; }
+  .meta { background:#fff; border:1px solid var(--line); border-radius:10px; padding:18px 22px; margin:22px 0; }
+  .meta ul { margin:8px 0 0; }
+  .toc { columns:3; column-gap:28px; background:#fff; border:1px solid var(--line); border-radius:10px; padding:16px 22px; }
+  .toc h2 { margin:0 0 8px; font-size:18px; column-span:all; }
+  .toc ul { margin:0; padding-left:18px; }
+  .toc li { font-size:13px; margin:2px 0; break-inside:avoid; }
+  .cc { color:#829ab1; }
+  section { background:#fff; border:1px solid var(--line); border-radius:10px; padding:18px 22px; margin:22px 0; scroll-margin-top:12px; }
+  section h3 { margin:0 0 4px; color:#0b3d91; font-size:19px; }
+  .tcomment { color:#52606d; font-style:italic; margin:0 0 14px; }
+  table { border-collapse:collapse; width:100%; font-size:13px; }
+  th, td { border:1px solid var(--line); padding:6px 9px; text-align:left; vertical-align:top; }
+  th { background:var(--head); }
+  td.cname { font-family:Consolas,monospace; font-weight:600; white-space:nowrap; }
+  td.ctype { font-family:Consolas,monospace; white-space:nowrap; color:#334e68; }
+  .pk { background:#ffe8a3; border-radius:4px; padding:1px 5px; font-size:11px; font-weight:700; }
+  .fk { background:#cfe3ff; border-radius:4px; padding:1px 5px; font-size:11px; font-weight:700; }
+  .ai { color:#0b6efd; font-size:11px; }
+  .sub { margin-top:12px; }
+  .sub h4 { margin:8px 0 4px; font-size:14px; color:#334e68; }
+  .flist { margin:0; padding-left:18px; font-size:13px; }
+  code { background:#f0f4f8; padding:1px 5px; border-radius:4px; font-family:Consolas,monospace; }
+  footer { text-align:center; color:#829ab1; font-size:12px; margin-top:30px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Diccionario de Datos &mdash; MetaFit</h1>
+  <p>Sistema de gesti&oacute;n para gimnasio. Base de datos <code>metafit</code> (MySQL).</p>
+</header>
+<main>
+  <div class="meta">
+    <strong>Resumen del modelo</strong>
+    <ul>
+      <li>Tablas: <strong>26</strong></li>
+      <li>Columnas documentadas: <strong>172</strong></li>
+      <li>Claves for&aacute;neas: <strong>41</strong></li>
+      <li>&Iacute;ndices adicionales (sin PK): <strong>32</strong></li>
+      <li>Motor de almacenamiento: <strong>InnoDB</strong> &middot; Juego de caracteres: <strong>utf8mb4</strong></li>
+    </ul>
+    <p style="margin-bottom:0;font-size:13px;color:#52606d;">
+      Documento generado a partir del Modelo Entidad-Relaci&oacute;n
+      <code>Modelo_Entidad_Relacion_MetaFit.mwb</code>. La notaci&oacute;n del diagrama EER es
+      <em>pata de gallo (crow's foot)</em>.
+    </p>
+  </div>
+
+  <nav class="toc">
+    <h2>Tablas</h2>
+    <ul>      <li><a href="#t_USUARIO">USUARIO</a> <span class="cc">(9 columnas)</span></li>
+      <li><a href="#t_RESTRICCION">RESTRICCION</a> <span class="cc">(4 columnas)</span></li>
+      <li><a href="#t_EJERCICIO">EJERCICIO</a> <span class="cc">(5 columnas)</span></li>
+      <li><a href="#t_ALIMENTO">ALIMENTO</a> <span class="cc">(5 columnas)</span></li>
+      <li><a href="#t_AFILIADO">AFILIADO</a> <span class="cc">(15 columnas)</span></li>
+      <li><a href="#t_AFILIADO_RESTRICCION">AFILIADO_RESTRICCION</a> <span class="cc">(2 columnas)</span></li>
+      <li><a href="#t_EJERCICIO_RESTRICCION_EXCLUIDA">EJERCICIO_RESTRICCION_EXCLUIDA</a> <span class="cc">(2 columnas)</span></li>
+      <li><a href="#t_ALIMENTO_RESTRICCION_EXCLUIDA">ALIMENTO_RESTRICCION_EXCLUIDA</a> <span class="cc">(2 columnas)</span></li>
+      <li><a href="#t_CICLO">CICLO</a> <span class="cc">(12 columnas)</span></li>
+      <li><a href="#t_PLAN_ENTRENAMIENTO">PLAN_ENTRENAMIENTO</a> <span class="cc">(3 columnas)</span></li>
+      <li><a href="#t_PLAN_NUTRICIONAL">PLAN_NUTRICIONAL</a> <span class="cc">(5 columnas)</span></li>
+      <li><a href="#t_RUTINA">RUTINA</a> <span class="cc">(5 columnas)</span></li>
+      <li><a href="#t_RUTINA_EJERCICIO">RUTINA_EJERCICIO</a> <span class="cc">(7 columnas)</span></li>
+      <li><a href="#t_DETALLE_NUTRICIONAL">DETALLE_NUTRICIONAL</a> <span class="cc">(4 columnas)</span></li>
+      <li><a href="#t_PROGRESO_FISICO">PROGRESO_FISICO</a> <span class="cc">(9 columnas)</span></li>
+      <li><a href="#t_PAGO">PAGO</a> <span class="cc">(9 columnas)</span></li>
+      <li><a href="#t_CONFIGURACION">CONFIGURACION</a> <span class="cc">(2 columnas)</span></li>
+      <li><a href="#t_NOTA_EJERCICIO">NOTA_EJERCICIO</a> <span class="cc">(6 columnas)</span></li>
+      <li><a href="#t_PROGRESO_EJERCICIO_DIARIO">PROGRESO_EJERCICIO_DIARIO</a> <span class="cc">(8 columnas)</span></li>
+      <li><a href="#t_REGISTRO_AGUA">REGISTRO_AGUA</a> <span class="cc">(6 columnas)</span></li>
+      <li><a href="#t_CONSUMO_ALIMENTO_DIARIO">CONSUMO_ALIMENTO_DIARIO</a> <span class="cc">(9 columnas)</span></li>
+      <li><a href="#t_REGISTRO_EJERCICIO">REGISTRO_EJERCICIO</a> <span class="cc">(11 columnas)</span></li>
+      <li><a href="#t_CONSUMO_ALIMENTO_REAL">CONSUMO_ALIMENTO_REAL</a> <span class="cc">(12 columnas)</span></li>
+      <li><a href="#t_PROGRESO_DIARIO">PROGRESO_DIARIO</a> <span class="cc">(12 columnas)</span></li>
+      <li><a href="#t_PASSWORD_RESET">PASSWORD_RESET</a> <span class="cc">(6 columnas)</span></li>
+      <li><a href="#t_PAGO_RECORDATORIO">PAGO_RECORDATORIO</a> <span class="cc">(2 columnas)</span></li></ul>
+  </nav>
+
+  <section id="t_USUARIO">
+    <h3>USUARIO</h3>
+    <p class="tcomment">Super-tipo central. Herencia hacia AFILIADO para clientes del gym. Contrasenas en bcrypt.</p>
+    <table>
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Clave</th><th>Nulo</th><th>Predeterminado</th><th>Extra</th><th>Descripción</th></tr></thead>
+      <tbody><tr><td class="cname">id_usuario</td><td class="ctype">INT</td><td><span class="pk">PK</span></td><td>NO</td><td>—</td><td> <span class="ai">AUTO_INCREMENT</span></td><td class="cdesc">Identificador unico del usuario (PK).</td></tr><tr><td class="cname">nombres</td><td class="ctype">VARCHAR(60)</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Nombres del usuario.</td></tr><tr><td class="cname">apellidos</td><td class="ctype">VARCHAR(60)</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Apellidos del usuario.</td></tr><tr><td class="cname">correo</td><td class="ctype">VARCHAR(100)</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Correo electronico. Unico; usado como credencial de acceso.</td></tr><tr><td class="cname">contrasena</td><td class="ctype">VARCHAR(255)</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Hash bcrypt (12 rondas) de la contrasena. Nunca se guarda texto plano.</td></tr><tr><td class="cname">rol</td><td class="ctype">ENUM(&#x27;Administrador&#x27;, &#x27;Recepcionista&#x27;, &#x27;Entrenador&#x27;, &#x27;Afiliado&#x27;)</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Rol del usuario: Administrador, Recepcionista, Entrenador o Afiliado.</td></tr><tr><td class="cname">estado</td><td class="ctype">ENUM(&#x27;Activo&#x27;, &#x27;Inactivo&#x27;, &#x27;Pendiente&#x27;)</td><td>—</td><td>NO</td><td>&#x27;Pendiente&#x27;</td><td>—</td><td class="cdesc">Estado de la cuenta: Activo, Inactivo o Pendiente (por defecto Pendiente).</td></tr><tr><td class="cname">fecha_registro</td><td class="ctype">DATETIME</td><td>—</td><td>NO</td><td>CURRENT_TIMESTAMP</td><td>—</td><td class="cdesc">Fecha y hora de creacion del usuario (CURRENT_TIMESTAMP).</td></tr><tr><td class="cname">push_token</td><td class="ctype">VARCHAR(255)</td><td>—</td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">Expo Push Token del dispositivo movil para notificaciones.</td></tr></tbody>
+    </table>
+    <div class="sub"><h4>Índices adicionales</h4><ul class="flist"><li><code>uq_usuario_correo</code> (correo) &middot; UNIQUE</li></ul></div>
+  </section>
+  <section id="t_RESTRICCION">
+    <h3>RESTRICCION</h3>
+    <p class="tcomment">Catalogo de condiciones medicas, lesiones, alergias y medicamentos.</p>
+    <table>
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Clave</th><th>Nulo</th><th>Predeterminado</th><th>Extra</th><th>Descripción</th></tr></thead>
+      <tbody><tr><td class="cname">id_restriccion</td><td class="ctype">INT</td><td><span class="pk">PK</span></td><td>NO</td><td>—</td><td> <span class="ai">AUTO_INCREMENT</span></td><td class="cdesc">Identificador unico de la restriccion (PK).</td></tr><tr><td class="cname">nombre_restriccion</td><td class="ctype">VARCHAR(120)</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Nombre de la restriccion. Unico.</td></tr><tr><td class="cname">tipo</td><td class="ctype">ENUM(&#x27;Enfermedad&#x27;, &#x27;Lesion&#x27;, &#x27;Alergia&#x27;, &#x27;Medicamento&#x27;, &#x27;Otra&#x27;)</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Tipo: Enfermedad, Lesion, Alergia, Medicamento u Otra.</td></tr><tr><td class="cname">efecto_relevante</td><td class="ctype">VARCHAR(200)</td><td>—</td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">Efecto o implicacion relevante (opcional).</td></tr></tbody>
+    </table>
+    <div class="sub"><h4>Índices adicionales</h4><ul class="flist"><li><code>uq_restriccion_nombre</code> (nombre_restriccion) &middot; UNIQUE</li></ul></div>
+  </section>
+  <section id="t_EJERCICIO">
+    <h3>EJERCICIO</h3>
+    <p class="tcomment">Catalogo de ejercicios. El entrenador selecciona al armar rutinas.</p>
+    <table>
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Clave</th><th>Nulo</th><th>Predeterminado</th><th>Extra</th><th>Descripción</th></tr></thead>
+      <tbody><tr><td class="cname">id_ejercicio</td><td class="ctype">INT</td><td><span class="pk">PK</span></td><td>NO</td><td>—</td><td> <span class="ai">AUTO_INCREMENT</span></td><td class="cdesc">Identificador unico del ejercicio (PK).</td></tr><tr><td class="cname">nombre_ejercicio</td><td class="ctype">VARCHAR(80)</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Nombre del ejercicio. Unico.</td></tr><tr><td class="cname">grupo_muscular</td><td class="ctype">ENUM(&#x27;Piernas&#x27;, &#x27;Pecho&#x27;, &#x27;Espalda&#x27;, &#x27;Hombros&#x27;, &#x27;Biceps&#x27;, &#x27;Triceps&#x27;, &#x27;Core&#x27;, &#x27;Gluteos&#x27;)</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Grupo muscular principal trabajado.</td></tr><tr><td class="cname">descripcion</td><td class="ctype">VARCHAR(500)</td><td>—</td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">Descripcion o indicaciones tecnicas del ejercicio.</td></tr><tr><td class="cname">nivel_minimo</td><td class="ctype">ENUM(&#x27;Principiante&#x27;, &#x27;Intermedio&#x27;, &#x27;Avanzado&#x27;)</td><td>—</td><td>NO</td><td>&#x27;Principiante&#x27;</td><td>—</td><td class="cdesc">Nivel minimo recomendado (por defecto Principiante).</td></tr></tbody>
+    </table>
+    <div class="sub"><h4>Índices adicionales</h4><ul class="flist"><li><code>uq_ejercicio_nombre</code> (nombre_ejercicio) &middot; UNIQUE</li></ul></div>
+  </section>
+  <section id="t_ALIMENTO">
+    <h3>ALIMENTO</h3>
+    <p class="tcomment">Macros por 100 g. Las calorias se calculan en la vista v_alimento_calorias (Atwater).</p>
+    <table>
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Clave</th><th>Nulo</th><th>Predeterminado</th><th>Extra</th><th>Descripción</th></tr></thead>
+      <tbody><tr><td class="cname">id_alimento</td><td class="ctype">INT</td><td><span class="pk">PK</span></td><td>NO</td><td>—</td><td> <span class="ai">AUTO_INCREMENT</span></td><td class="cdesc">Identificador unico del alimento (PK).</td></tr><tr><td class="cname">nombre_alimento</td><td class="ctype">VARCHAR(80)</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Nombre del alimento. Unico.</td></tr><tr><td class="cname">proteinas</td><td class="ctype">DECIMAL(6,2)</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Proteinas por 100 g (g).</td></tr><tr><td class="cname">carbohidratos</td><td class="ctype">DECIMAL(6,2)</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Carbohidratos por 100 g (g).</td></tr><tr><td class="cname">grasas</td><td class="ctype">DECIMAL(6,2)</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Grasas por 100 g (g).</td></tr></tbody>
+    </table>
+    <div class="sub"><h4>Índices adicionales</h4><ul class="flist"><li><code>uq_alimento_nombre</code> (nombre_alimento) &middot; UNIQUE</li></ul></div>
+  </section>
+  <section id="t_AFILIADO">
+    <h3>AFILIADO</h3>
+    <p class="tcomment">Sub-tipo de USUARIO (1:1). Datos estaticos; objetivo/nivel/disponibilidad por ciclo en CICLO (3FN).</p>
+    <table>
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Clave</th><th>Nulo</th><th>Predeterminado</th><th>Extra</th><th>Descripción</th></tr></thead>
+      <tbody><tr><td class="cname">id_usuario</td><td class="ctype">INT</td><td><span class="pk">PK</span> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">PK y FK a USUARIO (herencia 1:1).</td></tr><tr><td class="cname">documento</td><td class="ctype">VARCHAR(20)</td><td>—</td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">Numero de documento de identidad. Unico.</td></tr><tr><td class="cname">fecha_nacimiento</td><td class="ctype">DATE</td><td>—</td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">Fecha de nacimiento del afiliado.</td></tr><tr><td class="cname">sexo</td><td class="ctype">ENUM(&#x27;Masculino&#x27;, &#x27;Femenino&#x27;, &#x27;Otro&#x27;)</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Sexo: Masculino, Femenino u Otro.</td></tr><tr><td class="cname">telefono</td><td class="ctype">VARCHAR(20)</td><td>—</td><td>SÍ</td><td>&#x27;&#x27;</td><td>—</td><td class="cdesc">Telefono de contacto (por defecto cadena vacia).</td></tr><tr><td class="cname">direccion</td><td class="ctype">VARCHAR(100)</td><td>—</td><td>SÍ</td><td>&#x27;&#x27;</td><td>—</td><td class="cdesc">Direccion de residencia (por defecto cadena vacia).</td></tr><tr><td class="cname">estatura_cm</td><td class="ctype">DECIMAL(5,2)</td><td>—</td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">Estatura en centimetros.</td></tr><tr><td class="cname">estado_afiliacion</td><td class="ctype">ENUM(&#x27;Activo&#x27;, &#x27;Inactivo&#x27;, &#x27;Suspendido&#x27;)</td><td>—</td><td>NO</td><td>&#x27;Activo&#x27;</td><td>—</td><td class="cdesc">Estado de la afiliacion: Activo, Inactivo o Suspendido.</td></tr><tr><td class="cname">fecha_registro</td><td class="ctype">DATE</td><td>—</td><td>NO</td><td>(CURRENT_DATE)</td><td>—</td><td class="cdesc">Fecha de alta del afiliado (CURRENT_DATE).</td></tr><tr><td class="cname">fecha_ultima_modificacion</td><td class="ctype">DATETIME</td><td>—</td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">Fecha y hora de la ultima modificacion del registro.</td></tr><tr><td class="cname">registrado_por</td><td class="ctype">INT</td><td> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK a USUARIO: usuario (staff) que registro al afiliado.</td></tr><tr><td class="cname">objetivo_fisico</td><td class="ctype">ENUM(&#x27;Perdida de grasa&#x27;, &#x27;Aumento de masa&#x27;, &#x27;Mantenimiento&#x27;, &#x27;Rehabilitacion&#x27;)</td><td>—</td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">Objetivo capturado en el registro; el valor vigente se toma de CICLO (3FN).</td></tr><tr><td class="cname">nivel_experiencia</td><td class="ctype">ENUM(&#x27;Principiante&#x27;, &#x27;Intermedio&#x27;, &#x27;Avanzado&#x27;)</td><td>—</td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">Nivel capturado en el registro; el valor vigente se toma de CICLO (3FN).</td></tr><tr><td class="cname">disponibilidad_semanal_dias</td><td class="ctype">TINYINT</td><td>—</td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">Dias/semana capturados en el registro; el valor vigente se toma de CICLO (3FN).</td></tr><tr><td class="cname">foto</td><td class="ctype">VARCHAR(255)</td><td>—</td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">URL Cloudinary o ruta local de la foto de perfil.</td></tr></tbody>
+    </table>
+    <div class="sub"><h4>Claves foráneas</h4><ul class="flist"><li><code>fk_afiliado_usuario</code> (id_usuario) → <code>USUARIO</code> (id_usuario) &middot; ON DELETE RESTRICT / ON UPDATE CASCADE</li><li><code>fk_afiliado_registrado_por</code> (registrado_por) → <code>USUARIO</code> (id_usuario) &middot; ON DELETE RESTRICT / ON UPDATE CASCADE</li></ul></div><div class="sub"><h4>Índices adicionales</h4><ul class="flist"><li><code>uq_afiliado_documento</code> (documento) &middot; UNIQUE</li></ul></div>
+  </section>
+  <section id="t_AFILIADO_RESTRICCION">
+    <h3>AFILIADO_RESTRICCION</h3>
+    <p class="tcomment">Restricciones activas del afiliado (N:M). Consultada por middleware antes de asignar ejercicios.</p>
+    <table>
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Clave</th><th>Nulo</th><th>Predeterminado</th><th>Extra</th><th>Descripción</th></tr></thead>
+      <tbody><tr><td class="cname">id_usuario</td><td class="ctype">INT</td><td><span class="pk">PK</span> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK a AFILIADO: afiliado al que aplica la restriccion.</td></tr><tr><td class="cname">id_restriccion</td><td class="ctype">INT</td><td><span class="pk">PK</span> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK a RESTRICCION: restriccion activa del afiliado.</td></tr></tbody>
+    </table>
+    <div class="sub"><h4>Claves foráneas</h4><ul class="flist"><li><code>fk_afilrest_afiliado</code> (id_usuario) → <code>AFILIADO</code> (id_usuario) &middot; ON DELETE RESTRICT / ON UPDATE CASCADE</li><li><code>fk_afilrest_restriccion</code> (id_restriccion) → <code>RESTRICCION</code> (id_restriccion) &middot; ON DELETE RESTRICT / ON UPDATE CASCADE</li></ul></div>
+  </section>
+  <section id="t_EJERCICIO_RESTRICCION_EXCLUIDA">
+    <h3>EJERCICIO_RESTRICCION_EXCLUIDA</h3>
+    <p class="tcomment">Ejercicios prohibidos por restriccion (N:M). Consultada por middleware.</p>
+    <table>
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Clave</th><th>Nulo</th><th>Predeterminado</th><th>Extra</th><th>Descripción</th></tr></thead>
+      <tbody><tr><td class="cname">id_ejercicio</td><td class="ctype">INT</td><td><span class="pk">PK</span> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK a EJERCICIO: ejercicio excluido.</td></tr><tr><td class="cname">id_restriccion</td><td class="ctype">INT</td><td><span class="pk">PK</span> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK a RESTRICCION: restriccion que excluye el ejercicio.</td></tr></tbody>
+    </table>
+    <div class="sub"><h4>Claves foráneas</h4><ul class="flist"><li><code>fk_ejrest_ejercicio</code> (id_ejercicio) → <code>EJERCICIO</code> (id_ejercicio) &middot; ON DELETE RESTRICT / ON UPDATE CASCADE</li><li><code>fk_ejrest_restriccion</code> (id_restriccion) → <code>RESTRICCION</code> (id_restriccion) &middot; ON DELETE RESTRICT / ON UPDATE CASCADE</li></ul></div>
+  </section>
+  <section id="t_ALIMENTO_RESTRICCION_EXCLUIDA">
+    <h3>ALIMENTO_RESTRICCION_EXCLUIDA</h3>
+    <p class="tcomment">Alimentos prohibidos por restriccion (N:M). Consultada por middleware.</p>
+    <table>
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Clave</th><th>Nulo</th><th>Predeterminado</th><th>Extra</th><th>Descripción</th></tr></thead>
+      <tbody><tr><td class="cname">id_alimento</td><td class="ctype">INT</td><td><span class="pk">PK</span> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK a ALIMENTO: alimento excluido.</td></tr><tr><td class="cname">id_restriccion</td><td class="ctype">INT</td><td><span class="pk">PK</span> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK a RESTRICCION: restriccion que excluye el alimento.</td></tr></tbody>
+    </table>
+    <div class="sub"><h4>Claves foráneas</h4><ul class="flist"><li><code>fk_alrest_alimento</code> (id_alimento) → <code>ALIMENTO</code> (id_alimento) &middot; ON DELETE RESTRICT / ON UPDATE CASCADE</li><li><code>fk_alrest_restriccion</code> (id_restriccion) → <code>RESTRICCION</code> (id_restriccion) &middot; ON DELETE RESTRICT / ON UPDATE CASCADE</li></ul></div>
+  </section>
+  <section id="t_CICLO">
+    <h3>CICLO</h3>
+    <p class="tcomment">Macrociclo de entrenamiento. Objetivo/nivel/disponibilidad cambian por ciclo (3FN).</p>
+    <table>
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Clave</th><th>Nulo</th><th>Predeterminado</th><th>Extra</th><th>Descripción</th></tr></thead>
+      <tbody><tr><td class="cname">id_ciclo</td><td class="ctype">INT</td><td><span class="pk">PK</span></td><td>NO</td><td>—</td><td> <span class="ai">AUTO_INCREMENT</span></td><td class="cdesc">Identificador unico del ciclo (PK).</td></tr><tr><td class="cname">id_usuario</td><td class="ctype">INT</td><td> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK a AFILIADO: afiliado dueno del ciclo.</td></tr><tr><td class="cname">fecha_inicio</td><td class="ctype">DATE</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Fecha de inicio del ciclo.</td></tr><tr><td class="cname">fecha_fin</td><td class="ctype">DATE</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Fecha de fin del ciclo (mayor que fecha_inicio).</td></tr><tr><td class="cname">activo</td><td class="ctype">TINYINT(1)</td><td>—</td><td>NO</td><td>1</td><td>—</td><td class="cdesc">1 si es el ciclo activo del afiliado; 0 en caso contrario.</td></tr><tr><td class="cname">objetivo_fisico</td><td class="ctype">ENUM(&#x27;Perdida de grasa&#x27;, &#x27;Aumento de masa&#x27;, &#x27;Mantenimiento&#x27;, &#x27;Rehabilitacion&#x27;)</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Objetivo fisico del ciclo (fuente por ciclo).</td></tr><tr><td class="cname">grupo_muscular_prioritario</td><td class="ctype">ENUM(&#x27;Piernas&#x27;, &#x27;Pecho&#x27;, &#x27;Espalda&#x27;, &#x27;Hombros&#x27;, &#x27;Biceps&#x27;, &#x27;Triceps&#x27;, &#x27;Core&#x27;, &#x27;Gluteos&#x27;)</td><td>—</td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">Grupo muscular prioritario del ciclo (opcional).</td></tr><tr><td class="cname">nivel_experiencia</td><td class="ctype">ENUM(&#x27;Principiante&#x27;, &#x27;Intermedio&#x27;, &#x27;Avanzado&#x27;)</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Nivel de experiencia del ciclo.</td></tr><tr><td class="cname">disponibilidad_dias</td><td class="ctype">TINYINT</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Dias por semana disponibles para entrenar (1-7).</td></tr><tr><td class="cname">observaciones</td><td class="ctype">VARCHAR(400)</td><td>—</td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">Observaciones del entrenador sobre el ciclo.</td></tr><tr><td class="cname">fecha_creacion</td><td class="ctype">DATETIME</td><td>—</td><td>NO</td><td>CURRENT_TIMESTAMP</td><td>—</td><td class="cdesc">Fecha y hora de creacion del ciclo.</td></tr><tr><td class="cname">registrado_por</td><td class="ctype">INT</td><td> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK a USUARIO: entrenador que registro el ciclo.</td></tr></tbody>
+    </table>
+    <div class="sub"><h4>Claves foráneas</h4><ul class="flist"><li><code>fk_ciclo_afiliado</code> (id_usuario) → <code>AFILIADO</code> (id_usuario) &middot; ON DELETE RESTRICT / ON UPDATE CASCADE</li><li><code>fk_ciclo_registrado_por</code> (registrado_por) → <code>USUARIO</code> (id_usuario) &middot; ON DELETE RESTRICT / ON UPDATE CASCADE</li></ul></div><div class="sub"><h4>Índices adicionales</h4><ul class="flist"><li><code>uq_ciclo_afiliado_inicio</code> (id_usuario, fecha_inicio) &middot; UNIQUE</li><li><code>idx_ciclo_usuario</code> (id_usuario)</li><li><code>idx_ciclo_activo</code> (activo)</li></ul></div>
+  </section>
+  <section id="t_PLAN_ENTRENAMIENTO">
+    <h3>PLAN_ENTRENAMIENTO</h3>
+    <p class="tcomment">Plan de entrenamiento del ciclo (1:1 con CICLO).</p>
+    <table>
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Clave</th><th>Nulo</th><th>Predeterminado</th><th>Extra</th><th>Descripción</th></tr></thead>
+      <tbody><tr><td class="cname">id_ciclo</td><td class="ctype">INT</td><td><span class="pk">PK</span> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">PK y FK a CICLO (relacion 1:1).</td></tr><tr><td class="cname">modificado_por</td><td class="ctype">INT</td><td> <span class="fk">FK</span></td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">FK a USUARIO: ultimo usuario que modifico el plan.</td></tr><tr><td class="cname">observaciones</td><td class="ctype">VARCHAR(400)</td><td>—</td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">Observaciones del entrenador sobre el plan de entrenamiento.</td></tr></tbody>
+    </table>
+    <div class="sub"><h4>Claves foráneas</h4><ul class="flist"><li><code>fk_planen_ciclo</code> (id_ciclo) → <code>CICLO</code> (id_ciclo) &middot; ON DELETE RESTRICT / ON UPDATE CASCADE</li><li><code>fk_planen_modificado</code> (modificado_por) → <code>USUARIO</code> (id_usuario) &middot; ON DELETE RESTRICT / ON UPDATE CASCADE</li></ul></div>
+  </section>
+  <section id="t_PLAN_NUTRICIONAL">
+    <h3>PLAN_NUTRICIONAL</h3>
+    <p class="tcomment">Plan nutricional del ciclo (1:1 con CICLO). calorias_objetivo es meta del entrenador.</p>
+    <table>
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Clave</th><th>Nulo</th><th>Predeterminado</th><th>Extra</th><th>Descripción</th></tr></thead>
+      <tbody><tr><td class="cname">id_ciclo</td><td class="ctype">INT</td><td><span class="pk">PK</span> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">PK y FK a CICLO (relacion 1:1).</td></tr><tr><td class="cname">calorias_objetivo</td><td class="ctype">DECIMAL(8,2)</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Meta calorica diaria definida por el entrenador.</td></tr><tr><td class="cname">num_comidas</td><td class="ctype">TINYINT</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Numero de comidas diarias del plan.</td></tr><tr><td class="cname">modificado_por</td><td class="ctype">INT</td><td> <span class="fk">FK</span></td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">FK a USUARIO: ultimo usuario que modifico el plan.</td></tr><tr><td class="cname">observaciones</td><td class="ctype">VARCHAR(400)</td><td>—</td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">Observaciones del entrenador sobre el plan nutricional.</td></tr></tbody>
+    </table>
+    <div class="sub"><h4>Claves foráneas</h4><ul class="flist"><li><code>fk_plannut_ciclo</code> (id_ciclo) → <code>CICLO</code> (id_ciclo) &middot; ON DELETE RESTRICT / ON UPDATE CASCADE</li><li><code>fk_plannut_modificado</code> (modificado_por) → <code>USUARIO</code> (id_usuario) &middot; ON DELETE RESTRICT / ON UPDATE CASCADE</li></ul></div>
+  </section>
+  <section id="t_RUTINA">
+    <h3>RUTINA</h3>
+    <p class="tcomment">Dia de entrenamiento. dia_numero 1=Lunes ... 7=Domingo.</p>
+    <table>
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Clave</th><th>Nulo</th><th>Predeterminado</th><th>Extra</th><th>Descripción</th></tr></thead>
+      <tbody><tr><td class="cname">id_rutina</td><td class="ctype">INT</td><td><span class="pk">PK</span></td><td>NO</td><td>—</td><td> <span class="ai">AUTO_INCREMENT</span></td><td class="cdesc">Identificador unico de la rutina (PK).</td></tr><tr><td class="cname">id_ciclo</td><td class="ctype">INT</td><td> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK a PLAN_ENTRENAMIENTO: plan al que pertenece el dia de rutina.</td></tr><tr><td class="cname">nombre_rutina</td><td class="ctype">VARCHAR(100)</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Nombre del dia de entrenamiento.</td></tr><tr><td class="cname">enfoque_muscular</td><td class="ctype">ENUM(&#x27;Piernas&#x27;, &#x27;Pecho&#x27;, &#x27;Espalda&#x27;, &#x27;Hombros&#x27;, &#x27;Biceps&#x27;, &#x27;Triceps&#x27;, &#x27;Core&#x27;, &#x27;Gluteos&#x27;, &#x27;Full Body&#x27;, &#x27;Empuje&#x27;, &#x27;Jale&#x27;)</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Enfoque muscular del dia.</td></tr><tr><td class="cname">dia_numero</td><td class="ctype">TINYINT</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Dia de la semana (1=Lunes ... 7=Domingo).</td></tr></tbody>
+    </table>
+    <div class="sub"><h4>Claves foráneas</h4><ul class="flist"><li><code>fk_rutina_plan</code> (id_ciclo) → <code>PLAN_ENTRENAMIENTO</code> (id_ciclo) &middot; ON DELETE RESTRICT / ON UPDATE CASCADE</li></ul></div><div class="sub"><h4>Índices adicionales</h4><ul class="flist"><li><code>uq_rutina_ciclo_dia</code> (id_ciclo, dia_numero) &middot; UNIQUE</li></ul></div>
+  </section>
+  <section id="t_RUTINA_EJERCICIO">
+    <h3>RUTINA_EJERCICIO</h3>
+    <p class="tcomment">Alto volumen. PK=(rutina, orden). Ejercicios que componen un dia de rutina.</p>
+    <table>
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Clave</th><th>Nulo</th><th>Predeterminado</th><th>Extra</th><th>Descripción</th></tr></thead>
+      <tbody><tr><td class="cname">id_rutina</td><td class="ctype">INT</td><td><span class="pk">PK</span> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK y parte de la PK: rutina (dia) a la que pertenece el ejercicio.</td></tr><tr><td class="cname">orden</td><td class="ctype">INT</td><td><span class="pk">PK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Posicion del ejercicio dentro de la rutina (parte de la PK).</td></tr><tr><td class="cname">id_ejercicio</td><td class="ctype">INT</td><td> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK a EJERCICIO: ejercicio asignado.</td></tr><tr><td class="cname">series</td><td class="ctype">INT</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Numero de series indicadas.</td></tr><tr><td class="cname">repeticiones</td><td class="ctype">INT</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Numero de repeticiones por serie.</td></tr><tr><td class="cname">peso_kg</td><td class="ctype">DECIMAL(5,2)</td><td>—</td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">Peso sugerido en kg (opcional).</td></tr><tr><td class="cname">descanso_seg</td><td class="ctype">INT</td><td>—</td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">Descanso entre series en segundos (opcional).</td></tr></tbody>
+    </table>
+    <div class="sub"><h4>Claves foráneas</h4><ul class="flist"><li><code>fk_rutejec_rutina</code> (id_rutina) → <code>RUTINA</code> (id_rutina) &middot; ON DELETE RESTRICT / ON UPDATE CASCADE</li><li><code>fk_rutejec_ejercicio</code> (id_ejercicio) → <code>EJERCICIO</code> (id_ejercicio) &middot; ON DELETE RESTRICT / ON UPDATE CASCADE</li></ul></div><div class="sub"><h4>Índices adicionales</h4><ul class="flist"><li><code>idx_rutejec_ejercicio</code> (id_ejercicio)</li></ul></div>
+  </section>
+  <section id="t_DETALLE_NUTRICIONAL">
+    <h3>DETALLE_NUTRICIONAL</h3>
+    <p class="tcomment">Alto volumen. Alimentos por comida del plan. PK natural triple.</p>
+    <table>
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Clave</th><th>Nulo</th><th>Predeterminado</th><th>Extra</th><th>Descripción</th></tr></thead>
+      <tbody><tr><td class="cname">id_ciclo</td><td class="ctype">INT</td><td><span class="pk">PK</span> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK y parte de la PK: plan nutricional del ciclo.</td></tr><tr><td class="cname">num_comida</td><td class="ctype">TINYINT</td><td><span class="pk">PK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Numero de comida del plan (parte de la PK).</td></tr><tr><td class="cname">id_alimento</td><td class="ctype">INT</td><td><span class="pk">PK</span> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK y parte de la PK: alimento del plan.</td></tr><tr><td class="cname">cantidad_g</td><td class="ctype">DECIMAL(7,2)</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Cantidad indicada del alimento en gramos.</td></tr></tbody>
+    </table>
+    <div class="sub"><h4>Claves foráneas</h4><ul class="flist"><li><code>fk_detnut_plan</code> (id_ciclo) → <code>PLAN_NUTRICIONAL</code> (id_ciclo) &middot; ON DELETE RESTRICT / ON UPDATE CASCADE</li><li><code>fk_detnut_alimento</code> (id_alimento) → <code>ALIMENTO</code> (id_alimento) &middot; ON DELETE RESTRICT / ON UPDATE CASCADE</li></ul></div><div class="sub"><h4>Índices adicionales</h4><ul class="flist"><li><code>idx_detnut_alimento</code> (id_alimento)</li></ul></div>
+  </section>
+  <section id="t_PROGRESO_FISICO">
+    <h3>PROGRESO_FISICO</h3>
+    <p class="tcomment">Mediciones antropometricas del afiliado por ciclo. IMC calculado en backend/vista.</p>
+    <table>
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Clave</th><th>Nulo</th><th>Predeterminado</th><th>Extra</th><th>Descripción</th></tr></thead>
+      <tbody><tr><td class="cname">id_ciclo</td><td class="ctype">INT</td><td><span class="pk">PK</span> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK y parte de la PK: ciclo del afiliado.</td></tr><tr><td class="cname">fecha_registro</td><td class="ctype">DATE</td><td><span class="pk">PK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Fecha de la medicion (parte de la PK).</td></tr><tr><td class="cname">peso_kg</td><td class="ctype">DECIMAL(5,2)</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Peso corporal registrado (kg).</td></tr><tr><td class="cname">porcentaje_grasa</td><td class="ctype">DECIMAL(5,2)</td><td>—</td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">Porcentaje de grasa corporal (opcional).</td></tr><tr><td class="cname">medida_cintura</td><td class="ctype">DECIMAL(5,2)</td><td>—</td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">Medida de cintura en cm (opcional).</td></tr><tr><td class="cname">medida_brazo</td><td class="ctype">DECIMAL(5,2)</td><td>—</td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">Medida de brazo en cm (opcional).</td></tr><tr><td class="cname">medida_pierna</td><td class="ctype">DECIMAL(5,2)</td><td>—</td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">Medida de pierna en cm (opcional).</td></tr><tr><td class="cname">observaciones</td><td class="ctype">VARCHAR(400)</td><td>—</td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">Observaciones de la medicion.</td></tr><tr><td class="cname">registrado_por</td><td class="ctype">INT</td><td> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK a USUARIO: quien registro la medicion.</td></tr></tbody>
+    </table>
+    <div class="sub"><h4>Claves foráneas</h4><ul class="flist"><li><code>fk_progreso_ciclo</code> (id_ciclo) → <code>CICLO</code> (id_ciclo) &middot; ON DELETE RESTRICT / ON UPDATE CASCADE</li><li><code>fk_progreso_registrado</code> (registrado_por) → <code>USUARIO</code> (id_usuario) &middot; ON DELETE RESTRICT / ON UPDATE CASCADE</li></ul></div><div class="sub"><h4>Índices adicionales</h4><ul class="flist"><li><code>idx_progreso_ciclo</code> (id_ciclo)</li><li><code>idx_progreso_fecha</code> (fecha_registro)</li></ul></div>
+  </section>
+  <section id="t_PAGO">
+    <h3>PAGO</h3>
+    <p class="tcomment">Registro de pagos de membresia. Valor mensual unico.</p>
+    <table>
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Clave</th><th>Nulo</th><th>Predeterminado</th><th>Extra</th><th>Descripción</th></tr></thead>
+      <tbody><tr><td class="cname">id_pago</td><td class="ctype">INT</td><td><span class="pk">PK</span></td><td>NO</td><td>—</td><td> <span class="ai">AUTO_INCREMENT</span></td><td class="cdesc">Identificador unico del pago (PK).</td></tr><tr><td class="cname">id_usuario</td><td class="ctype">INT</td><td> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK a AFILIADO: afiliado que realizo el pago.</td></tr><tr><td class="cname">fecha_pago</td><td class="ctype">DATE</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Fecha en que se realizo el pago.</td></tr><tr><td class="cname">valor_pagado</td><td class="ctype">DECIMAL(10,2)</td><td>—</td><td>NO</td><td>80000.00</td><td>—</td><td class="cdesc">Valor pagado (por defecto 80000.00).</td></tr><tr><td class="cname">estado</td><td class="ctype">ENUM(&#x27;Pagado&#x27;, &#x27;Vencido&#x27;, &#x27;Pendiente&#x27;)</td><td>—</td><td>NO</td><td>&#x27;Pagado&#x27;</td><td>—</td><td class="cdesc">Estado del pago: Pagado, Vencido o Pendiente.</td></tr><tr><td class="cname">fecha_vencimiento</td><td class="ctype">DATE</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Fecha de vencimiento de la membresia.</td></tr><tr><td class="cname">observaciones</td><td class="ctype">VARCHAR(200)</td><td>—</td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">Observaciones del pago.</td></tr><tr><td class="cname">registrado_por</td><td class="ctype">INT</td><td>—</td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">FK a USUARIO: quien registro el pago (Admin/Recepcionista).</td></tr><tr><td class="cname">fecha_creacion</td><td class="ctype">DATETIME</td><td>—</td><td>NO</td><td>CURRENT_TIMESTAMP</td><td>—</td><td class="cdesc">Fecha y hora de creacion del registro.</td></tr></tbody>
+    </table>
+    <div class="sub"><h4>Claves foráneas</h4><ul class="flist"><li><code>fk_pago_afiliado</code> (id_usuario) → <code>AFILIADO</code> (id_usuario) &middot; ON DELETE RESTRICT / ON UPDATE CASCADE</li></ul></div><div class="sub"><h4>Índices adicionales</h4><ul class="flist"><li><code>idx_pago_afiliado</code> (id_usuario)</li><li><code>idx_pago_fecha</code> (fecha_pago)</li><li><code>idx_pago_registrado_por</code> (registrado_por)</li></ul></div>
+  </section>
+  <section id="t_CONFIGURACION">
+    <h3>CONFIGURACION</h3>
+    <p class="tcomment">Parametros configurables del sistema (ej: precio_membresia).</p>
+    <table>
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Clave</th><th>Nulo</th><th>Predeterminado</th><th>Extra</th><th>Descripción</th></tr></thead>
+      <tbody><tr><td class="cname">clave</td><td class="ctype">VARCHAR(50)</td><td><span class="pk">PK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Clave del parametro configurable (PK). Ej: precio_membresia.</td></tr><tr><td class="cname">valor</td><td class="ctype">VARCHAR(255)</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Valor del parametro configurable.</td></tr></tbody>
+    </table>
+    
+  </section>
+  <section id="t_NOTA_EJERCICIO">
+    <h3>NOTA_EJERCICIO</h3>
+    <p class="tcomment">Nota del afiliado sobre un ejercicio de su plan (feedback para el entrenador).</p>
+    <table>
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Clave</th><th>Nulo</th><th>Predeterminado</th><th>Extra</th><th>Descripción</th></tr></thead>
+      <tbody><tr><td class="cname">id_nota</td><td class="ctype">INT</td><td><span class="pk">PK</span></td><td>NO</td><td>—</td><td> <span class="ai">AUTO_INCREMENT</span></td><td class="cdesc">Identificador unico de la nota (PK).</td></tr><tr><td class="cname">id_usuario</td><td class="ctype">INT</td><td> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK a USUARIO: afiliado autor de la nota.</td></tr><tr><td class="cname">id_ejercicio</td><td class="ctype">INT</td><td> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK a EJERCICIO: ejercicio sobre el que se comenta.</td></tr><tr><td class="cname">id_ciclo</td><td class="ctype">INT</td><td> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK a CICLO: ciclo en el que se escribio la nota.</td></tr><tr><td class="cname">nota</td><td class="ctype">TEXT</td><td>—</td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">Contenido de la nota o feedback.</td></tr><tr><td class="cname">fecha_nota</td><td class="ctype">DATE</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Fecha de la nota.</td></tr></tbody>
+    </table>
+    <div class="sub"><h4>Claves foráneas</h4><ul class="flist"><li><code>fk_nota_usuario</code> (id_usuario) → <code>USUARIO</code> (id_usuario) &middot; ON DELETE CASCADE / ON UPDATE CASCADE</li><li><code>fk_nota_ejercicio</code> (id_ejercicio) → <code>EJERCICIO</code> (id_ejercicio) &middot; ON DELETE CASCADE / ON UPDATE CASCADE</li><li><code>fk_nota_ciclo</code> (id_ciclo) → <code>CICLO</code> (id_ciclo) &middot; ON DELETE CASCADE / ON UPDATE CASCADE</li></ul></div><div class="sub"><h4>Índices adicionales</h4><ul class="flist"><li><code>uq_nota_ejercicio_dia</code> (id_usuario, id_ejercicio, id_ciclo, fecha_nota) &middot; UNIQUE</li><li><code>idx_nota_usuario</code> (id_usuario)</li><li><code>idx_nota_ejercicio</code> (id_ejercicio)</li><li><code>idx_nota_ciclo</code> (id_ciclo)</li></ul></div>
+  </section>
+  <section id="t_PROGRESO_EJERCICIO_DIARIO">
+    <h3>PROGRESO_EJERCICIO_DIARIO</h3>
+    <p class="tcomment">Registro diario de ejercicios completados por el afiliado (modulo movil).</p>
+    <table>
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Clave</th><th>Nulo</th><th>Predeterminado</th><th>Extra</th><th>Descripción</th></tr></thead>
+      <tbody><tr><td class="cname">id_progreso</td><td class="ctype">INT</td><td><span class="pk">PK</span></td><td>NO</td><td>—</td><td> <span class="ai">AUTO_INCREMENT</span></td><td class="cdesc">Identificador unico del registro (PK).</td></tr><tr><td class="cname">id_usuario</td><td class="ctype">INT</td><td> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK a USUARIO: afiliado que completa el ejercicio.</td></tr><tr><td class="cname">id_ciclo</td><td class="ctype">INT</td><td> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK a CICLO: ciclo vigente.</td></tr><tr><td class="cname">id_ejercicio</td><td class="ctype">INT</td><td> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK a EJERCICIO: ejercicio completado.</td></tr><tr><td class="cname">fecha</td><td class="ctype">DATE</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Fecha del dia registrado.</td></tr><tr><td class="cname">completado</td><td class="ctype">TINYINT(1)</td><td>—</td><td>NO</td><td>0</td><td>—</td><td class="cdesc">1 si el ejercicio se completo; 0 por defecto.</td></tr><tr><td class="cname">created_at</td><td class="ctype">DATETIME</td><td>—</td><td>NO</td><td>CURRENT_TIMESTAMP</td><td>—</td><td class="cdesc">Fecha y hora de creacion.</td></tr><tr><td class="cname">updated_at</td><td class="ctype">DATETIME</td><td>—</td><td>NO</td><td>CURRENT_TIMESTAMP</td><td>—</td><td class="cdesc">Fecha y hora de la ultima actualizacion.</td></tr></tbody>
+    </table>
+    <div class="sub"><h4>Claves foráneas</h4><ul class="flist"><li><code>fk_PROGRESO_EJERCICIO_DIARIO_usuario</code> (id_usuario) → <code>USUARIO</code> (id_usuario) &middot; ON DELETE CASCADE / ON UPDATE RESTRICT</li><li><code>fk_PROGRESO_EJERCICIO_DIARIO_ciclo</code> (id_ciclo) → <code>CICLO</code> (id_ciclo) &middot; ON DELETE CASCADE / ON UPDATE RESTRICT</li><li><code>fk_PROGRESO_EJERCICIO_DIARIO_ejercicio</code> (id_ejercicio) → <code>EJERCICIO</code> (id_ejercicio) &middot; ON DELETE CASCADE / ON UPDATE RESTRICT</li></ul></div><div class="sub"><h4>Índices adicionales</h4><ul class="flist"><li><code>uk_ejercicio_dia</code> (id_usuario, id_ciclo, id_ejercicio, fecha) &middot; UNIQUE</li></ul></div>
+  </section>
+  <section id="t_REGISTRO_AGUA">
+    <h3>REGISTRO_AGUA</h3>
+    <p class="tcomment">Consumo diario de agua por afiliado (modulo movil). 1 fila por afiliado/dia.</p>
+    <table>
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Clave</th><th>Nulo</th><th>Predeterminado</th><th>Extra</th><th>Descripción</th></tr></thead>
+      <tbody><tr><td class="cname">id_agua</td><td class="ctype">INT</td><td><span class="pk">PK</span></td><td>NO</td><td>—</td><td> <span class="ai">AUTO_INCREMENT</span></td><td class="cdesc">Identificador unico del registro (PK).</td></tr><tr><td class="cname">id_usuario</td><td class="ctype">INT</td><td> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK a USUARIO: afiliado que registra el consumo.</td></tr><tr><td class="cname">fecha</td><td class="ctype">DATE</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Dia del registro (unico por usuario y dia).</td></tr><tr><td class="cname">vasos</td><td class="ctype">TINYINT</td><td>—</td><td>NO</td><td>0</td><td>—</td><td class="cdesc">Cantidad de vasos consumidos (por defecto 0).</td></tr><tr><td class="cname">created_at</td><td class="ctype">DATETIME</td><td>—</td><td>NO</td><td>CURRENT_TIMESTAMP</td><td>—</td><td class="cdesc">Fecha y hora de creacion.</td></tr><tr><td class="cname">updated_at</td><td class="ctype">DATETIME</td><td>—</td><td>NO</td><td>CURRENT_TIMESTAMP</td><td>—</td><td class="cdesc">Fecha y hora de la ultima actualizacion.</td></tr></tbody>
+    </table>
+    <div class="sub"><h4>Claves foráneas</h4><ul class="flist"><li><code>fk_REGISTRO_AGUA_usuario</code> (id_usuario) → <code>USUARIO</code> (id_usuario) &middot; ON DELETE CASCADE / ON UPDATE RESTRICT</li></ul></div><div class="sub"><h4>Índices adicionales</h4><ul class="flist"><li><code>uk_agua_dia</code> (id_usuario, fecha) &middot; UNIQUE</li></ul></div>
+  </section>
+  <section id="t_CONSUMO_ALIMENTO_DIARIO">
+    <h3>CONSUMO_ALIMENTO_DIARIO</h3>
+    <p class="tcomment">Marcado diario de comidas planificadas consumidas (modulo movil).</p>
+    <table>
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Clave</th><th>Nulo</th><th>Predeterminado</th><th>Extra</th><th>Descripción</th></tr></thead>
+      <tbody><tr><td class="cname">id_consumo</td><td class="ctype">INT</td><td><span class="pk">PK</span></td><td>NO</td><td>—</td><td> <span class="ai">AUTO_INCREMENT</span></td><td class="cdesc">Identificador unico del registro (PK).</td></tr><tr><td class="cname">id_usuario</td><td class="ctype">INT</td><td> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK a USUARIO: afiliado.</td></tr><tr><td class="cname">id_ciclo</td><td class="ctype">INT</td><td> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK a CICLO: ciclo vigente.</td></tr><tr><td class="cname">id_alimento</td><td class="ctype">INT</td><td> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK a ALIMENTO: alimento planificado.</td></tr><tr><td class="cname">num_comida</td><td class="ctype">TINYINT</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Numero de comida del plan.</td></tr><tr><td class="cname">fecha</td><td class="ctype">DATE</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Fecha del registro.</td></tr><tr><td class="cname">consumido</td><td class="ctype">TINYINT(1)</td><td>—</td><td>NO</td><td>0</td><td>—</td><td class="cdesc">1 si se consumio la comida; 0 por defecto.</td></tr><tr><td class="cname">created_at</td><td class="ctype">DATETIME</td><td>—</td><td>NO</td><td>CURRENT_TIMESTAMP</td><td>—</td><td class="cdesc">Fecha y hora de creacion.</td></tr><tr><td class="cname">updated_at</td><td class="ctype">DATETIME</td><td>—</td><td>NO</td><td>CURRENT_TIMESTAMP</td><td>—</td><td class="cdesc">Fecha y hora de la ultima actualizacion.</td></tr></tbody>
+    </table>
+    <div class="sub"><h4>Claves foráneas</h4><ul class="flist"><li><code>fk_CONSUMO_ALIMENTO_DIARIO_usuario</code> (id_usuario) → <code>USUARIO</code> (id_usuario) &middot; ON DELETE CASCADE / ON UPDATE RESTRICT</li><li><code>fk_CONSUMO_ALIMENTO_DIARIO_ciclo</code> (id_ciclo) → <code>CICLO</code> (id_ciclo) &middot; ON DELETE CASCADE / ON UPDATE RESTRICT</li><li><code>fk_CONSUMO_ALIMENTO_DIARIO_alimento</code> (id_alimento) → <code>ALIMENTO</code> (id_alimento) &middot; ON DELETE CASCADE / ON UPDATE RESTRICT</li></ul></div><div class="sub"><h4>Índices adicionales</h4><ul class="flist"><li><code>uk_alimento_dia</code> (id_usuario, id_ciclo, id_alimento, num_comida, fecha) &middot; UNIQUE</li></ul></div>
+  </section>
+  <section id="t_REGISTRO_EJERCICIO">
+    <h3>REGISTRO_EJERCICIO</h3>
+    <p class="tcomment">Alto volumen. Ejecucion real (series/reps/peso) del ejercicio de la rutina. FK compuesta a RUTINA_EJERCICIO.</p>
+    <table>
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Clave</th><th>Nulo</th><th>Predeterminado</th><th>Extra</th><th>Descripción</th></tr></thead>
+      <tbody><tr><td class="cname">id_registro</td><td class="ctype">INT</td><td><span class="pk">PK</span></td><td>NO</td><td>—</td><td> <span class="ai">AUTO_INCREMENT</span></td><td class="cdesc">Identificador unico del registro (PK).</td></tr><tr><td class="cname">id_usuario</td><td class="ctype">INT</td><td> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK a USUARIO (afiliado) que ejecuto el ejercicio.</td></tr><tr><td class="cname">id_ciclo</td><td class="ctype">INT</td><td> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK a CICLO: ciclo vigente.</td></tr><tr><td class="cname">id_rutina</td><td class="ctype">INT</td><td> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK compuesta a RUTINA_EJERCICIO: rutina ejecutada.</td></tr><tr><td class="cname">orden</td><td class="ctype">INT</td><td> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Posicion del ejercicio ejecutado (parte de la FK compuesta).</td></tr><tr><td class="cname">fecha</td><td class="ctype">DATE</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Fecha de la ejecucion.</td></tr><tr><td class="cname">series</td><td class="ctype">INT</td><td>—</td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">Series realmente realizadas (opcional).</td></tr><tr><td class="cname">repeticiones</td><td class="ctype">INT</td><td>—</td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">Repeticiones realmente realizadas (opcional).</td></tr><tr><td class="cname">peso_utilizado_kg</td><td class="ctype">DECIMAL(5,2)</td><td>—</td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">Peso utilizado en kg (opcional).</td></tr><tr><td class="cname">notas</td><td class="ctype">VARCHAR(400)</td><td>—</td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">Notas del afiliado sobre la ejecucion.</td></tr><tr><td class="cname">created_at</td><td class="ctype">DATETIME</td><td>—</td><td>NO</td><td>CURRENT_TIMESTAMP</td><td>—</td><td class="cdesc">Fecha y hora de creacion.</td></tr></tbody>
+    </table>
+    <div class="sub"><h4>Claves foráneas</h4><ul class="flist"><li><code>fk_rejec_usuario</code> (id_usuario) → <code>USUARIO</code> (id_usuario) &middot; ON DELETE CASCADE / ON UPDATE CASCADE</li><li><code>fk_rejec_ciclo</code> (id_ciclo) → <code>CICLO</code> (id_ciclo) &middot; ON DELETE CASCADE / ON UPDATE CASCADE</li><li><code>fk_rejec_rutejec</code> (id_rutina, orden) → <code>RUTINA_EJERCICIO</code> (id_rutina, orden) &middot; ON DELETE RESTRICT / ON UPDATE CASCADE</li></ul></div><div class="sub"><h4>Índices adicionales</h4><ul class="flist"><li><code>uk_registro_ejercicio_dia</code> (id_usuario, id_ciclo, id_rutina, orden, fecha) &middot; UNIQUE</li><li><code>idx_rejec_usuario_fecha</code> (id_usuario, fecha)</li><li><code>idx_rejec_rutina</code> (id_rutina, orden)</li></ul></div>
+  </section>
+  <section id="t_CONSUMO_ALIMENTO_REAL">
+    <h3>CONSUMO_ALIMENTO_REAL</h3>
+    <p class="tcomment">Alto volumen. Consumo real por alimento. Macros y calorias (Atwater) calculadas en el INSERT.</p>
+    <table>
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Clave</th><th>Nulo</th><th>Predeterminado</th><th>Extra</th><th>Descripción</th></tr></thead>
+      <tbody><tr><td class="cname">id_consumo</td><td class="ctype">INT</td><td><span class="pk">PK</span></td><td>NO</td><td>—</td><td> <span class="ai">AUTO_INCREMENT</span></td><td class="cdesc">Identificador unico del registro (PK).</td></tr><tr><td class="cname">id_usuario</td><td class="ctype">INT</td><td> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK a USUARIO (afiliado) que consumio.</td></tr><tr><td class="cname">id_ciclo</td><td class="ctype">INT</td><td> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK a CICLO: ciclo vigente.</td></tr><tr><td class="cname">num_comida</td><td class="ctype">TINYINT</td><td> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Numero de comida del plan.</td></tr><tr><td class="cname">id_alimento</td><td class="ctype">INT</td><td> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK a ALIMENTO consumido.</td></tr><tr><td class="cname">fecha</td><td class="ctype">DATE</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Fecha del consumo.</td></tr><tr><td class="cname">cantidad_g_consumida</td><td class="ctype">DECIMAL(7,2)</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Cantidad consumida en gramos.</td></tr><tr><td class="cname">calorias_consumidas</td><td class="ctype">DECIMAL(8,2)</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Calorias calculadas (Atwater) para la cantidad consumida.</td></tr><tr><td class="cname">proteinas_consumidas</td><td class="ctype">DECIMAL(8,2)</td><td>—</td><td>NO</td><td>0</td><td>—</td><td class="cdesc">Proteinas calculadas (g) para la cantidad consumida.</td></tr><tr><td class="cname">carbohidratos_consumidos</td><td class="ctype">DECIMAL(8,2)</td><td>—</td><td>NO</td><td>0</td><td>—</td><td class="cdesc">Carbohidratos calculados (g) para la cantidad consumida.</td></tr><tr><td class="cname">grasas_consumidas</td><td class="ctype">DECIMAL(8,2)</td><td>—</td><td>NO</td><td>0</td><td>—</td><td class="cdesc">Grasas calculadas (g) para la cantidad consumida.</td></tr><tr><td class="cname">created_at</td><td class="ctype">DATETIME</td><td>—</td><td>NO</td><td>CURRENT_TIMESTAMP</td><td>—</td><td class="cdesc">Fecha y hora de creacion.</td></tr></tbody>
+    </table>
+    <div class="sub"><h4>Claves foráneas</h4><ul class="flist"><li><code>fk_creal_usuario</code> (id_usuario) → <code>USUARIO</code> (id_usuario) &middot; ON DELETE CASCADE / ON UPDATE CASCADE</li><li><code>fk_creal_ciclo</code> (id_ciclo) → <code>CICLO</code> (id_ciclo) &middot; ON DELETE CASCADE / ON UPDATE CASCADE</li><li><code>fk_creal_detalle</code> (id_ciclo, num_comida, id_alimento) → <code>DETALLE_NUTRICIONAL</code> (id_ciclo, num_comida, id_alimento) &middot; ON DELETE RESTRICT / ON UPDATE CASCADE</li></ul></div><div class="sub"><h4>Índices adicionales</h4><ul class="flist"><li><code>uk_consumo_real_dia</code> (id_usuario, id_ciclo, num_comida, id_alimento, fecha) &middot; UNIQUE</li><li><code>idx_creal_usuario_fecha</code> (id_usuario, fecha)</li><li><code>idx_creal_id_alimento</code> (id_alimento)</li></ul></div>
+  </section>
+  <section id="t_PROGRESO_DIARIO">
+    <h3>PROGRESO_DIARIO</h3>
+    <p class="tcomment">Resumen diario por afiliado (1 fila/dia). Fuente: REGISTRO_EJERCICIO + CONSUMO_ALIMENTO_REAL + REGISTRO_AGUA.</p>
+    <table>
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Clave</th><th>Nulo</th><th>Predeterminado</th><th>Extra</th><th>Descripción</th></tr></thead>
+      <tbody><tr><td class="cname">id_progreso_diario</td><td class="ctype">INT</td><td><span class="pk">PK</span></td><td>NO</td><td>—</td><td> <span class="ai">AUTO_INCREMENT</span></td><td class="cdesc">Identificador unico del resumen diario (PK).</td></tr><tr><td class="cname">id_usuario</td><td class="ctype">INT</td><td> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK a USUARIO: afiliado.</td></tr><tr><td class="cname">fecha</td><td class="ctype">DATE</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Dia del resumen (unico por usuario).</td></tr><tr><td class="cname">calorias_consumidas</td><td class="ctype">DECIMAL(8,2)</td><td>—</td><td>NO</td><td>0</td><td>—</td><td class="cdesc">Total de calorias consumidas en el dia.</td></tr><tr><td class="cname">agua_vasos</td><td class="ctype">TINYINT</td><td>—</td><td>NO</td><td>0</td><td>—</td><td class="cdesc">Total de vasos de agua del dia.</td></tr><tr><td class="cname">ejercicios_realizados</td><td class="ctype">TINYINT</td><td>—</td><td>NO</td><td>0</td><td>—</td><td class="cdesc">Cantidad de ejercicios completados en el dia.</td></tr><tr><td class="cname">duracion_minutos</td><td class="ctype">INT</td><td>—</td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">Duracion total de entrenamiento en minutos (opcional).</td></tr><tr><td class="cname">nivel_energia</td><td class="ctype">TINYINT</td><td>—</td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">Nivel de energia percibido (escala 1-5) (opcional).</td></tr><tr><td class="cname">estado_animo</td><td class="ctype">ENUM(&#x27;Excelente&#x27;, &#x27;Bueno&#x27;, &#x27;Normal&#x27;, &#x27;Cansado&#x27;, &#x27;Agotado&#x27;)</td><td>—</td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">Estado de animo del dia (opcional).</td></tr><tr><td class="cname">observaciones</td><td class="ctype">VARCHAR(400)</td><td>—</td><td>SÍ</td><td>—</td><td>—</td><td class="cdesc">Observaciones del dia.</td></tr><tr><td class="cname">created_at</td><td class="ctype">DATETIME</td><td>—</td><td>NO</td><td>CURRENT_TIMESTAMP</td><td>—</td><td class="cdesc">Fecha y hora de creacion.</td></tr><tr><td class="cname">updated_at</td><td class="ctype">DATETIME</td><td>—</td><td>NO</td><td>CURRENT_TIMESTAMP</td><td>—</td><td class="cdesc">Fecha y hora de la ultima actualizacion.</td></tr></tbody>
+    </table>
+    <div class="sub"><h4>Claves foráneas</h4><ul class="flist"><li><code>fk_pdiario_usuario</code> (id_usuario) → <code>USUARIO</code> (id_usuario) &middot; ON DELETE CASCADE / ON UPDATE CASCADE</li></ul></div><div class="sub"><h4>Índices adicionales</h4><ul class="flist"><li><code>uk_progreso_diario</code> (id_usuario, fecha) &middot; UNIQUE</li></ul></div>
+  </section>
+  <section id="t_PASSWORD_RESET">
+    <h3>PASSWORD_RESET</h3>
+    <p class="tcomment">Tokens JWT de un solo uso para recuperacion de contrasena (15 min).</p>
+    <table>
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Clave</th><th>Nulo</th><th>Predeterminado</th><th>Extra</th><th>Descripción</th></tr></thead>
+      <tbody><tr><td class="cname">id</td><td class="ctype">INT</td><td><span class="pk">PK</span></td><td>NO</td><td>—</td><td> <span class="ai">AUTO_INCREMENT</span></td><td class="cdesc">Identificador unico del token (PK).</td></tr><tr><td class="cname">usuario_id</td><td class="ctype">INT</td><td> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">FK a USUARIO: usuario que solicita el restablecimiento.</td></tr><tr><td class="cname">token</td><td class="ctype">VARCHAR(512)</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Token JWT de un solo uso (indizado para busqueda).</td></tr><tr><td class="cname">expiracion</td><td class="ctype">DATETIME</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Fecha y hora de expiracion (15 min).</td></tr><tr><td class="cname">usado</td><td class="ctype">TINYINT(1)</td><td>—</td><td>NO</td><td>0</td><td>—</td><td class="cdesc">1 si el token ya fue usado; 0 por defecto.</td></tr><tr><td class="cname">creado</td><td class="ctype">DATETIME</td><td>—</td><td>NO</td><td>CURRENT_TIMESTAMP</td><td>—</td><td class="cdesc">Fecha y hora de emision del token.</td></tr></tbody>
+    </table>
+    <div class="sub"><h4>Claves foráneas</h4><ul class="flist"><li><code>fk_reset_usuario</code> (usuario_id) → <code>USUARIO</code> (id_usuario) &middot; ON DELETE CASCADE / ON UPDATE RESTRICT</li></ul></div><div class="sub"><h4>Índices adicionales</h4><ul class="flist"><li><code>idx_reset_token</code> (token)</li></ul></div>
+  </section>
+  <section id="t_PAGO_RECORDATORIO">
+    <h3>PAGO_RECORDATORIO</h3>
+    <p class="tcomment">Control de recordatorios de pago ya enviados (1 fila por pago/dia).</p>
+    <table>
+      <thead><tr><th>Columna</th><th>Tipo</th><th>Clave</th><th>Nulo</th><th>Predeterminado</th><th>Extra</th><th>Descripción</th></tr></thead>
+      <tbody><tr><td class="cname">id_pago</td><td class="ctype">INT</td><td><span class="pk">PK</span> <span class="fk">FK</span></td><td>NO</td><td>—</td><td>—</td><td class="cdesc">PK y FK a PAGO: pago recordado.</td></tr><tr><td class="cname">fecha_envio</td><td class="ctype">DATE</td><td>—</td><td>NO</td><td>—</td><td>—</td><td class="cdesc">Fecha del ultimo correo de recordatorio enviado.</td></tr></tbody>
+    </table>
+    <div class="sub"><h4>Claves foráneas</h4><ul class="flist"><li><code>fk_rec_pago</code> (id_pago) → <code>PAGO</code> (id_pago) &middot; ON DELETE CASCADE / ON UPDATE RESTRICT</li></ul></div><div class="sub"><h4>Índices adicionales</h4><ul class="flist"><li><code>idx_rec_fecha</code> (fecha_envio)</li></ul></div>
+  </section>
+  <footer>MetaFit &middot; Diccionario de Datos &middot; generado autom&aacute;ticamente</footer>
+</main>
+</body>
+</html>

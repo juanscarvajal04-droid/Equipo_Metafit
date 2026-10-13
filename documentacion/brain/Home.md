@@ -17,7 +17,7 @@
 - [[Backend Node.js]] — Express, middlewares, estructura de carpetas
 - [[Frontend React]] — Vite, RBAC, componentes, estilos
 - [[App Móvil React Native]] — Expo, navegación, pantallas
-- [[Base de datos MySQL]] — 17 tablas, 5 vistas, esquema completo
+- [[Base de datos MySQL]] — 26 tablas, 5 vistas, esquema completo
 
 ### 🔌 APIs
 - [[Autenticación]] — Login, JWT, recuperación de contraseña
@@ -27,7 +27,7 @@
 - [[Notificaciones]] — Push notifications y notificaciones por rol
 
 ### 🚀 Despliegue
-- `../manual_despliegue.md` — Guía completa de despliegue (Render, Railway, Brevo, Cloudinary, CI/CD)
+- `../entregables/Diagrama_de_Despliegue_MetaFit.drawio` — Diagrama de despliegue (Render, Docker, MariaDB, Brevo, Cloudinary, CI/CD)
 - `../n8n.md` — Automatización n8n: webhooks, credenciales, troubleshooting
 
 ### 🐛 Bugs y Soluciones
@@ -63,8 +63,8 @@
 
 | Métrica | Valor |
 |---|---|
-| Endpoints API | 57 |
-| Tablas BD | 17 + 5 vistas |
+| Endpoints API | 91 |
+| Tablas BD | 26 + 5 vistas |
 | Tests verdes | 74 (30 FE + 25 BE + 19 Móvil) |
 | Roles | 4 (Admin, Entrenador, Recepcionista, Afiliado) |
 | Despliegue | Render (BE) + Railway (DB) + EAS (Móvil) |
