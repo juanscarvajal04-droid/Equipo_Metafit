@@ -52,8 +52,8 @@
 
 | Archivo | Contenido |
 |---|---|
-| `documentacion/MANUAL_TECNICO.md` | Arquitectura, endpoints, BD, seguridad |
-| `documentacion/MANUAL_USUARIO.md` | Guías por rol |
+| `documentacion/entregables/Manual_Tecnico_MetaFit.docx` | Arquitectura, endpoints, BD, seguridad |
+| `documentacion/entregables/Manual_de_Usuario_MetaFit.docx` | Guías por rol |
 | `documentacion/MANUAL_POSTMAN.md` | Colecciones API |
 | `documentacion/DIAGRAMAS.md` | Diagramas de arquitectura |
 | `documentacion/entregables/Presentación Metafit.pptx` | Presentación del proyecto |
@@ -64,7 +64,7 @@
 
 > **Abrir los `.drawio`:** en [app.diagrams.net](https://app.diagrams.net) (✓ File → Open From → Device), en la app de escritorio draw.io (File → Open), o en VS Code con la extensión **"Draw.io Integration"** (hediet) abriendo el archivo directamente. Los archivos tienen varias **páginas** (pestañas) en la parte inferior.
 | `documentacion/entregables/Diagrama_de_Despliegue_MetaFit.drawio` | Diagrama de despliegue |
-| `documentacion/manual_apk_movil.md` | Guía compilación APK |
+| `documentacion/entregables/Manual_de_Instalacion_MetaFit.docx` | Guía de instalación, despliegue y compilación del APK |
 
 ---
 

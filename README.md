@@ -34,7 +34,7 @@ cd frontend_web && npm install && npm run dev
 git clone <repo-url>
 cd Equipo_Metafit
 
-# Iniciar todos los servicios (MySQL + Backend + Frontend + phpMyAdmin)
+# Iniciar todos los servicios (MariaDB + Backend + Frontend + phpMyAdmin + n8n)
 docker compose up -d --build
 
 # Verificar que los contenedores estén corriendo
@@ -96,10 +96,10 @@ Se proporcionan **dos** colecciones Postman (dentro de [`postman/`](./postman)):
 | Característica | Estado |
 |----------------|--------|
 | Mantenibilidad | ✅ Código modular MVC (controller → service → model) |
-| Funcionalidad  | ✅ 30+ endpoints documentados con Swagger |
+| Funcionalidad  | ✅ 54 endpoints documentados con Swagger |
 | Confiabilidad  | ✅ Manejo de errores con try-catch + códigos HTTP |
 | Seguridad      | ✅ JWT + bcrypt (12 rondas) + rutas protegidas |
-| Capacidad de prueba | ✅ 16 tests (integración + unitarios) pasando |
+| Capacidad de prueba | ✅ 74 tests (integración + unitarios) pasando |
 | Portabilidad   | ✅ Web (Vite) + Móvil (Expo) + Docker |
 
 ## 📚 Documentación
@@ -108,15 +108,14 @@ Todos los documentos se encuentran en la carpeta [`documentacion/`](./documentac
 
 | Documento | Descripción |
 |---|---|
-| `documentacion/MANUAL_TECNICO.md` | Manual técnico completo: arquitectura, endpoints, BD, seguridad, despliegue |
-| `documentacion/MANUAL_USUARIO.md` | Guías paso a paso para cada rol del sistema |
+| `documentacion/entregables/Manual_de_Instalacion_MetaFit.docx` | Instalación local/Docker, despliegue en producción y compilación del APK |
+| `documentacion/entregables/Manual_Tecnico_MetaFit.docx` | Manual técnico completo: arquitectura, endpoints, módulos, BD, seguridad e implementación |
+| `documentacion/entregables/Manual_de_Usuario_MetaFit.docx` | Guías paso a paso para cada rol del sistema |
 | `documentacion/MANUAL_POSTMAN.md` | Guía para probar la API con Postman desde cero |
 | `documentacion/DIAGRAMAS.md` | Diagramas de arquitectura, componentes, navegación, BD y flujos |
-| `documentacion/PRESENTACION.md` | Guion de sustentación (15-20 min) con diapositivas |
 | `documentacion/INFORME_CALIDAD_QA_ISO25010.md` | Pruebas, QA por fases e ISO/IEC 25010 |
 | `documentacion/AUDITORIA_METAFIT.md` | Auditoría funcional del proyecto |
 | `documentacion/UPTIME_ROBOT.md` | Monitoreo 24/7 con UptimeRobot (config manual) |
-| `documentacion/GUION_VIDEO_DEMO.md` | Guion del video demo (3–5 min, 3 roles) |
 
 ## 🚀 Mejoras "1000/10" (últimas fases)
 

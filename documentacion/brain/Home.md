@@ -35,10 +35,10 @@
 - [[Lecciones aprendidas]] — Mejores prácticas descubiertas
 
 ### 📖 Manuales
-- `../MANUAL_TECNICO.md` — Arquitectura, seguridad, endpoints
-- `../MANUAL_USUARIO.md` — Guías por rol (Admin, Entrenador, Recepcionista, Afiliado)
+- `../entregables/Manual_Tecnico_MetaFit.docx` — Arquitectura, seguridad, endpoints, BD e implementación
+- `../entregables/Manual_de_Usuario_MetaFit.docx` — Guías por rol (Admin, Entrenador, Recepcionista, Afiliado)
+- `../entregables/Manual_de_Instalacion_MetaFit.docx` — Instalación local, Docker, producción y APK
 - `../MANUAL_POSTMAN.md` — Colecciones y uso de la API
-- `../MANUAL_INGENIERIA_COMPLETO.md` — Manual integral de ingeniería
 
 ### 🎨 Diseño
 - [[Paleta de colores]] — Tokens de color dark/light, roles, marca

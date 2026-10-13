@@ -62,7 +62,7 @@ No hay ningún otro `axios.create`, `fetch(` ni cliente HTTP en `movil/src` (ver
 - `movil/src/services/api.js:18` → `const API_URL = 'https://metafit-backend-rr18.onrender.com';`
 - No existe ningún archivo `.env` dentro de `movil/` (verificado con listado de archivos, solo hay `.gitignore`).
 - `EXPO_PUBLIC_API_URL` **no aparece en ningún archivo del código fuente** del repositorio: solo aparece en documentación y en una tarea pendiente de auditoría:
-  - `documentacion/MANUAL_INGENIERIA_COMPLETO.md:1306-1307`.
+  - `documentacion/entregables/Manual_Tecnico_MetaFit.docx` (§ App Móvil → Servicio API móvil; documenta `EXPO_PUBLIC_API_URL` como mejora pendiente).
   - `documentacion/AUDITORIA_METAFIT.md:314` → `[ ] Apt Móvil: dejar de hardcodear API_URL (usar EXPO_PUBLIC_API_URL) y añadir guard de rol.` (abierta).
   - `documentacion/AUDITORIA_METAFIT.md:343` documenta además que en el pasado apuntó a `localhost:3001` en el emulador.
 
@@ -315,5 +315,5 @@ El desglose por rol de la web está documentado en `AUDITORIA_METAFIT.md` §3; e
 - **`documentacion/TRAZABILIDAD_MOVIL_RUTINA.md`** — documento hermano: arranque de la app móvil, asignación de rutina (web → BD), consulta de rutina (móvil → BD), tablas, JWT, progreso y volumen (324 líneas; secciones 1 a 7). *No se repite aquí.*
 - **`documentacion/API_REST_METAFIT.md`** — catálogo completo de los 91 endpoints del backend.
 - `documentacion/AUDITORIA_METAFIT.md` — auditoría general (permisos por rol, tareas abiertas del móvil).
-- `documentacion/MANUAL_INGENIERIA_COMPLETO.md` — referencia a `EXPO_PUBLIC_API_URL` (ver apartado 2.2) y `documentacion/entregables/Diagrama_de_Despliegue_MetaFit.drawio` — diagrama de despliegue.
-- `documentacion/manual_apk_movil.md` — empaquetado de la app.
+- `documentacion/entregables/Manual_Tecnico_MetaFit.docx` — referencia a `EXPO_PUBLIC_API_URL` (ver § App Móvil) y `documentacion/entregables/Diagrama_de_Despliegue_MetaFit.drawio` — diagrama de despliegue.
+- `documentacion/entregables/Manual_de_Instalacion_MetaFit.docx` — empaquetado, descarga y despliegue del APK.
