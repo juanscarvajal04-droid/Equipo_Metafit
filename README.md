@@ -115,6 +115,11 @@ Todos los documentos se encuentran en la carpeta [`documentacion/`](./documentac
 | `documentacion/entregables/Normalizacion_Modelo_Relacional_MetaFit.xlsx` | Normalización del modelo relacional (0FN → 1FN → 2FN → 3FN) |
 | `documentacion/entregables/Fichas_Tecnicas_MetaFit.docx` | Fichas técnicas de hardware y software (especificaciones, tipo de adquisición y costos) |
 | `documentacion/entregables/Estimacion_de_Costos_MetaFit.xlsx` | Estimación de costos, comparativo de proveedores y presupuesto por fases (≤ $30.000.000 COP) |
+| `documentacion/entregables/Plan_de_Instalacion_MetaFit.docx` | Plan de instalación: requisitos, entorno local/Docker, producción (Render) y APK |
+| `documentacion/entregables/Plan_de_Respaldo_Datos_MetaFit.docx` | Plan de respaldo de datos: política, RPO 24 h, RTO 4 h, actividades y apéndices |
+| `documentacion/entregables/Plan_de_Migracion_Carga_MetaFit.docx` | Plan de migración y carga inicial: requisitos MI/CO, modelo de datos y ETL |
+| `documentacion/entregables/Plan_de_Capacitacion_MetaFit.docx` | Plan de capacitación: agenda, ejecución y anexos de asistencia, control y encuesta |
+| `documentacion/entregables/Encuesta_Satisfaccion_MetaFit.docx` | Cuestionario de evaluación formativa de la capacitación |
 | `documentacion/MANUAL_POSTMAN.md` | Guía para probar la API con Postman desde cero |
 | `documentacion/DIAGRAMAS.md` | Diagramas de arquitectura, componentes, navegación, BD y flujos |
 | `documentacion/INFORME_CALIDAD_QA_ISO25010.md` | Pruebas, QA por fases e ISO/IEC 25010 |
