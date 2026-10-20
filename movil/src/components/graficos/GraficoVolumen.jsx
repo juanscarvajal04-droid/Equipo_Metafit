@@ -24,7 +24,7 @@ export default function GraficoVolumen({ data = [] }) {
     porSemana[semana] = (porSemana[semana] || 0) + (Number(r.volumen) || 0);
   });
 
-  const semanas = Object.keys(porSemana).sort().slice(-8);
+  const semanas = Object.keys(porSemana).sort((a, b) => a.localeCompare(b)).slice(-8);
   const valores = semanas.map((s) => porSemana[s]);
   if (semanas.length < 2 || valores.every((v) => v === 0)) return null;
 

@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "test": "jest --runInBand --forceExit",
+    "test": "jest --runInBand --forceExit --coverage --coverageReporters=lcov && node ../scripts/normalize-lcov.js coverage/lcov.info backend",
     "tunnel": "bash start-tunnel.sh"
   },
   "jest": {

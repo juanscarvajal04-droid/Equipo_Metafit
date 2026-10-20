@@ -5,7 +5,12 @@
 
 const axios = require('axios');
 
-const N8N_BASE_URL = process.env.N8N_WEBHOOK_URL || 'http://n8n:5678';
+// Sin valor por defecto: la URL debe configurarse explícitamente para evitar
+// enviar datos a un destino cleartext no verificado.
+const configuredN8nUrl = process.env.N8N_WEBHOOK_URL || '';
+const N8N_BASE_URL = configuredN8nUrl.endsWith('/')
+  ? configuredN8nUrl.slice(0, -1)
+  : configuredN8nUrl;
 const N8N_TIMEOUT = 5000; // 5 segundos máximo de espera
 
 /**
@@ -15,6 +20,10 @@ const N8N_TIMEOUT = 5000; // 5 segundos máximo de espera
  * @returns {Promise<void>}
  */
 async function dispararWebhook(path, payload) {
+  if (!N8N_BASE_URL) {
+    console.warn('[n8n] N8N_WEBHOOK_URL no configurada; webhook omitido');
+    return;
+  }
   try {
     await axios.post(`${N8N_BASE_URL}${path}`, payload, {
       timeout: N8N_TIMEOUT,

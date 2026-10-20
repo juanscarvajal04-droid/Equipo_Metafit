@@ -15,8 +15,6 @@ const TEMPLATE_PATH = path.join(__dirname, '..', 'templates', 'bienvenida-afilia
 const ASUNTO = 'Bienvenido a MetaFit — Sport Gym Sede Santa Rosita';
 const URL_APK = process.env.URL_APK
   || 'https://metafit-frontend-78x6.onrender.com/app/metafit.apk';
-// Fallback de contraseña temporal si el backend no genera ninguna (2.5).
-const PASSWORD_FALLBACK = 'MetaFit2025!';
 
 const nombreCompleto = (a) =>
   `${a.nombres || ''} ${a.apellidos || ''}`.trim() || a.correo || 'Afiliado';
@@ -24,7 +22,7 @@ const nombreCompleto = (a) =>
 const renderPlantilla = (afiliado, contrasenaTemporal) => {
   try {
     if (!fs.existsSync(TEMPLATE_PATH)) return null;
-    const passwordTemporal = contrasenaTemporal || PASSWORD_FALLBACK;
+    const passwordTemporal = contrasenaTemporal;
     let html = fs.readFileSync(TEMPLATE_PATH, 'utf8');
     // Placeholders nuevos
     html = html
@@ -45,7 +43,7 @@ const renderPlantilla = (afiliado, contrasenaTemporal) => {
 };
 
 const textoPlano = (afiliado, contrasenaTemporal) => {
-  const passwordTemporal = contrasenaTemporal || PASSWORD_FALLBACK;
+  const passwordTemporal = contrasenaTemporal;
   const nombre = nombreCompleto(afiliado);
   return [
     `¡Bienvenido a Sport Gym Sede Santa Rosita, ${nombre}!`,
@@ -63,7 +61,7 @@ const textoPlano = (afiliado, contrasenaTemporal) => {
 
 /** Envía el correo de bienvenida. Devuelve true/false (nunca lanza). */
 async function enviarCorreoBienvenida(afiliado, contrasenaTemporal) {
-  if (!afiliado?.correo) return false;
+  if (!afiliado?.correo || !contrasenaTemporal) return false;
   const html = renderPlantilla(afiliado, contrasenaTemporal);
   const text = textoPlano(afiliado, contrasenaTemporal);
   return enviarCorreo({

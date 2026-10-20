@@ -37,24 +37,28 @@ const AfiliadoController = {
       // Correo de bienvenida + webhook n8n (fire-and-forget: nunca bloquea la respuesta)
       if (result?.id) {
         // Contraseña efectiva: la que genera el backend (MF_{documento}@2025)
-        // si el frontend no envía `contrasena`. Fallback documentado.
+        // si el frontend no envía `contrasena`. Nunca se usa una clave fija.
         const passwordTemporal = result.password_temporal
-          || req.body.contrasena || req.body.password
-          || 'MetaFit2025!';
-        AfiliadoService.getById(result.id)
-          .then((detalle) => {
-            if (!detalle) return null;
-            // Correo de bienvenida
-            require('../services/bienvenidaService')
-              .enviarCorreoBienvenida(detalle, passwordTemporal)
-              .catch((err) => console.error('[afiliadoController] bienvenida:', err.message));
-            // Webhook n8n (Telegram + Google Sheets)
-            require('../services/n8nWebhookService')
-              .notificarNuevoAfiliado(detalle, passwordTemporal)
-              .catch((err) => console.error('[afiliadoController] webhook n8n:', err.message));
-            return null;
-          })
-          .catch((err) => console.error('[afiliadoController] post-creacion:', err.message));
+          || req.body.contrasena || req.body.password;
+
+        if (passwordTemporal) {
+          AfiliadoService.getById(result.id)
+            .then((detalle) => {
+              if (!detalle) return null;
+              // Correo de bienvenida
+              require('../services/bienvenidaService')
+                .enviarCorreoBienvenida(detalle, passwordTemporal)
+                .catch((err) => console.error('[afiliadoController] bienvenida:', err.message));
+              // Webhook n8n (Telegram + Google Sheets)
+              require('../services/n8nWebhookService')
+                .notificarNuevoAfiliado(detalle, passwordTemporal)
+                .catch((err) => console.error('[afiliadoController] webhook n8n:', err.message));
+              return null;
+            })
+            .catch((err) => console.error('[afiliadoController] post-creacion:', err.message));
+        } else {
+          console.warn('[afiliadoController] Sin contraseña temporal; se omiten bienvenida y webhook');
+        }
       }
       return res.status(201).json(result);
     } catch (err) {

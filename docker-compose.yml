@@ -80,6 +80,8 @@ services:
       SMTP_PASS: ${SMTP_PASS:-}
       SMTP_FROM: ${SMTP_FROM:-metafit.sistema@gmail.com}
       URL_APK: ${URL_APK:-https://metafit-frontend-78x6.onrender.com/app/metafit.apk}
+      # URL interna de n8n; sin esta variable los webhooks se omiten.
+      N8N_WEBHOOK_URL: ${N8N_WEBHOOK_URL:-http://n8n:5678}
     ports:
       - "${PORT}:${PORT}"
     depends_on:

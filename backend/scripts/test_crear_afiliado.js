@@ -54,13 +54,16 @@ async function main() {
   }
 
   // 2) Login para obtener token de admin
-  // Credenciales del seed: carlos@metafit.com / Admin123!
-  // (Administrador activo, id_usuario=1)
-  console.log('\n[2/3] Autenticando como admin (carlos@metafit.com)...');
+  // Credenciales por variables de entorno: nunca hardcodear secretos.
+  const adminEmail = process.env.TEST_ADMIN_EMAIL;
+  const adminPassword = process.env.TEST_ADMIN_PASSWORD;
+  if (!adminEmail || !adminPassword) {
+    throw new Error('Configura TEST_ADMIN_EMAIL y TEST_ADMIN_PASSWORD para ejecutar esta prueba');
+  }
+
+  console.log(`\n[2/3] Autenticando como admin (${adminEmail})...`);
   const credenciales = [
-    { email: 'carlos@metafit.com',  password: 'Admin123!'  },
-    { email: 'maria@metafit.com',   password: 'Maria123!'  },
-    { email: 'andres@metafit.com',  password: 'Andres123!' },
+    { email: adminEmail, password: adminPassword },
   ];
 
   let token = null;

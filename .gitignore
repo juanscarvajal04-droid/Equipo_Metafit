@@ -3,6 +3,7 @@
 *.env.local
 *.env.*.local
 node_modules/
+coverage/
 
 # Backups de base de datos (pueden contener datos sensibles)
 metafit_backup*.sql
