@@ -135,6 +135,9 @@ describe("AfiliadosView", () => {
     fireEvent.change(inputPorLabel("Apellidos"), { target: { value: "Afiliado" } });
     fireEvent.change(inputPorLabel("Correo"), { target: { value: "nuevo@metafit.com" } });
     fireEvent.change(inputPorLabel("Documento"), { target: { value: "999999" } });
+    fireEvent.change(inputPorLabel("Otros antecedentes (texto libre)"), {
+      target: { value: "Sin antecedentes" },
+    });
     fireEvent.click(screen.getByText("Crear afiliado"));
     await waitFor(() => expect(authAxiosMock.post).toHaveBeenCalledWith(
       "/afiliados",
