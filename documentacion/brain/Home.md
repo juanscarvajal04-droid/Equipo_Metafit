@@ -61,7 +61,7 @@
 | Backend | Node.js + Express | 3001 |
 | Frontend Web | React 19 + Vite | 5173 |
 | App Móvil | React Native + Expo 55 | — |
-| Base de datos | MySQL 8.0 | 3306 |
+| Base de datos | MariaDB 11 | 3306 |
 | phpMyAdmin | — | 8080 |
 | n8n | Automatización | 5678 |
 

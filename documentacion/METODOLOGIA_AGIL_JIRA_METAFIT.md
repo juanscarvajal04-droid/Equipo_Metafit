@@ -446,7 +446,7 @@ Snapshots locales citados por el informe: `jira_preaudit.json` y `jira_current.j
 La auditoría original reportaba 21 tablas / 63 endpoints / 6 pantallas móviles / 9 vistas web y 8⁄10 HU completas. Los conteos actuales son 26 tablas, 91 acciones de ruta (84 únicas), 10 pantallas móviles, 14 vistas web y 10⁄10 HU (ver sección 7 y sección 8).
 
 **Fecha:** 2026-08-27  
-**Alcance:** Frontend web (React/Vite), App móvil (React Native/Express), Backend (Node.js/Express), BD (MySQL 8), Postman  
+**Alcance:** Frontend web (React/Vite), App móvil (React Native/Express), Backend (Node.js/Express), BD (MariaDB 11), Postman  
 **Rama:** `feature/juan-carvajal`
 
 ---

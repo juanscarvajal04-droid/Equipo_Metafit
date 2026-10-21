@@ -361,9 +361,9 @@ Haz login con el usuario que tenga el rol adecuado:
 
 Si ves mensajes como `ECONNREFUSED` o `connect ECONNREFUSED 127.0.0.1:3306`:
 
-1. Verifica que MySQL esté corriendo
+1. Verifica que MariaDB esté corriendo
 2. Si usas Docker, revisa que el contenedor `db` esté activo
-3. Si usas MySQL local, verifica las credenciales en el archivo `backend/.env`
+3. Si usas MariaDB local, verifica las credenciales en el archivo `backend/.env`
 
 ---
 

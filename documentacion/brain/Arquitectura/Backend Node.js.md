@@ -11,7 +11,7 @@ backend/
 ├── index.js                  # Punto de entrada (migraciones, cron, listen)
 ├── server.js                 # Express app + middleware global
 ├── config/
-│   └── db.js                 # Pool MySQL (mysql2/promise)
+│   └── db.js                 # Pool MariaDB (mysql2/promise)
 ├── routes/
 │   ├── authRoutes.js         # Login, recuperar/reset password
 │   ├── usuarioRoutes.js      # CRUD personal (staff)
@@ -29,7 +29,7 @@ backend/
 │   ├── correoService.js      # Brevo API + SMTP fallback
 │   ├── facturaService.js     # Envío de facturas
 │   └── afiliadoService.js    # Lógica de afiliados
-├── models/                   # Queries MySQL directas
+├── models/                   # Queries MariaDB directas
 ├── middlewares/
 │   ├── auth.js               # JWT + RBAC (6 middlewares)
 │   └── uploadFoto.js         # Multer (Cloudinary o disco)
@@ -151,7 +151,7 @@ app.get('/api-docs.json', (req, res) => { ... });     // JSON crudo
 ## 🚀 Secuencia de Arranque (index.js)
 
 1. `dotenv.config()` — carga `.env`
-2. `config/db.js` — crea pool MySQL
+2. `config/db.js` — crea pool MariaDB
 3. `passwordResetModel.ensureTable()` — tabla PASSWORD_RESET
 4. `migracionFotos.runMigraciones()` — columna `AFILIADO.foto`
 5. `migracionPushToken.runMigraciones()` — columna `USUARIO.push_token`

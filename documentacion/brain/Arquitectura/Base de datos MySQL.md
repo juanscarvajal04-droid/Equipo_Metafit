@@ -1,6 +1,6 @@
-# 🗄️ Base de Datos MySQL
+# 🗄️ Base de Datos MariaDB 11
 
-> MySQL 8.0 — 26 tablas + 5 vistas — Sin ORM (mysql2/promise nativo)
+> MariaDB 11 — 26 tablas + 5 vistas — Sin ORM (mysql2/promise nativo)
 
 ---
 
@@ -81,7 +81,7 @@ USUARIO (super-tipo)
 
 ## 🔐 Integridad Referencial
 
-- **ON DELETE RESTRICT** en todas las FK críticas (MySQL bloquea eliminación si hay datos asociados)
+- **ON DELETE RESTRICT** en todas las FK críticas (MariaDB bloquea eliminación si hay datos asociados)
 - **3FN estricta** en todas las tablas
 - **PKs compuestas** en tablas pivot (AFILIADO_RESTRICCION, RUTINA_EJERCICIO)
 - **Triggers** para cierre automático de ciclos anteriores al crear uno nuevo

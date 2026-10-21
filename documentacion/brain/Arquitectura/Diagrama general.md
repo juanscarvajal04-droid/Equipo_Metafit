@@ -44,7 +44,7 @@
                         │
                         ▼
 ┌──────────────────────────────────────────────────────────┐
-│              BASE DE DATOS (MySQL 8.0)                    │
+│              BASE DE DATOS (MariaDB 11)                   │
 │  Deploy: Railway (cloud) / Docker local                   │
 │  26 tablas + 5 vistas | 0 triggers | FK RESTRICT         │
 │  Migraciones JS idempotentes al arrancar                  │
@@ -70,7 +70,7 @@
 3. HTTP request → Render.com (HTTPS)
 4. Express: rate limit → content-type check → CORS → helmet
 5. Middleware auth.js: verifica JWT → inyecta req.user
-6. Controller → Service → Model → MySQL query
+6. Controller → Service → Model → MariaDB query
 7. Response JSON → React actualiza estado
 ```
 
@@ -88,7 +88,7 @@
 
 ```yaml
 Servicios:
-  db:          mysql:8.0 (puerto 3307:3306)
+  db:          mariadb:11 (puerto 3307:3306)
   backend:     Build local (puerto 3001:3001)
   frontend:    Build local (puerto 5173:5173)
   phpmyadmin:  phpmyadmin (puerto 8080:80)

@@ -20,7 +20,7 @@
 
 ---
 
-## 2. BACKEND (Node.js + Express + MySQL)
+## 2. BACKEND (Node.js + Express + MariaDB 11)
 
 ### 2.1 Funcionalidades implementadas (✅)
 

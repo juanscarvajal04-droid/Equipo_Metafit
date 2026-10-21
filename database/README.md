@@ -40,7 +40,7 @@ Scripts SQL del motor **MariaDB 11** (mismo motor en Docker y producción). Se n
 
 ## Ejecución
 
-- **Docker**: `docker compose up -d --build` — MySQL/MariaDB ejecuta los `.sql` automáticamente en la primera inicialización del volumen. Para re-inicializar: `docker compose down -v && docker compose up -d`.
+- **Docker**: `docker compose up -d --build` — MariaDB 11 ejecuta los `.sql` automáticamente en la primera inicialización del volumen. Para re-inicializar: `docker compose down -v && docker compose up -d`.
 - **Manualmente**:
   ```bash
   mysql --socket="$MYSQL_SOCK" metafit < database/01_estructura.sql

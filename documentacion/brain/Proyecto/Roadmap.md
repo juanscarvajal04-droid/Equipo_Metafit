@@ -6,7 +6,7 @@
 
 ## ✅ v1.0 — Completado
 
-- [x] Backend Node.js con Express y MySQL
+- [x] Backend Node.js con Express y MariaDB 11
 - [x] CRUD de afiliados con transacciones
 - [x] Autenticación JWT con roles (RBAC)
 - [x] Planes de entrenamiento y nutrición
@@ -51,7 +51,7 @@
 - [ ] Exportación de planes en PDF
 - [ ] Gamificación (logros, rachas, rankings)
 - [ ] Dashboard analytics con filtros por rango de fechas
-- [ ] Backup automático de MySQL a S3
+- [ ] Backup automático de MariaDB a S3
 
 ---
 

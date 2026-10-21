@@ -25,7 +25,7 @@
 | Fotos de perfil | Multer → Cloudinary o disco local | `backend/middlewares/uploadFoto.js:30-61` |
 
 Patrón por endpoint: **router → middleware(s) de autenticación/rol → controller →
-service/model → MySQL**. Los routers no contienen lógica de negocio; solo declaran
+service/model → MariaDB**. Los routers no contienen lógica de negocio; solo declaran
 la ruta, los middlewares y el manejador.
 
 ### 1.2 Base URL

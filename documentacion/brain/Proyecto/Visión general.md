@@ -23,7 +23,7 @@ Sistema integral de administración de gimnasio que gestiona afiliados, planes d
 
 ### Backend
 - **Runtime:** Node.js 22 + Express
-- **BD:** MySQL 8.0 (sin ORM — mysql2/promise nativo)
+- **BD:** MariaDB 11 (sin ORM — mysql2/promise nativo)
 - **Auth:** JWT (8h) + bcrypt (12 rondas)
 - **Seguridad:** Helmet, rate limiting, validación Content-Type
 - **Docs:** Swagger UI (`/api-docs`)

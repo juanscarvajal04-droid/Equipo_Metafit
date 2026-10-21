@@ -31,7 +31,7 @@ Equipo_Metafit/
 │       ├── services/          # afiliadosService.js
 │       ├── context/           # AuthContext.jsx (expone authAxios)
 │       └── utils/             # analytics.js (trackEvent)
-├── backend/                    # API REST (Node + Express + MySQL con mysql2/promise)
+├── backend/                    # API REST (Node + Express + MariaDB 11 con mysql2/promise)
 │   ├── routes/                # afiliadoRoutes.js, planRoutes.js, authRoutes.js, catalogoRoutes.js
 │   ├── controllers/           # afiliadoController.js, planController.js, registroController.js
 │   ├── services/              # afiliadoService.js, registroService.js, notificacionesService.js

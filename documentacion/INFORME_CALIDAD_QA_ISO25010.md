@@ -2,7 +2,7 @@
 
 **Proyecto:** MetaFit — Sistema de Gestión Deportiva
 **Fecha de verificación:** 2026-10-05
-**Alcance:** `backend/` (Node.js + Express + MySQL), `frontend_web/` (React + Vite), `movil/` (Expo / React Native), `database/` (MariaDB), CI/CD y despliegue en Render.
+**Alcance:** `backend/` (Node.js + Express + MariaDB 11), `frontend_web/` (React + Vite), `movil/` (Expo / React Native), `database/` (MariaDB 11), CI/CD y despliegue en Render.
 **Fuente de verdad:** código del repositorio en la rama `feature/sofia-astudillo` (HEAD `763a088`).
 
 > Este documento **sustituye y consolida** a los extintos `QA_REPORT.md` y `auditoria_iso_25010_FINAL.md`, cuyos defectos de configuración (rate limiter global, `GET /usuarios` sin control de rol,*CORS* permisivo) se conservan aquí como evidencia de corrección. Las cifras anteriores de esos documentos quedaron obsoletas y **no deben citarse**.

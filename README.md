@@ -15,7 +15,7 @@ git clone <repo-url> && cd Equipo_Metafit
 
 # 2. Copiar variables de entorno
 cp .env.example .env
-# (editar .env si necesitas cambiar contraseña de MySQL, etc.)
+# (editar .env si necesitas cambiar contraseña de MariaDB, etc.)
 
 # 3. Backend
 cd backend && npm install && npm run dev
@@ -50,7 +50,7 @@ Los scripts SQL de [`database/`](./database) se ejecutan automáticamente al ini
 | Frontend   | 5173   | http://localhost:5173       |
 | Backend    | 3001   | http://localhost:3001       |
 | phpMyAdmin | 8080   | http://localhost:8080       |
-| MySQL      | 3306   | localhost:3306              |
+| MariaDB    | 3306   | localhost:3306              |
 
 ## 👤 Credenciales de prueba
 
