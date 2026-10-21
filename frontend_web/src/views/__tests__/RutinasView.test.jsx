@@ -147,9 +147,13 @@ describe("RutinasView", () => {
 
     fireEvent.click(screen.getAllByTitle("Historial de ciclos")[0]);
     expect(await screen.findByRole("heading", { name: /Historial de Ciclos/ })).toBeInTheDocument();
-
-    // Cierre por overlay accesible y edición inline de un ciclo.
     fireEvent.click(screen.getByLabelText("Cerrar modal"));
+    await waitFor(() =>
+      expect(screen.queryByRole("heading", { name: /Historial de Ciclos/ })).not.toBeInTheDocument()
+    );
+    fireEvent.click(screen.getAllByTitle("Historial de ciclos")[0]);
+    expect(await screen.findByRole("heading", { name: /Historial de Ciclos/ })).toBeInTheDocument();
+    fireEvent.keyDown(screen.getByLabelText("Cerrar modal"), { key: "Escape" });
     await waitFor(() =>
       expect(screen.queryByRole("heading", { name: /Historial de Ciclos/ })).not.toBeInTheDocument()
     );

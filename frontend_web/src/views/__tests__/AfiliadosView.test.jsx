@@ -125,6 +125,12 @@ describe("AfiliadosView", () => {
 
     fireEvent.click(screen.getByText(/Nuevo afiliado/));
     expect(await screen.findByRole("heading", { name: /Nuevo afiliado/ })).toBeInTheDocument();
+    fireEvent.keyDown(screen.getByLabelText("Cerrar modal"), { key: "Escape" });
+    await waitFor(() =>
+      expect(screen.queryByRole("heading", { name: /Nuevo afiliado/ })).not.toBeInTheDocument()
+    );
+    fireEvent.click(screen.getByText(/Nuevo afiliado/));
+    expect(await screen.findByRole("heading", { name: /Nuevo afiliado/ })).toBeInTheDocument();
     fireEvent.change(inputPorLabel("Nombres"), { target: { value: "Nuevo" } });
     fireEvent.change(inputPorLabel("Apellidos"), { target: { value: "Afiliado" } });
     fireEvent.change(inputPorLabel("Correo"), { target: { value: "nuevo@metafit.com" } });

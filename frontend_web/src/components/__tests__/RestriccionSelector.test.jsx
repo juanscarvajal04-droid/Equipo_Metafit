@@ -126,6 +126,13 @@ describe("RestriccionSelector (modo registro)", () => {
     render(<WrapperRegistro />);
 
     await abrirModalYCargarCatalogo();
+    fireEvent.keyDown(screen.getByLabelText("Cerrar modal"), { key: "Escape" });
+
+    await waitFor(() =>
+      expect(screen.queryByRole("combobox")).not.toBeInTheDocument()
+    );
+
+    await abrirModalYCargarCatalogo();
     fireEvent.click(screen.getByLabelText("Cerrar modal"));
 
     await waitFor(() =>
