@@ -105,6 +105,7 @@ describe('cicloModel', () => {
   test('findByAfiliado y findById', async () => {
     pool.query.mockResolvedValueOnce([[{ id_ciclo: 1 }]]);
     await expect(CicloModel.findByAfiliado(2)).resolves.toEqual([{ id_ciclo: 1 }]);
+    expect(pool.query.mock.calls[0][0]).toContain('entrenador_foto');
 
     pool.query.mockResolvedValueOnce([[{ id_ciclo: 1 }]]);
     await expect(CicloModel.findById(1)).resolves.toEqual({ id_ciclo: 1 });

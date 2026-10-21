@@ -40,6 +40,7 @@ describe('API Integration — Catálogos Filtrados', () => {
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty('accessToken');
     expect(res.body.user.role).toBe('Administrador');
+    expect(res.body.user.foto).toBeNull();
   });
 
   test('GET /afiliados/1/ejercicios-disponibles con token devuelve 200 y un array', async () => {

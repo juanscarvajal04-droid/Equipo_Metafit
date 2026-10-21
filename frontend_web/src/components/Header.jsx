@@ -1,8 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { API_BASE_URL } from "../services/api";
 import { getTheme, toggleTheme } from "../utils/theme.js";
 import styles from "./Header.module.css";
+
+const resolverFoto = (foto) => {
+  if (!foto) return null;
+  return /^https?:\/\//.test(foto) ? foto : `${API_BASE_URL}${foto}`;
+};
 
 const ROUTE_META = {
   "/dashboard": { label: "Panel de Control",        icon: "📊", parent: null },
@@ -41,7 +47,7 @@ function BellIcon() {
 export default function Header() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { user, authAxios } = useAuth();
+  const { user, authAxios, updateUser } = useAuth();
 
   const meta  = ROUTE_META[pathname] || { label: "MetaFit", icon: "💪", parent: null };
   const color = ROLE_COLOR[user?.role] || "#6c757d";
@@ -51,6 +57,11 @@ export default function Header() {
   const [notificaciones, setNotificaciones] = useState([]);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [estadoTema, setEstadoTema] = useState(getTheme());
+  const [fotoModalOpen, setFotoModalOpen] = useState(false);
+  const [fotoFile, setFotoFile] = useState(null);
+  const [fotoPreview, setFotoPreview] = useState(null);
+  const [fotoSaving, setFotoSaving] = useState(false);
+  const [fotoError, setFotoError] = useState("");
   const dropdownRef = useRef(null);
   const pollingRef = useRef(null);
 
@@ -120,10 +131,71 @@ export default function Header() {
     }
   };
 
-  return (
-    <header className={styles.header}>
+  useEffect(() => () => {
+    if (fotoPreview?.startsWith("blob:") && typeof URL.revokeObjectURL === "function") {
+      URL.revokeObjectURL(fotoPreview);
+    }
+  }, [fotoPreview]);
 
-      <nav aria-label="breadcrumb" className={styles.breadcrumb}>
+  const abrirModalFoto = () => {
+    setFotoError("");
+    setFotoModalOpen(true);
+  };
+
+  const cerrarModalFoto = () => {
+    setFotoModalOpen(false);
+    setFotoFile(null);
+    setFotoPreview(null);
+    setFotoError("");
+  };
+
+  const handleFotoChange = (e) => {
+    const file = e.target.files?.[0] || null;
+    setFotoFile(file);
+    setFotoError("");
+
+    if (fotoPreview?.startsWith("blob:") && typeof URL.revokeObjectURL === "function") {
+      URL.revokeObjectURL(fotoPreview);
+    }
+
+    if (file && typeof URL.createObjectURL === "function") {
+      setFotoPreview(URL.createObjectURL(file));
+    } else {
+      setFotoPreview(null);
+    }
+  };
+
+  const handleFotoSubmit = async () => {
+    if (!fotoFile || fotoSaving) return;
+    setFotoSaving(true);
+    setFotoError("");
+    try {
+      const fd = new FormData();
+      fd.append("foto", fotoFile);
+      const { data } = await authAxios.post("/usuarios/me/foto", fd);
+      const foto = data?.foto || data?.url || null;
+      if (foto && typeof updateUser === "function") {
+        updateUser({ foto });
+      }
+      cerrarModalFoto();
+    } catch (err) {
+      setFotoError(err?.response?.data?.error || "No se pudo subir la foto. Intentá nuevamente.");
+    } finally {
+      setFotoSaving(false);
+    }
+  };
+
+  const fotoUrl = resolverFoto(user?.foto);
+  const nombreUsuario = user?.nombres
+    ? `${user.nombres} ${user.apellidos || ""}`.trim()
+    : user?.email?.split("@")[0] || "Usuario";
+  const inicialUsuario = (user?.nombres?.charAt(0) || user?.email?.charAt(0) || "U").toUpperCase();
+
+  return (
+    <>
+      <header className={styles.header}>
+
+        <nav aria-label="breadcrumb" className={styles.breadcrumb}>
         <span className={styles.breadcrumbSystem}>MetaFit</span>
 
         {meta.parent && (
@@ -226,22 +298,31 @@ export default function Header() {
         <div className={styles.divider} />
 
         <div className={styles.avatarSection}>
-          <div
-            className={styles.avatar}
-            style={{
-              background: `linear-gradient(135deg, ${color}, ${color}aa)`,
-              boxShadow: `0 0 0 2px ${color}30`,
-            }}
+          <button
+            type="button"
+            className={styles.avatarButton}
+            onClick={abrirModalFoto}
+            aria-label="Cambiar foto de perfil"
+            title="Cambiar foto de perfil"
           >
-            {(user?.nombres?.charAt(0) || user?.email?.charAt(0) || "U").toUpperCase()}
-          </div>
+            {fotoUrl ? (
+              <img src={fotoUrl} alt={`Foto de perfil de ${nombreUsuario}`} className={styles.avatarPhoto} />
+            ) : (
+              <span
+                className={styles.avatar}
+                style={{
+                  background: `linear-gradient(135deg, ${color}, ${color}aa)`,
+                  boxShadow: `0 0 0 2px ${color}30`,
+                }}
+              >
+                {inicialUsuario}
+              </span>
+            )}
+            <span className={styles.avatarEditBadge} aria-hidden="true">📷</span>
+          </button>
 
           <div>
-            <div className={styles.avatarName}>
-              {user?.nombres
-                ? `${user.nombres} ${user.apellidos || ""}`.trim()
-                : user?.email?.split("@")[0] || "Usuario"}
-            </div>
+            <div className={styles.avatarName}>{nombreUsuario}</div>
             <div className={styles.avatarRole} style={{ color }}>
               {user?.role}
             </div>
@@ -249,5 +330,90 @@ export default function Header() {
         </div>
       </div>
     </header>
+
+      {fotoModalOpen && (
+        <div
+          className={styles.modalOverlay}
+          role="button"
+          tabIndex={0}
+          aria-label="Cerrar modal de foto"
+          onClick={(e) => { if (e.target === e.currentTarget) cerrarModalFoto(); }}
+          onKeyDown={(e) => {
+            if ((e.key === "Escape" || e.key === "Enter") && e.target === e.currentTarget) {
+              cerrarModalFoto();
+            }
+          }}
+        >
+          <div
+            className={styles.modalCard}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="foto-perfil-title"
+          >
+            <div className={styles.modalHeader}>
+              <h2 id="foto-perfil-title" className={styles.modalTitle}>Cambiar foto de perfil</h2>
+              <button
+                type="button"
+                className={styles.modalClose}
+                onClick={cerrarModalFoto}
+                aria-label="Cerrar modal de foto"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className={styles.modalBody}>
+              <div className={styles.photoPreview}>
+                {(fotoPreview || fotoUrl) ? (
+                  <img
+                    src={fotoPreview || fotoUrl}
+                    alt="Vista previa de la foto de perfil"
+                    className={styles.photoPreviewImg}
+                  />
+                ) : (
+                  <span className={styles.photoPreviewInitials}>{inicialUsuario}</span>
+                )}
+              </div>
+
+              <label htmlFor="foto-perfil-input" className={styles.btnSecondary}>
+                Seleccionar imagen
+              </label>
+              <input
+                id="foto-perfil-input"
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/gif"
+                className={styles.fileInput}
+                onChange={handleFotoChange}
+                aria-describedby="foto-perfil-hint"
+              />
+              <p id="foto-perfil-hint" className={styles.photoHint}>
+                PNG, JPG, WEBP o GIF. Tamaño máximo: 5 MB.
+              </p>
+              {fotoFile && <p className={styles.fileName}>{fotoFile.name}</p>}
+              {fotoError && <p className={styles.errorText} role="alert">{fotoError}</p>}
+            </div>
+
+            <div className={styles.modalFooter}>
+              <button
+                type="button"
+                className={styles.btnSecondary}
+                onClick={cerrarModalFoto}
+                disabled={fotoSaving}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className={styles.btnPrimary}
+                onClick={handleFotoSubmit}
+                disabled={!fotoFile || fotoSaving}
+              >
+                {fotoSaving ? "Subiendo..." : "Guardar foto"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

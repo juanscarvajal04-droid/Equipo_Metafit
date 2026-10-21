@@ -226,11 +226,16 @@ const AfiliadoModel = {
   _getCicloActivo: async (id_usuario) => {
     const [ciclos] = await pool.query(`
       SELECT c.*,
+        u.nombres   AS entrenador_nombres,
+        u.apellidos AS entrenador_apellidos,
+        u.rol       AS entrenador_rol,
+        u.foto      AS entrenador_foto,
         (SELECT COUNT(*) FROM CICLO c2
          WHERE c2.id_usuario = c.id_usuario AND c2.fecha_inicio <= c.fecha_inicio
         ) AS numero_ciclo,
         DATEDIFF(c.fecha_fin, CURDATE()) AS dias_restantes
       FROM CICLO c
+      LEFT JOIN USUARIO u ON u.id_usuario = c.registrado_por
       WHERE c.id_usuario = ? AND c.activo = 1
       LIMIT 1
     `, [id_usuario]);

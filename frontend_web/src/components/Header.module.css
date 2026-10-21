@@ -308,6 +308,23 @@
   gap: 10px;
 }
 
+.avatarButton {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.avatarButton:focus-visible {
+  outline: none;
+  box-shadow: var(--mf-focus-ring);
+}
+
 .avatar {
   width: 36px;
   height: 36px;
@@ -320,6 +337,30 @@
   font-size: 0.9rem;
   flex-shrink: 0;
   user-select: none;
+}
+
+.avatarPhoto {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.avatarEditBadge {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--mf-surface);
+  border: 1px solid var(--mf-border);
+  font-size: 0.52rem;
+  line-height: 1;
 }
 
 .avatarName {
@@ -338,4 +379,161 @@
   font-weight: 600;
   text-transform: capitalize;
   line-height: 1.3;
+}
+
+/* ── Modal de foto de perfil ── */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.modalCard {
+  width: 95%;
+  max-width: 390px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--mf-surface);
+  border: 1px solid var(--mf-border);
+  border-radius: 12px;
+  box-shadow: var(--mf-shadow-modal);
+  overflow: hidden;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--mf-border);
+}
+
+.modalTitle {
+  margin: 0;
+  color: var(--mf-text);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.modalClose {
+  border: 1px solid var(--mf-border);
+  border-radius: 7px;
+  background: transparent;
+  color: var(--mf-text);
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+}
+
+.modalClose:focus-visible,
+.btnSecondary:focus-visible,
+.btnPrimary:focus-visible {
+  outline: none;
+  box-shadow: var(--mf-focus-ring);
+}
+
+.modalBody {
+  padding: 1.25rem;
+  overflow-y: auto;
+}
+
+.photoPreview {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--mf-accent-soft);
+  border: 3px solid var(--mf-border);
+}
+
+.photoPreviewImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photoPreviewInitials {
+  color: var(--mf-accent);
+  font-size: 2.5rem;
+  font-weight: 800;
+}
+
+.fileInput {
+  display: none;
+}
+
+.btnSecondary,
+.btnPrimary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btnSecondary {
+  border: 1px solid var(--mf-border);
+  background: transparent;
+  color: var(--mf-text);
+}
+
+.btnPrimary {
+  border: 1px solid var(--mf-accent);
+  background: var(--mf-accent);
+  color: #fff;
+}
+
+.btnPrimary:disabled,
+.btnSecondary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.photoHint {
+  margin: 8px 0 0;
+  color: var(--mf-muted);
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+.fileName {
+  margin: 6px 0 0;
+  color: var(--mf-text);
+  font-size: 0.72rem;
+  text-align: center;
+  word-break: break-all;
+}
+
+.errorText {
+  margin: 10px 0 0;
+  color: var(--mf-error);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--mf-border);
+}
+
+@media (max-width: 640px) {
+  .modalOverlay { padding: 12px; }
+  .modalCard { max-height: 95vh; }
 }

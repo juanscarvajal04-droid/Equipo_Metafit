@@ -13,6 +13,10 @@ const CicloModel = {
   findByAfiliado: async (id_usuario) => {
     const [rows] = await pool.query(`
       SELECT c.*,
+        u.nombres   AS entrenador_nombres,
+        u.apellidos AS entrenador_apellidos,
+        u.rol       AS entrenador_rol,
+        u.foto      AS entrenador_foto,
         (
           SELECT COUNT(*)
           FROM CICLO c2
@@ -20,6 +24,7 @@ const CicloModel = {
             AND c2.fecha_inicio <= c.fecha_inicio
         ) AS numero_ciclo
       FROM CICLO c
+      LEFT JOIN USUARIO u ON u.id_usuario = c.registrado_por
       WHERE c.id_usuario = ?
       ORDER BY c.fecha_inicio DESC
     `, [id_usuario]);

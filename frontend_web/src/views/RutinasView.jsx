@@ -888,6 +888,7 @@ function PlanDisplay({ afiliado, authAxios }) {
   const [edit, setEdit] = useState({}); // { [rutina:ejercicio]: { series, repeticiones, peso_kg } }
   const [savingKey, setSavingKey] = useState(null);
   const [notas, setNotas] = useState([]);
+  const [notasOpen, setNotasOpen] = useState(false);
   const { showToast } = useToast();
 
   const cargar = async () => {
@@ -928,6 +929,13 @@ function PlanDisplay({ afiliado, authAxios }) {
   if (rutinas.length === 0) return <div className={s.emptyState}>No hay rutinas asignadas en este plan</div>;
 
   const notasPorEjercicio = (idEjercicio) => notas.filter((n) => String(n.id_ejercicio) === String(idEjercicio));
+
+  const notasAgrupadas = notas.reduce((grupos, nota) => {
+    const nombre = nota.nombre_ejercicio || "Ejercicio sin nombre";
+    if (!grupos[nombre]) grupos[nombre] = [];
+    grupos[nombre].push(nota);
+    return grupos;
+  }, {});
 
   const inicioEdicion = (rutina, ej) => {
     const key = `${rutina.id_rutina}:${ej.id_ejercicio}`;
@@ -971,7 +979,16 @@ function PlanDisplay({ afiliado, authAxios }) {
 
   return (
     <div>
-      <div style={{ textAlign:"right", marginBottom:8 }}>
+      <div style={{ display:"flex", justifyContent:"flex-end", alignItems:"center", gap:8, marginBottom:8 }}>
+        <button
+          type="button"
+          className={s.btnNotas}
+          onClick={() => setNotasOpen(true)}
+          title="Ver las notas que dejó el afiliado"
+        >
+          📝 Ver Notas del Afiliado
+          {notas.length > 0 && <span className={s.notasCount}>{notas.length}</span>}
+        </button>
         <button type="button" className={s.btnRefresh} onClick={cargar} title="Recargar">🔄</button>
       </div>
       {rutinas.map((rutina, ri) => (
@@ -1058,6 +1075,70 @@ function PlanDisplay({ afiliado, authAxios }) {
           )}
         </div>
       ))}
+
+      {notasOpen && (
+        <div
+          className={s.modalOverlay}
+          role="button"
+          tabIndex={0}
+          aria-label="Cerrar notas del afiliado"
+          onClick={(e) => { if (e.target === e.currentTarget) setNotasOpen(false); }}
+          onKeyDown={(e) => {
+            if ((e.key === "Escape" || e.key === "Enter") && e.target === e.currentTarget) {
+              setNotasOpen(false);
+            }
+          }}
+        >
+          <div
+            className={s.modalContent}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="notas-afiliado-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={s.modalHeader}>
+              <h5 id="notas-afiliado-title" className={s.modalTitle}>
+                📝 Notas del Afiliado — {nombreCompleto(afiliado)}
+              </h5>
+              <button
+                type="button"
+                className={s.btnOutline}
+                onClick={() => setNotasOpen(false)}
+                aria-label="Cerrar notas del afiliado"
+              >
+                ✕
+              </button>
+            </div>
+            <div className={s.modalBody}>
+              {notas.length === 0 ? (
+                <div className={s.emptyState} style={{ margin:0 }}>
+                  El afiliado todavía no dejó notas en sus ejercicios.
+                </div>
+              ) : (
+                Object.entries(notasAgrupadas).map(([nombre, items]) => (
+                  <div key={nombre} className={s.notasGroup}>
+                    <h6 className={s.notasGroupTitle}>
+                      🏋️ {nombre}
+                      <span className={s.notasCount}>{items.length}</span>
+                    </h6>
+                    {items.map((nota, idx) => (
+                      <div key={nota.id_nota ?? `${nombre}-${idx}`} className={s.notaItem}>
+                        <div className={s.notaTexto}>{nota.nota}</div>
+                        <div className={s.notaFecha}>📅 {toDateInput(nota.fecha_nota)}</div>
+                      </div>
+                    ))}
+                  </div>
+                ))
+              )}
+            </div>
+            <div className={s.modalFooter}>
+              <button type="button" className={s.btnOutline} onClick={() => setNotasOpen(false)}>
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

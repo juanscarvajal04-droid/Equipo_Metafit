@@ -21,6 +21,14 @@ const UsuarioService = {
     return UsuarioService.normalizarUsuario(user);
   },
 
+  getFoto: async (id) => {
+    return UsuarioModel.getFoto(id);
+  },
+
+  setFoto: async (id, foto) => {
+    return UsuarioModel.setFoto(id, foto);
+  },
+
   guardarPushToken: async (idUsuario, pushToken) => {
     const probar = () =>
       pool.query(
@@ -115,6 +123,7 @@ const UsuarioService = {
       nombres: u.nombres,
       apellidos: u.apellidos,
       estado: u.estado,
+      foto: u.foto || null,
       fecha_registro: u.fecha_registro
     };
   }

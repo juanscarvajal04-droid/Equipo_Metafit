@@ -109,6 +109,7 @@ Todos los endpoints protegidos requieren un **Bearer Token JWT**.
             correo:      { type: 'string',  format: 'email' },
             rol:         { type: 'string',  enum: ['Administrador', 'Recepcionista', 'Entrenador'] },
             estado:      { type: 'string',  enum: ['Activo', 'Inactivo', 'Pendiente'] },
+            foto:        { type: 'string',  nullable: true, example: 'https://res.cloudinary.com/metafit-cloud/image/upload/v1/metafit/staff/laura.jpg' },
             fecha_registro: { type: 'string', format: 'date-time' },
           },
         },

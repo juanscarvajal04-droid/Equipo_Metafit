@@ -71,6 +71,19 @@ describe('<AuthProvider />', () => {
     expect(localStorage.getItem('metafit_token')).toBeNull();
   });
 
+  test('updateUser fusiona cambios y actualiza localStorage', () => {
+    localStorage.setItem('metafit_token', 'jwt-persistido');
+    localStorage.setItem('metafit_user', JSON.stringify({ id: 7, email: 'karla@metafit.com', role: 'Recepcionista' }));
+    localStorage.setItem('metafit_role', 'Recepcionista');
+
+    const { result } = renderHook(() => useAuth(), { wrapper });
+
+    act(() => result.current.updateUser({ foto: 'https://cdn.test/karla.jpg' }));
+
+    expect(result.current.user.foto).toBe('https://cdn.test/karla.jpg');
+    expect(JSON.parse(localStorage.getItem('metafit_user')).foto).toBe('https://cdn.test/karla.jpg');
+  });
+
   test('logout limpia el estado y localStorage', async () => {
     localStorage.setItem('metafit_token', 'jwt-persistido');
     localStorage.setItem('metafit_user', JSON.stringify({ id: 7, email: 'karla@metafit.com', role: 'Recepcionista' }));

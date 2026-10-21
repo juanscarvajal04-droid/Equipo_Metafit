@@ -501,6 +501,90 @@
   font-size: 0.82rem;
 }
 
+/* ── Notas del afiliado ───────────────────────────── */
+.btnNotas {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--mf-accent);
+  border-radius: 8px;
+  background: var(--mf-accent-soft);
+  color: var(--mf-accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btnNotas:hover {
+  background: var(--mf-accent-strong);
+}
+
+.btnNotas:focus-visible {
+  outline: none;
+  box-shadow: var(--mf-focus-ring);
+}
+
+.notasCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--mf-accent);
+  color: #fff;
+  font-size: 0.63rem;
+  font-weight: 800;
+}
+
+.notasGroup {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  border: 1px solid var(--mf-border);
+  border-radius: 10px;
+  background: var(--mf-bg);
+}
+
+.notasGroup:last-child {
+  margin-bottom: 0;
+}
+
+.notasGroupTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 0.55rem;
+  color: var(--mf-text);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.notaItem {
+  padding: 0.55rem 0.65rem;
+  margin-bottom: 0.4rem;
+  border-left: 3px solid var(--mf-accent);
+  border-radius: 0 7px 7px 0;
+  background: var(--mf-surface);
+}
+
+.notaItem:last-child {
+  margin-bottom: 0;
+}
+
+.notaTexto {
+  color: var(--mf-text);
+  font-size: 0.8rem;
+  white-space: pre-wrap;
+}
+
+.notaFecha {
+  margin-top: 4px;
+  color: var(--mf-muted);
+  font-size: 0.68rem;
+}
+
 /* ── Modal ────────────────────────────────────────── */
 .modalOverlay {
   position: fixed;

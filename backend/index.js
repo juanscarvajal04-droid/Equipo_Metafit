@@ -44,6 +44,12 @@ esperarBaseDeDatos()
   .then(() => console.log('✅ Migración de push_token verificada'))
   .catch(err => console.error('[MIGRACION-PUSH] error:', err.message));
 
+// ── Migración idempotente: columna USUARIO.foto (foto de perfil del staff) ──
+esperarBaseDeDatos()
+  .then(() => require('./migrations/migracionFotoUsuario').runMigraciones())
+  .then(() => console.log('✅ Migración de foto de staff verificada'))
+  .catch(err => console.error('[MIGRACION-FOTO-USUARIO] error:', err.message));
+
 // ── Migración idempotente: RUTINA_EJERCICIO.peso_kg + RUTINA_EJERCICIO.descanso_seg (HU43 CA2) ──
 esperarBaseDeDatos()
   .then(() => require('./migrations/migracionRutinaDetalles').runMigraciones())

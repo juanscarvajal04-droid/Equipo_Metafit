@@ -78,6 +78,20 @@ describe('usuarioModel', () => {
     expect(pool.query).toHaveBeenCalledTimes(1);
   });
 
+  test('getFoto y setFoto usan USUARIO.foto', async () => {
+    pool.query.mockResolvedValueOnce([[{ foto: '/uploads/staff.jpg' }]]);
+    await expect(UsuarioModel.getFoto(3)).resolves.toBe('/uploads/staff.jpg');
+
+    pool.query.mockResolvedValueOnce([[]]);
+    await expect(UsuarioModel.getFoto(99)).resolves.toBeNull();
+
+    pool.query.mockResolvedValueOnce([{ affectedRows: 1 }]);
+    await expect(UsuarioModel.setFoto(3, '/uploads/staff.jpg')).resolves.toBe(true);
+
+    pool.query.mockResolvedValueOnce([{ affectedRows: 0 }]);
+    await expect(UsuarioModel.setFoto(99, '/uploads/staff.jpg')).resolves.toBe(false);
+  });
+
   test('delete devuelve affectedRows', async () => {
     pool.query.mockResolvedValueOnce([{ affectedRows: 1 }]);
     await expect(UsuarioModel.delete(4)).resolves.toBe(1);

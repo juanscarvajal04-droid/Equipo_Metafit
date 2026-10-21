@@ -67,6 +67,7 @@ const AuthController = {
           role     : user.rol,
           nombres  : user.nombres,
           apellidos: user.apellidos,
+          foto     : user.foto || null,
         },
       });
     } catch (err) {

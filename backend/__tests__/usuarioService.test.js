@@ -9,6 +9,8 @@ jest.mock('../models/usuarioModel', () => ({
   findById: jest.fn(),
   create: jest.fn(),
   update: jest.fn(),
+  getFoto: jest.fn(),
+  setFoto: jest.fn(),
   delete: jest.fn(),
 }));
 jest.mock('../config/db', () => ({ query: jest.fn() }));
@@ -28,6 +30,7 @@ const USUARIO_DB = {
   correo: 'ana@metafit.com',
   rol: 'Recepcionista',
   estado: 'Activo',
+  foto: '/uploads/ana.jpg',
   fecha_registro: '2026-01-01',
 };
 
@@ -56,6 +59,16 @@ describe('usuarioService - consultas y normalización', () => {
     UsuarioModel.findById.mockResolvedValueOnce(USUARIO_DB).mockResolvedValueOnce(null);
     expect((await UsuarioService.getById(1)).nombres).toBe('Ana');
     await expect(UsuarioService.getById(99)).resolves.toBeNull();
+  });
+
+  test('getFoto y setFoto delegan en el modelo', async () => {
+    UsuarioModel.getFoto.mockResolvedValue('/uploads/ana.jpg');
+    UsuarioModel.setFoto.mockResolvedValue(true);
+
+    await expect(UsuarioService.getFoto(1)).resolves.toBe('/uploads/ana.jpg');
+    await expect(UsuarioService.setFoto(1, '/uploads/ana.jpg')).resolves.toBe(true);
+    expect(UsuarioModel.getFoto).toHaveBeenCalledWith(1);
+    expect(UsuarioModel.setFoto).toHaveBeenCalledWith(1, '/uploads/ana.jpg');
   });
 });
 
@@ -154,6 +167,7 @@ describe('usuarioService - CRUD', () => {
       nombres: 'Ana',
       apellidos: 'Pérez',
       estado: 'Activo',
+      foto: '/uploads/ana.jpg',
       fecha_registro: '2026-01-01',
     });
   });

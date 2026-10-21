@@ -24,6 +24,8 @@ jest.mock('../services/usuarioService', () => ({
   create: jest.fn(),
   update: jest.fn(),
   guardarPushToken: jest.fn(),
+  getFoto: jest.fn(),
+  setFoto: jest.fn(),
   delete: jest.fn(),
 }));
 jest.mock('../models/pagoModel', () => ({
@@ -337,6 +339,54 @@ describe('usuarioController', () => {
     const deleteOk = makeRes();
     await usuario.delete(makeReq(), deleteOk);
     expect(deleteOk.json).toHaveBeenCalledWith({ message: 'Usuario eliminado correctamente' });
+  });
+
+  test('subirFoto valida archivo, guarda la URL y responde 404/500', async () => {
+    const sinArchivo = makeRes();
+    await usuario.subirFoto(makeReq(), sinArchivo);
+    expect(sinArchivo.status).toHaveBeenCalledWith(400);
+
+    UsuarioService.getFoto.mockResolvedValue(null);
+    UsuarioService.setFoto.mockResolvedValue(true);
+    const ok = makeRes();
+    await usuario.subirFoto(
+      makeReq({
+        protocol: 'http',
+        get: () => 'localhost:3000',
+        file: { path: '/app/uploads/staff.jpg', filename: 'staff.jpg' },
+      }),
+      ok
+    );
+    expect(UsuarioService.setFoto).toHaveBeenCalledWith(1, '/uploads/staff.jpg');
+    expect(ok.json).toHaveBeenCalledWith({
+      message: 'Foto de perfil actualizada',
+      foto: '/uploads/staff.jpg',
+      url: 'http://localhost:3000/uploads/staff.jpg',
+    });
+
+    UsuarioService.setFoto.mockResolvedValueOnce(false);
+    const noUser = makeRes();
+    await usuario.subirFoto(
+      makeReq({
+        protocol: 'https',
+        get: () => 'api.test',
+        file: { path: 'https://cdn.test/staff.jpg', filename: 'staff.jpg' },
+      }),
+      noUser
+    );
+    expect(noUser.status).toHaveBeenCalledWith(404);
+
+    UsuarioService.getFoto.mockRejectedValueOnce(new Error('db'));
+    const error = makeRes();
+    await usuario.subirFoto(
+      makeReq({
+        protocol: 'http',
+        get: () => 'localhost:3000',
+        file: { path: '/app/uploads/staff.jpg', filename: 'staff.jpg' },
+      }),
+      error
+    );
+    expect(error.status).toHaveBeenCalledWith(500);
   });
 
   test('update y delete traducen errores de negocio', async () => {

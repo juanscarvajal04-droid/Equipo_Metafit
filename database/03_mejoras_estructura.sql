@@ -95,6 +95,16 @@ SET @sql_add = IF(
   'SELECT 1');
 PREPARE stmt FROM @sql_add; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
+SET @sql_add = IF(
+  NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+               WHERE TABLE_SCHEMA = 'metafit' AND TABLE_NAME = 'USUARIO'
+                 AND COLUMN_NAME = 'foto'),
+  'ALTER TABLE `USUARIO`
+     ADD COLUMN `foto` VARCHAR(255) NULL
+     COMMENT ''URL Cloudinary o ruta local de la foto de perfil del staff. Ver backend/migrations/migracionFotoUsuario.js'' AFTER `push_token`',
+  'SELECT 1');
+PREPARE stmt FROM @sql_add; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
 
 -- ============================================================================================================================
 -- BLOQUE 2 — REGISTRO_EJERCICIO: ejecucion REAL de un ejercicio dentro de la rutina

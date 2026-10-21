@@ -5,6 +5,7 @@ const express            = require('express');
 const router             = express.Router();
 const UsuarioController  = require('../controllers/usuarioController');
 const { requireAuth, requireAdmin } = require('../middlewares/auth');
+const { uploadFoto } = require('../middlewares/uploadFoto');
 
 /**
  * @swagger
@@ -81,6 +82,55 @@ router.get('/', requireAuth, requireAdmin, UsuarioController.getAll);
  *         $ref: '#/components/responses/InternalError'
  */
 router.put('/me/push-token', requireAuth, UsuarioController.guardarPushToken);
+
+/**
+ * @swagger
+ * /usuarios/me/foto:
+ *   post:
+ *     summary: Subir mi foto de perfil (cualquier usuario autenticado)
+ *     description: >
+ *       Multipart/form-data, campo "foto" (PNG/JPG/WEBP/GIF, máx. 5 MB).
+ *       Se usa desde el Header web para Admin, Recepcionista y Entrenador.
+ *       El archivo queda en Cloudinary o en backend/uploads y USUARIO.foto
+ *       guarda la URL/ruta resultante.
+ *     tags: [Usuarios (Personal)]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               foto:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Foto actualizada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message: { type: string }
+ *                 foto: { type: string, description: 'Ruta relativa o URL persistida' }
+ *                 url: { type: string, description: 'URL absoluta para mostrar en el cliente' }
+ *       400:
+ *         description: Archivo faltante o formato no permitido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       404:
+ *         $ref: '#/components/responses/NotFound'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.post('/me/foto', requireAuth, uploadFoto, UsuarioController.subirFoto);
 
 /** @swagger
  * /usuarios/recepcionistas:

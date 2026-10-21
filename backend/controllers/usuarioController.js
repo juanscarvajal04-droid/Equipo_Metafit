@@ -3,6 +3,7 @@
 'use strict';
 
 const UsuarioService = require('../services/usuarioService');
+const { eliminarFotoAnterior } = require('../middlewares/uploadFoto');
 
 const UsuarioController = {
 
@@ -82,6 +83,41 @@ const UsuarioController = {
       return res.json({ message: 'Push token registrado' });
     } catch (err) {
       console.error('[usuarioController.guardarPushToken]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
+  /** POST /usuarios/me/foto — foto de perfil de cualquier usuario autenticado */
+  subirFoto: async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'Debe enviar una imagen en el campo "foto"' });
+      }
+
+      const id = req.user.sub;
+      // Cloudinary: req.file.path = URL https completa; disco: ruta /app/..., usar relativa.
+      const foto = /^https?:\/\//.test(req.file.path) ? req.file.path : `/uploads/${req.file.filename}`;
+      const url = /^https?:\/\//.test(foto) ? foto : `${req.protocol}://${req.get('host')}${foto}`;
+
+      const fotoAnterior = await UsuarioService.getFoto(id);
+      const ok = await UsuarioService.setFoto(id, foto);
+
+      if (!ok) {
+        eliminarFotoAnterior(foto);
+        return res.status(404).json({ error: 'Usuario no encontrado' });
+      }
+
+      if (fotoAnterior && fotoAnterior !== foto) {
+        eliminarFotoAnterior(fotoAnterior);
+      }
+
+      return res.json({
+        message: 'Foto de perfil actualizada',
+        foto,
+        url,
+      });
+    } catch (err) {
+      console.error('[usuarioController.subirFoto]', err);
       return res.status(500).json({ error: 'Error interno del servidor' });
     }
   },

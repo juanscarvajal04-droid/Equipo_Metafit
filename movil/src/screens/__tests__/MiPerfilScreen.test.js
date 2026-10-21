@@ -1,7 +1,7 @@
 // movil/src/screens/__tests__/MiPerfilScreen.test.js
 // Cubre carga inicial, refetch por foco, refresh manual y push token.
 import React from 'react';
-import { RefreshControl } from 'react-native';
+import { Image, RefreshControl } from 'react-native';
 import { render, waitFor, act } from '@testing-library/react-native';
 import MiPerfilScreen from '../MiPerfilScreen';
 import { getMiPerfil, getMisCiclos, getMisRestricciones } from '../../services/api';
@@ -48,7 +48,17 @@ describe('<MiPerfilScreen />', () => {
         ciclo_activo: { progreso_fisico: [{ peso_kg: 65, imc: 22.5 }] },
       },
     });
-    getMisCiclos.mockResolvedValue({ data: [{ id_ciclo: 1, activo: 1, numero_ciclo: 1 }] });
+    getMisCiclos.mockResolvedValue({
+      data: [{
+        id_ciclo: 1,
+        activo: 1,
+        numero_ciclo: 1,
+        entrenador_nombres: 'Laura',
+        entrenador_apellidos: 'Gómez',
+        entrenador_rol: 'Entrenador',
+        entrenador_foto: 'https://cdn.test/laura.jpg',
+      }],
+    });
     getMisRestricciones.mockResolvedValue({ data: [] });
 
     const listeners = {};
@@ -60,9 +70,18 @@ describe('<MiPerfilScreen />', () => {
       }),
     };
 
-    const { getByText, UNSAFE_getByType } = render(<MiPerfilScreen navigation={navigation} />);
+    const { getByText, UNSAFE_getAllByType, UNSAFE_getByType } = render(
+      <MiPerfilScreen navigation={navigation} />
+    );
 
     await waitFor(() => expect(getByText('Ana Pérez')).toBeTruthy());
+    expect(getByText('Laura Gómez')).toBeTruthy();
+    expect(getByText('Entrenador')).toBeTruthy();
+    expect(
+      UNSAFE_getAllByType(Image).some(
+        (img) => img.props.source?.uri === 'https://cdn.test/laura.jpg'
+      )
+    ).toBe(true);
     expect(activarPushNotifications).toHaveBeenCalledTimes(1);
 
     await act(async () => {

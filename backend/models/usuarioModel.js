@@ -11,7 +11,7 @@ const UsuarioModel = {
   findByEmail: async (correo) => {
     const [rows] = await pool.query(
       `SELECT id_usuario, nombres, apellidos, correo,
-              contrasena, rol, estado
+              contrasena, rol, estado, foto
        FROM USUARIO
        WHERE correo = ?`,
       [correo]
@@ -22,7 +22,7 @@ const UsuarioModel = {
   findAll: async () => {
     const [rows] = await pool.query(
       `SELECT id_usuario, nombres, apellidos, correo,
-              rol, estado, fecha_registro
+              rol, estado, foto, fecha_registro
        FROM USUARIO
        WHERE rol != 'Afiliado'
        ORDER BY rol, nombres`
@@ -33,7 +33,7 @@ const UsuarioModel = {
   findRecepcionistas: async () => {
     const [rows] = await pool.query(
       `SELECT id_usuario, nombres, apellidos, correo,
-              rol, estado, fecha_registro
+              rol, estado, foto, fecha_registro
        FROM USUARIO
        WHERE rol = 'Recepcionista' AND estado = 'Activo'
        ORDER BY nombres`
@@ -44,7 +44,7 @@ const UsuarioModel = {
   findById: async (id) => {
     const [rows] = await pool.query(
       `SELECT id_usuario, nombres, apellidos, correo,
-              rol, estado, fecha_registro
+              rol, estado, foto, fecha_registro
        FROM USUARIO WHERE id_usuario = ?`,
       [id]
     );
@@ -83,6 +83,21 @@ const UsuarioModel = {
       `UPDATE USUARIO SET ${sets.join(', ')} WHERE id_usuario = ?`, vals
     );
     return result.affectedRows;
+  },
+
+  // getFoto / setFoto — foto de perfil del staff (USUARIO.foto)
+  getFoto: async (id) => {
+    const [rows] = await pool.query(
+      'SELECT foto FROM USUARIO WHERE id_usuario = ?', [id]
+    );
+    return rows.length ? rows[0].foto : null;
+  },
+
+  setFoto: async (id, foto) => {
+    const [result] = await pool.query(
+      'UPDATE USUARIO SET foto = ? WHERE id_usuario = ?', [foto, id]
+    );
+    return result.affectedRows > 0;
   },
 
   delete: async (id) => {

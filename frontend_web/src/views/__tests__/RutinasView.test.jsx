@@ -1,6 +1,6 @@
 // frontend_web/src/views/__tests__/RutinasView.test.jsx
 // Smoke test de la vista más grande: render, carga de datos, modales y plan.
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { describe, test, expect, beforeEach, vi } from "vitest";
 import RutinasView from "../RutinasView";
@@ -78,7 +78,13 @@ const CICLOS = [
   },
 ];
 
-const NOTAS = [{ id_ejercicio: 5, nota: "Subir peso" }];
+const NOTAS = [{
+  id_nota: 1,
+  id_ejercicio: 5,
+  nombre_ejercicio: "Sentadilla",
+  nota: "Subir peso",
+  fecha_nota: "2026-10-02",
+}];
 
 function crearAuthAxios() {
   const get = vi.fn((url) => {
@@ -173,6 +179,16 @@ describe("RutinasView", () => {
     fireEvent.click(screen.getByTitle("Ver"));
     await waitFor(() => expect(screen.getByTitle("Recargar")).toBeInTheDocument());
     expect((await screen.findAllByText("Piernas")).length).toBeGreaterThan(0);
+
+    fireEvent.click(screen.getByRole("button", { name: /Ver Notas del Afiliado/ }));
+    expect(await screen.findByRole("heading", { name: /Notas del Afiliado — Ana Pérez/ })).toBeInTheDocument();
+    const dialogNotas = screen.getByRole("dialog");
+    expect(within(dialogNotas).getByText(/🏋️ Sentadilla/)).toBeInTheDocument();
+    expect(within(dialogNotas).getByText("Subir peso")).toBeInTheDocument();
+    expect(within(dialogNotas).getByText(/2026-10-02/)).toBeInTheDocument();
+    fireEvent.click(within(dialogNotas).getByRole("button", { name: "Cerrar" }));
+
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
     fireEvent.click(screen.getByText("Cerrar"));
   }, 15000);
 });

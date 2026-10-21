@@ -266,6 +266,14 @@ export default function MiPerfilScreen({ navigation }) {
     .filter((c) => !esCicloActivo(c))
     .sort((a, b) => (b.numero_ciclo || b.id_ciclo || 0) - (a.numero_ciclo || a.id_ciclo || 0));
 
+  const entrenador = ciclo
+    ? {
+        nombre: `${ciclo.entrenador_nombres || ''} ${ciclo.entrenador_apellidos || ''}`.trim(),
+        rol: ciclo.entrenador_rol || '',
+        foto: ciclo.entrenador_foto || null,
+      }
+    : null;
+
   const headerHeight = scrollY.interpolate({
     inputRange: [0, 120],
     outputRange: [260, 160],
@@ -370,6 +378,22 @@ export default function MiPerfilScreen({ navigation }) {
             </Text>
           </SectionCard>
         )}
+
+        {entrenador?.nombre ? (
+          <SectionCard title="Mi Entrenador" icon="person-circle-outline">
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Avatar nombre={entrenador.nombre} foto={entrenador.foto} size={58} />
+              <View style={{ marginLeft: SPACING.md, flex: 1 }}>
+                <Text style={{ color: COLORS.text, fontSize: FONTS.body, fontWeight: '700' }}>
+                  {entrenador.nombre}
+                </Text>
+                <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.small, marginTop: 2 }}>
+                  {entrenador.rol || 'Staff MetaFit'}
+                </Text>
+              </View>
+            </View>
+          </SectionCard>
+        ) : null}
 
         {historial.length > 0 && (
           <SectionCard title="Historial de Ciclos" icon="time-outline">

@@ -55,6 +55,13 @@ export function AuthProvider({ children }) {
     return userData;   // { id, email, role, nombres, apellidos }
   };
 
+  const updateUser = (cambios) => {
+    if (!user) return;
+    const next = { ...user, ...cambios };
+    if (token) persistSession(token, next);
+    setUser(next);
+  };
+
   const logout = () => {
     clearSession();
     flushSync(() => {
@@ -65,7 +72,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, isAuthReady, login, logout, authAxios: axiosRef.current }}>
+    <AuthContext.Provider value={{ user, token, isAuthReady, login, logout, updateUser, authAxios: axiosRef.current }}>
       {children}
     </AuthContext.Provider>
   );
