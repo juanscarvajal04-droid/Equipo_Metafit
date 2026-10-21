@@ -22,7 +22,7 @@ export default function useApi(apiFunction, initialData = null) {
   }, [apiFunction]);
 
   useEffect(() => {
-    execute();
+    void execute();
   }, [execute]);
 
   return { data, loading, error, refetch: execute };

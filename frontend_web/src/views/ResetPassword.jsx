@@ -82,9 +82,10 @@ export default function ResetPassword() {
             ) : (
               <form onSubmit={handleSubmit} noValidate autoComplete="off">
                 <div className={styles.fieldGroupLast}>
-                  <label className={styles.label}>Nueva Contraseña</label>
+                  <label className={styles.label} htmlFor="reset-nueva-password">Nueva Contraseña</label>
                   <div className={styles.passWrap}>
                     <input
+                      id="reset-nueva-password"
                       type={showPass ? "text" : "password"}
                       value={pass}
                       onChange={(e) => { setPass(e.target.value); setError(""); }}
@@ -106,8 +107,9 @@ export default function ResetPassword() {
                 </div>
 
                 <div className={styles.fieldGroupLast}>
-                  <label className={styles.label}>Confirmar Contraseña</label>
+                  <label className={styles.label} htmlFor="reset-confirmar-password">Confirmar Contraseña</label>
                   <input
+                    id="reset-confirmar-password"
                     type={showPass ? "text" : "password"}
                     value={confirm}
                     onChange={(e) => { setConfirm(e.target.value); setError(""); }}

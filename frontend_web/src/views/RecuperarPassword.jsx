@@ -81,8 +81,9 @@ export default function RecuperarPassword() {
             ) : (
               <form onSubmit={handleSubmit} noValidate autoComplete="off">
                 <div className={styles.fieldGroupLast}>
-                  <label className={styles.label}>Correo Electrónico</label>
+                  <label className={styles.label} htmlFor="recuperar-email">Correo Electrónico</label>
                   <input
+                    id="recuperar-email"
                     type="email"
                     name="email"
                     value={email}

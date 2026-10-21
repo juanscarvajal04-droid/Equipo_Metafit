@@ -203,12 +203,12 @@ export default function MiProgresoScreen() {
     }
   }, []);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => { void fetchData(); }, [fetchData]);
 
   // Sincronización tiempo real: polling 10s (progreso/agua/consumo siempre frescos)
   useAutoRefresh(fetchData, 10000);
 
-  const onRefresh = () => { setRefreshing(true); fetchData(); };
+  const onRefresh = () => { setRefreshing(true); void fetchData(); };
 
   if (loading) {
     return (

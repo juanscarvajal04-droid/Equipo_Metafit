@@ -51,7 +51,7 @@ export default function RestriccionesAdmin() {
   const [busqueda, setBusqueda] = useState("");
 
   useEffect(() => {
-    loadRestricciones();
+    void loadRestricciones();
   }, [loadRestricciones]);
 
   const abrirNuevo = () => {
@@ -224,8 +224,19 @@ export default function RestriccionesAdmin() {
         </div>
 
         {modalAbierto && (
-          <div className={s.modalOverlay} onClick={() => !guardando && setModalAbierto(false)}>
-            <div className={s.modalContent} onClick={(e) => e.stopPropagation()}>
+          <div
+            className={s.modalOverlay}
+            role="button"
+            tabIndex={0}
+            aria-label="Cerrar modal"
+            onClick={(e) => {
+              if (!guardando && e.target === e.currentTarget) setModalAbierto(false);
+            }}
+            onKeyDown={(e) => {
+              if ((e.key === "Escape" || e.key === "Enter") && !guardando) setModalAbierto(false);
+            }}
+          >
+            <div className={s.modalContent}>
               <form onSubmit={guardar}>
                 <div className={s.modalHeader}>
                   <h5 className={s.modalTitle}>
@@ -241,8 +252,9 @@ export default function RestriccionesAdmin() {
                 </div>
                 <div className={s.modalBody}>
                   <div>
-                    <label className={s.labelText}>Nombre *</label>
+                    <label className={s.labelText} htmlFor="restriccion-nombre">Nombre *</label>
                     <input
+                      id="restriccion-nombre"
                       className={s.inputDark}
                       value={form.nombre_restriccion}
                       onChange={(e) => setForm({ ...form, nombre_restriccion: e.target.value })}
@@ -251,8 +263,9 @@ export default function RestriccionesAdmin() {
                     />
                   </div>
                   <div>
-                    <label className={s.labelText}>Tipo *</label>
+                    <label className={s.labelText} htmlFor="restriccion-tipo">Tipo *</label>
                     <select
+                      id="restriccion-tipo"
                       className={s.inputDark}
                       value={form.tipo}
                       onChange={(e) => setForm({ ...form, tipo: e.target.value })}
@@ -265,8 +278,9 @@ export default function RestriccionesAdmin() {
                     </select>
                   </div>
                   <div>
-                    <label className={s.labelText}>Efecto relevante</label>
+                    <label className={s.labelText} htmlFor="restriccion-efecto">Efecto relevante</label>
                     <textarea
+                      id="restriccion-efecto"
                       className={`${s.inputDark} ${s.textareaDesc}`}
                       value={form.efecto_relevante}
                       onChange={(e) => setForm({ ...form, efecto_relevante: e.target.value })}

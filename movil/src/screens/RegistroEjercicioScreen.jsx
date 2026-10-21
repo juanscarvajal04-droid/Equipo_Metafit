@@ -63,7 +63,7 @@ export default function RegistroEjercicioScreen({ navigation, route }) {
       Alert.alert('Datos incompletos', 'Ingresá series y repeticiones (mínimo 1).');
       return;
     }
-    execute({
+    void execute({
       id_ciclo,
       id_rutina,
       orden,

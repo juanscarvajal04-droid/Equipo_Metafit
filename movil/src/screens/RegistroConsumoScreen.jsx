@@ -79,7 +79,7 @@ export default function RegistroConsumoScreen({ navigation, route }) {
       return;
     }
     setResultado(null);
-    execute({
+    void execute({
       id_ciclo,
       num_comida,
       id_alimento,

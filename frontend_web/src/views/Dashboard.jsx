@@ -36,7 +36,7 @@ export default function Dashboard() {
   useEffect(() => {
     const refresh = () => cargarKPIs();
     const handleVisibility = () => {
-      if (document.visibilityState === "visible") cargarKPIs();
+      if (document.visibilityState === "visible") void cargarKPIs();
     };
     window.addEventListener("pago-registrado", refresh);
     window.addEventListener("afiliado-modificado", refresh);

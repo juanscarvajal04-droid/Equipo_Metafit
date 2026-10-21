@@ -37,7 +37,7 @@ export default function LoginScreen({ navigation }) {
     setLoading(true);
     try {
       await login(correo.trim(), contrasena);
-      activarPushNotifications();
+      void activarPushNotifications();
     } catch (err) {
       if (!err.response) {
         setError('No se pudo conectar al servidor. Verificá tu conexión.');

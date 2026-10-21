@@ -183,7 +183,7 @@ export default function MiPerfilScreen({ navigation }) {
     }
   }, []);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => { void fetchData(); }, [fetchData]);
 
   // Sincronización tiempo real: polling 10s (foto, teléfono y ciclo siempre frescos)
   useAutoRefresh(fetchData, 10000);
@@ -195,9 +195,9 @@ export default function MiPerfilScreen({ navigation }) {
   }, [navigation, fetchData]);
 
   // Registro idempotente del push token (si el login no lo hizo aún)
-  useEffect(() => { activarPushNotifications(); }, []);
+  useEffect(() => { void activarPushNotifications(); }, []);
 
-  const onRefresh = () => { setRefreshing(true); fetchData(); };
+  const onRefresh = () => { setRefreshing(true); void fetchData(); };
 
   const handleLogout = async () => {
     try {

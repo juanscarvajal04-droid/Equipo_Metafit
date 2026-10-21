@@ -234,12 +234,12 @@ export default function MiDietaScreen() {
     }
   }, []);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => { void fetchData(); }, [fetchData]);
 
   // Sincronización tiempo real: polling 10s (silencioso, conserva consumo marcado)
   useAutoRefresh(() => fetchData(undefined, { silent: true }), 10000);
 
-  const onRefresh = () => { setRefreshing(true); fetchData(); };
+  const onRefresh = () => { setRefreshing(true); void fetchData(); };
 
   const onActualizar = () => {
     setActualizando(true);
@@ -249,7 +249,7 @@ export default function MiDietaScreen() {
   const handleCicloChange = (c) => {
     setShowPicker(false);
     setLoading(true);
-    fetchData(c);
+    void fetchData(c);
   };
 
   const handleAgua = async (index) => {

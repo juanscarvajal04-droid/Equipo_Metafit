@@ -389,12 +389,12 @@ export default function MiRutinaScreen() {
     }
   }, [loadRutinaDia, diaNumeroHoy]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => { void fetchData(); }, [fetchData]);
 
   // Sincronización tiempo real: polling 10s (silencioso, conserva día seleccionado)
   useAutoRefresh(() => fetchData(undefined, { silent: true }), 10000);
 
-  const onRefresh = () => { setRefreshing(true); fetchData(); };
+  const onRefresh = () => { setRefreshing(true); void fetchData(); };
 
   const onActualizar = () => {
     setActualizando(true);
@@ -407,7 +407,7 @@ export default function MiRutinaScreen() {
     setExpandido(null);
     setNotaTextos({});
     setLoading(true);
-    fetchData(c);
+    void fetchData(c);
   };
 
   const setNotaTexto = (idEjercicio, texto) => {

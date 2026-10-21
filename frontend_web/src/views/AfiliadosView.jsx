@@ -475,8 +475,19 @@ export default function AfiliadosView() {
       </div>
 
       {detalleAfiliado && (
-        <div className={s.modalOverlay} onClick={() => !saving && setDetalleAfiliado(null)}>
-          <div className={s.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: 650 }}>
+        <div
+          className={s.modalOverlay}
+          role="button"
+          tabIndex={0}
+          aria-label="Cerrar modal"
+          onClick={(e) => {
+            if (!saving && e.target === e.currentTarget) setDetalleAfiliado(null);
+          }}
+          onKeyDown={(e) => {
+            if ((e.key === "Escape" || e.key === "Enter") && !saving) setDetalleAfiliado(null);
+          }}
+        >
+          <div className={s.modalContent} style={{ maxWidth: 650 }}>
             <div className={s.modalHeader}>
               <h5 className={s.modalTitle} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <AvatarFoto nombre={nombreCompleto(detalleAfiliado)} foto={detalleAfiliado.foto} size={38} />
@@ -632,8 +643,19 @@ export default function AfiliadosView() {
       )}
 
       {editandoAfiliado && (
-        <div className={s.modalOverlay} onClick={() => !saving && setEditandoAfiliado(null)}>
-          <div className={s.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: 650 }}>
+        <div
+          className={s.modalOverlay}
+          role="button"
+          tabIndex={0}
+          aria-label="Cerrar modal"
+          onClick={(e) => {
+            if (!saving && e.target === e.currentTarget) setEditandoAfiliado(null);
+          }}
+          onKeyDown={(e) => {
+            if ((e.key === "Escape" || e.key === "Enter") && !saving) setEditandoAfiliado(null);
+          }}
+        >
+          <div className={s.modalContent} style={{ maxWidth: 650 }}>
             <form onSubmit={guardarEdicion}>
               <div className={s.modalHeader}>
                 <h5 className={s.modalTitle}>✏️ Editar: {nombreCompleto(editandoAfiliado)}</h5>
@@ -643,8 +665,9 @@ export default function AfiliadosView() {
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
                   <AvatarFoto nombre={nombreCompleto(editandoAfiliado)} foto={fotoPreview || editandoAfiliado.foto} size={56} />
                   <div style={{ flex: 1 }}>
-                    <label className={s.labelText}>Foto de perfil</label>
+                    <label className={s.labelText} htmlFor="afiliado-foto-editar">Foto de perfil</label>
                     <input
+                      id="afiliado-foto-editar"
                       className={s.inputDark}
                       type="file"
                       accept="image/*"
@@ -765,8 +788,9 @@ export default function AfiliadosView() {
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
                   <AvatarFoto nombre={formCrear.nombres || "?"} foto={fotoPreview} size={56} />
                   <div style={{ flex: 1 }}>
-                    <label className={s.labelText}>Foto de perfil</label>
+                    <label className={s.labelText} htmlFor="afiliado-foto-crear">Foto de perfil</label>
                     <input
+                      id="afiliado-foto-crear"
                       className={s.inputDark}
                       type="file"
                       accept="image/*"
