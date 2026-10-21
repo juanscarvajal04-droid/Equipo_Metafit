@@ -83,10 +83,7 @@ export default function RutinasView() {
   useEffect(() => { fetchAfiliados(); fetchEjercicios(); }, [fetchAfiliados, fetchEjercicios]);
 
   // Sincronización tiempo real: polling 10s + refetch al recobrar foco/visibilidad
-  useAutoRefresh(() => {
-    void fetchAfiliados({ silent: true });
-    void fetchEjercicios({ silent: true });
-  }, 10000);
+  useAutoRefresh(() => { void fetchAfiliados({ silent: true }); void fetchEjercicios({ silent: true }); }, 10000);
 
   // ── Derived data ────────────────────────────────────────────
   const filtered = afiliados.filter((a) => {

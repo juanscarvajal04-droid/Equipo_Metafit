@@ -83,10 +83,7 @@ export default function DietasView() {
   useEffect(() => { fetchAfiliados(); fetchAlimentos(); }, [fetchAfiliados, fetchAlimentos]);
 
   // Sincronización tiempo real: polling 10s + refetch al recobrar foco/visibilidad
-  useAutoRefresh(() => {
-    void fetchAfiliados({ silent: true });
-    void fetchAlimentos({ silent: true });
-  }, 10000);
+  useAutoRefresh(() => { void fetchAfiliados({ silent: true }); void fetchAlimentos({ silent: true }); }, 10000);
 
   // ── Derived data ────────────────────────────────────────────
   const filtered = afiliados.filter((a) => {

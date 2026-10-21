@@ -147,11 +147,28 @@ describe("RutinasView", () => {
 
     fireEvent.click(screen.getAllByTitle("Historial de ciclos")[0]);
     expect(await screen.findByRole("heading", { name: /Historial de Ciclos/ })).toBeInTheDocument();
+
+    // Cierre por overlay accesible y edición inline de un ciclo.
+    fireEvent.click(screen.getByLabelText("Cerrar modal"));
+    await waitFor(() =>
+      expect(screen.queryByRole("heading", { name: /Historial de Ciclos/ })).not.toBeInTheDocument()
+    );
+    fireEvent.click(screen.getAllByTitle("Historial de ciclos")[0]);
+    expect(await screen.findByRole("heading", { name: /Historial de Ciclos/ })).toBeInTheDocument();
+    fireEvent.click(screen.getByTitle("Editar"));
+    fireEvent.change(await screen.findByLabelText("Inicio"), { target: { value: "2026-10-02" } });
+    fireEvent.change(screen.getByLabelText("Fin"), { target: { value: "2026-11-01" } });
+    fireEvent.change(screen.getByLabelText("Objetivo"), { target: { value: "Mantenimiento" } });
+    fireEvent.change(screen.getByLabelText("Nivel"), { target: { value: "Avanzado" } });
+    fireEvent.change(screen.getByLabelText("Días/sem"), { target: { value: "5" } });
+    fireEvent.click(screen.getByLabelText("Activo"));
+    fireEvent.click(screen.getByText("Cancelar"));
+    await waitFor(() => expect(screen.getByTitle("Editar")).toBeInTheDocument());
     fireEvent.click(screen.getByText("Cerrar"));
 
     fireEvent.click(screen.getByTitle("Ver"));
     await waitFor(() => expect(screen.getByTitle("Recargar")).toBeInTheDocument());
     expect((await screen.findAllByText("Piernas")).length).toBeGreaterThan(0);
     fireEvent.click(screen.getByText("Cerrar"));
-  });
+  }, 15000);
 });

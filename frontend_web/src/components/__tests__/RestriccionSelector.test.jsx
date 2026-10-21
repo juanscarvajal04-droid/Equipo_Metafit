@@ -121,4 +121,15 @@ describe("RestriccionSelector (modo registro)", () => {
     await waitFor(() => expect(onAdd).toHaveBeenCalledTimes(1));
     expect(onAdd).toHaveBeenCalledWith("3");
   });
+
+  test("cierra el modal desde el overlay accesible", async () => {
+    render(<WrapperRegistro />);
+
+    await abrirModalYCargarCatalogo();
+    fireEvent.click(screen.getByLabelText("Cerrar modal"));
+
+    await waitFor(() =>
+      expect(screen.queryByRole("combobox")).not.toBeInTheDocument()
+    );
+  });
 });
