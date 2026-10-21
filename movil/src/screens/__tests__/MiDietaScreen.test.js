@@ -34,12 +34,15 @@ describe('<MiDietaScreen />', () => {
         { id_ciclo: 2, nombre_ciclo: 'Ciclo 2', activo: 0 },
       ],
     });
-    getPlanNutricional.mockResolvedValue({ data: { detalle: [] } });
+    getPlanNutricional.mockResolvedValue({
+      data: { detalle: [], recomendacion_agua_vasos: 8 },
+    });
     getAguaHoy.mockResolvedValue({ data: { vasos: 0 } });
 
     const { getByText, UNSAFE_getByType, UNSAFE_getAllByType } = render(<MiDietaScreen />);
 
     await waitFor(() => expect(getByText('Mi Dieta')).toBeTruthy());
+    expect(getByText(/Recomendado: 8 vasos \/ 2 L al día/)).toBeTruthy();
     expect(getMisCiclos).toHaveBeenCalledTimes(1);
 
     await act(async () => {

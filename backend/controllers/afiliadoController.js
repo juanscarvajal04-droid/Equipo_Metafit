@@ -390,6 +390,26 @@ const AfiliadoController = {
     }
   },
 
+  // Historial de agua de OTRO afiliado (staff: admin/entrenador/recepcionista).
+  // Cada vaso se interpreta como 250 ml para exponer también los litros.
+  getAguaAfiliado: async (req, res) => {
+    try {
+      const filas = await AfiliadoService.getAguaHistorial(req.params.id, req.query);
+      const result = (Array.isArray(filas) ? filas : []).map((fila) => {
+        const vasos = Number(fila.vasos) || 0;
+        return {
+          ...fila,
+          vasos,
+          litros: Number(((vasos * 250) / 1000).toFixed(2)),
+        };
+      });
+      return res.json(result);
+    } catch (err) {
+      console.error('[afiliadoController.getAguaAfiliado]', err);
+      return res.status(500).json({ error: 'Error interno del servidor' });
+    }
+  },
+
   getConsumoHistorial: async (req, res) => {
     try {
       const result = await AfiliadoService.getConsumoHistorial(req.user.sub, req.query);

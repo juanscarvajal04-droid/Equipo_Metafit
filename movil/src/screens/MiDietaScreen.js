@@ -163,6 +163,7 @@ export default function MiDietaScreen() {
   const [showPicker, setShowPicker] = useState(false);
   const [alimentos, setAlimentos] = useState([]);
   const [agua, setAgua] = useState(0);
+  const [recomendacionAgua, setRecomendacionAgua] = useState(null);
   const [consumidos, setConsumidos] = useState({});
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -193,6 +194,9 @@ export default function MiDietaScreen() {
       if (cicloData) {
         const planRes = await getPlanNutricional(cicloData.id_ciclo);
 
+        // Recomendación diaria de agua definida por el entrenador (opcional).
+        setRecomendacionAgua(planRes.data?.recomendacion_agua_vasos ?? null);
+
         // Contrato real del backend: { detalle: [{ num_comida, id_alimento, cantidad_g, nombre_alimento, ... }] }
         const planData = planRes.data?.detalle || planRes.data?.alimentos || planRes.data?.plan || [];
         const alimentosPlan = (Array.isArray(planData) ? planData : []).map((a) => ({
@@ -207,6 +211,7 @@ export default function MiDietaScreen() {
         // Sin ciclo activo: plan vacío, pero la pantalla sigue disponible
         // (solo el módulo de agua muestra el aviso y queda deshabilitado).
         setAlimentos([]);
+        setRecomendacionAgua(null);
         setConsumidos({});
       }
     } catch (err) {
@@ -390,6 +395,21 @@ export default function MiDietaScreen() {
           )}
 
           <BarraAgua actual={agua} meta={MAX_VASOS} />
+
+          {recomendacionAgua != null && (
+            <View style={{
+              marginTop: SPACING.sm,
+              backgroundColor: 'rgba(255,255,255,0.12)',
+              borderRadius: BORDER_RADIUS.md,
+              paddingVertical: SPACING.xs,
+              paddingHorizontal: SPACING.sm,
+            }}>
+              <Text style={{ color: '#fff', fontSize: FONTS.small, textAlign: 'center' }}>
+                💧 Recomendado: {recomendacionAgua} vasos /{' '}
+                {(Number(recomendacionAgua) * 0.25).toFixed(2).replace(/\.?0+$/, '')} L al día
+              </Text>
+            </View>
+          )}
         </View>
 
         {ciclos.length > 1 && (

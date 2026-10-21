@@ -68,6 +68,12 @@ esperarBaseDeDatos()
   .then(() => console.log('✅ Migración de NOTA_EJERCICIO verificada'))
   .catch(err => console.error('[MIGRACION-NOTA-EJERCICIO] error:', err.message));
 
+// ── Migración idempotente: recomendación de agua en PLAN_NUTRICIONAL ──
+esperarBaseDeDatos()
+  .then(() => require('./migrations/migracionRecomendacionAgua').runMigraciones())
+  .then(() => console.log('✅ Migración de recomendación de agua verificada'))
+  .catch(err => console.error('[MIGRACION-RECOMENDACION-AGUA] error:', err.message));
+
 // ── Cron: recordatorio de pagos por vencer (cada hora) ──
 const { iniciarCron } = require('./cron/recordatorioPagos');
 iniciarCron();

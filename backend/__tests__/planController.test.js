@@ -299,11 +299,33 @@ describe('planController - planes nutricionales', () => {
     PlanModel.createNutricional.mockResolvedValueOnce(5);
     const ok = makeRes();
     await controller.createNutricional(
-      makeReq({ body: { id_ciclo: 1, calorias_estimadas: 1800, num_comidas_diarias: 5 } }),
+      makeReq({
+        body: {
+          id_ciclo: 1,
+          calorias_estimadas: 1800,
+          num_comidas_diarias: 5,
+          recomendacion_agua_vasos: 8,
+        },
+      }),
       ok
     );
     expect(ok.status).toHaveBeenCalledWith(201);
+    expect(PlanModel.createNutricional.mock.calls[0][5]).toBe(8);
     expect(enviarPushAUsuarioDelCiclo).toHaveBeenCalled();
+
+    const invalidAgua = makeRes();
+    await controller.createNutricional(
+      makeReq({
+        body: {
+          id_ciclo: 1,
+          calorias_objetivo: 1800,
+          num_comidas: 5,
+          recomendacion_agua_vasos: 99,
+        },
+      }),
+      invalidAgua
+    );
+    expect(invalidAgua.status).toHaveBeenCalledWith(400);
 
     PlanModel.createNutricional.mockRejectedValueOnce(
       Object.assign(new Error('dup'), { code: 'ER_DUP_ENTRY' })
@@ -332,10 +354,30 @@ describe('planController - planes nutricionales', () => {
     PlanModel.updateNutricional.mockResolvedValueOnce({});
     const ok = makeRes();
     await controller.updateNutricional(
-      makeReq({ params: { id: '1' }, body: { calorias_estimadas: 1900, num_comidas_diarias: 4 } }),
+      makeReq({
+        params: { id: '1' },
+        body: {
+          calorias_estimadas: 1900,
+          num_comidas_diarias: 4,
+          recomendacion_agua_vasos: 10,
+        },
+      }),
       ok
     );
     expect(ok.json).toHaveBeenCalledWith({ message: 'Plan nutricional actualizado' });
+    expect(PlanModel.updateNutricional.mock.calls[0][1]).toMatchObject({
+      recomendacion_agua_vasos: 10,
+    });
+
+    const invalidAgua = makeRes();
+    await controller.updateNutricional(
+      makeReq({
+        params: { id: '1' },
+        body: { calorias_objetivo: 1900, num_comidas: 4, recomendacion_agua_vasos: -1 },
+      }),
+      invalidAgua
+    );
+    expect(invalidAgua.status).toHaveBeenCalledWith(400);
 
     PlanModel.updateNutricional.mockRejectedValueOnce(new Error('db'));
     const error = makeRes();

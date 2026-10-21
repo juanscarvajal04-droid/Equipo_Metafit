@@ -91,7 +91,8 @@ const AfiliadoModel = {
         pe.observaciones AS plan_observaciones,
         pn.calorias_objetivo,
         pn.num_comidas,
-        pn.observaciones AS plan_nutricional_obs
+        pn.observaciones AS plan_nutricional_obs,
+        pn.recomendacion_agua_vasos
       FROM CICLO c
       LEFT JOIN PLAN_ENTRENAMIENTO pe ON c.id_ciclo = pe.id_ciclo
       LEFT JOIN PLAN_NUTRICIONAL   pn ON c.id_ciclo = pn.id_ciclo
@@ -150,6 +151,7 @@ const AfiliadoModel = {
                 calorias_estimadas: raw.calorias_objetivo,
                 num_comidas_diarias: raw.num_comidas,
                 observaciones: raw.plan_nutricional_obs || null,
+                recomendacion_agua_vasos: raw.recomendacion_agua_vasos ?? null,
               };
             }
             return {

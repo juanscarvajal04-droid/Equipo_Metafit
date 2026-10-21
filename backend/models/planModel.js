@@ -202,7 +202,9 @@ const PlanModel = {
   // DETALLE_NUTRICIONAL: cantidad_g (no cantidad), num_comida (no numero_comida)
   getNutricionalByCiclo: async (id_ciclo) => {
     const [planes] = await pool.query(
-      'SELECT id_ciclo, calorias_objetivo, num_comidas, modificado_por, observaciones FROM PLAN_NUTRICIONAL WHERE id_ciclo = ?',
+      `SELECT id_ciclo, calorias_objetivo, num_comidas, modificado_por,
+              observaciones, recomendacion_agua_vasos
+         FROM PLAN_NUTRICIONAL WHERE id_ciclo = ?`,
       [id_ciclo]
     );
     if (!planes.length) return null;
@@ -221,22 +223,52 @@ const PlanModel = {
     return plan;
   },
 
-  createNutricional: async (id_ciclo, calorias_objetivo, num_comidas, modificado_por, observaciones) => {
+  createNutricional: async (
+    id_ciclo, calorias_objetivo, num_comidas, modificado_por, observaciones,
+    recomendacion_agua_vasos = null
+  ) => {
     const [r] = await pool.query(
       `INSERT INTO PLAN_NUTRICIONAL
-         (id_ciclo, calorias_objetivo, num_comidas, modificado_por, observaciones)
-       VALUES (?,?,?,?,?)`,
-      [id_ciclo, calorias_objetivo, num_comidas, modificado_por || null, observaciones || null]
+         (id_ciclo, calorias_objetivo, num_comidas, modificado_por, observaciones,
+          recomendacion_agua_vasos)
+       VALUES (?,?,?,?,?,?)`,
+      [
+        id_ciclo,
+        calorias_objetivo,
+        num_comidas,
+        modificado_por || null,
+        observaciones || null,
+        recomendacion_agua_vasos,
+      ]
     );
     return r.insertId;
   },
 
   updateNutricional: async (id_ciclo, campos, modificado_por) => {
+    const sets = [
+      'calorias_objetivo=?',
+      'num_comidas=?',
+      'modificado_por=?',
+      'observaciones=?',
+    ];
+    const params = [
+      campos.calorias_objetivo,
+      campos.num_comidas,
+      modificado_por,
+      campos.observaciones || null,
+    ];
+
+    // Campo opcional: solo se toca si el cliente lo envió. Así un PATCH
+    // parcial no borra una recomendación ya configurada.
+    if (campos.recomendacion_agua_vasos !== undefined) {
+      sets.push('recomendacion_agua_vasos=?');
+      params.push(campos.recomendacion_agua_vasos);
+    }
+    params.push(id_ciclo);
+
     const [r] = await pool.query(
-      `UPDATE PLAN_NUTRICIONAL
-       SET calorias_objetivo=?, num_comidas=?, modificado_por=?, observaciones=?
-       WHERE id_ciclo=?`,
-      [campos.calorias_objetivo, campos.num_comidas, modificado_por, campos.observaciones || null, id_ciclo]
+      `UPDATE PLAN_NUTRICIONAL SET ${sets.join(', ')} WHERE id_ciclo=?`,
+      params
     );
     return r.affectedRows;
   },

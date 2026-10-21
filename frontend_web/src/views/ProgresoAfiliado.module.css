@@ -80,6 +80,121 @@
   padding: 1rem 1.1rem;
 }
 
+/* ── Agua (últimos 7 días) ─────────────────────────────────── */
+.waterCard {
+  background: var(--mf-surface);
+  border: 1px solid var(--mf-border);
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  margin-bottom: 24px;
+}
+
+.waterHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.waterSub {
+  margin: -6px 0 0;
+  font-size: 0.76rem;
+  color: var(--mf-muted);
+}
+
+.waterGoal {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(59, 130, 246, 0.45);
+  background: rgba(59, 130, 246, 0.12);
+  color: #60a5fa;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.waterSummary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.waterMetric {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--mf-border);
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+
+.waterMetricLabel {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--mf-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 2px;
+}
+
+.waterMetricValue {
+  font-size: 0.95rem;
+  color: var(--mf-text);
+}
+
+.waterTableWrap {
+  overflow-x: auto;
+}
+
+.waterTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.waterTable th {
+  text-align: left;
+  padding: 0.45rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--mf-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  border-bottom: 1px solid var(--mf-border);
+  white-space: nowrap;
+}
+
+.waterTable td {
+  padding: 0.45rem 0.5rem;
+  color: var(--mf-text);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  vertical-align: middle;
+}
+
+.waterTable tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.waterBarTrack {
+  width: 100%;
+  min-width: 80px;
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(59, 130, 246, 0.14);
+  overflow: hidden;
+}
+
+.waterBarFill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #2563eb, #38bdf8);
+  transition: width 0.3s ease;
+}
+
 .infoGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));

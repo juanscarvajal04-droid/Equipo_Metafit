@@ -48,7 +48,12 @@ export default function DietasView() {
   const [asignarAfiliadoData, setAsignarAfiliadoData] = useState(null);
   const [alimentosDisponibles, setAlimentosDisponibles] = useState([]);
   const [selectedAlimentos, setSelectedAlimentos] = useState({});
-  const [formPlan, setFormPlan] = useState({ calorias_objetivo:"", num_comidas:"3", observaciones:"" });
+  const [formPlan, setFormPlan] = useState({
+    calorias_objetivo: "",
+    num_comidas: "3",
+    observaciones: "",
+    recomendacion_agua_vasos: "",
+  });
 
   // Nuevo/Editar alimento form
   const [formAlimento, setFormAlimento] = useState({ nombre_alimento:"", proteinas:"", carbohidratos:"", grasas:"", calorias_por_100g:"" });
@@ -106,7 +111,12 @@ export default function DietasView() {
     setAsignarAfiliadoData(null);
     setAlimentosDisponibles([]);
     setSelectedAlimentos({});
-    setFormPlan({ calorias_objetivo:"", num_comidas:"3", observaciones:"" });
+    setFormPlan({
+      calorias_objetivo: "",
+      num_comidas: "3",
+      observaciones: "",
+      recomendacion_agua_vasos: "",
+    });
     setFormAlimento({ nombre_alimento:"", proteinas:"", carbohidratos:"", grasas:"", calorias_por_100g:"" });
     setDeleteAlimentoId("");
   };
@@ -114,9 +124,33 @@ export default function DietasView() {
   const handleAfiliadoSelect = async (e) => {
     const id = e.target.value;
     setAsignarAfiliadoId(id);
-    if (!id) { setAsignarAfiliadoData(null); setAlimentosDisponibles([]); return; }
+    if (!id) {
+      setAsignarAfiliadoData(null);
+      setAlimentosDisponibles([]);
+      setFormPlan({
+        calorias_objetivo: "",
+        num_comidas: "3",
+        observaciones: "",
+        recomendacion_agua_vasos: "",
+      });
+      return;
+    }
     const a = afiliados.find((x) => String(getId(x)) === id);
     setAsignarAfiliadoData(a || null);
+
+    // Si el afiliado ya tiene plan, precargamos sus valores para no perder
+    // la recomendación de agua al editarlo.
+    const planActual = cicloActivo(a)?.plan_nutricional;
+    setFormPlan({
+      calorias_objetivo: planActual?.calorias_objetivo ?? planActual?.calorias_estimadas ?? "",
+      num_comidas: String(planActual?.num_comidas ?? planActual?.num_comidas_diarias ?? 3),
+      observaciones: planActual?.observaciones || "",
+      recomendacion_agua_vasos:
+        planActual?.recomendacion_agua_vasos != null
+          ? String(planActual.recomendacion_agua_vasos)
+          : "",
+    });
+
     try {
       const { data } = await authAxios.get(`/afiliados/${id}/alimentos-disponibles`);
       setAlimentosDisponibles(Array.isArray(data) ? data : []);
@@ -147,6 +181,9 @@ export default function DietasView() {
     }
     const a = asignarAfiliadoData;
     if (!a) { showToast("Selecciona un afiliado", "danger"); return; }
+    const aguaVasos = formPlan.recomendacion_agua_vasos === ""
+      ? null
+      : Number(formPlan.recomendacion_agua_vasos);
     setSaving(true);
     try {
       const idAfiliado = getId(a);
@@ -181,6 +218,7 @@ export default function DietasView() {
           calorias_objetivo: Number(formPlan.calorias_objetivo) || 2000,
           num_comidas: Number(formPlan.num_comidas) || 3,
           observaciones: formPlan.observaciones,
+          recomendacion_agua_vasos: aguaVasos,
         });
       } else {
         await authAxios.post("/planes/nutricional", {
@@ -188,6 +226,7 @@ export default function DietasView() {
           calorias_objetivo: Number(formPlan.calorias_objetivo) || 2000,
           num_comidas: Number(formPlan.num_comidas) || 3,
           observaciones: formPlan.observaciones,
+          recomendacion_agua_vasos: aguaVasos,
         });
       }
 
@@ -487,6 +526,26 @@ export default function DietasView() {
                         <input type="text" className={s.inputDark} value={formPlan.observaciones} onChange={(e)=>setFormPlan((f)=>({...f, observaciones:e.target.value}))} placeholder="Opcional" style={{ width:"100%" }} />
                       </div>
                     </div>
+                    <div style={{ marginTop:12 }}>
+                      <label className={s.labelText} htmlFor="recomendacion-agua">
+                        💧 Recomendación de agua diaria (vasos)
+                      </label>
+                      <input
+                        id="recomendacion-agua"
+                        type="number"
+                        min={0}
+                        max={50}
+                        step={1}
+                        className={s.inputDark}
+                        value={formPlan.recomendacion_agua_vasos}
+                        onChange={(e)=>setFormPlan((f)=>({...f, recomendacion_agua_vasos:e.target.value}))}
+                        placeholder="Ej: 8 (opcional)"
+                        style={{ width:"100%" }}
+                      />
+                      <small style={{ color:"var(--mf-muted)", fontSize:"0.72rem" }}>
+                        Se mostrará en la app del afiliado. 8 vasos = 2 litros al día.
+                      </small>
+                    </div>
                   </div>
                 )}
 
@@ -762,6 +821,15 @@ function DietaDisplay({ afiliado, authAxios }) {
             <small style={{ color:"var(--mf-muted)", fontSize:"0.72rem" }}>Comidas / día</small>
             <div style={{ fontWeight:600 }}>{plan.num_comidas || "—"}</div>
           </div>
+          {plan.recomendacion_agua_vasos != null && (
+            <div>
+              <small style={{ color:"var(--mf-muted)", fontSize:"0.72rem" }}>Recomendación de agua</small>
+              <div style={{ fontWeight:600 }}>
+                💧 {plan.recomendacion_agua_vasos} vasos /{" "}
+                {((Number(plan.recomendacion_agua_vasos) * 250) / 1000).toFixed(1)} L al día
+              </div>
+            </div>
+          )}
           {plan.observaciones && (
             <div style={{ gridColumn:"1/-1" }}>
               <small style={{ color:"var(--mf-muted)", fontSize:"0.72rem" }}>Observaciones</small>

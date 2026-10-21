@@ -351,6 +351,26 @@ describe('afiliadoController - endpoints /me y notas', () => {
     expect(statuses).toEqual([400, 409, 404, 400, 400, 500]);
   });
 
+  test('getAguaAfiliado devuelve vasos y litros para el staff', async () => {
+    const query = { fechaInicio: '2026-10-15', fechaFin: '2026-10-21' };
+    AfiliadoService.getAguaHistorial.mockResolvedValueOnce([
+      { fecha: '2026-10-20', vasos: 8 },
+      { fecha: '2026-10-19', vasos: 3 },
+    ]);
+    const res = makeRes();
+    await controller.getAguaAfiliado(makeReq({ params: { id: '9' }, query }), res);
+    expect(AfiliadoService.getAguaHistorial).toHaveBeenCalledWith('9', query);
+    expect(res.json).toHaveBeenCalledWith([
+      { fecha: '2026-10-20', vasos: 8, litros: 2 },
+      { fecha: '2026-10-19', vasos: 3, litros: 0.75 },
+    ]);
+
+    AfiliadoService.getAguaHistorial.mockRejectedValueOnce(new Error('db'));
+    const error = makeRes();
+    await controller.getAguaAfiliado(makeReq({ params: { id: '9' } }), error);
+    expect(error.status).toHaveBeenCalledWith(500);
+  });
+
   test('progreso de ejercicio, agua y consumo', async () => {
     AfiliadoService.saveProgresoEjercicio.mockResolvedValue({ id: 1 });
     AfiliadoService.getProgresoEjercicio.mockResolvedValue([{ id_ejercicio: 1 }]);

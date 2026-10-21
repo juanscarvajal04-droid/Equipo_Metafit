@@ -54,6 +54,7 @@ const PLAN = {
   calorias_objetivo: 2000,
   num_comidas: 2,
   observaciones: "Plan de prueba",
+  recomendacion_agua_vasos: 8,
   detalle: [
     {
       id_alimento: 5,
@@ -132,11 +133,14 @@ describe("DietasView", () => {
 
     fireEvent.click(screen.getByText(/Asignar Dieta/));
     expect(await screen.findByRole("heading", { name: /Asignar Dieta/ })).toBeInTheDocument();
+    fireEvent.change(screen.getByRole("combobox"), { target: { value: "1" } });
+    expect(await screen.findByLabelText(/Recomendación de agua diaria/)).toBeInTheDocument();
     fireEvent.click(screen.getByText("Cancelar"));
 
     fireEvent.click(screen.getByTitle("Ver"));
     expect(await screen.findByRole("heading", { name: /Plan Nutricional: Ana Pérez/ })).toBeInTheDocument();
     expect(await screen.findByText("Pollo")).toBeInTheDocument();
+    expect(await screen.findByText(/8 vasos \/ 2\.0 L al día/)).toBeInTheDocument();
 
     const cantidad = screen.getByDisplayValue("150");
     fireEvent.change(cantidad, { target: { value: "200" } });
@@ -148,5 +152,28 @@ describe("DietasView", () => {
     await waitFor(() => expect(authAxiosMock.delete).toHaveBeenCalled());
 
     fireEvent.click(screen.getByText("Cerrar"));
+  });
+
+  test("envía la recomendación de agua al guardar el plan", async () => {
+    renderView();
+
+    await screen.findByText("Ana Pérez");
+    fireEvent.click(screen.getByText("➕ Asignar"));
+    expect(await screen.findByRole("heading", { name: /Asignar Dieta/ })).toBeInTheDocument();
+
+    const checkbox = await screen.findByRole("checkbox");
+    fireEvent.click(checkbox);
+
+    fireEvent.change(screen.getByLabelText(/Recomendación de agua diaria/), {
+      target: { value: "9" },
+    });
+    fireEvent.click(screen.getByText(/Crear Plan Nutricional/));
+
+    await waitFor(() =>
+      expect(authAxiosMock.patch).toHaveBeenCalledWith(
+        expect.stringMatching(/^\/planes\/nutricional\//),
+        expect.objectContaining({ recomendacion_agua_vasos: 9 })
+      )
+    );
   });
 });

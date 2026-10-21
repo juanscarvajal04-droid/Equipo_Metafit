@@ -4,7 +4,11 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { describe, test, expect, beforeEach, vi } from "vitest";
 import ProgresoAfiliado from "../ProgresoAfiliado";
-import { fetchAfiliado, ultimoRegistroFisico } from "../../services/progresoService";
+import {
+  fetchAfiliado,
+  fetchAguaAfiliado,
+  ultimoRegistroFisico,
+} from "../../services/progresoService";
 import { useAuth } from "../../context/AuthContext";
 
 vi.mock("../../context/AuthContext", () => ({ useAuth: vi.fn() }));
@@ -20,6 +24,7 @@ vi.mock("../../components/graficos/ProgresoVolumenChart", () => ({
 }));
 vi.mock("../../services/progresoService", () => ({
   fetchAfiliado: vi.fn(),
+  fetchAguaAfiliado: vi.fn(),
   ultimoRegistroFisico: vi.fn(),
 }));
 
@@ -99,6 +104,20 @@ describe("ProgresoAfiliado", () => {
       grasa: 18,
       fecha: "2026-10-15",
     });
+
+    const iso = (date) => {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      const d = String(date.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    };
+    const hoy = new Date();
+    const ayer = new Date();
+    ayer.setDate(ayer.getDate() - 1);
+    fetchAguaAfiliado.mockResolvedValue([
+      { fecha: iso(hoy), vasos: 8, litros: 2 },
+      { fecha: iso(ayer), vasos: 3, litros: 0.75 },
+    ]);
     useAuth.mockReturnValue({
       authAxios: {
         get: vi.fn().mockResolvedValue({
@@ -126,6 +145,14 @@ describe("ProgresoAfiliado", () => {
     expect(screen.getByText(/Asma/)).toBeInTheDocument();
     expect(screen.getByText("Buena sesión")).toBeInTheDocument();
     expect(screen.queryByText("Sin observaciones registradas.")).not.toBeInTheDocument();
+
+    expect(screen.getByText(/Agua — últimos 7 días/)).toBeInTheDocument();
+    expect(screen.getByText("11 vasos")).toBeInTheDocument();
+    expect(screen.getByText("2.75 L")).toBeInTheDocument();
+    expect(fetchAguaAfiliado).toHaveBeenCalledWith(
+      "1",
+      expect.objectContaining({ fechaInicio: expect.any(String), fechaFin: expect.any(String) })
+    );
 
     fireEvent.click(screen.getByText(/Volver a Afiliados/));
   });

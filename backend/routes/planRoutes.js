@@ -403,6 +403,11 @@ router.delete('/rutinas/:id_rutina', requireAuth, requireAdminOrEntrenador, Plan
  *                 id_ciclo:          { type: integer }
  *                 calorias_objetivo: { type: number,  example: 2200.0 }
  *                 num_comidas:       { type: integer, example: 5 }
+ *                 recomendacion_agua_vasos:
+ *                   type: integer
+ *                   nullable: true
+ *                   example: 8
+ *                   description: Recomendación diaria de agua en vasos (0–50)
  *                 detalle:           { type: array }
  *       401:
  *         $ref: '#/components/responses/Unauthorized'
@@ -436,6 +441,11 @@ router.get('/nutricional/:id_ciclo', requireAuth, requireOwnCiclo, PlanControlle
  *               id_ciclo:          { type: integer, example: 1 }
  *               calorias_objetivo: { type: number,  example: 2200.0, description: 'Rango: 500–10000 kcal' }
  *               num_comidas:       { type: integer, example: 5, description: 'Rango: 1–10 comidas/día' }
+ *               recomendacion_agua_vasos:
+ *                 type: integer
+ *                 nullable: true
+ *                 example: 8
+ *                 description: 'Opcional. Rango: 0–50 vasos/día'
  *               observaciones:
  *                 type: string
  *                 nullable: true
@@ -529,6 +539,11 @@ router.post('/nutricional', requireAuth, requireAdminOrEntrenador, PlanControlle
  *                 type: integer
  *                 example: 5
  *                 description: 'Rango: 1–10 comidas/día'
+ *               recomendacion_agua_vasos:
+ *                 type: integer
+ *                 nullable: true
+ *                 example: 8
+ *                 description: 'Opcional. Rango: 0–50 vasos/día'
  *               observaciones:
  *                 type: string
  *                 nullable: true

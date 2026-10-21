@@ -105,6 +105,16 @@ SET @sql_add = IF(
   'SELECT 1');
 PREPARE stmt FROM @sql_add; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
+SET @sql_add = IF(
+  NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+               WHERE TABLE_SCHEMA = 'metafit' AND TABLE_NAME = 'PLAN_NUTRICIONAL'
+                 AND COLUMN_NAME = 'recomendacion_agua_vasos'),
+  'ALTER TABLE `PLAN_NUTRICIONAL`
+     ADD COLUMN `recomendacion_agua_vasos` TINYINT NULL
+     COMMENT ''Recomendación diaria de agua en vasos (0-50). Ver backend/migrations/migracionRecomendacionAgua.js'' AFTER `observaciones`',
+  'SELECT 1');
+PREPARE stmt FROM @sql_add; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
 
 -- ============================================================================================================================
 -- BLOQUE 2 — REGISTRO_EJERCICIO: ejecucion REAL de un ejercicio dentro de la rutina

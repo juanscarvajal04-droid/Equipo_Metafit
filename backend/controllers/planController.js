@@ -4,6 +4,17 @@
 const PlanModel = require('../models/planModel');
 const { enviarPushAUsuarioDelCiclo } = require('../services/pushService');
 
+// Recomendación diaria de agua en vasos (opcional).
+// Devuelve undefined si el campo no vino, null si se envió vacío,
+// NaN si es inválido y el entero cuando es correcto.
+function normalizarRecomendacionAgua(valor) {
+  if (valor === undefined) return undefined;
+  if (valor === null || valor === '') return null;
+  const n = Number(valor);
+  if (!Number.isInteger(n) || n < 0 || n > 50) return NaN;
+  return n;
+}
+
 const PlanController = {
 
   // ── PLAN ENTRENAMIENTO ────────────────────────────────────
@@ -185,12 +196,17 @@ const PlanController = {
     const calorias_objetivo = req.body.calorias_objetivo || req.body.calorias_estimadas;
     const num_comidas       = req.body.num_comidas || req.body.num_comidas_diarias;
     const observaciones     = req.body.observaciones;
+    const recAguaRaw        = normalizarRecomendacionAgua(req.body.recomendacion_agua_vasos);
 
     if (!id_ciclo || !calorias_objetivo || !num_comidas)
       return res.status(400).json({ error: 'id_ciclo, calorias_objetivo y num_comidas son requeridos' });
+    if (Number.isNaN(recAguaRaw))
+      return res.status(400).json({ error: 'recomendacion_agua_vasos debe ser un entero entre 0 y 50' });
     try {
+      const recomendacion_agua_vasos = recAguaRaw ?? null;
       const id = await PlanModel.createNutricional(
-        id_ciclo, calorias_objetivo, num_comidas, req.user.sub, observaciones
+        id_ciclo, calorias_objetivo, num_comidas, req.user.sub, observaciones,
+        recomendacion_agua_vasos
       );
       void enviarPushAUsuarioDelCiclo(id_ciclo, {
         title: '🥗 Nueva dieta asignada',
@@ -210,11 +226,21 @@ const PlanController = {
     const calorias_objetivo = req.body.calorias_objetivo || req.body.calorias_estimadas;
     const num_comidas       = req.body.num_comidas || req.body.num_comidas_diarias;
     const observaciones     = req.body.observaciones;
+    const recAguaRaw        = normalizarRecomendacionAgua(req.body.recomendacion_agua_vasos);
     if (!calorias_objetivo || !num_comidas)
       return res.status(400).json({ error: 'calorias_objetivo y num_comidas son requeridos' });
+    if (Number.isNaN(recAguaRaw))
+      return res.status(400).json({ error: 'recomendacion_agua_vasos debe ser un entero entre 0 y 50' });
     try {
       await PlanModel.updateNutricional(
-        req.params.id, { calorias_objetivo, num_comidas, observaciones }, req.user.sub
+        req.params.id,
+        {
+          calorias_objetivo,
+          num_comidas,
+          observaciones,
+          recomendacion_agua_vasos: recAguaRaw,
+        },
+        req.user.sub
       );
       res.json({ message: 'Plan nutricional actualizado' });
     } catch (err) {

@@ -52,6 +52,18 @@ export const fetchEjerciciosDisponibles = async (afiliadoId) => {
 };
 
 /**
+ * Historial de agua de un afiliado (staff). El backend devuelve
+ * [{ fecha, vasos, litros }] para el rango solicitado.
+ * @param {number|string} afiliadoId
+ * @param {{fechaInicio?: string, fechaFin?: string}} params
+ * @returns {Promise<Array>}
+ */
+export const fetchAguaAfiliado = async (afiliadoId, params = {}) => {
+  const { data } = await api.get(`/afiliados/${afiliadoId}/agua`, { params });
+  return Array.isArray(data) ? data : [];
+};
+
+/**
  * Calcula la evolución de peso e IMC a partir del historial físico.
  * Devuelve arrays ordenados cronológicamente (ascendente) listos
  * para graficar con react-chartjs-2.

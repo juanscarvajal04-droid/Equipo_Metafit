@@ -964,6 +964,51 @@ router.get('/:id/progreso', requireAuth, requireStaff, AfiliadoController.getPro
 
 /**
  * @swagger
+ * /afiliados/{id}/agua:
+ *   get:
+ *     summary: Historial de consumo de agua de un afiliado (staff)
+ *     description: >
+ *       Devuelve los registros de REGISTRO_AGUA del afiliado, con vasos y
+ *       su equivalente en litros (1 vaso = 250 ml). Acepta fechaInicio y
+ *       fechaFin (YYYY-MM-DD). La web lo usa para los últimos 7 días.
+ *     tags: [Afiliados]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema: { type: integer }
+ *       - in: query
+ *         name: fechaInicio
+ *         schema: { type: string, format: date }
+ *       - in: query
+ *         name: fechaFin
+ *         schema: { type: string, format: date }
+ *     responses:
+ *       200:
+ *         description: Lista de registros de agua
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   fecha:  { type: string, format: date }
+ *                   vasos:  { type: integer }
+ *                   litros: { type: number }
+ *       401:
+ *         $ref: '#/components/responses/Unauthorized'
+ *       403:
+ *         $ref: '#/components/responses/Forbidden'
+ *       500:
+ *         $ref: '#/components/responses/InternalError'
+ */
+router.get('/:id/agua', requireAuth, requireStaff, AfiliadoController.getAguaAfiliado);
+
+/**
+ * @swagger
  * /afiliados/progreso:
  *   post:
  *     summary: Registrar medición de progreso físico (Admin o Entrenador)
@@ -1146,6 +1191,10 @@ router.post('/me/agua', requireAuth, AfiliadoController.saveAgua);
  *       500:
  *         $ref: '#/components/responses/InternalError'
  */
+// Ruta específica ANTES de /me/agua/:fecha: si no, "historial" se
+// interpreta como una fecha y el historial siempre devuelve vacío.
+router.get('/me/agua/historial', requireAuth, AfiliadoController.getAguaHistorial);
+
 router.get('/me/agua/:fecha', requireAuth, AfiliadoController.getAgua);
 
 /**
@@ -1211,8 +1260,6 @@ router.post('/me/consumo-alimento', requireAuth, AfiliadoController.saveConsumoA
  *       401:
  *         $ref: '#/components/responses/Unauthorized'
  */
-router.get('/me/agua/historial', requireAuth, AfiliadoController.getAguaHistorial);
-
 /**
  * @swagger
  * /afiliados/me/consumo/historial:

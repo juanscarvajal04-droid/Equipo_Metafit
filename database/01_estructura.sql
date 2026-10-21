@@ -331,6 +331,9 @@ CREATE TABLE IF NOT EXISTS `PLAN_NUTRICIONAL` (
   `num_comidas`       TINYINT      NOT NULL CHECK (`num_comidas` BETWEEN 1 AND 10),
   `modificado_por`    INT          NULL,
   `observaciones`     VARCHAR(400) NULL,
+  `recomendacion_agua_vasos` TINYINT NULL
+    CHECK (`recomendacion_agua_vasos` IS NULL OR `recomendacion_agua_vasos` BETWEEN 0 AND 50)
+    COMMENT 'Recomendación diaria de agua en vasos definida junto con la dieta.',
 
   PRIMARY KEY (`id_ciclo`),
 
