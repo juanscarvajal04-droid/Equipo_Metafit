@@ -70,7 +70,7 @@ export default function EditarPerfilScreen({ navigation }) {
       return;
     }
 
-    execute({
+    void execute({
       telefono: telefono.trim() || undefined,
       direccion: direccion.trim() || undefined,
       peso_kg: p,

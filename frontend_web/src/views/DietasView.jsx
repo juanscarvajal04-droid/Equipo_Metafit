@@ -83,7 +83,10 @@ export default function DietasView() {
   useEffect(() => { fetchAfiliados(); fetchAlimentos(); }, [fetchAfiliados, fetchAlimentos]);
 
   // Sincronización tiempo real: polling 10s + refetch al recobrar foco/visibilidad
-  useAutoRefresh(() => { fetchAfiliados({ silent: true }); fetchAlimentos({ silent: true }); }, 10000);
+  useAutoRefresh(() => {
+    void fetchAfiliados({ silent: true });
+    void fetchAlimentos({ silent: true });
+  }, 10000);
 
   // ── Derived data ────────────────────────────────────────────
   const filtered = afiliados.filter((a) => {
@@ -742,7 +745,7 @@ function DietaDisplay({ afiliado, authAxios }) {
     }
   };
 
-  useEffect(() => { cargar(); /* eslint-disable-line react-hooks/exhaustive-deps */ }, [afiliado]);
+  useEffect(() => { void cargar(); /* eslint-disable-line react-hooks/exhaustive-deps */ }, [afiliado]);
 
   if (error) return <div className={s.emptyState}>{error}</div>;
   if (!plan) return <div className={s.emptyState}>Cargando plan...</div>;

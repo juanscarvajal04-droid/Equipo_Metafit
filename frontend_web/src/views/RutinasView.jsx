@@ -83,7 +83,10 @@ export default function RutinasView() {
   useEffect(() => { fetchAfiliados(); fetchEjercicios(); }, [fetchAfiliados, fetchEjercicios]);
 
   // Sincronización tiempo real: polling 10s + refetch al recobrar foco/visibilidad
-  useAutoRefresh(() => { fetchAfiliados({ silent: true }); fetchEjercicios({ silent: true }); }, 10000);
+  useAutoRefresh(() => {
+    void fetchAfiliados({ silent: true });
+    void fetchEjercicios({ silent: true });
+  }, 10000);
 
   // ── Derived data ────────────────────────────────────────────
   const filtered = afiliados.filter((a) => {
@@ -674,8 +677,15 @@ export default function RutinasView() {
       {/* MODAL: HISTORIAL DE CICLOS (editar/eliminar) */}
       {/* ════════════════════════════════════════════ */}
       {modal === "historial" && modalAfiliado && (
-        <div className={s.modalOverlay} onClick={closeModal}>
-          <div className={s.modalContent} onClick={(e)=>e.stopPropagation()} style={{ maxWidth:760 }}>
+        <div
+          className={s.modalOverlay}
+          role="button"
+          tabIndex={0}
+          aria-label="Cerrar modal"
+          onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
+          onKeyDown={(e) => { if (e.key === "Escape" || e.key === "Enter") closeModal(); }}
+        >
+          <div className={s.modalContent} style={{ maxWidth:760 }}>
             <div className={s.modalHeader}>
               <h5 className={s.modalTitle}>📜 Historial de Ciclos — {nombreCompleto(modalAfiliado)}</h5>
               <button type="button" className={s.btnOutline} onClick={closeModal}>✕</button>
@@ -754,7 +764,7 @@ function HistorialCiclos({ afiliado, authAxios, onCambio, showToast }) {
     }
   };
 
-  useEffect(() => { cargar(); /* eslint-disable-line react-hooks/exhaustive-deps */ }, [afiliado]);
+  useEffect(() => { void cargar(); /* eslint-disable-line react-hooks/exhaustive-deps */ }, [afiliado]);
 
   const iniciarEdicion = (c) => {
     setEditandoId(c.id_ciclo);
@@ -811,35 +821,35 @@ function HistorialCiclos({ afiliado, authAxios, onCambio, showToast }) {
             <div>
               <div className={s.formRow}>
                 <div className={s.formGroup}>
-                  <label className={s.inlineLabel}>Inicio</label>
-                  <input type="date" className={s.inlineInput} value={form.fecha_inicio} onChange={(e)=>setForm((f)=>({...f, fecha_inicio:e.target.value}))} />
+                  <label className={s.inlineLabel} htmlFor={`inicio-${c.id_ciclo}`}>Inicio</label>
+                  <input id={`inicio-${c.id_ciclo}`} type="date" className={s.inlineInput} value={form.fecha_inicio} onChange={(e)=>setForm((f)=>({...f, fecha_inicio:e.target.value}))} />
                 </div>
                 <div className={s.formGroup}>
-                  <label className={s.inlineLabel}>Fin</label>
-                  <input type="date" className={s.inlineInput} value={form.fecha_fin} onChange={(e)=>setForm((f)=>({...f, fecha_fin:e.target.value}))} />
+                  <label className={s.inlineLabel} htmlFor={`fin-${c.id_ciclo}`}>Fin</label>
+                  <input id={`fin-${c.id_ciclo}`} type="date" className={s.inlineInput} value={form.fecha_fin} onChange={(e)=>setForm((f)=>({...f, fecha_fin:e.target.value}))} />
                 </div>
                 <div className={s.formGroup} style={{ minWidth:120 }}>
-                  <label className={s.inlineLabel}>Objetivo</label>
-                  <select className={s.inlineSelect} value={form.objetivo_fisico} onChange={(e)=>setForm((f)=>({...f, objetivo_fisico:e.target.value}))}>
+                  <label className={s.inlineLabel} htmlFor={`objetivo-${c.id_ciclo}`}>Objetivo</label>
+                  <select id={`objetivo-${c.id_ciclo}`} className={s.inlineSelect} value={form.objetivo_fisico} onChange={(e)=>setForm((f)=>({...f, objetivo_fisico:e.target.value}))}>
                     {Object.keys(OBJETIVO_ICON).map((o) => <option key={o} value={o}>{OBJETIVO_ICON[o]} {o}</option>)}
                     <option value="Rehabilitacion">🤕 Rehabilitación</option>
                   </select>
                 </div>
                 <div className={s.formGroup} style={{ minWidth:110 }}>
-                  <label className={s.inlineLabel}>Nivel</label>
-                  <select className={s.inlineSelect} value={form.nivel_experiencia} onChange={(e)=>setForm((f)=>({...f, nivel_experiencia:e.target.value}))}>
+                  <label className={s.inlineLabel} htmlFor={`nivel-${c.id_ciclo}`}>Nivel</label>
+                  <select id={`nivel-${c.id_ciclo}`} className={s.inlineSelect} value={form.nivel_experiencia} onChange={(e)=>setForm((f)=>({...f, nivel_experiencia:e.target.value}))}>
                     {NIVELES.map((n) => <option key={n} value={n}>{n}</option>)}
                   </select>
                 </div>
                 <div className={s.formGroup} style={{ minWidth:70 }}>
-                  <label className={s.inlineLabel}>Días/sem</label>
-                  <select className={s.inlineSelect} value={form.disponibilidad_dias} onChange={(e)=>setForm((f)=>({...f, disponibilidad_dias:e.target.value}))}>
+                  <label className={s.inlineLabel} htmlFor={`dias-${c.id_ciclo}`}>Días/sem</label>
+                  <select id={`dias-${c.id_ciclo}`} className={s.inlineSelect} value={form.disponibilidad_dias} onChange={(e)=>setForm((f)=>({...f, disponibilidad_dias:e.target.value}))}>
                     {[1,2,3,4,5,6,7].map((d) => <option key={d} value={d}>{d}</option>)}
                   </select>
                 </div>
                 <div className={s.formGroup} style={{ minWidth:70 }}>
-                  <label className={s.inlineLabel}>Activo</label>
-                  <input type="checkbox" className={s.checkboxDark} checked={form.activo} onChange={(e)=>setForm((f)=>({...f, activo:e.target.checked}))} />
+                  <label className={s.inlineLabel} htmlFor={`activo-${c.id_ciclo}`}>Activo</label>
+                  <input id={`activo-${c.id_ciclo}`} type="checkbox" className={s.checkboxDark} checked={form.activo} onChange={(e)=>setForm((f)=>({...f, activo:e.target.checked}))} />
                 </div>
               </div>
               <div style={{ display:"flex", gap:6, marginTop:8 }}>
@@ -898,12 +908,12 @@ function PlanDisplay({ afiliado, authAxios }) {
   };
 
   useEffect(() => {
-    cargar();
+    void cargar();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [afiliado]);
 
   useEffect(() => {
-    (async () => {
+    void (async () => {
       try {
         const { data } = await authAxios.get(`/afiliados/${getId(afiliado)}/notas-ejercicio`);
         setNotas(Array.isArray(data) ? data : []);

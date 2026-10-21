@@ -53,7 +53,7 @@ export default function ProgresoAfiliado() {
     }
   }, [id, authAxios]);
 
-  useEffect(() => { cargar(); }, [cargar]);
+  useEffect(() => { void cargar(); }, [cargar]);
 
   // Sincronización tiempo real: polling 10s + refetch al recobrar foco/visibilidad
   useAutoRefresh(() => cargar({ silent: true }), 10000);

@@ -745,8 +745,17 @@ export default function AfiliadosView() {
       )}
 
       {creandoAbierto && (
-        <div className={s.modalOverlay} onClick={cerrarNuevo}>
-          <div className={s.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: 650 }}>
+        <div
+          className={s.modalOverlay}
+          role="button"
+          tabIndex={0}
+          aria-label="Cerrar modal"
+          onClick={(e) => { if (e.target === e.currentTarget) cerrarNuevo(); }}
+          onKeyDown={(e) => {
+            if (e.key === "Escape" || e.key === "Enter") cerrarNuevo();
+          }}
+        >
+          <div className={s.modalContent} style={{ maxWidth: 650 }}>
             <form onSubmit={handleCrear}>
               <div className={s.modalHeader}>
                 <h5 className={s.modalTitle}>➕ Nuevo afiliado</h5>
@@ -840,7 +849,7 @@ export default function AfiliadosView() {
                   </div>
                 </div>
                 <div style={{ marginTop: 12 }}>
-                  <label className={s.labelText}>Restricciones médicas (catálogo)</label>
+                  <span className={s.labelText}>Restricciones médicas (catálogo)</span>
                   <RestriccionSelector
                     restriccionesAsignadas={restriccionesSeleccionadas}
                     onAdd={handleAddRestriccionTemporal}
@@ -849,8 +858,8 @@ export default function AfiliadosView() {
                   />
                 </div>
                 <div style={{ marginTop: 8 }}>
-                  <label className={s.labelText}>Otros antecedentes (texto libre)</label>
-                  <textarea className={s.inputDark} rows={2} value={formCrear.restricciones_medicas} onChange={(e) => setFormCrear({ ...formCrear, restricciones_medicas: e.target.value })} />
+                  <label className={s.labelText} htmlFor="afiliado-antecedentes">Otros antecedentes (texto libre)</label>
+                  <textarea id="afiliado-antecedentes" className={s.inputDark} rows={2} value={formCrear.restricciones_medicas} onChange={(e) => setFormCrear({ ...formCrear, restricciones_medicas: e.target.value })} />
                 </div>
               </div>
               <div className={s.modalFooter}>

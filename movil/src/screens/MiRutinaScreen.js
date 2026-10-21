@@ -340,7 +340,7 @@ export default function MiRutinaScreen() {
       setEjercicios(ejerciciosPlan);
       if (cicloCambio || !opts.silent) {
         setDiaSeleccionado(null);
-        loadRutinaDia(cicloData.id_ciclo, diaNumeroHoy);
+        void loadRutinaDia(cicloData.id_ciclo, diaNumeroHoy);
       }
 
       const ids = ejerciciosPlan.map((e) => e.id_ejercicio);
@@ -398,7 +398,7 @@ export default function MiRutinaScreen() {
 
   const onActualizar = () => {
     setActualizando(true);
-    fetchData(ciclo).finally(() => setActualizando(false));
+    void fetchData(ciclo).finally(() => setActualizando(false));
   };
 
   const handleCicloChange = (c) => {
@@ -462,7 +462,9 @@ export default function MiRutinaScreen() {
     const seccion = getDiasData().find(([d]) => d === dia)?.[1];
     const diaNumero = seccion?.[0]?.dia_numero;
     setDiaSeleccionado(dia);
-    if (ciclo?.id_ciclo && diaNumero) loadRutinaDia(ciclo.id_ciclo, diaNumero);
+    if (ciclo?.id_ciclo && diaNumero) {
+      void loadRutinaDia(ciclo.id_ciclo, diaNumero);
+    }
   };
 
   const handleSave = async () => {

@@ -133,8 +133,17 @@ export default function RestriccionSelector({
       )}
 
       {showModal && (
-        <div className={styles.modalOverlay} onClick={() => setShowModal(false)}>
-          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+        <div
+          className={styles.modalOverlay}
+          role="button"
+          tabIndex={0}
+          aria-label="Cerrar modal"
+          onClick={(e) => { if (e.target === e.currentTarget) setShowModal(false); }}
+          onKeyDown={(e) => {
+            if (e.key === "Escape" || e.key === "Enter") setShowModal(false);
+          }}
+        >
+          <div className={styles.modalContent}>
             <div className={styles.modalHeader}>
               <h5 className={styles.modalTitle}>➕ Agregar restricción</h5>
               <button

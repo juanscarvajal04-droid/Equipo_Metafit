@@ -190,7 +190,7 @@ export default function MiPerfilScreen({ navigation }) {
 
   // Refetch al volver del editor de perfil (EditarPerfil).
   useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => { fetchData(); });
+    const unsubscribe = navigation.addListener('focus', () => { void fetchData(); });
     return unsubscribe;
   }, [navigation, fetchData]);
 

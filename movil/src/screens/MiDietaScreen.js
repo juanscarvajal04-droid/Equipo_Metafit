@@ -243,7 +243,7 @@ export default function MiDietaScreen() {
 
   const onActualizar = () => {
     setActualizando(true);
-    fetchData(ciclo).finally(() => setActualizando(false));
+    void fetchData(ciclo).finally(() => setActualizando(false));
   };
 
   const handleCicloChange = (c) => {
