@@ -84,6 +84,78 @@ describe('<AuthProvider />', () => {
     expect(JSON.parse(localStorage.getItem('metafit_user')).foto).toBe('https://cdn.test/karla.jpg');
   });
 
+  test('switchRole reemplaza por completo la sesión anterior', async () => {
+    localStorage.setItem('metafit_token', 'jwt-admin-anterior');
+    localStorage.setItem('metafit_user', JSON.stringify({ id: 1, email: 'carlos@metafit.com', role: 'Administrador' }));
+    localStorage.setItem('metafit_role', 'Administrador');
+    localStorage.setItem('notif_vistas_1', JSON.stringify({ ts: 1, total: 4 }));
+
+    loginUser.mockResolvedValueOnce({
+      accessToken: 'jwt-entrenador-nuevo',
+      user: { id: 2, email: 'laura@metafit.com', role: 'Entrenador' },
+    });
+
+    const { result } = renderHook(() => useAuth(), { wrapper });
+
+    await act(async () => {
+      await result.current.switchRole('laura@metafit.com', 'Laura123!', 'Entrenador');
+    });
+
+    expect(loginUser).toHaveBeenCalledWith({
+      correo: 'laura@metafit.com',
+      contrasena: 'Laura123!',
+    });
+    expect(result.current.token).toBe('jwt-entrenador-nuevo');
+    expect(result.current.user.role).toBe('Entrenador');
+    expect(localStorage.getItem('metafit_token')).toBe('jwt-entrenador-nuevo');
+    expect(localStorage.getItem('metafit_role')).toBe('Entrenador');
+    expect(localStorage.getItem('metafit_user')).not.toContain('Administrador');
+    expect(localStorage.getItem('notif_vistas_1')).toBeNull();
+  });
+
+  test('switchRole fallido conserva la sesión anterior', async () => {
+    localStorage.setItem('metafit_token', 'jwt-admin-anterior');
+    localStorage.setItem('metafit_user', JSON.stringify({ id: 1, email: 'carlos@metafit.com', role: 'Administrador' }));
+    localStorage.setItem('metafit_role', 'Administrador');
+
+    loginUser.mockRejectedValueOnce(new Error('credenciales inválidas'));
+
+    const { result } = renderHook(() => useAuth(), { wrapper });
+
+    await act(async () => {
+      await expect(
+        result.current.switchRole('laura@metafit.com', 'incorrecta', 'Entrenador')
+      ).rejects.toThrow('credenciales inválidas');
+    });
+
+    expect(result.current.token).toBe('jwt-admin-anterior');
+    expect(result.current.user.role).toBe('Administrador');
+    expect(localStorage.getItem('metafit_token')).toBe('jwt-admin-anterior');
+    expect(localStorage.getItem('metafit_role')).toBe('Administrador');
+  });
+
+  test('switchRole rechaza credenciales de otro rol sin tocar la sesión', async () => {
+    localStorage.setItem('metafit_token', 'jwt-admin-anterior');
+    localStorage.setItem('metafit_user', JSON.stringify({ id: 1, email: 'carlos@metafit.com', role: 'Administrador' }));
+    localStorage.setItem('metafit_role', 'Administrador');
+
+    loginUser.mockResolvedValueOnce({
+      accessToken: 'jwt-recepcion-nuevo',
+      user: { id: 4, email: 'maria@metafit.com', role: 'Recepcionista' },
+    });
+
+    const { result } = renderHook(() => useAuth(), { wrapper });
+
+    await act(async () => {
+      await expect(
+        result.current.switchRole('maria@metafit.com', 'Maria123!', 'Entrenador')
+      ).rejects.toThrow('Las credenciales corresponden al rol Recepcionista');
+    });
+
+    expect(result.current.user.role).toBe('Administrador');
+    expect(localStorage.getItem('metafit_token')).toBe('jwt-admin-anterior');
+  });
+
   test('logout limpia el estado y localStorage', async () => {
     localStorage.setItem('metafit_token', 'jwt-persistido');
     localStorage.setItem('metafit_user', JSON.stringify({ id: 7, email: 'karla@metafit.com', role: 'Recepcionista' }));

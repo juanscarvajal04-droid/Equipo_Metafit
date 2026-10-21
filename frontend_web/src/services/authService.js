@@ -106,6 +106,12 @@ export const clearSession = () => {
   localStorage.removeItem('metafit_token');
   localStorage.removeItem('metafit_user');
   localStorage.removeItem('metafit_role');
+
+  // Datos auxiliares atados al usuario anterior (ej. notificaciones leídas).
+  // Se eliminan en logout/cambio de rol para no filtrar estado entre cuentas.
+  Object.keys(localStorage)
+    .filter((key) => key.startsWith('notif_vistas_'))
+    .forEach((key) => localStorage.removeItem(key));
 };
 
 // ── 4. RECUPERACIÓN DE SESIÓN ────────────────────────────────

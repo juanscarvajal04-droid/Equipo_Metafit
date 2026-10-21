@@ -308,6 +308,114 @@
   gap: 10px;
 }
 
+/* ── Selector rápido de rol ── */
+.userMenuWrapper {
+  position: relative;
+}
+
+.userMenuButton {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 185px;
+  padding: 4px 7px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--mf-text);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.userMenuButton:hover {
+  background: var(--mf-surface-2);
+  border-color: var(--mf-border);
+}
+
+.userMenuButton:focus-visible {
+  outline: none;
+  box-shadow: var(--mf-focus-ring);
+}
+
+.userText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.roleChevron {
+  color: var(--mf-muted);
+  font-size: 0.68rem;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: transform 0.15s;
+}
+
+.userMenuButton[aria-expanded="true"] .roleChevron {
+  transform: rotate(180deg);
+}
+
+.roleMenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 232px;
+  padding: 6px;
+  background: var(--mf-surface);
+  border: 1px solid var(--mf-border);
+  border-radius: 12px;
+  box-shadow: var(--mf-shadow-popover);
+  z-index: 250;
+}
+
+.roleMenuHeader {
+  padding: 8px 10px 4px;
+  color: var(--mf-text);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.roleMenuCurrent {
+  padding: 0 10px 8px;
+  color: var(--mf-muted);
+  font-size: 0.66rem;
+  border-bottom: 1px solid var(--mf-border);
+}
+
+.roleMenuCurrent strong {
+  color: var(--mf-text);
+}
+
+.roleMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 9px 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--mf-text);
+  font-size: 0.76rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.roleMenuItem:hover {
+  background: var(--mf-surface-2);
+}
+
+.roleMenuItem:focus-visible {
+  outline: none;
+  box-shadow: var(--mf-focus-ring);
+}
+
+.roleMenuIcon {
+  font-size: 0.95rem;
+}
+
 .avatarButton {
   position: relative;
   width: 36px;
@@ -364,6 +472,7 @@
 }
 
 .avatarName {
+  display: block;
   font-size: 0.73rem;
   font-weight: 700;
   color: var(--mf-text);
@@ -375,6 +484,7 @@
 }
 
 .avatarRole {
+  display: block;
   font-size: 0.62rem;
   font-weight: 600;
   text-transform: capitalize;
@@ -531,6 +641,87 @@
   gap: 0.5rem;
   padding: 1rem 1.25rem;
   border-top: 1px solid var(--mf-border);
+}
+
+/* ── Modal de cambio rápido de rol ── */
+.switchModal {
+  max-width: 430px;
+}
+
+.switchIntro {
+  margin: 0 0 16px;
+  color: var(--mf-muted);
+  font-size: 0.76rem;
+  line-height: 1.55;
+}
+
+.switchIntro strong {
+  color: var(--mf-text);
+}
+
+.switchField {
+  margin-bottom: 13px;
+}
+
+.switchLabel {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--mf-text);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.switchInput {
+  width: 100%;
+  height: 38px;
+  padding: 0 11px;
+  border: 1px solid var(--mf-border);
+  border-radius: 8px;
+  background: var(--mf-surface-2);
+  color: var(--mf-text);
+  font-size: 0.8rem;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.switchInput:focus {
+  border-color: var(--mf-accent);
+  box-shadow: var(--mf-focus-ring);
+}
+
+.switchInput:disabled {
+  opacity: 0.6;
+}
+
+.switchPassWrap {
+  position: relative;
+}
+
+.switchPassInput {
+  padding-right: 40px;
+}
+
+.switchPassToggle {
+  position: absolute;
+  top: 50%;
+  right: 5px;
+  transform: translateY(-50%);
+  width: 29px;
+  height: 29px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.82rem;
+}
+
+.switchPassToggle:hover {
+  background: var(--mf-surface-3);
+}
+
+.switchPassToggle:focus-visible {
+  outline: none;
+  box-shadow: var(--mf-focus-ring);
 }
 
 @media (max-width: 640px) {

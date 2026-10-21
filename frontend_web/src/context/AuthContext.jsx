@@ -5,6 +5,10 @@ import { loginUser, persistSession, clearSession, loadStoredUser, loadStoredToke
 
 const AuthContext = createContext(null);
 
+// Solo el personal administrativo puede usar la web. Un cambio de rol nunca
+// debe convertir una sesión web en una sesión de Afiliado.
+const STAFF_ROLES = new Set(["Administrador", "Recepcionista", "Entrenador"]);
+
 export function AuthProvider({ children }) {
   const [user,  setUser]  = useState(() => loadStoredUser());
   const [token, setToken] = useState(() => loadStoredToken() || null);
@@ -34,9 +38,7 @@ export function AuthProvider({ children }) {
    *
    * También guardamos en localStorage como respaldo síncrono adicional.
    */
-  const login = async ({ correo, contrasena }) => {
-    const { accessToken, user: userData } = await loginUser({ correo, contrasena });
-
+  const aplicarSesion = (accessToken, userData) => {
     // ✅ Primero localStorage (respaldo síncrono — ProtectedRoute lo lee si el
     //    estado React aún no llegó al componente)
     persistSession(accessToken, userData);
@@ -51,8 +53,48 @@ export function AuthProvider({ children }) {
       setUser(userData);
       setIsAuthReady(true);
     });
+  };
 
+  const login = async ({ correo, contrasena }) => {
+    const { accessToken, user: userData } = await loginUser({ correo, contrasena });
+    aplicarSesion(accessToken, userData);
     return userData;   // { id, email, role, nombres, apellidos }
+  };
+
+  /**
+   * switchRole — Cambio rápido de rol para el staff.
+   *
+   * Seguridad (hallazgo #5):
+   *  1. Autentica las credenciales del nuevo rol contra POST /login.
+   *  2. Solo después de un login exitoso elimina la sesión anterior.
+   *  3. Persiste el nuevo JWT/usuario y actualiza el contexto de forma síncrona.
+   *  4. Si el login falla, la sesión anterior permanece intacta.
+   *
+   * @param {string} email
+   * @param {string} password
+   * @param {string} [rolEsperado] Rol elegido en el menú; evita cambiar a otro.
+   * @returns {Promise<object>} usuario autenticado con el nuevo rol
+   */
+  const switchRole = async (email, password, rolEsperado) => {
+    const { accessToken, user: userData } = await loginUser({
+      correo: String(email || "").trim(),
+      contrasena: password,
+    });
+
+    if (!STAFF_ROLES.has(userData?.role)) {
+      throw new Error("La cuenta no pertenece al personal administrativo.");
+    }
+
+    if (rolEsperado && userData.role !== rolEsperado) {
+      throw new Error(`Las credenciales corresponden al rol ${userData.role}, no a ${rolEsperado}.`);
+    }
+
+    // El login fue exitoso: borrar TODA la sesión anterior antes de guardar la
+    // nueva. Nunca debe quedar el JWT ni el usuario del rol anterior.
+    clearSession();
+    aplicarSesion(accessToken, userData);
+
+    return userData;
   };
 
   const updateUser = (cambios) => {
@@ -72,7 +114,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, isAuthReady, login, logout, updateUser, authAxios: axiosRef.current }}>
+    <AuthContext.Provider value={{ user, token, isAuthReady, login, switchRole, logout, updateUser, authAxios: axiosRef.current }}>
       {children}
     </AuthContext.Provider>
   );
