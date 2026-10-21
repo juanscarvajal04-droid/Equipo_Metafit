@@ -96,7 +96,7 @@ export default function Header() {
   }, [authAxios]);
 
   useEffect(() => {
-    cargarNotificaciones();
+    void cargarNotificaciones();
     pollingRef.current = setInterval(cargarNotificaciones, 60000);
     return () => {
       if (pollingRef.current) clearInterval(pollingRef.current);
@@ -115,7 +115,9 @@ export default function Header() {
 
   const handleNotificacionClick = (ruta) => {
     setDropdownOpen(false);
-    if (ruta) navigate(ruta);
+    if (ruta) {
+      void navigate(ruta);
+    }
   };
 
   return (

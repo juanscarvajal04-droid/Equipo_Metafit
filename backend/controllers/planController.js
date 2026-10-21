@@ -20,7 +20,7 @@ const PlanController = {
 
   // FASE A.3: rutina del día filtrada por su grupo muscular
   getRutinaDiaria: async (req, res) => {
-    const diaNumero = parseInt(req.params.dia_numero, 10);
+    const diaNumero = Number.parseInt(req.params.dia_numero, 10);
     if (!Number.isInteger(diaNumero) || diaNumero < 1 || diaNumero > 7) {
       return res.status(400).json({ error: 'dia_numero debe estar entre 1 y 7' });
     }
@@ -45,7 +45,7 @@ const PlanController = {
       const id = await PlanModel.createEntrenamiento(
         id_ciclo, req.user.sub, observaciones
       );
-      enviarPushAUsuarioDelCiclo(id_ciclo, {
+      void enviarPushAUsuarioDelCiclo(id_ciclo, {
         title: '🏋️ Nueva rutina asignada',
         body: 'Tu entrenador te asignó un plan de entrenamiento. ¡A darle!',
         data: { screen: 'Rutina' },
@@ -192,7 +192,7 @@ const PlanController = {
       const id = await PlanModel.createNutricional(
         id_ciclo, calorias_objetivo, num_comidas, req.user.sub, observaciones
       );
-      enviarPushAUsuarioDelCiclo(id_ciclo, {
+      void enviarPushAUsuarioDelCiclo(id_ciclo, {
         title: '🥗 Nueva dieta asignada',
         body: 'Tu nutricionista te asignó un plan de alimentación. ¡A comer rico y sano!',
         data: { screen: 'Dieta' },

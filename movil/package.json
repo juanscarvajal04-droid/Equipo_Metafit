@@ -55,7 +55,8 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage --coverageReporters=text-summary --coverageReporters=lcov && node scripts/normalize-lcov.js"
   },
   "jest": {
     "preset": "jest-expo",

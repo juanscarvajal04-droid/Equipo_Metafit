@@ -253,13 +253,14 @@ export default function MiDietaScreen() {
   };
 
   const handleAgua = async (index) => {
+    const aguaAnterior = agua;
     const nuevosVasos = index + 1 === agua ? index : index + 1;
     setAgua(nuevosVasos);
     setSavingAgua(true);
     try {
       await guardarAgua(hoy, nuevosVasos);
     } catch (_) {
-      setAgua(agua);
+      setAgua(aguaAnterior);
     } finally {
       setSavingAgua(false);
     }

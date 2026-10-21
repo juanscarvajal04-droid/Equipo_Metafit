@@ -26,7 +26,7 @@ function normalizarFecha(fecha) {
     const [d, m, y] = fecha.split('/');
     const candidato = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
     // Validar que la fecha resultante sea real (ej. 32/01/2024 daría inválida)
-    if (isNaN(new Date(candidato).getTime())) {
+    if (Number.isNaN(new Date(candidato).getTime())) {
       throw new Error(`Fecha inválida: "${fecha}"`);
     }
     return candidato;
@@ -34,7 +34,7 @@ function normalizarFecha(fecha) {
 
   // ISO 8601 completo o YYYY-MM-DD con hora → tomar solo la parte de fecha
   const soloFecha = fecha.split('T')[0].split(' ')[0];
-  if (isNaN(new Date(soloFecha).getTime())) {
+  if (Number.isNaN(new Date(soloFecha).getTime())) {
     throw new Error(`Fecha inválida: "${fecha}"`);
   }
   return soloFecha;

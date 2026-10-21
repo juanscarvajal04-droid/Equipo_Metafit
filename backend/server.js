@@ -246,6 +246,6 @@ app.use((err, req, res, next) => {
 });
 
 // Verificación asíncrona de Cloudinary (no bloquea el arranque)
-verificarCredenciales();
+void verificarCredenciales();
 
 module.exports = app;

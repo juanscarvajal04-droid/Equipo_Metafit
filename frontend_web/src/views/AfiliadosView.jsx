@@ -229,8 +229,8 @@ export default function AfiliadosView() {
     try {
       const payload = {
         ...formCrear,
-        estatura_cm: parseFloat(formCrear.estatura_cm) || null,
-        disponibilidad_semanal_dias: parseInt(formCrear.disponibilidad_semanal_dias) || 3,
+        estatura_cm: Number.parseFloat(formCrear.estatura_cm) || null,
+        disponibilidad_semanal_dias: Number.parseInt(formCrear.disponibilidad_semanal_dias) || 3,
         estado_afiliacion: formCrear.estado,
       };
       delete payload.estado;

@@ -20,7 +20,7 @@ const ConfiguracionController = {
 
   updatePrecioMembresia: async (req, res) => {
     const { valor } = req.body;
-    if (valor == null || isNaN(Number(valor)) || Number(valor) <= 0) {
+    if (valor == null || Number.isNaN(Number(valor)) || Number(valor) <= 0) {
       return res.status(400).json({ error: 'valor debe ser un numero positivo' });
     }
     try {

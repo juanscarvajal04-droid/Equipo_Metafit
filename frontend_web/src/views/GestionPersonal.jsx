@@ -78,7 +78,7 @@ export default function GestionPersonal() {
   };
 
   useEffect(() => {
-    fetchPersonal();
+    void fetchPersonal();
   }, []);
 
   const openCreate = () => {
@@ -122,7 +122,7 @@ export default function GestionPersonal() {
       await authAxios.post("/usuarios", formData);
       showToast("Empleado creado correctamente");
       closeModal();
-      fetchPersonal();
+      void fetchPersonal();
       window.dispatchEvent(new CustomEvent("personal-modificado"));
     } catch (err) {
       const msg = err?.response?.data?.error || "Error al crear empleado";
@@ -145,7 +145,7 @@ export default function GestionPersonal() {
       await authAxios.patch(`/usuarios/${getId(editingUser)}`, payload);
       showToast("Empleado actualizado correctamente");
       closeModal();
-      fetchPersonal();
+      void fetchPersonal();
       window.dispatchEvent(new CustomEvent("personal-modificado"));
     } catch (err) {
       const msg = err?.response?.data?.error || "Error al actualizar empleado";
@@ -162,7 +162,7 @@ export default function GestionPersonal() {
       await authAxios.delete(`/usuarios/${getId(deleteTarget)}`);
       showToast("Empleado eliminado correctamente");
       setDeleteTarget(null);
-      fetchPersonal();
+      void fetchPersonal();
       window.dispatchEvent(new CustomEvent("personal-modificado"));
     } catch (err) {
       const msg = err?.response?.data?.error || "Error al eliminar empleado";

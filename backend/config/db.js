@@ -64,7 +64,7 @@ if (process.env.DB_SOCKET) {
   console.log(`[db.js] Usando socket Unix: ${process.env.DB_SOCKET}`);
 } else {
   poolConfig.host = DB_HOST;
-  poolConfig.port = parseInt(DB_PORT, 10);
+  poolConfig.port = Number.parseInt(DB_PORT, 10);
 }
 poolConfig.user = DB_USER;
 poolConfig.password = DB_PASSWORD;

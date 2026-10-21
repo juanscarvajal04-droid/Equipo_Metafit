@@ -66,7 +66,7 @@ const eliminarFotoAnterior = (foto) => {
     if (STORAGE_KIND === 'cloudinary' && /^https:\/\//.test(foto)) {
       const publicId = publicIdDesdeUrl(foto);
       if (publicId) {
-        cloudinary.uploader.destroy(publicId, () => {});
+        void cloudinary.uploader.destroy(publicId, () => {});
       }
       return;
     }

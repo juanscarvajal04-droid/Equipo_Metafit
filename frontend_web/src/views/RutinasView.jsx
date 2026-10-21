@@ -764,6 +764,7 @@ function HistorialCiclos({ afiliado, authAxios, onCambio, showToast }) {
   };
 
   const guardar = async (c) => {
+    if (!form) return;
     setSaving(true);
     try {
       await authAxios.patch(`/ciclos/${c.id_ciclo}`, {
@@ -806,7 +807,7 @@ function HistorialCiclos({ afiliado, authAxios, onCambio, showToast }) {
     <div>
       {ciclos.map((c) => (
         <div key={c.id_ciclo} className={s.afiliadoSection} style={{ marginBottom:12, padding:"0.6rem 0.75rem" }}>
-          {editandoId === c.id_ciclo ? (
+          {editandoId === c.id_ciclo && form ? (
             <div>
               <div className={s.formRow}>
                 <div className={s.formGroup}>

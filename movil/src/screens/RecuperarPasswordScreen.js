@@ -193,7 +193,7 @@ export default function RecuperarPasswordScreen({ navigation }) {
               </>
             )}
 
-            {tokenInfo && (
+            {Boolean(tokenInfo) && (
               <Text style={styles.tokenInfo}>
                 Token: <Text style={styles.tokenText}>{tokenInfo}</Text>
               </Text>

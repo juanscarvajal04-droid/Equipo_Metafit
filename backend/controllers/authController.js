@@ -10,10 +10,9 @@ const UsuarioModel          = require('../models/usuarioModel');
 const PasswordResetModel    = require('../models/passwordResetModel');
 const AuthService           = require('../services/authService');
 const { signJWT, comparePassword } = require('../middlewares/auth');
+const { esEmailValido } = require('../utils/emailUtils');
 
-// ─── BUG-001: Regex de validación de email (RFC 5322 básico) ──
-// Rechaza strings sin @ o sin dominio antes de tocar la DB.
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// ─── BUG-001: Validación de email sin regex (evita backtracking) ──
 
 // ─── BUG-004: Límite bcrypt (72 bytes) ────────────────────────
 const MAX_PASSWORD_BYTES = 72;
@@ -28,7 +27,7 @@ const AuthController = {
       return res.status(400).json({ error: 'Correo y contraseña requeridos' });
 
     // ── BUG-001: Validación de formato ───────────────────────
-    if (typeof email !== 'string' || !EMAIL_REGEX.test(email.trim()))
+    if (typeof email !== 'string' || !esEmailValido(email))
       return res.status(400).json({ error: 'Formato de correo inválido' });
 
     // ── BUG-004: Contraseña dentro del límite bcrypt ─────────
@@ -87,7 +86,7 @@ const AuthController = {
   recuperarPassword: async (req, res) => {
     const { email } = req.body;
 
-    if (!email || typeof email !== 'string' || !EMAIL_REGEX.test(email.trim())) {
+    if (!email || typeof email !== 'string' || !esEmailValido(email)) {
       return res.status(400).json({ error: 'Correo inválido' });
     }
 

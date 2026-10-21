@@ -108,7 +108,7 @@ export default function AfiliadoCrearModal({
                   <label className="form-label small fw-semibold">Días disponibles/sem</label>
                   <input type="number" min="1" max="7" className="form-control"
                     value={formNuevo.disponibilidad_semanal_dias}
-                    onChange={(e) => setFormNuevo({ ...formNuevo, disponibilidad_semanal_dias: parseInt(e.target.value) || 3 })} />
+                    onChange={(e) => setFormNuevo({ ...formNuevo, disponibilidad_semanal_dias: Number.parseInt(e.target.value) || 3 })} />
                 </div>
               </div>
 

@@ -10,8 +10,8 @@ const AfiliadoController = {
 
   getAll: async (req, res) => {
     try {
-      const page  = Math.max(1, parseInt(req.query.page,  10) || 1);
-      const limit = Math.min(200, Math.max(1, parseInt(req.query.limit, 10) || 50));
+      const page  = Math.max(1, Number.parseInt(req.query.page,  10) || 1);
+      const limit = Math.min(200, Math.max(1, Number.parseInt(req.query.limit, 10) || 50));
       const afiliados = await AfiliadoService.getAll({ page, limit });
       return res.json(afiliados);
     } catch (err) {
@@ -44,7 +44,7 @@ const AfiliadoController = {
         if (passwordTemporal) {
           AfiliadoService.getById(result.id)
             .then((detalle) => {
-              if (!detalle) return null;
+              if (!detalle) return;
               // Correo de bienvenida
               require('../services/bienvenidaService')
                 .enviarCorreoBienvenida(detalle, passwordTemporal)
@@ -53,7 +53,6 @@ const AfiliadoController = {
               require('../services/n8nWebhookService')
                 .notificarNuevoAfiliado(detalle, passwordTemporal)
                 .catch((err) => console.error('[afiliadoController] webhook n8n:', err.message));
-              return null;
             })
             .catch((err) => console.error('[afiliadoController] post-creacion:', err.message));
         } else {

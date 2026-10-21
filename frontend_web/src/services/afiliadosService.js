@@ -95,12 +95,12 @@ export const buildCrearPayload = (form) => ({
     ? String(form.fecha_nacimiento).split('T')[0].split(' ')[0]
     : null,
   sexo:                        form.sexo,
-  estatura_cm:                 parseFloat(form.estatura_cm) || null,
+  estatura_cm:                 Number.parseFloat(form.estatura_cm) || null,
   estado_afiliacion:           form.estado || 'Activo',
   objetivo_fisico:             form.objetivo_fisico,
   grupo_muscular_prioritario:  form.grupo_muscular_prioritario,
   nivel_experiencia:           form.nivel_experiencia,
-  disponibilidad_semanal_dias: parseInt(form.disponibilidad_semanal_dias) || 3,
+  disponibilidad_semanal_dias: Number.parseInt(form.disponibilidad_semanal_dias) || 3,
 });
 
 /**

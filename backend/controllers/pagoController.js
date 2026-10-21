@@ -64,7 +64,7 @@ const PagoController = {
         estado: req.body.estado || 'Pagado',
         metodo_pago: req.body.metodo_pago || 'Efectivo',
       };
-      (async () => {
+      void (async () => {
         try {
           const AfiliadoModel = require('../models/afiliadoModel');
           const afiliado = await AfiliadoModel.findById(req.params.id);

@@ -11,6 +11,7 @@ const NotaEjercicioModel     = require('../models/notaEjercicioModel'); // Parte
 // FIX 1.3 / ISO 25000: normalizarFecha extraída a utils/fechaUtils.js
 // para que sea testeable sin dependencia de BD.
 const { normalizarFecha } = require('../utils/fechaUtils');
+const { esEmailValido } = require('../utils/emailUtils');
 const { normalizarObjetivoFisico, normalizarNivelExperiencia, OBJETIVOS_VALIDOS, NIVELES_VALIDOS }
   = require('../utils/objetivoUtils');
 
@@ -105,7 +106,7 @@ const AfiliadoService = {
     let correoNormalizado;
     if (correo !== undefined) {
       correoNormalizado = String(correo).trim().toLowerCase();
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correoNormalizado)) {
+      if (!esEmailValido(correoNormalizado)) {
         const err = new Error('Formato de correo inválido');
         err.code = 'DATOS_INVALIDOS';
         throw err;

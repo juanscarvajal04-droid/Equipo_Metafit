@@ -299,12 +299,12 @@ export default function AdminDashboard() {
   const [guardando, setGuardando] = useState(false);
 
   useEffect(() => {
-    fetchKpis();
-    fetchAfiliados();
+    void fetchKpis();
+    void fetchAfiliados();
   }, [fetchKpis, fetchAfiliados]);
 
   useEffect(() => {
-    const refresh = () => { fetchKpis(); fetchAfiliados(); };
+    const refresh = () => { void fetchKpis(); void fetchAfiliados(); };
     const handleVisibility = () => {
       if (document.visibilityState === "visible") refresh();
     };
@@ -331,12 +331,12 @@ export default function AdminDashboard() {
   }, [authAxios]);
 
   useEffect(() => {
-    cargarPrecio();
+    void cargarPrecio();
   }, [cargarPrecio]);
 
   const handleGuardarPrecio = async () => {
-    const val = parseInt(nuevoPrecio, 10);
-    if (isNaN(val) || val <= 0) {
+    const val = Number.parseInt(nuevoPrecio, 10);
+    if (Number.isNaN(val) || val <= 0) {
       showToast("Ingresa un precio valido", "danger");
       return;
     }
@@ -346,7 +346,7 @@ export default function AdminDashboard() {
       setPrecio(val);
       setEditPrecio(false);
       showToast(`Precio de membresia actualizado a $${val.toLocaleString("es-CO")} COP`);
-      fetchKpis();
+      void fetchKpis();
     } catch (err) {
       const msg = err?.response?.data?.error || "Error al guardar";
       showToast(msg, "danger");

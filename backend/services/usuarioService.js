@@ -64,11 +64,11 @@ const UsuarioService = {
     const rolNuevo    = datos.rol;
 
     // Protecciones de auto-modificación
-    if (parseInt(id, 10) === selfId && estadoNuevo && estadoNuevo !== 'Activo') {
+    if (Number.parseInt(id, 10) === selfId && estadoNuevo && estadoNuevo !== 'Activo') {
       throw new Error('No puedes desactivar tu propia cuenta');
     }
 
-    if (parseInt(id, 10) === selfId && rolNuevo && rolNuevo !== userRole) {
+    if (Number.parseInt(id, 10) === selfId && rolNuevo && rolNuevo !== userRole) {
       throw new Error('No puedes cambiar tu propio rol');
     }
 
@@ -96,7 +96,7 @@ const UsuarioService = {
   },
 
   delete: async (id, selfId) => {
-    if (parseInt(id, 10) === selfId) {
+    if (Number.parseInt(id, 10) === selfId) {
       throw new Error('No puedes eliminarte a ti mismo');
     }
     const affected = await UsuarioModel.delete(id);

@@ -76,19 +76,19 @@ export default function FinanzasView() {
   }, [authAxios]);
 
   useEffect(() => {
-    (async () => {
+    void (async () => {
       try {
         const { data: rec } = await authAxios.get("/usuarios/recepcionistas");
         setRecepcionistas(rec);
       } catch { /* ignore */ }
     })();
-    fetchMetricas({});
+    void fetchMetricas({});
   }, [fetchMetricas]);
 
   useEffect(() => {
     const handlePago = () => fetchMetricas({});
     const handleVisibility = () => {
-      if (document.visibilityState === "visible") fetchMetricas({});
+      if (document.visibilityState === "visible") void fetchMetricas({});
     };
     window.addEventListener("pago-registrado", handlePago);
     document.addEventListener("visibilitychange", handleVisibility);
@@ -99,12 +99,12 @@ export default function FinanzasView() {
   }, [fetchMetricas]);
 
   const handleFiltrar = () => {
-    fetchMetricas(filtros);
+    void fetchMetricas(filtros);
   };
 
   const handleLimpiar = () => {
     setFiltros({ fecha_inicio: "", fecha_fin: "", id_recepcionista: "" });
-    fetchMetricas({});
+    void fetchMetricas({});
   };
 
   const exportPDF = async () => {

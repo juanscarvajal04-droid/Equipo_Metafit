@@ -22,7 +22,7 @@ export default function useAutoRefresh(fetchFn, intervalMs = 10000) {
       runningRef.current = false;
       return;
     }
-    if (p && typeof p.catch === 'function') {
+    if (typeof p.catch === 'function') {
       p.catch((err) => console.warn('[useAutoRefresh]', err));
     }
     Promise.resolve(p).finally(() => { runningRef.current = false; });

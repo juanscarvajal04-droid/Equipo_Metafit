@@ -65,7 +65,7 @@ export default function RestriccionSelector({
         // mientras getId(r) devuelve number (id_restriccion INT de MySQL).
         // Sin coercion ambas promesas `===` falla y el find devuelve undefined,
         // por lo que la restricción nunca se agregaba a la lista ni se guardaba.
-        const restriccion = catalogo.find((r) => String(getId(r)) === String(selectedId));
+        const restriccion = (catalogo || []).find((r) => String(getId(r)) === String(selectedId));
         if (restriccion) onAdd(restriccion);
         setSelectedId("");
         setShowModal(false);
