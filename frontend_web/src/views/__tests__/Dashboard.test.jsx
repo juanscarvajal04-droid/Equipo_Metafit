@@ -69,6 +69,9 @@ describe("Dashboard", () => {
 
     fireEvent.click(screen.getByText(/Actualizar datos/));
     await waitFor(() => expect(authAxiosMock.get).toHaveBeenCalledTimes(2));
+
+    document.dispatchEvent(new Event("visibilitychange"));
+    await waitFor(() => expect(authAxiosMock.get).toHaveBeenCalledTimes(3));
   });
 
   test("muestra error si falla la carga", async () => {

@@ -148,4 +148,41 @@ describe("AfiliadosView", () => {
     fireEvent.click(screen.getAllByTitle("Eliminar")[0]);
     await waitFor(() => expect(authAxiosMock.delete).toHaveBeenCalledWith("/afiliados/1"));
   });
+
+  test("cierra los modales de detalle y edición con overlay y Escape", async () => {
+    renderView();
+    await screen.findByText("Ana Pérez");
+
+    fireEvent.click(screen.getAllByTitle("Ver")[0]);
+    await screen.findByRole("heading", { name: /Ana Pérez/ });
+    fireEvent.click(screen.getByLabelText("Cerrar modal"));
+    await waitFor(() =>
+      expect(screen.queryByRole("heading", { name: /Ana Pérez/ })).not.toBeInTheDocument()
+    );
+
+    fireEvent.click(screen.getAllByTitle("Ver")[0]);
+    let overlay = await screen.findByLabelText("Cerrar modal");
+    fireEvent.keyDown(overlay, { key: "Escape" });
+    await waitFor(() =>
+      expect(screen.queryByRole("heading", { name: /Ana Pérez/ })).not.toBeInTheDocument()
+    );
+
+    fireEvent.click(screen.getAllByTitle("Editar")[0]);
+    await screen.findByRole("heading", { name: /Editar: Ana Pérez/ });
+    fireEvent.click(screen.getByLabelText("Cerrar modal"));
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("heading", { name: /Editar: Ana Pérez/ })
+      ).not.toBeInTheDocument()
+    );
+
+    fireEvent.click(screen.getAllByTitle("Editar")[0]);
+    overlay = await screen.findByLabelText("Cerrar modal");
+    fireEvent.keyDown(overlay, { key: "Enter" });
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("heading", { name: /Editar: Ana Pérez/ })
+      ).not.toBeInTheDocument()
+    );
+  });
 });

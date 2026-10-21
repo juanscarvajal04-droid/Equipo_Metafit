@@ -129,4 +129,27 @@ describe("RestriccionesAdmin", () => {
     fireEvent.click(screen.getAllByTitle("Eliminar")[0]);
     await waitFor(() => expect(eliminarRestriccion).toHaveBeenCalledWith(1));
   });
+
+  test("cierra el modal con click en el overlay y con Escape", async () => {
+    renderView();
+    await screen.findByText(/Asma/);
+
+    fireEvent.click(screen.getByText(/Nueva restricción/));
+    await screen.findByRole("heading", { name: /Nueva restricción/ });
+    fireEvent.click(screen.getByLabelText("Cerrar modal"));
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("heading", { name: /Nueva restricción/ })
+      ).not.toBeInTheDocument()
+    );
+
+    fireEvent.click(screen.getByText(/Nueva restricción/));
+    const overlay = await screen.findByLabelText("Cerrar modal");
+    fireEvent.keyDown(overlay, { key: "Escape" });
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("heading", { name: /Nueva restricción/ })
+      ).not.toBeInTheDocument()
+    );
+  });
 });
