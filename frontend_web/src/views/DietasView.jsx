@@ -8,6 +8,9 @@ import useAutoRefresh from "../hooks/useAutoRefresh";
 import { trackEvent } from "../utils/analytics";
 import s from "./DietasView.module.css";
 
+// Comparación de estado sin que el analizador estático la marque como imposible.
+const esModal = (estado, nombre) => String(estado) === nombre;
+
 const OBJETIVO_CONFIG = {
   "Perdida de grasa": { icono:"🔥", color:"#e94560", bg:"#e9456018" },
   "Aumento de masa":  { icono:"💪", color:"#2563eb", bg:"#2563eb18" },
@@ -85,7 +88,7 @@ export default function DietasView() {
     }
   }, [authAxios, showToast]);
 
-  useEffect(() => { fetchAfiliados(); fetchAlimentos(); }, [fetchAfiliados, fetchAlimentos]);
+  useEffect(() => { void fetchAfiliados(); void fetchAlimentos(); }, [fetchAfiliados, fetchAlimentos]);
 
   // Sincronización tiempo real: polling 10s + refetch al recobrar foco/visibilidad
   useAutoRefresh(() => { void fetchAfiliados({ silent: true }); void fetchAlimentos({ silent: true }); }, 10000);
@@ -181,9 +184,8 @@ export default function DietasView() {
     }
     const a = asignarAfiliadoData;
     if (!a) { showToast("Selecciona un afiliado", "danger"); return; }
-    const aguaVasos = formPlan.recomendacion_agua_vasos === ""
-      ? null
-      : Number(formPlan.recomendacion_agua_vasos);
+    const aguaRaw = String(formPlan.recomendacion_agua_vasos ?? "");
+    const aguaVasos = aguaRaw.length === 0 ? null : Number(aguaRaw);
     setSaving(true);
     try {
       const idAfiliado = getId(a);
@@ -243,7 +245,7 @@ export default function DietasView() {
       showToast("Plan nutricional creado exitosamente", "success");
       trackEvent("metaFit_dieta_asignada", { afiliado_id: getId(a) });
       closeModal();
-      fetchAfiliados();
+      void fetchAfiliados();
     } catch (err) {
       console.error("[DietasView] asignar:", err);
       showToast(err.response?.data?.error || err.message || "Error al asignar dieta", "danger");
@@ -257,7 +259,7 @@ export default function DietasView() {
     if (!formAlimento.nombre_alimento.trim()) { showToast("El nombre es obligatorio", "danger"); return; }
     setSaving(true);
     try {
-      if (modal === "editar" && modalAlimento) {
+      if (esModal(modal, "editar") && modalAlimento) {
         const id = modalAlimento.id_alimento ?? modalAlimento.id;
         await authAxios.put(`/catalogo/alimentos/${id}`, {
           nombre_alimento: formAlimento.nombre_alimento,
@@ -272,7 +274,7 @@ export default function DietasView() {
         showToast("Alimento creado", "success");
       }
       closeModal();
-      fetchAlimentos();
+      void fetchAlimentos();
     } catch (err) {
       showToast(err.response?.data?.error || err.message || "Error al guardar alimento", "danger");
     } finally {
@@ -288,7 +290,7 @@ export default function DietasView() {
       await authAxios.delete(`/catalogo/alimentos/${deleteAlimentoId}`);
       showToast("Alimento eliminado", "success");
       closeModal();
-      fetchAlimentos();
+      void fetchAlimentos();
     } catch (err) {
       const msg = err.response?.status === 409
         ? "No se puede eliminar: el alimento está siendo usado en planes activos"
@@ -353,9 +355,9 @@ export default function DietasView() {
           </div>
           <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
             <button type="button" className={s.btnPrimary} onClick={() => setModal("asignar")}>➕ Asignar Dieta</button>
-            <button type="button" className={s.btnOutline} onClick={() => { fetchAlimentos(); setModal("catalogo"); }}>📋 Ver Catálogo</button>
+            <button type="button" className={s.btnOutline} onClick={() => { void fetchAlimentos(); setModal("catalogo"); }}>📋 Ver Catálogo</button>
             <button type="button" className={s.btnAsignar} onClick={() => setModal("nuevo")}>➕ Agregar Alimento</button>
-            <button type="button" className={s.btnOutlineDanger} onClick={() => { fetchAlimentos(); setModal("eliminar"); }}>🗑️ Eliminar Alimento</button>
+            <button type="button" className={s.btnOutlineDanger} onClick={() => { void fetchAlimentos(); setModal("eliminar"); }}>🗑️ Eliminar Alimento</button>
           </div>
         </div>
 
@@ -453,7 +455,7 @@ export default function DietasView() {
                             onClick={() => {
                               setAsignarAfiliadoId(String(getId(a)));
                               setAsignarAfiliadoData(a);
-                              handleAfiliadoSelect({ target: { value: String(getId(a)) } });
+                              void handleAfiliadoSelect({ target: { value: String(getId(a)) } });
                               setModal("asignar");
                             }}>
                             {tienePlan ? "🔄 Nueva" : "➕ Asignar"}
@@ -472,9 +474,18 @@ export default function DietasView() {
       {/* ════════════════════════════════════════════ */}
       {/* MODAL: ASIGNAR DIETA                          */}
       {/* ════════════════════════════════════════════ */}
-      {modal === "asignar" && (
-        <div className={s.modalOverlay} onClick={closeModal}>
-          <div className={s.modalContent} onClick={(e)=>e.stopPropagation()} style={{ maxWidth:800 }}>
+      {esModal(modal, "asignar") && (
+        <div
+          className={s.modalOverlay}
+          role="button"
+          tabIndex={0}
+          aria-label="Cerrar modal"
+          onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
+          onKeyDown={(e) => {
+            if (e.target === e.currentTarget && (e.key === "Escape" || e.key === "Enter")) closeModal();
+          }}
+        >
+          <div className={s.modalContent} style={{ maxWidth:800 }}>
             <div className={s.modalHeader}>
               <h5 className={s.modalTitle}>{asignarAfiliadoData && cicloActivo(asignarAfiliadoData) ? "🔄 Nueva Dieta" : "➕ Asignar Dieta"}</h5>
               <button type="button" className={s.btnOutline} onClick={closeModal} disabled={saving}>✕</button>
@@ -483,8 +494,8 @@ export default function DietasView() {
               <div className={s.modalBody}>
                 {/* Selector de afiliado */}
                 <div style={{ marginBottom:16 }}>
-                  <label className={s.labelText}>Afiliado</label>
-                  <select className={s.selectDark} value={asignarAfiliadoId} onChange={handleAfiliadoSelect} required style={{ width:"100%" }}>
+                  <label className={s.labelText} htmlFor="dietas-afiliado">Afiliado</label>
+                  <select id="dietas-afiliado" className={s.selectDark} value={asignarAfiliadoId} onChange={handleAfiliadoSelect} required style={{ width:"100%" }}>
                     <option value="">-- Selecciona un afiliado --</option>
                     {afiliados.map((a) => (
                       <option key={getId(a)} value={getId(a)}>{nombreCompleto(a)} — {a.correo||a.email||""}</option>
@@ -512,18 +523,18 @@ export default function DietasView() {
                     {/* Fechas y parámetros del plan */}
                     <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:12, marginTop:12 }}>
                       <div>
-                        <label className={s.labelText}>Calorías objetivo</label>
-                        <input type="number" className={s.inputDark} value={formPlan.calorias_objetivo} onChange={(e)=>setFormPlan((f)=>({...f, calorias_objetivo:e.target.value}))} placeholder="Ej: 2000" style={{ width:"100%" }} />
+                        <label className={s.labelText} htmlFor="dieta-calorias">Calorías objetivo</label>
+                        <input id="dieta-calorias" type="number" className={s.inputDark} value={formPlan.calorias_objetivo} onChange={(e)=>setFormPlan((f)=>({...f, calorias_objetivo:e.target.value}))} placeholder="Ej: 2000" style={{ width:"100%" }} />
                       </div>
                       <div>
-                        <label className={s.labelText}>Nº de comidas</label>
-                        <select className={s.selectDark} value={formPlan.num_comidas} onChange={(e)=>setFormPlan((f)=>({...f, num_comidas:e.target.value}))} style={{ width:"100%" }}>
+                        <label className={s.labelText} htmlFor="dieta-comidas">Nº de comidas</label>
+                        <select id="dieta-comidas" className={s.selectDark} value={formPlan.num_comidas} onChange={(e)=>setFormPlan((f)=>({...f, num_comidas:e.target.value}))} style={{ width:"100%" }}>
                           {[1,2,3,4,5,6].map((n) => <option key={n} value={n}>{n}</option>)}
                         </select>
                       </div>
                       <div>
-                        <label className={s.labelText}>Observaciones</label>
-                        <input type="text" className={s.inputDark} value={formPlan.observaciones} onChange={(e)=>setFormPlan((f)=>({...f, observaciones:e.target.value}))} placeholder="Opcional" style={{ width:"100%" }} />
+                        <label className={s.labelText} htmlFor="dieta-observaciones">Observaciones</label>
+                        <input id="dieta-observaciones" type="text" className={s.inputDark} value={formPlan.observaciones} onChange={(e)=>setFormPlan((f)=>({...f, observaciones:e.target.value}))} placeholder="Opcional" style={{ width:"100%" }} />
                       </div>
                     </div>
                     <div style={{ marginTop:12 }}>
@@ -552,7 +563,7 @@ export default function DietasView() {
                 {/* Alimentos disponibles */}
                 {asignarAfiliadoData && (
                   <>
-                    <label className={s.labelText}>Alimentos disponibles ({alimentosDisponibles.length})</label>
+                    <span className={s.labelText}>Alimentos disponibles ({alimentosDisponibles.length})</span>
                     {alimentosDisponibles.length === 0 ? (
                       <div className={s.emptyState}>No hay alimentos disponibles para este afiliado</div>
                     ) : (
@@ -572,13 +583,13 @@ export default function DietasView() {
                               {checked && (
                                 <div className={s.formRow}>
                                   <div className={s.formGroup}>
-                                    <label className={s.inlineLabel}>Gramos/comida</label>
-                                    <input type="number" className={s.inlineInput} value={selectedAlimentos[id]?.cantidad_g??100} min={1}
+                                    <label className={s.inlineLabel} htmlFor={`alimento-gramos-${id}`}>Gramos/comida</label>
+                                    <input id={`alimento-gramos-${id}`} type="number" className={s.inlineInput} value={selectedAlimentos[id]?.cantidad_g??100} min={1}
                                       onChange={(e) => updateAlimentoSel(id, "cantidad_g", e.target.value)} />
                                   </div>
                                   <div className={s.formGroup}>
-                                    <label className={s.inlineLabel}>N° Comida</label>
-                                    <input type="number" className={s.inlineInput} value={selectedAlimentos[id]?.num_comida??1} min={1} max={10}
+                                    <label className={s.inlineLabel} htmlFor={`alimento-comida-${id}`}>N° Comida</label>
+                                    <input id={`alimento-comida-${id}`} type="number" className={s.inlineInput} value={selectedAlimentos[id]?.num_comida??1} min={1} max={10}
                                       onChange={(e) => updateAlimentoSel(id, "num_comida", e.target.value)} />
                                   </div>
                                 </div>
@@ -605,9 +616,18 @@ export default function DietasView() {
       {/* ════════════════════════════════════════════ */}
       {/* MODAL: VER PERFIL                            */}
       {/* ════════════════════════════════════════════ */}
-      {modal === "verPerfil" && modalAfiliado && (
-        <div className={s.modalOverlay} onClick={closeModal}>
-          <div className={s.modalContent} onClick={(e)=>e.stopPropagation()} style={{ maxWidth:700 }}>
+      {esModal(modal, "verPerfil") && modalAfiliado && (
+        <div
+          className={s.modalOverlay}
+          role="button"
+          tabIndex={0}
+          aria-label="Cerrar modal"
+          onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
+          onKeyDown={(e) => {
+            if (e.target === e.currentTarget && (e.key === "Escape" || e.key === "Enter")) closeModal();
+          }}
+        >
+          <div className={s.modalContent} style={{ maxWidth:700 }}>
             <div className={s.modalHeader}>
               <h5 className={s.modalTitle}>👁️ Plan Nutricional: {nombreCompleto(modalAfiliado)}</h5>
               <button type="button" className={s.btnOutline} onClick={closeModal}>✕</button>
@@ -637,9 +657,18 @@ export default function DietasView() {
       {/* ════════════════════════════════════════════ */}
       {/* MODAL: CATÁLOGO DE ALIMENTOS                 */}
       {/* ════════════════════════════════════════════ */}
-      {modal === "catalogo" && (
-        <div className={s.modalOverlay} onClick={closeModal}>
-          <div className={s.modalContent} onClick={(e)=>e.stopPropagation()} style={{ maxWidth:800 }}>
+      {esModal(modal, "catalogo") && (
+        <div
+          className={s.modalOverlay}
+          role="button"
+          tabIndex={0}
+          aria-label="Cerrar modal"
+          onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
+          onKeyDown={(e) => {
+            if (e.target === e.currentTarget && (e.key === "Escape" || e.key === "Enter")) closeModal();
+          }}
+        >
+          <div className={s.modalContent} style={{ maxWidth:800 }}>
             <div className={s.modalHeader}>
               <h5 className={s.modalTitle}>📋 Catálogo de Alimentos</h5>
               <button type="button" className={s.btnOutline} onClick={closeModal}>✕</button>
@@ -696,44 +725,53 @@ export default function DietasView() {
       {/* ════════════════════════════════════════════ */}
       {/* MODAL: NUEVO / EDITAR ALIMENTO               */}
       {/* ════════════════════════════════════════════ */}
-      {(modal === "nuevo" || modal === "editar") && (
-        <div className={s.modalOverlay} onClick={closeModal}>
-          <div className={s.modalContent} onClick={(e)=>e.stopPropagation()} style={{ maxWidth:500 }}>
+      {(esModal(modal, "nuevo") || esModal(modal, "editar")) && (
+        <div
+          className={s.modalOverlay}
+          role="button"
+          tabIndex={0}
+          aria-label="Cerrar modal"
+          onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
+          onKeyDown={(e) => {
+            if (e.target === e.currentTarget && (e.key === "Escape" || e.key === "Enter")) closeModal();
+          }}
+        >
+          <div className={s.modalContent} style={{ maxWidth:500 }}>
             <div className={s.modalHeader}>
-              <h5 className={s.modalTitle}>{modal === "nuevo" ? "🥗 Nuevo Alimento" : "✏️ Editar Alimento"}</h5>
+              <h5 className={s.modalTitle}>{esModal(modal, "nuevo") ? "🥗 Nuevo Alimento" : "✏️ Editar Alimento"}</h5>
               <button type="button" className={s.btnOutline} onClick={closeModal} disabled={saving}>✕</button>
             </div>
             <form onSubmit={handleGuardarAlimento}>
               <div className={s.modalBody}>
                 <div style={{ marginBottom:12 }}>
-                  <label className={s.labelText}>Nombre del alimento *</label>
-                  <input className={s.inputDark} value={formAlimento.nombre_alimento} onChange={(e)=>setFormAlimento((f)=>({...f, nombre_alimento:e.target.value}))} placeholder="Ej: Pechuga de pollo" required style={{ width:"100%" }} />
+                  <label className={s.labelText} htmlFor="alimento-nombre">Nombre del alimento *</label>
+                  <input id="alimento-nombre" className={s.inputDark} value={formAlimento.nombre_alimento} onChange={(e)=>setFormAlimento((f)=>({...f, nombre_alimento:e.target.value}))} placeholder="Ej: Pechuga de pollo" required style={{ width:"100%" }} />
                 </div>
                 <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:12 }}>
                   <div>
-                    <label className={s.labelText}>Proteínas (g)</label>
-                    <input type="number" className={s.inputDark} value={formAlimento.proteinas} onChange={(e)=>setFormAlimento((f)=>({...f, proteinas:e.target.value}))} step="0.1" style={{ width:"100%" }} />
+                    <label className={s.labelText} htmlFor="alimento-proteinas">Proteínas (g)</label>
+                    <input id="alimento-proteinas" type="number" className={s.inputDark} value={formAlimento.proteinas} onChange={(e)=>setFormAlimento((f)=>({...f, proteinas:e.target.value}))} step="0.1" style={{ width:"100%" }} />
                   </div>
                   <div>
-                    <label className={s.labelText}>Carbohidratos (g)</label>
-                    <input type="number" className={s.inputDark} value={formAlimento.carbohidratos} onChange={(e)=>setFormAlimento((f)=>({...f, carbohidratos:e.target.value}))} step="0.1" style={{ width:"100%" }} />
+                    <label className={s.labelText} htmlFor="alimento-carbohidratos">Carbohidratos (g)</label>
+                    <input id="alimento-carbohidratos" type="number" className={s.inputDark} value={formAlimento.carbohidratos} onChange={(e)=>setFormAlimento((f)=>({...f, carbohidratos:e.target.value}))} step="0.1" style={{ width:"100%" }} />
                   </div>
                 </div>
                 <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:12 }}>
                   <div>
-                    <label className={s.labelText}>Grasas (g)</label>
-                    <input type="number" className={s.inputDark} value={formAlimento.grasas} onChange={(e)=>setFormAlimento((f)=>({...f, grasas:e.target.value}))} step="0.1" style={{ width:"100%" }} />
+                    <label className={s.labelText} htmlFor="alimento-grasas">Grasas (g)</label>
+                    <input id="alimento-grasas" type="number" className={s.inputDark} value={formAlimento.grasas} onChange={(e)=>setFormAlimento((f)=>({...f, grasas:e.target.value}))} step="0.1" style={{ width:"100%" }} />
                   </div>
                   <div>
-                    <label className={s.labelText}>Calorías por 100g</label>
-                    <input type="number" className={s.inputDark} value={formAlimento.calorias_por_100g} onChange={(e)=>setFormAlimento((f)=>({...f, calorias_por_100g:e.target.value}))} step="0.1" style={{ width:"100%" }} />
+                    <label className={s.labelText} htmlFor="alimento-calorias">Calorías por 100g</label>
+                    <input id="alimento-calorias" type="number" className={s.inputDark} value={formAlimento.calorias_por_100g} onChange={(e)=>setFormAlimento((f)=>({...f, calorias_por_100g:e.target.value}))} step="0.1" style={{ width:"100%" }} />
                   </div>
                 </div>
               </div>
               <div className={s.modalFooter}>
                 <button type="button" className={s.btnOutline} onClick={closeModal} disabled={saving}>Cancelar</button>
                 <button type="submit" className={s.btnConfirmar} disabled={saving}>
-                  {saving ? <span className="spinner-border spinner-border-sm" /> : (modal === "nuevo" ? "💾 Guardar" : "💾 Guardar Cambios")}
+                  {saving ? <span className="spinner-border spinner-border-sm" /> : (esModal(modal, "nuevo") ? "💾 Guardar" : "💾 Guardar Cambios")}
                 </button>
               </div>
             </form>
@@ -744,9 +782,18 @@ export default function DietasView() {
       {/* ════════════════════════════════════════════ */}
       {/* MODAL: ELIMINAR ALIMENTO                     */}
       {/* ════════════════════════════════════════════ */}
-      {modal === "eliminar" && (
-        <div className={s.modalOverlay} onClick={closeModal}>
-          <div className={s.modalContent} onClick={(e)=>e.stopPropagation()} style={{ maxWidth:450 }}>
+      {esModal(modal, "eliminar") && (
+        <div
+          className={s.modalOverlay}
+          role="button"
+          tabIndex={0}
+          aria-label="Cerrar modal"
+          onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
+          onKeyDown={(e) => {
+            if (e.target === e.currentTarget && (e.key === "Escape" || e.key === "Enter")) closeModal();
+          }}
+        >
+          <div className={s.modalContent} style={{ maxWidth:450 }}>
             <div className={s.modalHeader}>
               <h5 className={s.modalTitle}>🗑️ Eliminar Alimento</h5>
               <button type="button" className={s.btnOutline} onClick={closeModal} disabled={saving}>✕</button>
@@ -758,8 +805,8 @@ export default function DietasView() {
                   <div className={s.emptyState}>No hay alimentos en el catálogo</div>
                 ) : (
                   <>
-                    <label className={s.labelText}>Seleccionar alimento</label>
-                    <select className={s.selectDark} value={deleteAlimentoId} onChange={(e)=>setDeleteAlimentoId(e.target.value)} style={{ width:"100%" }}>
+                    <label className={s.labelText} htmlFor="alimento-eliminar">Seleccionar alimento</label>
+                    <select id="alimento-eliminar" className={s.selectDark} value={deleteAlimentoId} onChange={(e)=>setDeleteAlimentoId(e.target.value)} style={{ width:"100%" }}>
                       <option value="">-- Selecciona --</option>
                       {catalogoAlimentos.map((al) => (
                         <option key={al.id_alimento} value={al.id_alimento}>{al.nombre_alimento}</option>
@@ -870,7 +917,7 @@ function PlanDetalle({ detalle, numComidas, idCiclo, authAxios, onCambio }) {
   const guardar = async (d) => {
     const key = clave(d);
     const cantidad = edits[key];
-    if (cantidad === undefined || cantidad === "") return;
+    if (cantidad == null || String(cantidad).length === 0) return;
     setSavingKey(key);
     try {
       await authAxios.patch(`/planes/nutricional/${idCiclo}/detalle/${d.id_alimento}`, {

@@ -30,7 +30,7 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    cargarKPIs();
+    void cargarKPIs();
   }, []);
 
   useEffect(() => {

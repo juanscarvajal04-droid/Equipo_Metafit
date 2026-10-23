@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { nombreCompleto, inicial, cicloActivo } from "../utils/afiliadoHelpers";
+import { nombreCompleto, cicloActivo } from "../utils/afiliadoHelpers";
 
 const TABS_RECEPCIONISTA = ["Estado de Cuenta"];
 const TABS_ENTRENADOR    = ["Progreso Físico", "Ciclo Activo"];
@@ -21,8 +21,18 @@ export default function AfiliadoVerModal({ afiliado, role, onClose, onEdit }) {
              :                           TABS_ADMIN;
 
   return (
-    <div className="modal d-block" style={{ background: "rgba(0,0,0,0.5)", zIndex: 1050 }} onClick={onClose}>
-      <div className="modal-dialog modal-lg modal-dialog-scrollable" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="modal d-block"
+      style={{ background: "rgba(0,0,0,0.5)", zIndex: 1050 }}
+      role="button"
+      tabIndex={0}
+      aria-label="Cerrar modal de afiliado"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      onKeyDown={(e) => {
+        if (e.target === e.currentTarget && (e.key === "Escape" || e.key === "Enter")) onClose();
+      }}
+    >
+      <div className="modal-dialog modal-lg modal-dialog-scrollable">
         <div className="modal-content border-0 shadow">
           <div className="modal-header text-white border-0"
             style={{ background: "linear-gradient(135deg,#1a1a2e,#16213e)" }}>

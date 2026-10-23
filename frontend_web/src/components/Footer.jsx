@@ -13,8 +13,17 @@ function InstagramIcon() {
 // ── Modal de Términos y Condiciones ───────────────────────────────────────────
 function ModalTerminos({ onClose }) {
   return (
-    <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.modalBox} onClick={(e) => e.stopPropagation()}>
+    <div
+      className={styles.modalOverlay}
+      role="button"
+      tabIndex={0}
+      aria-label="Cerrar términos y condiciones"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      onKeyDown={(e) => {
+        if (e.target === e.currentTarget && (e.key === "Escape" || e.key === "Enter")) onClose();
+      }}
+    >
+      <div className={styles.modalBox}>
 
         {/* Header del modal */}
         <div className={styles.modalHeader}>

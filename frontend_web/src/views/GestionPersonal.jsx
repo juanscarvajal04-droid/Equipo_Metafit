@@ -319,8 +319,17 @@ export default function GestionPersonal() {
 
       {/* ── Delete Confirmation Modal ───────────────── */}
       {deleteTarget && (
-        <div className={s.modalOverlay} onClick={() => !saving && setDeleteTarget(null)}>
-          <div className={s.modalContent} onClick={(e) => e.stopPropagation()}>
+        <div
+          className={s.modalOverlay}
+          role="button"
+          tabIndex={0}
+          aria-label="Cerrar modal de eliminación"
+          onClick={(e) => { if (!saving && e.target === e.currentTarget) setDeleteTarget(null); }}
+          onKeyDown={(e) => {
+            if (e.target === e.currentTarget && (e.key === "Escape" || e.key === "Enter") && !saving) setDeleteTarget(null);
+          }}
+        >
+          <div className={s.modalContent}>
             <div className={s.modalHeader}>
               <h5 className={s.modalTitle}>🗑️ Eliminar empleado</h5>
               <button
@@ -379,8 +388,17 @@ function ModalPersonal({ type, formData, setFormData, onSubmit, onClose, saving 
   };
 
   return (
-    <div className={s.modalOverlay} onClick={() => !saving && onClose()}>
-      <div className={s.modalContent} onClick={(e) => e.stopPropagation()}>
+    <div
+      className={s.modalOverlay}
+      role="button"
+      tabIndex={0}
+      aria-label="Cerrar modal de empleado"
+      onClick={(e) => { if (!saving && e.target === e.currentTarget) onClose(); }}
+      onKeyDown={(e) => {
+        if (e.target === e.currentTarget && (e.key === "Escape" || e.key === "Enter") && !saving) onClose();
+      }}
+    >
+      <div className={s.modalContent}>
         <div className={s.modalHeader}>
           <h5 className={s.modalTitle}>
             {isEdit ? "✏️ Editar empleado" : "➕ Nuevo empleado"}
@@ -392,8 +410,9 @@ function ModalPersonal({ type, formData, setFormData, onSubmit, onClose, saving 
         <form onSubmit={onSubmit}>
           <div className={s.modalBody}>
             <div style={{ marginBottom: "0.75rem" }}>
-              <label className={s.labelText}>Nombres</label>
+              <label className={s.labelText} htmlFor="personal-nombres">Nombres</label>
               <input
+                id="personal-nombres"
                 type="text"
                 name="nombres"
                 className={s.inputDark}
@@ -404,8 +423,9 @@ function ModalPersonal({ type, formData, setFormData, onSubmit, onClose, saving 
             </div>
 
             <div style={{ marginBottom: "0.75rem" }}>
-              <label className={s.labelText}>Apellidos</label>
+              <label className={s.labelText} htmlFor="personal-apellidos">Apellidos</label>
               <input
+                id="personal-apellidos"
                 type="text"
                 name="apellidos"
                 className={s.inputDark}
@@ -416,8 +436,9 @@ function ModalPersonal({ type, formData, setFormData, onSubmit, onClose, saving 
             </div>
 
             <div style={{ marginBottom: "0.75rem" }}>
-              <label className={s.labelText}>Correo electrónico *</label>
+              <label className={s.labelText} htmlFor="personal-email">Correo electrónico *</label>
               <input
+                id="personal-email"
                 type="email"
                 name="email"
                 className={s.inputDark}
@@ -429,11 +450,12 @@ function ModalPersonal({ type, formData, setFormData, onSubmit, onClose, saving 
             </div>
 
             <div style={{ marginBottom: "0.75rem" }}>
-              <label className={s.labelText}>
+              <label className={s.labelText} htmlFor="personal-password">
                 Contraseña {isEdit ? "(dejar vacío para mantener)" : "*"}
               </label>
               <div style={{ position: "relative" }}>
                 <input
+                  id="personal-password"
                   type={showPassword ? "text" : "password"}
                   name="password"
                   className={s.inputDark}
@@ -465,8 +487,9 @@ function ModalPersonal({ type, formData, setFormData, onSubmit, onClose, saving 
             </div>
 
             <div style={{ marginBottom: "0.75rem" }}>
-              <label className={s.labelText}>Rol</label>
+              <label className={s.labelText} htmlFor="personal-rol">Rol</label>
               <select
+                id="personal-rol"
                 name="rol"
                 className={s.selectDark}
                 value={formData.rol}
@@ -479,8 +502,9 @@ function ModalPersonal({ type, formData, setFormData, onSubmit, onClose, saving 
             </div>
 
             <div style={{ marginBottom: "0.75rem" }}>
-              <label className={s.labelText}>Estado</label>
+              <label className={s.labelText} htmlFor="personal-estado">Estado</label>
               <select
+                id="personal-estado"
                 name="estado"
                 className={s.selectDark}
                 value={formData.estado}

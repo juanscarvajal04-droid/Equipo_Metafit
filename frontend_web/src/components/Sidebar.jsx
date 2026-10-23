@@ -66,7 +66,7 @@ export default function Sidebar() {
   const gradient = ROLE_GRADIENT[role] || "#e31c25";
   const isAdmin  = role === "Administrador";
 
-  const handleLogout = () => { logout(); navigate("/"); };
+  const handleLogout = () => { logout(); void navigate("/"); };
 
   return (
     <aside className={styles.sidebar}>

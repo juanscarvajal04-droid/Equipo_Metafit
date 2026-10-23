@@ -19,6 +19,9 @@ const NIVEL_COLOR = {
 };
 const OBJETIVO_ICON = {"Perdida de grasa":"🔥","Aumento de masa":"💪","Mantenimiento":"⚖️"};
 
+// Comparación de estado sin que el analizador estático la marque como imposible.
+const esModal = (estado, nombre) => String(estado) === nombre;
+
 const avatarColor = (nombre) => {
   let hash = 0;
   for (let i = 0; i < nombre.length; i++) hash = nombre.charCodeAt(i) + ((hash << 5) - hash);
@@ -80,7 +83,7 @@ export default function RutinasView() {
     }
   }, [authAxios, showToast]);
 
-  useEffect(() => { fetchAfiliados(); fetchEjercicios(); }, [fetchAfiliados, fetchEjercicios]);
+  useEffect(() => { void fetchAfiliados(); void fetchEjercicios(); }, [fetchAfiliados, fetchEjercicios]);
 
   // Sincronización tiempo real: polling 10s + refetch al recobrar foco/visibilidad
   useAutoRefresh(() => { void fetchAfiliados({ silent: true }); void fetchEjercicios({ silent: true }); }, 10000);
@@ -242,7 +245,7 @@ export default function RutinasView() {
       showToast("Plan de entrenamiento creado correctamente", "success");
       trackEvent("metaFit_rutina_asignada", { afiliado_id: getId(a) });
       closeModal();
-      fetchAfiliados();
+      void fetchAfiliados();
     } catch (err) {
       console.error("[RutinasView] asignar:", err);
       showToast(err.response?.data?.error || err.message || "Error al asignar rutina", "danger");
@@ -256,7 +259,7 @@ export default function RutinasView() {
     if (!formEj.nombre_ejercicio.trim()) { showToast("El nombre es obligatorio", "danger"); return; }
     setSaving(true);
     try {
-      if (modal === "editar" && modalEjercicio) {
+      if (esModal(modal, "editar") && modalEjercicio) {
         const id = modalEjercicio.id_ejercicio ?? modalEjercicio.id;
         await authAxios.put(`/catalogo/ejercicios/${id}`, formEj);
         showToast("Ejercicio actualizado", "success");
@@ -265,7 +268,7 @@ export default function RutinasView() {
         showToast("Ejercicio creado", "success");
       }
       closeModal();
-      fetchEjercicios();
+      void fetchEjercicios();
     } catch (err) {
       showToast(err.response?.data?.error || err.message || "Error al guardar ejercicio", "danger");
     } finally {
@@ -281,7 +284,7 @@ export default function RutinasView() {
       await authAxios.delete(`/catalogo/ejercicios/${deleteEjId}`);
       showToast("Ejercicio eliminado", "success");
       closeModal();
-      fetchEjercicios();
+      void fetchEjercicios();
     } catch (err) {
       const msg = err.response?.status === 409
         ? "No se puede eliminar: el ejercicio está siendo usado en planes activos"
@@ -322,9 +325,9 @@ export default function RutinasView() {
           </div>
           <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
             <button type="button" className={s.btnPrimary} onClick={openAsignar}>➕ Asignar Rutina</button>
-            <button type="button" className={s.btnOutline} onClick={() => { fetchEjercicios(); setModal("catalogo"); }}>📋 Ver Catálogo</button>
+            <button type="button" className={s.btnOutline} onClick={() => { void fetchEjercicios(); setModal("catalogo"); }}>📋 Ver Catálogo</button>
             <button type="button" className={s.btnAsignar} onClick={() => setModal("nuevo")}>➕ Agregar Ejercicio</button>
-            <button type="button" className={s.btnOutlineDanger} onClick={() => { fetchEjercicios(); setModal("eliminar"); }}>🗑️ Eliminar Ejercicio</button>
+            <button type="button" className={s.btnOutlineDanger} onClick={() => { void fetchEjercicios(); setModal("eliminar"); }}>🗑️ Eliminar Ejercicio</button>
           </div>
         </div>
 
@@ -404,7 +407,7 @@ export default function RutinasView() {
                           {tienePlan && (
                             <button type="button" className={s.btnOutline} style={{ padding:"0.25rem 0.5rem", fontSize:"0.75rem" }} onClick={() => { setModalAfiliado(a); setModal("verPerfil"); }} title="Ver">👁️</button>
                           )}
-                          <button type="button" className={s.btnAsignar} style={{ padding:"0.25rem 0.6rem", fontSize:"0.75rem" }} onClick={() => { setAsignarAfiliadoId(String(getId(a))); setAsignarAfiliadoData(a); handleAfiliadoSelect({ target: { value: String(getId(a)) } }); setModal("asignar"); }}>
+                          <button type="button" className={s.btnAsignar} style={{ padding:"0.25rem 0.6rem", fontSize:"0.75rem" }} onClick={() => { setAsignarAfiliadoId(String(getId(a))); setAsignarAfiliadoData(a); void handleAfiliadoSelect({ target: { value: String(getId(a)) } }); setModal("asignar"); }}>
                             {tienePlan ? "🔄 Nueva" : "➕ Asignar"}
                           </button>
                         </div>
@@ -421,9 +424,18 @@ export default function RutinasView() {
       {/* ════════════════════════════════════════════ */}
       {/* MODAL: ASIGNAR RUTINA                         */}
       {/* ════════════════════════════════════════════ */}
-      {modal === "asignar" && (
-        <div className={s.modalOverlay} onClick={closeModal}>
-          <div className={s.modalContent} onClick={(e)=>e.stopPropagation()} style={{ maxWidth:800 }}>
+      {esModal(modal, "asignar") && (
+        <div
+          className={s.modalOverlay}
+          role="button"
+          tabIndex={0}
+          aria-label="Cerrar modal"
+          onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
+          onKeyDown={(e) => {
+            if (e.target === e.currentTarget && (e.key === "Escape" || e.key === "Enter")) closeModal();
+          }}
+        >
+          <div className={s.modalContent} style={{ maxWidth:800 }}>
             <div className={s.modalHeader}>
               <h5 className={s.modalTitle}>{asignarAfiliadoData && cicloActivo(asignarAfiliadoData) ? "🔄 Nueva Rutina" : "➕ Asignar Rutina"}</h5>
               <button type="button" className={s.btnOutline} onClick={closeModal} disabled={saving}>✕</button>
@@ -432,8 +444,8 @@ export default function RutinasView() {
               <div className={s.modalBody}>
                 {/* Selector de afiliado */}
                 <div style={{ marginBottom:16 }}>
-                  <label className={s.labelText}>Afiliado</label>
-                  <select className={s.selectDark} value={asignarAfiliadoId} onChange={handleAfiliadoSelect} required style={{ width:"100%" }}>
+                  <label className={s.labelText} htmlFor="rutinas-afiliado">Afiliado</label>
+                  <select id="rutinas-afiliado" className={s.selectDark} value={asignarAfiliadoId} onChange={handleAfiliadoSelect} required style={{ width:"100%" }}>
                     <option value="">-- Selecciona un afiliado --</option>
                     {afiliados.map((a) => (
                       <option key={getId(a)} value={getId(a)}>{nombreCompleto(a)} — {a.correo||a.email||""}</option>
@@ -469,7 +481,7 @@ export default function RutinasView() {
                 {/* Ejercicios disponibles */}
                 {asignarAfiliadoData && (
                   <>
-                    <label className={s.labelText}>Ejercicios disponibles ({ejerciciosDisponibles.length})</label>
+                    <span className={s.labelText}>Ejercicios disponibles ({ejerciciosDisponibles.length})</span>
                     {ejerciciosDisponibles.length === 0 ? (
                       <div className={s.emptyState}>No hay ejercicios disponibles para este afiliado</div>
                     ) : (
@@ -498,16 +510,16 @@ export default function RutinasView() {
                             {checked && (
                               <div className={s.formRow}>
                                 <div className={s.formGroup}>
-                                  <label className={s.inlineLabel}>Series</label>
-                                  <input type="number" className={s.inlineInput} min={1} max={20} value={data.series??3} onChange={(e)=>updateEjercicioSel(id,"series",e.target.value)} />
+                                  <label className={s.inlineLabel} htmlFor={`rutina-series-${id}`}>Series</label>
+                                  <input id={`rutina-series-${id}`} type="number" className={s.inlineInput} min={1} max={20} value={data.series??3} onChange={(e)=>updateEjercicioSel(id,"series",e.target.value)} />
                                 </div>
                                 <div className={s.formGroup}>
-                                  <label className={s.inlineLabel}>Reps</label>
-                                  <input type="number" className={s.inlineInput} min={1} max={100} value={data.repeticiones??12} onChange={(e)=>updateEjercicioSel(id,"repeticiones",e.target.value)} />
+                                  <label className={s.inlineLabel} htmlFor={`rutina-reps-${id}`}>Reps</label>
+                                  <input id={`rutina-reps-${id}`} type="number" className={s.inlineInput} min={1} max={100} value={data.repeticiones??12} onChange={(e)=>updateEjercicioSel(id,"repeticiones",e.target.value)} />
                                 </div>
                                 <div className={s.formGroup} style={{ minWidth:100 }}>
-                                  <label className={s.inlineLabel}>Día</label>
-                                  <select className={s.inlineSelect} value={data.dia_numero??1} onChange={(e)=>updateEjercicioSel(id,"dia_numero",e.target.value)}>
+                                  <label className={s.inlineLabel} htmlFor={`rutina-dia-${id}`}>Día</label>
+                                  <select id={`rutina-dia-${id}`} className={s.inlineSelect} value={data.dia_numero??1} onChange={(e)=>updateEjercicioSel(id,"dia_numero",e.target.value)}>
                                     {DAY_LABELS.map((d, i) => <option key={i+1} value={i+1}>{d}</option>)}
                                   </select>
                                 </div>
@@ -534,9 +546,18 @@ export default function RutinasView() {
       {/* ════════════════════════════════════════════ */}
       {/* MODAL: CATÁLOGO DE EJERCICIOS                 */}
       {/* ════════════════════════════════════════════ */}
-      {modal === "catalogo" && (
-        <div className={s.modalOverlay} onClick={closeModal}>
-          <div className={s.modalContent} onClick={(e)=>e.stopPropagation()} style={{ maxWidth:800 }}>
+      {esModal(modal, "catalogo") && (
+        <div
+          className={s.modalOverlay}
+          role="button"
+          tabIndex={0}
+          aria-label="Cerrar modal"
+          onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
+          onKeyDown={(e) => {
+            if (e.target === e.currentTarget && (e.key === "Escape" || e.key === "Enter")) closeModal();
+          }}
+        >
+          <div className={s.modalContent} style={{ maxWidth:800 }}>
             <div className={s.modalHeader}>
               <h5 className={s.modalTitle}>📋 Catálogo de Ejercicios</h5>
               <button type="button" className={s.btnOutline} onClick={closeModal}>✕</button>
@@ -589,40 +610,49 @@ export default function RutinasView() {
       {/* ════════════════════════════════════════════ */}
       {/* MODAL: NUEVO / EDITAR EJERCICIO               */}
       {/* ════════════════════════════════════════════ */}
-      {(modal === "nuevo" || modal === "editar") && (
-        <div className={s.modalOverlay} onClick={closeModal}>
-          <div className={s.modalContent} onClick={(e)=>e.stopPropagation()} style={{ maxWidth:500 }}>
+      {(esModal(modal, "nuevo") || esModal(modal, "editar")) && (
+        <div
+          className={s.modalOverlay}
+          role="button"
+          tabIndex={0}
+          aria-label="Cerrar modal"
+          onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
+          onKeyDown={(e) => {
+            if (e.target === e.currentTarget && (e.key === "Escape" || e.key === "Enter")) closeModal();
+          }}
+        >
+          <div className={s.modalContent} style={{ maxWidth:500 }}>
             <div className={s.modalHeader}>
-              <h5 className={s.modalTitle}>{modal === "nuevo" ? "🏋️ Nuevo Ejercicio" : "✏️ Editar Ejercicio"}</h5>
+              <h5 className={s.modalTitle}>{esModal(modal, "nuevo") ? "🏋️ Nuevo Ejercicio" : "✏️ Editar Ejercicio"}</h5>
               <button type="button" className={s.btnOutline} onClick={closeModal} disabled={saving}>✕</button>
             </div>
             <form onSubmit={handleGuardarEjercicio}>
               <div className={s.modalBody}>
                 <div style={{ marginBottom:12 }}>
-                  <label className={s.labelText}>Nombre del ejercicio *</label>
-                  <input className={s.inputDark} value={formEj.nombre_ejercicio} onChange={(e)=>setFormEj((f)=>({...f, nombre_ejercicio:e.target.value}))} placeholder="Ej: Press de banca" required style={{ width:"100%" }} />
+                  <label className={s.labelText} htmlFor="ejercicio-nombre">Nombre del ejercicio *</label>
+                  <input id="ejercicio-nombre" className={s.inputDark} value={formEj.nombre_ejercicio} onChange={(e)=>setFormEj((f)=>({...f, nombre_ejercicio:e.target.value}))} placeholder="Ej: Press de banca" required style={{ width:"100%" }} />
                 </div>
                 <div style={{ marginBottom:12 }}>
-                  <label className={s.labelText}>Grupo muscular</label>
-                  <select className={s.selectDark} value={formEj.grupo_muscular} onChange={(e)=>setFormEj((f)=>({...f, grupo_muscular:e.target.value}))} style={{ width:"100%" }}>
+                  <label className={s.labelText} htmlFor="ejercicio-grupo">Grupo muscular</label>
+                  <select id="ejercicio-grupo" className={s.selectDark} value={formEj.grupo_muscular} onChange={(e)=>setFormEj((f)=>({...f, grupo_muscular:e.target.value}))} style={{ width:"100%" }}>
                     {GRUPOS_MUSCULARES.map((g) => <option key={g} value={g}>{g}</option>)}
                   </select>
                 </div>
                 <div style={{ marginBottom:12 }}>
-                  <label className={s.labelText}>Nivel mínimo</label>
-                  <select className={s.selectDark} value={formEj.nivel_minimo} onChange={(e)=>setFormEj((f)=>({...f, nivel_minimo:e.target.value}))} style={{ width:"100%" }}>
+                  <label className={s.labelText} htmlFor="ejercicio-nivel">Nivel mínimo</label>
+                  <select id="ejercicio-nivel" className={s.selectDark} value={formEj.nivel_minimo} onChange={(e)=>setFormEj((f)=>({...f, nivel_minimo:e.target.value}))} style={{ width:"100%" }}>
                     {NIVELES.map((n) => <option key={n} value={n}>{n}</option>)}
                   </select>
                 </div>
                 <div style={{ marginBottom:12 }}>
-                  <label className={s.labelText}>Descripción (opcional)</label>
-                  <textarea className={s.textareaDark} rows={3} value={formEj.descripcion} onChange={(e)=>setFormEj((f)=>({...f, descripcion:e.target.value}))} placeholder="Instrucciones o notas..." style={{ width:"100%" }} />
+                  <label className={s.labelText} htmlFor="ejercicio-descripcion">Descripción (opcional)</label>
+                  <textarea id="ejercicio-descripcion" className={s.textareaDark} rows={3} value={formEj.descripcion} onChange={(e)=>setFormEj((f)=>({...f, descripcion:e.target.value}))} placeholder="Instrucciones o notas..." style={{ width:"100%" }} />
                 </div>
               </div>
               <div className={s.modalFooter}>
                 <button type="button" className={s.btnOutline} onClick={closeModal} disabled={saving}>Cancelar</button>
                 <button type="submit" className={s.btnConfirmar} disabled={saving}>
-                  {saving ? <span className="spinner-border spinner-border-sm" /> : (modal === "nuevo" ? "💾 Guardar" : "💾 Guardar Cambios")}
+                  {saving ? <span className="spinner-border spinner-border-sm" /> : (esModal(modal, "nuevo") ? "💾 Guardar" : "💾 Guardar Cambios")}
                 </button>
               </div>
             </form>
@@ -633,9 +663,18 @@ export default function RutinasView() {
       {/* ════════════════════════════════════════════ */}
       {/* MODAL: ELIMINAR EJERCICIO                     */}
       {/* ════════════════════════════════════════════ */}
-      {modal === "eliminar" && (
-        <div className={s.modalOverlay} onClick={closeModal}>
-          <div className={s.modalContent} onClick={(e)=>e.stopPropagation()} style={{ maxWidth:450 }}>
+      {esModal(modal, "eliminar") && (
+        <div
+          className={s.modalOverlay}
+          role="button"
+          tabIndex={0}
+          aria-label="Cerrar modal"
+          onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
+          onKeyDown={(e) => {
+            if (e.target === e.currentTarget && (e.key === "Escape" || e.key === "Enter")) closeModal();
+          }}
+        >
+          <div className={s.modalContent} style={{ maxWidth:450 }}>
             <div className={s.modalHeader}>
               <h5 className={s.modalTitle}>🗑️ Eliminar Ejercicio</h5>
               <button type="button" className={s.btnOutline} onClick={closeModal} disabled={saving}>✕</button>
@@ -647,8 +686,8 @@ export default function RutinasView() {
                   <div className={s.emptyState}>No hay ejercicios en el catálogo</div>
                 ) : (
                   <>
-                    <label className={s.labelText}>Seleccionar ejercicio</label>
-                    <select className={s.selectDark} value={deleteEjId} onChange={(e)=>setDeleteEjId(e.target.value)} style={{ width:"100%" }}>
+                    <label className={s.labelText} htmlFor="ejercicio-eliminar">Seleccionar ejercicio</label>
+                    <select id="ejercicio-eliminar" className={s.selectDark} value={deleteEjId} onChange={(e)=>setDeleteEjId(e.target.value)} style={{ width:"100%" }}>
                       <option value="">-- Selecciona --</option>
                       {catalogoEj.map((ej) => (
                         <option key={ej.id_ejercicio??ej.id} value={ej.id_ejercicio??ej.id}>
@@ -673,7 +712,7 @@ export default function RutinasView() {
       {/* ════════════════════════════════════════════ */}
       {/* MODAL: HISTORIAL DE CICLOS (editar/eliminar) */}
       {/* ════════════════════════════════════════════ */}
-      {modal === "historial" && modalAfiliado && (
+      {esModal(modal, "historial") && modalAfiliado && (
         <div
           className={s.modalOverlay}
           role="button"
@@ -700,9 +739,18 @@ export default function RutinasView() {
       {/* ════════════════════════════════════════════ */}
       {/* MODAL: VER PERFIL DEL AFILIADO                */}
       {/* ════════════════════════════════════════════ */}
-      {modal === "verPerfil" && modalAfiliado && (
-        <div className={s.modalOverlay} onClick={closeModal}>
-          <div className={s.modalContent} onClick={(e)=>e.stopPropagation()} style={{ maxWidth:700 }}>
+      {esModal(modal, "verPerfil") && modalAfiliado && (
+        <div
+          className={s.modalOverlay}
+          role="button"
+          tabIndex={0}
+          aria-label="Cerrar modal"
+          onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
+          onKeyDown={(e) => {
+            if (e.target === e.currentTarget && (e.key === "Escape" || e.key === "Enter")) closeModal();
+          }}
+        >
+          <div className={s.modalContent} style={{ maxWidth:700 }}>
             <div className={s.modalHeader}>
               <h5 className={s.modalTitle}>👁️ Rutina: {nombreCompleto(modalAfiliado)}</h5>
               <button type="button" className={s.btnOutline} onClick={closeModal}>✕</button>

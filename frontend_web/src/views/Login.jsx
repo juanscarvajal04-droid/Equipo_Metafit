@@ -71,7 +71,7 @@ export default function Login() {
       }
 
       persistUserRole(role || "");
-      navigate(ROLE_MAP[role] || "/afiliados", { replace: true });
+      void navigate(ROLE_MAP[role] || "/afiliados", { replace: true });
     } catch (err) {
       const status = err?.response?.status;
       setError(
@@ -128,7 +128,7 @@ export default function Login() {
 
               {/* Selector de Rol — border DINÁMICO según rol */}
               <div className={styles.fieldGroup}>
-                <label className={styles.label}>Tipo de usuario</label>
+                <label className={styles.label} htmlFor="rol">Tipo de usuario</label>
                 <select
                   id="rol" name="rol"
                   value={form.rol}
@@ -155,7 +155,7 @@ export default function Login() {
               ) : (
                 <>
                   <div className={styles.fieldGroup}>
-                    <label className={styles.label}>Correo Electrónico</label>
+                    <label className={styles.label} htmlFor="meta_user">Correo Electrónico</label>
                     <input
                       type="text" id="meta_user" name="meta_user"
                       value={form.meta_user} onChange={handleChange}
@@ -168,7 +168,7 @@ export default function Login() {
                   </div>
 
                   <div className={styles.fieldGroupLast}>
-                    <label className={styles.label}>Contraseña</label>
+                    <label className={styles.label} htmlFor="meta_pass">Contraseña</label>
                     <div className={styles.passWrap}>
                       <input
                         type={showPass ? "text" : "password"} id="meta_pass" name="meta_pass"

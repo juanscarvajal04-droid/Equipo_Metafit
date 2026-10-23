@@ -364,8 +364,9 @@ export default function FinanzasView() {
         <div className={styles.filterBar}>
           <div className="row g-3 align-items-end">
             <div className="col-6 col-md-3">
-              <label className={styles.filterLabel}>Fecha inicio</label>
+              <label className={styles.filterLabel} htmlFor="finanzas-fecha-inicio">Fecha inicio</label>
               <input
+                id="finanzas-fecha-inicio"
                 type="date"
                 className={styles.filterInput}
                 value={filtros.fecha_inicio}
@@ -373,8 +374,9 @@ export default function FinanzasView() {
               />
             </div>
             <div className="col-6 col-md-3">
-              <label className={styles.filterLabel}>Fecha fin</label>
+              <label className={styles.filterLabel} htmlFor="finanzas-fecha-fin">Fecha fin</label>
               <input
+                id="finanzas-fecha-fin"
                 type="date"
                 className={styles.filterInput}
                 value={filtros.fecha_fin}
@@ -382,8 +384,9 @@ export default function FinanzasView() {
               />
             </div>
             <div className="col-6 col-md-3">
-              <label className={styles.filterLabel}>Recepcionista</label>
+              <label className={styles.filterLabel} htmlFor="finanzas-recepcionista">Recepcionista</label>
               <select
+                id="finanzas-recepcionista"
                 className={styles.filterInput}
                 value={filtros.id_recepcionista}
                 onChange={(e) => setFiltros((f) => ({ ...f, id_recepcionista: e.target.value }))}

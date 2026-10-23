@@ -17,9 +17,18 @@ export default function AfiliadoCrearModal({
   if (!crearModal) return null;
 
   return (
-    <div className="modal d-block" style={{ background: "rgba(0,0,0,0.55)", zIndex: 1050 }}
-      onClick={() => !savingNew && onCancel()}>
-      <div className="modal-dialog modal-lg modal-dialog-scrollable" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="modal d-block"
+      style={{ background: "rgba(0,0,0,0.55)", zIndex: 1050 }}
+      role="button"
+      tabIndex={0}
+      aria-label="Cerrar modal de nuevo afiliado"
+      onClick={(e) => { if (!savingNew && e.target === e.currentTarget) onCancel(); }}
+      onKeyDown={(e) => {
+        if (e.target === e.currentTarget && (e.key === "Escape" || e.key === "Enter") && !savingNew) onCancel();
+      }}
+    >
+      <div className="modal-dialog modal-lg modal-dialog-scrollable">
         <div className="modal-content border-0 shadow">
           <div className="modal-header text-white border-0"
             style={{ background: "linear-gradient(135deg,#198754,#146c43)" }}>
@@ -42,27 +51,27 @@ export default function AfiliadoCrearModal({
                   { label: "Nacimiento",   key: "fecha_nacimiento", type: "date", required: false },
                 ].map(({ label, key, type, required }) => (
                   <div key={key} className="col-md-6">
-                    <label className="form-label small fw-semibold">{label}</label>
-                    <input type={type} className="form-control" required={required}
+                    <label className="form-label small fw-semibold" htmlFor={`crear-afiliado-${key}`}>{label}</label>
+                    <input id={`crear-afiliado-${key}`} type={type} className="form-control" required={required}
                       value={formNuevo[key]}
                       onChange={(e) => setFormNuevo({ ...formNuevo, [key]: e.target.value })} />
                   </div>
                 ))}
                 <div className="col-md-6">
-                  <label className="form-label small fw-semibold">Sexo</label>
-                  <select className="form-select" value={formNuevo.sexo}
+                  <label className="form-label small fw-semibold" htmlFor="crear-afiliado-sexo">Sexo</label>
+                  <select id="crear-afiliado-sexo" className="form-select" value={formNuevo.sexo}
                     onChange={(e) => setFormNuevo({ ...formNuevo, sexo: e.target.value })}>
                     {SEXOS.map((s) => <option key={s}>{s}</option>)}
                   </select>
                 </div>
                 <div className="col-md-6">
-                  <label className="form-label small fw-semibold">Estatura (cm)</label>
-                  <input type="number" step="0.1" className="form-control" value={formNuevo.estatura_cm}
+                  <label className="form-label small fw-semibold" htmlFor="crear-afiliado-estatura">Estatura (cm)</label>
+                  <input id="crear-afiliado-estatura" type="number" step="0.1" className="form-control" value={formNuevo.estatura_cm}
                     onChange={(e) => setFormNuevo({ ...formNuevo, estatura_cm: e.target.value })} />
                 </div>
                 <div className="col-12">
-                  <label className="form-label small fw-semibold">Dirección</label>
-                  <input type="text" className="form-control" value={formNuevo.direccion}
+                  <label className="form-label small fw-semibold" htmlFor="crear-afiliado-direccion">Dirección</label>
+                  <input id="crear-afiliado-direccion" type="text" className="form-control" value={formNuevo.direccion}
                     onChange={(e) => setFormNuevo({ ...formNuevo, direccion: e.target.value })} />
                 </div>
               </div>
@@ -70,43 +79,43 @@ export default function AfiliadoCrearModal({
               <h6 className="fw-bold text-muted text-uppercase small mb-3">🏋️ Plan de membresía</h6>
               <div className="row g-3">
                 <div className="col-md-4">
-                  <label className="form-label small fw-semibold">Plan *</label>
-                  <select className="form-select" required value={formNuevo.plan_membresia}
+                  <label className="form-label small fw-semibold" htmlFor="crear-afiliado-plan">Plan *</label>
+                  <select id="crear-afiliado-plan" className="form-select" required value={formNuevo.plan_membresia}
                     onChange={(e) => setFormNuevo({ ...formNuevo, plan_membresia: e.target.value })}>
                     {PLANES.map((p) => <option key={p}>{p}</option>)}
                   </select>
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label small fw-semibold">Estado inicial</label>
-                  <select className="form-select" value={formNuevo.estado}
+                  <label className="form-label small fw-semibold" htmlFor="crear-afiliado-estado">Estado inicial</label>
+                  <select id="crear-afiliado-estado" className="form-select" value={formNuevo.estado}
                     onChange={(e) => setFormNuevo({ ...formNuevo, estado: e.target.value })}>
                     {ESTADOS.map((s) => <option key={s}>{s}</option>)}
                   </select>
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label small fw-semibold">Objetivo físico</label>
-                  <select className="form-select" value={formNuevo.objective_fisico || formNuevo.objetivo_fisico}
+                  <label className="form-label small fw-semibold" htmlFor="crear-afiliado-objetivo">Objetivo físico</label>
+                  <select id="crear-afiliado-objetivo" className="form-select" value={formNuevo.objective_fisico || formNuevo.objetivo_fisico}
                     onChange={(e) => setFormNuevo({ ...formNuevo, objetivo_fisico: e.target.value })}>
                     {OBJETIVOS.map((o) => <option key={o}>{o}</option>)}
                   </select>
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label small fw-semibold">Nivel</label>
-                  <select className="form-select" value={formNuevo.nivel_experiencia}
+                  <label className="form-label small fw-semibold" htmlFor="crear-afiliado-nivel">Nivel</label>
+                  <select id="crear-afiliado-nivel" className="form-select" value={formNuevo.nivel_experiencia}
                     onChange={(e) => setFormNuevo({ ...formNuevo, nivel_experiencia: e.target.value })}>
                     {NIVELES.map((n) => <option key={n}>{n}</option>)}
                   </select>
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label small fw-semibold">Músculo prioritario</label>
-                  <select className="form-select" value={formNuevo.grupo_muscular_prioritario}
+                  <label className="form-label small fw-semibold" htmlFor="crear-afiliado-musculo">Músculo prioritario</label>
+                  <select id="crear-afiliado-musculo" className="form-select" value={formNuevo.grupo_muscular_prioritario}
                     onChange={(e) => setFormNuevo({ ...formNuevo, grupo_muscular_prioritario: e.target.value })}>
                     {MUSCULOS.map((m) => <option key={m}>{m}</option>)}
                   </select>
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label small fw-semibold">Días disponibles/sem</label>
-                  <input type="number" min="1" max="7" className="form-control"
+                  <label className="form-label small fw-semibold" htmlFor="crear-afiliado-dias">Días disponibles/sem</label>
+                  <input id="crear-afiliado-dias" type="number" min="1" max="7" className="form-control"
                     value={formNuevo.disponibilidad_semanal_dias}
                     onChange={(e) => setFormNuevo({ ...formNuevo, disponibilidad_semanal_dias: Number.parseInt(e.target.value) || 3 })} />
                 </div>
@@ -115,7 +124,7 @@ export default function AfiliadoCrearModal({
               <h6 className="fw-bold text-muted text-uppercase small mb-3 mt-4">⚠️ Restricciones Médicas</h6>
               <div className="row g-3">
                 <div className="col-12">
-                  <label className="form-label small fw-semibold">
+                  <label className="form-label small fw-semibold" htmlFor="restricciones-medicas-afiliado">
                     Restricciones médicas / condiciones
                     <span className="text-muted fw-normal ms-2">(una por línea, opcional)</span>
                   </label>

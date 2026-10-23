@@ -254,7 +254,7 @@ export default function Header() {
       setSwitchModalOpen(false);
       setSwitchPassword("");
       setSwitchError("");
-      navigate(ROLE_REDIRECT_MAP[userData.role] || "/afiliados", { replace: true });
+      void navigate(ROLE_REDIRECT_MAP[userData.role] || "/afiliados", { replace: true });
     } catch (err) {
       setSwitchError(mensajeErrorCambioRol(err));
     } finally {

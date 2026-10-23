@@ -47,7 +47,7 @@ export default function PagosView() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    (async () => {
+    void (async () => {
       try {
         const { data } = await authAxios.get("/afiliados");
         setAfiliados(data);
@@ -240,8 +240,17 @@ export default function PagosView() {
         </div>
 
         {pagoModal && (
-          <div className={s.modalOverlay} onClick={() => !saving && setPagoModal(null)}>
-            <div className={s.modalContent} onClick={(e) => e.stopPropagation()}>
+          <div
+            className={s.modalOverlay}
+            role="button"
+            tabIndex={0}
+            aria-label="Cerrar modal de pago"
+            onClick={(e) => { if (!saving && e.target === e.currentTarget) setPagoModal(null); }}
+            onKeyDown={(e) => {
+              if (e.target === e.currentTarget && (e.key === "Escape" || e.key === "Enter") && !saving) setPagoModal(null);
+            }}
+          >
+            <div className={s.modalContent}>
               <div className={s.modalHeader}>
                 <h5 className={s.modalTitle}>Registrar Pago en Efectivo</h5>
                 <button type="button" className={s.btnOutline} onClick={() => setPagoModal(null)}>{'\u2715'}</button>
@@ -288,8 +297,17 @@ export default function PagosView() {
         )}
 
         {histModal && (
-          <div className={s.modalOverlay} onClick={() => setHistModal(null)}>
-            <div className={s.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: 600 }}>
+          <div
+            className={s.modalOverlay}
+            role="button"
+            tabIndex={0}
+            aria-label="Cerrar historial de pagos"
+            onClick={(e) => { if (e.target === e.currentTarget) setHistModal(null); }}
+            onKeyDown={(e) => {
+              if (e.target === e.currentTarget && (e.key === "Escape" || e.key === "Enter")) setHistModal(null);
+            }}
+          >
+            <div className={s.modalContent} style={{ maxWidth: 600 }}>
               <div className={s.modalHeader}>
                 <h5 className={s.modalTitle}>Historial de pagos</h5>
                 <button type="button" className={s.btnOutline} onClick={() => setHistModal(null)}>{'\u2715'}</button>

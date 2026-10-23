@@ -121,7 +121,7 @@ export default function AfiliadosView() {
   };
 
   useEffect(() => {
-    fetchAfiliados();
+    void fetchAfiliados();
   }, []);
 
   // Sincronización tiempo real: polling 10s + refetch al recobrar foco/visibilidad
@@ -683,75 +683,75 @@ export default function AfiliadosView() {
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <div>
-                    <label className={s.labelText}>Nombres</label>
-                    <input className={s.inputDark} value={formEdit.nombres} onChange={(e) => setFormEdit({ ...formEdit, nombres: e.target.value })} required />
+                    <label className={s.labelText} htmlFor="editar-afiliado-nombres">Nombres</label>
+                    <input id="editar-afiliado-nombres" className={s.inputDark} value={formEdit.nombres} onChange={(e) => setFormEdit({ ...formEdit, nombres: e.target.value })} required />
                   </div>
                   <div>
-                    <label className={s.labelText}>Apellidos</label>
-                    <input className={s.inputDark} value={formEdit.apellidos} onChange={(e) => setFormEdit({ ...formEdit, apellidos: e.target.value })} required />
+                    <label className={s.labelText} htmlFor="editar-afiliado-apellidos">Apellidos</label>
+                    <input id="editar-afiliado-apellidos" className={s.inputDark} value={formEdit.apellidos} onChange={(e) => setFormEdit({ ...formEdit, apellidos: e.target.value })} required />
                   </div>
                   <div>
-                    <label className={s.labelText}>Correo</label>
-                    <input className={s.inputDark} type="email" value={formEdit.correo} onChange={(e) => setFormEdit({ ...formEdit, correo: e.target.value })} required />
+                    <label className={s.labelText} htmlFor="editar-afiliado-correo">Correo</label>
+                    <input id="editar-afiliado-correo" className={s.inputDark} type="email" value={formEdit.correo} onChange={(e) => setFormEdit({ ...formEdit, correo: e.target.value })} required />
                   </div>
                   <div>
-                    <label className={s.labelText}>Teléfono</label>
-                    <input className={s.inputDark} value={formEdit.telefono} onChange={(e) => setFormEdit({ ...formEdit, telefono: e.target.value })} />
+                    <label className={s.labelText} htmlFor="editar-afiliado-telefono">Teléfono</label>
+                    <input id="editar-afiliado-telefono" className={s.inputDark} value={formEdit.telefono} onChange={(e) => setFormEdit({ ...formEdit, telefono: e.target.value })} />
                   </div>
                   <div>
-                    <label className={s.labelText}>Documento</label>
-                    <input className={s.inputDark} value={formEdit.documento} onChange={(e) => setFormEdit({ ...formEdit, documento: e.target.value })} />
+                    <label className={s.labelText} htmlFor="editar-afiliado-documento">Documento</label>
+                    <input id="editar-afiliado-documento" className={s.inputDark} value={formEdit.documento} onChange={(e) => setFormEdit({ ...formEdit, documento: e.target.value })} />
                   </div>
                   <div>
-                    <label className={s.labelText}>Sexo</label>
-                    <select className={s.selectDark} value={formEdit.sexo} onChange={(e) => setFormEdit({ ...formEdit, sexo: e.target.value })}>
+                    <label className={s.labelText} htmlFor="editar-afiliado-sexo">Sexo</label>
+                    <select id="editar-afiliado-sexo" className={s.selectDark} value={formEdit.sexo} onChange={(e) => setFormEdit({ ...formEdit, sexo: e.target.value })}>
                       {SEXOS.map((sx) => <option key={sx} value={sx}>{sx}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className={s.labelText}>Fecha Nacimiento</label>
-                    <input className={s.inputDark} type="date" value={formEdit.fecha_nacimiento} onChange={(e) => setFormEdit({ ...formEdit, fecha_nacimiento: e.target.value })} />
+                    <label className={s.labelText} htmlFor="editar-afiliado-nacimiento">Fecha Nacimiento</label>
+                    <input id="editar-afiliado-nacimiento" className={s.inputDark} type="date" value={formEdit.fecha_nacimiento} onChange={(e) => setFormEdit({ ...formEdit, fecha_nacimiento: e.target.value })} />
                   </div>
                   <div>
-                    <label className={s.labelText}>Estatura (cm)</label>
-                    <input className={s.inputDark} type="number" value={formEdit.estatura_cm} onChange={(e) => setFormEdit({ ...formEdit, estatura_cm: e.target.value })} />
+                    <label className={s.labelText} htmlFor="editar-afiliado-estatura">Estatura (cm)</label>
+                    <input id="editar-afiliado-estatura" className={s.inputDark} type="number" value={formEdit.estatura_cm} onChange={(e) => setFormEdit({ ...formEdit, estatura_cm: e.target.value })} />
                   </div>
                   <div>
-                    <label className={s.labelText}>Dirección</label>
-                    <input className={s.inputDark} value={formEdit.direccion} onChange={(e) => setFormEdit({ ...formEdit, direccion: e.target.value })} />
+                    <label className={s.labelText} htmlFor="editar-afiliado-direccion">Dirección</label>
+                    <input id="editar-afiliado-direccion" className={s.inputDark} value={formEdit.direccion} onChange={(e) => setFormEdit({ ...formEdit, direccion: e.target.value })} />
                   </div>
                   <div>
-                    <label className={s.labelText}>Objetivo físico</label>
-                    <select className={s.selectDark} value={formEdit.objetivo_fisico} onChange={(e) => setFormEdit({ ...formEdit, objetivo_fisico: e.target.value })}>
+                    <label className={s.labelText} htmlFor="editar-afiliado-objetivo">Objetivo físico</label>
+                    <select id="editar-afiliado-objetivo" className={s.selectDark} value={formEdit.objetivo_fisico} onChange={(e) => setFormEdit({ ...formEdit, objetivo_fisico: e.target.value })}>
                       {OBJETIVOS.map((o) => <option key={o} value={o}>{o}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className={s.labelText}>Nivel experiencia</label>
-                    <select className={s.selectDark} value={formEdit.nivel_experiencia} onChange={(e) => setFormEdit({ ...formEdit, nivel_experiencia: e.target.value })}>
+                    <label className={s.labelText} htmlFor="editar-afiliado-nivel">Nivel experiencia</label>
+                    <select id="editar-afiliado-nivel" className={s.selectDark} value={formEdit.nivel_experiencia} onChange={(e) => setFormEdit({ ...formEdit, nivel_experiencia: e.target.value })}>
                       {NIVELES.map((n) => <option key={n} value={n}>{n}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className={s.labelText}>Días/semana</label>
-                    <input className={s.inputDark} type="number" min={1} max={7} value={formEdit.disponibilidad_semanal_dias} onChange={(e) => setFormEdit({ ...formEdit, disponibilidad_semanal_dias: e.target.value })} />
+                    <label className={s.labelText} htmlFor="editar-afiliado-dias">Días/semana</label>
+                    <input id="editar-afiliado-dias" className={s.inputDark} type="number" min={1} max={7} value={formEdit.disponibilidad_semanal_dias} onChange={(e) => setFormEdit({ ...formEdit, disponibilidad_semanal_dias: e.target.value })} />
                   </div>
                   <div>
-                    <label className={s.labelText}>Estado</label>
-                    <select className={s.selectDark} value={formEdit.estado} onChange={(e) => setFormEdit({ ...formEdit, estado: e.target.value })}>
+                    <label className={s.labelText} htmlFor="editar-afiliado-estado">Estado</label>
+                    <select id="editar-afiliado-estado" className={s.selectDark} value={formEdit.estado} onChange={(e) => setFormEdit({ ...formEdit, estado: e.target.value })}>
                       {ESTADOS.map((es) => <option key={es} value={es}>{es}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className={s.labelText}>Grupo muscular</label>
-                    <select className={s.selectDark} value={formEdit.grupo_muscular_prioritario} onChange={(e) => setFormEdit({ ...formEdit, grupo_muscular_prioritario: e.target.value })}>
+                    <label className={s.labelText} htmlFor="editar-afiliado-musculo">Grupo muscular</label>
+                    <select id="editar-afiliado-musculo" className={s.selectDark} value={formEdit.grupo_muscular_prioritario} onChange={(e) => setFormEdit({ ...formEdit, grupo_muscular_prioritario: e.target.value })}>
                       {["Pecho", "Espalda", "Piernas", "Glúteos", "Hombros", "Bíceps", "Tríceps", "Abdomen"].map((g) => <option key={g} value={g}>{g}</option>)}
                     </select>
                   </div>
                 </div>
                 <div style={{ marginTop: 12 }}>
-                  <label className={s.labelText}>Restricciones médicas</label>
-                  <textarea className={s.inputDark} rows={2} value={formEdit.restricciones_medicas} onChange={(e) => setFormEdit({ ...formEdit, restricciones_medicas: e.target.value })} />
+                  <label className={s.labelText} htmlFor="editar-afiliado-restricciones">Restricciones médicas</label>
+                  <textarea id="editar-afiliado-restricciones" className={s.inputDark} rows={2} value={formEdit.restricciones_medicas} onChange={(e) => setFormEdit({ ...formEdit, restricciones_medicas: e.target.value })} />
                 </div>
               </div>
               <div className={s.modalFooter}>
@@ -806,68 +806,68 @@ export default function AfiliadosView() {
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <div>
-                    <label className={s.labelText}>Nombres</label>
-                    <input className={s.inputDark} value={formCrear.nombres} onChange={(e) => setFormCrear({ ...formCrear, nombres: e.target.value })} required />
+                    <label className={s.labelText} htmlFor="crear-afiliado-nombres">Nombres</label>
+                    <input id="crear-afiliado-nombres" className={s.inputDark} value={formCrear.nombres} onChange={(e) => setFormCrear({ ...formCrear, nombres: e.target.value })} required />
                   </div>
                   <div>
-                    <label className={s.labelText}>Apellidos</label>
-                    <input className={s.inputDark} value={formCrear.apellidos} onChange={(e) => setFormCrear({ ...formCrear, apellidos: e.target.value })} required />
+                    <label className={s.labelText} htmlFor="crear-afiliado-apellidos">Apellidos</label>
+                    <input id="crear-afiliado-apellidos" className={s.inputDark} value={formCrear.apellidos} onChange={(e) => setFormCrear({ ...formCrear, apellidos: e.target.value })} required />
                   </div>
                   <div>
-                    <label className={s.labelText}>Correo</label>
-                    <input className={s.inputDark} type="email" value={formCrear.correo} onChange={(e) => setFormCrear({ ...formCrear, correo: e.target.value })} required />
+                    <label className={s.labelText} htmlFor="crear-afiliado-correo">Correo</label>
+                    <input id="crear-afiliado-correo" className={s.inputDark} type="email" value={formCrear.correo} onChange={(e) => setFormCrear({ ...formCrear, correo: e.target.value })} required />
                   </div>
                   <div>
-                    <label className={s.labelText}>Teléfono</label>
-                    <input className={s.inputDark} value={formCrear.telefono} onChange={(e) => setFormCrear({ ...formCrear, telefono: e.target.value })} />
+                    <label className={s.labelText} htmlFor="crear-afiliado-telefono">Teléfono</label>
+                    <input id="crear-afiliado-telefono" className={s.inputDark} value={formCrear.telefono} onChange={(e) => setFormCrear({ ...formCrear, telefono: e.target.value })} />
                   </div>
                   <div>
-                    <label className={s.labelText}>Documento</label>
-                    <input className={s.inputDark} value={formCrear.documento} onChange={(e) => setFormCrear({ ...formCrear, documento: e.target.value })} required />
+                    <label className={s.labelText} htmlFor="crear-afiliado-documento">Documento</label>
+                    <input id="crear-afiliado-documento" className={s.inputDark} value={formCrear.documento} onChange={(e) => setFormCrear({ ...formCrear, documento: e.target.value })} required />
                   </div>
                   <div>
-                    <label className={s.labelText}>Sexo</label>
-                    <select className={s.selectDark} value={formCrear.sexo} onChange={(e) => setFormCrear({ ...formCrear, sexo: e.target.value })}>
+                    <label className={s.labelText} htmlFor="crear-afiliado-sexo">Sexo</label>
+                    <select id="crear-afiliado-sexo" className={s.selectDark} value={formCrear.sexo} onChange={(e) => setFormCrear({ ...formCrear, sexo: e.target.value })}>
                       {SEXOS.map((sx) => <option key={sx} value={sx}>{sx}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className={s.labelText}>Fecha Nacimiento</label>
-                    <input className={s.inputDark} type="date" value={formCrear.fecha_nacimiento} onChange={(e) => setFormCrear({ ...formCrear, fecha_nacimiento: e.target.value })} />
+                    <label className={s.labelText} htmlFor="crear-afiliado-nacimiento">Fecha Nacimiento</label>
+                    <input id="crear-afiliado-nacimiento" className={s.inputDark} type="date" value={formCrear.fecha_nacimiento} onChange={(e) => setFormCrear({ ...formCrear, fecha_nacimiento: e.target.value })} />
                   </div>
                   <div>
-                    <label className={s.labelText}>Estatura (cm)</label>
-                    <input className={s.inputDark} type="number" value={formCrear.estatura_cm} onChange={(e) => setFormCrear({ ...formCrear, estatura_cm: e.target.value })} />
+                    <label className={s.labelText} htmlFor="crear-afiliado-estatura">Estatura (cm)</label>
+                    <input id="crear-afiliado-estatura" className={s.inputDark} type="number" value={formCrear.estatura_cm} onChange={(e) => setFormCrear({ ...formCrear, estatura_cm: e.target.value })} />
                   </div>
                   <div>
-                    <label className={s.labelText}>Dirección</label>
-                    <input className={s.inputDark} value={formCrear.direccion} onChange={(e) => setFormCrear({ ...formCrear, direccion: e.target.value })} />
+                    <label className={s.labelText} htmlFor="crear-afiliado-direccion">Dirección</label>
+                    <input id="crear-afiliado-direccion" className={s.inputDark} value={formCrear.direccion} onChange={(e) => setFormCrear({ ...formCrear, direccion: e.target.value })} />
                   </div>
                   <div>
-                    <label className={s.labelText}>Objetivo físico</label>
-                    <select className={s.selectDark} value={formCrear.objetivo_fisico} onChange={(e) => setFormCrear({ ...formCrear, objetivo_fisico: e.target.value })}>
+                    <label className={s.labelText} htmlFor="crear-afiliado-objetivo">Objetivo físico</label>
+                    <select id="crear-afiliado-objetivo" className={s.selectDark} value={formCrear.objetivo_fisico} onChange={(e) => setFormCrear({ ...formCrear, objetivo_fisico: e.target.value })}>
                       {OBJETIVOS.map((o) => <option key={o} value={o}>{o}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className={s.labelText}>Nivel experiencia</label>
-                    <select className={s.selectDark} value={formCrear.nivel_experiencia} onChange={(e) => setFormCrear({ ...formCrear, nivel_experiencia: e.target.value })}>
+                    <label className={s.labelText} htmlFor="crear-afiliado-nivel">Nivel experiencia</label>
+                    <select id="crear-afiliado-nivel" className={s.selectDark} value={formCrear.nivel_experiencia} onChange={(e) => setFormCrear({ ...formCrear, nivel_experiencia: e.target.value })}>
                       {NIVELES.map((n) => <option key={n} value={n}>{n}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className={s.labelText}>Días/semana</label>
-                    <input className={s.inputDark} type="number" min={1} max={7} value={formCrear.disponibilidad_semanal_dias} onChange={(e) => setFormCrear({ ...formCrear, disponibilidad_semanal_dias: e.target.value })} />
+                    <label className={s.labelText} htmlFor="crear-afiliado-dias">Días/semana</label>
+                    <input id="crear-afiliado-dias" className={s.inputDark} type="number" min={1} max={7} value={formCrear.disponibilidad_semanal_dias} onChange={(e) => setFormCrear({ ...formCrear, disponibilidad_semanal_dias: e.target.value })} />
                   </div>
                   <div>
-                    <label className={s.labelText}>Estado</label>
-                    <select className={s.selectDark} value={formCrear.estado} onChange={(e) => setFormCrear({ ...formCrear, estado: e.target.value })}>
+                    <label className={s.labelText} htmlFor="crear-afiliado-estado">Estado</label>
+                    <select id="crear-afiliado-estado" className={s.selectDark} value={formCrear.estado} onChange={(e) => setFormCrear({ ...formCrear, estado: e.target.value })}>
                       {ESTADOS.map((es) => <option key={es} value={es}>{es}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className={s.labelText}>Grupo muscular</label>
-                    <select className={s.selectDark} value={formCrear.grupo_muscular_prioritario} onChange={(e) => setFormCrear({ ...formCrear, grupo_muscular_prioritario: e.target.value })}>
+                    <label className={s.labelText} htmlFor="crear-afiliado-musculo">Grupo muscular</label>
+                    <select id="crear-afiliado-musculo" className={s.selectDark} value={formCrear.grupo_muscular_prioritario} onChange={(e) => setFormCrear({ ...formCrear, grupo_muscular_prioritario: e.target.value })}>
                       {["Pecho", "Espalda", "Piernas", "Glúteos", "Hombros", "Bíceps", "Tríceps", "Abdomen"].map((g) => <option key={g} value={g}>{g}</option>)}
                     </select>
                   </div>

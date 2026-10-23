@@ -25,7 +25,7 @@ export function AuthProvider({ children }) {
         setLoading(false);
       }
     };
-    restoreSession();
+    void restoreSession();
   }, []);
 
   const login = useCallback(async (correo, contrasena) => {

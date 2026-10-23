@@ -17,9 +17,18 @@ export default function AfiliadoEditModal({
   if (!editModal) return null;
 
   return (
-    <div className="modal d-block" style={{ background: "rgba(0,0,0,0.55)", zIndex: 1050 }}
-      onClick={() => !savingEdit && onCancel()}>
-      <div className="modal-dialog modal-lg modal-dialog-scrollable" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="modal d-block"
+      style={{ background: "rgba(0,0,0,0.55)", zIndex: 1050 }}
+      role="button"
+      tabIndex={0}
+      aria-label="Cerrar modal de edición de afiliado"
+      onClick={(e) => { if (!savingEdit && e.target === e.currentTarget) onCancel(); }}
+      onKeyDown={(e) => {
+        if (e.target === e.currentTarget && (e.key === "Escape" || e.key === "Enter") && !savingEdit) onCancel();
+      }}
+    >
+      <div className="modal-dialog modal-lg modal-dialog-scrollable">
         <div className="modal-content border-0 shadow">
           <div className="modal-header text-white border-0"
             style={{ background: "linear-gradient(135deg,#e94560,#c62a47)" }}>
@@ -39,35 +48,35 @@ export default function AfiliadoEditModal({
                   { label: "Documento", key: "documento", type: "text"   },
                 ].map(({ label, key, type }) => (
                   <div key={key} className="col-md-6">
-                    <label className="form-label small fw-semibold">{label}</label>
-                    <input type={type} className="form-control" value={formEdit[key]}
+                    <label className="form-label small fw-semibold" htmlFor={`editar-afiliado-${key}`}>{label}</label>
+                    <input id={`editar-afiliado-${key}`} type={type} className="form-control" value={formEdit[key]}
                       onChange={(e) => setFormEdit({ ...formEdit, [key]: e.target.value })} />
                   </div>
                 ))}
                 <div className="col-md-6">
-                  <label className="form-label small fw-semibold">Estado</label>
-                  <select className="form-select" value={formEdit.estado}
+                  <label className="form-label small fw-semibold" htmlFor="editar-afiliado-estado">Estado</label>
+                  <select id="editar-afiliado-estado" className="form-select" value={formEdit.estado}
                     onChange={(e) => setFormEdit({ ...formEdit, estado: e.target.value })}>
                     {ESTADOS.map((s) => <option key={s}>{s}</option>)}
                   </select>
                 </div>
                 <div className="col-md-6">
-                  <label className="form-label small fw-semibold">Plan membresía</label>
-                  <select className="form-select" value={formEdit.plan_membresia}
+                  <label className="form-label small fw-semibold" htmlFor="editar-afiliado-plan">Plan membresía</label>
+                  <select id="editar-afiliado-plan" className="form-select" value={formEdit.plan_membresia}
                     onChange={(e) => setFormEdit({ ...formEdit, plan_membresia: e.target.value })}>
                     {PLANES.map((p) => <option key={p}>{p}</option>)}
                   </select>
                 </div>
                 <div className="col-md-6">
-                  <label className="form-label small fw-semibold">Objetivo físico</label>
-                  <select className="form-select" value={formEdit.objetivo_fisico}
+                  <label className="form-label small fw-semibold" htmlFor="editar-afiliado-objetivo">Objetivo físico</label>
+                  <select id="editar-afiliado-objetivo" className="form-select" value={formEdit.objetivo_fisico}
                     onChange={(e) => setFormEdit({ ...formEdit, objetivo_fisico: e.target.value })}>
                     {OBJETIVOS.map((o) => <option key={o}>{o}</option>)}
                   </select>
                 </div>
                 <div className="col-md-6">
-                  <label className="form-label small fw-semibold">Nivel</label>
-                  <select className="form-select" value={formEdit.nivel_experiencia}
+                  <label className="form-label small fw-semibold" htmlFor="editar-afiliado-nivel">Nivel</label>
+                  <select id="editar-afiliado-nivel" className="form-select" value={formEdit.nivel_experiencia}
                     onChange={(e) => setFormEdit({ ...formEdit, nivel_experiencia: e.target.value })}>
                     {NIVELES.map((n) => <option key={n}>{n}</option>)}
                   </select>

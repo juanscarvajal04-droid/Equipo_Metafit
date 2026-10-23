@@ -94,8 +94,17 @@ function IgIcon() {
 /* ── Modal Términos ──────────────────────────────────────────────────────────── */
 function ModalTerminos({ onClose }) {
   return (
-    <div onClick={onClose} className={s.modalOverlay}>
-      <div onClick={e => e.stopPropagation()} className={s.modalBox}>
+    <div
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      onKeyDown={(e) => {
+        if (e.target === e.currentTarget && (e.key === "Escape" || e.key === "Enter")) onClose();
+      }}
+      className={s.modalOverlay}
+      role="button"
+      tabIndex={0}
+      aria-label="Cerrar términos y condiciones"
+    >
+      <div className={s.modalBox}>
         <div className={s.modalHeader}>
           <div>
             <h5 className={s.modalHeaderTitle}>📋 Términos y Condiciones</h5>
@@ -154,7 +163,7 @@ export default function LandingPage() {
   useEffect(() => {
     if (user?.role) {
       const map = { Administrador: "/dashboard", Recepcionista: "/afiliados", Entrenador: "/rutinas" };
-      navigate(map[user.role] || "/login", { replace: true });
+      void navigate(map[user.role] || "/login", { replace: true });
     }
   }, [user, navigate]);
 
@@ -174,7 +183,15 @@ export default function LandingPage() {
       ════════════════════════════════════════════════════════════════════ */}
       <nav className={`${s.navbar} ${scrolled ? s.navbarScrolled : ""}`}>
         {/* Logo → vuelve al inicio del Hero */}
-        <div className={s.logoWrapper} onClick={() => navigate("/")}>
+        <div
+          className={s.logoWrapper}
+          role="button"
+          tabIndex={0}
+          onClick={() => { void navigate("/"); }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") { e.preventDefault(); void navigate("/"); }
+          }}
+        >
           <span className={s.logoIcon}>💪</span>
           <div>
             <div className={s.logoTitle}>MetaFit</div>
@@ -188,7 +205,12 @@ export default function LandingPage() {
             <span
               key={l.id}
               className={s.navLink}
+              role="button"
+              tabIndex={0}
               onClick={() => scrollTo(l.id)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") { e.preventDefault(); scrollTo(l.id); }
+              }}
             >
               {l.label}
             </span>
@@ -575,7 +597,15 @@ export default function LandingPage() {
             📋 Términos y Condiciones
           </button>
           <span className={s.footerSep}>|</span>
-          <span className={s.footerLink} onClick={() => scrollTo("nosotros")}>Sobre Nosotros</span>
+          <span
+            className={s.footerLink}
+            role="button"
+            tabIndex={0}
+            onClick={() => scrollTo("nosotros")}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") { e.preventDefault(); scrollTo("nosotros"); }
+            }}
+          >Sobre Nosotros</span>
         </div>
         <a href="https://www.instagram.com/sportgymsede80/" target="_blank" rel="noopener noreferrer" className={s.footerIg}>
           <IgIcon /> @sportgymsede80
