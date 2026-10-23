@@ -902,7 +902,7 @@ function DietaDisplay({ afiliado, authAxios }) {
 function PlanDetalle({ detalle, numComidas, idCiclo, authAxios, onCambio }) {
   const { showToast } = useToast();
   const [edits, setEdits] = useState({});
-  const [savingKey, setSavingKey] = useState(null);
+  const [savingKey, setSavingKey] = useState("");
 
   const grouped = {};
   for (const d of detalle) {
@@ -933,7 +933,7 @@ function PlanDetalle({ detalle, numComidas, idCiclo, authAxios, onCambio }) {
       console.error("[DietasView] actualizar detalle:", err);
       showToast(err.response?.data?.error || err.message || "Error al actualizar cantidad", "danger");
     } finally {
-      setSavingKey(null);
+      setSavingKey("");
     }
   };
 
@@ -950,7 +950,7 @@ function PlanDetalle({ detalle, numComidas, idCiclo, authAxios, onCambio }) {
       console.error("[DietasView] quitar detalle:", err);
       showToast(err.response?.data?.error || err.message || "Error al eliminar alimento", "danger");
     } finally {
-      setSavingKey(null);
+      setSavingKey("");
     }
   };
 

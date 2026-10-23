@@ -934,7 +934,7 @@ function PlanDisplay({ afiliado, authAxios }) {
   const [plan, setPlan] = useState(null);
   const [error, setError] = useState(null);
   const [edit, setEdit] = useState({}); // { [rutina:ejercicio]: { series, repeticiones, peso_kg } }
-  const [savingKey, setSavingKey] = useState(null);
+  const [savingKey, setSavingKey] = useState("");
   const [notas, setNotas] = useState([]);
   const [notasOpen, setNotasOpen] = useState(false);
   const { showToast } = useToast();
@@ -1005,7 +1005,7 @@ function PlanDisplay({ afiliado, authAxios }) {
       console.error("[RutinasView] guardar ejercicio:", err);
       showToast(err.response?.data?.error || err.message || "Error al actualizar ejercicio", "danger");
     } finally {
-      setSavingKey(null);
+      setSavingKey("");
     }
   };
 
@@ -1021,7 +1021,7 @@ function PlanDisplay({ afiliado, authAxios }) {
       console.error("[RutinasView] quitar ejercicio:", err);
       showToast(err.response?.data?.error || err.message || "Error al eliminar ejercicio", "danger");
     } finally {
-      setSavingKey(null);
+      setSavingKey("");
     }
   };
 

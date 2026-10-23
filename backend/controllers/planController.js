@@ -11,7 +11,7 @@ function normalizarRecomendacionAgua(valor) {
   if (valor === undefined) return undefined;
   if (valor === null || valor === '') return null;
   const n = Number(valor);
-  if (!Number.isInteger(n) || n < 0 || n > 50) return NaN;
+  if (!Number.isInteger(n) || n < 0 || n > 50) return Number.NaN;
   return n;
 }
 

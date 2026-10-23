@@ -406,7 +406,7 @@ export default function MiDietaScreen() {
             }}>
               <Text style={{ color: '#fff', fontSize: FONTS.small, textAlign: 'center' }}>
                 💧 Recomendado: {recomendacionAgua} vasos /{' '}
-                {(Number(recomendacionAgua) * 0.25).toFixed(2).replace(/\.?0+$/, '')} L al día
+                {Number((Number(recomendacionAgua) * 0.25).toFixed(2))} L al día
               </Text>
             </View>
           )}
