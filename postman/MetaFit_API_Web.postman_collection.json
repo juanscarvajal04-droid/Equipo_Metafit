@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "MetaFit API - Web",
-    "description": "Colección reescrita a partir del código real del backend (08/2026). Módulos: Dashboard, Afiliados, Personal, Pagos, Planes, Catálogos, Notificaciones y Configuración. Login guarda el JWT en {{token}} automáticamente. Base: https://metafit-backend-rr18.onrender.com",
+    "description": "Colección actualizada a partir del código real del backend (10/2026). Módulos: Dashboard, Afiliados, Personal, Pagos, Planes, Ciclos, Catálogos, Notificaciones y Configuración. Incluye foto de perfil del staff, historial de agua del afiliado, notas de ejercicios y CRUD de restricciones/ciclos. Login guarda el JWT en {{token}} automáticamente. Base: https://metafit-backend-rr18.onrender.com",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "MetaFit"
   },
@@ -1396,6 +1396,114 @@
           ]
         },
         {
+          "name": "GET /afiliados/:id/notas-ejercicio",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/{{id_afiliado}}/notas-ejercicio",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "{{id_afiliado}}",
+                "notas-ejercicio"
+              ]
+            },
+            "description": "Staff (Admin, Recepcionista o Entrenador). Lista las notas que el afiliado registró sobre sus ejercicios, incluyendo el nombre del ejercicio. Usa {{id_afiliado}}."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "[\n  {\n    \"id_nota\": 1,\n    \"id_usuario\": 205,\n    \"id_ejercicio\": 5,\n    \"nombre_ejercicio\": \"Sentadilla\",\n    \"id_ciclo\": 204,\n    \"nota\": \"Me cuesta el hombro con este ejercicio\",\n    \"fecha_nota\": \"2026-10-20\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "GET /afiliados/:id/agua",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/{{id_afiliado}}/agua?fechaInicio={{fecha_inicio}}&fechaFin={{fecha_fin}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "{{id_afiliado}}",
+                "agua"
+              ],
+              "query": [
+                {
+                  "key": "fechaInicio",
+                  "value": "{{fecha_inicio}}"
+                },
+                {
+                  "key": "fechaFin",
+                  "value": "{{fecha_fin}}"
+                }
+              ]
+            },
+            "description": "Staff (Admin, Recepcionista o Entrenador). Historial de consumo de agua del afiliado. Acepta fechaInicio y fechaFin (YYYY-MM-DD). Cada vaso equivale a 250 ml y la respuesta incluye litros."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "[\n  {\n    \"fecha\": \"2026-10-21\",\n    \"vasos\": 8,\n    \"litros\": 2\n  },\n  {\n    \"fecha\": \"2026-10-22\",\n    \"vasos\": 7,\n    \"litros\": 1.75\n  }\n]"
+            }
+          ]
+        },
+        {
           "name": "POST /afiliados/progreso",
           "request": {
             "method": "POST",
@@ -2016,6 +2124,59 @@
               "cookie": [],
               "_postman_previewlanguage": "json",
               "body": "{\n  \"error\": \"push_token es requerido\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST /usuarios/me/foto",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usuarios/me/foto",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuarios",
+                "me",
+                "foto"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "foto",
+                  "type": "file",
+                  "src": "/ruta/a/foto-staff.jpg"
+                }
+              ]
+            },
+            "description": "Cualquier usuario autenticado (Admin, Recepcionista o Entrenador). Multipart/form-data con el campo \"foto\". Formatos PNG/JPG/WEBP/GIF, máximo 5 MB. Guarda la ruta/URL en USUARIO.foto."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Foto de perfil actualizada\",\n  \"foto\": \"/uploads/3-1722.jpg\",\n  \"url\": \"https://metafit-backend-rr18.onrender.com/uploads/3-1722.jpg\"\n}"
             }
           ]
         }
@@ -2767,6 +2928,66 @@
           ]
         },
         {
+          "name": "PATCH /planes/rutinas/:id_rutina/ejercicios/:id_ejercicio",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/planes/rutinas/{{id_rutina}}/ejercicios/{{id_ejercicio}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "planes",
+                "rutinas",
+                "{{id_rutina}}",
+                "ejercicios",
+                "{{id_ejercicio}}"
+              ]
+            },
+            "description": "Admin o Entrenador. Actualiza series, repeticiones, peso, descanso y/o la descripción del ejercicio en la rutina. Envía al menos un campo.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"series\": 4,\n  \"repeticiones\": 12,\n  \"peso_kg\": 60,\n  \"descanso_seg\": 90,\n  \"descripcion\": \"Mantener la espalda recta durante todo el movimiento\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Ejercicio actualizado correctamente\",\n  \"affected\": 1\n}"
+            }
+          ]
+        },
+        {
           "name": "DELETE /planes/rutinas/:id_rutina",
           "request": {
             "method": "DELETE",
@@ -3152,6 +3373,236 @@
               "cookie": [],
               "_postman_previewlanguage": "json",
               "body": "{\n  \"error\": \"Ese alimento ya está en esa comida del plan\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "PATCH /planes/nutricional/:id_plan/detalle/:id_detalle",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/planes/nutricional/{{id_ciclo}}/detalle/{{id_alimento}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "planes",
+                "nutricional",
+                "{{id_ciclo}}",
+                "detalle",
+                "{{id_alimento}}"
+              ]
+            },
+            "description": "Admin o Entrenador. Actualiza la cantidad y/o mueve un alimento de comida dentro del plan nutricional. id_plan corresponde al id_ciclo e id_detalle al id_alimento.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cantidad_gramos\": 150,\n  \"num_comida\": 1,\n  \"num_comida_anterior\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Detalle nutricional actualizado\",\n  \"affected\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "DELETE /planes/nutricional/:id_plan/detalle/:id_detalle",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/planes/nutricional/{{id_ciclo}}/detalle/{{id_alimento}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "planes",
+                "nutricional",
+                "{{id_ciclo}}",
+                "detalle",
+                "{{id_alimento}}"
+              ]
+            },
+            "description": "Admin o Entrenador. Elimina un alimento del plan nutricional. Envía num_comida para borrar solo esa comida; si se omite, elimina el alimento del plan.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"num_comida\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Alimento eliminado del plan nutricional\",\n  \"affected\": 1\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Ciclos",
+      "item": [
+        {
+          "name": "PATCH /ciclos/:id_ciclo",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/ciclos/{{id_ciclo}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ciclos",
+                "{{id_ciclo}}"
+              ]
+            },
+            "description": "Admin o Entrenador. Actualiza solo los campos enviados del ciclo: fechas, objetivo_fisico, nivel_experiencia, disponibilidad_dias, observaciones y activo.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fecha_inicio\": \"2026-10-01\",\n  \"fecha_fin\": \"2026-12-31\",\n  \"objetivo_fisico\": \"Aumento de masa\",\n  \"nivel_experiencia\": \"Intermedio\",\n  \"disponibilidad_dias\": 4,\n  \"observaciones\": \"Ajuste de ciclo\",\n  \"activo\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Ciclo actualizado correctamente\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "DELETE /ciclos/:id_ciclo",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/ciclos/{{id_ciclo}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "ciclos",
+                "{{id_ciclo}}"
+              ]
+            },
+            "description": "Solo Administrador. Elimina el ciclo y sus datos asociados (registros, rutinas, planes, progreso y notas) antes de borrar el ciclo."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Ciclo eliminado correctamente\"\n}"
             }
           ]
         }
@@ -3785,6 +4236,170 @@
               "cookie": [],
               "_postman_previewlanguage": "json",
               "body": "[\n  {\n    \"id_restriccion\": 1,\n    \"nombre_restriccion\": \"Hipertensión\",\n    \"tipo\": \"Enfermedad\",\n    \"efecto_relevante\": \"Evitar esfuerzos máximos\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "POST /catalogo/restricciones",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/catalogo/restricciones",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "catalogo",
+                "restricciones"
+              ]
+            },
+            "description": "Staff (Admin, Recepcionista o Entrenador). Crea una restricción médica en el catálogo. tipo debe ser Enfermedad, Lesion, Alergia, Medicamento u Otra.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre_restriccion\": \"Asma\",\n  \"tipo\": \"Enfermedad\",\n  \"efecto_relevante\": \"Evitar esfuerzos de alta intensidad\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"id\": 12,\n  \"message\": \"Restricción creada\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "PUT /catalogo/restricciones/:id",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/catalogo/restricciones/{{id_restriccion}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "catalogo",
+                "restricciones",
+                "{{id_restriccion}}"
+              ]
+            },
+            "description": "Staff (Admin, Recepcionista o Entrenador). Actualiza una restricción del catálogo. El nombre debe seguir siendo único.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre_restriccion\": \"Asma\",\n  \"tipo\": \"Enfermedad\",\n  \"efecto_relevante\": \"Evitar ejercicios de alta intensidad y controlar la respiración\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Restricción actualizada\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "DELETE /catalogo/restricciones/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/catalogo/restricciones/{{id_restriccion}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "catalogo",
+                "restricciones",
+                "{{id_restriccion}}"
+              ]
+            },
+            "description": "Solo Administrador. Elimina una restricción del catálogo. Devuelve 409 si está asignada a afiliados, ejercicios o alimentos."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Restricción eliminada\"\n}"
             }
           ]
         }

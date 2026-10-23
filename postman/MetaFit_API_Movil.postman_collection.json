@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "MetaFit API - Movil",
-    "description": "Colección reescrita a partir del código real del backend y de la app móvil (08/2026). Autenticación Bearer {{token}} (rol Afiliado). Incluye perfil, ciclos, progreso diario, hábitos (agua/consumo), restricciones, planes, recuperación de contraseña y push token. Base: https://metafit-backend-rr18.onrender.com",
+    "description": "Colección actualizada a partir del código real del backend y de la app móvil (10/2026). Autenticación Bearer {{token}} (rol Afiliado). Incluye perfil editable, ciclos, progreso diario, hábitos (agua/consumo), registros reales, notas de ejercicios, restricciones, planes, recuperación de contraseña y push token. Base: https://metafit-backend-rr18.onrender.com",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "MetaFit"
   },
@@ -339,6 +339,63 @@
           ]
         },
         {
+          "name": "PATCH /afiliados/me",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "me"
+              ]
+            },
+            "description": "Afiliado autenticado. Actualiza solo los campos enviados de su perfil. peso se guarda en el progreso del ciclo activo; talla actualiza la estatura; correo debe ser único. Devuelve el IMC recalculado.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"peso\": 78.5,\n  \"talla\": 178,\n  \"telefono\": \"3001234567\",\n  \"correo\": \"juan@gmail.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Perfil actualizado correctamente\",\n  \"imc\": 24.8,\n  \"perfil\": {\n    \"id_usuario\": 6,\n    \"telefono\": \"3001234567\",\n    \"estatura_cm\": 178,\n    \"correo\": \"juan@gmail.com\",\n    \"peso_kg\": 78.5\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "POST /afiliados/me/foto",
           "request": {
             "method": "POST",
@@ -652,6 +709,780 @@
               "body": "{\n  \"ejercicios\": [\n    {\n      \"id_ejercicio\": 5,\n      \"completado\": 1\n    },\n    {\n      \"id_ejercicio\": 7,\n      \"completado\": 0\n    }\n  ]\n}"
             }
           ]
+        },
+        {
+          "name": "GET /afiliados/me/progreso-ejercicio/historial",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/me/progreso-ejercicio/historial?id_ciclo={{id_ciclo}}&fechaInicio={{fecha_inicio}}&fechaFin={{fecha_fin}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "me",
+                "progreso-ejercicio",
+                "historial"
+              ],
+              "query": [
+                {
+                  "key": "id_ciclo",
+                  "value": "{{id_ciclo}}"
+                },
+                {
+                  "key": "fechaInicio",
+                  "value": "{{fecha_inicio}}"
+                },
+                {
+                  "key": "fechaFin",
+                  "value": "{{fecha_fin}}"
+                }
+              ]
+            },
+            "description": "Afiliado autenticado. Historial de progreso de ejercicios (máximo 200 registros). Filtros opcionales: id_ciclo, fechaInicio y fechaFin."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "[\n  {\n    \"fecha\": \"2026-10-23\",\n    \"id_ejercicio\": 5,\n    \"completado\": true\n  }\n]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Registros reales",
+      "item": [
+        {
+          "name": "POST /afiliados/me/registro-ejercicio",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/me/registro-ejercicio",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "me",
+                "registro-ejercicio"
+              ]
+            },
+            "description": "Afiliado autenticado. Registra la ejecución real de un ejercicio. Requiere id_ciclo, id_rutina, orden, fecha, series y repeticiones; peso_utilizado_kg y notas son opcionales. Valida que el ciclo sea del afiliado y que el ejercicio pertenezca a la rutina.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_ciclo\": 204,\n  \"id_rutina\": 206,\n  \"orden\": 1,\n  \"fecha\": \"2026-10-23\",\n  \"series\": 4,\n  \"repeticiones\": 12,\n  \"peso_utilizado_kg\": 60,\n  \"notas\": \"Última serie con buena técnica\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Ejercicio registrado correctamente\",\n  \"id_registro\": 10,\n  \"resumen\": {\n    \"fecha\": \"2026-10-23\",\n    \"ejercicios_realizados\": 1,\n    \"calorias_consumidas\": 0,\n    \"agua_vasos\": 0\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /afiliados/me/registro-ejercicio/historial",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/me/registro-ejercicio/historial?id_ciclo={{id_ciclo}}&fechaInicio={{fecha_inicio}}&fechaFin={{fecha_fin}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "me",
+                "registro-ejercicio",
+                "historial"
+              ],
+              "query": [
+                {
+                  "key": "id_ciclo",
+                  "value": "{{id_ciclo}}"
+                },
+                {
+                  "key": "fechaInicio",
+                  "value": "{{fecha_inicio}}"
+                },
+                {
+                  "key": "fechaFin",
+                  "value": "{{fecha_fin}}"
+                }
+              ]
+            },
+            "description": "Afiliado autenticado. Historial de registros reales de ejercicios (máximo 300). Filtros opcionales: id_ciclo, fechaInicio y fechaFin."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "[\n  {\n    \"id_registro\": 10,\n    \"fecha\": \"2026-10-23\",\n    \"id_ejercicio\": 5,\n    \"nombre_ejercicio\": \"Sentadilla\",\n    \"series\": 4,\n    \"repeticiones\": 12,\n    \"peso_utilizado_kg\": 60,\n    \"volumen\": 2880,\n    \"notas\": \"Última serie con buena técnica\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "POST /afiliados/me/consumo-alimento-real",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/me/consumo-alimento-real",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "me",
+                "consumo-alimento-real"
+              ]
+            },
+            "description": "Afiliado autenticado. Registra el consumo real de un alimento del plan nutricional. Las calorías se calculan con la fórmula Atwater. El alimento debe pertenecer al plan del ciclo.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_ciclo\": 204,\n  \"num_comida\": 1,\n  \"id_alimento\": 1,\n  \"fecha\": \"2026-10-23\",\n  \"cantidad_g_consumida\": 150\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Consumo registrado correctamente\",\n  \"id_consumo\": 7,\n  \"calorias_consumidas\": 195,\n  \"resumen\": {\n    \"fecha\": \"2026-10-23\",\n    \"calorias_consumidas\": 195,\n    \"agua_vasos\": 0,\n    \"ejercicios_realizados\": 0\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /afiliados/me/consumo-alimento-real/historial",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/me/consumo-alimento-real/historial?id_ciclo={{id_ciclo}}&fechaInicio={{fecha_inicio}}&fechaFin={{fecha_fin}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "me",
+                "consumo-alimento-real",
+                "historial"
+              ],
+              "query": [
+                {
+                  "key": "id_ciclo",
+                  "value": "{{id_ciclo}}"
+                },
+                {
+                  "key": "fechaInicio",
+                  "value": "{{fecha_inicio}}"
+                },
+                {
+                  "key": "fechaFin",
+                  "value": "{{fecha_fin}}"
+                }
+              ]
+            },
+            "description": "Afiliado autenticado. Historial de consumos reales de alimentos (máximo 300). Filtros opcionales: id_ciclo, fechaInicio y fechaFin."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "[\n  {\n    \"id_consumo\": 7,\n    \"fecha\": \"2026-10-23\",\n    \"num_comida\": 1,\n    \"id_alimento\": 1,\n    \"nombre_alimento\": \"Avena\",\n    \"cantidad_g_consumida\": 150,\n    \"calorias_consumidas\": 195\n  }\n]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Notas de ejercicios",
+      "item": [
+        {
+          "name": "POST /afiliados/me/notas-ejercicio",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/me/notas-ejercicio",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "me",
+                "notas-ejercicio"
+              ]
+            },
+            "description": "Afiliado autenticado. Guarda o actualiza (upsert por día) una nota sobre un ejercicio de su ciclo. Requiere id_ejercicio, id_ciclo y nota; fecha_nota es opcional (hoy por defecto).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_ejercicio\": 5,\n  \"id_ciclo\": 204,\n  \"nota\": \"Me cuesta el hombro con este ejercicio\",\n  \"fecha_nota\": \"2026-10-23\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"id_nota\": 3,\n  \"message\": \"Nota guardada correctamente\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /afiliados/me/notas-ejercicio",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/me/notas-ejercicio?id_ciclo={{id_ciclo}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "me",
+                "notas-ejercicio"
+              ],
+              "query": [
+                {
+                  "key": "id_ciclo",
+                  "value": "{{id_ciclo}}"
+                }
+              ]
+            },
+            "description": "Afiliado autenticado. Lista sus notas de ejercicios. El filtro id_ciclo es opcional; si se envía, devuelve solo las notas de ese ciclo."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "[\n  {\n    \"id_nota\": 3,\n    \"id_ejercicio\": 5,\n    \"nombre_ejercicio\": \"Sentadilla\",\n    \"id_ciclo\": 204,\n    \"nota\": \"Me cuesta el hombro con este ejercicio\",\n    \"fecha_nota\": \"2026-10-23\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "PATCH /afiliados/me/notas-ejercicio/:id_nota",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/me/notas-ejercicio/{{id_nota}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "me",
+                "notas-ejercicio",
+                "{{id_nota}}"
+              ]
+            },
+            "description": "Afiliado autenticado. Edita una nota propia. Solo se puede modificar una nota que pertenezca al usuario del token.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nota\": \"Ya no me molesta, mejoré la técnica\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Nota actualizada correctamente\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "DELETE /afiliados/me/notas-ejercicio/:id_nota",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/me/notas-ejercicio/{{id_nota}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "me",
+                "notas-ejercicio",
+                "{{id_nota}}"
+              ]
+            },
+            "description": "Afiliado autenticado. Elimina una nota propia. Devuelve 404 si la nota no existe o no pertenece al usuario."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Nota eliminada correctamente\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Progreso diario",
+      "item": [
+        {
+          "name": "GET /progreso/resumen",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/progreso/resumen?fecha={{fecha}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "progreso",
+                "resumen"
+              ],
+              "query": [
+                {
+                  "key": "fecha",
+                  "value": "{{fecha}}"
+                }
+              ]
+            },
+            "description": "Afiliado autenticado. Resumen diario de calorías, agua, ejercicios, energía y estado de ánimo. Si se omite fecha, usa la fecha actual."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"id_progreso_diario\": 1,\n  \"id_usuario\": 6,\n  \"fecha\": \"2026-10-23\",\n  \"calorias_consumidas\": 1850.5,\n  \"agua_vasos\": 8,\n  \"ejercicios_realizados\": 5,\n  \"duracion_minutos\": 55,\n  \"nivel_energia\": 4,\n  \"estado_animo\": \"Bueno\",\n  \"observaciones\": \"Buena sesión\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "PUT /progreso/resumen",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/progreso/resumen",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "progreso",
+                "resumen"
+              ]
+            },
+            "description": "Afiliado autenticado. Actualiza el estado subjetivo del día: nivel_energia (1–5), estado_animo, observaciones y/o duracion_minutos. Requiere fecha.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fecha\": \"2026-10-23\",\n  \"nivel_energia\": 4,\n  \"estado_animo\": \"Bueno\",\n  \"observaciones\": \"Buena sesión, sin molestias\",\n  \"duracion_minutos\": 55\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"message\": \"Resumen diario actualizado correctamente\",\n  \"resumen\": {\n    \"fecha\": \"2026-10-23\",\n    \"nivel_energia\": 4,\n    \"estado_animo\": \"Bueno\",\n    \"duracion_minutos\": 55\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /progreso/historial",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/progreso/historial?fechaInicio={{fecha_inicio}}&fechaFin={{fecha_fin}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "progreso",
+                "historial"
+              ],
+              "query": [
+                {
+                  "key": "fechaInicio",
+                  "value": "{{fecha_inicio}}"
+                },
+                {
+                  "key": "fechaFin",
+                  "value": "{{fecha_fin}}"
+                }
+              ]
+            },
+            "description": "Afiliado autenticado. Historial de resúmenes diarios (máximo 90 días). Filtros opcionales: fechaInicio y fechaFin."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "[\n  {\n    \"fecha\": \"2026-10-22\",\n    \"calorias_consumidas\": 1780,\n    \"agua_vasos\": 8,\n    \"ejercicios_realizados\": 4\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "GET /progreso/ejercicio/:idEjercicio/evolucion",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/progreso/ejercicio/{{id_ejercicio}}/evolucion?fechaInicio={{fecha_inicio}}&fechaFin={{fecha_fin}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "progreso",
+                "ejercicio",
+                "{{id_ejercicio}}",
+                "evolucion"
+              ],
+              "query": [
+                {
+                  "key": "fechaInicio",
+                  "value": "{{fecha_inicio}}"
+                },
+                {
+                  "key": "fechaFin",
+                  "value": "{{fecha_fin}}"
+                }
+              ]
+            },
+            "description": "Afiliado autenticado. Evolución de un ejercicio con fecha, series, repeticiones, peso y volumen calculado (series × repeticiones × peso)."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "[\n  {\n    \"fecha\": \"2026-10-16\",\n    \"series\": 4,\n    \"repeticiones\": 10,\n    \"peso_kg\": 55,\n    \"volumen\": 2200\n  },\n  {\n    \"fecha\": \"2026-10-23\",\n    \"series\": 4,\n    \"repeticiones\": 12,\n    \"peso_kg\": 60,\n    \"volumen\": 2880\n  }\n]"
+            }
+          ]
         }
       ]
     },
@@ -730,6 +1561,66 @@
               "cookie": [],
               "_postman_previewlanguage": "json",
               "body": "{\n  \"error\": \"fecha y vasos son requeridos\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /afiliados/me/agua/historial",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/me/agua/historial?fechaInicio={{fecha_inicio}}&fechaFin={{fecha_fin}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "me",
+                "agua",
+                "historial"
+              ],
+              "query": [
+                {
+                  "key": "fechaInicio",
+                  "value": "{{fecha_inicio}}"
+                },
+                {
+                  "key": "fechaFin",
+                  "value": "{{fecha_fin}}"
+                }
+              ]
+            },
+            "description": "Afiliado autenticado. Historial de consumo de agua de los últimos 30 días. Filtros opcionales: fechaInicio y fechaFin (YYYY-MM-DD)."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "[\n  {\n    \"fecha\": \"2026-10-22\",\n    \"vasos\": 8\n  },\n  {\n    \"fecha\": \"2026-10-23\",\n    \"vasos\": 7\n  }\n]"
             }
           ]
         },
@@ -855,6 +1746,66 @@
               "cookie": [],
               "_postman_previewlanguage": "json",
               "body": "{\n  \"error\": \"id_ciclo, fecha y alimentos son requeridos\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /afiliados/me/consumo/historial",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/me/consumo/historial?fechaInicio={{fecha_inicio}}&fechaFin={{fecha_fin}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "me",
+                "consumo",
+                "historial"
+              ],
+              "query": [
+                {
+                  "key": "fechaInicio",
+                  "value": "{{fecha_inicio}}"
+                },
+                {
+                  "key": "fechaFin",
+                  "value": "{{fecha_fin}}"
+                }
+              ]
+            },
+            "description": "Afiliado autenticado. Historial de consumo de alimentos de los últimos 100 registros. Filtros opcionales: fechaInicio y fechaFin."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "[\n  {\n    \"fecha\": \"2026-10-23\",\n    \"id_ciclo\": 204,\n    \"id_alimento\": 1,\n    \"num_comida\": 1,\n    \"consumido\": true\n  }\n]"
             }
           ]
         }
@@ -987,6 +1938,118 @@
               "body": "{\n  \"error\": \"Este ciclo no te pertenece\"\n}"
             }
           ]
+        },
+        {
+          "name": "GET /afiliados/me/ejercicios-disponibles",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/me/ejercicios-disponibles?grupo_muscular=Piernas",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "me",
+                "ejercicios-disponibles"
+              ],
+              "query": [
+                {
+                  "key": "grupo_muscular",
+                  "value": "Piernas"
+                }
+              ]
+            },
+            "description": "Afiliado autenticado. Lista los ejercicios permitidos para su perfil, excluyendo los prohibidos por sus restricciones. El filtro grupo_muscular es opcional."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "[\n  {\n    \"id_ejercicio\": 5,\n    \"nombre_ejercicio\": \"Sentadilla\",\n    \"grupo_muscular\": \"Piernas\",\n    \"nivel_minimo\": \"Principiante\"\n  },\n  {\n    \"id_ejercicio\": 7,\n    \"nombre_ejercicio\": \"Prensa\",\n    \"grupo_muscular\": \"Piernas\",\n    \"nivel_minimo\": \"Intermedio\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "GET /planes/entrenamiento/:id_ciclo/rutina/:dia_numero",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/planes/entrenamiento/{{id_ciclo}}/rutina/2?grupo_muscular=Piernas",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "planes",
+                "entrenamiento",
+                "{{id_ciclo}}",
+                "rutina",
+                "2"
+              ],
+              "query": [
+                {
+                  "key": "grupo_muscular",
+                  "value": "Piernas"
+                }
+              ]
+            },
+            "description": "Afiliado autenticado. Obtiene la rutina del día indicado (1=domingo … 7=sábado) filtrada por grupo muscular. Si no se envía grupo_muscular, usa el enfoque_muscular del día."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"id_rutina\": 206,\n  \"nombre_rutina\": \"Leg Day\",\n  \"enfoque_muscular\": \"Piernas\",\n  \"dia_numero\": 2,\n  \"ejercicios\": [\n    {\n      \"id_ejercicio\": 5,\n      \"nombre_ejercicio\": \"Sentadilla\",\n      \"series\": 4,\n      \"repeticiones\": 12,\n      \"peso_kg\": 60,\n      \"descanso_seg\": 90\n    }\n  ]\n}"
+            }
+          ]
         }
       ]
     },
@@ -1061,6 +2124,65 @@
               "cookie": [],
               "_postman_previewlanguage": "json",
               "body": "{\n  \"error\": \"Plan nutricional no encontrado para este ciclo\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /afiliados/me/alimentos-disponibles",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/afiliados/me/alimentos-disponibles?max_kcal=250&min_proteinas=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "afiliados",
+                "me",
+                "alimentos-disponibles"
+              ],
+              "query": [
+                {
+                  "key": "max_kcal",
+                  "value": "250"
+                },
+                {
+                  "key": "min_proteinas",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Afiliado autenticado. Lista los alimentos permitidos para su perfil, excluyendo los prohibidos por sus restricciones. Incluye calorías por 100 g; max_kcal y min_proteinas son filtros opcionales."
+          },
+          "response": [
+            {
+              "name": "200 OK - Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "type": "text"
+                }
+              ],
+              "cookie": [],
+              "_postman_previewlanguage": "json",
+              "body": "[\n  {\n    \"id_alimento\": 1,\n    \"nombre_alimento\": \"Avena\",\n    \"proteinas\": 13.5,\n    \"carbohidratos\": 66,\n    \"grasas\": 7,\n    \"calorias_100g\": 380\n  }\n]"
             }
           ]
         }
