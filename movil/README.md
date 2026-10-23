@@ -1,75 +1,249 @@
-# Welcome to your Expo app 👋
+# App móvil MetaFit — Expo / React Native
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplicación Android para los afiliados de **Sport Gym Sede Santa Rosita**. Permite consultar el perfil, la rutina, la dieta y el progreso, además de registrar ejercicio, consumo de alimentos, agua y notas personales.
 
-## Unit testing con Jest
+- **APK de producción:** https://metafit-frontend-78x6.onrender.com/app/metafit.apk
+- **Backend de producción:** https://metafit-backend-rr18.onrender.com
+- **Expo web local:** http://localhost:8081
 
-La app usa **Jest + jest-expo** (preset oficial de Expo para SDK 55) y **React Native Testing Library**.
+---
 
-```bash
-npm test          # ejecuta una sola vez
-npm run test:watch # ejecución en modo watch
-```
+## Stack
 
-Qué cubren (14 tests):
-
-| Archivo | Cobertura |
+| Tecnología | Uso |
 |---|---|
-| `src/screens/__tests__/LoginScreen.test.js` | Render de campos, validación de vacíos, flujo de login y errores |
-| `src/services/__tests__/api.test.js` | Interceptor JWT desde AsyncStorage, 401 global, loginRequest, getMiPerfil |
-| `src/context/__tests__/AuthContext.test.jsx` | login/logout y restauración de sesión desde AsyncStorage |
+| **Expo SDK 55** | Toolchain y APIs nativas |
+| **React Native 0.83** | Interfaz móvil |
+| **React Navigation 7** | Stack + tabs |
+| **AsyncStorage** | Persistencia del token, usuario y tema |
+| **Axios** | Cliente HTTP con interceptor JWT |
+| **expo-notifications** | Notificaciones push |
+| **expo-image-picker** | Selección de foto de perfil |
+| **react-native-chart-kit** | Gráficos de progreso |
+| **Jest + jest-expo + RNTL** | Pruebas unitarias y de componentes |
 
-Configuración: preset `jest-expo` + `transformIgnorePatterns` en `movil/package.json`. Los módulos nativos (AsyncStorage) se reemplazan con el mock oficial del paquete (`jest/async-storage-mock`).
+La app **no usa Expo Router**: la navegación está definida en `src/navigation/AppNavigator.js` con React Navigation.
 
-## Get started
+---
 
-1. Install dependencies
+## Requisitos
 
-   ```bash
-   npm install
-   ```
+- Node.js 20 o 22
+- npm 10+
+- Expo Go en el teléfono (opcional, para pruebas rápidas)
+- Android Studio + SDK (opcional, para compilar en local)
+- Cuenta de Expo/EAS (para generar el APK en la nube)
 
-2. Start the app
+---
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Instalación
 
 ```bash
-npm run reset-project
+cd movil
+npm ci
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-### Other setup steps
+## Ejecutar la app
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+### 1. Expo web — http://localhost:8081
 
-## Learn more
+```bash
+cd movil
+npm run web
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+Este comando ejecuta `expo start --web`. Abre **http://localhost:8081** en el navegador. Es útil para probar la interfaz y la integración con el backend local.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Si el puerto está ocupado:
 
-## Join the community
+```bash
+npx expo start --web --port 8081
+```
 
-Join our community of developers creating universal apps.
+### 2. Expo Go o emulador
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```bash
+cd movil
+npm start
+```
+
+Expo muestra un código QR y las opciones para abrir la app en Expo Go, un emulador Android o un development build. Algunas funciones nativas pueden requerir un development build en lugar de Expo Go.
+
+### 3. Android nativo
+
+```bash
+cd movil
+npm run android
+```
+
+Este comando ejecuta `expo run:android` y requiere Android Studio, un SDK configurado y un emulador o dispositivo conectado.
+
+---
+
+## URL del backend
+
+La URL se decide en `src/services/api.js` según la plataforma:
+
+| Entorno | URL |
+|---|---|
+| Expo web | `EXPO_PUBLIC_API_URL` o `http://localhost:3001` por defecto |
+| Android (Expo Go o APK) | `https://metafit-backend-rr18.onrender.com` |
+
+Para cambiar la URL de Expo web, crea `movil/.env`:
+
+```env
+EXPO_PUBLIC_API_URL=http://localhost:3001
+```
+
+> El APK compilado apunta al backend de producción. Si necesitas cambiar ese destino, debe coordinarse una nueva compilación.
+
+---
+
+## Estructura de carpetas
+
+```text
+movil/
+├── assets/                  Íconos, splash y recursos
+├── src/
+│   ├── components/          Componentes reutilizables
+│   ├── context/             AuthContext y ThemeContext
+│   ├── hooks/               useApi, useMutation, useAutoRefresh
+│   ├── navigation/          AppNavigator (stack + tabs)
+│   ├── screens/             Pantallas de la app
+│   ├── services/            Cliente Axios y llamadas a la API
+│   ├── utils/               Formateadores, errores y ciclos
+│   └── theme.js             Paleta y tokens visuales
+├── App.js                   Punto de entrada
+├── app.json                 Configuración de Expo
+├── eas.json                 Perfiles de EAS Build
+├── jest.setup.js            Configuración de Jest
+├── babel.config.js
+└── package.json
+```
+
+### Pantallas principales
+
+| Pantalla | Función |
+|---|---|
+| `LandingScreen` | Presentación de la app |
+| `LoginScreen` | Inicio de sesión del afiliado |
+| `RecuperarPasswordScreen` | Recuperación de contraseña |
+| `MiPerfilScreen` | Datos del afiliado |
+| `EditarPerfilScreen` | Edición de perfil y foto |
+| `MiRutinaScreen` | Rutina asignada por el entrenador |
+| `MiDietaScreen` | Plan nutricional |
+| `MiProgresoScreen` | Progreso, agua y evolución |
+| `RegistroEjercicioScreen` | Registro de ejercicios realizados |
+| `RegistroConsumoScreen` | Registro de alimentos consumidos |
+
+La app usa un **stack de autenticación** (Landing, Login, Recuperar) y, una vez autenticado, un **stack raíz** con tabs de Perfil, Rutina, Dieta y Progreso, más las pantallas de registro y edición.
+
+---
+
+## Pruebas
+
+```bash
+cd movil
+npm test
+```
+
+- Framework: **Jest**
+- Preset: **jest-expo**
+- Utilidades: **React Native Testing Library**
+- Cobertura actual: **99.37% de líneas** (944/950)
+
+Para generar el reporte de cobertura:
+
+```bash
+npm run test:coverage
+```
+
+Configuración relevante en `package.json`:
+
+- `preset: "jest-expo"`
+- `setupFiles: ["./jest.setup.js"]`
+- `transformIgnorePatterns` para módulos de Expo y React Native
+- Mock oficial de AsyncStorage
+
+La suite cubre login, contexto de autenticación, interceptor JWT, restauración de sesión, pantallas y utilidades.
+
+---
+
+## Generar el APK con Expo / EAS
+
+El perfil `preview` de `eas.json` genera un **APK instalable**:
+
+```bash
+cd movil
+npx eas-cli login
+npx eas-cli build --platform android --profile preview
+```
+
+Al finalizar, EAS muestra un enlace de descarga. Copia el APK al directorio que sirve la web:
+
+```bash
+cp <ruta-del-apk>.apk ../frontend_web/public/app/metafit.apk
+```
+
+En PowerShell:
+
+```powershell
+Copy-Item <ruta-del-apk>.apk ..\frontend_web\public\app\metafit.apk
+```
+
+La descarga pública queda en:
+
+```text
+https://metafit-frontend-78x6.onrender.com/app/metafit.apk
+```
+
+### Instalación en Android
+
+1. Descarga el APK desde la URL anterior.
+2. Activa la instalación desde **orígenes desconocidos** si Android lo solicita.
+3. Instala y abre **MetaFit**.
+4. Inicia sesión con la cuenta de afiliado.
+
+Si el APK no instala, desinstala una versión anterior con firma distinta y vuelve a intentarlo.
+
+> El procedimiento detallado de compilación, firma y publicación está en [`../documentacion/manual_apk_movil.md`](../documentacion/manual_apk_movil.md).
+
+---
+
+## Comandos disponibles
+
+| Comando | Descripción |
+|---|---|
+| `npm start` | Inicia el servidor de Expo |
+| `npm run web` | Ejecuta Expo web en http://localhost:8081 |
+| `npm run android` | Compila y ejecuta en Android |
+| `npm run ios` | Compila y ejecuta en iOS (requiere macOS) |
+| `npm run lint` | Ejecuta ESLint |
+| `npm test` | Ejecuta Jest |
+| `npm run test:watch` | Jest en modo watch |
+| `npm run test:coverage` | Jest con reporte de cobertura |
+
+---
+
+## Troubleshooting
+
+| Problema | Solución |
+|---|---|
+| Expo web no refleja cambios | `npx expo start -c` para limpiar caché |
+| El puerto 8081 está ocupado | `npx expo start --web --port 8081` o detener el proceso anterior |
+| La app no conecta al backend local | Verificar `EXPO_PUBLIC_API_URL` y que el backend esté en `http://localhost:3001` |
+| El APK no instala | Permitir orígenes desconocidos y desinstalar la versión anterior |
+| Notificaciones push no llegan en Expo Go | Probar con un development build o APK en dispositivo físico |
+| El backend de Render tarda en responder | El servicio gratuito puede estar despertando; esperar unos segundos |
+
+---
+
+## Documentación relacionada
+
+- [`../README.md`](../README.md) — presentación del proyecto y enlaces de producción.
+- [`../README_DEV.md`](../README_DEV.md) — entorno local completo y flujo de trabajo.
+- [`../documentacion/manual_apk_movil.md`](../documentacion/manual_apk_movil.md) — compilación y firma del APK.
+- [`../backend/README.md`](../backend/README.md) — API y endpoints.
+- [`../frontend_web/README.md`](../frontend_web/README.md) — frontend web del personal.

@@ -1,274 +1,172 @@
-# 🚀 MetaFit - Sistema de Gestión Deportiva
+# MetaFit
 
-Bienvenido a la rama de trabajo de la dirección del proyecto. Esta sección es administrada por el líder técnico para garantizar la integridad del código.
+**Sistema de gestión deportiva para Sport Gym Sede Santa Rosita**
 
-## 👤 Perfil del Integrante
-**Nombre:** Juan Sebastián Carvajal
+MetaFit es una aplicación full-stack para administrar la operación de un gimnasio: afiliados, ciclos de entrenamiento, rutinas, planes nutricionales, pagos, finanzas, restricciones médicas y progreso físico. El personal del gimnasio trabaja desde la web y los afiliados desde una app móvil Android.
 
----
+> **Este README está orientado a producción y evaluación.**
+> Si vas a desarrollar o ejecutar el proyecto en local, consulta [`README_DEV.md`](./README_DEV.md).
 
-## 🧭 Entornos
-
-> **Regla de oro:** los datos de LOCAL solo se ven en **phpMyAdmin**
-> (`localhost:8080`); los datos de PRODUCCIÓN solo se ven en **Adminer**
-> (`https://metafit-adminer.onrender.com`). Son BDs separadas, nunca mezclar.
-> Detalle completo en [`documentacion/entornos.md`](./documentacion/entornos.md).
-
-| Entorno    | Frontend                  | Backend                           | BD                 |
-|------------|---------------------------|-----------------------------------|--------------------|
-| Local      | http://localhost:5173     | http://localhost:3001             | Docker MySQL (MariaDB 11, phpMyAdmin :8080) |
-| Producción | https://metafit-frontend-78x6.onrender.com | https://metafit-backend-rr18.onrender.com | VPS Oracle (MySQL 8, Adminer) |
+[![Web](https://img.shields.io/badge/Web-producci%C3%B3n-e31c25?style=for-the-badge)](https://metafit-frontend-78x6.onrender.com)
+[![Swagger](https://img.shields.io/badge/Swagger-OpenAPI%203.0%20%7C%2093%20endpoints-85EA2D?style=for-the-badge&logo=swagger&logoColor=white)](https://metafit-backend-rr18.onrender.com/api-docs)
+[![APK](https://img.shields.io/badge/APK-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://metafit-frontend-78x6.onrender.com/app/metafit.apk)
+[![SonarQube](https://img.shields.io/badge/SonarQube-0%20issues-4E9BCD?style=for-the-badge&logo=sonarqube&logoColor=white)](#calidad-y-métricas)
 
 ---
 
-## 📋 Instalación local (sin Docker)
+## ¿Qué incluye?
 
-```bash
-# 1. Clonar
-git clone <repo-url> && cd Equipo_Metafit
+| Módulo | Para quién | Funcionalidad principal |
+|---|---|---|
+| Web de gestión | Administrador, Recepcionista y Entrenador | Dashboard, afiliados, ciclos, rutinas, dietas, pagos, finanzas, personal y restricciones |
+| App móvil | Afiliado | Perfil, rutina del día, dieta, progreso, registro de ejercicio, consumo de alimentos, agua y notas |
+| API REST | Web y móvil | 93 endpoints documentados con OpenAPI 3.0, autenticación JWT y control de acceso por rol |
+| Base de datos | Backend | Modelo relacional en 3FN con vistas para cálculos de IMC, calorías y seguimiento |
 
-# 2. Copiar variables de entorno
-cp .env.example .env
-# (editar .env si necesitas cambiar contraseña de MySQL, etc.)
-
-# 3. Backend
-cd backend && npm install && npm run dev
-
-# 4. Frontend (otra terminal)
-cd frontend_web && npm install && npm run dev
-```
-
-> El frontend usa `VITE_API_URL` (fallback: `http://localhost:3001`).
-> En Docker, `frontend_web/.env.development` ya está configurado automáticamente.
-
-## 🐳 Levantar el proyecto con Docker
-
-```bash
-# Clonar el repositorio
-git clone <repo-url>
-cd Equipo_Metafit
-
-# Iniciar todos los servicios (MySQL + Backend + Frontend + phpMyAdmin)
-docker compose up -d --build
-
-# Verificar que los contenedores estén corriendo
-docker compose ps
-```
-
-Los scripts SQL de [`database/`](./database) se ejecutan automáticamente al iniciar MariaDB por primera vez. El orden lexicográfico coincide con las dependencias: `01_estructura → 02_migracion_movil → 03_mejoras_estructura → 04_datos_iniciales → 05_password_reset` (detalles en [`database/README.md`](./database/README.md)).
-
-## 🔄 Reset de base de datos local
-
-```bash
-docker compose down -v
-docker compose up -d --build
-# Esto recrea la BD desde cero con el seed completo.
-# Los datos de prueba quedan listos en ~30 segundos.
-```
-
-> `down -v` borra el volumen `metafit_db_data`; al volver a levantar, MariaDB
-> re-ejecuta todos los `.sql` de `database/` en orden (01 → 02 → 03 → 04 → 05)
-> y deja la BD poblada con usuarios, ciclos, planes, pagos y restricciones de
-> prueba (Admin `carlos@metafit.com / Admin123!`).
-
-## 🔌 Puertos
-
-| Servicio   | Puerto | URL                        |
-|------------|--------|----------------------------|
-| Frontend   | 5173   | http://localhost:5173       |
-| Backend    | 3001   | http://localhost:3001       |
-| phpMyAdmin | 8080   | http://localhost:8080       |
-| MySQL      | 3306   | localhost:3306              |
-
-## 👤 Credenciales de prueba
-
-| Rol             | Email                    | Contraseña     |
-|-----------------|--------------------------|----------------|
-| Administrador   | carlos@metafit.com       | Admin123!      |
-| Recepcionista   | maria@metafit.com        | Maria123!      |
-| Entrenador      | laura@metafit.com        | Laura123!      |
-| Entrenador      | andres@metafit.com       | Andres123!     |
-| Afiliado        | ana.lopez@example.com    | Afiliado123!   |
-
-## 🔬 Tests
-
-```bash
-# Backend (25 tests — integración + unitarios)
-cd backend && npm test
-```
-
-Respuesta esperada:
-```
-Test Suites: 2 passed, 2 total
-Tests:       25 passed, 25 total
-```
-
-Además: `frontend_web` (30 tests, `npm test`) y `movil` (19 tests, `npx jest`). Total: **74 tests verdes**. CI los corre todos en GitHub Actions (`.github/workflows/ci.yml`).
-
-## 📬 Postman
-
-Se proporcionan **dos** colecciones Postman (dentro de [`postman/`](./postman)):
-
-| Colección | Archivo | Para quién |
-|-----------|---------|------------|
-| Web (Staff) | `postman/MetaFit_API_Web.postman_collection.json` | Admin / Recepcionista / Entrenador |
-| Móvil (Afiliado) | `postman/MetaFit_API_Movil.postman_collection.json` | Afiliado (app móvil) |
-
-**Configuración:**
-1. Importa los 3 archivos de la carpeta `postman/` en Postman
-2. Selecciona el entorno `MetaFit Environment`
-3. Ejecuta primero el login — el token JWT se guarda automáticamente
-
-## 📖 Documentación interactiva de la API (Swagger)
-
-[![Swagger](https://img.shields.io/badge/Swagger-OpenAPI%203.0%20%7C%2091%20endpoints-85EA2D?style=for-the-badge&logo=swagger&logoColor=white)](https://metafit-backend-rr18.onrender.com/api-docs)
-
-Todos los **91 endpoints** del backend están documentados con anotaciones `@swagger` (OpenAPI 3.0)
-y son probables directamente desde la UI de Swagger:
-
-| Entorno | URL |
-|---|---|
-| 🌐 Producción | https://metafit-backend-rr18.onrender.com/api-docs |
-| 🐳 Local (Docker) | http://localhost:3001/api-docs |
-| 📄 Spec JSON versionada | `documentacion/swagger.json` |
-
-1. Abre la URL y haz clic en **Authorize** (candado).
-2. Ejecuta `POST /login` para obtener el token JWT.
-3. Pega `Bearer <token>` y prueba cualquier endpoint protegido.
-
-## 📊 ISO 25000 — Cumplimiento
-
-| Característica | Estado |
-|----------------|--------|
-| Mantenibilidad | ✅ Código modular MVC (controller → service → model) |
-| Funcionalidad  | ✅ **91 endpoints** documentados con Swagger (OpenAPI 3.0) |
-| Confiabilidad  | ✅ Manejo de errores con try-catch + códigos HTTP |
-| Seguridad      | ✅ JWT + bcrypt (12 rondas) + rutas protegidas |
-| Capacidad de prueba | ✅ 16 tests (integración + unitarios) pasando |
-| Portabilidad   | ✅ Web (Vite) + Móvil (Expo) + Docker |
-
-## 📚 Documentación
-
-Todos los documentos se encuentran en la carpeta [`documentacion/`](./documentacion).
-
-| Documento | Descripción |
-|---|---|
-| `documentacion/MANUAL_TECNICO.md` | Manual técnico completo: arquitectura, endpoints, BD, seguridad, despliegue |
-| `documentacion/MANUAL_USUARIO.md` | Guías paso a paso para cada rol del sistema |
-| `documentacion/MANUAL_POSTMAN.md` | Guía para probar la API con Postman desde cero |
-| `documentacion/DIAGRAMAS.md` | Diagramas de arquitectura, componentes, navegación, BD y flujos |
-| `documentacion/PRESENTACION.md` | Guion de sustentación (15-20 min) con diapositivas |
-| `documentacion/QA_REPORT.md` | Reporte de aseguramiento de calidad |
-| `documentacion/AUDITORIA_FINAL.md` | Auditoría final del proyecto |
-| `documentacion/UPTIME_ROBOT.md` | Monitoreo 24/7 con UptimeRobot (config manual) |
-| `documentacion/adminer.md` | Adminer en Render: acceso gráfico a la BD (`https://metafit-adminer.onrender.com`) |
-| `documentacion/infraestructura_vps.md` | BD de producción migrada a Oracle VPS + Dokploy (MySQL 8, 141.148.94.173:3306) |
-| `documentacion/seguridad.md` | Rotación de credenciales y medidas de seguridad vigentes |
-| `documentacion/verificacion_final.md` | Verificación E2E de producción completada el 22-sep-2026 |
-| `documentacion/entornos.md` | Entornos LOCAL/PROD: variables por archivo, arranque, reset y troubleshooting |
-| `documentacion/demo_sustentacion.md` | Checklist paso a paso para la sustentación (4 demos) |
-| `documentacion/GUION_VIDEO_DEMO.md` | Guion del video demo (3–5 min, 3 roles) |
-| `documentacion/swagger.json` | Spec OpenAPI 3.0 exportada de producción (91 endpoints) |
-
-## 🚀 Mejoras "1000/10" (últimas fases)
-
-| Mejora | Estado |
-|---|---|
-| Modo claro/oscuro (web + app móvil) | ✅ Toggle ☀️/🌙 persistente |
-| Analítica GA4 + GTM + GSC | ✅ GTM-K6JZS4MG activo, 4 eventos dataLayer |
-| Push notifications (Expo) | ✅ `push_token` + avisos de rutina/dieta |
-| Correo de bienvenida (Brevo) | ✅ Plantilla 600px + credenciales |
-| Recordatorio de pagos (cron) | ✅ Cada hora, vence en ≤3 días, dedupe diario |
-| Code Climate | ⏳ `.codeclimate.yml` listo (requiere repo público + login manual) |
-| GitHub Actions CI/CD | ✅ 74 tests en CI + deploy automático a Render en `main` |
-| UptimeRobot | ⏳ Guía lista (`documentacion/UPTIME_ROBOT.md`), monitores manuales |
-| Cloudinary | ✅ Con fallback a disco (activa con 3 env vars) |
-| Storybook | ✅ 5 historias (Badge, Button, Card, Modal, Avatar) tema oscuro |
-| n8n (automatizaciones) | ✅ 4 flujos: pagos, recordatorios, Telegram, Google Sheets **— corren en local (`localhost:5678`), no en el VPS** |
-| Verificación E2E prod | ✅ Documentada en `documentacion/verificacion_final.md` (CORS 403, Cloudinary 200, BD limpia 13/8) |
+La web y la app móvil son **dos clientes del mismo backend**: lo que registra un entrenador en la web aparece en la app del afiliado y viceversa.
 
 ---
 
-## 🔒 CORS (lista blanca)
+## Enlaces de producción
 
-El backend usa una **whitelist de orígenes** — solo permite conexiones desde:
-
-| Entorno | Orígenes permitidos |
+| Recurso | URL |
 |---|---|
-| Desarrollo | `localhost:5173`, `127.0.0.1:5173`, `localhost:8081`, `127.0.0.1:8081` |
-| Producción | `metafit-frontend-78x6.onrender.com` + los de desarrollo |
+| 🌐 **Aplicación web (staff)** | https://metafit-frontend-78x6.onrender.com |
+| 📖 **Swagger UI (93 endpoints)** | https://metafit-backend-rr18.onrender.com/api-docs |
+| 📄 **Especificación OpenAPI en vivo** | https://metafit-backend-rr18.onrender.com/api-docs.json |
+| ❤️ **Health check del backend** | https://metafit-backend-rr18.onrender.com/health |
+| 🗄️ **Adminer (consulta de la BD)** | https://metafit-adminer.onrender.com |
+| 📱 **Descarga del APK Android** | https://metafit-frontend-78x6.onrender.com/app/metafit.apk |
+| 💻 **Repositorio GitHub** | https://github.com/juanscarvajal04-droid/Equipo_Metafit |
 
-Configurable vía `CORS_ORIGINS` en `.env` o en Render. Solicitudes sin `Origin` (móvil, curl, Postman) siempre pasan.
+> Adminer abre con el servidor de producción ya configurado. Usuario: `metafit`, base de datos: `metafit`. Las credenciales completas y el procedimiento de conexión están en [`documentacion/adminer.md`](./documentacion/adminer.md).
+>
+> Los servicios gratuitos de Render pueden tardar unos segundos en responder después de un periodo de inactividad.
 
 ---
 
-## 🏗️ Arquitectura de producción (verificada 22-sep-2026)
+## Arquitectura en la nube
 
 ```text
-                        ┌─────────────────────────────────────────────────────────┐
-   Usuarios web/móvil   │                        Render                      │
- ──────────────►        │  ┌──────────────────────┐        ┌─────────────────────┐ │
-                        │  │ metafit-frontend     │  CORS  │ metafit-backend     │ │
-                        │  │ :5173 / :8081        │ ─────► │ /health 200         │ │
-                        │  └──────────────────────┘  whitelist │ DB externa VPS   │ │
-                        │  ┌──────────────────────┐        └──────────┬──────────┘ │
-                        │  │ metafit-adminer      │                    │            │
-                        │  │ (prefill VPS :3306)  │                    ▼            │
-                        └──┴──────────────────────┴────────────────────┼───────────┘
-                                                          ┌───────────┴───────────┐
-                                                          │ Oracle VPS (Dokploy)  │
-                                                          │ MySQL 8 `metafit`     │
-                                                          │ 141.148.94.173:3306   │
-                                                          └───────────┬───────────┘
-                                                                      │
-                       Integraciones:                                │
-   ┌──────────────────┬──────────────────┬─────────────────────┬─────┴─────────┐
-   │ Cloudinary       │ Brevo (SMTP 235) │ GTM-K6JZS4MG        │ n8n (LOCAL)   │
-   │ fotos de          │ correo bienvenida│ analítica web      │ localhost:5678│
-   │ afiliados 200     │ (API 401 → SMTP) │                     │ Telegram/GS   │
-   └──────────────────┴──────────────────┴─────────────────────┴───────────────┘
+Usuarios web (staff) ─┐
+                      ├──► Render: Frontend React + Vite ──► Render: API Node/Express
+App móvil (afiliados) ┘                                             │
+                                                                    ├──► Oracle Cloud VPS: MySQL 8
+                                                                    └──► Cloudinary: fotos
+Render: Adminer ────────────────────────────────────────────────────► Oracle Cloud VPS: MySQL 8
 ```
 
-**Puntos clave del estado actual:**
-- Backend y frontend en Render; **BD de producción = MySQL 8 en el VPS** (no embebida).
-- **Cloudinary** sube y sirve fotos (HTTP 200 verificado).
-- **CORS** en lista blanca: orígenes ajenos → 403.
-- **Brevo**: la API key está obsoleta (401) y el flujo de correos funciona por **SMTP relay (AUTH OK)**.
-- **n8n** con sus 4 flujos corre **solo en la PC local**; en producción los webhooks a `n8n:5678`
-  no existen (pendiente exponerlo si se quiere en prod).
-- Detalle de rotación de credenciales en `documentacion/seguridad.md`.
+| Componente | Plataforma | Detalle |
+|---|---|---|
+| Frontend web | Render | React 19 + Vite 6, desplegado como sitio estático |
+| Backend / API | Render | Node.js + Express, Web Service con Docker y health check |
+| Base de datos | Oracle Cloud VPS | MySQL 8 administrado con Dokploy; separada de la BD local |
+| Imágenes | Cloudinary | Fotos de perfil y recursos; fallback local en desarrollo |
+| Administración de BD | Render | Adminer apuntando al MySQL del VPS |
+| CI/CD | GitHub Actions | Tests de backend, frontend y móvil + deploy automático a Render |
 
 ---
 
-## 🧠 Obsidian Vault
+## Calidad y métricas
 
-El proyecto incluye un **vault de Obsidian** con documentación viva en `documentacion/brain/`:
+| Indicador | Resultado |
+|---|---|
+| **SonarQube** | **0 issues** · Quality Gate `MetaFit`: **OK** |
+| **Cobertura backend** | **100.00%** · 2474/2474 líneas |
+| **Cobertura frontend web** | **99.45%** · 2509/2523 líneas |
+| **Cobertura app móvil** | **99.37%** · 944/950 líneas |
+| **Duplicación de código** | **0.9%** · 311 líneas |
+| **CI/CD** | GitHub Actions en verde: tests + build + deploy |
+| **Documentación de API** | 93/93 endpoints documentados en Swagger/OpenAPI 3.0 |
 
-- **28 notas interconectadas** cubriendo arquitectura, APIs, despliegue, bugs, manuales y diseño.
-- Cada nota usa enlaces `[[doble corchete]]` para navegar entre temas.
-- Basado en el código real del proyecto (endpoints, middlewares, schemas, configs).
-
-### Cómo abrirlo en Obsidian
-
-1. Abrir Obsidian
-2. `File > Open folder as vault`
-3. Seleccionar `documentacion/brain/`
-4. Explorar desde `Home.md` como punto de entrada
-
-### Estructura
-
-```
-documentacion/brain/
-├── Home.md              ← Punto de entrada
-├── Proyecto/            ← Visión general, historias, roadmap
-├── Arquitectura/        ← Backend, Frontend, Móvil, BD
-├── APIs/                ← Autenticación, Afiliados, Pagos, Planes
-├── Despliegue/          ← Render, Railway, Brevo, Cloudinary, CI/CD
-├── Bugs y soluciones/   ← Historial y lecciones aprendidas
-├── Manuales/            ← Técnico, Usuario, Postman
-├── Diseño/              ← Colores, tokens CSS, favicon
-└── Enlaces útiles.md
-```
+Todas las suites de pruebas se ejecutan en cada push y el pipeline despliega automáticamente a Render cuando la rama `main` queda en verde.
 
 ---
-*MetaFit Inc. · Sport Gym Sede Santa Rosita · Bogotá, Colombia*
+
+## Cómo usar la app
+
+### 1. Web de gestión (personal del gimnasio)
+
+1. Abre https://metafit-frontend-78x6.onrender.com
+2. Entra con una de las cuentas de prueba.
+3. Según el rol, verás el dashboard, afiliados, pagos, rutinas, dietas, finanzas o gestión de personal.
+
+### 2. App móvil (afiliados)
+
+1. Descarga el APK desde https://metafit-frontend-78x6.onrender.com/app/metafit.apk
+2. En Android, permite la instalación desde orígenes desconocidos si el sistema lo solicita.
+3. Instala **MetaFit**, ábrela e inicia sesión con la cuenta de afiliado.
+
+### Credenciales de prueba
+
+| Rol | Correo | Contraseña | Dónde entrar |
+|---|---|---|---|
+| **Administrador** | `carlos@metafit.com` | `Admin123!` | Web |
+| **Recepcionista** | `maria@metafit.com` | `Maria123!` | Web |
+| **Entrenador** | `laura@metafit.com` | `Laura123!` | Web |
+| **Afiliado** | `ana.lopez@example.com` | `Afiliado123!` | App móvil (o Expo web en local) |
+
+> También existe una segunda cuenta de entrenador: `andres@metafit.com` / `Andres123!`.
+>
+> Estas cuentas son datos de demostración para la evaluación. No elimines registros ni cambies contraseñas durante la revisión.
+
+### Alcance por rol
+
+| Rol | Puede hacer |
+|---|---|
+| **Administrador** | Todo: dashboard, afiliados, ciclos, personal, pagos, finanzas, rutinas, dietas y restricciones |
+| **Recepcionista** | Gestionar afiliados, registrar pagos y administrar restricciones |
+| **Entrenador** | Crear y editar rutinas, dietas y restricciones; consultar afiliados y su progreso |
+| **Afiliado** | Ver su perfil, rutina, dieta y progreso; registrar ejercicio, alimentos, agua y notas |
+
+---
+
+## Tecnologías principales
+
+| Capa | Tecnologías |
+|---|---|
+| Frontend web | React 19, Vite 6, React Router 7, Bootstrap 5, Chart.js, Axios, Storybook |
+| App móvil | Expo SDK 55, React Native 0.83, React Navigation, AsyncStorage, Axios |
+| Backend | Node.js 22, Express 4, MySQL2, JWT, bcrypt (12 rondas), Multer, Swagger |
+| Base de datos | MySQL 8 en producción · MariaDB 11 en local |
+| Infraestructura | Docker Compose, Render, Oracle Cloud VPS, Cloudinary, GitHub Actions |
+
+---
+
+## Documentación
+
+### Desarrollo
+
+| Documento | Contenido |
+|---|---|
+| [`README_DEV.md`](./README_DEV.md) | Clonado, entorno local con Docker, tests, migraciones, variables de entorno y generación del APK |
+| [`backend/README.md`](./backend/README.md) | Arquitectura MVC + Services, scripts, migraciones y despliegue del backend |
+| [`frontend_web/README.md`](./frontend_web/README.md) | Stack, estructura de carpetas, comandos y build del frontend |
+| [`movil/README.md`](./movil/README.md) | Expo, ejecución web en `localhost:8081`, tests y compilación del APK |
+| [`database/README.md`](./database/README.md) | Orden de scripts SQL, convenciones y ejecución manual |
+
+### Producción y operación
+
+| Documento | Contenido |
+|---|---|
+| [`documentacion/MANUAL_TECNICO.md`](./documentacion/MANUAL_TECNICO.md) | Arquitectura, endpoints, base de datos, seguridad y despliegue |
+| [`documentacion/MANUAL_USUARIO.md`](./documentacion/MANUAL_USUARIO.md) | Guías de uso por rol |
+| [`documentacion/MANUAL_POSTMAN.md`](./documentacion/MANUAL_POSTMAN.md) | Pruebas de la API con las colecciones Postman |
+| [`documentacion/adminer.md`](./documentacion/adminer.md) | Conexión a la base de datos de producción con Adminer |
+| [`documentacion/entornos.md`](./documentacion/entornos.md) | Separación entre entorno local y producción |
+| [`documentacion/infraestructura_vps.md`](./documentacion/infraestructura_vps.md) | Infraestructura de la BD en Oracle Cloud + Dokploy |
+| [`documentacion/manual_apk_movil.md`](./documentacion/manual_apk_movil.md) | Generación, firma y publicación del APK |
+| [`documentacion/QA_REPORT.md`](./documentacion/QA_REPORT.md) | Reporte de aseguramiento de calidad |
+| [`documentacion/seguridad.md`](./documentacion/seguridad.md) | Medidas de seguridad y rotación de credenciales |
+| [`documentacion/DIAGRAMAS.md`](./documentacion/DIAGRAMAS.md) | Diagramas de arquitectura, componentes y flujos |
+| [`documentacion/brain/Home.md`](./documentacion/brain/Home.md) | Vault de Obsidian con documentación viva del proyecto |
+
+---
+
+## Estado del proyecto
+
+Proyecto académico **finalizado y congelado** para entrega. La versión de producción mantiene los 93 endpoints documentados, las suites de pruebas en verde y el Quality Gate de SonarQube aprobado.
+
+---
+
+*MetaFit · Sport Gym Sede Santa Rosita · Bogotá, Colombia*
