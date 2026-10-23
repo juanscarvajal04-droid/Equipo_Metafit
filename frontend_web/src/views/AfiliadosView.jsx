@@ -83,6 +83,96 @@ const AvatarFoto = ({ nombre, foto, size = 32, style }) => {
   );
 };
 
+// Campos compartidos por los formularios de creación y edición de afiliados.
+// El prefijo de id mantiene labels e inputs únicos en cada modal.
+const CamposAfiliado = ({ idPrefix, form, setForm, nombreAvatar, fotoPreview, onFotoChange, documentoRequerido = false }) => (
+  <>
+    <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
+      <AvatarFoto nombre={nombreAvatar} foto={fotoPreview} size={56} />
+      <div style={{ flex: 1 }}>
+        <label className={s.labelText} htmlFor={`${idPrefix}-foto`}>Foto de perfil</label>
+        <input
+          id={`${idPrefix}-foto`}
+          className={s.inputDark}
+          type="file"
+          accept="image/*"
+          onChange={(e) => onFotoChange(e.target.files?.[0] || null)}
+          style={{ padding: "0.35rem 0.5rem" }}
+        />
+        <small style={{ color: "var(--mf-muted)" }}>JPG, PNG, WEBP o GIF · máx 5 MB</small>
+      </div>
+    </div>
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+      <div>
+        <label className={s.labelText} htmlFor={`${idPrefix}-nombres`}>Nombres</label>
+        <input id={`${idPrefix}-nombres`} className={s.inputDark} value={form.nombres} onChange={(e) => setForm({ ...form, nombres: e.target.value })} required />
+      </div>
+      <div>
+        <label className={s.labelText} htmlFor={`${idPrefix}-apellidos`}>Apellidos</label>
+        <input id={`${idPrefix}-apellidos`} className={s.inputDark} value={form.apellidos} onChange={(e) => setForm({ ...form, apellidos: e.target.value })} required />
+      </div>
+      <div>
+        <label className={s.labelText} htmlFor={`${idPrefix}-correo`}>Correo</label>
+        <input id={`${idPrefix}-correo`} className={s.inputDark} type="email" value={form.correo} onChange={(e) => setForm({ ...form, correo: e.target.value })} required />
+      </div>
+      <div>
+        <label className={s.labelText} htmlFor={`${idPrefix}-telefono`}>Teléfono</label>
+        <input id={`${idPrefix}-telefono`} className={s.inputDark} value={form.telefono} onChange={(e) => setForm({ ...form, telefono: e.target.value })} />
+      </div>
+      <div>
+        <label className={s.labelText} htmlFor={`${idPrefix}-documento`}>Documento</label>
+        <input id={`${idPrefix}-documento`} className={s.inputDark} value={form.documento} onChange={(e) => setForm({ ...form, documento: e.target.value })} required={documentoRequerido} />
+      </div>
+      <div>
+        <label className={s.labelText} htmlFor={`${idPrefix}-sexo`}>Sexo</label>
+        <select id={`${idPrefix}-sexo`} className={s.selectDark} value={form.sexo} onChange={(e) => setForm({ ...form, sexo: e.target.value })}>
+          {SEXOS.map((sx) => <option key={sx} value={sx}>{sx}</option>)}
+        </select>
+      </div>
+      <div>
+        <label className={s.labelText} htmlFor={`${idPrefix}-nacimiento`}>Fecha Nacimiento</label>
+        <input id={`${idPrefix}-nacimiento`} className={s.inputDark} type="date" value={form.fecha_nacimiento} onChange={(e) => setForm({ ...form, fecha_nacimiento: e.target.value })} />
+      </div>
+      <div>
+        <label className={s.labelText} htmlFor={`${idPrefix}-estatura`}>Estatura (cm)</label>
+        <input id={`${idPrefix}-estatura`} className={s.inputDark} type="number" value={form.estatura_cm} onChange={(e) => setForm({ ...form, estatura_cm: e.target.value })} />
+      </div>
+      <div>
+        <label className={s.labelText} htmlFor={`${idPrefix}-direccion`}>Dirección</label>
+        <input id={`${idPrefix}-direccion`} className={s.inputDark} value={form.direccion} onChange={(e) => setForm({ ...form, direccion: e.target.value })} />
+      </div>
+      <div>
+        <label className={s.labelText} htmlFor={`${idPrefix}-objetivo`}>Objetivo físico</label>
+        <select id={`${idPrefix}-objetivo`} className={s.selectDark} value={form.objetivo_fisico} onChange={(e) => setForm({ ...form, objetivo_fisico: e.target.value })}>
+          {OBJETIVOS.map((o) => <option key={o} value={o}>{o}</option>)}
+        </select>
+      </div>
+      <div>
+        <label className={s.labelText} htmlFor={`${idPrefix}-nivel`}>Nivel experiencia</label>
+        <select id={`${idPrefix}-nivel`} className={s.selectDark} value={form.nivel_experiencia} onChange={(e) => setForm({ ...form, nivel_experiencia: e.target.value })}>
+          {NIVELES.map((n) => <option key={n} value={n}>{n}</option>)}
+        </select>
+      </div>
+      <div>
+        <label className={s.labelText} htmlFor={`${idPrefix}-dias`}>Días/semana</label>
+        <input id={`${idPrefix}-dias`} className={s.inputDark} type="number" min={1} max={7} value={form.disponibilidad_semanal_dias} onChange={(e) => setForm({ ...form, disponibilidad_semanal_dias: e.target.value })} />
+      </div>
+      <div>
+        <label className={s.labelText} htmlFor={`${idPrefix}-estado`}>Estado</label>
+        <select id={`${idPrefix}-estado`} className={s.selectDark} value={form.estado} onChange={(e) => setForm({ ...form, estado: e.target.value })}>
+          {ESTADOS.map((es) => <option key={es} value={es}>{es}</option>)}
+        </select>
+      </div>
+      <div>
+        <label className={s.labelText} htmlFor={`${idPrefix}-musculo`}>Grupo muscular</label>
+        <select id={`${idPrefix}-musculo`} className={s.selectDark} value={form.grupo_muscular_prioritario} onChange={(e) => setForm({ ...form, grupo_muscular_prioritario: e.target.value })}>
+          {["Pecho", "Espalda", "Piernas", "Glúteos", "Hombros", "Bíceps", "Tríceps", "Abdomen"].map((g) => <option key={g} value={g}>{g}</option>)}
+        </select>
+      </div>
+    </div>
+  </>
+);
+
 export default function AfiliadosView() {
   const { user, authAxios } = useAuth();
   const navigate = useNavigate();
@@ -311,6 +401,11 @@ export default function AfiliadosView() {
     setRestriccionesSeleccionadas((prev) =>
       prev.filter((r) => (r?.id_restriccion ?? r?.id) !== restriccionId)
     );
+  };
+
+  const handleFotoChange = (f) => {
+    setFotoFile(f);
+    setFotoPreview(f ? URL.createObjectURL(f) : null);
   };
 
   const abrirNuevo = () => {
@@ -662,93 +757,14 @@ export default function AfiliadosView() {
                 <button type="button" className={s.btnOutline} onClick={() => !saving && setEditandoAfiliado(null)}>✕</button>
               </div>
               <div className={s.modalBody}>
-                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
-                  <AvatarFoto nombre={nombreCompleto(editandoAfiliado)} foto={fotoPreview || editandoAfiliado.foto} size={56} />
-                  <div style={{ flex: 1 }}>
-                    <label className={s.labelText} htmlFor="afiliado-foto-editar">Foto de perfil</label>
-                    <input
-                      id="afiliado-foto-editar"
-                      className={s.inputDark}
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const f = e.target.files?.[0] || null;
-                        setFotoFile(f);
-                        setFotoPreview(f ? URL.createObjectURL(f) : null);
-                      }}
-                      style={{ padding: "0.35rem 0.5rem" }}
-                    />
-                    <small style={{ color: "var(--mf-muted)" }}>JPG, PNG, WEBP o GIF · máx 5 MB</small>
-                  </div>
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                  <div>
-                    <label className={s.labelText} htmlFor="editar-afiliado-nombres">Nombres</label>
-                    <input id="editar-afiliado-nombres" className={s.inputDark} value={formEdit.nombres} onChange={(e) => setFormEdit({ ...formEdit, nombres: e.target.value })} required />
-                  </div>
-                  <div>
-                    <label className={s.labelText} htmlFor="editar-afiliado-apellidos">Apellidos</label>
-                    <input id="editar-afiliado-apellidos" className={s.inputDark} value={formEdit.apellidos} onChange={(e) => setFormEdit({ ...formEdit, apellidos: e.target.value })} required />
-                  </div>
-                  <div>
-                    <label className={s.labelText} htmlFor="editar-afiliado-correo">Correo</label>
-                    <input id="editar-afiliado-correo" className={s.inputDark} type="email" value={formEdit.correo} onChange={(e) => setFormEdit({ ...formEdit, correo: e.target.value })} required />
-                  </div>
-                  <div>
-                    <label className={s.labelText} htmlFor="editar-afiliado-telefono">Teléfono</label>
-                    <input id="editar-afiliado-telefono" className={s.inputDark} value={formEdit.telefono} onChange={(e) => setFormEdit({ ...formEdit, telefono: e.target.value })} />
-                  </div>
-                  <div>
-                    <label className={s.labelText} htmlFor="editar-afiliado-documento">Documento</label>
-                    <input id="editar-afiliado-documento" className={s.inputDark} value={formEdit.documento} onChange={(e) => setFormEdit({ ...formEdit, documento: e.target.value })} />
-                  </div>
-                  <div>
-                    <label className={s.labelText} htmlFor="editar-afiliado-sexo">Sexo</label>
-                    <select id="editar-afiliado-sexo" className={s.selectDark} value={formEdit.sexo} onChange={(e) => setFormEdit({ ...formEdit, sexo: e.target.value })}>
-                      {SEXOS.map((sx) => <option key={sx} value={sx}>{sx}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className={s.labelText} htmlFor="editar-afiliado-nacimiento">Fecha Nacimiento</label>
-                    <input id="editar-afiliado-nacimiento" className={s.inputDark} type="date" value={formEdit.fecha_nacimiento} onChange={(e) => setFormEdit({ ...formEdit, fecha_nacimiento: e.target.value })} />
-                  </div>
-                  <div>
-                    <label className={s.labelText} htmlFor="editar-afiliado-estatura">Estatura (cm)</label>
-                    <input id="editar-afiliado-estatura" className={s.inputDark} type="number" value={formEdit.estatura_cm} onChange={(e) => setFormEdit({ ...formEdit, estatura_cm: e.target.value })} />
-                  </div>
-                  <div>
-                    <label className={s.labelText} htmlFor="editar-afiliado-direccion">Dirección</label>
-                    <input id="editar-afiliado-direccion" className={s.inputDark} value={formEdit.direccion} onChange={(e) => setFormEdit({ ...formEdit, direccion: e.target.value })} />
-                  </div>
-                  <div>
-                    <label className={s.labelText} htmlFor="editar-afiliado-objetivo">Objetivo físico</label>
-                    <select id="editar-afiliado-objetivo" className={s.selectDark} value={formEdit.objetivo_fisico} onChange={(e) => setFormEdit({ ...formEdit, objetivo_fisico: e.target.value })}>
-                      {OBJETIVOS.map((o) => <option key={o} value={o}>{o}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className={s.labelText} htmlFor="editar-afiliado-nivel">Nivel experiencia</label>
-                    <select id="editar-afiliado-nivel" className={s.selectDark} value={formEdit.nivel_experiencia} onChange={(e) => setFormEdit({ ...formEdit, nivel_experiencia: e.target.value })}>
-                      {NIVELES.map((n) => <option key={n} value={n}>{n}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className={s.labelText} htmlFor="editar-afiliado-dias">Días/semana</label>
-                    <input id="editar-afiliado-dias" className={s.inputDark} type="number" min={1} max={7} value={formEdit.disponibilidad_semanal_dias} onChange={(e) => setFormEdit({ ...formEdit, disponibilidad_semanal_dias: e.target.value })} />
-                  </div>
-                  <div>
-                    <label className={s.labelText} htmlFor="editar-afiliado-estado">Estado</label>
-                    <select id="editar-afiliado-estado" className={s.selectDark} value={formEdit.estado} onChange={(e) => setFormEdit({ ...formEdit, estado: e.target.value })}>
-                      {ESTADOS.map((es) => <option key={es} value={es}>{es}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className={s.labelText} htmlFor="editar-afiliado-musculo">Grupo muscular</label>
-                    <select id="editar-afiliado-musculo" className={s.selectDark} value={formEdit.grupo_muscular_prioritario} onChange={(e) => setFormEdit({ ...formEdit, grupo_muscular_prioritario: e.target.value })}>
-                      {["Pecho", "Espalda", "Piernas", "Glúteos", "Hombros", "Bíceps", "Tríceps", "Abdomen"].map((g) => <option key={g} value={g}>{g}</option>)}
-                    </select>
-                  </div>
-                </div>
+                <CamposAfiliado
+                  idPrefix="editar-afiliado"
+                  form={formEdit}
+                  setForm={setFormEdit}
+                  nombreAvatar={nombreCompleto(editandoAfiliado)}
+                  fotoPreview={fotoPreview || editandoAfiliado.foto}
+                  onFotoChange={handleFotoChange}
+                />
                 <div style={{ marginTop: 12 }}>
                   <label className={s.labelText} htmlFor="editar-afiliado-restricciones">Restricciones médicas</label>
                   <textarea id="editar-afiliado-restricciones" className={s.inputDark} rows={2} value={formEdit.restricciones_medicas} onChange={(e) => setFormEdit({ ...formEdit, restricciones_medicas: e.target.value })} />
@@ -785,93 +801,15 @@ export default function AfiliadosView() {
                 <button type="button" className={s.btnOutline} onClick={cerrarNuevo}>✕</button>
               </div>
               <div className={s.modalBody}>
-                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
-                  <AvatarFoto nombre={formCrear.nombres || "?"} foto={fotoPreview} size={56} />
-                  <div style={{ flex: 1 }}>
-                    <label className={s.labelText} htmlFor="afiliado-foto-crear">Foto de perfil</label>
-                    <input
-                      id="afiliado-foto-crear"
-                      className={s.inputDark}
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const f = e.target.files?.[0] || null;
-                        setFotoFile(f);
-                        setFotoPreview(f ? URL.createObjectURL(f) : null);
-                      }}
-                      style={{ padding: "0.35rem 0.5rem" }}
-                    />
-                    <small style={{ color: "var(--mf-muted)" }}>JPG, PNG, WEBP o GIF · máx 5 MB</small>
-                  </div>
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                  <div>
-                    <label className={s.labelText} htmlFor="crear-afiliado-nombres">Nombres</label>
-                    <input id="crear-afiliado-nombres" className={s.inputDark} value={formCrear.nombres} onChange={(e) => setFormCrear({ ...formCrear, nombres: e.target.value })} required />
-                  </div>
-                  <div>
-                    <label className={s.labelText} htmlFor="crear-afiliado-apellidos">Apellidos</label>
-                    <input id="crear-afiliado-apellidos" className={s.inputDark} value={formCrear.apellidos} onChange={(e) => setFormCrear({ ...formCrear, apellidos: e.target.value })} required />
-                  </div>
-                  <div>
-                    <label className={s.labelText} htmlFor="crear-afiliado-correo">Correo</label>
-                    <input id="crear-afiliado-correo" className={s.inputDark} type="email" value={formCrear.correo} onChange={(e) => setFormCrear({ ...formCrear, correo: e.target.value })} required />
-                  </div>
-                  <div>
-                    <label className={s.labelText} htmlFor="crear-afiliado-telefono">Teléfono</label>
-                    <input id="crear-afiliado-telefono" className={s.inputDark} value={formCrear.telefono} onChange={(e) => setFormCrear({ ...formCrear, telefono: e.target.value })} />
-                  </div>
-                  <div>
-                    <label className={s.labelText} htmlFor="crear-afiliado-documento">Documento</label>
-                    <input id="crear-afiliado-documento" className={s.inputDark} value={formCrear.documento} onChange={(e) => setFormCrear({ ...formCrear, documento: e.target.value })} required />
-                  </div>
-                  <div>
-                    <label className={s.labelText} htmlFor="crear-afiliado-sexo">Sexo</label>
-                    <select id="crear-afiliado-sexo" className={s.selectDark} value={formCrear.sexo} onChange={(e) => setFormCrear({ ...formCrear, sexo: e.target.value })}>
-                      {SEXOS.map((sx) => <option key={sx} value={sx}>{sx}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className={s.labelText} htmlFor="crear-afiliado-nacimiento">Fecha Nacimiento</label>
-                    <input id="crear-afiliado-nacimiento" className={s.inputDark} type="date" value={formCrear.fecha_nacimiento} onChange={(e) => setFormCrear({ ...formCrear, fecha_nacimiento: e.target.value })} />
-                  </div>
-                  <div>
-                    <label className={s.labelText} htmlFor="crear-afiliado-estatura">Estatura (cm)</label>
-                    <input id="crear-afiliado-estatura" className={s.inputDark} type="number" value={formCrear.estatura_cm} onChange={(e) => setFormCrear({ ...formCrear, estatura_cm: e.target.value })} />
-                  </div>
-                  <div>
-                    <label className={s.labelText} htmlFor="crear-afiliado-direccion">Dirección</label>
-                    <input id="crear-afiliado-direccion" className={s.inputDark} value={formCrear.direccion} onChange={(e) => setFormCrear({ ...formCrear, direccion: e.target.value })} />
-                  </div>
-                  <div>
-                    <label className={s.labelText} htmlFor="crear-afiliado-objetivo">Objetivo físico</label>
-                    <select id="crear-afiliado-objetivo" className={s.selectDark} value={formCrear.objetivo_fisico} onChange={(e) => setFormCrear({ ...formCrear, objetivo_fisico: e.target.value })}>
-                      {OBJETIVOS.map((o) => <option key={o} value={o}>{o}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className={s.labelText} htmlFor="crear-afiliado-nivel">Nivel experiencia</label>
-                    <select id="crear-afiliado-nivel" className={s.selectDark} value={formCrear.nivel_experiencia} onChange={(e) => setFormCrear({ ...formCrear, nivel_experiencia: e.target.value })}>
-                      {NIVELES.map((n) => <option key={n} value={n}>{n}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className={s.labelText} htmlFor="crear-afiliado-dias">Días/semana</label>
-                    <input id="crear-afiliado-dias" className={s.inputDark} type="number" min={1} max={7} value={formCrear.disponibilidad_semanal_dias} onChange={(e) => setFormCrear({ ...formCrear, disponibilidad_semanal_dias: e.target.value })} />
-                  </div>
-                  <div>
-                    <label className={s.labelText} htmlFor="crear-afiliado-estado">Estado</label>
-                    <select id="crear-afiliado-estado" className={s.selectDark} value={formCrear.estado} onChange={(e) => setFormCrear({ ...formCrear, estado: e.target.value })}>
-                      {ESTADOS.map((es) => <option key={es} value={es}>{es}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className={s.labelText} htmlFor="crear-afiliado-musculo">Grupo muscular</label>
-                    <select id="crear-afiliado-musculo" className={s.selectDark} value={formCrear.grupo_muscular_prioritario} onChange={(e) => setFormCrear({ ...formCrear, grupo_muscular_prioritario: e.target.value })}>
-                      {["Pecho", "Espalda", "Piernas", "Glúteos", "Hombros", "Bíceps", "Tríceps", "Abdomen"].map((g) => <option key={g} value={g}>{g}</option>)}
-                    </select>
-                  </div>
-                </div>
+                <CamposAfiliado
+                  idPrefix="crear-afiliado"
+                  form={formCrear}
+                  setForm={setFormCrear}
+                  nombreAvatar={formCrear.nombres || "?"}
+                  fotoPreview={fotoPreview}
+                  onFotoChange={handleFotoChange}
+                  documentoRequerido
+                />
                 <div style={{ marginTop: 12 }}>
                   <span className={s.labelText}>Restricciones médicas (catálogo)</span>
                   <RestriccionSelector

@@ -92,6 +92,7 @@ describe("DietasView — interacciones de envío", () => {
     fireEvent.change(screen.getByLabelText("N° Comida"), { target: { value: "2" } });
     fireEvent.change(screen.getByLabelText("Calorías objetivo"), { target: { value: "1800" } });
     fireEvent.change(screen.getByLabelText("💧 Recomendación de agua diaria (vasos)"), { target: { value: "8" } });
+    fireEvent.change(screen.getByLabelText("Observaciones"), { target: { value: "Sin sal" } });
 
     fireEvent.submit(screen.getByText("✅ Crear Plan Nutricional").closest("form"));
 
@@ -262,5 +263,45 @@ describe("DietasView — interacciones de envío", () => {
 
     fireEvent.change(screen.getByPlaceholderText("Buscar afiliado..."), { target: { value: "zzz" } });
     expect(screen.getByText("No se encontraron afiliados")).toBeInTheDocument();
+  });
+
+  test("cierra los modales de dieta con Escape", async () => {
+    montar();
+    await screen.findByText("Ana Pérez");
+
+    fireEvent.click(screen.getByText("➕ Asignar Dieta"));
+    await screen.findByRole("heading", { name: /Asignar Dieta/ });
+    fireEvent.keyDown(screen.getByLabelText("Cerrar modal"), { key: "Escape" });
+    await waitFor(() =>
+      expect(screen.queryByRole("heading", { name: /Asignar Dieta/ })).not.toBeInTheDocument()
+    );
+
+    fireEvent.click(screen.getByText(/Ver Catálogo/));
+    await screen.findByRole("heading", { name: /Catálogo de Alimentos/ });
+    fireEvent.keyDown(screen.getByLabelText("Cerrar modal"), { key: "Escape" });
+    await waitFor(() =>
+      expect(screen.queryByRole("heading", { name: /Catálogo de Alimentos/ })).not.toBeInTheDocument()
+    );
+
+    fireEvent.click(screen.getByText(/➕ Agregar Alimento/));
+    await screen.findByRole("heading", { name: /Nuevo Alimento/ });
+    fireEvent.keyDown(screen.getByLabelText("Cerrar modal"), { key: "Escape" });
+    await waitFor(() =>
+      expect(screen.queryByRole("heading", { name: /Nuevo Alimento/ })).not.toBeInTheDocument()
+    );
+
+    fireEvent.click(screen.getByText(/🗑️ Eliminar Alimento/));
+    await screen.findByRole("heading", { name: /Eliminar Alimento/ });
+    fireEvent.keyDown(screen.getByLabelText("Cerrar modal"), { key: "Escape" });
+    await waitFor(() =>
+      expect(screen.queryByRole("heading", { name: /Eliminar Alimento/ })).not.toBeInTheDocument()
+    );
+
+    fireEvent.click(screen.getByTitle("Ver"));
+    await screen.findByRole("heading", { name: /Plan Nutricional: Ana Pérez/ });
+    fireEvent.keyDown(screen.getByLabelText("Cerrar modal"), { key: "Escape" });
+    await waitFor(() =>
+      expect(screen.queryByRole("heading", { name: /Plan Nutricional: Ana Pérez/ })).not.toBeInTheDocument()
+    );
   });
 });

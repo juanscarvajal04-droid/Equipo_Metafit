@@ -92,6 +92,7 @@ describe("RutinasView — interacciones de envío", () => {
     expect(await screen.findByText(/Ejercicios disponibles \(2\)/)).toBeInTheDocument();
     fireEvent.click(screen.getAllByRole("checkbox")[0]);
     fireEvent.change(await screen.findByLabelText("Series"), { target: { value: "4" } });
+    fireEvent.change(screen.getByLabelText("Reps"), { target: { value: "15" } });
     fireEvent.change(screen.getByLabelText("Día"), { target: { value: "2" } });
 
     fireEvent.click(screen.getByText("✅ Crear Plan de Entrenamiento"));
@@ -283,5 +284,97 @@ describe("RutinasView — interacciones de envío", () => {
     await waitFor(() =>
       expect(showToast).toHaveBeenCalledWith("Error al cargar ejercicios disponibles", "danger")
     );
+  });
+
+  test("cierra catálogo, ejercicio, eliminar y ver rutina con Escape", async () => {
+    const authAxios = crearAxios();
+    useAuth.mockReturnValue({ user: { role: "Administrador" }, authAxios });
+    montar();
+    await screen.findByText("Ana Pérez");
+
+    fireEvent.click(screen.getByText(/Ver Catálogo/));
+    await screen.findByRole("heading", { name: /Catálogo de Ejercicios/ });
+    fireEvent.keyDown(screen.getByLabelText("Cerrar modal"), { key: "Escape" });
+    await waitFor(() =>
+      expect(screen.queryByRole("heading", { name: /Catálogo de Ejercicios/ })).not.toBeInTheDocument()
+    );
+
+    fireEvent.click(screen.getByText(/➕ Agregar Ejercicio/));
+    await screen.findByRole("heading", { name: /Nuevo Ejercicio/ });
+    fireEvent.keyDown(screen.getByLabelText("Cerrar modal"), { key: "Escape" });
+    await waitFor(() =>
+      expect(screen.queryByRole("heading", { name: /Nuevo Ejercicio/ })).not.toBeInTheDocument()
+    );
+
+    fireEvent.click(screen.getByText(/🗑️ Eliminar Ejercicio/));
+    await screen.findByRole("heading", { name: /Eliminar Ejercicio/ });
+    fireEvent.keyDown(screen.getByLabelText("Cerrar modal"), { key: "Escape" });
+    await waitFor(() =>
+      expect(screen.queryByRole("heading", { name: /Eliminar Ejercicio/ })).not.toBeInTheDocument()
+    );
+
+    fireEvent.click(screen.getAllByTitle("Ver")[0]);
+    await screen.findByRole("heading", { name: /Rutina: Ana Pérez/ });
+    fireEvent.keyDown(screen.getByLabelText("Cerrar modal"), { key: "Escape" });
+    await waitFor(() =>
+      expect(screen.queryByRole("heading", { name: /Rutina: Ana Pérez/ })).not.toBeInTheDocument()
+    );
+  });
+
+  test("edita y quita un ejercicio del plan activo", async () => {
+    const authAxios = crearAxios();
+    authAxios.get = vi.fn((url) => {
+      if (url === "/afiliados") return Promise.resolve({ data: [ANA] });
+      if (url === "/planes/entrenamiento/10")
+        return Promise.resolve({
+          data: {
+            rutinas: [
+              {
+                id_rutina: 7,
+                dia_numero: 1,
+                ejercicios: [
+                  { id_ejercicio: 5, nombre_ejercicio: "Sentadilla", series: 3, repeticiones: 12, peso_kg: 20 },
+                ],
+              },
+            ],
+          },
+        });
+      if (url.startsWith("/afiliados/1/notas-ejercicio")) return Promise.resolve({ data: [] });
+      return Promise.resolve({ data: [] });
+    });
+    useAuth.mockReturnValue({ user: { role: "Administrador" }, authAxios });
+    montar();
+
+    await screen.findByText("Ana Pérez");
+    fireEvent.click(screen.getAllByTitle("Ver")[0]);
+    expect(await screen.findByRole("heading", { name: /Rutina: Ana Pérez/ })).toBeInTheDocument();
+    expect(await screen.findByText("Sentadilla")).toBeInTheDocument();
+
+    const fila = screen.getByText("Sentadilla").closest("tr");
+    fireEvent.click(within(fila).getByTitle("Editar serie/reps/peso"));
+    const inputs = within(fila).getAllByRole("spinbutton");
+    fireEvent.change(inputs[0], { target: { value: "4" } });
+    fireEvent.change(inputs[1], { target: { value: "10" } });
+    fireEvent.change(inputs[2], { target: { value: "25" } });
+    fireEvent.click(within(fila).getByText("💾"));
+
+    await waitFor(() =>
+      expect(authAxios.patch).toHaveBeenCalledWith("/planes/rutinas/7/ejercicios/5", {
+        series: 4,
+        repeticiones: 10,
+        peso_kg: 25,
+      })
+    );
+    await waitFor(() => expect(showToast).toHaveBeenCalledWith("Ejercicio actualizado", "success"));
+
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
+    fireEvent.click(within(fila).getByTitle("Quitar de la rutina"));
+    await waitFor(() =>
+      expect(authAxios.delete).toHaveBeenCalledWith("/planes/rutinas/7/ejercicios/5")
+    );
+    await waitFor(() =>
+      expect(showToast).toHaveBeenCalledWith("Ejercicio eliminado de la rutina", "success")
+    );
+    confirmSpy.mockRestore();
   });
 });

@@ -251,4 +251,42 @@ describe("AfiliadosView — interacciones", () => {
     expect(screen.getByText("solo-lectura")).toBeInTheDocument();
     expect(screen.queryByText("add-restriccion")).not.toBeInTheDocument();
   });
+
+  test("recorre todos los campos de los formularios de crear y editar", async () => {
+    window.URL.createObjectURL = vi.fn(() => "blob:foto");
+    montar("Administrador");
+    await screen.findByText("Ana Pérez");
+
+    fireEvent.click(screen.getByText(/Nuevo afiliado/));
+    await screen.findByRole("heading", { name: /Nuevo afiliado/ });
+
+    fireEvent.change(screen.getByLabelText("Nombres"), { target: { value: "Nuevo" } });
+    fireEvent.change(screen.getByLabelText("Apellidos"), { target: { value: "Usuario" } });
+    fireEvent.change(screen.getByLabelText("Correo"), { target: { value: "nuevo@metafit.com" } });
+    fireEvent.change(screen.getByLabelText("Teléfono"), { target: { value: "3000000000" } });
+    fireEvent.change(screen.getByLabelText("Documento"), { target: { value: "999999" } });
+    fireEvent.change(screen.getByLabelText("Sexo"), { target: { value: "Femenino" } });
+    fireEvent.change(screen.getByLabelText("Fecha Nacimiento"), { target: { value: "1995-05-05" } });
+    fireEvent.change(screen.getByLabelText("Estatura (cm)"), { target: { value: "170" } });
+    fireEvent.change(screen.getByLabelText("Dirección"), { target: { value: "Calle 3" } });
+    fireEvent.change(screen.getByLabelText("Objetivo físico"), { target: { value: "Aumento de masa" } });
+    fireEvent.change(screen.getByLabelText("Nivel experiencia"), { target: { value: "Avanzado" } });
+    fireEvent.change(screen.getByLabelText("Días/semana"), { target: { value: "5" } });
+    fireEvent.change(screen.getByLabelText("Estado"), { target: { value: "Inactivo" } });
+    fireEvent.change(screen.getByLabelText("Grupo muscular"), { target: { value: "Espalda" } });
+    fireEvent.change(screen.getByLabelText("Otros antecedentes (texto libre)"), { target: { value: "Ninguno" } });
+    fireEvent.change(screen.getByLabelText("Foto de perfil"), {
+      target: { files: [new File(["x"], "foto.png", { type: "image/png" })] },
+    });
+    expect(screen.getByLabelText("Documento")).toBeRequired();
+
+    fireEvent.click(screen.getByText("Cancelar"));
+    await waitFor(() => expect(screen.queryByRole("heading", { name: /Nuevo afiliado/ })).not.toBeInTheDocument());
+
+    fireEvent.click(screen.getAllByTitle("Editar")[0]);
+    await screen.findByRole("heading", { name: /Editar: Ana Pérez/ });
+    fireEvent.change(screen.getByLabelText("Nombres"), { target: { value: "Ana María" } });
+    fireEvent.change(screen.getByLabelText("Restricciones médicas"), { target: { value: "Asma" } });
+    expect(screen.getByLabelText("Documento")).not.toBeRequired();
+  });
 });
