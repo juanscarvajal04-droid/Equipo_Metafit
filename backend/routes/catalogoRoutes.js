@@ -358,7 +358,7 @@ router.get('/restricciones', requireAuth, CatalogoController.getAllRestricciones
  * @swagger
  * /catalogo/restricciones:
  *   post:
- *     summary: Crear restricción médica en el catálogo (staff: Admin, Recepcionista o Entrenador)
+ *     summary: Crear restricción médica en el catálogo (Admin, Recepcionista o Entrenador)
  *     description: Disponible para todo el staff. Solo el Administrador puede eliminar.
  *     tags: [Catálogos]
  *     security:
@@ -399,7 +399,7 @@ router.post('/restricciones', requireAuth, requireStaff, CatalogoController.crea
  * @swagger
  * /catalogo/restricciones/{id}:
  *   put:
- *     summary: Actualizar restricción del catálogo (staff: Admin, Recepcionista o Entrenador)
+ *     summary: Actualizar restricción del catálogo (Admin, Recepcionista o Entrenador)
  *     description: Disponible para todo el staff. Solo el Administrador puede eliminar.
  *     tags: [Catálogos]
  *     security:
