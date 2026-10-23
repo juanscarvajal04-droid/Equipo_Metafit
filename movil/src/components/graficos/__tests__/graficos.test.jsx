@@ -58,9 +58,12 @@ describe('<GraficoPeso />', () => {
         ]}
       />
     );
-    expect(getByTestId('line-chart')).toBeTruthy();
+    const chart = getByTestId('line-chart');
+    expect(chart).toBeTruthy();
     expect(getByText('Evolución de peso')).toBeTruthy();
     expect(getByText('2 registros')).toBeTruthy();
+    expect(chart.props.chartConfig.color(0.5)).toBe('rgba(167, 139, 250, 0.5)');
+    expect(chart.props.chartConfig.labelColor(1)).toBe('rgba(255, 255, 255, 0.5)');
   });
 });
 
@@ -92,8 +95,11 @@ describe('<GraficoVolumen />', () => {
         ]}
       />
     );
-    expect(getByTestId('bar-chart')).toBeTruthy();
+    const chart = getByTestId('bar-chart');
+    expect(chart).toBeTruthy();
     expect(getByText('Volumen por semana')).toBeTruthy();
     expect(getByText('kg levantados')).toBeTruthy();
+    expect(chart.props.chartConfig.color(0.5)).toBe('rgba(139, 92, 246, 0.5)');
+    expect(chart.props.chartConfig.labelColor(1)).toBe('rgba(255, 255, 255, 0.5)');
   });
 });

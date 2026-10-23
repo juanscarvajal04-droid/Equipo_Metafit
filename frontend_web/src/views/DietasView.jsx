@@ -2,7 +2,10 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
-import { getId, nombreCompleto, inicial, cicloActivo } from "../utils/afiliadoHelpers";
+import ModalShell from "../components/common/ModalShell";
+import AfiliadoSearchBar from "../components/common/AfiliadoSearchBar";
+import AfiliadoIdentity from "../components/common/AfiliadoIdentity";
+import { getId, nombreCompleto, inicial, cicloActivo, avatarColor } from "../utils/afiliadoHelpers";
 import { useToast } from "../hooks/useToast";
 import useAutoRefresh from "../hooks/useAutoRefresh";
 import { trackEvent } from "../utils/analytics";
@@ -20,12 +23,6 @@ const RESTRICCION_COLOR = {
   "Enfermedad": { bg:"#ef444418", text:"#dc2626" },
   "Alergia":    { bg:"#f9731618", text:"#ea580c" },
   "Lesion":     { bg:"#eab30818", text:"#ca8a04" },
-};
-
-const avatarColor = (nombre) => {
-  let hash = 0;
-  for (let i = 0; i < nombre.length; i++) hash = nombre.charCodeAt(i) + ((hash << 5) - hash);
-  return `hsl(${Math.abs(hash) % 360}, 65%, 55%)`;
 };
 
 export default function DietasView() {
@@ -382,14 +379,16 @@ export default function DietasView() {
         </div>
 
         {/* SEARCH + TABLE */}
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:16, flexWrap:"wrap", gap:12,
-          background:"var(--mf-surface)", border:"1px solid var(--mf-border)", borderRadius:14, padding:"0.75rem 1rem" }}>
-          <span className="fw-bold" style={{ fontSize:"0.85rem", color:"var(--mf-text)" }}>🥗 Afiliados</span>
-          <div style={{ display:"flex", gap:8, alignItems:"center" }}>
-            <input type="text" className={s.searchInput} placeholder="Buscar afiliado..." value={search} onChange={(e)=>setSearch(e.target.value)} style={{ maxWidth:260, padding:"0.4rem 0.7rem", fontSize:"0.85rem" }} />
-            <button type="button" className={s.btnRefresh} onClick={fetchAfiliados} disabled={loading} title="Refrescar">{loading ? <span className="spinner-border spinner-border-sm" /> : "🔄"}</button>
-          </div>
-        </div>
+        <AfiliadoSearchBar
+          classes={s}
+          title="🥗 Afiliados"
+          search={search}
+          onSearch={setSearch}
+          onRefresh={fetchAfiliados}
+          loading={loading}
+          containerStyle={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:16, flexWrap:"wrap", gap:12,
+            background:"var(--mf-surface)", border:"1px solid var(--mf-border)", borderRadius:14, padding:"0.75rem 1rem" }}
+        />
 
         {/* TABLE */}
         <div className={s.tableCard}>
@@ -414,19 +413,11 @@ export default function DietasView() {
                   const ciclo = cicloActivo(a);
                   const tienePlan = ciclo && !!ciclo.plan_nutricional;
                   const objConf = OBJETIVO_CONFIG[a.objetivo] || { icono:"🎯", color:"var(--mf-muted)", bg:"#94a3b818" };
-                  const nombre = nombreCompleto(a);
-                  const email = a.correo || a.email || "";
                   return (
                     <tr key={getId(a)}>
                       <td style={{ color:"var(--mf-muted)", fontSize:"0.78rem" }}>{idx + 1}</td>
                       <td>
-                        <div style={{ display:"flex", alignItems:"center", gap:"0.5rem" }}>
-                          <div className={s.avatar} style={{ background:avatarColor(nombre) }}>{inicial(a)}</div>
-                          <div>
-                            <div style={{ fontSize:"0.85rem", fontWeight:600 }}>{nombre}</div>
-                            <div className={s.emailText}>{email}</div>
-                          </div>
-                        </div>
+                        <AfiliadoIdentity afiliado={a} classes={s} />
                       </td>
                       <td>
                         <span className={s.badgeDark} style={{ background:objConf.bg, color:objConf.color }}>
@@ -475,22 +466,14 @@ export default function DietasView() {
       {/* MODAL: ASIGNAR DIETA                          */}
       {/* ════════════════════════════════════════════ */}
       {esModal(modal, "asignar") && (
-        <div
-          className={s.modalOverlay}
-          role="button"
-          tabIndex={0}
-          aria-label="Cerrar modal"
-          onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
-          onKeyDown={(e) => {
-            if (e.target === e.currentTarget && (e.key === "Escape" || e.key === "Enter")) closeModal();
-          }}
+        <ModalShell
+          classes={s}
+          title={asignarAfiliadoData && cicloActivo(asignarAfiliadoData) ? "🔄 Nueva Dieta" : "➕ Asignar Dieta"}
+          maxWidth={800}
+          onClose={closeModal}
+          closeDisabled={saving}
+          onSubmit={handleAsignar}
         >
-          <div className={s.modalContent} style={{ maxWidth:800 }}>
-            <div className={s.modalHeader}>
-              <h5 className={s.modalTitle}>{asignarAfiliadoData && cicloActivo(asignarAfiliadoData) ? "🔄 Nueva Dieta" : "➕ Asignar Dieta"}</h5>
-              <button type="button" className={s.btnOutline} onClick={closeModal} disabled={saving}>✕</button>
-            </div>
-            <form onSubmit={handleAsignar}>
               <div className={s.modalBody}>
                 {/* Selector de afiliado */}
                 <div style={{ marginBottom:16 }}>
@@ -608,30 +591,19 @@ export default function DietasView() {
                   {saving ? <span className="spinner-border spinner-border-sm" /> : "✅ Crear Plan Nutricional"}
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
+        </ModalShell>
       )}
 
       {/* ════════════════════════════════════════════ */}
       {/* MODAL: VER PERFIL                            */}
       {/* ════════════════════════════════════════════ */}
       {esModal(modal, "verPerfil") && modalAfiliado && (
-        <div
-          className={s.modalOverlay}
-          role="button"
-          tabIndex={0}
-          aria-label="Cerrar modal"
-          onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
-          onKeyDown={(e) => {
-            if (e.target === e.currentTarget && (e.key === "Escape" || e.key === "Enter")) closeModal();
-          }}
+        <ModalShell
+          classes={s}
+          title={`👁️ Plan Nutricional: ${nombreCompleto(modalAfiliado)}`}
+          maxWidth={700}
+          onClose={closeModal}
         >
-          <div className={s.modalContent} style={{ maxWidth:700 }}>
-            <div className={s.modalHeader}>
-              <h5 className={s.modalTitle}>👁️ Plan Nutricional: {nombreCompleto(modalAfiliado)}</h5>
-              <button type="button" className={s.btnOutline} onClick={closeModal}>✕</button>
-            </div>
             <div className={s.modalBody}>
               <div className={s.afiliadoInfoBox}>
                 <div style={{ display:"flex", alignItems:"center", gap:12 }}>
@@ -650,29 +622,19 @@ export default function DietasView() {
             <div className={s.modalFooter}>
               <button type="button" className={s.btnOutline} onClick={closeModal}>Cerrar</button>
             </div>
-          </div>
-        </div>
+        </ModalShell>
       )}
 
       {/* ════════════════════════════════════════════ */}
       {/* MODAL: CATÁLOGO DE ALIMENTOS                 */}
       {/* ════════════════════════════════════════════ */}
       {esModal(modal, "catalogo") && (
-        <div
-          className={s.modalOverlay}
-          role="button"
-          tabIndex={0}
-          aria-label="Cerrar modal"
-          onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
-          onKeyDown={(e) => {
-            if (e.target === e.currentTarget && (e.key === "Escape" || e.key === "Enter")) closeModal();
-          }}
+        <ModalShell
+          classes={s}
+          title="📋 Catálogo de Alimentos"
+          maxWidth={800}
+          onClose={closeModal}
         >
-          <div className={s.modalContent} style={{ maxWidth:800 }}>
-            <div className={s.modalHeader}>
-              <h5 className={s.modalTitle}>📋 Catálogo de Alimentos</h5>
-              <button type="button" className={s.btnOutline} onClick={closeModal}>✕</button>
-            </div>
             <div className={s.modalBody}>
               {catalogoAlimentos.length === 0 ? (
                 <div className={s.emptyState}>No hay alimentos en el catálogo</div>
@@ -718,30 +680,21 @@ export default function DietasView() {
               <button type="button" className={s.btnPrimary} onClick={() => setModal("nuevo")}>➕ Nuevo Alimento</button>
               <button type="button" className={s.btnOutline} onClick={closeModal}>Cerrar</button>
             </div>
-          </div>
-        </div>
+        </ModalShell>
       )}
 
       {/* ════════════════════════════════════════════ */}
       {/* MODAL: NUEVO / EDITAR ALIMENTO               */}
       {/* ════════════════════════════════════════════ */}
       {(esModal(modal, "nuevo") || esModal(modal, "editar")) && (
-        <div
-          className={s.modalOverlay}
-          role="button"
-          tabIndex={0}
-          aria-label="Cerrar modal"
-          onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
-          onKeyDown={(e) => {
-            if (e.target === e.currentTarget && (e.key === "Escape" || e.key === "Enter")) closeModal();
-          }}
+        <ModalShell
+          classes={s}
+          title={esModal(modal, "nuevo") ? "🥗 Nuevo Alimento" : "✏️ Editar Alimento"}
+          maxWidth={500}
+          onClose={closeModal}
+          closeDisabled={saving}
+          onSubmit={handleGuardarAlimento}
         >
-          <div className={s.modalContent} style={{ maxWidth:500 }}>
-            <div className={s.modalHeader}>
-              <h5 className={s.modalTitle}>{esModal(modal, "nuevo") ? "🥗 Nuevo Alimento" : "✏️ Editar Alimento"}</h5>
-              <button type="button" className={s.btnOutline} onClick={closeModal} disabled={saving}>✕</button>
-            </div>
-            <form onSubmit={handleGuardarAlimento}>
               <div className={s.modalBody}>
                 <div style={{ marginBottom:12 }}>
                   <label className={s.labelText} htmlFor="alimento-nombre">Nombre del alimento *</label>
@@ -774,31 +727,21 @@ export default function DietasView() {
                   {saving ? <span className="spinner-border spinner-border-sm" /> : (esModal(modal, "nuevo") ? "💾 Guardar" : "💾 Guardar Cambios")}
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
+        </ModalShell>
       )}
 
       {/* ════════════════════════════════════════════ */}
       {/* MODAL: ELIMINAR ALIMENTO                     */}
       {/* ════════════════════════════════════════════ */}
       {esModal(modal, "eliminar") && (
-        <div
-          className={s.modalOverlay}
-          role="button"
-          tabIndex={0}
-          aria-label="Cerrar modal"
-          onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
-          onKeyDown={(e) => {
-            if (e.target === e.currentTarget && (e.key === "Escape" || e.key === "Enter")) closeModal();
-          }}
+        <ModalShell
+          classes={s}
+          title="🗑️ Eliminar Alimento"
+          maxWidth={450}
+          onClose={closeModal}
+          closeDisabled={saving}
+          onSubmit={handleEliminarAlimento}
         >
-          <div className={s.modalContent} style={{ maxWidth:450 }}>
-            <div className={s.modalHeader}>
-              <h5 className={s.modalTitle}>🗑️ Eliminar Alimento</h5>
-              <button type="button" className={s.btnOutline} onClick={closeModal} disabled={saving}>✕</button>
-            </div>
-            <form onSubmit={handleEliminarAlimento}>
               <div className={s.modalBody}>
                 <div className={s.alertDanger} style={{ marginBottom:"0.75rem", padding:"0.5rem 0.75rem", fontSize:"0.82rem" }}>⚠️ Esta acción no se puede deshacer.</div>
                 {catalogoAlimentos.length === 0 ? (
@@ -821,9 +764,7 @@ export default function DietasView() {
                   {saving ? <span className="spinner-border spinner-border-sm" /> : "🗑️ Eliminar"}
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
+        </ModalShell>
       )}
     </AppLayout>
   );

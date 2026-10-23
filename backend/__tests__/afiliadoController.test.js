@@ -467,3 +467,130 @@ describe('afiliadoController - endpoints /me y notas', () => {
     expect(r404.status).toHaveBeenCalledWith(404);
   });
 });
+
+describe('afiliadoController - ramas de error restantes', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('traduce a 500 los fallos de los endpoints de lectura y escritura', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    const casos = [
+      ['getById', { params: { id: '1' } }, 'getById'],
+      ['update', { params: { id: '1' } }, 'update'],
+      ['delete', { params: { id: '1' } }, 'delete'],
+      ['getCiclos', { params: { id: '1' } }, 'getCiclos'],
+      ['getRestricciones', { params: { id: '1' } }, 'getRestricciones'],
+      ['addRestriccion', { params: { id: '1' } }, 'addRestriccion'],
+      ['removeRestriccion', { params: { id: '1', id_restriccion: '2' } }, 'removeRestriccion'],
+      ['getEjerciciosDisponibles', { params: { id: '1' } }, 'getEjerciciosDisponibles'],
+      ['getAlimentosDisponibles', { params: { id: '1' } }, 'getAlimentosDisponibles'],
+      ['getProgreso', { params: { id: '1' } }, 'getProgreso'],
+      ['subirFoto', { file: { path: '/tmp/foto.jpg', filename: 'foto.jpg' } }, 'getFoto'],
+      ['getMe', {}, 'getById'],
+      ['getMisCiclos', {}, 'getCiclos'],
+      ['getMiProgreso', {}, 'getProgreso'],
+      ['getMisRestricciones', {}, 'getRestricciones'],
+      ['getProgresoEjercicio', { params: { idCiclo: '1', fecha: '2026-01-01' } }, 'getProgresoEjercicio'],
+      ['saveProgresoEjercicio', {}, 'saveProgresoEjercicio'],
+      ['getAgua', { params: { fecha: '2026-01-01' } }, 'getAgua'],
+      ['saveAgua', {}, 'saveAgua'],
+      ['saveConsumoAlimento', {}, 'saveConsumoAlimento'],
+      ['getAguaHistorial', {}, 'getAguaHistorial'],
+      ['getAguaAfiliado', { params: { id: '1' } }, 'getAguaHistorial'],
+      ['getConsumoHistorial', {}, 'getConsumoHistorial'],
+      ['getProgresoEjercicioHistorial', {}, 'getProgresoEjercicioHistorial'],
+      ['crearNotaEjercicio', {}, 'guardarNotaEjercicio'],
+      ['getMisNotasEjercicio', {}, 'getMisNotasEjercicio'],
+      ['actualizarNotaEjercicio', { params: { id_nota: '1' } }, 'actualizarNotaEjercicio'],
+      ['eliminarNotaEjercicio', { params: { id_nota: '1' } }, 'eliminarNotaEjercicio'],
+      ['getNotasEjercicioAfiliado', { params: { id: '1' } }, 'getNotasEjercicioDeAfiliado'],
+    ];
+
+    for (const [metodo, req, servicio] of casos) {
+      AfiliadoService[servicio].mockRejectedValueOnce(new Error('db'));
+      const res = makeRes();
+      await controller[metodo](makeReq(req), res);
+      expect(res.status).toHaveBeenCalledWith(500);
+    }
+  });
+
+  test('cubre validaciones y ramas específicas de restricciones, progreso y notas', async () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    AfiliadoService.delete.mockResolvedValueOnce(false);
+    const rDelete = makeRes();
+    await controller.delete(makeReq({ params: { id: '1' } }), rDelete);
+    expect(rDelete.status).toHaveBeenCalledWith(404);
+
+    AfiliadoService.addRestriccion.mockRejectedValueOnce(new Error('id_restriccion requerido'));
+    const rRestr = makeRes();
+    await controller.addRestriccion(makeReq(), rRestr);
+    expect(rRestr.status).toHaveBeenCalledWith(400);
+
+    AfiliadoService.saveProgresoEjercicio.mockRejectedValueOnce(new Error('campos requeridos'));
+    const rProg = makeRes();
+    await controller.saveProgresoEjercicio(makeReq(), rProg);
+    expect(rProg.status).toHaveBeenCalledWith(400);
+
+    AfiliadoService.saveConsumoAlimento.mockRejectedValueOnce(new Error('campos requeridos'));
+    const rConsumo = makeRes();
+    await controller.saveConsumoAlimento(makeReq(), rConsumo);
+    expect(rConsumo.status).toHaveBeenCalledWith(400);
+
+    AfiliadoService.updateMe.mockRejectedValueOnce(
+      Object.assign(new Error('sin ciclo'), { code: 'SIN_CICLO_ACTIVO' })
+    );
+    const rUpdateMe = makeRes();
+    await controller.updateMe(makeReq(), rUpdateMe);
+    expect(rUpdateMe.status).toHaveBeenCalledWith(400);
+
+    AfiliadoService.guardarNotaEjercicio
+      .mockRejectedValueOnce(new Error('campos requeridos'))
+      .mockRejectedValueOnce(Object.assign(new Error('check'), { code: 'ER_CHECK_CONSTRAINT_VIOLATED' }));
+    const rNotaReq = makeRes();
+    const rNotaCheck = makeRes();
+    await controller.crearNotaEjercicio(makeReq(), rNotaReq);
+    await controller.crearNotaEjercicio(makeReq(), rNotaCheck);
+    expect(rNotaReq.status).toHaveBeenCalledWith(400);
+    expect(rNotaCheck.status).toHaveBeenCalledWith(400);
+
+    AfiliadoService.actualizarNotaEjercicio.mockRejectedValueOnce(
+      new Error('nota es requerida')
+    );
+    const rNotaAct = makeRes();
+    await controller.actualizarNotaEjercicio(makeReq(), rNotaAct);
+    expect(rNotaAct.status).toHaveBeenCalledWith(400);
+
+    AfiliadoService.eliminarNotaEjercicio.mockRejectedValueOnce(
+      Object.assign(new Error('no'), { code: 'NO_ENCONTRADO' })
+    );
+    const rNotaDel = makeRes();
+    await controller.eliminarNotaEjercicio(makeReq(), rNotaDel);
+    expect(rNotaDel.status).toHaveBeenCalledWith(404);
+  });
+
+  test('create ejecuta callbacks post-creación y registra sus fallos', async () => {
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    AfiliadoService.create.mockResolvedValue({ id: 7, password_temporal: 'temporal' });
+    AfiliadoService.getById.mockResolvedValueOnce({ id_usuario: 7 });
+    enviarCorreoBienvenida.mockRejectedValueOnce(new Error('mail'));
+    notificarNuevoAfiliado.mockRejectedValueOnce(new Error('hook'));
+
+    await controller.create(makeReq(), makeRes());
+    await new Promise((resolve) => setImmediate(resolve));
+
+    expect(errorSpy).toHaveBeenCalledWith('[afiliadoController] bienvenida:', 'mail');
+    expect(errorSpy).toHaveBeenCalledWith('[afiliadoController] webhook n8n:', 'hook');
+
+    AfiliadoService.create.mockResolvedValue({ id: 8, password_temporal: 'temporal' });
+    AfiliadoService.getById.mockRejectedValueOnce(new Error('db'));
+
+    await controller.create(makeReq(), makeRes());
+    await new Promise((resolve) => setImmediate(resolve));
+
+    expect(errorSpy).toHaveBeenCalledWith('[afiliadoController] post-creacion:', 'db');
+  });
+});

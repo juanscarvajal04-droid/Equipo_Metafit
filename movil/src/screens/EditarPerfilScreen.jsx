@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
-  StyleSheet,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -14,7 +13,8 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { COLORS, GRADIENTS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../theme';
+import { COLORS, GRADIENTS, FONTS, SPACING } from '../theme';
+import { createFormScreenStyles } from '../components/common/formStyles';
 import { useTheme } from '../context/ThemeContext';
 import useApi from '../hooks/useApi';
 import useMutation from '../hooks/useMutation';
@@ -184,52 +184,12 @@ export default function EditarPerfilScreen({ navigation }) {
   );
 }
 
-const createStyles = () => StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: COLORS.bg,
-  },
-  flex: {
-    flex: 1,
-  },
-  scroll: {
-    flexGrow: 1,
-    paddingBottom: SPACING.xl,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm + 2,
-  },
-  backBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: {
-    color: '#fff',
-    fontSize: FONTS.subtitle,
-    fontWeight: '700',
-  },
-  card: {
-    backgroundColor: COLORS.bgSecondary,
-    borderRadius: BORDER_RADIUS.lg,
-    padding: SPACING.lg,
-    margin: SPACING.md,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    ...SHADOWS.card,
-  },
+const createStyles = () => createFormScreenStyles({
   imcBanner: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.purpleGlow,
-    borderRadius: BORDER_RADIUS.md,
+    borderRadius: 10,
     padding: SPACING.sm,
     marginBottom: SPACING.md,
   },
@@ -238,44 +198,10 @@ const createStyles = () => StyleSheet.create({
     fontSize: FONTS.body,
     fontWeight: '700',
   },
-  subtitle: {
-    color: COLORS.textSecondary,
-    fontSize: FONTS.xsmall,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: SPACING.xs,
-    marginTop: SPACING.xs,
-  },
   hint: {
     color: COLORS.textMuted,
     fontSize: FONTS.xsmall,
     marginBottom: SPACING.xs,
-  },
-  input: {
-    backgroundColor: COLORS.inputBg,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: BORDER_RADIUS.md,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: 14,
-    fontSize: FONTS.body,
-    color: COLORS.text,
-    marginBottom: SPACING.md,
-  },
-  button: {
-    borderRadius: BORDER_RADIUS.md,
-    paddingVertical: 16,
-    alignItems: 'center',
-    marginTop: SPACING.sm,
-    ...SHADOWS.purple,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: FONTS.body,
-    fontWeight: '700',
   },
   ultimo: {
     color: COLORS.textMuted,

@@ -26,6 +26,15 @@ export const inicial = (a) => {
 };
 
 /**
+ * Genera un color HSL estable a partir del nombre para el avatar.
+ */
+export const avatarColor = (nombre = "") => {
+  let hash = 0;
+  for (let i = 0; i < nombre.length; i++) hash = nombre.charCodeAt(i) + ((hash << 5) - hash);
+  return `hsl(${Math.abs(hash) % 360}, 65%, 55%)`;
+};
+
+/**
  * Retorna el ciclo activo del afiliado.
  */
 export const cicloActivo = (a) => {

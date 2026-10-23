@@ -27,7 +27,14 @@ jest.mock('@react-navigation/native-stack', () => {
 
 jest.mock('@react-navigation/bottom-tabs', () => {
   const ReactLib = require('react');
-  const Navigator = ({ children }) => ReactLib.createElement(ReactLib.Fragment, null, children);
+  const Navigator = ({ children, screenOptions }) => {
+    if (screenOptions) {
+      const options = screenOptions({ route: { name: 'Perfil' } });
+      options.tabBarIcon?.({ focused: true, color: '#fff', size: 22 });
+      options.tabBarIcon?.({ focused: false, color: '#fff', size: 22 });
+    }
+    return ReactLib.createElement(ReactLib.Fragment, null, children);
+  };
   const Screen = ({ component: Comp }) => (Comp ? ReactLib.createElement(Comp) : null);
   return { createBottomTabNavigator: () => ({ Navigator, Screen }) };
 });

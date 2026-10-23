@@ -22,8 +22,23 @@ vi.mock("../../components/AppLayout", () => ({
   default: ({ children }) => <div>{children}</div>,
 }));
 vi.mock("react-chartjs-2", () => ({
-  Bar: () => <div data-testid="finanzas-bar" />,
-  Doughnut: () => <div data-testid="finanzas-doughnut" />,
+  Bar: ({ options }) => {
+    const tooltip = options?.plugins?.tooltip?.callbacks;
+    tooltip?.title([{ label: "Oct" }]);
+    tooltip?.label({ parsed: { y: 170000 } });
+    options?.plugins?.datalabels?.formatter?.(170000);
+    options?.plugins?.datalabels?.formatter?.(0);
+    options?.scales?.y?.ticks?.callback?.(170000);
+    return <div data-testid="finanzas-bar" />;
+  },
+  Doughnut: ({ options }) => {
+    const tooltip = options?.plugins?.tooltip?.callbacks;
+    tooltip?.title([{ label: "Rita" }]);
+    tooltip?.label({ parsed: 255000 });
+    options?.plugins?.datalabels?.formatter?.(255000);
+    options?.plugins?.datalabels?.formatter?.(0);
+    return <div data-testid="finanzas-doughnut" />;
+  },
 }));
 
 import FinanzasView from "../FinanzasView";
@@ -127,10 +142,23 @@ describe("FinanzasView — interacciones", () => {
     renderView();
     await screen.findByText("Panel de Finanzas");
 
+    fireEvent.change(screen.getByLabelText("Fecha inicio"), {
+      target: { value: "2026-09-01" },
+    });
+    fireEvent.change(screen.getByLabelText("Fecha fin"), {
+      target: { value: "2026-10-31" },
+    });
     fireEvent.change(screen.getByLabelText("Recepcionista"), { target: { value: "1" } });
     fireEvent.click(screen.getByText("Filtrar"));
     await waitFor(() =>
-      expect(authAxiosMock.get).toHaveBeenCalledWith("/pagos/metricas?id_recepcionista=1")
+      expect(authAxiosMock.get).toHaveBeenCalledWith(
+        expect.stringContaining("id_recepcionista=1")
+      )
+    );
+
+    fireEvent.click(screen.getByText("Limpiar"));
+    await waitFor(() =>
+      expect(authAxiosMock.get).toHaveBeenCalledWith("/pagos/metricas")
     );
 
     fireEvent.click(screen.getByText("Exportar a PDF"));
@@ -182,5 +210,23 @@ describe("FinanzasView — interacciones", () => {
     );
 
     expect(await screen.findByText("No se pudieron cargar las metricas financieras.")).toBeInTheDocument();
+  });
+
+  test("maneja el fallo al exportar PDF y navega a gestión de pagos", async () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    renderView();
+    await screen.findByText("Panel de Finanzas");
+
+    docMock.save.mockImplementationOnce(() => {
+      throw new Error("pdf roto");
+    });
+    fireEvent.click(screen.getByText("Exportar a PDF"));
+    await waitFor(() =>
+      expect(errorSpy).toHaveBeenCalledWith("[exportPDF]", expect.any(Error))
+    );
+
+    fireEvent.click(screen.getByText(/Ir a Gestión de Pagos/));
+    expect(document.body).toBeTruthy();
+    errorSpy.mockRestore();
   });
 });

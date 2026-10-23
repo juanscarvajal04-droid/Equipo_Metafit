@@ -468,6 +468,30 @@ describe('pagoController', () => {
     expect(res.status).toHaveBeenCalledWith(500);
   });
 
+  test('create cubre afiliado inexistente y fallo post-pago', async () => {
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    PagoModel.create.mockResolvedValue({ id_pago: 11, fecha_vencimiento: '2026-11-20' });
+    AfiliadoModel.findById.mockResolvedValueOnce(null);
+    await pago.create(makeReq({ params: { id: '1' } }), makeRes());
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(errorSpy).toHaveBeenCalledWith(
+      '[pagoController.create] afiliado no encontrado para factura'
+    );
+
+    PagoModel.create.mockResolvedValue({ id_pago: 12, fecha_vencimiento: '2026-11-20' });
+    AfiliadoModel.findById.mockResolvedValueOnce({ id_usuario: 1, correo: 'ana@metafit.com' });
+    enviarFacturaPago.mockRejectedValueOnce(new Error('mail'));
+    await pago.create(makeReq({ params: { id: '1' } }), makeRes());
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(errorSpy).toHaveBeenCalledWith(
+      '[pagoController.create] error post-pago (no afecta el pago):',
+      'mail'
+    );
+
+    errorSpy.mockRestore();
+  });
+
   test('consultas responden 500 ante error', async () => {
     PagoModel.findByAfiliado.mockRejectedValueOnce(new Error('db'));
     PagoModel.getAll.mockRejectedValueOnce(new Error('db'));

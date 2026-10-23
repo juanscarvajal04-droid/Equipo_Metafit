@@ -13,6 +13,7 @@
 'use strict';
 
 const pool = require('../config/db');
+const { construirSets } = require('../utils/modelUpdate');
 
 const AfiliadoModel = {
 
@@ -418,23 +419,8 @@ const AfiliadoModel = {
     // Campos permitidos en la tabla USUARIO
     const permitidosUsuario = ['nombres', 'apellidos', 'correo', 'estado'];
 
-    const setsAfiliado = [];
-    const valsAfiliado = [];
-    for (const key of permitidosAfiliado) {
-      if (campos[key] !== undefined) {
-        setsAfiliado.push(`${key}=?`);
-        valsAfiliado.push(campos[key]);
-      }
-    }
-
-    const setsUsuario = [];
-    const valsUsuario = [];
-    for (const key of permitidosUsuario) {
-      if (campos[key] !== undefined) {
-        setsUsuario.push(`${key}=?`);
-        valsUsuario.push(campos[key]);
-      }
-    }
+    const { sets: setsAfiliado, valores: valsAfiliado } = construirSets(campos, permitidosAfiliado);
+    const { sets: setsUsuario, valores: valsUsuario } = construirSets(campos, permitidosUsuario);
 
     // Si no hay nada que actualizar, retornar 0
     if (!setsAfiliado.length && !setsUsuario.length) return 0;
@@ -482,23 +468,8 @@ const AfiliadoModel = {
     const permitidosAfiliado = ['telefono', 'direccion', 'estatura_cm'];
     const permitidosUsuario  = ['correo'];
 
-    const setsAfiliado = [];
-    const valsAfiliado = [];
-    for (const key of permitidosAfiliado) {
-      if (campos[key] !== undefined) {
-        setsAfiliado.push(`${key}=?`);
-        valsAfiliado.push(campos[key]);
-      }
-    }
-
-    const setsUsuario = [];
-    const valsUsuario = [];
-    for (const key of permitidosUsuario) {
-      if (campos[key] !== undefined) {
-        setsUsuario.push(`${key}=?`);
-        valsUsuario.push(campos[key]);
-      }
-    }
+    const { sets: setsAfiliado, valores: valsAfiliado } = construirSets(campos, permitidosAfiliado);
+    const { sets: setsUsuario, valores: valsUsuario } = construirSets(campos, permitidosUsuario);
 
     if (!setsAfiliado.length && !setsUsuario.length && campos.peso_kg === undefined) return 0;
 

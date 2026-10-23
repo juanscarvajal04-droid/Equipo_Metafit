@@ -80,4 +80,27 @@ describe("Login", () => {
       await screen.findByText(/solo para personal administrativo/)
     ).toBeInTheDocument();
   });
+
+  test("aplica los estados visuales de foco, blur y hover", async () => {
+    renderView();
+    const correo = await screen.findByPlaceholderText(
+      "Ingresa tu correo electrónico",
+      {},
+      { timeout: 2500 }
+    );
+    const password = screen.getByPlaceholderText("Ingresa tu contraseña");
+    const rol = screen.getByRole("combobox");
+    const boton = screen.getByText(/Ingresar al Sistema/).closest("button");
+
+    fireEvent.focus(rol);
+    fireEvent.blur(rol);
+    fireEvent.focus(correo);
+    fireEvent.blur(correo);
+    fireEvent.focus(password);
+    fireEvent.blur(password);
+    fireEvent.mouseEnter(boton);
+    fireEvent.mouseLeave(boton);
+
+    expect(boton).toHaveStyle({ transform: "translateY(0)" });
+  });
 });

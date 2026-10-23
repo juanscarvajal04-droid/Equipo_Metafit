@@ -6,6 +6,17 @@ const AfiliadoService = require('../services/afiliadoService');
 const RegistroService = require('../services/registroService');
 const { eliminarFotoAnterior } = require('../middlewares/uploadFoto');
 
+function manejarErrorCreacion(res, err, { validacion, duplicado, etiqueta }) {
+  if (err.message === validacion) {
+    return res.status(400).json({ error: err.message });
+  }
+  if (err.code === 'ER_DUP_ENTRY') {
+    return res.status(400).json({ error: duplicado });
+  }
+  console.error(`[afiliadoController.${etiqueta}]`, err);
+  return res.status(500).json({ error: 'Error interno del servidor' });
+}
+
 const AfiliadoController = {
 
   getAll: async (req, res) => {
@@ -112,14 +123,11 @@ const AfiliadoController = {
       const result = await AfiliadoService.createCiclo(req.body, req.user.sub);
       return res.status(201).json(result);
     } catch (err) {
-      if (err.message === 'id_usuario, fecha_inicio y fecha_fin son requeridos') {
-        return res.status(400).json({ error: err.message });
-      }
-      if (err.code === 'ER_DUP_ENTRY') {
-        return res.status(400).json({ error: 'Ya existe un ciclo con esa fecha de inicio para este afiliado' });
-      }
-      console.error('[afiliadoController.createCiclo]', err);
-      return res.status(500).json({ error: 'Error interno del servidor' });
+      return manejarErrorCreacion(res, err, {
+        validacion: 'id_usuario, fecha_inicio y fecha_fin son requeridos',
+        duplicado: 'Ya existe un ciclo con esa fecha de inicio para este afiliado',
+        etiqueta: 'createCiclo',
+      });
     }
   },
 
@@ -201,14 +209,11 @@ const AfiliadoController = {
       const result = await AfiliadoService.createProgreso(req.body, req.user.sub);
       return res.status(201).json(result);
     } catch (err) {
-      if (err.message === 'id_ciclo, fecha_registro y peso son requeridos') {
-        return res.status(400).json({ error: err.message });
-      }
-      if (err.code === 'ER_DUP_ENTRY') {
-        return res.status(400).json({ error: 'Ya existe un registro de progreso para ese ciclo en esa fecha' });
-      }
-      console.error('[afiliadoController.createProgreso]', err);
-      return res.status(500).json({ error: 'Error interno del servidor' });
+      return manejarErrorCreacion(res, err, {
+        validacion: 'id_ciclo, fecha_registro y peso son requeridos',
+        duplicado: 'Ya existe un registro de progreso para ese ciclo en esa fecha',
+        etiqueta: 'createProgreso',
+      });
     }
   },
 

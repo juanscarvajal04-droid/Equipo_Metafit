@@ -272,6 +272,26 @@ describe('authController.recuperarPassword', () => {
     expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ modoPrueba: true }));
   });
 
+  test('usa modo prueba si falla la lectura de la plantilla', async () => {
+    mockUser();
+    const fs = require('fs');
+    jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+    jest.spyOn(fs, 'readFileSync').mockImplementation(() => {
+      throw new Error('EACCES');
+    });
+    const res = makeRes();
+
+    await AuthController.recuperarPassword(req('ana@metafit.com'), res);
+
+    expect(console.error).toHaveBeenCalledWith(
+      '[authController.recuperarPassword] plantilla:',
+      'EACCES'
+    );
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ modoPrueba: true, token: 'reset-token' })
+    );
+  });
+
   test('envía por Brevo y oculta el token', async () => {
     mockUser();
     process.env.BREVO_API_KEY = 'brevo-key';
@@ -321,6 +341,32 @@ describe('authController.recuperarPassword', () => {
     expect(res.json).toHaveBeenCalledWith({
       mensaje: expect.any(String),
     });
+  });
+
+  test('registra el error si también falla el envío por SMTP', async () => {
+    mockUser();
+    process.env.BREVO_API_KEY = 'brevo-key';
+    process.env.SMTP_HOST = 'smtp.test';
+    process.env.SMTP_USER = 'user';
+    process.env.SMTP_PASS = 'pass';
+    fetchMock.mockResolvedValue({
+      ok: false,
+      status: 500,
+      json: jest.fn().mockResolvedValue({ message: 'boom' }),
+    });
+    const sendMail = jest.fn().mockRejectedValue(new Error('smtp caído'));
+    nodemailer.createTransport.mockReturnValue({ sendMail });
+    const res = makeRes();
+
+    await AuthController.recuperarPassword(req('ana@metafit.com'), res);
+
+    expect(console.error).toHaveBeenCalledWith(
+      '[authController.recuperarPassword] error envío:',
+      'smtp caído'
+    );
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ modoPrueba: true, token: 'reset-token' })
+    );
   });
 
   test('si Brevo lanza y no hay SMTP devuelve token', async () => {

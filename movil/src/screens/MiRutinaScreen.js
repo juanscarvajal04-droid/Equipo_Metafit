@@ -25,6 +25,11 @@ import {
 } from '../services/api';
 import { seleccionarCicloActivo } from '../utils/cicloUtils';
 import { formatearFechaLegible, capitalizar } from '../utils/formateadores';
+import ScreenHeader from '../components/common/ScreenHeader';
+import CicloPicker from '../components/common/CicloPicker';
+import ErrorState from '../components/common/ErrorState';
+import SaveProgressButton from '../components/common/SaveProgressButton';
+import { mensajeErrorCarga } from '../utils/errorUtils';
 import useAutoRefresh from '../hooks/useAutoRefresh';
 
 const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
@@ -365,24 +370,8 @@ export default function MiRutinaScreen() {
         setNotas(notaMap);
       } catch (_) {}
     } catch (err) {
-      if (!err.response) {
-        setError('Sin conexión. Verificá tu red.');
-      } else {
-        switch (err.response.status) {
-          case 401:
-            // El interceptor ya maneja esto: cierra sesión automáticamente.
-            break;
-          case 403:
-            setError('No tenés permiso para ver estos datos.');
-            break;
-          default:
-            if (err.response.status >= 500) {
-              setError('Error al cargar los datos. Intentá más tarde.');
-            } else {
-              setError('No se pudieron cargar los datos.');
-            }
-        }
-      }
+      const mensaje = mensajeErrorCarga(err);
+      if (mensaje) setError(mensaje);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -534,37 +523,12 @@ export default function MiRutinaScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
-      <LinearGradient colors={GRADIENTS.purple} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
-        style={{ paddingHorizontal: SPACING.lg, paddingTop: SPACING.xl, paddingBottom: SPACING.lg }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <View>
-            <Text style={{ color: '#fff', fontSize: FONTS.title, fontWeight: '800' }}>Mi Rutina</Text>
-            <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: FONTS.body, marginTop: 4 }}>
-              {formatearFechaLegible(hoy)} — {diaSemana}
-            </Text>
-          </View>
-          <TouchableOpacity
-            onPress={onActualizar}
-            activeOpacity={0.7}
-            disabled={actualizando}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 18,
-              backgroundColor: 'rgba(255,255,255,0.15)',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-          >
-            {actualizando ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Ionicons name="refresh" size={20} color="#fff" />
-            )}
-          </TouchableOpacity>
-        </View>
-
+      <ScreenHeader
+        title="Mi Rutina"
+        subtitle={`${formatearFechaLegible(hoy)} — ${diaSemana}`}
+        refreshing={actualizando}
+        onRefresh={onActualizar}
+      >
         <View style={{
           flexDirection: 'row',
           backgroundColor: 'rgba(255,255,255,0.1)',
@@ -591,69 +555,17 @@ export default function MiRutinaScreen() {
           </View>
         </View>
 
-        {ciclos.length > 1 && (
-          <TouchableOpacity
-            onPress={() => setShowPicker(!showPicker)}
-            activeOpacity={0.7}
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              backgroundColor: 'rgba(255,255,255,0.15)',
-              borderRadius: BORDER_RADIUS.md,
-              padding: SPACING.sm,
-              marginTop: SPACING.sm,
-            }}
-          >
-            <Ionicons name="swap-horizontal" size={16} color="rgba(255,255,255,0.7)" />
-            <Text style={{ color: '#fff', fontSize: FONTS.small, marginLeft: SPACING.xs, flex: 1 }}>
-              Ciclo: {ciclo?.nombre_ciclo || ciclo?.id_ciclo}
-            </Text>
-            <Ionicons name={showPicker ? 'chevron-up' : 'chevron-down'} size={16} color="rgba(255,255,255,0.7)" />
-          </TouchableOpacity>
-        )}
-
-        {showPicker && (
-          <View style={{
-            backgroundColor: COLORS.bgCard,
-            borderRadius: BORDER_RADIUS.md,
-            marginTop: SPACING.sm,
-            overflow: 'hidden',
-          }}>
-            {ciclos.map((c) => {
-              const activo = c.id_ciclo === ciclo?.id_ciclo;
-              return (
-                <TouchableOpacity
-                  key={c.id_ciclo}
-                  onPress={() => handleCicloChange(c)}
-                  activeOpacity={0.7}
-                  style={{
-                    paddingVertical: SPACING.sm,
-                    paddingHorizontal: SPACING.md,
-                    borderBottomWidth: 1,
-                    borderBottomColor: COLORS.border,
-                    backgroundColor: activo ? 'rgba(168,85,247,0.2)' : 'transparent',
-                  }}
-                >
-                  <Text style={{ color: COLORS.text, fontSize: FONTS.body, fontWeight: activo ? '700' : '400' }}>
-                    {c.nombre_ciclo || `Ciclo ${c.id_ciclo}`}
-                  </Text>
-                  <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.small, marginTop: 2 }}>
-                    {formatearFechaLegible(c.fecha_inicio)} — {c.fecha_fin ? formatearFechaLegible(c.fecha_fin) : 'Activo'}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        )}
-      </LinearGradient>
+        <CicloPicker
+          ciclos={ciclos}
+          ciclo={ciclo}
+          showPicker={showPicker}
+          onToggle={() => setShowPicker(!showPicker)}
+          onSelect={handleCicloChange}
+        />
+      </ScreenHeader>
 
       {error ? (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: SPACING.lg }}>
-          <Ionicons name="alert-circle-outline" size={48} color={COLORS.textSecondary} />
-          <Text style={{ color: COLORS.textSecondary, fontSize: FONTS.body, marginTop: SPACING.md, textAlign: 'center' }}>
-            {error}
-          </Text>
-        </View>
+        <ErrorState message={error} />
       ) : (
         <>
           {diasData.length > 0 && (
@@ -726,36 +638,7 @@ export default function MiRutinaScreen() {
         </>
       )}
 
-      {!error && (
-        <View style={{
-          position: 'absolute',
-          bottom: 30,
-          left: SPACING.lg,
-          right: SPACING.lg,
-        }}>
-          <TouchableOpacity onPress={handleSave} disabled={saving} activeOpacity={0.8}>
-            <LinearGradient
-              colors={saving ? ['#555', '#555'] : GRADIENTS.purple}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={{
-                borderRadius: BORDER_RADIUS.lg,
-                padding: SPACING.md,
-                alignItems: 'center',
-                ...SHADOWS.purple,
-              }}
-            >
-              {saving ? (
-                <ActivityIndicator size="small" color="#fff" />
-              ) : (
-                <Text style={{ color: '#fff', fontSize: FONTS.body, fontWeight: '700' }}>
-                  Guardar Progreso
-                </Text>
-              )}
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
-      )}
+      {!error && <SaveProgressButton saving={saving} onPress={handleSave} />}
     </View>
   );
 }

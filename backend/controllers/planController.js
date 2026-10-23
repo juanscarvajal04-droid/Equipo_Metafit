@@ -15,6 +15,18 @@ function normalizarRecomendacionAgua(valor) {
   return n;
 }
 
+function manejarErrorCreacionPlan(res, err, etiqueta, mensajeDuplicado) {
+  if (err.code === 'ER_DUP_ENTRY') {
+    return res.status(400).json({ error: mensajeDuplicado });
+  }
+  console.error(`[planController.${etiqueta}]`, err);
+  return res.status(500).json({ error: 'Error interno del servidor' });
+}
+
+function notificarNuevoPlan(id_ciclo, title, body, screen) {
+  void enviarPushAUsuarioDelCiclo(id_ciclo, { title, body, data: { screen } });
+}
+
 const PlanController = {
 
   // ── PLAN ENTRENAMIENTO ────────────────────────────────────
@@ -56,17 +68,20 @@ const PlanController = {
       const id = await PlanModel.createEntrenamiento(
         id_ciclo, req.user.sub, observaciones
       );
-      void enviarPushAUsuarioDelCiclo(id_ciclo, {
-        title: '🏋️ Nueva rutina asignada',
-        body: 'Tu entrenador te asignó un plan de entrenamiento. ¡A darle!',
-        data: { screen: 'Rutina' },
-      });
+      notificarNuevoPlan(
+        id_ciclo,
+        '🏋️ Nueva rutina asignada',
+        'Tu entrenador te asignó un plan de entrenamiento. ¡A darle!',
+        'Rutina'
+      );
       res.status(201).json({ id_ciclo: id, message: 'Plan de entrenamiento creado' });
     } catch (err) {
-      if (err.code === 'ER_DUP_ENTRY')
-        return res.status(400).json({ error: 'Este ciclo ya tiene un plan de entrenamiento' });
-      console.error('[planController.createEntrenamiento]', err);
-      res.status(500).json({ error: 'Error interno del servidor' });
+      manejarErrorCreacionPlan(
+        res,
+        err,
+        'createEntrenamiento',
+        'Este ciclo ya tiene un plan de entrenamiento'
+      );
     }
   },
 
@@ -208,17 +223,20 @@ const PlanController = {
         id_ciclo, calorias_objetivo, num_comidas, req.user.sub, observaciones,
         recomendacion_agua_vasos
       );
-      void enviarPushAUsuarioDelCiclo(id_ciclo, {
-        title: '🥗 Nueva dieta asignada',
-        body: 'Tu nutricionista te asignó un plan de alimentación. ¡A comer rico y sano!',
-        data: { screen: 'Dieta' },
-      });
+      notificarNuevoPlan(
+        id_ciclo,
+        '🥗 Nueva dieta asignada',
+        'Tu nutricionista te asignó un plan de alimentación. ¡A comer rico y sano!',
+        'Dieta'
+      );
       res.status(201).json({ id_ciclo: id, message: 'Plan nutricional creado' });
     } catch (err) {
-      if (err.code === 'ER_DUP_ENTRY')
-        return res.status(400).json({ error: 'Este ciclo ya tiene un plan nutricional' });
-      console.error('[planController.createNutricional]', err);
-      res.status(500).json({ error: 'Error interno del servidor' });
+      manejarErrorCreacionPlan(
+        res,
+        err,
+        'createNutricional',
+        'Este ciclo ya tiene un plan nutricional'
+      );
     }
   },
 

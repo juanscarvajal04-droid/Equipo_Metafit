@@ -154,6 +154,24 @@ describe('enviarFacturaPago', () => {
     );
   });
 
+  test('omite htmlContent si falla la lectura de la plantilla', async () => {
+    process.env.BREVO_API_KEY = 'brevo-test-key';
+    jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+    jest.spyOn(fs, 'readFileSync').mockImplementation(() => {
+      throw new Error('read fail');
+    });
+    global.fetch.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: jest.fn().mockResolvedValue({}),
+    });
+
+    await expect(enviarFacturaPago(pago, afiliado)).resolves.toBe(true);
+    expect(console.error).toHaveBeenCalledWith('[facturaService.renderPlantilla]', 'read fail');
+    const body = JSON.parse(global.fetch.mock.calls[0][1].body);
+    expect(body).not.toHaveProperty('htmlContent');
+  });
+
   test('omite htmlContent si la plantilla no existe', async () => {
     process.env.BREVO_API_KEY = 'brevo-test-key';
     jest.spyOn(fs, 'existsSync').mockReturnValue(false);

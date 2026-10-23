@@ -377,4 +377,178 @@ describe("RutinasView — interacciones de envío", () => {
     );
     confirmSpy.mockRestore();
   });
+
+  test("agrega por grupo muscular, quita selección y maneja fallos al asignar", async () => {
+    const authAxios = crearAxios();
+    authAxios.get = vi.fn((url) => {
+      if (url === "/afiliados") return Promise.resolve({ data: [ANA] });
+      if (url === "/catalogo/ejercicios") return Promise.resolve({ data: EJERCICIOS });
+      if (url.includes("/ejercicios-disponibles")) return Promise.resolve({ data: EJERCICIOS });
+      if (url === "/planes/entrenamiento/10")
+        return Promise.resolve({ data: { rutinas: [{ dia_numero: 1, id_rutina: 7 }] } });
+      return Promise.resolve({ data: [] });
+    });
+    authAxios.delete.mockRejectedValueOnce(new Error("delete boom"));
+    authAxios.post.mockRejectedValueOnce(new Error("assign boom"));
+    useAuth.mockReturnValue({ user: { role: "Administrador" }, authAxios });
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    montar();
+
+    await screen.findByText("Ana Pérez");
+    fireEvent.click(screen.getByText("🔄 Nueva"));
+    expect(await screen.findByText(/Ciclo activo detectado/)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText("➕ Piernas"));
+    expect(screen.getAllByRole("checkbox")[0]).toBeChecked();
+    fireEvent.click(screen.getAllByRole("checkbox")[0]);
+    expect(screen.getAllByRole("checkbox")[0]).not.toBeChecked();
+    fireEvent.click(screen.getAllByRole("checkbox")[0]);
+
+    fireEvent.click(screen.getByText("✅ Crear Plan de Entrenamiento"));
+    await waitFor(() => expect(showToast).toHaveBeenCalledWith("assign boom", "danger"));
+  });
+
+  test("muestra error al guardar un ejercicio del catálogo", async () => {
+    const authAxios = crearAxios();
+    authAxios.post.mockRejectedValueOnce(new Error("save boom"));
+    useAuth.mockReturnValue({ user: { role: "Administrador" }, authAxios });
+    montar();
+
+    await screen.findByText("Ana Pérez");
+    fireEvent.click(screen.getByText(/➕ Agregar Ejercicio/));
+    fireEvent.change(await screen.findByLabelText("Nombre del ejercicio *"), {
+      target: { value: "Press militar" },
+    });
+    fireEvent.submit(screen.getByText("💾 Guardar").closest("form"));
+
+    await waitFor(() => expect(showToast).toHaveBeenCalledWith("save boom", "danger"));
+  });
+
+  test("edita y elimina ciclos del historial con éxito y error", async () => {
+    const authAxios = crearAxios();
+    const ciclo = {
+      id_ciclo: 10,
+      fecha_inicio: "2026-01-01",
+      fecha_fin: "2026-03-31",
+      objetivo_fisico: "Perdida de grasa",
+      nivel_experiencia: "Intermedio",
+      disponibilidad_dias: 4,
+      activo: 1,
+      numero_ciclo: 1,
+    };
+    authAxios.get = vi.fn((url) => {
+      if (url === "/afiliados") return Promise.resolve({ data: [ANA] });
+      if (url === "/catalogo/ejercicios") return Promise.resolve({ data: EJERCICIOS });
+      if (url === "/afiliados/1/ciclos") return Promise.resolve({ data: [ciclo] });
+      if (url === "/planes/entrenamiento/10")
+        return Promise.resolve({
+          data: {
+            rutinas: [
+              {
+                id_rutina: 7,
+                dia_numero: 1,
+                ejercicios: [
+                  { id_ejercicio: 5, nombre_ejercicio: "Sentadilla", series: 3, repeticiones: 12 },
+                ],
+              },
+            ],
+          },
+        });
+      if (url.startsWith("/afiliados/1/notas-ejercicio"))
+        return Promise.reject(new Error("notes boom"));
+      return Promise.resolve({ data: [] });
+    });
+    useAuth.mockReturnValue({ user: { role: "Administrador" }, authAxios });
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    montar();
+
+    await screen.findByText("Ana Pérez");
+    fireEvent.click(screen.getByTitle("Historial de ciclos"));
+    expect(
+      await screen.findByRole("heading", { name: /Historial de Ciclos/ })
+    ).toBeInTheDocument();
+    await screen.findByText(/#10/);
+
+    authAxios.patch.mockRejectedValueOnce(new Error("update boom"));
+    fireEvent.click(screen.getByTitle("Editar"));
+    fireEvent.click(await screen.findByText("💾 Guardar"));
+    await waitFor(() => expect(showToast).toHaveBeenCalledWith("update boom", "danger"));
+
+    authAxios.patch.mockResolvedValueOnce({ data: {} });
+    fireEvent.click(screen.getByText("💾 Guardar"));
+    await waitFor(() =>
+      expect(showToast).toHaveBeenCalledWith("Ciclo actualizado correctamente", "success")
+    );
+
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
+    authAxios.delete.mockRejectedValueOnce(new Error("delete cycle boom"));
+    fireEvent.click(screen.getByTitle("Eliminar"));
+    await waitFor(() => expect(showToast).toHaveBeenCalledWith("delete cycle boom", "danger"));
+
+    authAxios.delete.mockResolvedValueOnce({ data: {} });
+    fireEvent.click(screen.getByTitle("Eliminar"));
+    await waitFor(() =>
+      expect(showToast).toHaveBeenCalledWith("Ciclo eliminado correctamente", "success")
+    );
+    confirmSpy.mockRestore();
+
+    fireEvent.keyDown(screen.getByLabelText("Cerrar modal"), { key: "Escape" });
+    await waitFor(() =>
+      expect(screen.queryByRole("heading", { name: /Historial de Ciclos/ })).not.toBeInTheDocument()
+    );
+    fireEvent.click(screen.getAllByTitle("Ver")[0]);
+    expect(await screen.findByRole("heading", { name: /Rutina: Ana Pérez/ })).toBeInTheDocument();
+    expect(await screen.findByText("Sentadilla")).toBeInTheDocument();
+
+    const fila = screen.getByText("Sentadilla").closest("tr");
+    fireEvent.click(within(fila).getByTitle("Editar serie/reps/peso"));
+    authAxios.patch.mockRejectedValueOnce(new Error("exercise boom"));
+    fireEvent.click(within(fila).getByText("💾"));
+    await waitFor(() => expect(showToast).toHaveBeenCalledWith("exercise boom", "danger"));
+    fireEvent.click(within(fila).getByText("✖"));
+
+    authAxios.delete.mockRejectedValueOnce(new Error("remove boom"));
+    const confirmRemove = vi.spyOn(window, "confirm").mockReturnValue(true);
+    fireEvent.click(within(fila).getByTitle("Quitar de la rutina"));
+    await waitFor(() => expect(showToast).toHaveBeenCalledWith("remove boom", "danger"));
+    confirmRemove.mockRestore();
+
+    fireEvent.click(screen.getByText(/Ver Notas del Afiliado/));
+    expect(
+      await screen.findByRole("heading", { name: /Notas del Afiliado/ })
+    ).toBeInTheDocument();
+    fireEvent.keyDown(screen.getAllByLabelText("Cerrar notas del afiliado")[0], {
+      key: "Escape",
+    });
+    await waitFor(() =>
+      expect(screen.queryByRole("heading", { name: /Notas del Afiliado/ })).not.toBeInTheDocument()
+    );
+  });
+
+  test("muestra estados sin plan activo y error al cargar el plan", async () => {
+    const authAxios = crearAxios();
+    authAxios.get = vi.fn((url) => {
+      if (url === "/afiliados") return Promise.resolve({ data: [ANA] });
+      if (url === "/catalogo/ejercicios") return Promise.resolve({ data: EJERCICIOS });
+      if (url === "/planes/entrenamiento/10") return Promise.reject(new Error("plan boom"));
+      return Promise.resolve({ data: [] });
+    });
+    useAuth.mockReturnValue({ user: { role: "Administrador" }, authAxios });
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    montar();
+
+    await screen.findByText("Ana Pérez");
+    fireEvent.click(screen.getAllByTitle("Ver")[0]);
+    expect(await screen.findByText("Error al cargar plan de entrenamiento")).toBeInTheDocument();
+    fireEvent.keyDown(screen.getByLabelText("Cerrar modal"), { key: "Escape" });
+
+    const planOriginal = ANA.ciclo_activo.plan_entrenamiento;
+    delete ANA.ciclo_activo.plan_entrenamiento;
+    fireEvent.click(screen.getAllByTitle("Ver")[0]);
+    expect(
+      await screen.findByText("Este afiliado no tiene un plan de entrenamiento activo")
+    ).toBeInTheDocument();
+    ANA.ciclo_activo.plan_entrenamiento = planOriginal;
+  });
 });

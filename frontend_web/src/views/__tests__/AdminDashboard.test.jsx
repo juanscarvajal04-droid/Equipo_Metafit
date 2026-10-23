@@ -19,7 +19,22 @@ vi.mock("../../components/AppLayout", () => ({
 vi.mock("react-chartjs-2", () => ({
   Bar: () => <div data-testid="chart-bar" />,
   Line: () => <div data-testid="chart-line" />,
-  Doughnut: () => <div data-testid="chart-doughnut" />,
+  Doughnut: ({ plugins }) => {
+    const ctx = {
+      save: vi.fn(),
+      restore: vi.fn(),
+      fillText: vi.fn(),
+    };
+    plugins?.forEach((plugin) =>
+      plugin.beforeDraw({
+        width: 200,
+        height: 200,
+        ctx,
+        data: { datasets: [{ data: [1, 2, 3] }] },
+      })
+    );
+    return <div data-testid="chart-doughnut" />;
+  },
 }));
 
 const KPIS = {
@@ -50,6 +65,7 @@ const AFILIADOS = [
     nivel_experiencia: "Intermedio",
     estado: "Activo",
     ciclo_activo: { numero_ciclo: 2 },
+    fecha_registro: "2026-10-01",
   },
   {
     id_usuario: 2,
@@ -60,6 +76,7 @@ const AFILIADOS = [
     nivel_experiencia: "Principiante",
     estado: "Inactivo",
     ciclo_activo: null,
+    fecha_registro: "2026-09-15",
   },
   {
     id_usuario: 3,
@@ -74,6 +91,9 @@ const AFILIADOS = [
 ];
 
 let authAxiosMock;
+let showToastMock;
+let fetchKpisMock;
+let fetchAfiliadosMock;
 
 function crearAuthAxios() {
   return {
@@ -100,19 +120,22 @@ describe("AdminDashboard", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     authAxiosMock = crearAuthAxios();
+    showToastMock = vi.fn();
+    fetchKpisMock = vi.fn();
+    fetchAfiliadosMock = vi.fn();
     useAuth.mockReturnValue({ user: { role: "Administrador" }, authAxios: authAxiosMock });
-    useToast.mockReturnValue({ toast: {}, showToast: vi.fn() });
+    useToast.mockReturnValue({ toast: {}, showToast: showToastMock });
     useDashboard.mockReturnValue({
       kpis: KPIS,
       loading: false,
       error: "",
-      fetchKpis: vi.fn(),
+      fetchKpis: fetchKpisMock,
     });
     useAfiliados.mockReturnValue({
       afiliados: AFILIADOS,
       loading: false,
       error: "",
-      fetchAfiliados: vi.fn(),
+      fetchAfiliados: fetchAfiliadosMock,
     });
   });
 
@@ -145,5 +168,97 @@ describe("AdminDashboard", () => {
         { valor: 90000 }
       )
     );
+  });
+
+  test("usa el fallback de objetivos y refresca al volver a estar visible", async () => {
+    useDashboard.mockReturnValue({
+      kpis: { ...KPIS, por_objetivo: [] },
+      loading: false,
+      error: "",
+      fetchKpis: fetchKpisMock,
+    });
+    renderView();
+    await screen.findByText("Dashboard General");
+
+    expect(screen.getByText("Perdida de grasa")).toBeInTheDocument();
+    expect(fetchKpisMock).toHaveBeenCalledTimes(1);
+
+    Object.defineProperty(document, "visibilityState", {
+      value: "visible",
+      configurable: true,
+    });
+    fireEvent(document, new Event("visibilitychange"));
+    await waitFor(() => expect(fetchKpisMock).toHaveBeenCalledTimes(2));
+
+    Object.defineProperty(document, "visibilityState", {
+      value: "hidden",
+      configurable: true,
+    });
+    fireEvent(document, new Event("visibilitychange"));
+    expect(fetchKpisMock).toHaveBeenCalledTimes(2);
+  });
+
+  test("muestra el skeleton de carga", async () => {
+    useDashboard.mockReturnValue({
+      kpis: null,
+      loading: true,
+      error: "",
+      fetchKpis: fetchKpisMock,
+    });
+    useAfiliados.mockReturnValue({
+      afiliados: [],
+      loading: true,
+      error: "",
+      fetchAfiliados: fetchAfiliadosMock,
+    });
+    const { container } = renderView();
+
+    await screen.findByText("Dashboard General");
+    expect(container.querySelectorAll(".spinner-border").length).toBeGreaterThan(0);
+    expect(screen.queryByTestId("chart-bar")).not.toBeInTheDocument();
+  });
+
+  test("tolera el error al cargar el precio de membresía", async () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    authAxiosMock.get.mockImplementation((url) =>
+      url.includes("precio-membresia")
+        ? Promise.reject(new Error("precio caído"))
+        : Promise.resolve({ data: {} })
+    );
+
+    renderView();
+    await screen.findByText("Dashboard General");
+    await waitFor(() =>
+      expect(errorSpy).toHaveBeenCalledWith(
+        "[AdminDashboard] Error al cargar precio:",
+        expect.any(Error)
+      )
+    );
+    errorSpy.mockRestore();
+  });
+
+  test("valida, informa el error al guardar y cancela la edición", async () => {
+    renderView();
+    await screen.findByText("Dashboard General");
+
+    fireEvent.click(screen.getByText(/Editar/));
+    const inputPrecio = screen.getByRole("spinbutton");
+    fireEvent.change(inputPrecio, { target: { value: "0" } });
+    fireEvent.click(screen.getByText(/Guardar/));
+    expect(showToastMock).toHaveBeenCalledWith("Ingresa un precio valido", "danger");
+    expect(authAxiosMock.put).not.toHaveBeenCalled();
+
+    authAxiosMock.put.mockRejectedValueOnce({
+      response: { data: { error: "No autorizado" } },
+    });
+    fireEvent.change(inputPrecio, { target: { value: "95000" } });
+    fireEvent.click(screen.getByText(/Guardar/));
+    await waitFor(() =>
+      expect(showToastMock).toHaveBeenCalledWith("No autorizado", "danger")
+    );
+
+    await waitFor(() => expect(screen.getByText("Cancelar")).not.toBeDisabled());
+    fireEvent.click(screen.getByText("Cancelar"));
+    expect(screen.queryByRole("spinbutton")).not.toBeInTheDocument();
   });
 });

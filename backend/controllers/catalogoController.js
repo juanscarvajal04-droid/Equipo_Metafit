@@ -3,6 +3,14 @@
 'use strict';
 const CatalogoModel = require('../models/catalogoModel');
 
+function manejarErrorEliminacion(res, err, { mensaje, etiqueta }) {
+  if (err.code === 'ER_ROW_IS_REFERENCED_2' || err.code === 'ER_ROW_IS_REFERENCED') {
+    return res.status(409).json({ error: mensaje });
+  }
+  console.error(`[catalogoController.${etiqueta}]`, err);
+  return res.status(500).json({ error: 'Error interno del servidor' });
+}
+
 const CatalogoController = {
 
   // ── EJERCICIOS ────────────────────────────────────────────
@@ -63,11 +71,10 @@ const CatalogoController = {
       if (affected === 0) return res.status(404).json({ error: 'Ejercicio no encontrado' });
       res.json({ message: 'Ejercicio eliminado' });
     } catch (err) {
-      if (err.code === 'ER_ROW_IS_REFERENCED_2' || err.code === 'ER_ROW_IS_REFERENCED') {
-        return res.status(409).json({ error: 'No se puede eliminar: el ejercicio está siendo usado en rutinas activas' });
-      }
-      console.error('[catalogoController.deleteEjercicio]', err);
-      res.status(500).json({ error: 'Error interno del servidor' });
+      return manejarErrorEliminacion(res, err, {
+        mensaje: 'No se puede eliminar: el ejercicio está siendo usado en rutinas activas',
+        etiqueta: 'deleteEjercicio',
+      });
     }
   },
 
@@ -94,11 +101,10 @@ const CatalogoController = {
       if (affected === 0) return res.status(404).json({ error: 'Alimento no encontrado' });
       res.json({ message: 'Alimento eliminado' });
     } catch (err) {
-      if (err.code === 'ER_ROW_IS_REFERENCED_2' || err.code === 'ER_ROW_IS_REFERENCED') {
-        return res.status(409).json({ error: 'No se puede eliminar: el alimento está siendo usado en planes nutricionales activos' });
-      }
-      console.error('[catalogoController.deleteAlimento]', err);
-      res.status(500).json({ error: 'Error interno del servidor' });
+      return manejarErrorEliminacion(res, err, {
+        mensaje: 'No se puede eliminar: el alimento está siendo usado en planes nutricionales activos',
+        etiqueta: 'deleteAlimento',
+      });
     }
   },
 

@@ -41,6 +41,7 @@ const PERSONAL = [
 ];
 
 let authAxiosMock;
+let showToastMock;
 
 function crearAuthAxios() {
   return {
@@ -64,11 +65,12 @@ describe("GestionPersonal", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     authAxiosMock = crearAuthAxios();
+    showToastMock = vi.fn();
     useAuth.mockReturnValue({
       user: { id_usuario: 99, role: "Administrador" },
       authAxios: authAxiosMock,
     });
-    useToast.mockReturnValue({ toast: {}, showToast: vi.fn() });
+    useToast.mockReturnValue({ toast: {}, showToast: showToastMock });
   });
 
   test("renderiza la tabla y cubre creación, edición y eliminación", async () => {
@@ -142,5 +144,113 @@ describe("GestionPersonal", () => {
     });
     renderView();
     expect(await screen.findByText(/No autorizado/)).toBeInTheDocument();
+  });
+
+  test("valida el formulario de creación y muestra el error del backend", async () => {
+    renderView();
+    await screen.findByText("Root Admin");
+
+    fireEvent.click(screen.getByText(/Nuevo empleado/));
+    const form = screen.getByText("Guardar").closest("form");
+    fireEvent.submit(form);
+    expect(showToastMock).toHaveBeenCalledWith("El correo es obligatorio", "danger");
+
+    fireEvent.change(screen.getByPlaceholderText("correo@ejemplo.com"), {
+      target: { value: "nuevo@metafit.com" },
+    });
+    fireEvent.submit(form);
+    expect(showToastMock).toHaveBeenCalledWith(
+      "La contraseña es obligatoria",
+      "danger"
+    );
+
+    authAxiosMock.post.mockRejectedValueOnce({
+      response: { data: { error: "Correo duplicado" } },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Contraseña"), {
+      target: { value: "secreto123" },
+    });
+    fireEvent.click(screen.getByText("Guardar"));
+    await waitFor(() =>
+      expect(showToastMock).toHaveBeenCalledWith("Correo duplicado", "danger")
+    );
+  });
+
+  test("valida la edición, informa errores y cierra con teclado", async () => {
+    renderView();
+    await screen.findByText("Root Admin");
+
+    fireEvent.click(screen.getAllByTitle("Editar")[1]);
+    await screen.findByRole("heading", { name: /Editar empleado/ });
+
+    fireEvent.change(screen.getByDisplayValue("luis@metafit.com"), {
+      target: { value: "" },
+    });
+    fireEvent.submit(screen.getByText("Guardar").closest("form"));
+    expect(showToastMock).toHaveBeenCalledWith("El correo es obligatorio", "danger");
+
+    fireEvent.change(screen.getByPlaceholderText("correo@ejemplo.com"), {
+      target: { value: "luis@metafit.com" },
+    });
+    authAxiosMock.patch.mockRejectedValueOnce({
+      response: { data: { error: "No se pudo actualizar" } },
+    });
+    fireEvent.click(screen.getByText("Guardar"));
+    await waitFor(() =>
+      expect(showToastMock).toHaveBeenCalledWith("No se pudo actualizar", "danger")
+    );
+
+    fireEvent.keyDown(screen.getByLabelText("Cerrar modal de empleado"), {
+      key: "Escape",
+    });
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("heading", { name: /Editar empleado/ })
+      ).not.toBeInTheDocument()
+    );
+  });
+
+  test("cubre las formas de cerrar el modal de eliminación y su error", async () => {
+    renderView();
+    await screen.findByText("Root Admin");
+
+    fireEvent.click(screen.getAllByTitle("Eliminar")[1]);
+    await screen.findByRole("heading", { name: /Eliminar empleado/ });
+    fireEvent.keyDown(screen.getByLabelText("Cerrar modal de eliminación"), {
+      key: "Escape",
+    });
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("heading", { name: /Eliminar empleado/ })
+      ).not.toBeInTheDocument()
+    );
+
+    fireEvent.click(screen.getAllByTitle("Eliminar")[1]);
+    await screen.findByRole("heading", { name: /Eliminar empleado/ });
+    fireEvent.click(screen.getByText("✕"));
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("heading", { name: /Eliminar empleado/ })
+      ).not.toBeInTheDocument()
+    );
+
+    fireEvent.click(screen.getAllByTitle("Eliminar")[1]);
+    await screen.findByRole("heading", { name: /Eliminar empleado/ });
+    fireEvent.click(screen.getByText("Cancelar"));
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("heading", { name: /Eliminar empleado/ })
+      ).not.toBeInTheDocument()
+    );
+
+    fireEvent.click(screen.getAllByTitle("Eliminar")[1]);
+    await screen.findByRole("heading", { name: /Eliminar empleado/ });
+    authAxiosMock.delete.mockRejectedValueOnce({
+      response: { data: { error: "No se pudo eliminar" } },
+    });
+    fireEvent.click(screen.getByText(/Sí, eliminar/));
+    await waitFor(() =>
+      expect(showToastMock).toHaveBeenCalledWith("No se pudo eliminar", "danger")
+    );
   });
 });

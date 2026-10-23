@@ -198,6 +198,14 @@ describe('planController - rutinas y ejercicios', () => {
       dup
     );
     expect(dup.status).toHaveBeenCalledWith(400);
+
+    PlanModel.addEjercicioToRutina.mockRejectedValueOnce(new Error('db'));
+    const error = makeRes();
+    await controller.addEjercicio(
+      makeReq({ body: { id_ejercicio: 1, series: 3, repeticiones: 10, orden: 1 } }),
+      error
+    );
+    expect(error.status).toHaveBeenCalledWith(500);
   });
 
   test('updateEjercicio cubre cantidad, descripción, 404 y errores', async () => {
@@ -463,6 +471,14 @@ describe('planController - planes nutricionales', () => {
       invalid
     );
     expect(invalid.status).toHaveBeenCalledWith(400);
+
+    PlanModel.updateAlimentoEnDetalle.mockRejectedValueOnce(new Error('db'));
+    const error = makeRes();
+    await controller.updateDetalle(
+      makeReq({ params: { id_plan: '1', id_detalle: '2' }, body: { cantidad_g: 100 } }),
+      error
+    );
+    expect(error.status).toHaveBeenCalledWith(500);
   });
 
   test('removeDetalle devuelve 404, éxito y 500', async () => {

@@ -6,6 +6,7 @@ jest.mock('../services/correoService', () => ({
   enviarCorreo: jest.fn(),
 }));
 
+const fs = require('fs');
 const { enviarCorreo } = require('../services/correoService');
 const { enviarCorreoBienvenida } = require('../services/bienvenidaService');
 
@@ -57,5 +58,23 @@ describe('enviarCorreoBienvenida', () => {
     enviarCorreo.mockResolvedValue(false);
 
     await expect(enviarCorreoBienvenida(afiliado, 'Temp123!')).resolves.toBe(false);
+  });
+
+  test('omite el HTML y registra el error si falla la lectura de la plantilla', async () => {
+    const existsSpy = jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+    const readSpy = jest.spyOn(fs, 'readFileSync').mockImplementation(() => {
+      throw new Error('read fail');
+    });
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    enviarCorreo.mockResolvedValue(true);
+
+    await expect(enviarCorreoBienvenida(afiliado, 'Temp123!')).resolves.toBe(true);
+
+    expect(errorSpy).toHaveBeenCalledWith('[bienvenidaService.renderPlantilla]', 'read fail');
+    expect(enviarCorreo.mock.calls[0][0].html).toBeNull();
+
+    existsSpy.mockRestore();
+    readSpy.mockRestore();
+    errorSpy.mockRestore();
   });
 });

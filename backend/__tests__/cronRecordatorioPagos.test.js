@@ -234,4 +234,28 @@ describe('iniciarCron', () => {
     await callback();
     expect(pool.query).toHaveBeenCalled();
   });
+
+  test('registra el error del cron si la pasada rechaza', async () => {
+    let callback;
+    cron.schedule.mockImplementation((expresion, fn) => {
+      callback = fn;
+    });
+    pool.query.mockRejectedValue(new Error('db caída'));
+
+    let llamadas = 0;
+    console.error.mockImplementation((...args) => {
+      llamadas += 1;
+      if (llamadas === 1) throw new Error('log boom');
+      return args;
+    });
+
+    iniciarCron();
+    await callback();
+    await new Promise((resolve) => setImmediate(resolve));
+
+    expect(console.error).toHaveBeenCalledWith(
+      '[recordatorioPagos] cron error:',
+      'log boom'
+    );
+  });
 });

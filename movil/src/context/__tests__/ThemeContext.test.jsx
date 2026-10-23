@@ -93,4 +93,15 @@ describe('<ThemeProvider />', () => {
     expect(ctx.isDark).toBe(false);
     expect(COLORS.bg).toBe(LIGHT.bg);
   });
+
+  test('setMode cambia y persiste el modo explícito', async () => {
+    renderWithTheme();
+    await act(async () => {});
+
+    await act(async () => { ctx.setMode('light'); });
+
+    expect(ctx.mode).toBe('light');
+    expect(ctx.theme).toBe('light');
+    expect(await AsyncStorage.getItem('metafit_theme_movil')).toBe('light');
+  });
 });

@@ -139,4 +139,80 @@ describe("RestriccionSelector (modo registro)", () => {
       expect(screen.queryByRole("combobox")).not.toBeInTheDocument()
     );
   });
+
+  test("registra el error al cargar el catálogo", async () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    fetchRestricciones.mockRejectedValueOnce(new Error("catálogo caído"));
+
+    render(<WrapperRegistro />);
+    fireEvent.click(screen.getByText("+ Agregar restricción"));
+
+    await waitFor(() =>
+      expect(errorSpy).toHaveBeenCalledWith(
+        "[RestriccionSelector] cargar catálogo:",
+        expect.any(Error)
+      )
+    );
+    fireEvent.keyDown(screen.getByLabelText("Cerrar modal"), { key: "Escape" });
+    errorSpy.mockRestore();
+  });
+
+  test("cierra el modal con la X y con Cancelar", async () => {
+    render(<WrapperRegistro />);
+
+    await abrirModalYCargarCatalogo();
+    fireEvent.click(screen.getByText("✕"));
+    await waitFor(() =>
+      expect(screen.queryByRole("combobox")).not.toBeInTheDocument()
+    );
+
+    await abrirModalYCargarCatalogo();
+    fireEvent.click(screen.getByText("Cancelar"));
+    await waitFor(() =>
+      expect(screen.queryByRole("combobox")).not.toBeInTheDocument()
+    );
+  });
+
+  test("registra los errores al asignar y al remover restricciones", async () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const onAdd = vi.fn().mockRejectedValueOnce(new Error("add boom"));
+    const onRemove = vi
+      .fn()
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(new Error("remove boom"));
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
+
+    render(
+      <RestriccionSelector
+        restriccionesAsignadas={[
+          { id_restriccion: 3, nombre_restriccion: "Hipertensión" },
+        ]}
+        onAdd={onAdd}
+        onRemove={onRemove}
+      />
+    );
+
+    fireEvent.click(screen.getByLabelText("Remover Hipertensión"));
+    await waitFor(() => expect(onRemove).toHaveBeenCalledWith(3));
+
+    fireEvent.click(screen.getByLabelText("Remover Hipertensión"));
+    await waitFor(() =>
+      expect(errorSpy).toHaveBeenCalledWith(
+        "[RestriccionSelector] remover:",
+        expect.any(Error)
+      )
+    );
+
+    await abrirModalYCargarCatalogo();
+    confirmarAgregado("7");
+    await waitFor(() =>
+      expect(errorSpy).toHaveBeenCalledWith(
+        "[RestriccionSelector] asignar:",
+        expect.any(Error)
+      )
+    );
+
+    confirmSpy.mockRestore();
+    errorSpy.mockRestore();
+  });
 });

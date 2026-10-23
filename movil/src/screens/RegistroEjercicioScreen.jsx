@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
-  StyleSheet,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -14,10 +13,12 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { COLORS, GRADIENTS, FONTS, SPACING, BORDER_RADIUS, SHADOWS } from '../theme';
+import { COLORS, GRADIENTS, FONTS, SPACING } from '../theme';
+import { createFormScreenStyles } from '../components/common/formStyles';
 import { useTheme } from '../context/ThemeContext';
 import useMutation from '../hooks/useMutation';
 import { registrarEjercicioReal } from '../services/registroService';
+import { mensajeErrorRegistroEjercicio } from '../utils/errorUtils';
 
 const fechaLocal = () => {
   const d = new Date();
@@ -41,18 +42,7 @@ export default function RegistroEjercicioScreen({ navigation, route }) {
       ]);
     },
     onError: (err, msg) => {
-      const status = err?.response?.status;
-      let m;
-      if (status === 409) {
-        m = 'Ya registraste este ejercicio hoy. Volvé mañana.';
-      } else if (!err?.response) {
-        m = 'Sin conexión. Verificá tu red.';
-      } else if (status >= 500) {
-        m = 'Error del servidor. Intentá más tarde.';
-      } else {
-        m = msg || 'No se pudo guardar. Intentá de nuevo.';
-      }
-      Alert.alert('Error', m);
+      Alert.alert('Error', mensajeErrorRegistroEjercicio(err, msg));
     },
   });
 
@@ -164,98 +154,8 @@ export default function RegistroEjercicioScreen({ navigation, route }) {
   );
 }
 
-const createStyles = () => StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: COLORS.bg,
-  },
-  flex: {
-    flex: 1,
-  },
-  scroll: {
-    flexGrow: 1,
-    paddingBottom: SPACING.xl,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm + 2,
-  },
-  backBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: {
-    color: '#fff',
-    fontSize: FONTS.subtitle,
-    fontWeight: '700',
-  },
-  card: {
-    backgroundColor: COLORS.bgSecondary,
-    borderRadius: BORDER_RADIUS.lg,
-    padding: SPACING.lg,
-    margin: SPACING.md,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    ...SHADOWS.card,
-  },
-  fecha: {
-    color: COLORS.text,
-    fontSize: FONTS.body,
-    fontWeight: '600',
-    marginBottom: SPACING.md,
-  },
-  subtitle: {
-    color: COLORS.textSecondary,
-    fontSize: FONTS.xsmall,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: SPACING.xs,
-    marginTop: SPACING.xs,
-  },
-  nombre: {
-    color: COLORS.text,
-    fontSize: FONTS.subtitle,
-    fontWeight: '700',
-  },
-  contexto: {
-    color: COLORS.purpleLight,
-    fontSize: FONTS.small,
-    marginBottom: SPACING.md,
-  },
-  input: {
-    backgroundColor: COLORS.inputBg,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: BORDER_RADIUS.md,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: 14,
-    fontSize: FONTS.body,
-    color: COLORS.text,
-    marginBottom: SPACING.md,
-  },
+const createStyles = () => createFormScreenStyles({
   notas: {
     minHeight: 90,
-  },
-  button: {
-    borderRadius: BORDER_RADIUS.md,
-    paddingVertical: 16,
-    alignItems: 'center',
-    marginTop: SPACING.sm,
-    ...SHADOWS.purple,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: FONTS.body,
-    fontWeight: '700',
   },
 });

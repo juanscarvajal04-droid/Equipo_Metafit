@@ -27,6 +27,34 @@ describe("useAutoRefresh", () => {
     unmount();
   });
 
+  test("captura errores síncronos y responde a foco/visibilidad", async () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const fetchFn = vi.fn(() => {
+      throw new Error("sync boom");
+    });
+    const { result, unmount } = renderHook(() => useAutoRefresh(fetchFn, 1000));
+
+    act(() => {
+      result.current();
+    });
+    expect(errorSpy).toHaveBeenCalledWith("[useAutoRefresh]", expect.any(Error));
+
+    fetchFn.mockReturnValue(undefined);
+    act(() => {
+      window.dispatchEvent(new Event("focus"));
+    });
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      get: () => "visible",
+    });
+    act(() => {
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    unmount();
+  });
+
   test("captura errores sin dejar el polling bloqueado", async () => {
     const fetchFn = vi.fn().mockRejectedValue(new Error("boom"));
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});

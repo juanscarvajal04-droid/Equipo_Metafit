@@ -3,9 +3,15 @@ import { render, screen } from "@testing-library/react";
 import { describe, test, expect, vi } from "vitest";
 
 vi.mock("react-chartjs-2", () => ({
-  Line: ({ data }) => (
-    <div data-testid="line-chart" data-datasets={data.datasets.length} data-labels={data.labels.length} />
-  ),
+  Line: ({ data, options }) => {
+    options?.plugins?.tooltip?.callbacks?.label?.({
+      dataset: { label: "Peso (kg)" },
+      parsed: { y: 70 },
+    });
+    return (
+      <div data-testid="line-chart" data-datasets={data.datasets.length} data-labels={data.labels.length} />
+    );
+  },
 }));
 
 import ProgresoPesoChart from "../ProgresoPesoChart";

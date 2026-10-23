@@ -91,4 +91,51 @@ describe('<RecuperarPasswordScreen />', () => {
 
     expect(loginNav.navigate).toHaveBeenCalledWith('RecuperarPassword');
   });
+
+  test('valida el correo vacío y vuelve al login', () => {
+    const { getByText } = render(<RecuperarPasswordScreen navigation={navigation} />);
+
+    fireEvent.press(getByText('Enviar solicitud'));
+    expect(getByText('⚠️ Ingresá tu correo electrónico')).toBeTruthy();
+
+    fireEvent.press(getByText('Volver al login'));
+    expect(navigation.goBack).toHaveBeenCalled();
+  });
+
+  test('completa el reset validando token, longitud y error del backend', async () => {
+    mockSolicitar.mockResolvedValueOnce({ modoPrueba: true, token: 'tok-123' });
+    mockReset.mockRejectedValueOnce({
+      response: { data: { error: 'Token vencido' } },
+    });
+
+    const { getByPlaceholderText, getByText, UNSAFE_getAllByType } = render(
+      <RecuperarPasswordScreen navigation={navigation} />
+    );
+
+    fireEvent.changeText(getByPlaceholderText('Correo electrónico'), 'ana@metafit.com');
+    fireEvent.press(getByText('Enviar solicitud'));
+    await waitFor(() => expect(getByText(/tok-123/)).toBeTruthy());
+
+    fireEvent.press(getByText('Guardar nueva contraseña'));
+    expect(getByText('⚠️ Ingresá el token recibido')).toBeTruthy();
+
+    fireEvent.changeText(getByPlaceholderText('Token recibido'), 'tok-123');
+    fireEvent.changeText(getByPlaceholderText('Nueva contraseña'), '123');
+    fireEvent.press(getByText('Guardar nueva contraseña'));
+    expect(getByText('⚠️ La contraseña debe tener al menos 6 caracteres')).toBeTruthy();
+
+    const eye = UNSAFE_getAllByType(require('react-native').TouchableOpacity).find(
+      (n) => n.props.hitSlop
+    );
+    fireEvent.press(eye);
+
+    fireEvent.changeText(getByPlaceholderText('Nueva contraseña'), 'Nueva123');
+    fireEvent.press(getByText('Guardar nueva contraseña'));
+    await waitFor(() => expect(getByText('⚠️ Token vencido')).toBeTruthy());
+
+    mockReset.mockResolvedValueOnce({ ok: true });
+    fireEvent.press(getByText('Guardar nueva contraseña'));
+    await waitFor(() => expect(getByText('Listo')).toBeTruthy());
+    expect(mockReset).toHaveBeenLastCalledWith('tok-123', 'Nueva123');
+  });
 });

@@ -3,6 +3,7 @@
 'use strict';
 
 const pool = require('../config/db');
+const { consultarHistorial } = require('../utils/historialQuery');
 
 const RegistroEjercicioModel = {
 
@@ -21,24 +22,17 @@ const RegistroEjercicioModel = {
     return r.insertId;
   },
 
-  getHistorial: async (id_usuario, { id_ciclo, fechaInicio, fechaFin }) => {
-    let sql = `
-      SELECT re.id_registro, re.id_ciclo, re.fecha, re.id_rutina, re.orden,
+  getHistorial: async (id_usuario, filtros) => consultarHistorial(pool, id_usuario, filtros, {
+    select: `re.id_registro, re.id_ciclo, re.fecha, re.id_rutina, re.orden,
              re.series, re.repeticiones, re.peso_utilizado_kg, re.notas,
              e.id_ejercicio, e.nombre_ejercicio, e.grupo_muscular,
-             ROUND(re.series * re.repeticiones * COALESCE(re.peso_utilizado_kg, 0), 2) AS volumen
-      FROM REGISTRO_EJERCICIO re
-      JOIN RUTINA_EJERCICIO rute ON re.id_rutina = rute.id_rutina AND re.orden = rute.orden
-      JOIN EJERCICIO e           ON rute.id_ejercicio = e.id_ejercicio
-      WHERE re.id_usuario = ?`;
-    const params = [id_usuario];
-    if (id_ciclo)    { sql += ` AND re.id_ciclo = ?`; params.push(id_ciclo); }
-    if (fechaInicio) { sql += ` AND re.fecha >= ?`;   params.push(fechaInicio); }
-    if (fechaFin)    { sql += ` AND re.fecha <= ?`;   params.push(fechaFin); }
-    sql += ` ORDER BY re.fecha DESC, re.id_registro DESC LIMIT 300`;
-    const [rows] = await pool.query(sql, params);
-    return rows;
-  },
+             ROUND(re.series * re.repeticiones * COALESCE(re.peso_utilizado_kg, 0), 2) AS volumen`,
+    from: `REGISTRO_EJERCICIO re
+           JOIN RUTINA_EJERCICIO rute ON re.id_rutina = rute.id_rutina AND re.orden = rute.orden
+           JOIN EJERCICIO e           ON rute.id_ejercicio = e.id_ejercicio`,
+    orderBy: `re.fecha DESC, re.id_registro DESC`,
+    alias: 're',
+  }),
 
   getEvolucion: async (id_usuario, id_ejercicio, { fechaInicio, fechaFin }) => {
     let sql = `

@@ -178,4 +178,13 @@ describe('swagger', () => {
     expect(res.body).toBeDefined();
     expect(res.body.openapi || res.body.swagger).toBeDefined();
   });
+
+  test('GET /api-docs/ sirve la UI con el spec dinámico', async () => {
+    const res = await request(app)
+      .get('/api-docs/')
+      .set('Host', 'localhost:3000');
+
+    expect(res.status).toBe(200);
+    expect(res.text).toContain('swagger');
+  });
 });

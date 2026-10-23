@@ -90,7 +90,10 @@ function montar(rol = "Administrador", axios = crearAxios()) {
 }
 
 describe("AfiliadosView — interacciones", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    window.URL.createObjectURL = vi.fn(() => "blob:foto");
+  });
 
   test("asigna y remueve restricciones desde el detalle (refresco sin cerrar)", async () => {
     montar("Administrador");
@@ -250,6 +253,146 @@ describe("AfiliadosView — interacciones", () => {
     await screen.findByRole("heading", { name: /Ana Pérez/ });
     expect(screen.getByText("solo-lectura")).toBeInTheDocument();
     expect(screen.queryByText("add-restriccion")).not.toBeInTheDocument();
+  });
+
+  test("oculta la foto si la imagen falla y navega al progreso", async () => {
+    const axios = crearAxios({
+      afiliados: [{ ...AFILIADOS[0], foto: "/uploads/ana.png" }],
+    });
+    montar("Administrador", axios);
+    await screen.findByText("Ana Pérez");
+
+    const foto = screen.getByAltText("Ana Pérez");
+    fireEvent.error(foto);
+    expect(foto.style.display).toBe("none");
+
+    fireEvent.click(screen.getByTitle("Progreso"));
+    expect(screen.getByText("Ana Pérez")).toBeInTheDocument();
+  });
+
+  test("sube foto al editar y tolera el fallo del endpoint de foto", async () => {
+    const axios = crearAxios();
+    axios.post.mockRejectedValueOnce(new Error("foto boom"));
+    montar("Administrador", axios);
+    await screen.findByText("Ana Pérez");
+
+    fireEvent.click(screen.getAllByTitle("Editar")[0]);
+    await screen.findByRole("heading", { name: /Editar: Ana Pérez/ });
+    fireEvent.change(screen.getByLabelText("Foto de perfil"), {
+      target: { files: [new File(["x"], "foto.png", { type: "image/png" })] },
+    });
+    fireEvent.submit(screen.getByText("Guardar").closest("form"));
+
+    await waitFor(() =>
+      expect(axios.post).toHaveBeenCalledWith("/afiliados/1/foto", expect.any(FormData))
+    );
+    await waitFor(() =>
+      expect(showToast).toHaveBeenCalledWith("Afiliado actualizado correctamente", "success")
+    );
+  });
+
+  test("crea con foto, tolera el fallo de subida y muestra error de creación", async () => {
+    const axios = crearAxios();
+    axios.post.mockImplementation((url) => {
+      if (url === "/afiliados") return Promise.resolve({ data: { id: 3 } });
+      if (url === "/afiliados/3/foto") return Promise.reject(new Error("foto boom"));
+      return Promise.resolve({ data: {} });
+    });
+    montar("Administrador", axios);
+    await screen.findByText("Ana Pérez");
+
+    fireEvent.click(screen.getByText(/Nuevo afiliado/));
+    await screen.findByRole("heading", { name: /Nuevo afiliado/ });
+    fireEvent.change(screen.getByLabelText("Nombres"), { target: { value: "Nuevo" } });
+    fireEvent.change(screen.getByLabelText("Apellidos"), { target: { value: "Afiliado" } });
+    fireEvent.change(screen.getByLabelText("Correo"), { target: { value: "nuevo@metafit.com" } });
+    fireEvent.change(screen.getByLabelText("Documento"), { target: { value: "999999" } });
+    fireEvent.change(screen.getByLabelText("Foto de perfil"), {
+      target: { files: [new File(["x"], "foto.png", { type: "image/png" })] },
+    });
+    fireEvent.submit(screen.getByText("Crear afiliado").closest("form"));
+
+    await waitFor(() =>
+      expect(axios.post).toHaveBeenCalledWith("/afiliados/3/foto", expect.any(FormData))
+    );
+    await waitFor(() =>
+      expect(showToast).toHaveBeenCalledWith("Afiliado creado correctamente", "success")
+    );
+
+    axios.post.mockRejectedValueOnce({ response: { data: { error: "Duplicado" } } });
+    fireEvent.click(screen.getByText(/Nuevo afiliado/));
+    await screen.findByRole("heading", { name: /Nuevo afiliado/ });
+    fireEvent.change(screen.getByLabelText("Nombres"), { target: { value: "Otro" } });
+    fireEvent.change(screen.getByLabelText("Apellidos"), { target: { value: "Afiliado" } });
+    fireEvent.change(screen.getByLabelText("Correo"), { target: { value: "otro@metafit.com" } });
+    fireEvent.change(screen.getByLabelText("Documento"), { target: { value: "888888" } });
+    fireEvent.submit(screen.getByText("Crear afiliado").closest("form"));
+    await waitFor(() => expect(showToast).toHaveBeenCalledWith("Duplicado", "danger"));
+  });
+
+  test("maneja afiliados sin id y remueve restricciones temporales", async () => {
+    const sinId = { nombres: "Sin", apellidos: "Id", correo: "sin@id.com", estado: "Activo" };
+    const axios = crearAxios({ afiliados: [sinId] });
+    montar("Administrador", axios);
+    await screen.findByText("Sin Id");
+
+    fireEvent.click(screen.getByTitle("Ver"));
+    await waitFor(() =>
+      expect(showToast).toHaveBeenCalledWith(
+        "Error: no se pudo identificar el afiliado",
+        "danger"
+      )
+    );
+
+    fireEvent.click(screen.getByTitle("Editar"));
+    await screen.findByRole("heading", { name: /Editar: Sin Id/ });
+    fireEvent.submit(screen.getByText("Guardar").closest("form"));
+    await waitFor(() =>
+      expect(showToast).toHaveBeenCalledWith(
+        "Error: no se pudo identificar el afiliado",
+        "danger"
+      )
+    );
+    fireEvent.click(screen.getByText("Cancelar"));
+
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
+    fireEvent.click(screen.getByTitle("Eliminar"));
+    await waitFor(() =>
+      expect(showToast).toHaveBeenCalledWith(
+        "Error: no se pudo identificar el afiliado",
+        "danger"
+      )
+    );
+    confirmSpy.mockRestore();
+
+    fireEvent.click(screen.getByText(/Nuevo afiliado/));
+    fireEvent.click(screen.getByText("add-restriccion"));
+    fireEvent.click(screen.getByText("remove-restriccion"));
+  });
+
+  test("tolera el fallo al refrescar el detalle tras asignar restricción", async () => {
+    const axios = crearAxios();
+    let detalleLlamadas = 0;
+    axios.get = vi.fn((url) => {
+      if (url === "/afiliados") return Promise.resolve({ data: AFILIADOS });
+      if (url === "/afiliados/1") {
+        detalleLlamadas += 1;
+        if (detalleLlamadas > 1) return Promise.reject(new Error("refresh boom"));
+        return Promise.resolve({ data: DETALLE });
+      }
+      return Promise.resolve({ data: {} });
+    });
+    montar("Administrador", axios);
+    await screen.findByText("Ana Pérez");
+
+    fireEvent.click(screen.getAllByTitle("Ver")[0]);
+    await screen.findByRole("heading", { name: /Ana Pérez/ });
+    fireEvent.click(screen.getByText("add-restriccion"));
+
+    await waitFor(() =>
+      expect(axios.post).toHaveBeenCalledWith("/afiliados/1/restricciones", { id_restriccion: 7 })
+    );
+    expect(screen.getByRole("heading", { name: /Ana Pérez/ })).toBeInTheDocument();
   });
 
   test("recorre todos los campos de los formularios de crear y editar", async () => {

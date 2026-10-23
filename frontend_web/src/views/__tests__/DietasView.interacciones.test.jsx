@@ -265,6 +265,101 @@ describe("DietasView — interacciones de envío", () => {
     expect(screen.getByText("No se encontraron afiliados")).toBeInTheDocument();
   });
 
+  test("cubre selección vacía, fallos de catálogo, asignación y detalle", async () => {
+    const axios = crearAxios();
+    const plan = {
+      id_ciclo: 10,
+      calorias_objetivo: 2000,
+      num_comidas: 3,
+      observaciones: "Sin sal",
+      recomendacion_agua_vasos: 8,
+      detalle: [
+        { id_alimento: 5, nombre_alimento: "Pechuga de pollo", cantidad_g: 150, num_comida: 1 },
+      ],
+    };
+    const ana = {
+      ...ANA,
+      restricciones: {
+        lactosa: true,
+        gluten: "true",
+        frutos_secos: { nombre_restriccion: "Frutos secos" },
+        ninguna: false,
+      },
+    };
+    const luis = {
+      ...LUIS,
+      restricciones: [null, "Lactosa", { tipo: "Alergia" }],
+    };
+    axios.get = vi.fn((url) => {
+      if (url === "/afiliados") return Promise.resolve({ data: [ana, luis] });
+      if (url === "/catalogo/alimentos") return Promise.resolve({ data: ALIMENTOS });
+      if (url === "/afiliados/2/alimentos-disponibles")
+        return Promise.reject(new Error("disponibles boom"));
+      if (url.includes("/alimentos-disponibles")) return Promise.resolve({ data: ALIMENTOS });
+      if (url === "/planes/nutricional/10") return Promise.resolve({ data: plan });
+      return Promise.resolve({ data: [] });
+    });
+    montar(axios);
+
+    await screen.findByText("Ana Pérez");
+    expect(screen.getByText("Lactosa")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText(/Asignar Dieta/));
+    await screen.findByRole("heading", { name: /Asignar Dieta/ });
+    fireEvent.change(screen.getByRole("combobox"), { target: { value: "" } });
+    fireEvent.change(screen.getByRole("combobox"), { target: { value: "2" } });
+    await waitFor(() =>
+      expect(showToast).toHaveBeenCalledWith("Error al cargar alimentos disponibles", "danger")
+    );
+    fireEvent.click(screen.getByText("Cancelar"));
+
+    fireEvent.click(screen.getByText(/Ver Catálogo/));
+    await screen.findByRole("heading", { name: /Catálogo de Alimentos/ });
+    const filaAlimento = screen.getByText("Pechuga de pollo").closest("tr");
+    fireEvent.click(within(filaAlimento).getAllByRole("button")[1]);
+    expect(await screen.findByRole("heading", { name: /Eliminar Alimento/ })).toBeInTheDocument();
+    fireEvent.click(screen.getByText("Cancelar"));
+
+    fireEvent.click(screen.getByText(/Agregar Alimento/));
+    await screen.findByRole("heading", { name: /Nuevo Alimento/ });
+    axios.post.mockRejectedValueOnce(new Error("save food boom"));
+    fireEvent.change(screen.getByLabelText("Nombre del alimento *"), {
+      target: { value: "Avena" },
+    });
+    fireEvent.submit(screen.getByText(/Guardar/).closest("form"));
+    await waitFor(() => expect(showToast).toHaveBeenCalledWith("save food boom", "danger"));
+    fireEvent.click(screen.getByText("Cancelar"));
+
+    fireEvent.click(screen.getByText(/Ver Catálogo/));
+    await screen.findByRole("heading", { name: /Catálogo de Alimentos/ });
+    fireEvent.click(screen.getByText(/Nuevo Alimento/));
+    expect(await screen.findByRole("heading", { name: /Nuevo Alimento/ })).toBeInTheDocument();
+    fireEvent.click(screen.getByText("Cancelar"));
+
+    const filaAna = screen.getByText("Ana Pérez").closest("tr");
+    fireEvent.click(within(filaAna).getByText(/Nueva/));
+    await screen.findByRole("heading", { name: /Nueva Dieta/ });
+    fireEvent.click((await screen.findAllByRole("checkbox"))[0]);
+    axios.patch.mockRejectedValueOnce(new Error("assign boom"));
+    fireEvent.submit(screen.getByText(/Crear Plan Nutricional/).closest("form"));
+    await waitFor(() => expect(showToast).toHaveBeenCalledWith("assign boom", "danger"));
+    fireEvent.click(screen.getByText("Cancelar"));
+
+    fireEvent.click(within(filaAna).getByTitle("Ver"));
+    expect(await screen.findByText("Sin sal")).toBeInTheDocument();
+    const cantidad = screen.getByDisplayValue("150");
+    fireEvent.change(cantidad, { target: { value: "180" } });
+    axios.patch.mockRejectedValueOnce(new Error("detail boom"));
+    fireEvent.click(screen.getByText(/Guardar/));
+    await waitFor(() => expect(showToast).toHaveBeenCalledWith("detail boom", "danger"));
+
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
+    axios.delete.mockRejectedValueOnce(new Error("remove detail boom"));
+    fireEvent.click(screen.getByText(/Quitar/));
+    await waitFor(() => expect(showToast).toHaveBeenCalledWith("remove detail boom", "danger"));
+    confirmSpy.mockRestore();
+  });
+
   test("cierra los modales de dieta con Escape", async () => {
     montar();
     await screen.findByText("Ana Pérez");

@@ -6,6 +6,7 @@
 'use strict';
 
 const pool = require('../config/db');
+const { consultarHistorial } = require('../utils/historialQuery');
 
 const ConsumoAlimentoRealModel = {
 
@@ -52,23 +53,16 @@ const ConsumoAlimentoRealModel = {
     };
   },
 
-  getHistorial: async (id_usuario, { id_ciclo, fechaInicio, fechaFin }) => {
-    let sql = `
-      SELECT c.id_consumo, c.id_ciclo, c.num_comida, c.fecha,
+  getHistorial: async (id_usuario, filtros) => consultarHistorial(pool, id_usuario, filtros, {
+    select: `c.id_consumo, c.id_ciclo, c.num_comida, c.fecha,
              c.cantidad_g_consumida, c.calorias_consumidas,
              c.proteinas_consumidas, c.carbohidratos_consumidos, c.grasas_consumidas,
-             a.id_alimento, a.nombre_alimento
-      FROM CONSUMO_ALIMENTO_REAL c
-      JOIN ALIMENTO a ON c.id_alimento = a.id_alimento
-      WHERE c.id_usuario = ?`;
-    const params = [id_usuario];
-    if (id_ciclo)    { sql += ` AND c.id_ciclo = ?`; params.push(id_ciclo); }
-    if (fechaInicio) { sql += ` AND c.fecha >= ?`;   params.push(fechaInicio); }
-    if (fechaFin)    { sql += ` AND c.fecha <= ?`;   params.push(fechaFin); }
-    sql += ` ORDER BY c.fecha DESC, c.num_comida, c.id_consumo DESC LIMIT 300`;
-    const [rows] = await pool.query(sql, params);
-    return rows;
-  },
+             a.id_alimento, a.nombre_alimento`,
+    from: `CONSUMO_ALIMENTO_REAL c
+           JOIN ALIMENTO a ON c.id_alimento = a.id_alimento`,
+    orderBy: `c.fecha DESC, c.num_comida, c.id_consumo DESC`,
+    alias: 'c',
+  }),
 };
 
 module.exports = ConsumoAlimentoRealModel;

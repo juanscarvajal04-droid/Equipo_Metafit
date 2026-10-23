@@ -211,6 +211,13 @@ describe("AfiliadoEditModal", () => {
     fireEvent.keyDown(screen.getByRole("button", { name: "Cerrar modal de edición de afiliado" }), { key: "Escape" });
     expect(screen.getByText(/Editar — Ana Pérez/)).toBeInTheDocument();
   });
+
+  test("cierra con el botón X del encabezado", () => {
+    render(<HarnessEditar />);
+    const cerrar = document.querySelector(".btn-close");
+    fireEvent.click(cerrar);
+    expect(screen.queryByText(/Editar — Ana Pérez/)).not.toBeInTheDocument();
+  });
 });
 
 describe("AfiliadoVerModal", () => {

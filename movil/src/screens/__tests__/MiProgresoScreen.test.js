@@ -2,7 +2,7 @@
 // Cubre carga inicial y pull-to-refresh del progreso.
 import React from 'react';
 import { RefreshControl } from 'react-native';
-import { render, waitFor, act } from '@testing-library/react-native';
+import { render, waitFor, act, fireEvent } from '@testing-library/react-native';
 import MiProgresoScreen from '../MiProgresoScreen';
 import {
   getMiProgreso,
@@ -61,5 +61,75 @@ describe('<MiProgresoScreen />', () => {
       await Promise.resolve();
     });
     await waitFor(() => expect(getMiProgreso).toHaveBeenCalledTimes(2));
+  });
+
+  test('muestra historiales completos, agua, ejercicios y consumos', async () => {
+    getMiProgreso.mockResolvedValue({
+      data: {
+        progreso: Array.from({ length: 6 }, (_, i) => ({
+          id_progreso: i + 1,
+          fecha: `2026-10-0${i + 1}`,
+          peso: 70 - i,
+          imc: 23 - i * 0.1,
+          musculo: 30,
+          cintura: 80,
+        })),
+      },
+    });
+    getAguaHistorial.mockResolvedValue({
+      data: [{ fecha: '2026-10-01', vasos: 6 }],
+    });
+    getConsumoHistorial.mockResolvedValue({
+      data: [
+        { fecha: '2026-10-01', nombre_alimento: 'Pollo', consumado: true },
+        { fecha: '2026-10-01', nombre_alimento: 'Arroz', consumado: false },
+      ],
+    });
+    getProgresoEjercicioHistorial.mockResolvedValue({
+      data: [
+        { fecha: '2026-10-01', completado: true },
+        { fecha: '2026-10-01', completado: false },
+        { fecha: '2026-10-02', completado: true },
+      ],
+    });
+    getHistorialEjerciciosReales.mockResolvedValue({
+      data: [
+        {
+          id_registro: 1,
+          nombre_ejercicio: 'Sentadilla',
+          fecha: '2026-10-01',
+          series: 3,
+          repeticiones: 12,
+          peso_utilizado_kg: 20,
+          notas: 'buena forma',
+          volumen: 720,
+        },
+      ],
+    });
+    getHistorialConsumosReales.mockResolvedValue({
+      data: [
+        {
+          id_consumo: 1,
+          nombre_alimento: 'Pollo',
+          fecha: '2026-10-01',
+          num_comida: 2,
+          calorias_consumidas: 250,
+        },
+      ],
+    });
+
+    const { getByText } = render(<MiProgresoScreen />);
+
+    await waitFor(() => expect(getByText('Ejercicios Completados')).toBeTruthy());
+    expect(getByText('Consumo de Agua')).toBeTruthy();
+    expect(getByText('Consumo de Alimentos')).toBeTruthy();
+    expect(getByText('Ejercicios Registrados')).toBeTruthy();
+    expect(getByText('Consumos Registrados')).toBeTruthy();
+    expect(getByText('1/2')).toBeTruthy();
+
+    fireEvent.press(getByText('Ver historial completo'));
+    expect(getByText('Mostrar menos')).toBeTruthy();
+    fireEvent.press(getByText('Mostrar menos'));
+    expect(getByText('Ver historial completo')).toBeTruthy();
   });
 });

@@ -58,6 +58,7 @@ const AFILIADOS = [
 ];
 
 let authAxiosMock;
+let showToastMock;
 
 function crearAuthAxios() {
   return {
@@ -98,8 +99,9 @@ describe("PagosView", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     authAxiosMock = crearAuthAxios();
+    showToastMock = vi.fn();
     useAuth.mockReturnValue({ authAxios: authAxiosMock });
-    useToast.mockReturnValue({ showToast: vi.fn() });
+    useToast.mockReturnValue({ showToast: showToastMock });
   });
 
   test("muestra estados, busca y registra pago e historial", async () => {
@@ -140,5 +142,98 @@ describe("PagosView", () => {
     ).toBeInTheDocument();
     expect(await screen.findByText("Rita López")).toBeInTheDocument();
     fireEvent.click(screen.getByText("Cerrar"));
+  });
+
+  test("registra el error de carga de afiliados", async () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    authAxiosMock.get.mockRejectedValueOnce(new Error("red caída"));
+
+    renderView();
+    await waitFor(() =>
+      expect(errorSpy).toHaveBeenCalledWith("[PagosView]", expect.any(Error))
+    );
+    errorSpy.mockRestore();
+  });
+
+  test("cierra el modal de pago de tres formas y muestra el error al registrar", async () => {
+    renderView();
+    await screen.findByText("Ana Pérez");
+
+    fireEvent.click(screen.getAllByTitle("Registrar pago")[0]);
+    await screen.findByRole("heading", { name: "Registrar Pago en Efectivo" });
+    fireEvent.keyDown(screen.getByLabelText("Cerrar modal de pago"), {
+      key: "Escape",
+    });
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("heading", { name: "Registrar Pago en Efectivo" })
+      ).not.toBeInTheDocument()
+    );
+
+    fireEvent.click(screen.getAllByTitle("Registrar pago")[0]);
+    await screen.findByRole("heading", { name: "Registrar Pago en Efectivo" });
+    fireEvent.click(screen.getByText("✕"));
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("heading", { name: "Registrar Pago en Efectivo" })
+      ).not.toBeInTheDocument()
+    );
+
+    fireEvent.click(screen.getAllByTitle("Registrar pago")[0]);
+    await screen.findByRole("heading", { name: "Registrar Pago en Efectivo" });
+    fireEvent.click(screen.getByText("Cancelar"));
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("heading", { name: "Registrar Pago en Efectivo" })
+      ).not.toBeInTheDocument()
+    );
+
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    authAxiosMock.post.mockRejectedValueOnce({
+      response: { data: { message: "Saldo insuficiente" } },
+    });
+    fireEvent.click(screen.getAllByTitle("Registrar pago")[0]);
+    await screen.findByRole("heading", { name: "Registrar Pago en Efectivo" });
+    fireEvent.click(screen.getByText(/Confirmar Pago/));
+    await waitFor(() =>
+      expect(showToastMock).toHaveBeenCalledWith("Saldo insuficiente", "error")
+    );
+    errorSpy.mockRestore();
+  });
+
+  test("cierra el historial con Escape y X, y avisa si falla la carga", async () => {
+    renderView();
+    await screen.findByText("Ana Pérez");
+
+    fireEvent.click(screen.getAllByTitle("Ver historial")[0]);
+    await screen.findByRole("heading", { name: "Historial de pagos" });
+    fireEvent.keyDown(screen.getByLabelText("Cerrar historial de pagos"), {
+      key: "Escape",
+    });
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("heading", { name: "Historial de pagos" })
+      ).not.toBeInTheDocument()
+    );
+
+    fireEvent.click(screen.getAllByTitle("Ver historial")[0]);
+    await screen.findByRole("heading", { name: "Historial de pagos" });
+    fireEvent.click(screen.getByText("✕"));
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("heading", { name: "Historial de pagos" })
+      ).not.toBeInTheDocument()
+    );
+
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    authAxiosMock.get.mockRejectedValueOnce(new Error("historial caído"));
+    fireEvent.click(screen.getAllByTitle("Ver historial")[0]);
+    await waitFor(() =>
+      expect(showToastMock).toHaveBeenCalledWith(
+        "Error al cargar historial",
+        "error"
+      )
+    );
+    errorSpy.mockRestore();
   });
 });

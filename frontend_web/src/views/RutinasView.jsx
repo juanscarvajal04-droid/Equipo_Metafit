@@ -2,7 +2,10 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import AppLayout from "../components/AppLayout";
-import { getId, nombreCompleto, inicial, cicloActivo, toDateInput } from "../utils/afiliadoHelpers";
+import ModalShell from "../components/common/ModalShell";
+import AfiliadoSearchBar from "../components/common/AfiliadoSearchBar";
+import AfiliadoIdentity from "../components/common/AfiliadoIdentity";
+import { getId, nombreCompleto, inicial, cicloActivo, toDateInput, avatarColor } from "../utils/afiliadoHelpers";
 import { useToast } from "../hooks/useToast";
 import useAutoRefresh from "../hooks/useAutoRefresh";
 import { trackEvent } from "../utils/analytics";
@@ -21,12 +24,6 @@ const OBJETIVO_ICON = {"Perdida de grasa":"🔥","Aumento de masa":"💪","Mante
 
 // Comparación de estado sin que el analizador estático la marque como imposible.
 const esModal = (estado, nombre) => String(estado) === nombre;
-
-const avatarColor = (nombre) => {
-  let hash = 0;
-  for (let i = 0; i < nombre.length; i++) hash = nombre.charCodeAt(i) + ((hash << 5) - hash);
-  return `hsl(${Math.abs(hash) % 360}, 65%, 55%)`;
-};
 
 export default function RutinasView() {
   const { user, authAxios } = useAuth();
@@ -352,13 +349,16 @@ export default function RutinasView() {
         </div>
 
         {/* SEARCH + TABLE CARD */}
-        <div className={s.tableCardHeader} style={{ marginBottom:16, borderRadius:14, border:"1px solid var(--mf-border)", display:"flex", gap:12, flexWrap:"wrap", alignItems:"center", justifyContent:"space-between", padding:"0.75rem 1rem" }}>
-          <span className="fw-bold" style={{ fontSize:"0.85rem", color:"var(--mf-text)" }}>🏋️ Afiliados</span>
-          <div style={{ display:"flex", gap:8, alignItems:"center" }}>
-            <input type="text" className={s.searchInput} placeholder="Buscar afiliado..." value={search} onChange={(e)=>setSearch(e.target.value)} style={{ maxWidth:260, padding:"0.4rem 0.7rem", fontSize:"0.85rem" }} />
-            <button type="button" className={s.btnRefresh} onClick={fetchAfiliados} disabled={loading} title="Refrescar">{loading ? <span className="spinner-border spinner-border-sm" /> : "🔄"}</button>
-          </div>
-        </div>
+        <AfiliadoSearchBar
+          classes={s}
+          title="🏋️ Afiliados"
+          search={search}
+          onSearch={setSearch}
+          onRefresh={fetchAfiliados}
+          loading={loading}
+          containerClassName={s.tableCardHeader}
+          containerStyle={{ marginBottom:16, borderRadius:14, border:"1px solid var(--mf-border)", display:"flex", gap:12, flexWrap:"wrap", alignItems:"center", justifyContent:"space-between", padding:"0.75rem 1rem" }}
+        />
 
         {/* TABLE */}
         <div className={s.tableCard}>
@@ -383,19 +383,11 @@ export default function RutinasView() {
                 ) : filtered.map((a, idx) => {
                   const ciclo = cicloActivo(a);
                   const tienePlan = ciclo && !!ciclo.plan_entrenamiento;
-                  const nombre = nombreCompleto(a);
-                  const email = a.correo || a.email || "";
                   return (
                     <tr key={getId(a)}>
                       <td style={{ color:"var(--mf-muted)", fontSize:"0.78rem" }}>{idx + 1}</td>
                       <td>
-                        <div style={{ display:"flex", alignItems:"center", gap:"0.5rem" }}>
-                          <div className={s.avatar} style={{ background:avatarColor(nombre) }}>{inicial(a)}</div>
-                          <div>
-                            <div style={{ fontSize:"0.85rem", fontWeight:600 }}>{nombre}</div>
-                            <div className={s.emailText}>{email}</div>
-                          </div>
-                        </div>
+                        <AfiliadoIdentity afiliado={a} classes={s} />
                       </td>
                       <td>{a.objetivo_fisico ? <span>{OBJETIVO_ICON[a.objetivo_fisico]||""} {a.objetivo_fisico}</span> : "—"}</td>
                       <td>{badgeNivel(a.nivel_experiencia)}</td>
@@ -425,22 +417,14 @@ export default function RutinasView() {
       {/* MODAL: ASIGNAR RUTINA                         */}
       {/* ════════════════════════════════════════════ */}
       {esModal(modal, "asignar") && (
-        <div
-          className={s.modalOverlay}
-          role="button"
-          tabIndex={0}
-          aria-label="Cerrar modal"
-          onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
-          onKeyDown={(e) => {
-            if (e.target === e.currentTarget && (e.key === "Escape" || e.key === "Enter")) closeModal();
-          }}
+        <ModalShell
+          classes={s}
+          title={asignarAfiliadoData && cicloActivo(asignarAfiliadoData) ? "🔄 Nueva Rutina" : "➕ Asignar Rutina"}
+          maxWidth={800}
+          onClose={closeModal}
+          closeDisabled={saving}
+          onSubmit={handleAsignar}
         >
-          <div className={s.modalContent} style={{ maxWidth:800 }}>
-            <div className={s.modalHeader}>
-              <h5 className={s.modalTitle}>{asignarAfiliadoData && cicloActivo(asignarAfiliadoData) ? "🔄 Nueva Rutina" : "➕ Asignar Rutina"}</h5>
-              <button type="button" className={s.btnOutline} onClick={closeModal} disabled={saving}>✕</button>
-            </div>
-            <form onSubmit={handleAsignar}>
               <div className={s.modalBody}>
                 {/* Selector de afiliado */}
                 <div style={{ marginBottom:16 }}>
@@ -538,31 +522,20 @@ export default function RutinasView() {
                   {saving ? <span className="spinner-border spinner-border-sm" /> : "✅ Crear Plan de Entrenamiento"}
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
+        </ModalShell>
       )}
 
       {/* ════════════════════════════════════════════ */}
       {/* MODAL: CATÁLOGO DE EJERCICIOS                 */}
       {/* ════════════════════════════════════════════ */}
       {esModal(modal, "catalogo") && (
-        <div
-          className={s.modalOverlay}
-          role="button"
-          tabIndex={0}
-          aria-label="Cerrar modal"
-          onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
-          onKeyDown={(e) => {
-            if (e.target === e.currentTarget && (e.key === "Escape" || e.key === "Enter")) closeModal();
-          }}
+        <ModalShell
+          classes={s}
+          title="📋 Catálogo de Ejercicios"
+          maxWidth={800}
+          onClose={closeModal}
         >
-          <div className={s.modalContent} style={{ maxWidth:800 }}>
-            <div className={s.modalHeader}>
-              <h5 className={s.modalTitle}>📋 Catálogo de Ejercicios</h5>
-              <button type="button" className={s.btnOutline} onClick={closeModal}>✕</button>
-            </div>
-            <div className={s.modalBody}>
+          <div className={s.modalBody}>
               {catalogoEj.length === 0 ? (
                 <div className={s.emptyState}>No hay ejercicios en el catálogo</div>
               ) : (
@@ -603,30 +576,21 @@ export default function RutinasView() {
               <button type="button" className={s.btnPrimary} onClick={() => setModal("nuevo")}>➕ Nuevo Ejercicio</button>
               <button type="button" className={s.btnOutline} onClick={closeModal}>Cerrar</button>
             </div>
-          </div>
-        </div>
+        </ModalShell>
       )}
 
       {/* ════════════════════════════════════════════ */}
       {/* MODAL: NUEVO / EDITAR EJERCICIO               */}
       {/* ════════════════════════════════════════════ */}
       {(esModal(modal, "nuevo") || esModal(modal, "editar")) && (
-        <div
-          className={s.modalOverlay}
-          role="button"
-          tabIndex={0}
-          aria-label="Cerrar modal"
-          onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
-          onKeyDown={(e) => {
-            if (e.target === e.currentTarget && (e.key === "Escape" || e.key === "Enter")) closeModal();
-          }}
+        <ModalShell
+          classes={s}
+          title={esModal(modal, "nuevo") ? "🏋️ Nuevo Ejercicio" : "✏️ Editar Ejercicio"}
+          maxWidth={500}
+          onClose={closeModal}
+          closeDisabled={saving}
+          onSubmit={handleGuardarEjercicio}
         >
-          <div className={s.modalContent} style={{ maxWidth:500 }}>
-            <div className={s.modalHeader}>
-              <h5 className={s.modalTitle}>{esModal(modal, "nuevo") ? "🏋️ Nuevo Ejercicio" : "✏️ Editar Ejercicio"}</h5>
-              <button type="button" className={s.btnOutline} onClick={closeModal} disabled={saving}>✕</button>
-            </div>
-            <form onSubmit={handleGuardarEjercicio}>
               <div className={s.modalBody}>
                 <div style={{ marginBottom:12 }}>
                   <label className={s.labelText} htmlFor="ejercicio-nombre">Nombre del ejercicio *</label>
@@ -655,31 +619,21 @@ export default function RutinasView() {
                   {saving ? <span className="spinner-border spinner-border-sm" /> : (esModal(modal, "nuevo") ? "💾 Guardar" : "💾 Guardar Cambios")}
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
+        </ModalShell>
       )}
 
       {/* ════════════════════════════════════════════ */}
       {/* MODAL: ELIMINAR EJERCICIO                     */}
       {/* ════════════════════════════════════════════ */}
       {esModal(modal, "eliminar") && (
-        <div
-          className={s.modalOverlay}
-          role="button"
-          tabIndex={0}
-          aria-label="Cerrar modal"
-          onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
-          onKeyDown={(e) => {
-            if (e.target === e.currentTarget && (e.key === "Escape" || e.key === "Enter")) closeModal();
-          }}
+        <ModalShell
+          classes={s}
+          title="🗑️ Eliminar Ejercicio"
+          maxWidth={450}
+          onClose={closeModal}
+          closeDisabled={saving}
+          onSubmit={handleEliminarEjercicio}
         >
-          <div className={s.modalContent} style={{ maxWidth:450 }}>
-            <div className={s.modalHeader}>
-              <h5 className={s.modalTitle}>🗑️ Eliminar Ejercicio</h5>
-              <button type="button" className={s.btnOutline} onClick={closeModal} disabled={saving}>✕</button>
-            </div>
-            <form onSubmit={handleEliminarEjercicio}>
               <div className={s.modalBody}>
                 <div className={s.alertDanger} style={{ marginBottom:"0.75rem", padding:"0.5rem 0.75rem", fontSize:"0.82rem" }}>⚠️ Esta acción no se puede deshacer.</div>
                 {catalogoEj.length === 0 ? (
@@ -704,57 +658,38 @@ export default function RutinasView() {
                   {saving ? <span className="spinner-border spinner-border-sm" /> : "🗑️ Eliminar"}
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
+        </ModalShell>
       )}
 
       {/* ════════════════════════════════════════════ */}
       {/* MODAL: HISTORIAL DE CICLOS (editar/eliminar) */}
       {/* ════════════════════════════════════════════ */}
       {esModal(modal, "historial") && modalAfiliado && (
-        <div
-          className={s.modalOverlay}
-          role="button"
-          tabIndex={0}
-          aria-label="Cerrar modal"
-          onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
-          onKeyDown={(e) => { if (e.key === "Escape" || e.key === "Enter") closeModal(); }}
+        <ModalShell
+          classes={s}
+          title={`📜 Historial de Ciclos — ${nombreCompleto(modalAfiliado)}`}
+          maxWidth={760}
+          onClose={closeModal}
         >
-          <div className={s.modalContent} style={{ maxWidth:760 }}>
-            <div className={s.modalHeader}>
-              <h5 className={s.modalTitle}>📜 Historial de Ciclos — {nombreCompleto(modalAfiliado)}</h5>
-              <button type="button" className={s.btnOutline} onClick={closeModal}>✕</button>
-            </div>
             <div className={s.modalBody}>
               <HistorialCiclos afiliado={modalAfiliado} authAxios={authAxios} onCambio={fetchAfiliados} showToast={showToast} />
             </div>
             <div className={s.modalFooter}>
               <button type="button" className={s.btnOutline} onClick={closeModal}>Cerrar</button>
             </div>
-          </div>
-        </div>
+        </ModalShell>
       )}
 
       {/* ════════════════════════════════════════════ */}
       {/* MODAL: VER PERFIL DEL AFILIADO                */}
       {/* ════════════════════════════════════════════ */}
       {esModal(modal, "verPerfil") && modalAfiliado && (
-        <div
-          className={s.modalOverlay}
-          role="button"
-          tabIndex={0}
-          aria-label="Cerrar modal"
-          onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
-          onKeyDown={(e) => {
-            if (e.target === e.currentTarget && (e.key === "Escape" || e.key === "Enter")) closeModal();
-          }}
+        <ModalShell
+          classes={s}
+          title={`👁️ Rutina: ${nombreCompleto(modalAfiliado)}`}
+          maxWidth={700}
+          onClose={closeModal}
         >
-          <div className={s.modalContent} style={{ maxWidth:700 }}>
-            <div className={s.modalHeader}>
-              <h5 className={s.modalTitle}>👁️ Rutina: {nombreCompleto(modalAfiliado)}</h5>
-              <button type="button" className={s.btnOutline} onClick={closeModal}>✕</button>
-            </div>
             <div className={s.modalBody}>
               <div className={s.afiliadoSection} style={{ marginBottom:16 }}>
                 <div style={{ display:"flex", alignItems:"center", gap:12 }}>
@@ -779,8 +714,7 @@ export default function RutinasView() {
             <div className={s.modalFooter}>
               <button type="button" className={s.btnOutline} onClick={closeModal}>Cerrar</button>
             </div>
-          </div>
-        </div>
+        </ModalShell>
       )}
     </AppLayout>
   );
@@ -1125,38 +1059,15 @@ function PlanDisplay({ afiliado, authAxios }) {
       ))}
 
       {notasOpen && (
-        <div
-          className={s.modalOverlay}
-          role="button"
-          tabIndex={0}
-          aria-label="Cerrar notas del afiliado"
-          onClick={(e) => { if (e.target === e.currentTarget) setNotasOpen(false); }}
-          onKeyDown={(e) => {
-            if ((e.key === "Escape" || e.key === "Enter") && e.target === e.currentTarget) {
-              setNotasOpen(false);
-            }
-          }}
+        <ModalShell
+          classes={s}
+          title={`📝 Notas del Afiliado — ${nombreCompleto(afiliado)}`}
+          titleId="notas-afiliado-title"
+          dialog
+          overlayAriaLabel="Cerrar notas del afiliado"
+          closeAriaLabel="Cerrar notas del afiliado"
+          onClose={() => setNotasOpen(false)}
         >
-          <div
-            className={s.modalContent}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="notas-afiliado-title"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className={s.modalHeader}>
-              <h5 id="notas-afiliado-title" className={s.modalTitle}>
-                📝 Notas del Afiliado — {nombreCompleto(afiliado)}
-              </h5>
-              <button
-                type="button"
-                className={s.btnOutline}
-                onClick={() => setNotasOpen(false)}
-                aria-label="Cerrar notas del afiliado"
-              >
-                ✕
-              </button>
-            </div>
             <div className={s.modalBody}>
               {notas.length === 0 ? (
                 <div className={s.emptyState} style={{ margin:0 }}>
@@ -1184,8 +1095,7 @@ function PlanDisplay({ afiliado, authAxios }) {
                 Cerrar
               </button>
             </div>
-          </div>
-        </div>
+        </ModalShell>
       )}
     </div>
   );

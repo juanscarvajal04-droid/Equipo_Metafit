@@ -62,6 +62,8 @@ function renderView() {
   );
 }
 
+let showToastMock;
+
 describe("RestriccionesAdmin", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -70,7 +72,8 @@ describe("RestriccionesAdmin", () => {
     actualizarRestriccion.mockResolvedValue({ message: "ok" });
     eliminarRestriccion.mockResolvedValue({ message: "ok" });
     useAuth.mockReturnValue({ user: { role: "Administrador" } });
-    useToast.mockReturnValue({ toast: {}, showToast: vi.fn() });
+    showToastMock = vi.fn();
+    useToast.mockReturnValue({ toast: {}, showToast: showToastMock });
   });
 
   test("lista, busca y ejecuta crear, editar y eliminar", async () => {
@@ -150,6 +153,74 @@ describe("RestriccionesAdmin", () => {
       expect(
         screen.queryByRole("heading", { name: /Nueva restricción/ })
       ).not.toBeInTheDocument()
+    );
+  });
+
+  test("valida el nombre y muestra el error al guardar", async () => {
+    renderView();
+    await screen.findByText(/Asma/);
+
+    fireEvent.click(screen.getByText(/Nueva restricción/));
+    await screen.findByRole("heading", { name: /Nueva restricción/ });
+    fireEvent.submit(screen.getByText("Crear").closest("form"));
+    expect(showToastMock).toHaveBeenCalledWith(
+      "El nombre de la restricción es obligatorio",
+      "danger"
+    );
+    expect(crearRestriccion).not.toHaveBeenCalled();
+
+    crearRestriccion.mockRejectedValueOnce({
+      response: { data: { error: "Restricción duplicada" } },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Ej: Asma"), {
+      target: { value: "Gluten" },
+    });
+    fireEvent.click(screen.getByText("Crear"));
+    await waitFor(() =>
+      expect(showToastMock).toHaveBeenCalledWith(
+        "Restricción duplicada",
+        "danger"
+      )
+    );
+  });
+
+  test("cierra el modal con la X y con Cancelar", async () => {
+    renderView();
+    await screen.findByText(/Asma/);
+
+    fireEvent.click(screen.getByText(/Nueva restricción/));
+    await screen.findByRole("heading", { name: /Nueva restricción/ });
+    fireEvent.click(screen.getByText("✕"));
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("heading", { name: /Nueva restricción/ })
+      ).not.toBeInTheDocument()
+    );
+
+    fireEvent.click(screen.getByText(/Nueva restricción/));
+    await screen.findByRole("heading", { name: /Nueva restricción/ });
+    fireEvent.click(screen.getByText("Cancelar"));
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("heading", { name: /Nueva restricción/ })
+      ).not.toBeInTheDocument()
+    );
+  });
+
+  test("muestra el error al eliminar una restricción", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    eliminarRestriccion.mockRejectedValueOnce({
+      response: { data: { error: "No se pudo eliminar" } },
+    });
+
+    renderView();
+    await screen.findByText(/Asma/);
+    fireEvent.click(screen.getAllByTitle("Eliminar")[0]);
+    await waitFor(() =>
+      expect(showToastMock).toHaveBeenCalledWith(
+        "No se pudo eliminar",
+        "danger"
+      )
     );
   });
 });

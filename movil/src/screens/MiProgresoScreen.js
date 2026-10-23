@@ -14,6 +14,7 @@ import { COLORS, GRADIENTS, FONTS, SPACING, SHADOWS, BORDER_RADIUS } from '../th
 import { getMiProgreso, getAguaHistorial, getConsumoHistorial, getProgresoEjercicioHistorial } from '../services/api';
 import { getHistorialEjerciciosReales, getHistorialConsumosReales } from '../services/registroService';
 import { formatearFechaLegible, nombreComida } from '../utils/formateadores';
+import { mensajeErrorCarga } from '../utils/errorUtils';
 import StatsCard from '../components/common/StatsCard';
 import GraficoPeso from '../components/graficos/GraficoPeso';
 import GraficoVolumen from '../components/graficos/GraficoVolumen';
@@ -179,24 +180,8 @@ export default function MiProgresoScreen() {
       setRegistrosEjercicio(realEjercRes.status === 'fulfilled' ? (realEjercRes.value.data || []) : []);
       setRegistrosConsumo(realConsumoRes.status === 'fulfilled' ? (realConsumoRes.value.data || []) : []);
     } catch (err) {
-      if (!err.response) {
-        setError('Sin conexión. Verificá tu red.');
-      } else {
-        switch (err.response.status) {
-          case 401:
-            // El interceptor ya maneja esto: cierra sesión automáticamente.
-            break;
-          case 403:
-            setError('No tenés permiso para ver estos datos.');
-            break;
-          default:
-            if (err.response.status >= 500) {
-              setError('Error al cargar los datos. Intentá más tarde.');
-            } else {
-              setError('No se pudieron cargar los datos.');
-            }
-        }
-      }
+      const mensaje = mensajeErrorCarga(err);
+      if (mensaje) setError(mensaje);
     } finally {
       setLoading(false);
       setRefreshing(false);

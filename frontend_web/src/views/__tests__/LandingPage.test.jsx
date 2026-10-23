@@ -1,10 +1,11 @@
 // frontend_web/src/views/__tests__/LandingPage.test.jsx
 // Smoke test de la página pública: navegación, secciones y modal de términos.
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { describe, test, expect, beforeEach, vi } from "vitest";
 import LandingPage from "../LandingPage";
 import { useAuth } from "../../context/AuthContext";
+import { trackEvent } from "../../utils/analytics";
 
 vi.mock("../../context/AuthContext", () => ({ useAuth: vi.fn() }));
 vi.mock("../../utils/analytics", () => ({ trackEvent: vi.fn() }));
@@ -62,5 +63,41 @@ describe("LandingPage", () => {
     useAuth.mockReturnValue({ user: { role: "Entrenador" } });
     renderView();
     expect(screen.getByText(/Toma el Control/)).toBeInTheDocument();
+  });
+
+  test("cubre logo, navegación por teclado, hover, APK y cierre del modal", async () => {
+    renderView();
+
+    const logo = screen.getByRole("button", {
+      name: /MetaFit Sport Gym Sede Santa Rosita/,
+    });
+    fireEvent.click(logo);
+    fireEvent.keyDown(logo, { key: "Enter" });
+    fireEvent.keyDown(logo, { key: " " });
+
+    const navSobre = screen.getAllByText("Sobre Nosotros")[0];
+    fireEvent.keyDown(navSobre, { key: "Enter" });
+
+    const extraCard = screen.getByText("Dashboard Gerencial").parentElement;
+    fireEvent.mouseEnter(extraCard);
+    fireEvent.mouseLeave(extraCard);
+
+    fireEvent.click(screen.getByText(/Descargar APK/));
+    expect(trackEvent).toHaveBeenCalledWith("metaFit_apk_descargado");
+
+    const footerSobre = screen.getAllByText("Sobre Nosotros")[1];
+    fireEvent.click(footerSobre);
+    fireEvent.keyDown(footerSobre, { key: "Enter" });
+
+    fireEvent.click(screen.getByText(/Términos y Condiciones/));
+    const overlay = screen
+      .getByText(/Privacidad de Datos/)
+      .closest('[role="button"]');
+    fireEvent.keyDown(overlay, { key: "Escape" });
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("heading", { name: /Términos y Condiciones/ })
+      ).not.toBeInTheDocument()
+    );
   });
 });

@@ -27,6 +27,8 @@ axios.create.mockReturnValue(mockInstance);
 const api = require('../api');
 const { TOKEN_KEY, USER_KEY, ROLE_KEY } = api;
 const requestHandler = mockInstance.interceptors.request.use.mock.calls[0][0];
+const requestErrorHandler = mockInstance.interceptors.request.use.mock.calls[0][1];
+const responseSuccessHandler = mockInstance.interceptors.response.use.mock.calls[0][0];
 const responseHandler = mockInstance.interceptors.response.use.mock.calls[0][1];
 
 beforeEach(async () => {
@@ -113,5 +115,48 @@ describe('Cliente API móvil (axios + AsyncStorage)', () => {
     await expect(responseHandler(error)).rejects.toBe(error);
 
     expect(await AsyncStorage.getItem(TOKEN_KEY)).toBe('sesion-activa');
+  });
+
+  test('los interceptores dejan pasar la respuesta y propagan errores de petición', async () => {
+    const res = { data: { ok: true } };
+    expect(responseSuccessHandler(res)).toBe(res);
+
+    const error = new Error('network');
+    await expect(requestErrorHandler(error)).rejects.toBe(error);
+  });
+
+  test('los helpers invocan los endpoints esperados', async () => {
+    mockInstance.post.mockResolvedValue({});
+    mockInstance.get.mockResolvedValue({});
+    mockInstance.patch.mockResolvedValue({});
+
+    await api.solicitarRecuperacion('a@b.com');
+    await api.resetPasswordRequest('tok', 'Nueva123');
+    await api.guardarProgresoEjercicio(1, '2026-10-01', []);
+    await api.getProgresoEjercicioHoy(1, '2026-10-01');
+    await api.guardarAgua('2026-10-01', 4);
+    await api.getAguaHoy('2026-10-01');
+    await api.guardarConsumoAlimento(1, '2026-10-01', []);
+    await api.getAguaHistorial();
+    await api.getConsumoHistorial({ limite: 5 });
+    await api.getProgresoEjercicioHistorial();
+    await api.guardarNotaEjercicio({ nota: 'ok' });
+    await api.getMisNotasEjercicio(2);
+    await api.getMisNotasEjercicio();
+    await api.actualizarNotaEjercicio(3, 'mejorar');
+
+    expect(mockInstance.post).toHaveBeenCalledWith('/auth/recuperar-password', { email: 'a@b.com' });
+    expect(mockInstance.post).toHaveBeenCalledWith('/auth/reset-password', {
+      token: 'tok',
+      nuevaPassword: 'Nueva123',
+    });
+    expect(mockInstance.get).toHaveBeenCalledWith('/afiliados/me/agua/2026-10-01');
+    expect(mockInstance.get).toHaveBeenCalledWith('/afiliados/me/notas-ejercicio', {
+      params: { id_ciclo: 2 },
+    });
+    expect(mockInstance.get).toHaveBeenCalledWith('/afiliados/me/notas-ejercicio', { params: {} });
+    expect(mockInstance.patch).toHaveBeenCalledWith('/afiliados/me/notas-ejercicio/3', {
+      nota: 'mejorar',
+    });
   });
 });

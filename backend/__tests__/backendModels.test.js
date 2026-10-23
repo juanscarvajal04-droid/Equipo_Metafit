@@ -11,6 +11,7 @@ jest.mock('../config/db', () => ({
 const pool = require('../config/db');
 const PagoModel = require('../models/pagoModel');
 const CicloModel = require('../models/cicloModel');
+const ConsumoAlimentoRealModel = require('../models/consumoAlimentoRealModel');
 
 function makeConn() {
   return {
@@ -181,5 +182,21 @@ describe('cicloModel', () => {
     await expect(CicloModel.remove(2)).rejects.toThrow('fk');
     expect(failConn.rollback).toHaveBeenCalled();
     expect(failConn.release).toHaveBeenCalled();
+  });
+});
+
+describe('consumoAlimentoRealModel', () => {
+  test('insertar lanza ALIMENTO_NO_ENCONTRADO si el alimento no existe', async () => {
+    const conn = makeConn();
+    conn.query.mockResolvedValueOnce([{ affectedRows: 0, insertId: 0 }]);
+
+    await expect(ConsumoAlimentoRealModel.insertar(conn, {
+      id_usuario: 1,
+      id_ciclo: 2,
+      num_comida: 1,
+      id_alimento: 999,
+      fecha: '2026-10-20',
+      cantidad_g_consumida: 100,
+    })).rejects.toMatchObject({ code: 'ALIMENTO_NO_ENCONTRADO' });
   });
 });

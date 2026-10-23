@@ -22,6 +22,11 @@ describe('formatearFechaLegible', () => {
     expect(formatearFechaLegible(null)).toBe('-');
     expect(formatearFechaLegible('')).toBe('-');
   });
+
+  test('parsea fechas con otros formatos y conserva las inválidas', () => {
+    expect(formatearFechaLegible('2026/09/01')).toBe('01/09/2026');
+    expect(formatearFechaLegible('fecha-invalida')).toBe('fecha-invalida');
+  });
 });
 
 describe('formatearNumero', () => {

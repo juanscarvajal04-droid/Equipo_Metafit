@@ -18,8 +18,6 @@ const sumarDias = (fechaStr, dias) => {
   return base.toISOString().split("T")[0];
 };
 
-const hoyISO = () => new Date().toISOString().split("T")[0];
-
 const estadoMembresia = (dias) => {
   if (dias === null) return { label: "Sin registro", color: "var(--mf-muted)", bg: "#94a3b818" };
   if (dias < 0) return { label: "Vencido", color: "#e94560", bg: "#e9456018" };
