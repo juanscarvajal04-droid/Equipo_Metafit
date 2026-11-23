@@ -13,9 +13,9 @@ const TOKEN_KEY = 'metafit_token';
 const USER_KEY  = 'metafit_user';
 const ROLE_KEY  = 'metafit_role';
 
-// Backend desplegado (Render) — el móvil NO usa localhost porque la app corre
-// en un dispositivo/emulador, así que siempre apunta al entorno de producción.
-const API_URL = 'https://metafit-backend-rr18.onrender.com';
+// Backend en EC2 (o el definido en EXPO_PUBLIC_API_URL). El móvil NO usa
+// localhost porque la app corre en un dispositivo/emulador.
+const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://44.223.48.141:3001';
 
 /** Instancia axios base: JSON por defecto + timeout de 10 s. */
 const api = axios.create({
