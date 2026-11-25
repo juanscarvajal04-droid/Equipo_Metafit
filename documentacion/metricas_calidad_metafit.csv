@@ -1,0 +1,25 @@
+id,caracteristica,subcaracteristica,metrica,formula,unidad,meta,valor_actual,fuente,estado,accion,responsable
+Q-FUN-01,Adecuacion funcional,Completitud,Cobertura funcional de modulos con prueba,"modulos con prueba / modulos evaluados * 100",%,">= 80",73,Pruebas automatizadas y QA manual,Parcial,Agregar pruebas de pagos y dashboard,Equipo backend
+Q-FUN-02,Adecuacion funcional,Correccion,Tasa de pruebas aprobadas,"aprobadas / ejecutadas * 100",%,">= 98",100,Informe de ejecucion 2026-11-25,Cumplida,Mantener regresion,Equipo QA
+Q-FUN-03,Adecuacion funcional,Pertinencia,Endpoints documentados,"endpoints documentados / endpoints reales * 100",%,100,100,Swagger y rutas backend,Cumplida,Actualizar Swagger si cambian rutas,Equipo backend
+Q-PER-01,Eficiencia de desempeno,Comportamiento temporal,Latencia p95 de endpoints criticos,percentil 95 de tiempos,ms,"<= 500",No medido,Sin prueba de carga,No medido,Implementar k6,Equipo QA
+Q-PER-02,Eficiencia de desempeno,Capacidad,Throughput sostenido,requests por segundo,rps,">= 50",No medido,Sin prueba de carga,No medido,Implementar k6,Equipo QA
+Q-COM-01,Compatibilidad,Interoperabilidad,Matriz CORS aprobada,"origenes permitidos / origenes probados * 100",%,100,83,Verificacion CORS en EC2,Parcial,Incluir todos los origenes en la matriz,Responsable despliegue
+Q-COM-02,Compatibilidad,Coexistencia,Navegadores y dispositivos probados,"combinaciones aprobadas / planificadas * 100",%,">= 80",No medido,Sin matriz formal,No medido,Definir matriz navegador/dispositivo,Equipo QA
+Q-USA-01,Usabilidad,Aprendibilidad,Tasa de exito en tareas guiadas,"tareas completadas / tareas propuestas * 100",%,">= 90",No medido,Sin prueba con usuarios,No medido,Ejecutar prueba guiada con los 4 roles,Equipo QA
+Q-USA-02,Usabilidad,Proteccion contra errores,Validaciones con mensaje claro,"campos validados / campos criticos * 100",%,100,100,Pruebas y QA manual,Cumplida,Mantener validaciones,Equipo desarrollo
+Q-USA-03,Usabilidad,Accesibilidad,Criterios WCAG verificados,"criterios cumplidos / criterios evaluados * 100",%,">= 70",No medido,Sin evaluacion,No medido,Checklist WCAG 2.1 AA,Equipo web
+Q-REL-01,Fiabilidad,Disponibilidad,Disponibilidad del backend,"tiempo disponible / tiempo total * 100",%,">= 99",100,Health check en ventana de practica,Cumplida,Monitoreo UptimeRobot,Responsable despliegue
+Q-REL-02,Fiabilidad,Madurez,Densidad de defectos abiertos,"defectos abiertos / 1000 lineas",defectos/kloc,"<= 2",3,Defectos conocidos y LOC no medido,Parcial,Reducir y medir LOC,Equipo QA
+Q-REL-03,Fiabilidad,Recuperabilidad,Restauracion verificada,"restores exitosos / restores programados * 100",%,100,0,Sin evidencia de restore,No cumplida,Ejecutar restore y anexar acta,Responsable respaldo
+Q-SEC-01,Seguridad,Autenticidad,Rutas privadas con JWT,"rutas protegidas / rutas privadas * 100",%,100,100,Middlewares y pruebas RBAC,Cumplida,Mantener pruebas,Equipo backend
+Q-SEC-02,Seguridad,Confidencialidad,Secretos versionados,"secretos encontrados en el arbol actual",conteo,0,0 en arbol local; hallazgos historicos remotos,Misma variable; auditoria de seguridad,No cumplida,Rotar y sanear historia,Security lead
+Q-SEC-03,Seguridad,Integridad,Consultas parametrizadas,"consultas parametrizadas / consultas totales * 100",%,100,100,Revision de models,Cumplida,Mantener revision,Equipo backend
+Q-SEC-04,Seguridad,Responsabilidad,Eventos de autenticacion auditados,"eventos auditados / eventos criticos * 100",%,">= 80",No medido,Sin auditoria centralizada,No medido,Agregar logs de auditoria,Equipo backend
+Q-MAN-01,Mantenibilidad,Modularidad,Separacion controller/service/model,"modulos separados / modulos * 100",%,100,100,Arquitectura MVC,Cumplida,Mantener convencion,Equipo desarrollo
+Q-MAN-02,Mantenibilidad,Capacidad de prueba,Cobertura de lineas,"lineas cubiertas / lineas ejecutables * 100",%,">= 60",No medido,Sin reporte de cobertura,No medido,Configurar coverage,Equipo QA
+Q-MAN-03,Mantenibilidad,Analizabilidad,Advertencias de lint movil,"advertencias / 1000 lineas",advertencias/kloc,"<= 20",176,Configuracion ESLint movil,Parcial,Configurar entorno Jest,Equipo movil
+Q-MAN-04,Mantenibilidad,Documentacion,Entregables actualizados,"documentos actualizados / documentos evaluados * 100",%,100,100,Documentos de esta iteracion,Cumplida,Mantener versionado,Equipo documentacion
+Q-POR-01,Portabilidad,Instalabilidad,Despliegues reproducibles,"despliegues exitosos / intentos * 100",%,100,100,Runbook EC2 y Docker,Cumplida,Probar desde cero,Responsable despliegue
+Q-POR-02,Portabilidad,Adaptabilidad,Plataformas soportadas,plataformas con build,conteo,3,3,Web Android Docker,Cumplida,Mantener builds,Equipo desarrollo
+Q-POR-03,Portabilidad,Reemplazabilidad,Dependencias de proveedor criticas,"servicios acoplados / servicios totales * 100",%,"<= 30",40,Render Brevo Cloudinary Expo,Parcial,Documentar alternativas,Arquitecto

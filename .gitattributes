@@ -1,0 +1,40 @@
+# Normalizacion de texto
+* text=auto
+
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.sql text eol=lf
+*.sh text eol=lf
+
+# Binarios (sin diffs de texto y sin conversion de fin de linea)
+*.docx binary
+*.doc binary
+*.xlsx binary
+*.xls binary
+*.pdf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.apk binary
+*.aab binary
+*.zip binary
+*.jar binary
+*.pem binary
+*.p12 binary
+*.jks binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+
+# Diagramas editables (XML); se conservan como texto para revision
+*.drawio text eol=lf

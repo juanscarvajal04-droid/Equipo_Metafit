@@ -1,0 +1,60 @@
+# MetaFit - Docker Compose de produccion para AWS EC2
+# Uso: docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+# Requiere un archivo .env.prod local, con permisos 600 y NUNCA versionado.
+
+name: metafit_prod
+
+services:
+  db:
+    image: mariadb:11
+    container_name: metafit_db
+    restart: unless-stopped
+    env_file:
+      - .env.prod
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-metafit}
+      MYSQL_INITDB_SKIP_TZINFO: "true"
+    volumes:
+      - metafit_db_data:/var/lib/mysql
+      - ../database:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mariadb-admin ping --skip-ssl -h 127.0.0.1 -u root -p\"$${MYSQL_ROOT_PASSWORD}\"",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks:
+      - metafit_net
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: metafit_backend
+    restart: unless-stopped
+    env_file:
+      - .env.prod
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-metafit}
+    ports:
+      - "3001:3001"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - metafit_net
+
+volumes:
+  metafit_db_data:
+
+networks:
+  metafit_net:
+    driver: bridge

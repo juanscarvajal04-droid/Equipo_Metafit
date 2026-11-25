@@ -1,5 +1,57 @@
 # MetaFit — Root .gitignore
+
+# Entorno y secretos
 .env
-*.env.local
-*.env.*.local
+.env.*
+!.env.example
+!.env.*.example
+!deploy/.env.prod.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.crt
+
+# Dependencias
 node_modules/
+**/node_modules/
+
+# Build, cobertura y cachés
+dist/
+build/
+coverage/
+.nyc_output/
+.expo/
+.vite/
+.cache/
+*.tsbuildinfo
+
+# Logs y temporales
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.tmp
+*.temp
+
+# Respaldos de base de datos
+/respaldos/
+respaldo*.sql
+*.dump
+*.bak
+
+# APK/AAB generados (el APK publicado se conserva como archivo trackeado)
+*.aab
+movil/android/app/build/
+movil/android/.gradle/
+movil/ios/build/
+
+# Sistema operativo / editores
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp

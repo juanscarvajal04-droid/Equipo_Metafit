@@ -26,12 +26,13 @@ const IS_PROD = process.env.NODE_ENV === 'production';
 const { verificarCredenciales } = require('./config/cloudinary');
 
 // ── CORS ──────────────────────────────────────────────────────
-// Whitelist de orígenes: en desarrollo acepta localhost en cualquier puerto,
-// en producción usa la whitelist de CORS_ORIGINS.
-// Solicitudes sin Origin (móvil, curl, Postman) siempre pasan.
+// Whitelist de orígenes: usa CORS_ORIGINS (producción) y, además, permite
+// orígenes de desarrollo/pruebas (localhost, IPs privadas de la LAN y Expo)
+// para que la app móvil, Vite y Expo no fallen con "CORS no permitido".
+// Solicitudes sin Origin (móvil nativo, curl, Postman) siempre pasan.
 //
-// DECISIÓN: se permite cualquier puerto de localhost en desarrollo para que
-// Vite (5173/5174/5175), Expo (8081) y otras herramientas no rompan por CORS.
+// DECISIÓN: los orígenes locales/privados solo habilitan CORS; la seguridad
+// real la dan el JWT y el rate limiting, no la cabecera Origin.
 const DEFAULT_CORS_ORIGIN = [
   'http://localhost:5173',
   'http://127.0.0.1:5173',
@@ -56,12 +57,25 @@ const corsOrigins = () =>
     .map((s) => s.trim())
     .filter(Boolean);
 
+// Orígenes de desarrollo/pruebas: localhost/127.0.0.1 en cualquier puerto,
+// IPs privadas de la LAN (Expo Go en dispositivo físico) y esquemas exp://.
+const DEV_ORIGIN = /^https?:\/\/(localhost|127\.0\.0\.1|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3})(:\d+)?$/;
+
+const isDevOrigin = (origin) =>
+  origin.startsWith('exp://') ||
+  origin.startsWith('exps://') ||
+  DEV_ORIGIN.test(origin);
+
 app.use(cors({
   origin(origin, callback) {
-    // Requests sin Origin (app móvil, curl, Postman) siempre se aceptan.
+    // Requests sin Origin (app móvil nativa, curl, Postman) siempre se aceptan.
     if (!origin) return callback(null, true);
     const allowed = corsOrigins();
     if (allowed.includes('*') || allowed.includes(origin)) {
+      return callback(null, true);
+    }
+    // Entornos de desarrollo/pruebas (Expo, Vite en LAN, localhost).
+    if (isDevOrigin(origin)) {
       return callback(null, true);
     }
     return callback(new Error('CORS no permitido para este origen'));

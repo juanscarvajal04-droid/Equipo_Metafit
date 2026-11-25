@@ -52,30 +52,41 @@ Los scripts SQL de [`database/`](./database) se ejecutan automáticamente al ini
 | phpMyAdmin | 8080   | http://localhost:8080       |
 | MariaDB    | 3306   | localhost:3306              |
 
-## 👤 Credenciales de prueba
+## ☁️ Despliegue AWS EC2
 
-| Rol             | Email                    | Contraseña     |
-|-----------------|--------------------------|----------------|
-| Administrador   | carlos@metafit.com       | Admin123!      |
-| Recepcionista   | maria@metafit.com        | Maria123!      |
-| Entrenador      | laura@metafit.com        | Laura123!      |
-| Entrenador      | andres@metafit.com       | Andres123!     |
-| Afiliado        | ana.lopez@example.com    | Afiliado123!   |
+La práctica vigente corre el backend y MariaDB en una instancia EC2 con Docker Compose:
+
+- Arquitectura: [`documentacion/ARQUITECTURA_DESPLIEGUE_METAFIT.md`](./documentacion/ARQUITECTURA_DESPLIEGUE_METAFIT.md)
+- Procedimiento: [`deploy/RUNBOOK_DESPLIEGUE_EC2.md`](./deploy/RUNBOOK_DESPLIEGUE_EC2.md)
+- Compose de referencia: [`deploy/docker-compose.prod.yml`](./deploy/docker-compose.prod.yml)
+
+```bash
+curl -fsS http://<IP_PUBLICA_EC2>:3001/health
+# {"status":"ok","db":"MySQL conectado"}
+```
+
+> La IP pública de Learner Lab es dinámica. Si cambia, actualizar `CORS_ORIGINS`, `EXPO_PUBLIC_API_URL` y los enlaces de la documentación.
+
+## 👤 Roles de prueba
+
+El sistema tiene cuatro roles: Administrador, Recepcionista, Entrenador y Afiliado. Los correos y contraseñas de seed **no se publican en el README**; se obtienen del entorno local autorizado o del documento de instalación entregado al equipo.
+
+> No incluir credenciales reales en el repositorio, issues, capturas ni documentación abierta.
 
 ## 🔬 Tests
 
 ```bash
-# Backend (25 tests — integración + unitarios)
+# Backend (69 tests)
 cd backend && npm test
+
+# Panel web (30 tests)
+cd ../frontend_web && npm test
+
+# App móvil (35 tests)
+cd ../movil && npm test
 ```
 
-Respuesta esperada:
-```
-Test Suites: 2 passed, 2 total
-Tests:       25 passed, 25 total
-```
-
-Además: `frontend_web` (30 tests, `npm test`) y `movil` (19 tests, `npx jest`). Total: **74 tests verdes**. CI los corre todos en GitHub Actions (`.github/workflows/ci.yml`).
+Resultado de la línea base (2026-11-25): **134/134 tests verdes** (69 backend + 30 web + 35 móvil). Evidencia en [`documentacion/pruebas/INFORME_EJECUCION_PRUEBAS_METAFIT.md`](./documentacion/pruebas/INFORME_EJECUCION_PRUEBAS_METAFIT.md). CI los ejecuta en GitHub Actions (`.github/workflows/ci.yml`).
 
 ## 📬 Postman
 
@@ -91,16 +102,18 @@ Se proporcionan **dos** colecciones Postman (dentro de [`postman/`](./postman)):
 2. Selecciona el entorno `MetaFit Environment`
 3. Ejecuta primero el login — el token JWT se guarda automáticamente
 
-## 📊 ISO 25000 — Cumplimiento
+## 📊 ISO/IEC 25010 — Evaluación
 
 | Característica | Estado |
 |----------------|--------|
-| Mantenibilidad | ✅ Código modular MVC (controller → service → model) |
-| Funcionalidad  | ✅ 54 endpoints documentados con Swagger |
-| Confiabilidad  | ✅ Manejo de errores con try-catch + códigos HTTP |
-| Seguridad      | ✅ JWT + bcrypt (12 rondas) + rutas protegidas |
-| Capacidad de prueba | ✅ 74 tests (integración + unitarios) pasando |
-| Portabilidad   | ✅ Web (Vite) + Móvil (Expo) + Docker |
+| Adecuación funcional | ✅ 91 endpoints con RBAC; cobertura parcial de pruebas |
+| Mantenibilidad | ✅ MVC (controller → service → model); lint y cobertura pendientes |
+| Fiabilidad | ✅ Manejo de errores, transacciones y `/health`; restore sin verificar |
+| Seguridad | ⚠️ JWT + bcrypt + RBAC; secretos históricos requieren rotación |
+| Capacidad de prueba | ✅ 134/134 tests automatizados (2026-11-25) |
+| Portabilidad | ✅ Web (Vite) + Móvil (Expo) + Docker en AWS EC2 |
+
+La evaluación completa, con métricas y brechas explícitas, está en [`documentacion/MODELO_DE_CALIDAD_METAFIT.md`](./documentacion/MODELO_DE_CALIDAD_METAFIT.md) y [`documentacion/INFORME_CALIDAD_QA_ISO25010.md`](./documentacion/INFORME_CALIDAD_QA_ISO25010.md).
 
 ## 📚 Documentación
 
@@ -115,11 +128,19 @@ Todos los documentos se encuentran en la carpeta [`documentacion/`](./documentac
 | `documentacion/entregables/Normalizacion_Modelo_Relacional_MetaFit.xlsx` | Normalización del modelo relacional (0FN → 1FN → 2FN → 3FN) |
 | `documentacion/entregables/Fichas_Tecnicas_MetaFit.docx` | Fichas técnicas de hardware y software (especificaciones, tipo de adquisición y costos) |
 | `documentacion/entregables/Estimacion_de_Costos_MetaFit.xlsx` | Estimación de costos, comparativo de proveedores y presupuesto por fases (≤ $30.000.000 COP) |
-| `documentacion/entregables/Plan_de_Instalacion_MetaFit.docx` | Plan de instalación: requisitos, entorno local/Docker, producción (Render) y APK |
+| `documentacion/entregables/Plan_de_Instalacion_MetaFit.docx` | Plan de instalación: requisitos, entorno local/Docker, AWS EC2 y APK |
 | `documentacion/entregables/Plan_de_Respaldo_Datos_MetaFit.docx` | Plan de respaldo de datos: política, RPO 24 h, RTO 4 h, actividades y apéndices |
 | `documentacion/entregables/Plan_de_Migracion_Carga_MetaFit.docx` | Plan de migración y carga inicial: requisitos MI/CO, modelo de datos y ETL |
 | `documentacion/entregables/Plan_de_Capacitacion_MetaFit.docx` | Plan de capacitación: agenda, ejecución y anexos de asistencia, control y encuesta |
 | `documentacion/entregables/Encuesta_Satisfaccion_MetaFit.docx` | Cuestionario de evaluación formativa de la capacitación |
+| `documentacion/pruebas/PLAN_DE_PRUEBAS_METAFIT.md` | Estrategia, niveles, criterios y riesgos de prueba |
+| `documentacion/pruebas/CASOS_DE_PRUEBA_METAFIT.md` | Inventario de casos automatizados y QA manual |
+| `documentacion/pruebas/MATRIZ_TRAZABILIDAD_PRUEBAS.md` | Trazabilidad módulo → prueba → caso |
+| `documentacion/pruebas/INFORME_EJECUCION_PRUEBAS_METAFIT.md` | Evidencia de la ejecución 134/134 y limitaciones |
+| `documentacion/MODELO_DE_CALIDAD_METAFIT.md` | Modelo ISO/IEC 25010, métricas y metas |
+| `documentacion/metricas_calidad_metafit.csv` | Registro medible de métricas de calidad |
+| `documentacion/ARQUITECTURA_DESPLIEGUE_METAFIT.md` | Arquitectura AWS EC2 + Docker + MariaDB |
+| `deploy/RUNBOOK_DESPLIEGUE_EC2.md` | Runbook de despliegue, CORS, respaldo y restore |
 | `documentacion/MANUAL_POSTMAN.md` | Guía para probar la API con Postman desde cero |
 | `documentacion/DIAGRAMAS.md` | Diagramas de arquitectura, componentes, navegación, BD y flujos |
 | `documentacion/INFORME_CALIDAD_QA_ISO25010.md` | Pruebas, QA por fases e ISO/IEC 25010 |
@@ -136,7 +157,7 @@ Todos los documentos se encuentran en la carpeta [`documentacion/`](./documentac
 | Correo de bienvenida (Brevo) | ✅ Plantilla 600px + credenciales |
 | Recordatorio de pagos (cron) | ✅ Cada hora, vence en ≤3 días, dedupe diario |
 | Code Climate | ⏳ `.codeclimate.yml` listo (requiere repo público + login manual) |
-| GitHub Actions CI/CD | ✅ 74 tests en CI + deploy automático a Render en `main` |
+| GitHub Actions CI | ✅ 134 tests en CI; CD a Render legado en `main`; AWS EC2 se despliega con runbook |
 | UptimeRobot | ⏳ Guía lista (`documentacion/UPTIME_ROBOT.md`), monitores manuales |
 | Cloudinary | ✅ Con fallback a disco (activa con 3 env vars) |
 | Storybook | ✅ 5 historias (Badge, Button, Card, Modal, Avatar) tema oscuro |
@@ -151,9 +172,10 @@ El backend usa una **whitelist de orígenes** — solo permite conexiones desde:
 | Entorno | Orígenes permitidos |
 |---|---|
 | Desarrollo | `localhost:5173`, `127.0.0.1:5173`, `localhost:8081`, `127.0.0.1:8081` |
-| Producción | `metafit-frontend-78x6.onrender.com` + los de desarrollo |
+| Producción AWS | `http://<IP_PUBLICA_EC2>:5173` y orígenes definidos en `CORS_ORIGINS` |
+| Render (legado) | `metafit-frontend-78x6.onrender.com` |
 
-Configurable vía `CORS_ORIGINS` en `.env` o en Render. Solicitudes sin `Origin` (móvil, curl, Postman) siempre pasan.
+Configurable vía `CORS_ORIGINS` en `.env` o en `deploy/.env.prod`. Solicitudes sin `Origin` (móvil, curl, Postman) pasan; los orígenes desconocidos reciben `403`. La IP de AWS Academy Learner Lab puede cambiar.
 
 ---
 
@@ -180,7 +202,7 @@ documentacion/brain/
 ├── Proyecto/            ← Visión general, historias, roadmap
 ├── Arquitectura/        ← Backend, Frontend, Móvil, BD
 ├── APIs/                ← Autenticación, Afiliados, Pagos, Planes
-├── Despliegue/          ← Render, Railway, Brevo, Cloudinary, CI/CD
+├── Despliegue/          ← AWS EC2, Docker, Brevo, Cloudinary, CI/CD
 ├── Bugs y soluciones/   ← Historial y lecciones aprendidas
 ├── Manuales/            ← Técnico, Usuario, Postman
 ├── Diseño/              ← Colores, tokens CSS, favicon

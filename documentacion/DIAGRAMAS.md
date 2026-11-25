@@ -1,7 +1,10 @@
 # DIAGRAMAS — MetaFit
 
-**Versión:** 1.0  
+**Versión:** 1.1  
+**Última actualización:** 2026-11-25  
 **Propósito:** Diagramas de arquitectura, componentes, navegación, base de datos y flujos del sistema MetaFit.
+
+> Los diagramas 3.1–3.7 describen la arquitectura lógica y el entorno local. La arquitectura de producción de la práctica (AWS EC2 + Docker + MariaDB) está en la sección 3.8.
 
 ---
 
@@ -423,9 +426,50 @@ Servicios compartidos:
                                       └──────┬─────┘  └──────┬─────┘          │
                                              ▼                ▼                ▼
                                       ┌────────────┐  ┌────────────┐  ┌────────────┐
-                                      │ Mostrar    │  │ Mostrar    │  │ Mostrar    │
-                                      │ rutinas    │  │ comidas    │  │ historial  │
-                                      │ por día    │  │ + macros   │  │ mediciones │
-                                      │ expandibles│  │ expandibles│  │ FlatList   │
-                                      └────────────┘  └────────────┘  └────────────┘
+                                       │ Mostrar    │  │ Mostrar    │  │ Mostrar    │
+                                       │ rutinas    │  │ comidas    │  │ historial  │
+                                       │ por día    │  │ + macros   │  │ mediciones │
+                                       │ expandibles│  │ expandibles│  │ FlatList   │
+                                       └────────────┘  └────────────┘  └────────────┘
 ```
+
+---
+
+## 3.8 Diagrama de Despliegue — AWS EC2 + Docker (práctica)
+
+**Entorno:** AWS Academy Learner Lab, `us-east-1`, EC2 `t3.micro`, Amazon Linux 2023.  
+**IP pública:** dinámica (`<IP_PUBLICA_EC2>`).
+
+```mermaid
+flowchart LR
+    WEB[Panel web React/Vite] -->|HTTP :3001| SG[Security Group EC2<br/>TCP 3001]
+    MOV[App Android Expo] -->|HTTP :3001| SG
+    SG --> EC2[EC2 t3.micro<br/>Amazon Linux 2023]
+    EC2 --> NET[Red Docker metafit_net]
+    NET --> API[metafit_backend<br/>Node.js :3001]
+    NET --> DB[(metafit_db<br/>MariaDB 11 :3306 interno)]
+    DB --> VOL[(Volumen metafit_db_data)]
+    API --> BREVO[Brevo]
+    API --> CLOUD[Cloudinary]
+    API --> PUSH[Expo Push]
+    GH[GitHub] -->|clone / CI| EC2
+```
+
+### Puertos y exposición
+
+| Componente | Puerto host | Puerto interno | Exposición |
+|---|---|---|---|
+| Backend API | `3001` | `3001` | Security Group |
+| MariaDB | — | `3306` | Solo red Docker |
+| Panel web | `5173` en local | — | Según hosting |
+| App móvil | — | — | Cliente externo |
+
+### Flujo de verificación
+
+1. `docker compose -f deploy/docker-compose.prod.yml up -d --build`.
+2. `docker compose ps` → `metafit_db` healthy y `metafit_backend` activo.
+3. `GET http://<IP_PUBLICA_EC2>:3001/health` → `200` con `db: MySQL conectado`.
+4. CORS: origen permitido `200`; origen desconocido `403`.
+5. App móvil con `EXPO_PUBLIC_API_URL=http://<IP_PUBLICA_EC2>:3001`.
+
+> El detalle operativo, respaldo/restore y solución de problemas está en `deploy/RUNBOOK_DESPLIEGUE_EC2.md`.
